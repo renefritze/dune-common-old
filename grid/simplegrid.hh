@@ -1,5 +1,5 @@
-#ifndef SIMPLEGRID_HH
-#define SIMPLEGRID_HH
+#ifndef DUNE_SIMPLEGRID_HH
+#define DUNE_SIMPLEGRID_HH
 
 #include"../common/matvec.hh"
 #include"common/grid.hh"
@@ -46,7 +46,7 @@ template<int dim, int dimworld>            class SimpleHierarchicIterator;
 
     /** \todo Please doc me! */
 template<int dim>
-struct levelinfo {
+struct LevelInfo {
 
     /** \brief Level of this info struct */
     int level; 
@@ -94,7 +94,7 @@ struct levelinfo {
 /** Singleton holding reference elements */
 template<int dim>
 struct SimpleReferenceElement {
-  static levelinfo<dim> li;
+  static LevelInfo<dim> li;
   static SimpleElement<dim,dim> refelem;
 };
 
@@ -103,7 +103,7 @@ template<int dim>
 SimpleElement<dim,dim> SimpleReferenceElement<dim>::refelem(SimpleReferenceElement<dim>::li);
 
 template<int dim>
-levelinfo<dim> SimpleReferenceElement<dim>::li;
+LevelInfo<dim> SimpleReferenceElement<dim>::li;
 
 //************************************************************************
 /*!
@@ -339,7 +339,7 @@ public:
   }
   
   //! constructor without arguments makes uninitialized element
-  SimpleElement (levelinfo<dim>& _li, int _id)
+  SimpleElement (LevelInfo<dim>& _li, int _id)
   {
         li = &_li;
         id = _id;
@@ -360,7 +360,7 @@ public:
   }
 
   //! constructor making reference element
-  SimpleElement (levelinfo<dim>& _li)
+  SimpleElement (LevelInfo<dim>& _li)
   {
         li = &_li;
         for (int i=0; i<dim; ++i)
@@ -452,7 +452,7 @@ private:
   int id;                      // my id
   int coord[dim];              // my integer position             
   simplegrid_ctype s[dim];     // my position 
-  levelinfo<dim>* li;          // access to information common to all elements on a level
+  LevelInfo<dim>* li;          // access to information common to all elements on a level
   Mat<dim,dim,sgrid_ctype> Jinv; //!< storage for inverse of jacobian
 
   FieldVector<simplegrid_ctype, dim> c; // needed for returning references
@@ -488,7 +488,7 @@ public:
   }
   
   //! constructor
-  SimpleElement (levelinfo<dimworld>& _li, int _id) : li(_li)
+  SimpleElement (LevelInfo<dimworld>& _li, int _id) : li(_li)
   {
         id = _id;
 
@@ -555,7 +555,7 @@ private:
   int id;                           //!< my id
   int coord[dimworld];              //!< my integer position             
   FieldVector<simplegrid_ctype, dimworld> s; //!< pos
-  levelinfo<dimworld>& li;          //!< common information for all vertices
+  LevelInfo<dimworld>& li;          //!< common information for all vertices
 };
 
 template <int dim, int dimworld>
@@ -1109,7 +1109,7 @@ public:
   int level () {return elem.level();}
 
   //! constructor
-  SimpleLevelIterator (levelinfo<dim>& li, int id) : elem(li,id),enty(elem)
+  SimpleLevelIterator (LevelInfo<dim>& li, int id) : elem(li,id),enty(elem)
   {  }
 
   //! copy constructor
@@ -1163,7 +1163,7 @@ public:
   int level () {return elem.level();}
   
   //! constructor
-  SimpleLevelIterator (levelinfo<dim>& li, int id) : elem(li,id),enty(elem)
+  SimpleLevelIterator (LevelInfo<dim>& li, int id) : elem(li,id),enty(elem)
   {  }
 
   //! copy constructor
@@ -1421,13 +1421,13 @@ public:
      * 
      * \todo Make sure the level exists!
      */
-  levelinfo<dim>* get_levelinfo (int l) {return &li[l];}
+  LevelInfo<dim>* get_levelinfo (int l) {return &li[l];}
 
     /** \brief Returns information about a given grid level 
      * 
      * \todo Make sure the level exists!
      */
-    const levelinfo<dim>* get_levelinfo (int l) const {return &li[l];}
+    const LevelInfo<dim>* get_levelinfo (int l) const {return &li[l];}
 
   //! write Grid to file filename and store time  
   //! writeout is SGrid format, so u can use SGrid for visualisation 
@@ -1453,7 +1453,7 @@ public:
 
 private:
   int L;                              // number of levels in hierarchic mesh 0<=level<L
-  levelinfo<dim> li[MAXL];            // array of info structures
+  LevelInfo<dim> li[MAXL];            // array of info structures
 };
 
 
