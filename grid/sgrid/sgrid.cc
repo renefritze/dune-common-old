@@ -130,6 +130,7 @@ inline sgrid_ctype SElement<dim,dimworld>::integration_element (const Vec<dim,sg
 {
         sgrid_ctype s = 1.0;
         for (int j=0; j<dim; j++) s *= A(j).norm1();
+
         return s;
 }
 
@@ -1103,6 +1104,7 @@ writeGrid (const char * filename, sgrid_ctype time )
   file << dim << " " << dimworld << " " << time << "\n"; 
   file << L << " ";
   for(int i=0; i<dim; i++) file << N[0][i] << " ";
+  for(int i=0; i<dim; i++) file << low[i] << " ";
   for(int i=0; i<dim; i++) file << H[i] << " ";
   file.close();
   return true;
@@ -1115,6 +1117,7 @@ readGrid (const char * filename , sgrid_ctype &time)
 {
   int n[dim];
   sgrid_ctype h[dim];
+  sgrid_ctype L_[dim];
   int d,dw;
   int level; 
   
@@ -1136,9 +1139,10 @@ readGrid (const char * filename , sgrid_ctype &time)
   file >> level;
  
   for(int i=0; i<dim; i++) file >> n[i];
+  for(int i=0; i<dim; i++) file >> L_[i];
   for(int i=0; i<dim; i++) file >> h[i];
   file.close();
-  makeSGrid( (int *)&n,(double *)&h);
+  makeSGrid( (int *)&n,(double *) &L_, (double *)&h);
   for(int i=1; i<level; i++) globalRefine(1); 
   return true;
 }
