@@ -8,11 +8,6 @@
 //
 //***********************************************************************
 
-#include<iostream>
-#include<iomanip>
-#include<string>
-#include<rpc/xdr.h>
-
 #include "array.hh"
 
 namespace Dune 
@@ -31,13 +26,6 @@ namespace Dune
         
         //! make array with m components
         SimpleVector(int m) : Array<T>::Array(m) {}
-
-        //! assignment from scalar
-        SimpleVector<T>& operator= (const T t)
-        {
-          for (int i=0; i<this->n; ++i) this->p[i] = t;
-          return *this;
-        }
 
         //! Addition
         SimpleVector<T>& operator+= (const SimpleVector<T>& vec)
@@ -68,6 +56,15 @@ namespace Dune
         {
           for (int i=0; i<this->n; ++i) this->p[i] += a*x.p[i];
         }
+
+      //! Multiplication with a scalar
+      friend SimpleVector<T> operator*(const T& s, const SimpleVector<T>& v) {
+          SimpleVector<T> out(v.size());
+          for (int i=0; i<out.size(); i++)
+              out[i] = s*v[i];
+
+          return out;
+      }
 
       //! Vector subtraction
       friend SimpleVector<T> operator-(const SimpleVector<T>& v1,
