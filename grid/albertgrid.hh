@@ -7,6 +7,7 @@
 #include <vector>
 #include <assert.h>
 
+// if we have ALBERT C++ lib define namespace for ALBERT
 #ifdef __ALBERTpp__
 #define ALBERT Albert:: 
 #else 
@@ -622,9 +623,6 @@ public:
   AlbertGridEntity<0,dim,dimworld>* operator->();
 
 private:
-  //! implement with virtual element
-  AlbertGridEntity<0,dim,dimworld> virtualEntity_;
-
   //! know the grid were im comming from
   AlbertGrid<dim,dimworld> &grid_;
 
@@ -633,6 +631,9 @@ private:
 
   //! max level to go down 
   int maxlevel_;
+
+  //! implement with virtual element
+  AlbertGridEntity<0,dim,dimworld> virtualEntity_;
 
   //! we need this for Albert traversal, and we need ManageTravStack, which
   //! does count References when copied
