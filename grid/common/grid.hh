@@ -1093,6 +1093,8 @@ public:
 private:
   //! Barton-Nackman trick 
   GridImp<dim,dimworld>& asImp () {return static_cast<GridImp<dim,dimworld>&>(*this);}
+  //! Barton-Nackman trick 
+  const GridImp<dim,dimworld>& asImp () const {return static_cast<const GridImp<dim,dimworld>&>(*this);}
 };
 
 

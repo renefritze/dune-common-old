@@ -616,6 +616,7 @@ class LagrangeDiscreteFunctionSpace
 FastBaseFunctionSet < LagrangeDiscreteFunctionSpace
 < FunctionSpaceType , GridType, polOrd   > > >
 {
+public:
   typedef DiscreteFunctionSpaceInterface <
       FunctionSpaceType , GridType,
     LagrangeDiscreteFunctionSpace < FunctionSpaceType , GridType, polOrd >,
@@ -634,6 +635,9 @@ FastBaseFunctionSet < LagrangeDiscreteFunctionSpace
   
 
 public:
+  // for gcc ( gcc sucks )
+  typedef typename FunctionSpaceType::Domain Domain;  
+  typedef typename FunctionSpaceType::Range Range;  
 
   // dimension of value 
   enum { dimVal = 1 };
@@ -655,9 +659,9 @@ public:
       baseFuncSet_(i) = NULL;
     
     // search the macro grid for diffrent element types 
-    typedef typename GridType::Traits<0>::LevelIterator LevelIterator;
-    LevelIterator endit = g.template lend<0>(0);
-    for(LevelIterator it = g.template lbegin<0>(0); it != endit; ++it)
+    typedef typename GridType::Traits<0>::LevelIterator LevelIteratorType;
+    LevelIteratorType endit = g.template lend<0>(0);
+    for(LevelIteratorType it = g.template lbegin<0>(0); it != endit; ++it)
     {
       ElementType type = (*it).geometry().type(); // Hack 
       if(baseFuncSet_( type ) == NULL ) 
@@ -679,7 +683,7 @@ public:
   {
     ElementType type =  en.geometry().type();
     return (*baseFuncSet_( type ));
-  }; 
+  } 
 
   //! default for polOrd 0
   template <class EntityType> 
@@ -823,14 +827,18 @@ class DGDiscreteFunctionSpace
 {
   typedef LagrangeDiscreteFunctionSpace < FunctionSpaceType , GridType,polOrd >
         LagrangeSpaceType; 
-  
 public:
-  DGDiscreteFunctionSpace ( GridType & g ) : LagrangeSpaceType (g) 
+  typedef LagrangeDiscreteFunctionSpace 
+      < FunctionSpaceType , GridType , polOrd > LagrangeDiscreteFunctionSpaceType;
+  typedef typename  LagrangeDiscreteFunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
+
+  DGDiscreteFunctionSpace ( GridType & g ) : 
+    LagrangeDiscreteFunctionSpace < FunctionSpaceType , GridType, polOrd > (g) 
   { 
     mapper_ = NULL;
-    typedef typename GridType::Traits<0>::LevelIterator LevelIterator;
-    LevelIterator endit = g.lend<0>(0);
-    for(LevelIterator it = g.lbegin<0>(0); it != endit; ++it)
+    typedef typename GridType::Traits<0>::LevelIterator LevelIteratorType;
+    LevelIteratorType endit = g.template lend<0>(0);
+    for(LevelIteratorType it = g.template lbegin<0>(0); it != endit; ++it)
     {
       if(!mapper_)
       {
@@ -1228,12 +1236,17 @@ FastBaseFunctionSet < RaviartThomasSpace
     RaviartThomasSpace < FunctionSpaceType , GridType, polOrd >,
     FastBaseFunctionSet < RaviartThomasSpace
       < FunctionSpaceType , GridType, polOrd   > > >  DiscreteFunctionSpaceType;
-
+    
     // i.e. number of diffrent element types 
     enum { numOfDiffBase_ = 20 }; 
     enum { dimVal = FunctionSpaceType::DimRange };
   
 public:
+
+  // for gcc   
+  typedef typename FunctionSpaceType::Domain Domain;  
+  typedef typename FunctionSpaceType::Range Range;  
+  
   RaviartThomasSpace ( GridType & g ) :
     DiscreteFunctionSpaceType (g,id) 
   {
@@ -1401,6 +1414,9 @@ FastBaseFunctionSet < EdgeSpace
     FastBaseFunctionSet < EdgeSpace
       < FunctionSpaceType , GridType, polOrd   > > >  DiscreteFunctionSpaceType;
 
+  typedef typename FunctionSpaceType::Domain Domain;  
+  typedef typename FunctionSpaceType::Range Range;  
+    
     // i.e. number of diffrent element types 
     enum { numOfDiffBase_ = 20 }; 
     enum { dimVal = FunctionSpaceType::DimRange };
