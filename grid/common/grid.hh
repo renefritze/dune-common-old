@@ -61,6 +61,13 @@ enum ElementType {unknown,vertex,line, triangle, quadrilateral, tetrahedron, pyr
                           USPM , //!< strange format ... ask Robert Kloefkorn
                           pgm }; //!< store data in portable graymap file format (pgm)
 
+    /*! 
+      To specify the boundary type of an face at the boundary. 
+      This specifier should be located in a geometry class. 
+     */
+    enum BoundaryType { Neumann ,  //!< Neumann type boundary  
+                        Dirichlet //!< Dirichlet type boundary 
+                      };
 //************************************************************************
 // E L E M E N T
 //************************************************************************
