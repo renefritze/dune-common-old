@@ -3,6 +3,7 @@
 
 namespace Dune {
 
+#if 0
 // calculates the number of points on on segment, i.e. a line   
 template <int order> 
 struct PointsOnLine 
@@ -44,7 +45,7 @@ struct power_M_P< m , 0>
   // m^0 = 1
   enum { power = 1 };
 };
-
+#endif
   
 template<class Domain, class RangeField, int dim, int order>
 class GaussQuadrature 
@@ -73,7 +74,7 @@ public:
 
 private:
   // Vectors storing the quadrature points and weights
-	Vec<dim,ct> local[n];
+	Domain local[n];
 	RangeField weight[n];
 };
 
