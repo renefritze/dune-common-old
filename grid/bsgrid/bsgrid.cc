@@ -414,7 +414,8 @@ template <FileFormatType ftype>
 inline bool BSGrid<dim,dimworld>::
 writeGrid( const char * filename, bs_ctype time ) const
 {
-  const_cast<BSSPACE BSGitterType &> (myGrid()).duneBackup(filename);
+  BSSPACE BSGitterType & mygrd = const_cast<BSGrid<dim,dimworld> &> (*this).myGrid();
+  mygrd.duneBackup(filename);
   // write time and maxlevel 
   {
     char *extraName = new char[strlen(filename)+20];
@@ -866,7 +867,6 @@ first (BSSPACE HElementType & elem, int wLevel)
 
   // if needed more than once we spare the virtual funtion call
   isBoundary_ = item_->myneighbour(index_).first->isboundary();
-  std::cout << isBoundary_ << " isBound\n";
   checkGhost();
   
   theSituation_ = ( (elem.level() < wLevel ) && elem.leaf() );
@@ -1070,10 +1070,14 @@ outerNormal(const FieldVector<bs_ctype, dim-1>& local) const
   assert(item_ != 0);
   if(needNormal_) 
   { 
+    // NOTE: &(outNormal_[0]) is a pointer to the inside vector 
+    // of the FieldVector class, we need this here, because 
+    // in BSGrid we dont now the type FieldVector 
+    
     if( boundary() || ( !daOtherSituation_ ) )
     {
       // if boundary calc normal normal ;)
-      item_->outerNormal(index_,outNormal_);
+      item_->outerNormal(index_, &(outNormal_[0]) );
     }
     else 
     {
@@ -1081,7 +1085,7 @@ outerNormal(const FieldVector<bs_ctype, dim-1>& local) const
 
       if(neigh_)
       {
-        neigh_->neighOuterNormal(numberInNeigh_,outNormal_);
+        neigh_->neighOuterNormal(numberInNeigh_, &(outNormal_[0]));
       }
       else 
       {
@@ -1089,8 +1093,7 @@ outerNormal(const FieldVector<bs_ctype, dim-1>& local) const
         assert(ghost_->level() != item_->level());
  
         // ghostpair_.second stores the twist of the face 
-        //ghost_->faceNormal( outNormal_ );
-        item_->outerNormal(index_,outNormal_);
+        item_->outerNormal(index_, &(outNormal_[0]));
         outNormal_ *= 0.25;
       }
     }
