@@ -220,10 +220,10 @@ class SBoundaryEntity
 {
 public: 
   //! return type of boundary segment 
-  BoundaryType type () {};
+  BoundaryType type () { return Dirichlet;  };
 
   //! return true if ghost cell was calced
-  bool hasGeometry ();
+  bool hasGeometry () { return false; };
 
   //! return outer ghost cell 
   SElement<dim,dimworld> & geometry();
