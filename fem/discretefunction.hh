@@ -372,14 +372,14 @@ public:
     for(int i=0; i< levOcu_-1; i++)
     {
       int length = functionSpace_.size( i );
-      (dofVec_[i]).realloc( length );
+      (dofVec_[i]).resize( length );
       for( int j=0; j<length; j++)
         (dofVec_[i])[j] = 0.0;
     }
 
     // the last level is done always
     int length = functionSpace_.size( level_ );
-    (dofVec_[level_]).realloc( length );
+    (dofVec_[level_]).resize( length );
     for( int j=0; j<length; j++) (dofVec_[level_])[j] = 0.0;
     
   };  

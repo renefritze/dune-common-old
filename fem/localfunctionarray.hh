@@ -69,7 +69,7 @@ public:
     baseFuncSet_ = & ( fSpace_.getBaseFunctionSet(en) );
     numOfDof_ = baseFuncSet_->getNumberOfBaseFunctions();
     if(numOfDof_ > map_.size())
-      map_.realloc( numOfDof_ );
+      map_.resize( numOfDof_ );
     for(int i=0; i<numOfDof_; i++)
       map_ [i] = fSpace_.mapToGlobal ( en , i);
     built_ = true;
