@@ -902,6 +902,7 @@ grid2File ( const char * filename , ct time, int timestep,
   file << asImp().type() << "   #GridType \n";
 
   fn = genFilename(path,filename,timestep);
+  file.close();
   return asImp().writeGrid<ftype>(fn,time);
 } // end grid2File
 
@@ -921,13 +922,14 @@ file2Grid ( const char * filename , ct & time, int timestep ,
   type = ( GridIdentifier ) helpType;
   if(type != asImp().type())
   {
-    std::cerr << "Cannot read diffrent GridIdentifier!\n";
+    std::cerr << "Cannot read different GridIdentifier!\n";
     abort();
   }
       
   const char *path = NULL;
   fn = genFilename(path,filename,timestep); 
   printf("Read file: filename = `%s' \n",fn);
+  file.close();
   return asImp().readGrid<ftype>(fn,time);
 } // end file2Grid
 
