@@ -287,8 +287,8 @@ public:
     :  dofArray_ ( dofArray ) , constArray_ (dofArray) , count_ ( count ) {};
   
   DofIteratorAdapt ( const DofArrayType & dofArray , int count )
-    :  constArray_ ( dofArray ) , 
-       dofArray_ ( const_cast <DofArrayType &> (dofArray) ) ,
+    :  dofArray_ ( const_cast <DofArrayType &> (dofArray) ) ,
+       constArray_ ( dofArray ) , 
        count_ ( count ) {};
 
   //! return dof
