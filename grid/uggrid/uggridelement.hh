@@ -3,6 +3,8 @@
 
 #include "ugtypes.hh"
 
+namespace Dune {
+
 //**********************************************************************
 //
 // --UGGridElement
@@ -18,9 +20,6 @@
 
   dimworld: Each corner is a point with dimworld coordinates.
 */
-
-namespace Dune {
-
 template<int dim, int dimworld>  
 class UGGridElement : 
 public ElementDefault <dim,dimworld, UGCtype,UGGridElement>
