@@ -148,6 +148,7 @@ namespace Dune
 
 	//! random access operator
 	T& operator[](int i);
+        const T& operator[](int i) const;
 
 	//! export base type of array
 	typedef T MemberType;  // Merke den Grundtyp ...
@@ -315,6 +316,11 @@ namespace Dune
   // Indizierung
   template <class T>
   inline T& Array<T>::operator[] (int i)
+  {
+	return p[i];
+  }
+  template <class T>
+  inline const T& Array<T>::operator[] (int i) const
   {
 	return p[i];
   }
