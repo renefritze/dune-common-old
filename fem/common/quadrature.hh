@@ -8,8 +8,8 @@
 
 namespace Dune{
 
-/** @defgroup Quadrature Quadrature
-  @ingroup DiscreteFunction
+/** @defgroup Quadrature The Quadrature Interface
+
   This is the interface for qaudratures. It contains three methods, 
   namely for geting the number of quadrature points, the quadrature points 
   and the quadrature weights. 
@@ -81,11 +81,23 @@ template <class Domain, class RangeField, ElementType ElType, int polOrd>
 struct QuadraturePoints 
 {
   enum { identifier = 0 };  
-  enum { numberOfQuadPoints = 0 }; 
+  static int numberOfQuadPoints ();
+  static int order ();
   static Domain getPoint (int i);
   static RangeField getWeight (int i);
 };
 
+template <class Domain, class RangeField, ElementType ElType, int polOrd>
+int QuadraturePoints<Domain,RangeField, ElType,polOrd>::
+numberOfQuadPoints()
+{
+  return -1;
+}
+template <class Domain, class RangeField, ElementType ElType, int polOrd>
+int QuadraturePoints<Domain,RangeField, ElType,polOrd>::order()
+{
+  return -1;
+}
 //! default implementation of getPoint throws error because no 
 //! default implementation can be done in this matter  
 template <class Domain, class RangeField, ElementType ElType, int polOrd>
@@ -154,13 +166,9 @@ getWeight ( int i )
 //! to be parametrized by the element type. 
 //!
 //**************************************************************************
-template< class FunctionSpaceType , class QuadratureImp>
+template< class RangeFieldType , class DomainType , class QuadratureImp>
 class QuadratureInterface : public DynamicType 
 {
-  // just for readability of the code 
-  typedef typename FunctionSpaceType::Domain DomainType ; 
-  typedef typename FunctionSpaceType::RangeField RangeFieldType ; 
-  
 public:
   //! Contructor passing ident to DynamicType for comparison with other
   //! Quadratures 
@@ -193,14 +201,21 @@ private:
 
 }; // end class QuadraturInterface 
 
-template< class FunctionSpaceType , class QuadratureImp>
+template< class RangeFieldType , class DomainType , class QuadratureImp>
 class QuadratureDefault 
-: public QuadratureInterface  < FunctionSpaceType , QuadratureImp >
+: public QuadratureInterface  < RangeFieldType , DomainType , QuadratureImp >
 {
 public:
   QuadratureDefault ( int ident ) : 
-    QuadratureInterface < FunctionSpaceType, QuadratureImp > (ident) {}; 
-  
+    QuadratureInterface < RangeFieldType , DomainType, QuadratureImp > (ident) {};   
+
+  void printQuad () const 
+  {
+    for(int i=0; i<asImp().nop(); i++)
+    {
+      std::cout << asImp().weight(i) << asImp().point(i) << "\n";
+    }
+  }
 private:
   //! Barton - Nackman trick 
   QuadratureImp &asImp() { return static_cast<QuadratureImp&>(*this); }
@@ -209,6 +224,8 @@ private:
 
 }; // end class QuadraturDefault 
 
+
+#if 0
 //********************************************************************
 //
 //  --FastQuadrature
@@ -293,6 +310,7 @@ private:
 }; // end class FastQuadrature 
 
 
+
 //**************************************************************************
 //
 //  Fast Quadrature for unspecified Element type 
@@ -326,7 +344,6 @@ public:
   FastQuad ( EntityType &en ) : 
     QuadratureDefault < FunctionSpaceType, FastQuadType > (6) 
   {
-    //std::cout << maxQuadPoints << " Maximal points \n";
     switch(en.geometry().type())
     {
       case line:          { makeQuadrature<line> (); break; }
@@ -334,13 +351,25 @@ public:
       case hexahedron:    { makeQuadrature<hexahedron> (); break; }
       case triangle:      { makeQuadrature<triangle> (); break; }
       case tetrahedron:   { makeQuadrature<tetrahedron> (); break; }
-      case unknown:       { std::cerr << "Unkown ElementType in FastQuad::makeQuadrature()\n"; abort();  break; }
+      default :       { std::cerr << "Unkown ElementType in FastQuad::makeQuadrature()\n"; abort();  break; }
     }
   };
 
   //! return number of quadrature points 
-  int getNumberOfQuadPoints () const { return numQuadPoints_; };
+  int nop() const { return numberOfQuadPoints_; };
 
+  //! return number of quadrature points 
+  int getNumberOfQuadPoints () const { return numberOfQuadPoints_; };
+
+  //! return number of quadrature points 
+  int order () const { return order_ };
+
+  //! return weight for point i
+  const RangeFieldType& weight ( int i) const
+  {
+    return (weights_(i)); 
+  };
+  
   //! return weight for point i
   const RangeFieldType& getQuadratureWeight ( int i) const
   {
@@ -348,9 +377,14 @@ public:
   };
 
   //! return point i
+  const DomainType& point (int i) const 
+  {
+    return (points_(i));
+  };
+
+  //! return point i
   const DomainType& getQuadraturePoint (int i) const 
   {
-    //(points_.read(i)).print(std::cout , 1); std::cout << "QuadRead \n";
     return (points_(i));
   };
 
@@ -363,9 +397,10 @@ private:
                 RangeFieldType,ElType,polOrd>  QuadInitializer;
 
     // same story as above 
-    numQuadPoints_ = QuadInitializer::numberOfQuadPoints; 
+    numberOfQuadPoints_ = QuadInitializer::numberOfQuadPoints(); 
+    order_              = 0 ;//QuadInitializer::order();
 
-    for(int i=0; i<numQuadPoints_; i++)
+    for(int i=0; i<numberOfQuadPoints_; i++)
     {
       points_(i) = QuadInitializer::getPoint(i);
       weights_(i) = QuadInitializer::getWeight(i);
@@ -373,7 +408,10 @@ private:
   }
   
   //! number of quadrature points 
-  int numQuadPoints_;
+  int numberOfQuadPoints_;
+
+  //! real quadrature order 
+  int order_;
 
   //! Vecs with constant length holding the weights and points 
   Vec < maxQuadPoints , RangeFieldType > weights_;
@@ -381,6 +419,7 @@ private:
 
 }; // end class FastQuadrature 
 
+#endif
 
 //********************************************************************
 //
@@ -395,8 +434,9 @@ private:
 //
 //********************************************************************
 template< class FunctionSpaceType, ElementType ElType >
-class Quadrature : public QuadratureDefault  < FunctionSpaceType ,
-  Quadrature < FunctionSpaceType, ElType > >  {
+class Quadrature : public QuadratureDefault  < 
+  typename FunctionSpaceType::RangeField , typename
+  FunctionSpaceType::Domain, Quadrature < FunctionSpaceType, ElType > >  {
 
   // just for readability 
   typedef typename FunctionSpaceType::Domain DomainType ; 
@@ -445,7 +485,7 @@ private:
     std::cout <<"Making Quadrature with dynamic polOrd! \n";
   
     // same story as above 
-    numQuadPoints_ = QuadInitializer::numberOfQuadPoints; 
+    numQuadPoints_ = QuadInitializer::numberOfQuadPoints(); 
 
     // get memory 
     weights_.resize( numQuadPoints_);
