@@ -27,7 +27,7 @@ namespace Dune {
     
   public:
     //! ???
-    FastQuad < typename FunctionSpaceType::RangeField, typename
+    DuneQuad < typename FunctionSpaceType::RangeField, typename
                FunctionSpaceType::Domain , polOrd > quad;
         
 
