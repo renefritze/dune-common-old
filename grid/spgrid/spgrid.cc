@@ -15,7 +15,7 @@ namespace Dune {
     int ov2=
       overlap_[l+1]*do_front_share(d,process);
     if (ov1 != ov2) {
-      std::cout << rank_ << " expected front_overlap=" << ov2
+      std::cout << rank_ << " expected front_overlap[process]=" << ov2
 		<< " got " << ov1 << std::endl;
       throw std::string("ERROR");
     }
@@ -58,7 +58,7 @@ namespace Dune {
     int ov2=
       overlap_[l+1]*do_end_share(d,process);
     if (ov1 != ov2) {
-      std::cout << rank_ << " expected front_overlap=" << ov2
+      std::cout << rank_ << " expected front_overlap[process]=" << ov2
 		<< " got " << ov1 << std::endl;
       throw std::string("ERROR");
     }
