@@ -320,7 +320,7 @@ public:
   FastQuad ( EntityType &en ) : 
     QuadratureDefault < FunctionSpaceType, FastQuadType > (6) 
   {
-    std::cout << maxQuadPoints << " Maximal points \n";
+    //std::cout << maxQuadPoints << " Maximal points \n";
     switch(en.geometry().type())
     {
       case line:          { makeQuadrature<line> (); break; }
@@ -328,7 +328,7 @@ public:
       case hexahedron:    { makeQuadrature<hexahedron> (); break; }
       case triangle:      { makeQuadrature<triangle> (); break; }
       case tetrahedron:   { makeQuadrature<tetrahedron> (); break; }
-      case unknown:        { std::cerr << "Unkown ElementType in FastQuad::makeQuadrature()\n"; abort();  break; }
+      case unknown:       { std::cerr << "Unkown ElementType in FastQuad::makeQuadrature()\n"; abort();  break; }
     }
   };
 
