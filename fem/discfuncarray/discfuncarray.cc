@@ -128,14 +128,11 @@ inline void DiscFuncArray< DiscreteFunctionSpaceType >::clear ()
 template<class DiscreteFunctionSpaceType >
 inline void DiscFuncArray< DiscreteFunctionSpaceType >::print(std::ostream &s, int level )
 {
-  RangeFieldType sum = 0.;
   DofIteratorType enddof = this->dend ( level );
   for(DofIteratorType itdof = this->dbegin ( level ); itdof != enddof; ++itdof) 
   {
-    //s << (*itdof) << " DofValue \n";
-    sum += ABS(*itdof);
+    s << (*itdof) << " DofValue \n";
   } 
-  s << "sum = " << sum << "\n";
 }
 //*************************************************************************
 //  Interface Methods 
