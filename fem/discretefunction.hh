@@ -78,9 +78,8 @@ public:
 #endif
 
     std::cout << "setFunction ... ";
-    int level = level_;    
-    LevelIterator endit = grid.lend<0>(level);
-    for(LevelIterator it = grid.lbegin<0>(level); it != endit; ++it)
+    LevelIterator endit = grid.lend<0>(level_);
+    for(LevelIterator it = grid.lbegin<0>(level_); it != endit; ++it)
     {
       typedef DofStorageType::Traits::LocalDofIterator Iter;
    
@@ -99,8 +98,8 @@ public:
     typedef DofStorageType::Traits::GlobalDofIterator Iter;
 
     std::cout << "Check the global dof iterator! \n";
-    Iter endglob = dofStorage_.endGlobal( grid , level ); 
-    for(Iter it = dofStorage_.beginGlobal( grid, level ); it != endglob; ++it)
+    Iter endglob = dofStorage_.endGlobal( grid , level_ ); 
+    for(Iter it = dofStorage_.beginGlobal( grid, level_ ); it != endglob; ++it)
     {
       std::cout << (*it) << " Dofval \n"; 
     }
@@ -171,6 +170,7 @@ public:
   template <class EvalEntityType>
   void evaluate ( int level, const EvalEntityType &, const Domain &, Range & );
 
+  //! get access to the DofStorage for manipulations 
   DofStorageType& getDofStorage () { return dofStorage_; }
   
 private:
