@@ -40,7 +40,7 @@ class DefaultGridIndexSetBase : public IndexSetInterface
 public:  
   enum { ncodim = GridType::dimension + 1 };
   
-  DefaultGridIndexSetBase ( GridType & grid ) : grid_ (grid) {}
+  DefaultGridIndexSetBase (const GridType & grid ) : grid_ (grid) {}
 
   //! return false mean the no memory has to be allocated 
   virtual bool compress () { return false; }
@@ -141,7 +141,7 @@ protected:
   }
 
   // the corresponding grid 
-  GridType & grid_;
+    const GridType & grid_;
 };
 
 //! Default is the Identity
@@ -213,7 +213,7 @@ class DefaultGridIndexSet : public DefaultGridIndexSetBase <GridType>
 
 public:
   enum { ncodim = GridType::dimension + 1 };
-  DefaultGridIndexSet ( GridType & grid ) : DefaultGridIndexSetBase <GridType> (grid) {}
+  DefaultGridIndexSet (const GridType & grid ) : DefaultGridIndexSetBase <GridType> (grid) {}
 
   //! return size of grid entities per level and codim 
   int size ( int level , int codim ) const   
