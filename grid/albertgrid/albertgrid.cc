@@ -9,6 +9,12 @@ namespace Albert
 void AlbertLeafRefine(EL *parent, EL *child[2]){};
 void AlbertLeafCoarsen(EL *parent, EL *child[2]){};
 
+static int maxLevel=0;
+void getMaxLevel(const EL_INFO * elf)
+{
+  if(maxLevel < elf->level) maxLevel = elf->level;   
+}
+
 void initLeafData(LEAF_DATA_INFO * linfo)
 {
   linfo->leaf_data_size = sizeof(AlbertLeafData);
@@ -938,8 +944,9 @@ makeDescription()
 
 template<int codim, int dim, int dimworld>
 inline AlbertGridEntity < codim, dim ,dimworld >::
-AlbertGridEntity(AlbertGrid<dim,dimworld> &grid, 
+AlbertGridEntity(AlbertGrid<dim,dimworld> &grid, int level, 
       ALBERT TRAVERSE_STACK * travStack) : grid_(grid) 
+  , level_ ( level )
 //      , vxEntity_ ( grid_ , NULL, 0, 0, 0, 0) 
       , geo_ (false)
 {
@@ -957,8 +964,9 @@ setTraverseStack(ALBERT TRAVERSE_STACK * travStack)
 
 template<int codim, int dim, int dimworld>
 inline AlbertGridEntity < codim, dim ,dimworld >::
-AlbertGridEntity(AlbertGrid<dim,dimworld> &grid) : 
+AlbertGridEntity(AlbertGrid<dim,dimworld> &grid, int level) : 
   grid_(grid)
+, level_ (level)
   //, vxEntity_ ( grid , NULL, 0, 0, 0, 0) 
   , geo_ ( false )
 {
@@ -990,7 +998,7 @@ template<int codim, int dim, int dimworld>
 inline int AlbertGridEntity < codim, dim ,dimworld >::
 level()
 {
-  return elInfo_->level;
+  return level_;
 }
 
 template<int codim, int dim, int dimworld>
@@ -1010,8 +1018,6 @@ index()
 
 inline int AlbertGridEntity < 3, 3,3 >::
 index()
-{
-  return grid_.indexOnLevel<3>(globalIndex(),level());
 }
 #endif
 
@@ -1053,6 +1059,20 @@ AlbertGridEntity < codim, dim ,dimworld >::father()
 //  --0Entity codim = 0 
 //
 //************************************
+template< int dim, int dimworld>
+inline bool AlbertGridEntity < 0, dim ,dimworld >::
+mark( int refCount )
+{
+  if(level_ == grid_.maxlevel())
+  {
+    elInfo_->el->mark = refCount;
+    return true;
+  }
+  
+  std::cout << "Element not marked!\n";
+  return false;
+}
+//***************************
 
 template< int dim, int dimworld>
 inline void AlbertGridEntity < 0, dim ,dimworld >::
@@ -1061,16 +1081,8 @@ makeDescription()
   elInfo_ = NULL;
   builtgeometry_ = false;
 
-  // not fast 
+  // not fast , and also not needed
   //geo_.initGeom();
-}
-
-template<int dim, int dimworld>
-inline AlbertGridEntity < 0, dim ,dimworld >::
-AlbertGridEntity(ALBERT TRAVERSE_STACK * travStack)
-{
-  travStack_ = travStack;
-  makeDescription();
 }
 
 template<int dim, int dimworld>
@@ -1100,7 +1112,8 @@ inline AlbertGridEntity < 0, 3, 3 >::
 
 template< int dim, int dimworld>
 inline AlbertGridEntity < 0, dim ,dimworld >::
-AlbertGridEntity(AlbertGrid<dim,dimworld> &grid) : grid_(grid) 
+AlbertGridEntity(AlbertGrid<dim,dimworld> &grid, int level) : grid_(grid) 
+  , level_ (level)
   , vxEntity_ ( grid_ , NULL, 0, 0, 0, 0) 
   , geo_(false)
 {
@@ -1168,23 +1181,21 @@ template<int dim, int dimworld>
 inline int AlbertGridEntity < 0, dim ,dimworld >::
 level()
 {
-  return elInfo_->level;
+  return level_;
 }
 
 template<int dim, int dimworld>
 inline int AlbertGridEntity < 0, dim ,dimworld >::
 index()
 {
-#if 0
-  int num = globalIndex();
-  if(num < 0)
-    return num;
-  else  
-    // last 0 stands for level an is not used in this context, 
-    // because the global index of elinfo is unique for all levels
-    return grid_.indexOnLevel<0>(num,0);
-#endif
-  return grid_.indexOnLevel<0>( this->globalIndex() , 0);
+  return grid_.indexOnLevel<0>( this->globalIndex() , level_ );
+}
+
+template< int dim, int dimworld>
+inline void AlbertGridEntity < 0, dim ,dimworld >::
+setLevel(int actLevel)
+{
+  level_ = actLevel;
 }
 
 template< int dim, int dimworld>
@@ -1213,15 +1224,20 @@ inline AlbertGridLevelIterator<0,dim,dimworld>
 AlbertGridEntity < 0, dim ,dimworld >::father()
 {
   ALBERT EL_INFO * fatherInfo = NULL;
-  // if level <= 0 return father = this entity 
-  if(elInfo_->level <= 0)
+  int fatherLevel = level_-1;
+  // if this level > 0 return father = elInfoStack -1, 
+  // else return father = this 
+  if(level_ > 0)
     fatherInfo = &travStack_->elinfo_stack[travStack_->stack_used-1];
   else
+  {
     fatherInfo = elInfo_;
+    fatherLevel = 0;
+  }
 
   // new LevelIterator with EL_INFO one level above 
   AlbertGridLevelIterator <0,dim,dimworld>
-    it(grid_,fatherInfo,grid_.indexOnLevel<0>(fatherInfo->el->index,fatherInfo->level),0,0,0);
+    it(grid_,fatherInfo,grid_.indexOnLevel<0>(fatherInfo->el->index,fatherLevel),0,0,0);
   return it;  
 }
 
@@ -1260,8 +1276,9 @@ makeIterator()
 
 template< int dim, int dimworld>
 inline AlbertGridHierarchicIterator<dim,dimworld>::
-AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid) : 
-grid_(grid), virtualEntity_(grid)
+AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid,int actLevel,
+    int maxLevel) : grid_(grid), level_ (actLevel) 
+, maxlevel_ (maxLevel) , virtualEntity_(grid,level_)
 {
   makeIterator();
 }
@@ -1269,8 +1286,9 @@ grid_(grid), virtualEntity_(grid)
 template< int dim, int dimworld>
 inline AlbertGridHierarchicIterator<dim,dimworld>::
 AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid, 
-  ALBERT TRAVERSE_STACK *travStack,int travLevel) : 
-  grid_(grid), virtualEntity_(grid)
+  ALBERT TRAVERSE_STACK *travStack,int actLevel, int maxLevel) : 
+  grid_(grid), level_ (actLevel), 
+  maxlevel_ ( maxLevel), virtualEntity_(grid,level_)
 {
   if(travStack)
   {
@@ -1282,21 +1300,24 @@ AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid,
     cutHierarchicStack(stack, travStack);
 
     // set new traverse level
-    if(travLevel < 0) 
+    if(maxlevel_ < 0) 
     {
       // this means, we go until leaf level 
       stack->traverse_fill_flag = CALL_LEAF_EL | stack->traverse_fill_flag;
       // exact here has to stand Grid->maxlevel, but is ok anyway
-      travLevel = grid_.maxlevel(); //123456789;
+      maxlevel_ = grid_.maxlevel(); //123456789;
     }
     // set new traverse level
-    stack->traverse_level = travLevel;
+    stack->traverse_level = maxlevel_;
 
     virtualEntity_.setTraverseStack(stack);
     // Hier kann ein beliebiges Element uebergeben werden,
     // da jedes AlbertElement einen Zeiger auf das Macroelement
     // enthaelt.
     virtualEntity_.setElInfo(recursiveTraverse(stack));
+
+    // set new level 
+    virtualEntity_.setLevel(level_);
   }
   else
   {
@@ -1309,8 +1330,9 @@ template< int dim, int dimworld>
 inline AlbertGridHierarchicIterator<dim,dimworld>& 
 AlbertGridHierarchicIterator< dim,dimworld >::operator ++()
 {
-  // die 0 ist wichtig, weil Face 0, heist hier jetzt Element
-  virtualEntity_.setElInfo(recursiveTraverse(manageStack_.getStack())); 
+  virtualEntity_.setElInfo(recursiveTraverse(manageStack_.getStack()));
+  // set new actual level 
+  virtualEntity_.setLevel(level_);
   return (*this);
 }
 
@@ -1371,23 +1393,27 @@ recursiveTraverse(ALBERT TRAVERSE_STACK * stack)
     }
     else
     {
+      // go up until we can go down again
       el = stack->elinfo_stack[stack->stack_used].el;
-
+      
       while((stack->stack_used > 0) &&
       ((stack->info_stack[stack->stack_used] >= 2) 
-       || (el->child[0]==NULL)
+       || ((el->child[0]==NULL) && level_ >= maxlevel_ )
        || ( stack->traverse_level <=
       (stack->elinfo_stack+stack->stack_used)->level)) )
       {
         stack->stack_used--;
         el = stack->elinfo_stack[stack->stack_used].el;
+        level_ = stack->elinfo_stack[stack->stack_used].level;
       }
-
+      
       // goto next father is done by other iterator and not our problem  
       if(stack->stack_used < 1)
+      {
         return NULL;
+      }
     }
-
+    
     // go down next child 
     if(el->child[0] && (stack->traverse_level > 
           (stack->elinfo_stack+stack->stack_used)->level) )
@@ -1401,8 +1427,18 @@ recursiveTraverse(ALBERT TRAVERSE_STACK * stack)
       ALBERT fill_elinfo(i, stack->elinfo_stack + stack->stack_used,
         stack->elinfo_stack + (stack->stack_used + 1));
       stack->stack_used++;
-
+      
       stack->info_stack[stack->stack_used] = 0;
+
+      // new: go down maxlevel, but fake the elements 
+      level_++;
+    }
+    // the case if we have no child but level_ < maxlevel_ 
+    // then we want to fake the next maxlevel_ - level_ elements
+    else if(level_ < maxlevel_)
+    {
+      // new: go down until maxlevel, but fake the not existant elements 
+      level_++;
     }
 
   return (stack->elinfo_stack + stack->stack_used);
@@ -1435,8 +1471,8 @@ makeIterator()
 
 template< int dim, int dimworld>
 inline AlbertGridNeighborIterator<dim,dimworld>::
-AlbertGridNeighborIterator(AlbertGrid<dim,dimworld> &grid) : 
-grid_(grid)
+AlbertGridNeighborIterator(AlbertGrid<dim,dimworld> &grid, int level) : 
+grid_(grid), level_ (level)
 {
   virtualEntity_ = NULL; 
   fakeNeigh_ = NULL;
@@ -1446,8 +1482,8 @@ grid_(grid)
 
 template< int dim, int dimworld>
 inline AlbertGridNeighborIterator<dim,dimworld>::AlbertGridNeighborIterator
-(AlbertGrid<dim,dimworld> &grid, ALBERT EL_INFO *elInfo) : 
-  grid_(grid) , neighborCount_ (0), elInfo_ ( elInfo ) 
+(AlbertGrid<dim,dimworld> &grid, int level, ALBERT EL_INFO *elInfo) : 
+  grid_(grid) , level_ (level), neighborCount_ (0), elInfo_ ( elInfo ) 
 {
   virtualEntity_ = NULL;
   fakeNeigh_ = NULL;
@@ -1528,7 +1564,7 @@ operator *()
 {
   if(!virtualEntity_)
   {
-    virtualEntity_ = new AlbertGridEntity<0,dim,dimworld> (grid_);
+    virtualEntity_ = new AlbertGridEntity<0,dim,dimworld> (grid_,level_);
     virtualEntity_->setTraverseStack(NULL);
   }
 
@@ -1543,7 +1579,7 @@ operator ->()
 {
   if(!virtualEntity_)
   {
-    virtualEntity_ = new AlbertGridEntity<0,dim,dimworld> (grid_);
+    virtualEntity_ = new AlbertGridEntity<0,dim,dimworld> (grid_,level_);
     virtualEntity_->setTraverseStack(NULL);
   }
 
@@ -1903,8 +1939,8 @@ makeIterator()
 // Make LevelIterator with point to element from previous iterations
 template<int codim, int dim, int dimworld>
 inline AlbertGridLevelIterator<codim,dim,dimworld >::
-AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid) :
-  grid_(grid), virtualEntity_(grid)  
+AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, int travLevel) :
+  grid_(grid), level_ (travLevel) ,  virtualEntity_(grid,0)  
 {
   makeIterator();
 }
@@ -1912,9 +1948,9 @@ AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid) :
 // Make LevelIterator with point to element from previous iterations
 template<int codim, int dim, int dimworld>
 inline AlbertGridLevelIterator<codim,dim,dimworld >::
-AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, 
+AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid,  
 ALBERT EL_INFO *elInfo,int elNum,int face,int edge,int vertex) : 
-  grid_(grid), virtualEntity_(grid) , elNum_ ( elNum ) , face_ ( face ) ,
+  grid_(grid), virtualEntity_(grid,0) , elNum_ ( elNum ) , face_ ( face ) ,
   edge_ ( edge ), vertex_ ( vertex ) 
 {
   vertexMarker_ = NULL;
@@ -1933,7 +1969,8 @@ template<int codim, int dim, int dimworld>
 inline AlbertGridLevelIterator<codim,dim,dimworld >::
 AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, 
             AlbertMarkerVector * vertexMark, 
-            int travLevel) : grid_(grid) , virtualEntity_(grid)
+            int travLevel) : grid_(grid) , level_ (travLevel)
+, virtualEntity_(grid,travLevel)
 {
   ALBERT MESH * mesh = grid_.getMesh();
 
@@ -2284,7 +2321,8 @@ AlbertGridEntity < 0, dim ,dimworld >::hbegin(int maxlevel)
   // der gleiche, deshalb kann man auch nur nach unten, d.h. zu den Kindern
   // laufen
 
-  AlbertGridHierarchicIterator<dim,dimworld> it(grid_,travStack_,maxlevel);  
+  AlbertGridHierarchicIterator<dim,dimworld> 
+    it(grid_,travStack_,level(),maxlevel);  
   return it;
 }
 
@@ -2292,7 +2330,7 @@ template< int dim, int dimworld>
 inline AlbertGridHierarchicIterator<dim,dimworld> 
 AlbertGridEntity < 0, dim ,dimworld >::hend(int maxlevel)
 {
-  AlbertGridHierarchicIterator<dim,dimworld> it(grid_);  
+  AlbertGridHierarchicIterator<dim,dimworld> it(grid_,level(),maxlevel);  
   return it;
 }
 
@@ -2302,7 +2340,7 @@ template< int dim, int dimworld>
 inline AlbertGridNeighborIterator<dim,dimworld> 
 AlbertGridEntity < 0, dim ,dimworld >::nbegin()
 {
-  AlbertGridNeighborIterator<dim,dimworld> it(grid_,elInfo_);  
+  AlbertGridNeighborIterator<dim,dimworld> it(grid_,level(),elInfo_);  
   return it;
 }
 
@@ -2310,7 +2348,7 @@ template< int dim, int dimworld>
 inline AlbertGridNeighborIterator<dim,dimworld> 
 AlbertGridEntity < 0, dim ,dimworld >::nend()
 {
-  AlbertGridNeighborIterator<dim,dimworld> it(grid_);  
+  AlbertGridNeighborIterator<dim,dimworld> it(grid_,level());  
   return it;
 }
 
@@ -2351,6 +2389,7 @@ template <class Grid>
 void AlbertMarkerVector::markNewVertices(Grid &grid)
 {
   ALBERT MESH *mesh_ = grid.getMesh(); 
+
   int nvx = mesh_->n_vertices;
   numVertex_ = nvx;
   int maxlevel = grid.maxlevel();
@@ -2385,6 +2424,7 @@ void AlbertMarkerVector::print()
 //***********************************************************************
 // 
 // --AlbertGrid
+// --Grid
 // 
 //***********************************************************************
 template < int dim, int dimworld >
@@ -2423,48 +2463,61 @@ template < int dim, int dimworld > template<int codim>
 inline AlbertGridLevelIterator<codim,dim,dimworld> 
 AlbertGrid < dim, dimworld >::lend (int level)
 {
-  AlbertGridLevelIterator<codim,dim,dimworld> it((*this));
+  AlbertGridLevelIterator<codim,dim,dimworld> it((*this),level);
   return it;
 }
 
+//**************************************
+//  refine and coarsen methods
+//**************************************
 template < int dim, int dimworld >
-inline void AlbertGrid < dim, dimworld >::
+inline bool AlbertGrid < dim, dimworld >::
 globalRefine(int refCount)
 {
-  unsigned char flag;
+  typedef AlbertGridLevelIterator <0,dim,dimworld> LevIt;
 
-  // trage auf jedem Element refCount ein 
-  flag = ALBERT global_refine(mesh_, refCount);
-
-  // verfeinere 
-  refineLocal(refCount);
+  LevIt endit = lend<0>(maxlevel());
+  for(LevIt it = lbegin<0>(maxlevel()); it != endit; ++it)
+    (*it).mark(refCount);
+  
+  bool fake = refineLocal ();
 
   printf("AlbertGrid<%d,%d>::globalRefine: Grid refined, maxlevel = %d \n",
           dim,dimworld,maxlevel_);
+  return fake;
 }
 
 
 template < int dim, int dimworld >
-inline void AlbertGrid < dim, dimworld >::
-refineLocal(int refCount)
+inline bool AlbertGrid < dim, dimworld >::refineLocal()
 {
   unsigned char flag;
+
+  // refine underlying mesh 
   flag = ALBERT refine(mesh_);
-  maxlevel_ += refCount;
+
+  // determine new maxlevel 
+  ALBERT maxLevel = 0;
+  ALBERT mesh_traverse(mesh_,-1,CALL_LEAF_EL|FILL_NOTHING,ALBERT getMaxLevel);
+  maxlevel_ = ALBERT maxLevel;
 
   vertexMarker_->markNewVertices(*this);
 
   // map the indices
   markNew();
 
+  bool refined = (flag == 0) ? false : true;
+  return refined;
 }
 
 template < int dim, int dimworld >
-inline void AlbertGrid < dim, dimworld >::
+inline bool AlbertGrid < dim, dimworld >::
 coarsenLocal()
 {
   unsigned char flag;
   flag = ALBERT coarsen(mesh_);
+  bool coarsend = (flag == 0) ? false : true;
+  return coarsend;
 }
 
 

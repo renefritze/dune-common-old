@@ -445,10 +445,10 @@ public:
   //! used for access to degrees of freedom
   int index ();
 
-  AlbertGridEntity(AlbertGrid<dim,dimworld> &grid, 
+  AlbertGridEntity(AlbertGrid<dim,dimworld> &grid, int level, 
                    ALBERT TRAVERSE_STACK * travStack);
   
-  AlbertGridEntity(AlbertGrid<dim,dimworld> &grid);
+  AlbertGridEntity(AlbertGrid<dim,dimworld> &grid, int level);
 
   //! geometry of this entity
   AlbertGridElement<dim-codim,dimworld>& geometry ();
@@ -509,6 +509,9 @@ private:
   //! element number 
   int elNum_;
 
+  //! level
+  int level_;
+
   //! Which Face of the Element 
   unsigned char face_;
 
@@ -567,10 +570,8 @@ public:
   //! there are only implementations for dim==dimworld 2,3
   ~AlbertGridEntity() {};
 
-  //! Default Constructor, needed, but empty 
-  AlbertGridEntity(AlbertGrid<dim,dimworld> &grid);
-
-  AlbertGridEntity(ALBERT TRAVERSE_STACK * travStack);
+  //! Constructor, real information is set via setElInfo method
+  AlbertGridEntity(AlbertGrid<dim,dimworld> &grid, int level);
 
   //! level of this element
   int level ();
@@ -644,7 +645,20 @@ public:
   //! Returns iterator to one past the last son
   AlbertGridHierarchicIterator<dim,dimworld> hend (int maxlevel);
 
+  //***************************************************************
+  //  Interface for Adaptation
+  //***************************************************************
+  
+  //! marks an element for refCount refines. if refCount is negative the
+  //! element is coarsend -refCount times
+  //! mark returns true if element was marked, otherwise false
+  bool mark( int refCount ); 
+  
 private: 
+  // called from HierarchicIterator, because only this 
+  // class changes the level of the entity
+  void setLevel ( int actLevel );  
+  
 // face, edge and vertex only for codim > 0, in this
 // case just to supply the same interface
   void setTraverseStack (ALBERT TRAVERSE_STACK *travStack);
@@ -684,6 +698,9 @@ private:
 
   //! pointer to the real Albert element data
   ALBERT EL_INFO *elInfo_;
+
+  //! the level of the entity
+  int level_;
   
   //! pointer to the Albert TRAVERSE_STACK data
   ALBERT TRAVERSE_STACK * travStack_;
@@ -716,14 +733,24 @@ public:
 
   //! know your own dimension of world
   enum { dimensionworld=dimworld };
-  
+ 
+#if 1
+  //! the normal Constructor
+  AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid,
+    ALBERT TRAVERSE_STACK *travStack, int actLevel, int maxLevel);
+
+  //! the default Constructor
+  AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid,
+        int actLevel,int maxLevel);
+#else 
   //! the normal Constructor
   AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid,
     ALBERT TRAVERSE_STACK *travStack, int travLevel);
 
   //! the default Constructor
   AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid);
-
+#endif
+  
   //! prefix increment
   AlbertGridHierarchicIterator& operator ++();
 
@@ -748,6 +775,12 @@ private:
 
   //! know the grid were im comming from
   AlbertGrid<dim,dimworld> &grid_;
+
+  //! the actual Level of this Hierarichic Iterator 
+  int level_;
+
+  //! max level to go down 
+  int maxlevel_;
 
   //! we need this for Albert traversal, and we need ManageTravStack, which
   //! does count References when copied
@@ -793,10 +826,10 @@ public:
   AlbertGridNeighborIterator& operator ++(int i);
 
   //! The default Constructor 
-  AlbertGridNeighborIterator(AlbertGrid<dim,dimworld> &grid);
+  AlbertGridNeighborIterator(AlbertGrid<dim,dimworld> &grid,int level);
 
   //! The Constructor 
-  AlbertGridNeighborIterator(AlbertGrid<dim,dimworld> &grid,
+  AlbertGridNeighborIterator(AlbertGrid<dim,dimworld> &grid,int level,
           ALBERT EL_INFO *elInfo);
   
   //! The Destructor 
@@ -868,6 +901,9 @@ private:
 
   //! know the grid were im comming from
   AlbertGrid<dim,dimworld> &grid_;
+
+  //! the actual level
+  int level_;
   
   //! implement with virtual element
   //! Most of the information can be generated from the ALBERT EL_INFO 
@@ -927,7 +963,7 @@ public:
   enum { dimensionworld=dimworld };
 
   //! Constructor
-  AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid);
+  AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, int travLevel);
   
   //! Constructor
   AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid,
@@ -1014,6 +1050,9 @@ private:
 
   //! element number 
   int elNum_; 
+
+  //! level 
+  int level_;
     
   //! which face, edge and vertex are we watching of an elInfo
   unsigned char face_;
@@ -1088,9 +1127,15 @@ public:
 //**********************************************************
 // End of Interface Methods
 //**********************************************************
-  void globalRefine(int refCount);
-  void coarsenLocal();
-  void refineLocal(int refCount);
+  //! refine all positive marked leaf entities 
+  //! return true if the grid was refined
+  bool refineLocal ();
+  bool coarsenLocal();
+
+  //! uses the interface, mark on entity and refineLocal 
+  bool globalRefine(int refCount);
+  
+
   void writeGrid(int level=-1);
 
   //! access to mesh pointer, needed by some methods
