@@ -1,5 +1,5 @@
-#ifndef __DUNE_BSGRID_HH__
-#define __DUNE_BSGRID_HH__
+#ifndef __DUNE_ALU3DGRID_HH__
+#define __DUNE_ALU3DGRID_HH__
 
 #include <vector>
 #include <assert.h>
@@ -39,7 +39,7 @@ class ALU3dGridError : public Exception {};
 enum ALU3dGridElementType { tetra = 4, hexa = 7 };  
   
 // i.e. double or float 
-typedef double bs_ctype;
+typedef double alu3d_ctype;
 
 template<int cd, int dim, class GridImp> class ALU3dGridEntity;
 template<int cd, PartitionIteratorType pitype, class GridImp > class ALU3dGridLevelIterator;
@@ -73,7 +73,7 @@ template<int dim,class GridImp> struct ALU3dGridReferenceGeometry;
   dimworld: Each corner is a point with dimworld coordinates.
 */
 
-#ifdef _BSGRID_PARALLEL_
+#ifdef _ALU3DGRID_PARALLEL_
 static int __MyRank__ = -1;
 #endif
 
@@ -96,7 +96,7 @@ public:
   }
 
   // call buildGhost of realGeometry 
-  bool buildGhost(const BSSPACE PLLBndFaceType & ghost)
+  bool buildGhost(const ALU3DSPACE PLLBndFaceType & ghost)
   {
     return this->realGeometry.buildGhost(ghost); 
   }
@@ -108,7 +108,7 @@ public:
   }
 
   // for changing the coordinates of one element 
-  FieldVector<bs_ctype, coorddim> & getCoordVec (int i)
+  FieldVector<alu3d_ctype, coorddim> & getCoordVec (int i)
   {
     return this->realGeometry.getCoordVec(i);
   }
@@ -137,7 +137,7 @@ public:
   int corners () const;
 
   //! access to coordinates of corners. Index is the number of the corner 
-  const FieldVector<bs_ctype, cdim>& operator[] (int i) const;
+  const FieldVector<alu3d_ctype, cdim>& operator[] (int i) const;
 
   /*! return reference element corresponding to this element. If this is
     a reference element then self is returned.
@@ -146,39 +146,39 @@ public:
 
   //! maps a local coordinate within reference element to 
   //! global coordinate in element 
-  FieldVector<bs_ctype, cdim> global (const FieldVector<bs_ctype, mydim>& local) const;
+  FieldVector<alu3d_ctype, cdim> global (const FieldVector<alu3d_ctype, mydim>& local) const;
   
   //! maps a global coordinate within the element to a 
   //! local coordinate in its reference element
-  FieldVector<bs_ctype,  mydim> local (const FieldVector<bs_ctype, cdim>& global) const;
+  FieldVector<alu3d_ctype,  mydim> local (const FieldVector<alu3d_ctype, cdim>& global) const;
   
   //! returns true if the point in local coordinates is inside reference element
-  bool checkInside(const FieldVector<bs_ctype, mydim>& local) const;
+  bool checkInside(const FieldVector<alu3d_ctype, mydim>& local) const;
 
   //! A(l) , see grid.hh 
-  bs_ctype integrationElement (const FieldVector<bs_ctype, mydim>& local) const;
+  alu3d_ctype integrationElement (const FieldVector<alu3d_ctype, mydim>& local) const;
 
   //! can only be called for dim=dimworld!
-  const FieldMatrix<bs_ctype,mydim,mydim>& jacobianInverse (const FieldVector<bs_ctype, cdim>& local) const;
+  const FieldMatrix<alu3d_ctype,mydim,mydim>& jacobianInverse (const FieldVector<alu3d_ctype, cdim>& local) const;
 
   //***********************************************************************
   //!  Methods that not belong to the Interface, but have to be public
   //***********************************************************************
   //! generate the geometry for out of given ALU3dGridElement  
-  bool buildGeom(const BSSPACE IMPLElementType & item);
-  bool buildGeom(const BSSPACE HFaceType & item);
-  bool buildGeom(const BSSPACE HEdgeType & item);
-  bool buildGeom(const BSSPACE VertexType & item);
+  bool buildGeom(const ALU3DSPACE IMPLElementType & item);
+  bool buildGeom(const ALU3DSPACE HFaceType & item);
+  bool buildGeom(const ALU3DSPACE HEdgeType & item);
+  bool buildGeom(const ALU3DSPACE VertexType & item);
  
   //! build ghost out of internal boundary segment 
-  bool buildGhost(const BSSPACE PLLBndFaceType & ghost);
+  bool buildGhost(const ALU3DSPACE PLLBndFaceType & ghost);
  
   //! print internal data
   //! no interface method
   void print (std::ostream& ss) const;
 
   // for changing the coordinates of one element 
-  FieldVector<bs_ctype, cdim> & getCoordVec (int i);
+  FieldVector<alu3d_ctype, cdim> & getCoordVec (int i);
 
 private:
   // generate Jacobian Inverse and calculate integration_element 
@@ -188,7 +188,7 @@ private:
   void calcElMatrix () const;
 
   //! the vertex coordinates 
-  mutable FieldMatrix<bs_ctype,mydim+1,cdim> coord_; 
+  mutable FieldMatrix<alu3d_ctype,mydim+1,cdim> coord_; 
   
   //! is true if Jinv_, A and detDF_ is calced
   mutable bool builtinverse_;
@@ -196,15 +196,15 @@ private:
   mutable bool builtDetDF_;
   
   enum { matdim = (mydim > 0) ? mydim : 1 };
-  mutable FieldMatrix<bs_ctype,matdim,matdim> Jinv_; //!< storage for inverse of jacobian
-  mutable bs_ctype detDF_;                           //!< storage of integration_element
-  mutable FieldMatrix<bs_ctype,matdim,matdim> A_;    //!< transformation matrix 
+  mutable FieldMatrix<alu3d_ctype,matdim,matdim> Jinv_; //!< storage for inverse of jacobian
+  mutable alu3d_ctype detDF_;                           //!< storage of integration_element
+  mutable FieldMatrix<alu3d_ctype,matdim,matdim> A_;    //!< transformation matrix 
 
-  mutable FieldVector<bs_ctype, mydim> localCoord_;
-  mutable FieldVector<bs_ctype, cdim>  globalCoord_;
+  mutable FieldVector<alu3d_ctype, mydim> localCoord_;
+  mutable FieldVector<alu3d_ctype, cdim>  globalCoord_;
 
-  mutable FieldVector<bs_ctype,cdim> tmpV_; //! temporary memory 
-  mutable FieldVector<bs_ctype,cdim> tmpU_; //! temporary memory
+  mutable FieldVector<alu3d_ctype,cdim> tmpV_; //! temporary memory 
+  mutable FieldVector<alu3d_ctype,cdim> tmpU_; //! temporary memory
 };
 
 
@@ -236,13 +236,13 @@ public:
   }
   
   // set element as ghost 
-  void setGhost(BSSPACE HElementType &ghost)
+  void setGhost(ALU3DSPACE HElementType &ghost)
   {
     this->realEntity.setGhost(ghost);
   }
   
   //! set original element pointer to fake entity
-  void setGhost(BSSPACE PLLBndFaceType  &ghost)
+  void setGhost(ALU3DSPACE PLLBndFaceType  &ghost)
   {
     this->realEntity.setGhost(ghost);
   }
@@ -267,8 +267,8 @@ public EntityDefault <cd,dim,GridImp,ALU3dGridEntity>
   friend class ALU3dGridHierarchicIndexSet<dim,dimworld>;
 
 public:
-  typedef typename BSSPACE BSHElementType<cd>::ElementType BSElementType;
-  typedef typename BSSPACE BSIMPLElementType<cd>::ElementType BSIMPLElementType;
+  typedef typename ALU3DSPACE ALUHElementType<cd>::ElementType BSElementType;
+  typedef typename ALU3DSPACE BSIMPLElementType<cd>::ElementType BSIMPLElementType;
   
   typedef typename GridImp::template codim<cd>::Entity Entity;  
   typedef typename GridImp::template codim<cd>::Geometry Geometry;
@@ -298,11 +298,11 @@ public:
   EntityPointer ownersFather () const;
 
   //! my position in local coordinates of the owners father
-  FieldVector<bs_ctype, dim>& positionInOwnersFather () const;
+  FieldVector<alu3d_ctype, dim>& positionInOwnersFather () const;
  
   // set element as normal entity
   void setElement(const BSElementType & item); 
-  void setElement(const BSSPACE HElementType & el, const BSSPACE VertexType & vx);
+  void setElement(const ALU3DSPACE HElementType & el, const ALU3DSPACE VertexType & vx);
   
 private: 
   //! index is unique within the grid hierachie and per codim
@@ -315,14 +315,14 @@ private:
 
   // corresponding ALU3dGridElement
   const BSIMPLElementType * item_;
-  const BSSPACE HElementType * father_;
+  const ALU3DSPACE HElementType * father_;
     
   //! the cuurent geometry
   mutable GeometryImp geo_;
   mutable bool builtgeometry_;         //!< true if geometry has been constructed
 
   mutable bool localFCoordCalced_;
-  mutable FieldVector<bs_ctype, dim> localFatherCoords_; //! coords of vertex in father 
+  mutable FieldVector<alu3d_ctype, dim> localFatherCoords_; //! coords of vertex in father 
 };
 
 /*! 
@@ -365,7 +365,7 @@ class ALU3dGridEntity<0,dim,GridImp>
   template <int codim> 
   struct IndexWrapper
   {
-    static inline int subIndex(BSSPACE GEOElementType &elem, int i) 
+    static inline int subIndex(ALU3DSPACE GEOElementType &elem, int i) 
     {
       return elem.myvertex(i)->getIndex();
     }
@@ -376,7 +376,7 @@ class ALU3dGridEntity<0,dim,GridImp>
   template <> 
   struct IndexWrapper<dim>
   {
-    static int subIndex(BSSPACE GEOElementType &elem, int i) const
+    static int subIndex(ALU3DSPACE GEOElementType &elem, int i) const
     {
       return elem.myvertex(i)->getIndex();
     }
@@ -481,16 +481,16 @@ public:
   /*! private methods, but public because of datahandle and template
       arguments of these methods
   */
-  void setElement(BSSPACE HElementType &element);
+  void setElement(ALU3DSPACE HElementType &element);
   
   /*! private methods, but public because of datahandle and template
       arguments of these methods
       set original element pointer to fake entity
   */
-  void setGhost(BSSPACE HElementType &ghost);
+  void setGhost(ALU3DSPACE HElementType &ghost);
   
   //! set original element pointer to fake entity
-  void setGhost(BSSPACE PLLBndFaceType  &ghost);
+  void setGhost(ALU3DSPACE PLLBndFaceType  &ghost);
 
 private:
   //! index is unique within the grid hierachie and per codim
@@ -500,10 +500,10 @@ private:
   const GridImp  & grid_;
 
   // the current element of grid 
-  BSSPACE IMPLElementType *item_;
+  ALU3DSPACE IMPLElementType *item_;
   
   // the current ghost, if element is ghost
-  BSSPACE PLLBndFaceType * ghost_;
+  ALU3DSPACE PLLBndFaceType * ghost_;
   mutable bool isGhost_; //! true if entity is ghost entity
 
   //! the cuurent geometry
@@ -546,7 +546,7 @@ public:
 
   //! the normal Constructor
   ALU3dGridHierarchicIterator(const GridImp &grid,
-      const BSSPACE HElementType & elem, int maxlevel, bool end=false);
+      const ALU3DSPACE HElementType & elem, int maxlevel, bool end=false);
  
   //! increment
   void increment();
@@ -559,15 +559,15 @@ public:
   
 private:
   // go to next valid element 
-  BSSPACE HElementType * goNextElement (BSSPACE HElementType * oldEl);
+  ALU3DSPACE HElementType * goNextElement (ALU3DSPACE HElementType * oldEl);
   
   const GridImp & grid_;  //!< the corresponding ALU3dGrid 
-  const BSSPACE HElementType & elem_; //!< the start  element of this iterator  
-  BSSPACE HElementType * item_; //!< the actual element of this iterator 
+  const ALU3DSPACE HElementType & elem_; //!< the start  element of this iterator  
+  ALU3DSPACE HElementType * item_; //!< the actual element of this iterator 
   int maxlevel_; //!< maxlevel 
 
   // holds the entity, copy pointer and delete if no refcount is left 
-  BSSPACE AutoPointer< EntityImp > objEntity_;
+  ALU3DSPACE AutoPointer< EntityImp > objEntity_;
 };
 
 //*******************************************************************
@@ -656,7 +656,7 @@ public:
   
   //! The default Constructor , level tells on which level we want
   //! neighbours 
-  ALU3dGridIntersectionIterator(const GridImp & grid, BSSPACE HElementType *el,
+  ALU3dGridIntersectionIterator(const GridImp & grid, ALU3DSPACE HElementType *el,
              int wLevel,bool end=false);
 
   //! The Destructor 
@@ -703,17 +703,17 @@ public:
   
   //! return unit outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
-  typedef FieldVector<bs_ctype, dimworld> NormalType;
+  typedef FieldVector<alu3d_ctype, dimworld> NormalType;
   
-  const NormalType & unitOuterNormal (const FieldVector<bs_ctype, dim-1>& local) const ;
+  const NormalType & unitOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const ;
   
   //! return outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
-  const NormalType & outerNormal (const FieldVector<bs_ctype, dim-1>& local) const;
+  const NormalType & outerNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
 
   //! return outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
-  const NormalType & integrationOuterNormal (const FieldVector<bs_ctype, dim-1>& local) const;
+  const NormalType & integrationOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
 
 private:
   // if neighbour exists , do setup of new neighbour 
@@ -726,7 +726,7 @@ private:
   void resetBools () const ; 
 
   // reset IntersectionIterator to first neighbour 
-  void first(BSSPACE HElementType & elem, int wLevel); 
+  void first(ALU3DSPACE HElementType & elem, int wLevel); 
 
   // set behind last neighbour
   void done ();
@@ -734,13 +734,13 @@ private:
   mutable EntityImp entity_; //! neighbour entity 
 
   // current element from which we started the intersection iterator
-  mutable BSSPACE GEOElementType *item_;  
+  mutable ALU3DSPACE GEOElementType *item_;  
 
   //! current neighbour 
-  mutable BSSPACE GEOElementType *neigh_; 
+  mutable ALU3DSPACE GEOElementType *neigh_; 
 
   //! current ghost if we have one  
-  mutable BSSPACE PLLBndFaceType *ghost_;
+  mutable ALU3DSPACE PLLBndFaceType *ghost_;
 
   mutable int index_;         //! internal index of intersection  
   mutable int numberInNeigh_; //! index of intersection in neighbor
@@ -752,14 +752,14 @@ private:
   mutable bool isBoundary_; //! true if intersection is with boundary 
   mutable bool isGhost_;  //! true if intersection is with internal boundary (only parallel grid) 
 
-  mutable FieldVector<bs_ctype, dimworld> outNormal_;  //! outerNormal of current intersection
-  mutable FieldVector<bs_ctype, dimworld> unitOuterNormal_; //! unitOuterNormal of current intersection
+  mutable FieldVector<alu3d_ctype, dimworld> outNormal_;  //! outerNormal of current intersection
+  mutable FieldVector<alu3d_ctype, dimworld> unitOuterNormal_; //! unitOuterNormal of current intersection
 
   mutable bool needSetup_; //! true if setup is needed
   mutable bool needNormal_;//! true if normal has to be calculated
 
   // pair holding pointer to face and twist 
-  mutable BSSPACE NeighbourFaceType neighpair_;
+  mutable ALU3DSPACE NeighbourFaceType neighpair_;
 
   mutable bool initInterGl_; //! true if interSelfGlobal_ was initialized
   mutable GeometryImp interSelfGlobal_; //! intersection_self_global
@@ -799,7 +799,7 @@ public:
   ALU3dGridLevelIterator(const GridImp & grid, int level , bool end=false);
   
   //! Constructor for father 
-  ALU3dGridLevelIterator(const GridImp & grid, const BSSPACE HElementType & item);
+  ALU3dGridLevelIterator(const GridImp & grid, const ALU3DSPACE HElementType & item);
   
   //! prefix increment
   void increment ();
@@ -824,11 +824,11 @@ private:
   int level_;
   
   // the wrapper for the original iterator of the ALU3dGrid  
-  typedef typename BSSPACE ALU3dGridLevelIteratorWrapper<cd> IteratorType; 
-  BSSPACE AutoPointer< IteratorType > iter_;
+  typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper<cd> IteratorType; 
+  ALU3DSPACE AutoPointer< IteratorType > iter_;
     
   // holds the entity, copy pointer and delete if no refcount is left 
-  BSSPACE AutoPointer< EntityImp > objEntity_;
+  ALU3DSPACE AutoPointer< EntityImp > objEntity_;
 };
 
 //********************************************************************
@@ -879,11 +879,11 @@ private:
   int level_;
 
   // the wrapper for the original iterator of the ALU3dGrid  
-  typedef typename BSSPACE ALU3dGridLeafIteratorWrapper<codim> IteratorType; 
-  BSSPACE AutoPointer < IteratorType > iter_;
+  typedef typename ALU3DSPACE ALU3dGridLeafIteratorWrapper<codim> IteratorType; 
+  ALU3DSPACE AutoPointer < IteratorType > iter_;
   
   // holds the entity, copy pointer and delete if no refcount is left 
-  BSSPACE AutoPointer< EntityImp > objEntity_;
+  ALU3DSPACE AutoPointer< EntityImp > objEntity_;
 
   //! my partition tpye 
   const PartitionIteratorType pitype_; 
@@ -897,16 +897,17 @@ private:
 //
 //**********************************************************************
 
-/** \brief The BS %Grid class
- *
- * \todo Please doc me!
+/*! 
+ *  The ALU3dGrid implements the Dune GridInterface for 3d tetrahedral
+ *  meshes. This grid can be locally adapted and used in parallel
+ *  computations using dynamcic load balancing. 
  */
 template <int dim, int dimworld>
-class ALU3dGrid : public GridDefault  < dim, dimworld, bs_ctype,ALU3dGrid<dim,dimworld> >
+class ALU3dGrid : public GridDefault  < dim, dimworld, alu3d_ctype,ALU3dGrid<dim,dimworld> >
 {
   //CompileTimeChecker<dim      == 3>   ALU3dGrid_only_implemented_for_3dp;   
   //CompileTimeChecker<dimworld == 3>   ALU3dGrid_only_implemented_for_3dw;   
-  //CompileTimeChecker< (eltype == BSSPACE tetra_t) || (eltype == BSSPACE hexa_t ) > ALU3dGrid_only_implemented_for_tetra_or_hexa;
+  //CompileTimeChecker< (eltype == ALU3DSPACE tetra_t) || (eltype == ALU3DSPACE hexa_t ) > ALU3dGrid_only_implemented_for_tetra_or_hexa;
 
   typedef ALU3dGrid<dim,dimworld> MyType; 
   friend class ALU3dGridEntity <0,dim,MyType>;
@@ -932,7 +933,7 @@ public:
   typedef typename Traits::LeafIterator LeafIteratorType;  
   //typedef ALU3dGridReferenceGeometry<dim> ReferenceGeometry;
 
-  typedef BSSPACE ObjectStream ObjectStreamType;
+  typedef ALU3DSPACE ObjectStream ObjectStreamType;
 
   //typedef typename std::pair < ObjectStreamType * , ALU3dGridEntity<0,dim,dimworld> * > 
   //              DataCollectorParamType;
@@ -949,7 +950,7 @@ public:
 
   //! Constructor which reads an ALU3dGrid Macro Triang file 
   //! or given GridFile 
-#ifdef _BSGRID_PARALLEL_
+#ifdef _ALU3DGRID_PARALLEL_
   ALU3dGrid(const char* macroTriangFilename , MPI_Comm mpiComm);
   ALU3dGrid(MPI_Comm mpiComm);
 #else 
@@ -1043,17 +1044,17 @@ public:
   /** \brief write Grid to file in specified FileFormatType 
    */
   template <FileFormatType ftype>
-  bool writeGrid( const char * filename, bs_ctype time ) const ;
+  bool writeGrid( const char * filename, alu3d_ctype time ) const ;
   
   /** \brief read Grid from file filename and store time of mesh in time 
    */
   template <FileFormatType ftype>
-  bool readGrid( const char * filename, bs_ctype & time );
+  bool readGrid( const char * filename, alu3d_ctype & time );
 
   //! return pointer to org ALU3dGrid 
   //! private method, but otherwise we have to friend class all possible
   //! types of LevelIterator ==> later
-  BSSPACE BSGitterType & myGrid();
+  ALU3DSPACE GitterImplType & myGrid();
 
   //! return my rank (only parallel)
   int myRank () const { return myRank_; }
@@ -1106,9 +1107,9 @@ private:
   void setCoarsenMark() const;
 
   // the real grid 
-  BSSPACE BSGitterType * mygrid_;
+  ALU3DSPACE GitterImplType * mygrid_;
 #ifdef _BSGRID_PARALLEL_
-  BSSPACE MpAccessMPI mpAccess_;
+  ALU3DSPACE MpAccessMPI mpAccess_;
 #endif
   // save global_size of grid 
   mutable int globalSize_[dim+1];
