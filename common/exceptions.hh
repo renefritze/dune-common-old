@@ -8,10 +8,10 @@
 
 namespace Dune {
 
-/*! \file exceptions.hh */
 
 /*! \defgroup Exceptions Exception handling
-  
+  \ingroup Common
+
   The Dune-exceptions are designed to allow a simple derivation of subclasses
   and to accept a text written in the '<<' syntax.
 
@@ -57,6 +57,14 @@ int main () {
   See exceptions.hh for detailed info
 
 */
+
+/*! \file
+  
+This file defines a common framework for generating exception
+subclasses and to throw them in a simple manner
+
+*/
+
 
 /*! \brief Base class for Dune-Exceptions
   
@@ -164,6 +172,11 @@ class RangeError : public Exception {};
   
  */
 class SystemError : public Exception {};
+
+  /*! default exception if memory allocation fails
+
+  */
+  class OutOfMemoryError : public SystemError {};
 
 } // end namespace
 
