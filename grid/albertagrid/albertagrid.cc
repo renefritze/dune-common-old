@@ -241,6 +241,7 @@ initGeom()
   vertex_ = 0;
   builtinverse_ = false;
   builtElMat_   = false;
+  calcedDet_    = false;
 }
 
 // built Geometry 
@@ -256,6 +257,7 @@ builtGeom(ALBERTA EL_INFO *elInfo, int face,
   elDet_ = 0.0;
   builtinverse_ = false;
   builtElMat_   = false;
+  calcedDet_    = false;
 
   if(elInfo_)
   {
@@ -286,6 +288,7 @@ builtGeom(ALBERTA EL_INFO *elInfo, int face,
   elDet_ = 0.0;
   builtinverse_ = false;
   builtElMat_   = false;
+  calcedDet_    = false;
 
   if(elInfo_)
   {
@@ -314,7 +317,8 @@ builtGeom(ALBERTA EL_INFO *elInfo, int face,
   elDet_ = 0.0;
   builtinverse_ = false;
   builtElMat_   = false;
-
+  calcedDet_    = false;
+  
   if(elInfo_)
   {
     for(int i=0; i<dim+1; i++)
@@ -611,6 +615,7 @@ buildJacobianInverse() const
   elDet_ = std::abs( FMatrixHelp::invertMatrix(elMat_,Jinv_) );
 
   assert(elDet_ > 1.0E-25);
+  calcedDet_ = true;
   builtinverse_ = true;
   return;
 }
@@ -627,32 +632,66 @@ buildJacobianInverse() const
   DUNE_THROW(AlbertaError,"buildJacobianInverse<2,3> not correctly implemented!"); 
   elDet_ = 0.1; 
   builtinverse_ = true;
+  calcedDet_ = true;
 }
 
 template <>
 inline void AlbertaGridGeometry<1,2,const AlbertaGrid<1,2> >:: 
 buildJacobianInverse() const
 {
+  DUNE_THROW(AlbertaError,"this method is not implemented!\n");
+  
   // volume is length of edge 
-  FieldVector<albertCtype, 2> vec = coord_[0] - coord_[1];
-  elDet_ = vec.two_norm(); 
+  //FieldVector<albertCtype, 2> vec = coord_[0] - coord_[1];
+  //elDet_ = vec.two_norm(); 
 
-  builtinverse_ = true;
+  //calcedDet_ = true;
+  //builtinverse_ = true;
 }
 
 // default implementation calls ALBERTA routine 
 template <int mydim, int cdim, class GridImp>
 inline albertCtype AlbertaGridGeometry<mydim,cdim,GridImp>::elDeterminant () const
 {
-  return ALBERTA el_det(elInfo_);
+  DUNE_THROW(AlbertaError,"this method is not implemented !\n");
+  return 0.0;
 }
 
-// volume of one Geometry, here triangle  
+// determinat of one Geometry, here line  
+template <> 
+inline albertCtype AlbertaGridGeometry<1,2,const AlbertaGrid<2,2> >::elDeterminant () const
+{
+  // volume is length of edge 
+  tmpZ_ = coord_[0] - coord_[1];
+  return std::abs ( tmpZ_.two_norm() );
+}
+
+// determinat of one Geometry, here triangle  
 template <> 
 inline albertCtype AlbertaGridGeometry<2,2,const AlbertaGrid<2,2> >::elDeterminant () const
 {
   calcElMatrix();
   return std::abs ( elMat_.determinant () );
+}
+
+// determinat of one Geometry, here triangle in 3d   
+template <> 
+inline albertCtype AlbertaGridGeometry<2,3,const AlbertaGrid<3,3> >::elDeterminant () const
+{
+  enum { dim = 3 };
+  
+  // create vectors of face 
+  tmpV_ = coord_[1] - coord_[0]; 
+  tmpU_ = coord_[2] - coord_[1]; 
+
+  // calculate scaled outer normal 
+  for(int i=0; i<dim; i++) 
+  {
+    tmpZ_[i] = 0.5 * (  tmpU_[(i+1)%dim] * tmpV_[(i+2)%dim] 
+                      - tmpU_[(i+2)%dim] * tmpV_[(i+1)%dim] );
+  }
+
+  return std::abs( tmpZ_.two_norm() );
 }
 
 // volume of one Geometry, here therahedron  
@@ -668,10 +707,11 @@ inline albertCtype AlbertaGridGeometry<mydim,cdim,GridImp>::
 integrationElement (const FieldVector<albertCtype, mydim>& local) const
 {
   // if inverse was built, volume was calced already 
-  if(builtinverse_)
+  if(calcedDet_)
     return elDet_; 
 
   elDet_ = elDeterminant();
+  calcedDet_ = true;
   return elDet_;
 }
 
