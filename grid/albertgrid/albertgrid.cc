@@ -3747,19 +3747,15 @@ inline void AlbertGrid < dim, dimworld >::markNew()
 #define CALC_COORD
 template<int dim, int dimworld>
 inline void AlbertGrid<dim,dimworld >::
-firstNeigh(const int ichild, const int actLevel , 
-    const ALBERT EL_INFO *elinfo_old, ALBERT EL_INFO *elinfo, const bool leafLevel) const
+firstNeigh(const int ichild, const ALBERT EL_INFO *elinfo_old, 
+           ALBERT EL_INFO *elinfo, const bool leafLevel) const
 {
   // old stuff 
-  const ALBERT EL * el_old = elinfo_old->el;
-  const ALBERT S_CHAR * old_opp_vertex = elinfo_old->opp_vertex;
   const ALBERT REAL_D * old_opp_coord  = elinfo_old->opp_coord;
   const ALBERT REAL_D * old_coord      = elinfo_old->coord;
-  assert(el_old != NULL);
-  assert(el_old->child[0] != NULL);
 
   // new stuff 
-  ALBERT S_CHAR * opp_vertex     = elinfo->opp_vertex;
+  ALBERT U_CHAR * opp_vertex     = elinfo->opp_vertex;
   ALBERT EL ** neigh = NEIGH(el,elinfo);
   ALBERT REAL_D * opp_coord = elinfo->opp_coord;
 
@@ -3770,7 +3766,7 @@ firstNeigh(const int ichild, const int actLevel ,
   
   // first nb 0 of new elinfo
   {
-    ALBERT EL * nb = NEIGH(el_old,elinfo_old)[2];
+    ALBERT EL * nb = NEIGH(elinfo_old->el,elinfo_old)[2];
     if(nb)
     {
       // if NULL then nonconforme refinement 
@@ -3811,19 +3807,14 @@ firstNeigh(const int ichild, const int actLevel ,
 
 template<int dim, int dimworld>
 inline void AlbertGrid<dim,dimworld >::
-secondNeigh(const int ichild, const int actLevel , 
-    const ALBERT EL_INFO *elinfo_old, ALBERT EL_INFO *elinfo, const bool leafLevel) const
+secondNeigh(const int ichild, const ALBERT EL_INFO *elinfo_old, 
+            ALBERT EL_INFO *elinfo, const bool leafLevel) const
 {
   // old stuff 
-  const ALBERT EL * el_old = elinfo_old->el;
-  const ALBERT S_CHAR * old_opp_vertex = elinfo_old->opp_vertex;
-  const ALBERT REAL_D * old_opp_coord  = elinfo_old->opp_coord;
   const ALBERT REAL_D * old_coord      = elinfo_old->coord;
-  assert(el_old != NULL);
-  assert(el_old->child[0] != NULL);
 
   // new stuff 
-  ALBERT S_CHAR * opp_vertex     = elinfo->opp_vertex;
+  ALBERT U_CHAR * opp_vertex     = elinfo->opp_vertex;
   ALBERT EL ** neigh = NEIGH(el,elinfo);
   ALBERT REAL_D * opp_coord = elinfo->opp_coord;
 
@@ -3833,7 +3824,7 @@ secondNeigh(const int ichild, const int actLevel ,
   const int onechi = 1-ichild;
   // nb 1 of new elinfo, always the same 
   {
-    ALBERT EL * nextNb = el_old->child[onechi]; 
+    ALBERT EL * nextNb = elinfo_old->el->child[onechi]; 
     opp_vertex[onechi] = ichild;
 #ifdef CALC_COORD
     for(int i=0; i<dimworld; i++)
@@ -3860,19 +3851,16 @@ secondNeigh(const int ichild, const int actLevel ,
 
 template<int dim, int dimworld>
 inline void AlbertGrid<dim,dimworld >::
-thirdNeigh(const int ichild, const int actLevel , 
-    const ALBERT EL_INFO *elinfo_old, ALBERT EL_INFO *elinfo, const bool leafLevel) const
+thirdNeigh(const int ichild, const ALBERT EL_INFO *elinfo_old, 
+           ALBERT EL_INFO *elinfo, const bool leafLevel) const
 {
   // old stuff 
-  const ALBERT EL * el_old = elinfo_old->el;
-  const ALBERT S_CHAR * old_opp_vertex = elinfo_old->opp_vertex;
+  const ALBERT U_CHAR * old_opp_vertex = elinfo_old->opp_vertex;
   const ALBERT REAL_D * old_opp_coord  = elinfo_old->opp_coord;
   const ALBERT REAL_D * old_coord      = elinfo_old->coord;
-  assert(el_old != NULL);
-  assert(el_old->child[0] != NULL);
 
   // new stuff 
-  ALBERT S_CHAR * opp_vertex     = elinfo->opp_vertex;
+  ALBERT U_CHAR * opp_vertex     = elinfo->opp_vertex;
   ALBERT EL ** neigh = NEIGH(el,elinfo);
   ALBERT REAL_D * opp_coord = elinfo->opp_coord;
 
@@ -3882,7 +3870,7 @@ thirdNeigh(const int ichild, const int actLevel ,
   const int onechi = 1-ichild;
   // nb 2 of new elinfo 
   {
-    ALBERT EL * nb = NEIGH(el_old,elinfo_old)[onechi];
+    ALBERT EL * nb = NEIGH(elinfo_old->el,elinfo_old)[onechi];
     if(nb)
     {
       const int vx = old_opp_vertex[onechi];
@@ -3930,10 +3918,7 @@ fillElInfo(int ichild, int actLevel , const ALBERT EL_INFO *elinfo_old, ALBERT E
 #else 
     
   // old stuff 
-  const ALBERT EL * el_old = elinfo_old->el;
-  const ALBERT S_CHAR * old_opp_vertex = elinfo_old->opp_vertex;
-  const ALBERT REAL_D * old_opp_coord  = elinfo_old->opp_coord;
-  const ALBERT REAL_D * old_coord      = elinfo_old->coord;
+  ALBERT EL * el_old = elinfo_old->el;
   assert(el_old != NULL);
   assert(el_old->child[0] != NULL);
   
@@ -3941,12 +3926,8 @@ fillElInfo(int ichild, int actLevel , const ALBERT EL_INFO *elinfo_old, ALBERT E
   // set new element
   ALBERT EL * el  = el_old->child[ichild];
   elinfo->el = el;
-  //ALBERT S_CHAR * opp_vertex = elinfo->opp_vertex;
-  //ALBERT EL ** neigh = NEIGH(el,elinfo);
-  //ALBERT REAL_D * opp_coord = elinfo->opp_coord;
 
-  FLAGS   fill_flag = elinfo_old->fill_flag;
-  FLAGS   fill_opp_coords;
+  ALBERT FLAGS   fill_flag = elinfo_old->fill_flag;
 
   elinfo->macro_el  = elinfo_old->macro_el;
   elinfo->fill_flag = fill_flag;
@@ -3954,9 +3935,6 @@ fillElInfo(int ichild, int actLevel , const ALBERT EL_INFO *elinfo_old, ALBERT E
   elinfo->parent    = el_old;
   elinfo->level     = elinfo_old->level + 1;
   
-  //assert(neigh != NULL);
-  //assert(neigh == NEIGH(el,elinfo));
-
   // calculate the coordinates 
   if (fill_flag & FILL_COORDS)
   {
@@ -3986,9 +3964,9 @@ fillElInfo(int ichild, int actLevel , const ALBERT EL_INFO *elinfo_old, ALBERT E
     // allow to go down on neighbour more than once 
     // if the following condition is satisfied 
     const bool leafLevel = ((el->child[0] == NULL) && (elinfo->level < actLevel));
-    firstNeigh (ichild,actLevel,elinfo_old,elinfo,leafLevel);
-    secondNeigh(ichild,actLevel,elinfo_old,elinfo,leafLevel);
-    thirdNeigh (ichild,actLevel,elinfo_old,elinfo,leafLevel);
+    firstNeigh (ichild,elinfo_old,elinfo,leafLevel);
+    secondNeigh(ichild,elinfo_old,elinfo,leafLevel);
+    thirdNeigh (ichild,elinfo_old,elinfo,leafLevel);
   }
 
   // boundary calculation 
@@ -3999,20 +3977,11 @@ fillElInfo(int ichild, int actLevel , const ALBERT EL_INFO *elinfo_old, ALBERT E
     else
       elinfo->bound[2] = INTERIOR;
 
-    if (ichild==0) {
-      elinfo->bound[0] = elinfo_old->bound[2];
-      elinfo->bound[1] = elinfo_old->bound[0];
-      elinfo->boundary[0] = elinfo_old->boundary[2];
-      elinfo->boundary[1] = nil;
-      elinfo->boundary[2] = elinfo_old->boundary[1];
-    }
-    else {
-      elinfo->bound[0] = elinfo_old->bound[1];
-      elinfo->bound[1] = elinfo_old->bound[2];
-      elinfo->boundary[0] = nil;
-      elinfo->boundary[1] = elinfo_old->boundary[2];
-      elinfo->boundary[2] = elinfo_old->boundary[0];
-    }
+    elinfo->bound[ichild]   = elinfo_old->bound[2];
+    elinfo->bound[1-ichild] = elinfo_old->bound[ichild];
+    elinfo->boundary[ichild] = elinfo_old->boundary[2];
+    elinfo->boundary[1-ichild] = nil;
+    elinfo->boundary[2] = elinfo_old->boundary[1-ichild];
   }
 #endif
 } // end Grid::fillElInfo 2D
