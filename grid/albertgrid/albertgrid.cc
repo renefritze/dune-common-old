@@ -3510,6 +3510,7 @@ inline bool AlbertGrid < dim, dimworld >::readGridXdr (const char * filename, al
   // use read_mesh_xdr, but works not correctly 
   mesh_ = (ALBERT read_mesh (filename, &time , ALBERT AlbertHelp::initLeafData , 
                                 ALBERT AlbertHelp::initBoundary) );
+  assert(mesh_ != 0);
   
   // read element numbering from file 
   char elnumfile[2048];
