@@ -110,6 +110,7 @@ MemoryProvider<Object>::getNewObjectEntity()
   }
 }
 
+template <>
 inline MemoryProvider<ALBERT EL_INFO>::ObjectEntity *
 MemoryProvider<ALBERT EL_INFO>::getNewObjectEntity()
 {
@@ -155,6 +156,7 @@ inline void MemoryProvider<Object>::deleteEntity(ObjectEntity *obj)
   }
 }
 
+template <>
 inline void MemoryProvider<ALBERT EL_INFO>::deleteEntity(ObjectEntity *obj)
 {
   std::free(obj->item); 

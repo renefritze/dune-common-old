@@ -7,46 +7,33 @@
 #include <vector>
 #include <assert.h>
 
-
-#ifdef __ALBERTNAME__
+#ifdef __ALBERT++__
 #define ALBERT Albert:: 
-namespace Albert 
-{
 
 #else 
 #define ALBERT
 #endif
+
+// Dune includes
 #include "../common/misc.hh"
 #include "../common/matvec.hh"
 #include "../common/array.hh"
 #include "common/grid.hh"
  
-#ifndef __ALBERTNAME__
+#ifndef __ALBERT++__
 extern "C" 
 {
 #endif
 
-// we need EL_INDEX to be defined 1, 
-// we need use this element index for determination wether an element is
-// new or not 
-#ifndef EL_INDEX 
-#define EL_INDEX 1
-#endif
-
-  
 // the original ALBERT header 
 #include <albert.h>
 
-#ifndef __ALBERTNAME__
+#ifndef __ALBERT++__
 } // end extern "C"
 #endif
 
 // some extra functions for handling the Albert Mesh  
 #include "albertgrid/albertextra.hh"
-
-#ifdef __ALBERTNAME__
-} //end namespace Albert
-#endif
 
 #if 1
 #ifdef ABS
@@ -62,7 +49,12 @@ extern "C"
 #endif
 #endif
 
+// contains a simple memory management for some componds of this grid 
 #include "albertgrid/agmemory.hh"
+
+// contains the communication for parallel computing for this grid
+#undef HAVE_MPI 
+#include "albertgrid/agcommunicator.hh"
 
 namespace Dune 
 {
@@ -107,8 +99,6 @@ template<int dim, int dimworld>            class AlbertGridBoundaryEntity;
 template<int dim, int dimworld>            class AlbertGridHierarchicIterator;
 template<int dim, int dimworld>            class AlbertGridIntersectionIterator;
 template<int dim, int dimworld>            class AlbertGrid;
-
-template <class Object> class AlbertGridMemory;
 
 // singleton holding reference elements
 template<int dim> struct AlbertGridReferenceElement;
@@ -404,6 +394,8 @@ public EntityDefault<0,dim,dimworld,albertCtype,AlbertGridEntity,AlbertGridEleme
 public:
   typedef AlbertGridIntersectionIterator<dim,dimworld> IntersectionIterator; 
   typedef AlbertGridHierarchicIterator<dim,dimworld> HierarchicIterator; 
+
+  enum { dimension = dim };
   
   //! Destructor, needed perhaps needed for deleteing faceEntity_ and
   //! edgeEntity_ , see below
@@ -489,12 +481,31 @@ public:
   //***************************************************************
   //  Interface for Adaptation
   //***************************************************************
-  
   //! marks an element for refCount refines. if refCount is negative the
   //! element is coarsend -refCount times
   //! mark returns true if element was marked, otherwise false
   bool mark( int refCount ); 
+
+  //! return whether entity could be cosrsend (COARSEND) or was refined
+  //! (REFIEND) or nothing happend (NONE) 
   AdaptationState state (); 
+
+  //***************************************************************
+  //  Interface for parallelisation 
+  //***************************************************************
+    
+  //! AlbertGrid internal method for partitioning 
+  //! set processor number of this entity  
+  bool partition( int proc ); 
+
+  //! return partition type of this entity ( see grid.hh )
+  PartitionType partitionType() const; 
+
+  //! return true if this entity belong to master set of this grid   
+  bool master() const; 
+
+  //! return processor number where entity is master 
+  int owner () const; 
   
   //! return the global unique index in grid 
   int el_index(); 
@@ -863,9 +874,11 @@ public LevelIteratorDefault <codim,dim,dimworld,albertCtype,
   friend class AlbertGrid < dim , dimworld >;
 public:
 
+  enum { dimension = dim };
+
   //! Constructor
   AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, int
-      travLevel, bool leafIt=false);
+      travLevel, IteratorType IType, int proc, bool leafIt=false );
   
   //! Constructor
   AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, int travLevel,
@@ -873,7 +886,8 @@ public:
   
   //! Constructor
   AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, 
-          AlbertMarkerVector * vec ,int travLevel,bool leafIt=false);
+          AlbertMarkerVector * vec ,int travLevel, 
+          IteratorType IType, int proc ,bool leafIt=false);
   
   //! prefix increment
   AlbertGridLevelIterator<codim,dim,dimworld>& operator ++();
@@ -906,8 +920,9 @@ private:
   ALBERT EL_INFO * goFirstElement(ALBERT TRAVERSE_STACK *stack,
                             ALBERT MESH *mesh,
                            int level, ALBERT FLAGS fill_flag);
-  ALBERT EL_INFO * traverseLeafElLevel(ALBERT TRAVERSE_STACK * stack);
   ALBERT EL_INFO * traverseElLevel(ALBERT TRAVERSE_STACK * stack);
+  ALBERT EL_INFO * traverseElLevelInteriorBorder(ALBERT TRAVERSE_STACK * stack);
+  ALBERT EL_INFO * traverseElLevelGhosts(ALBERT TRAVERSE_STACK * stack);
  
   // the default is, go to next elInfo
   //template <int cc>  
@@ -922,7 +937,9 @@ private:
   ALBERT EL_INFO * goNextVertex(ALBERT TRAVERSE_STACK *stack,
                               ALBERT EL_INFO *elInfo);
 
-
+  // search next macro el  
+  ALBERT MACRO_EL * nextGhostMacro(ALBERT MACRO_EL *mel);
+  
   //! the grid were it all comes from
   AlbertGrid<dim,dimworld> &grid_; 
 
@@ -945,11 +962,18 @@ private:
 
   // knows on which element a point is viewed
   AlbertMarkerVector * vertexMarker_;
+
+  // variables for parallelisation 
+  // my iterator type, see IteratorType in grid.hh
+  const IteratorType myType_;
   
+  // store processor number of elements
+  // for ghost walktrough, i.e. walk over ghosts which belong
+  // tp processor 2 
+  const int proc_;
 };
 
 
-  
 //**********************************************************************
 //
 // --AlbertGrid
@@ -995,9 +1019,16 @@ public:
     /** \todo Please doc me! */
   enum { numCodim = dim+1 };
 
+  // cover gcc bug 
+  enum { dimension = dim };
+
   //! Constructor which reads an Albert Macro Triang file 
   //! or given GridFile 
   AlbertGrid(const char* macroTriangFilename);
+  
+  //! Constructor which reads an Albert Macro Triang file 
+  //! or given GridFile 
+  AlbertGrid(AlbertGrid<dim,dimworld> & oldGrid, int proc);
   
   //! empty Constructor 
   AlbertGrid();
@@ -1010,12 +1041,12 @@ public:
   int maxlevel() const;
 
   //! Iterator to first entity of given codim on level
-  template<int codim>
-  AlbertGridLevelIterator<codim,dim,dimworld> lbegin (int level);
+  template<int codim>  AlbertGridLevelIterator<codim,dim,dimworld> 
+  lbegin (int level,IteratorType IType = InteriorBorder, int proc = -1 );
 
   //! one past the end on this level
-  template<int codim>
-  AlbertGridLevelIterator<codim,dim,dimworld> lend (int level);
+  template<int codim>  AlbertGridLevelIterator<codim,dim,dimworld> 
+  lend (int level, IteratorType IType = InteriorBorder, int proc = -1 );
 
   //! number of grid entities per level and codim
   int size (int level, int codim);
@@ -1063,10 +1094,10 @@ public:
   albertCtype getTime () const { return time_; };
 
   //! return LeafIterator which points to first leaf entity 
-  LeafIterator leafbegin ( int maxlevel );
+  LeafIterator leafbegin ( int maxlevel, IteratorType IType = InteriorBorder, int proc = -1 );
   
   //! return LeafIterator which points behind last leaf entity 
-  LeafIterator leafend   ( int maxlevel );
+  LeafIterator leafend   ( int maxlevel, IteratorType IType = InteriorBorder, int proc = -1 );
 
   //! returns size of mesh includi all levels 
   //! max Index of grid entities with given codim 
@@ -1074,15 +1105,14 @@ public:
   //! the grid which is of minor cost 
   int global_size (int codim) const;
 
+  // return number of my processor 
+  int myProcessor () const { return myProc_; }; 
 private:
-  //! returns min Index of grid entities with given codim 
-  int minIndex (int codim) const { return minHierIndex_[codim];} 
+  // initialize of some members 
+  void initGrid(int proc);
   
   // max global index in Grid 
   int maxHierIndex_[dim+1];
-
-  // max global index in Grid 
-  int minHierIndex_[dim+1];
 
   // make the calculation of indexOnLevel and so on.
   // extra method because of Reihenfolge
@@ -1125,7 +1155,22 @@ private:
   // realtions ( in ALBERT only on leaf level ), so we needed a new
   // fill_elinfo. 
   void fillElInfo(int ichild, int actLevel ,const ALBERT EL_INFO *elinfo_old, 
-        ALBERT EL_INFO *elinfo, bool hierachical ) const;
+        ALBERT EL_INFO *elinfo, bool hierachical, bool leaf=false ) const;
+  
+  // calc the neigh[0] 
+  void firstNeigh(const int ichild, const int actLevel , 
+      const ALBERT EL_INFO *elinfo_old, ALBERT EL_INFO *elinfo, const
+        bool leafLevel) const;
+  
+  // calc the neigh[1] 
+  void secondNeigh(const int ichild, const int actLevel , 
+      const ALBERT EL_INFO *elinfo_old, ALBERT EL_INFO *elinfo, const
+        bool leafLevel) const;
+  
+  // calc the neigh[2] 
+  void thirdNeigh(const int ichild, const int actLevel , 
+      const ALBERT EL_INFO *elinfo_old, ALBERT EL_INFO *elinfo, const
+        bool leafLevel) const;
   
   // needed for VertexIterator, mark on which element a vertex is treated 
   AlbertMarkerVector * vertexMarker_; 
@@ -1168,34 +1213,51 @@ private:
   IntersectionSelfProvider  interSelfProvider_;
   IntersectionNeighProvider interNeighProvider_;
 
-  //*********************************************
+  //*********************************************************************
   // organisation of the global index 
-  INDEX_MANAGER *indexManager_;
+  //*********************************************************************
+  // the index Manager, to be replaced by Stack 
+  ALBERT INDEX_MANAGER *indexManager_;
 
-  
-  // storage of unique element numbers 
-  DOF_INT_VEC * elNumbers_;
-  DOF_INT_VEC * elNewCheck_;
-  
-  const DOF_ADMIN * elAdmin_;
+  // the DOF_INT_VECs we need 
+  ALBERT AlbertHelp::DOFVEC_STACK dofvecs_;
+        
+  const ALBERT DOF_ADMIN * elAdmin_;
   // pointer to vec of elNumbers_
   const int * elNumVec_;
   const int * elNewVec_;
 
   const int nv_;
   const int dof_; 
-  //*********************************************
  
   // make some shortcuts 
   void arrangeDofVec(); 
   
-  // read global element number form elNumbers_  
-  int getElementNumber ( ALBERT EL * el ) const; 
-
   // return true if el is new 
   bool checkElNew ( ALBERT EL * el ) const;
   
-  //****************************************//
+  // read global element number form elNumbers_  
+  int getElementNumber ( ALBERT EL * el ) const; 
+
+  //********************************************************************
+  //  organisation of the parallelisation 
+  //********************************************************************
+  
+  // pointer to vec  with processor number for each element, 
+  // access via setOwner and getOwner 
+  int * ownerVec_;
+
+  // set owner of element, for partioning  
+  bool setOwner ( ALBERT EL * el , int proc );
+  
+  // return the processor number of element  
+  int getOwner ( ALBERT EL * el ) const;
+
+  // PartitionType (InteriorEntity , BorderEntity, GhostEntity )
+  PartitionType partitionType ( ALBERT EL_INFO * elinfo) const;
+
+  // rank of my thread, i.e. number of my processor 
+  const int myProc_;
 
 }; // end Class AlbertGridGrid
 
@@ -1223,6 +1285,8 @@ private:
   int numVertex_;
 };
 
+//#include "albertgrid/albertparalleliterator.hh"
+
 /** @} end documentation group */
 
 
@@ -1230,5 +1294,6 @@ private:
 
 #include "albertgrid/agmemory.hh"
 #include "albertgrid/albertgrid.cc"
+//#include "albertgrid/albertparalleliterator.cc"
 
 #endif
