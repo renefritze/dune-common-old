@@ -54,7 +54,20 @@ public:
   {
     return asImp().getBaseFunctionSet( en );
   }
+  
+  //! Get maximal polynom order of functionspace. 
+  int polynomOrder () const 
+  {
+    return asImp().polynomOrder();
+  }
  
+  //! Get polynom order for special element. 
+  template <class EntityType>
+  int localPolynomOrder ( EntityType &en ) const 
+  {
+    return asImp().localPolynomOrder( en );
+  }
+  
   //! return the corresponding Grid 
   const GridType & getGrid () const { return grid_; }
 
