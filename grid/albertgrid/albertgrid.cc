@@ -2876,7 +2876,7 @@ template < int dim, int dimworld >
 inline AlbertGrid < dim, dimworld >::AlbertGrid() : 
  mesh_ (NULL), maxlevel_ (0) , wasChanged_ (false)
   , isMarked_ (false) 
-  , time_ (0.0) , hasLevelIndex_ (false)
+  , time_ (0.0) , hasLevelIndex_ (true)
   , indexManager_ (NULL) 
   , nv_ (dim+1) , dof_ (0) , myProc_ (0)
 {
