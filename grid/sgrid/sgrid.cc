@@ -36,7 +36,7 @@ inline SElement<dim,dimworld>::SElement (bool b)
         s = 0.0;
         for (int j=0; j<dim; j++) {
             // make unit vectors
-            A(j)   = FieldVector<sgrid_ctype, dimworld>(0.0); 
+            A[j]   = FieldVector<sgrid_ctype, dimworld>(0.0); 
             A(j,j) = 1.0;
         }
 
@@ -46,7 +46,7 @@ inline SElement<dim,dimworld>::SElement (bool b)
                 // use binary representation of corner number to assign corner coordinates
                 c[i] = s;
                 for (int k=0; k<dim; k++)
-                        if (i&(1<<k)) c[i] = c[i]+A(k);
+                        if (i&(1<<k)) c[i] = c[i]+A[k];
         }
 }
 
@@ -57,8 +57,8 @@ inline void SElement<dim,dimworld>::make(Mat<dimworld,dim+1,sgrid_ctype>& __As)
         builtinverse = false;
 
         // copy arguments
-        s = __As(dim);
-        for (int j=0; j<dim; j++) A(j) = __As(j);
+        s = __As[dim];
+        for (int j=0; j<dim; j++) A[j] = __As[j];
 
         // make corners
         for (int i=0; i<(1<<dim); i++) // there are 2^d corners
@@ -68,7 +68,7 @@ inline void SElement<dim,dimworld>::make(Mat<dimworld,dim+1,sgrid_ctype>& __As)
                 c[i] = s;
                 for (int k=0; k<dim; k++)
                 {
-                        if (i&mask) c[i] = c[i]+A(k);
+                        if (i&mask) c[i] = c[i]+A[k];
                         mask = mask<<1;
                 }
         }
@@ -193,7 +193,7 @@ inline SElement<0,dimworld>::SElement (bool b)
 template<int dimworld> 
 inline void SElement<0,dimworld>::make (Mat<dimworld,1,sgrid_ctype>& __As)
 {
-        s = __As(0);
+        s = __As[0];
 }
 
 template<int dimworld> 
@@ -313,7 +313,7 @@ inline SElement<dim-codim,dimworld>& SEntityBase<codim,dim,dimworld>::geometry (
                         t[i] -= 2; // direction i => even
                         p1 = grid->pos(l,t);
                         t[i] += 1; // revert t to original state
-                        __As(dir) = p2-p1;
+                        __As[dir] = p2-p1;
                         dir++;
                 }
 
@@ -321,7 +321,7 @@ inline SElement<dim-codim,dimworld>& SEntityBase<codim,dim,dimworld>::geometry (
         for (int i=0; i<dim; i++)
                 if (t[i]%2==1)
                         t[i] -= 1;
-        __As(dir) =grid->pos(l,t); // all components of t are even
+        __As[dir] =grid->pos(l,t); // all components of t are even
         
         // make element
         geo.make(__As);
@@ -830,7 +830,7 @@ inline void SIntersectionIterator<dim,dimworld>::makeintersections ()
         // local coordinates in self
         p1 = 0.0;
         p1[dir] = c;    // all points have p[dir]=c in entity
-        __As(dim-1) = p1; // position vector
+        __As[dim-1] = p1; // position vector
         t = 0;
         for (int i=0; i<dim; ++i) // this loop makes dim-1 direction vectors
                 if (i!=dir) 
@@ -838,7 +838,7 @@ inline void SIntersectionIterator<dim,dimworld>::makeintersections ()
                         // each i!=dir gives one direction vector
                         p2 = p1;
                         p2[i] = 1.0;
-                        __As(t) = p2-p1; // a direction vector
+                        __As[t] = p2-p1; // a direction vector
                         ++t;
                 }
         is_self_local.make(__As); // build geometry
@@ -846,7 +846,7 @@ inline void SIntersectionIterator<dim,dimworld>::makeintersections ()
         // local coordinates in neighbor
         p1 = 0.0;
         p1[dir] = 1-c;    // all points have p[dir]=1-c in entity
-        __As(dim-1) = p1;   // position vector
+        __As[dim-1] = p1;   // position vector
         t = 0;
         for (int i=0; i<dim; ++i) // this loop makes dim-1 direction vectors
                 if (i!=dir) 
@@ -854,7 +854,7 @@ inline void SIntersectionIterator<dim,dimworld>::makeintersections ()
                         // each i!=dir gives one direction vector
                         p2 = p1;
                         p2[i] = 1.0;
-                        __As(t) = p2-p1; // a direction vector
+                        __As[t] = p2-p1; // a direction vector
                         ++t;
                 }
         is_nb_local.make(__As); // build geometry
@@ -870,13 +870,13 @@ inline void SIntersectionIterator<dim,dimworld>::makeintersections ()
                         z1[i] -= 2; // direction i => even
                         p1 = grid->pos(self->level(),z1);
                         z1[i] += 1; // revert t to original state
-                        __As(t) = p2-p1;
+                        __As[t] = p2-p1;
                         ++t;
                 }
         for (int i=0; i<dim; i++)
                 if (i!=dir)
                         z1[i] -= 1;
-        __As(t) =grid->pos(self->level(),z1);
+        __As[t] =grid->pos(self->level(),z1);
         is_global.make(__As); // build geometry
 
         built_intersections = true;
