@@ -1,7 +1,7 @@
 #ifndef __DUNE_BSGRID_MYAUTOPTR_HH__
 #define __DUNE_BSGRID_MYAUTOPTR_HH__
 
-/** \brief An auto pointer class *\
+/** \brief An auto pointer class */
 template <class Pointer> 
 class AutoPointer
 {
