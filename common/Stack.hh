@@ -37,13 +37,13 @@ inline bool Stack<T>::isfull () const
 template<class T>
 inline void Stack<T>::push_front (T t)
 {
-	insert_after(rbegin(),t);
+	insert_after(this->rbegin(),t);
 }
 
 template<class T>
 inline T Stack<T>::pop_front ()
 {
-	typename DoubleLinkedList<T>::Iterator i=rbegin();
+	typename DoubleLinkedList<T>::Iterator i=this->rbegin();
 	T t = *i;
 	erase(i);
 	return t;
@@ -52,7 +52,7 @@ inline T Stack<T>::pop_front ()
 template<class T>
 inline T Stack<T>::front () const
 {
-	typename DoubleLinkedList<T>::Iterator i=rbegin();
+	typename DoubleLinkedList<T>::Iterator i=this->rbegin();
 	T t = *i;
 	return t;
 }

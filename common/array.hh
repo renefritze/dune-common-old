@@ -459,7 +459,7 @@ namespace Dune
         //! assignment from scalar
         SimpleVector<T>& operator= (const T t)
         {
-          for (int i=0; i<n; ++i) p[i] = t;
+          for (int i=0; i<this->n; ++i) this->p[i] = t;
           return *this;
         }
 
@@ -467,14 +467,14 @@ namespace Dune
         T ddot (const SimpleVector<T>& x)
         {
           T sum = 0;
-          for (int i=0; i<n; ++i) sum += p[i]*x.p[i];
+          for (int i=0; i<this->n; ++i) sum += this->p[i]*x.p[i];
           return sum;
         }
 
         //! add scalar times other vector
         void daxpy (T a, const SimpleVector<T>& x)
         {
-          for (int i=0; i<n; ++i) p[i] += a*x.p[i];
+          for (int i=0; i<this->n; ++i) this->p[i] += a*x.p[i];
         }
   };
   
