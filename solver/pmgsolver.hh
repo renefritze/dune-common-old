@@ -97,15 +97,10 @@ namespace Dune {
       MPI_Comm_rank(g.comm(), &rank);
     };
     ~pmgsolver() {
-      std::cerr << "exchange_data_from not cleaned up!!!\n";
-      std::cerr << "exchange_data_to not cleaned up!!!\n";
-      /*
-	free(exchange_data_from);
-	free(exchange_data_to);
-      */
     }
-    void solve(int);
-    void init();
+    void solve(int,level);
+    void solveNested();
+    void init(level);
     inline void initIterator(typename GRID::iterator it) {
       int i=it.id();
       b[i] = discrete.rhs(it);

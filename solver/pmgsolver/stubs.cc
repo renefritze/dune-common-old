@@ -54,6 +54,7 @@ namespace Dune {
           x[i] -= cl.aij[n] * x[j];
         }
         x[i] /= cl.aii;
+        assert(finite(x[i]));
       } // end evaluate
     };
 
@@ -150,6 +151,7 @@ namespace Dune {
         if (dir<0) {
           int f = g.father_id(l,coord);
           solver.b[f] += d;
+          assert(finite(solver.b[f]));
           return;
         }
 		
@@ -180,6 +182,7 @@ namespace Dune {
         if (dir<0) {
           typename GRID::iterator f = it.father();
           solver.b[f.id()] += d;
+          assert(finite(solver.b[f.id()]));
           return;
         }
         if (it.coord(dir)%2==coord_shift[dir]) {
@@ -223,6 +226,7 @@ namespace Dune {
           break;
         }
         }
+        assert(finite(x[i]));
       }
       double correction(int dir, level l, array<DIM> coord) {
         dir--;
