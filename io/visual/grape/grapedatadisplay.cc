@@ -277,7 +277,7 @@ func_real (DUNE_ELEM *he , DUNE_FDATA * fe,int ind, const double *coord, double 
 }
 
 template<class GridType, class DiscFuncType>
-void GrapeDataDisplay<GridType,DiscFuncType>::dataDisplay(DiscFuncType &func)
+inline void GrapeDataDisplay<GridType,DiscFuncType>::dataDisplay(DiscFuncType &func)
 { 
   /* add function data */
   this->addData(func,"myFunc",0.0);
@@ -288,7 +288,7 @@ void GrapeDataDisplay<GridType,DiscFuncType>::dataDisplay(DiscFuncType &func)
 
 
 template<class GridType, class DiscFuncType>
-void GrapeDataDisplay<GridType,DiscFuncType>::
+inline void GrapeDataDisplay<GridType,DiscFuncType>::
 addData(DiscFuncType &func , const char *name , double time )
 { 
   typedef typename DiscFuncType::LocalFunctionType LocalFuncType;
