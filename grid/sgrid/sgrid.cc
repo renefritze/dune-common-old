@@ -593,7 +593,8 @@ template<class GridImp>
 inline SHierarchicIterator<GridImp>::SHierarchicIterator (GridImp* _grid, 
                                                           const SEntity<0,GridImp::dimension,GridImp>& _e,
                                                           int _maxlevel, bool makeend) :
-        grid(_grid),e(_e)
+  Dune::SEntityPointer<0,GridImp>(_grid,_e.level(),_e.index()),
+  grid(_grid),e(_e)
 {
         // without sons, we are done (i.e. this is te end iterator, having original element in it)
         if (makeend) return;
@@ -631,18 +632,6 @@ inline void SHierarchicIterator<GridImp>::increment ()
                 push_sons(newe.l,newe.id);
 }
 
-template<class GridImp>
-inline bool SHierarchicIterator<GridImp>::equals(const SHierarchicIterator<GridImp>& i) const
-{
-  return (stack.size()==i.stack.size()) && (e.index()==i.e.index()) && (e.level()==i.e.level());
-}
-
-template<class GridImp>
-inline typename SHierarchicIterator<GridImp>::Entity& SHierarchicIterator<GridImp>::dereference () const
-{
-  return e;
-}
-
 //************************************************************************
 // inline methods for IntersectionIterator
 
@@ -668,24 +657,26 @@ inline void SIntersectionIterator<GridImp>::make (int _count) const
                 zrednb[count/2] -= 1; // even
 
         // now check if neighbor exists
-        is_on_boundary = !grid->exists(self->level(),zrednb);
+        is_on_boundary = !this->grid->exists(self->level(),zrednb);
         if (is_on_boundary) return; // ok, done it
 
         // now neighbor is in the grid and must be initialized. 
         // First compute its id
-        int nbid = grid->n(self->level(),grid->expand(self->level(),zrednb,partition));
+        int nbid =
+          this->grid->n(self->level(),
+                        this->grid->expand(self->level(),zrednb,partition));
 
         // and make it
-        e.make(self->level(),nbid);
+        this->e.make(self->level(),nbid);
 }
 
 template<class GridImp>
 inline SIntersectionIterator<GridImp>::SIntersectionIterator 
-(GridImp* _grid, const SEntity<0,dim,GridImp>* _self, int _count) 
-  : grid(_grid), self(_self),
-    partition(grid->partition(self->l,self->z)),
-    zred(grid->compress(self->l,self->z)),
-    e(_grid,self->l,self->id)
+  (GridImp* _grid, const SEntity<0,dim,GridImp>* _self, int _count) :
+    Dune::SEntityPointer<0,GridImp>(_grid,_self->l,_self->id),
+    self(_self),
+    partition(_grid->partition(self->l,self->z)),
+    zred(_grid->compress(self->l,self->z))
 {
   // make neighbor
   make(_count);
@@ -696,18 +687,6 @@ inline void SIntersectionIterator<GridImp>::increment ()
 {
         count++;
         make(count);
-}
-
-template<class GridImp>
-inline bool SIntersectionIterator<GridImp>::equals (const SIntersectionIterator<GridImp>& i) const
-{
-        return (count==i.count)&&(self==i.self);
-}
-
-template<class GridImp>
-inline typename SIntersectionIterator<GridImp>::Entity& SIntersectionIterator<GridImp>::dereference () const
-{
-        return e;
 }
 
 template<class GridImp>
@@ -783,9 +762,9 @@ inline void SIntersectionIterator<GridImp>::makeintersections () const
                 {
                         // each i!=dir gives one direction vector
                         z1[i] += 1; // direction i => even
-                        p2 = grid->pos(self->level(),z1);
+                        p2 = this->grid->pos(self->level(),z1);
                         z1[i] -= 2; // direction i => even
-                        p1 = grid->pos(self->level(),z1);
+                        p1 = this->grid->pos(self->level(),z1);
                         z1[i] += 1; // revert t to original state
                         __As[t] = p2-p1;
                         ++t;
@@ -793,7 +772,7 @@ inline void SIntersectionIterator<GridImp>::makeintersections () const
         for (int i=0; i<dim; i++)
                 if (i!=dir)
                         z1[i] -= 1;
-        __As[t] =grid->pos(self->level(),z1);
+        __As[t] = this->grid->pos(self->level(),z1);
         is_global.make(__As); // build geometry
 
         built_intersections = true;
@@ -851,24 +830,27 @@ SIntersectionIterator<GridImp>::unitOuterNormal (const FieldVector<typename Grid
 template<int codim, PartitionIteratorType pitype, class GridImp>
 inline void SLevelIterator<codim,pitype,GridImp>::increment ()
 {
-        id++;
-        e.make(l,id);
+        this->id++;
+        this->e.make(this->l,this->id);
 }
 
-template<int codim, PartitionIteratorType pitype, class GridImp>
-inline bool SLevelIterator<codim,pitype,GridImp>::equals (const SLevelIterator<codim,pitype,GridImp>& i) const
+//************************************************************************
+// inline methods for SEntityPointer
+
+template<int codim, class GridImp>
+inline bool SEntityPointer<codim,GridImp>::equals (const SEntityPointer<codim,GridImp>& i) const
 {
         return (id==i.id)&&(l==i.l)&&(grid==i.grid);
 }
 
-template<int codim, PartitionIteratorType pitype, class GridImp>
-inline typename SLevelIterator<codim,pitype,GridImp>::Entity& SLevelIterator<codim,pitype,GridImp>::dereference () const
+template<int codim, class GridImp>
+inline typename SEntityPointer<codim,GridImp>::Entity& SEntityPointer<codim,GridImp>::dereference () const
 {
         return e;
 }
 
-template<int codim, PartitionIteratorType pitype, class GridImp>
-inline int SLevelIterator<codim,pitype,GridImp>::level () const
+template<int codim, class GridImp>
+inline int SEntityPointer<codim,GridImp>::level () const
 {
         return l;
 }

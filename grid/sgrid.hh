@@ -67,6 +67,7 @@ typedef double sgrid_ctype;
 
 template<int dim, int dimworld, class GridImp> class SGeometry;
 template<int codim, int dim, class GridImp> class SEntity;
+template<int codim, class GridImp> class SEntityPointer;
 template<int codim, PartitionIteratorType, class GridImp> class SLevelIterator;
 template<int dim, int dimworld> class SGrid;
 template<class GridImp> class SIntersectionIterator;
@@ -247,6 +248,16 @@ public:
 
   SBoundaryEntity() : elem_(SGeometry<dim,dimworld,const GridImp>(true)) {} 
 
+  SBoundaryEntity(const SBoundaryEntity & rhs) :
+    outerPoint_(rhs.outerPoint_),
+    elem_(SGeometry<dim,dimworld,const GridImp>(true))
+    {};
+
+  SBoundaryEntity & operator= (const SBoundaryEntity & b)
+    {
+      outerPoint_ = b.outerPoint_;
+    }
+  
   //! return id of boundary segment 
   int id () const { return -1; } 
   
@@ -568,6 +579,7 @@ struct SHierarchicStackElem {
 
 template<class GridImp>
 class SHierarchicIterator :
+  public Dune::SEntityPointer <0,GridImp>,
   public HierarchicIteratorDefault <GridImp,SHierarchicIterator>
 {
   friend class SHierarchicIterator<const GridImp>;
@@ -579,12 +591,6 @@ public:
 
   //! increment
   void increment();
-
-  //! equality
-  bool equals (const SHierarchicIterator<GridImp>& i) const;
-
-  //! dereferencing
-  Entity& dereference() const;
 
   /*! constructor. Here is how it works: If with_sons is true, push start
     element and all its sons on the stack, so the initial element is popped
@@ -606,7 +612,7 @@ public:
       stack = i.stack;
       return *this;
     }
-  
+
 private:
   GridImp* const grid;   //!< my grid
   mutable SMakeableEntity<0,dim,GridImp> e;              //!< virtual son entity
@@ -626,7 +632,9 @@ private:
   of an element!
  */
 template<class GridImp>
-class SIntersectionIterator : public IntersectionIteratorDefault <GridImp,SIntersectionIterator>
+class SIntersectionIterator :
+  public Dune::SEntityPointer <0,GridImp>,
+  public IntersectionIteratorDefault <GridImp,SIntersectionIterator>
 {
   enum { dim=GridImp::dimension };
   enum { dimworld=GridImp::dimensionworld };
@@ -644,10 +652,6 @@ public:
 
   //! increment
   void increment();
-  //! equality
-  bool equals (const SIntersectionIterator<GridImp>& i) const;
-  //! access neighbor, dereferencing 
-  Entity& dereference() const;
 
   //! return true if intersection is with boundary. \todo connection with boundary information, processor/outer boundary
   bool boundary () const;
@@ -682,19 +686,16 @@ public:
 
   //! constructor
   SIntersectionIterator (GridImp* _grid, const SEntity<0,dim,GridImp >* _self, int _count);
-  SIntersectionIterator () {};
-
+  
 private:
   void make (int _count) const;                 //!< reinitialze iterator with given neighbor
   void makeintersections () const;              //!< compute intersections
-  GridImp* grid;                                //!< my grid
   const SEntity<0,dim,GridImp >* self;          //!< myself, SEntity is a friend class  
   const int partition;                          //!< partition number of self, needed for coordinate expansion
   const FixedArray<int,dim> zred;                 //!< reduced coordinates of myself, allows easy computation of neighbors
   mutable int count;                              //!< number of neighbor
   mutable bool valid_count;                       //!< true if count is in range
   mutable bool is_on_boundary;                    //!< true if neighbor is otside the domain
-  mutable SMakeableEntity<0,dim,GridImp> e;             //!< virtual neighbor entity
   mutable bool built_intersections;               //!< true if all intersections have been built
   mutable SMakeableGeometry<dim-1,dim,const GridImp> is_self_local;      //!< intersection in own local coordinates
   mutable SMakeableGeometry<dim-1,dimworld,const GridImp> is_global;     //!< intersection in global coordinates, map consistent with is_self_local
@@ -704,10 +705,43 @@ private:
 
 //************************************************************************
 
+/*! Acts as a pointer to an  entities of a given codimension.
+ */
+template<int codim, class GridImp>
+class SEntityPointer :
+  public EntityPointerDefault <codim, GridImp,
+                               Dune::SEntityPointer<codim,GridImp> >
+{
+  enum { dim = GridImp::dimension };
+public:
+  typedef typename GridImp::template codim<codim>::Entity Entity;
+
+  //! equality
+  bool equals(const SEntityPointer<codim,GridImp>& i) const;
+  //! dereferencing
+  Entity& dereference() const;
+  //! ask for level of entity
+  int level () const;
+
+  //! constructor
+  SEntityPointer (GridImp * _grid, int _l, int _id) :
+    grid(_grid), l(_l), id(_id), e(_grid,_l,_id) { }
+  
+protected:
+  GridImp* grid;                 //!< my grid
+  int l;                         //!< level where element is on
+  mutable int id;                //!< my consecutive id
+  mutable SMakeableEntity<codim,dim,GridImp> e;  //!< virtual entity
+};
+
+//************************************************************************
+
 /*! Enables iteration over all entities of a given codimension and level of a grid.
  */
 template<int codim, PartitionIteratorType pitype, class GridImp>
-class SLevelIterator : public LevelIteratorDefault <codim,pitype,GridImp,SLevelIterator>
+class SLevelIterator :
+  public Dune::SEntityPointer <codim,GridImp>,
+  public LevelIteratorDefault <codim,pitype,GridImp,SLevelIterator>
 {
   friend class SLevelIterator<codim, pitype,const GridImp>;
   enum { dim = GridImp::dimension };
@@ -716,22 +750,10 @@ public:
 
   //! increment
   void increment();
-  //! equality
-  bool equals(const SLevelIterator<codim,pitype,GridImp>& i) const;
-  //! dereferencing
-  Entity& dereference() const;
-  //! ask for level of entity
-  int level () const;
 
   //! constructor
   SLevelIterator (GridImp * _grid, int _l, int _id) :
-    grid(_grid), l(_l), id(_id), e(_grid,_l,_id) {}
-  
-private:
-  GridImp* grid;                 //!< my grid
-  int l;                         //!< level where element is on
-  mutable int id;                        //!< my consecutive id
-  mutable SMakeableEntity<codim,dim,GridImp> e;  //!< virtual entity
+    Dune::SEntityPointer<codim,GridImp>(_grid,_l,_id) {}
 };
 
 //************************************************************************
@@ -751,9 +773,10 @@ template<int dim, int dimworld>
 class SGrid : public GridDefault <dim,dimworld,sgrid_ctype,SGrid<dim,dimworld> >
 {
 public:
-  typedef GridTraits<dim,dimworld,Dune::SGrid<dim,dimworld> ,SGeometry,SEntity,
-                     SBoundaryEntity,SLevelIterator, // to be replaced by SGridEntityPointer 
-                     SLevelIterator,SIntersectionIterator,SHierarchicIterator> Traits;
+  typedef GridTraits<dim,dimworld,Dune::SGrid<dim,dimworld>,
+                     SGeometry,SEntity,SBoundaryEntity,
+                     SEntityPointer,SLevelIterator,
+                     SIntersectionIterator,SHierarchicIterator> Traits;
 
   //! maximum number of levels allowed
   enum { MAXL=32 };
