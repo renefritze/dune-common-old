@@ -6,7 +6,7 @@
 #include "common/quadrature.hh"
 
 // the barycenters for each codim 
-#include "dunequad/facecenterpoints.hh"
+#include "barycenter/facecenterpoints.hh"
 
 namespace Dune {
 
@@ -29,12 +29,8 @@ private:
   //! my Type 
   typedef BaryCenterQuad <  RangeFieldType , DomainType, codim > BaryCenterQuadType;
 
-  // number of quadrature points on segment line 
-  // upper bound 
-  enum { m = PointsOnLine<2>::points+2 };
-
   //! the number of quadrature points is stored as enum
-  enum { maxQuadPoints = power_M_P < m , dim >::power };
+  enum { maxQuadPoints = 9 };
 
 public:
   //! Constructor build the vec with the points and weights
@@ -43,6 +39,7 @@ public:
   {
     switch(en.geometry().type())
     {
+      case line:          { makeQuadrature<line> (); break; }
       case quadrilateral: { makeQuadrature<quadrilateral> (); break; }
       case hexahedron:    { makeQuadrature<hexahedron> (); break; }
       case triangle:      { makeQuadrature<triangle> (); break; }
@@ -56,6 +53,7 @@ public:
   {
     switch(eltype)
     {
+      case line:          { makeQuadrature<line> (); break; }
       case quadrilateral: { makeQuadrature<quadrilateral> (); break; }
       case hexahedron:    { makeQuadrature<hexahedron> (); break; }
       case triangle:      { makeQuadrature<triangle> (); break; }
