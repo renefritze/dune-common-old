@@ -322,6 +322,9 @@ public:
   //! geometry of this entity
   const Geometry& geometry () const { return SEntityBase<codim,dim,GridImp>::geometry(); }
   
+  //! only interior entities
+  PartitionType partitionType () const { return InteriorEntity; }
+
   // specific to SEntity
   //! constructor
   SEntity (GridImp* _grid, int _l, int _id) : SEntityBase<codim,dim,GridImp>::SEntityBase(_grid,_l,_id) {};
@@ -356,9 +359,9 @@ public:
   template <int cd>
   struct codim
   {
-    typedef typename GridImp::template codim<cd>::LevelIterator LevelIterator;
+    typedef typename GridImp::template codim<cd>::EntityPointer EntityPointer;
   };
-  typedef typename GridImp::template codim<0>::LevelIterator LevelIterator;
+  typedef typename GridImp::template codim<0>::EntityPointer EntityPointer;
   typedef typename GridImp::template codim<0>::IntersectionIterator IntersectionIterator;
   typedef typename GridImp::template codim<0>::HierarchicIterator HierarchicIterator;
 
@@ -386,7 +389,7 @@ public:
   /*! Provide access to mesh entity i of given codimension. Entities
     are numbered 0 ... count<cc>()-1
   */ 
-  template<int cc> const typename codim<cc>::LevelIterator entity (int i) const;
+  template<int cc> const typename codim<cc>::EntityPointer entity (int i) const;
 
   //! return global index of entity<cc> number i 
   template <int cc> int subIndex ( int i ) const;
@@ -402,7 +405,7 @@ public:
   IntersectionIterator iend () const;
 
   //! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
-  const LevelIterator father () const;
+  const EntityPointer father () const;
 
   //! return true if the entity is leaf 
   bool isLeaf ()
@@ -477,7 +480,7 @@ class SEntity<dim,dim,GridImp> : public SEntityBase<dim,dim,GridImp>,
   enum { dimworld = GridImp::dimensionworld };
 public:
   typedef typename GridImp::template codim<dim>::Geometry Geometry;
-  typedef typename GridImp::template codim<0>::LevelIterator LevelIterator;
+  typedef typename GridImp::template codim<0>::EntityPointer EntityPointer;
 
   // disambiguate member functions with the same name in both bases
   //! level of this element
@@ -496,7 +499,7 @@ public:
     This can speed up on-the-fly interpolation for linear conforming elements
     Possibly this is sufficient for all applications we want on-the-fly.
   */
-  const LevelIterator ownersFather () const;
+  const EntityPointer ownersFather () const;
 
   //! local coordinates within father
   FieldVector<sgrid_ctype, dim>& positionInOwnersFather () const;
