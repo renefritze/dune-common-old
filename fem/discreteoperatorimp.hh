@@ -10,9 +10,11 @@ namespace Dune{
 // Note: Range has to have Vector structure as well.
 template <class DiscreteFunctionType, class LocalOperatorImp >
 class DiscreteOperator 
-: public DiscreteOperatorDefault 
-    < DiscreteFunctionType , LocalOperatorImp, 
-      DiscreteOperator <DiscreteFunctionType,LocalOperatorImp > > 
+//: public DiscreteOperatorDefault 
+//    < DiscreteFunctionType , LocalOperatorImp, 
+//      DiscreteOperator <DiscreteFunctionType,LocalOperatorImp > > 
+: public Operator <typename DiscreteFunctionType::RangeFieldType,
+    DiscreteFunctionType , DiscreteFunctionType>
 {  
   typedef typename DiscreteFunctionType::FunctionSpaceType::RangeField RangeFieldType;
     
@@ -24,6 +26,15 @@ public:
   //! remember time step size 
   void prepare ( int level , const Domain &Arg, Range &Dest, 
                  Range *tmp , RangeFieldType & a, RangeFieldType & b) 
+  {
+    level_ = level;
+    localOp_.prepareGlobal(level,Arg,Dest,tmp,a,b);
+    prepared_ = true;
+  }
+ 
+  //! remember time step size 
+  virtual void prepareG ( int level , const Domain &Arg, Range &Dest, 
+                 Range *tmp , RangeFieldType & a, RangeFieldType & b) const
   {
     level_ = level;
     localOp_.prepareGlobal(level,Arg,Dest,tmp,a,b);
@@ -62,7 +73,7 @@ public:
     else 
     {
       typedef typename GridType::Traits<0>::LevelIterator LevelIterator;
-  
+
       // make run through grid 
       LevelIterator it = grid.template lbegin<0>( level_ );
       LevelIterator endit = grid.template lend<0>  ( level_ );
@@ -73,6 +84,14 @@ public:
   //! finalize the operation 
   void finalize ( int level , const Domain &Arg, Range &Dest, 
                   Range *tmp , RangeFieldType & a, RangeFieldType & b)
+  {
+    prepared_ = false;
+    localOp_.finalizeGlobal(level,Arg,Dest,tmp,a,b);
+  }
+  
+  //! finalize the operation 
+  virtual void finalizeG ( int level , const Domain &Arg, Range &Dest, 
+                  Range *tmp , RangeFieldType & a, RangeFieldType & b) const
   {
     prepared_ = false;
     localOp_.finalizeGlobal(level,Arg,Dest,tmp,a,b);
@@ -90,7 +109,7 @@ private:
                      const Domain &Arg, Range &Dest ) const 
   {
       // erase destination function
-      Dest.clear();
+      Dest.clearLevel ( level_ );
 
       // run through grid and apply the local operator
       for( it ; it != endit; ++it )

@@ -56,11 +56,12 @@ protected:
     typedef typename GridType::Traits<0>::LevelIterator LevelIterator; 
     typedef typename FunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
 
-    GridType &grid = const_cast<GridType &> (functionSpace_.getGrid());
+    GridType &grid = functionSpace_.getGrid();
 
   {  
     LevelIterator it = grid.template lbegin<0>( grid.maxlevel() );
     LevelIterator endit = grid.template lend<0> ( grid.maxlevel() );
+    
     for( it ; it != endit; ++it ) 
     {
       prepare( *it );
@@ -126,6 +127,7 @@ protected:
       }
     }
   }
+    //matrix_->print(std::cout);
     matrix_assembled_ = true;
   }
 
