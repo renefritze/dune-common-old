@@ -7,11 +7,6 @@ template<class C, class T> class TestIterator;
 
 template<class T> 
 class TestContainer{
-  friend class TestIterator<TestContainer<T>,T>;
-  friend class TestIterator<const TestContainer<T>, const T>;
-  
-  //  friend class TestConstIterator<T>;
-
 public:
   typedef TestIterator<TestContainer<T>,T> iterator;
   
@@ -87,7 +82,7 @@ public:
   }
   
   T& dereference() const{
-    return container_->values_[position_];
+    return container_->operator[](position_);
   }
 
   void increment(){
