@@ -12,14 +12,11 @@ namespace Dune
 
 template<class GridImp, template<class> class IntersectionIteratorImp>
 class IntersectionIterator :
-    public Dune::ForwardIteratorFacade<IntersectionIterator<GridImp,IntersectionIteratorImp>,
-                                       typename GridImp::template codim<0>::Entity>
+    public EntityPointer<GridImp, IntersectionIteratorImp<GridImp> >
 {
   enum { dim=GridImp::dimension };
   enum { dimworld=GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
-protected:
-  IntersectionIteratorImp<GridImp> realIterator;
 public:
   typedef typename GridImp::template codim<0>::Entity Entity;
   typedef typename GridImp::template codim<0>::BoundaryEntity BoundaryEntity;
@@ -32,34 +29,33 @@ public:
   //! define type used for coordinates in grid module
   typedef ct ctype;
 
-  //! increment
-  void increment()
+  /** @brief Preincrement operator. */
+  IntersectionIterator& operator++()
     {
-      realIterator.increment();
+      this->realIterator.increment();
+      return *this;
     }
-  //! equality
-  bool equals (const IntersectionIterator<GridImp,IntersectionIteratorImp>& i) const
+  
+  /** @brief Postincrement operator. */
+  IntersectionIterator& operator++(int)
     {
-      return realIterator.equals(i.realIterator);
+      this->realIterator.operator++();
+      return *this;
     }
-  //! access neighbor, dereferencing
-  Entity& dereference() const
-    {
-        return realIterator.dereference();
-    }
+  
   //! return true if intersection is with boundary. \todo connection with boundary information, processor/outer boundary
   bool boundary () const
     {
-      return realIterator.boundary();
+      return this->realIterator.boundary();
     }
   const BoundaryEntity & boundaryEntity () const
     {
-      return realIterator.boundaryEntity();
+      return this->realIterator.boundaryEntity();
     }
   //! return true if intersection is with neighbor on this level.
   bool neighbor () const
     {
-      return realIterator.neighbor();
+      return this->realIterator.neighbor();
     }
   /*! return an outer normal (length not necessarily 1)
 
@@ -69,7 +65,7 @@ public:
   */
   FieldVector<ct, dimworld> outerNormal (const FieldVector<ct, dim-1>& local) const
     {
-      return realIterator.outerNormal(local);
+      return this->realIterator.outerNormal(local);
     }
 
   /*! intersection of codimension 1 of this neighbor with element where iteration started.
@@ -77,14 +73,14 @@ public:
   */
   const LocalGeometry& intersectionSelfLocal () const
     {
-      return realIterator.intersectionSelfLocal();
+      return this->realIterator.intersectionSelfLocal();
     }
   /*! intersection of codimension 1 of this neighbor with element where iteration started.
     Here returned element is in LOCAL coordinates of neighbor
   */
   const LocalGeometry& intersectionNeighborLocal () const
     {
-      return realIterator.intersectionNeighborLocal();
+      return this->realIterator.intersectionNeighborLocal();
     }
 
   /*! intersection of codimension 1 of this neighbor with element where iteration started.
@@ -92,19 +88,19 @@ public:
   */
   const Geometry& intersectionGlobal () const
     {
-      return realIterator.intersectionGlobal();
+      return this->realIterator.intersectionGlobal();
     }
 
   //! local number of codim 1 entity in self where intersection is contained in
   int numberInSelf () const
     {
-      return realIterator.numberInSelf ();
+      return this->realIterator.numberInSelf ();
     }
 
   //! local number of codim 1 entity in neighbor where intersection is contained in
   int numberInNeighbor () const
     {
-      return realIterator.numberInNeighbor ();
+      return this->realIterator.numberInNeighbor ();
     }
 
   //! return unit outer normal, this should be dependent on
@@ -112,17 +108,17 @@ public:
   //! the normal is scaled with the integration element
   FieldVector<ct, dimworld> integrationOuterNormal (const FieldVector<ct, dim-1>& local) const
     {
-      return realIterator.integrationOuterNormal(local);
+      return this->realIterator.integrationOuterNormal(local);
     }
   //! return unit outer normal
   FieldVector<ct, dimworld> unitOuterNormal (const FieldVector<ct, dim-1>& local) const
     {
-      return realIterator.unitOuterNormal(local);
+      return this->realIterator.unitOuterNormal(local);
     }
 
   // copy constructor from IntersectionIteratorImp
   IntersectionIterator (const IntersectionIteratorImp<const GridImp> & i) :
-    realIterator(i) {}
+    EntityPointer<GridImp, IntersectionIteratorImp<GridImp> >(i) {};
 };
 
 //************************************************************************
@@ -157,16 +153,6 @@ public:
   void increment()
     {
       asImp().increment();
-    }
-  //! equality
-  bool equals(const IntersectionIteratorImp<GridImp>& i) const
-    {
-      return asImp().equals(i);
-    }
-  //! access neighbor, dereferencing
-  Entity& dereference() const
-    {
-      return asImp().dereference();
     }
 
   //! return true if intersection is with boundary. \todo connection with boundary information, processor/outer boundary

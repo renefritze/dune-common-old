@@ -249,7 +249,10 @@ protected:
   /** hide copy constructor */
   Entity(const Entity& rhs) : realEntity(rhs.realEntity) {};
   /** hide assignement operator */
-  Entity & operator = (const Entity& rhs) { realEntity = rhs.realEntity; };
+  Entity & operator = (const Entity& rhs) {
+    realEntity = rhs.realEntity;
+    return *this;
+  };
 };
 
     /** \brief The wrapper class for entities representing vertices 

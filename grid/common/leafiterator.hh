@@ -6,39 +6,28 @@ namespace Dune
 
 template<class GridImp, template<class> class LeafIteratorImp>
 class LeafIterator :
-    public Dune::ForwardIteratorFacade<LeafIterator<GridImp,LeafIteratorImp>,
-                                       typename GridImp::template codim<0>::Entity>
+    public EntityPointer<GridImp, LeafIteratorImp<GridImp> >
 {
-protected:
-  LeafIteratorImp<GridImp> realIterator;
 public:
   typedef typename GridImp::template codim<0>::Entity Entity;
 
-  //! increment
-  void increment()
+  /** @brief Preincrement operator. */
+  LeafIterator& operator++()
     {
-      realIterator.increment();
+      this->realIterator.increment();
+      return *this;
     }
-
-  //! equality
-  bool equals (const LeafIterator<GridImp,LeafIteratorImp>& i) const
+  
+  /** @brief Postincrement operator. */
+  LeafIterator& operator++(int)
     {
-      return realIterator.equals(i.realIterator);
+      this->realIterator.operator++();
+      return *this;
     }
-
-  //! dereferencing
-  Entity& dereference() const
-    {
-      return realIterator.dereference();
-    }
-  //! ask for level of entity
-  int level () const
-    {
-      return realIterator.level();
-    }
-
-  // copy constructor from LeafIteratorImp
-  LeafIterator (const LeafIteratorImp<const GridImp> & i) : realIterator(i) {};
+  
+  /** @brief copy constructor from LevelIteratorImp */
+  LeafIterator (const LeafIteratorImp<const GridImp> & i) : 
+    EntityPointer<GridImp, LeafIteratorImp<GridImp> >(i) {};
 };
 
 /*
@@ -56,20 +45,6 @@ public:
       asImp().increment();
     }
 
-  //! equality
-  bool equals (const LeafIterator<GridImp,LeafIteratorImp>& i) const
-    {
-      return asImp().equals(i.realIterator);
-    }
-
-  //! dereferencing
-  Entity& dereference() const
-    {
-      return asImp().dereference();
-    }
-  
-  //! ask for level of entity
-  int level () const { return asImp().level(); }
 private:
   //!  Barton-Nackman trick
   LeafIteratorImp<GridImp>& asImp ()
@@ -91,9 +66,12 @@ private:
 };
 
 template<class GridImp>
-class GenericLeafIterator : public LeafIteratorDefault<GridImp, GenericLeafIterator>
+class GenericLeafIterator :
+  public GridImp::template codim<0>::EntityPointer::base,
+  public LeafIteratorDefault<GridImp, GenericLeafIterator>
 {
   friend class GenericLeafIterator<const GridImp>;
+  typedef typename GridImp::template codim<0>::EntityPointer::base EntityPointerImp;
 public:
   typedef typename GridImp::template codim<0>::Entity Entity;
   typedef typename GridImp::template codim<0>::LevelIterator LevelIterator;
@@ -120,26 +98,11 @@ public:
         if(hit->level() == maxlevel) break;
         if(hit->isLeaf()) break;
       }
-    }
-  //! equality
-  bool equals (const GenericLeafIterator<GridImp>& i) const
-    {
-      if (lit == lend) return (lit == i.lit);
-      if (i.lit == i.lend) return (lit == i.lit);
-      return (lit == i.lit) && (hit == i.hit);
-    }
-  //! dereferencing
-  Entity& dereference() const
-    {
-      return *hit;
-    }
-  //! ask for level of entity
-  int level () const
-    {
-      return hit->level();
+      static_cast<EntityPointerImp&>(*this) = hit.realIterator;
     }
 
   GenericLeafIterator(GridImp & g, int maxl, bool end) :
+    EntityPointerImp(g.template lbegin<0>(0).realIterator),
     grid(g), maxlevel(maxl),
     lit(grid.template lbegin<0>(0)),
     lend(grid.template lend<0>(0)),
@@ -150,12 +113,15 @@ public:
       {
         lit = grid.template lend<0>(0);
       }
+      static_cast<EntityPointerImp&>(*this) = hit.realIterator;
     }
 
-//   GenericLeafIterator(const GenericLeafIterator<typename RemoveConst<GridImp>::Type> & i) :
-//     grid(i.grid), maxlevel(i.maxlevel),
-//     lit(i.lit), lend(i.lend), hit(i.hit), hend(i.hend)
-//     {}  
+  GenericLeafIterator(const GenericLeafIterator & rhs) :
+    EntityPointerImp(rhs.hit.realIterator),
+    grid(rhs.grid), maxlevel(rhs.maxlevel),
+    lit(rhs.lit), lend(rhs.lend),
+    hit(rhs.hit), hend(rhs.hend)
+    {}
   
 private:
   GridImp & grid;

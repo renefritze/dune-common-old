@@ -1,6 +1,8 @@
 #ifndef DUNE_GRID_HIERARCHICITERATOR_HH
 #define DUNE_GRID_HIERARCHICITERATOR_HH
 
+#include "entitypointer.hh"
+
 namespace Dune {
 
 //************************************************************************
@@ -16,34 +18,27 @@ namespace Dune {
  */
 template<class GridImp, template<class> class HierarchicIteratorImp>
 class HierarchicIterator :
-    public Dune::ForwardIteratorFacade<HierarchicIterator<GridImp,HierarchicIteratorImp>,
-                                       typename GridImp::template codim<0>::Entity>
+    public EntityPointer<GridImp, HierarchicIteratorImp<GridImp> >
 {
-protected:
-  HierarchicIteratorImp<GridImp> realIterator;
 public:
   typedef typename GridImp::template codim<0>::Entity Entity;
-  //! increment
-  void increment()
+  /** @brief Preincrement operator. */
+  HierarchicIterator& operator++()
     {
-      realIterator.increment();
+      this->realIterator.increment();
+      return *this;
+    }
+  
+  /** @brief Postincrement operator. */
+  HierarchicIterator& operator++(int)
+    {
+      this->realIterator.operator++();
+      return *this;
     }
 
-  //! equality
-  bool equals (const HierarchicIterator<GridImp,HierarchicIteratorImp>& i) const
-    {
-      return realIterator.equals(i.realIterator);
-    }
-
-  //! dereferencing
-  Entity& dereference() const
-    {
-      return realIterator.dereference();
-    }
-
-  // copy constructor from HierarchicIteratorImp
+  /** @brief copy constructor from HierarchicIteratorImp */
   HierarchicIterator (const HierarchicIteratorImp<const GridImp> & i) :
-    realIterator(i) {};
+    EntityPointer<GridImp,HierarchicIteratorImp<GridImp> >(i) {};
 };
 
 /*
@@ -59,18 +54,6 @@ public:
   void increment()
     {
       asImp().increment();
-    }
-
-  //! equality
-  bool equals (const HierarchicIterator<GridImp,HierarchicIteratorImp>& i) const
-    {
-      return asImp().equals(i.realIterator);
-    }
-
-  //! dereferencing
-  Entity& dereference() const
-    {
-      return asImp().dereference();
     }
 
 private:

@@ -222,13 +222,14 @@ template<int mydim, int cdim, class GridImp,template<int,int,class> class Geomet
 // EntityImp gets GridImp as 3rd template parameter to distinguish between const and mutable grid
 template<int codim, int dim, class GridImp,template<int,int,class> class EntityImp> class Entity;
 template<class GridImp, template<class> class BoundaryEntityImp> class BoundaryEntity;
+template<class GridImp, class EntityPointerImp> class EntityPointer;
 template<int codim, PartitionIteratorType pitype, class GridImp,
          template<int,PartitionIteratorType,class> class LevelIteratorImp> class LevelIterator;
 template<class GridImp, template<class> class IntersectionIteratorImp> class IntersectionIterator;
 template<class GridImp, template<class> class HierarchicIteratorImp> class HierarchicIterator;
 template<class GridImp, template<class> class LeafIteratorImp> class LeafIterator;
 template<class GridImp> class GenericLeafIterator;
-  
+
 //************************************************************************
 // G R I D
 //************************************************************************
@@ -429,7 +430,7 @@ public:
   template <class T>
   bool mark( int refCount, T & e )
     {
-      IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridImp>::template codim<0>::EntityPointer>::sameType >::yes();
+      IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridImp>::template codim<0>::EntityPointer>::exists >::yes();
       return false;
     }
 
@@ -460,7 +461,7 @@ template <int dim, int dimw, class GridImp,
           template<int,int,class> class GeometryImp,
           template<int,int,class> class EntityImp,
           template<class> class BoundaryEntityImp,
-          template<int, PartitionIteratorType, class> class EntityPointerImp,
+          template<int,class> class EntityPointerImp,
           template<int,PartitionIteratorType,class> class LevelIteratorImp,
           template<class> class IntersectionIteratorImp,
           template<class> class HierarchicIteratorImp,
@@ -488,9 +489,7 @@ struct GridTraits
 
     typedef Dune::LevelIterator<cd,All_Partition,const GridImp,LevelIteratorImp> LevelIterator;
 
-    // The wrapper class should be adjusted in future
-    // the EntityPointer class should replace LevelIterator here 
-    typedef Dune::LevelIterator<cd,All_Partition,const GridImp, EntityPointerImp> EntityPointer;
+    typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntityPointer;
 
     //! Please doc me!
     typedef Dune::LevelIterator<cd,Interior_Partition,const GridImp,LevelIteratorImp>        InteriorLevelIterator;
@@ -550,6 +549,7 @@ inline std::string transformToGridName(GridIdentifier type)
 #include "geometry.hh"
 #include "entity.hh"
 #include "boundary.hh"
+#include "entitypointer.hh"
 #include "leveliterator.hh"
 #include "intersectioniterator.hh"
 #include "hierarchiciterator.hh"
