@@ -1,5 +1,5 @@
-#ifndef __DUNE_GAUSS_SEIDEL_STEP_HH__
-#define __DUNE_GAUSS_SEIDEL_STEP_HH__
+#ifndef DUNE_GAUSS_SEIDEL_STEP_HH
+#define DUNE_GAUSS_SEIDEL_STEP_HH
 
 #include <dune/solver/common/iterationstep.hh>
 
