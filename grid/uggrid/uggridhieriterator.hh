@@ -72,8 +72,7 @@ public:
 private:
 
   //! implement with virtual element
-    UGGridEntity<0,GridImp::dimension,GridImp> virtualEntity_;
-    //Entity virtualEntity_;
+    UGMakeableEntity<0,GridImp::dimension,GridImp> virtualEntity_;
 
   //! max level to go down 
   int maxlevel_;
