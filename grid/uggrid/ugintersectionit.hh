@@ -111,6 +111,10 @@ private:
     //! Set intersection iterator to nb-th neighbor of element 'center'
     void setToTarget(typename TargetType<0,GridImp::dimensionworld>::T* center, int nb);
 
+    /** \brief Set intersection iterator to nb-th neighbor of element 'center'
+     * and set the level as well */
+    void setToTarget(typename TargetType<0,GridImp::dimensionworld>::T* center, int nb, int level);
+
     //! Returns true if the iterator represents an actual intersection
     bool isValid() const;
 
