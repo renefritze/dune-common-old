@@ -99,6 +99,8 @@ public ElementDefault <dim,dimworld, OneDCType,OneDGridElement>
     template <int cc_, int dim_, int dimworld_>
     friend class OneDGridSubEntityFactory;
 
+    friend class OneDGridIntersectionIterator<1,1>;
+
 public:
 
     /** \brief Return the element type identifier 
