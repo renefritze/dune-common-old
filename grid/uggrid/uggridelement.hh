@@ -25,7 +25,7 @@ template<int dim, int dimworld>
 class UGGridElement : 
 public ElementDefault <dim,dimworld, UGCtype,UGGridElement>
 { 
-  friend class UGGridBoundaryEntity<dim,dimworld>;
+    //friend class UGGridBoundaryEntity<dim,dimworld>;
 public:
 
   //! know dimension of world
@@ -104,7 +104,7 @@ public:
   void print (std::ostream& ss, int indent);
 #endif
 
-    void setToTarget(void* target) {target_ = target;}
+    void setToTarget(typename TargetType<dimworld-dim,dimworld>::T* target) {target_ = target;}
 
 private:
 
@@ -153,7 +153,7 @@ private:
   //Mat<dim,dim, UGCtype> Jinv_;  //!< storage for inverse of jacobian
   //UGCtype volume_; //!< storage of element volume
     
-   TargetType<dimworld-dim,dimworld>::T* target_;
+   typename TargetType<dimworld-dim,dimworld>::T* target_;
 };
 
 }  // namespace Dune

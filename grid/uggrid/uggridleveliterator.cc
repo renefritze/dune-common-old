@@ -9,7 +9,7 @@
 // Make LevelIterator with point to element from previous iterations
 template<int codim, int dim, int dimworld>
 inline UGGridLevelIterator<codim,dim,dimworld >::
-UGGridLevelIterator(int travLevel) : level_ (travLevel) ,  virtualEntity_(0)
+UGGridLevelIterator(int travLevel) : virtualEntity_(0), level_ (travLevel)
 {
     target_ = NULL;
 
@@ -19,7 +19,7 @@ UGGridLevelIterator(int travLevel) : level_ (travLevel) ,  virtualEntity_(0)
 // Make LevelIterator with point to element from previous iterations
 template<int codim, int dim, int dimworld>
 inline UGGridLevelIterator<codim,dim,dimworld >::UGGridLevelIterator(UGGrid<dim,dimworld> &grid, int travLevel) :
-    /*grid_(grid), */level_ (travLevel) ,  virtualEntity_(0)
+    virtualEntity_(0), level_ (travLevel)
 {
     target_ = NULL;
 
