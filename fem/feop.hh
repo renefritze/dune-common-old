@@ -132,8 +132,8 @@ public:
     typedef typename DiscFunctionType::DofIteratorType DofIteratorType;
     int level = grid.maxlevel();
 
-    DofIteratorType dest_it = dest.dbegin( level );
-    DofIteratorType arg_it = arg.dbegin( level );
+    DofIteratorType dest_it = dest.dbegin();
+    DofIteratorType arg_it = arg.dbegin();
       
     const BaseFunctionSetType & baseSet = functionSpace_.getBaseFunctionSet( en );
     int numOfBaseFct = baseSet.getNumberOfBaseFunctions();  
@@ -196,8 +196,8 @@ public:
     typedef typename DiscFunctionType::DofIteratorType DofIteratorType;
     int level = grid.maxlevel();
 
-    DofIteratorType dest_it = dest.dbegin( level );
-    DofIteratorType arg_it = arg.dbegin( level );
+    DofIteratorType dest_it = dest.dbegin();
+    DofIteratorType arg_it = arg.dbegin();
 
     NeighIt nit = en.ibegin();
     NeighIt endnit = en.iend();
