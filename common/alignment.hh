@@ -38,7 +38,6 @@ namespace Dune
 #define ALIGNMENT_MODULO(a, b)   ((a) % (b) == 0 ? (b) : (a) % (b))
 #define ALIGNMENT_MIN(a, b)      (static_cast<std::size_t>(a) <   \
                                      static_cast<std::size_t>(b) ? (a) : (b))
-  /** \todo Please doc me! */
   template <class T, std::size_t N>
   struct AlignmentTester
   {
@@ -55,7 +54,6 @@ namespace Dune
       };
   };
 
-  /** \todo Please doc me! */
   template <class T>
   struct AlignmentTester<T, 0>
   {
