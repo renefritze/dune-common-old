@@ -159,8 +159,6 @@ makeRefElemCoords()
 
   // vertex 1
   coord_(1,1) = 1.0;
-
-  coord_.print(std::cout,1);
 }
 
 template <>
