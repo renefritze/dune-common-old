@@ -25,20 +25,11 @@ public:
   //! prefix increment
   UGGridIntersectionIterator& operator ++();
 
-  //! postfix increment
-  UGGridIntersectionIterator& operator ++(int i);
-
   //! The default Constructor makes empty Iterator 
   UGGridIntersectionIterator();
 
   //! The default Constructor 
   //UGGridIntersectionIterator();
-
-#if 0
-  //! The Constructor 
-  UGGridIntersectionIterator(UGGrid<dim,dimworld> &grid,int level,
-          ALBERT EL_INFO *elInfo);
-#endif  
 
   //! The Destructor 
   ~UGGridIntersectionIterator() {};
@@ -108,23 +99,23 @@ private:
   //  private methods 
   //**********************************************************
 
-    //! \todo Please doc me!
+    //! Returns the element whose intersection with center_
+    //! is represented by the intersection iterator
     typename TargetType<0,dimworld>::T* target() const;
     
-    //! \todo Please doc me!
+    //! Set intersection iterator to nb-th neighbor of element 'center'
     void setToTarget(typename TargetType<0,dimworld>::T* center, int nb);
 
+    //! Returns true if the iterator represents an actual intersection
+    bool isValid() const;
+
   //! the actual level
-  int level_;
+  //int level_;
   
-  //! implement with virtual element
-  //! Most of the information can be generated from the ALBERT EL_INFO 
-  //! therefore this element is only created on demand. 
-  bool builtNeigh_;
     UGGridEntity<0,dim,dimworld> virtualEntity_;
  
   //! vector storing the outer normal 
-  //Vec<dimworld,albertCtype> outerNormal_;
+  //Vec<dimworld,UGCtype> outerNormal_;
 
   //! pointer to element holding the self_local and self_global information.
   //! This element is created on demand.
@@ -135,7 +126,7 @@ private:
   UGGridElement<dim-1,dimworld> *neighGlob_;
 
   //! BoundaryEntity
-  UGGridBoundaryEntity<dim,dimworld> *boundaryEntity_;
+  UGGridBoundaryEntity<dim,dimworld> boundaryEntity_;
   
     //! !
   Vec<dimworld,UGCtype> outNormal_;

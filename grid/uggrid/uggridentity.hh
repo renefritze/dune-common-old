@@ -1,5 +1,5 @@
-#ifndef DUNE_UGGRIDENTITY_HH
-#define DUNE_UGGRIDENTITY_HH
+#ifndef __DUNE_UGGRIDENTITY_HH__
+#define __DUNE_UGGRIDENTITY_HH__
 
 #include "ugtypes.hh"
 
@@ -59,13 +59,13 @@ public:
     which has an entity of codimension 1 in commen with this entity. Access to neighbors
     is provided using iterators. This allows meshes to be nonmatching. Returns iterator
     referencing the first neighbor. */
-  UGGridIntersectionIterator<dim,dimworld> ibegin ();
+    //UGGridIntersectionIterator<dim,dimworld> ibegin ();
 
   //! same method for fast access 
     //void ibegin (AlbertGridIntersectionIterator<dim,dimworld> &it);
 
   //! Reference to one past the last intersection with neighbor
-  UGGridIntersectionIterator<dim,dimworld> iend ();
+  //UGGridIntersectionIterator<dim,dimworld> iend ();
 
   //! geometry of this entity
   UGGridElement<dim-codim,dimworld>& geometry ();
@@ -88,8 +88,6 @@ private:
 
   // private Methods
   void makeDescription();
-
-    //UGGrid<dim,dimworld> &grid_;
 
   //! the current geometry
   UGGridElement<dim-codim,dimworld> geo_;
@@ -132,7 +130,6 @@ public EntityDefault<0,dim,dimworld, UGCtype,UGGridEntity,UGGridElement,
               UGGridHierarchicIterator>
 {
   friend class UGGrid < dim , dimworld >;
-  friend class UGMarkerVector;
   friend class UGGridIntersectionIterator < dim, dimworld>;
   friend class UGGridHierarchicIterator < dim, dimworld>;
   friend class UGGridLevelIterator <0,dim,dimworld>;
@@ -175,10 +172,10 @@ public:
     which has an entity of codimension 1 in commen with this entity. Access to neighbors
     is provided using iterators. This allows meshes to be nonmatching. Returns iterator
     referencing the first neighbor. */
-  UGGridIntersectionIterator<dim,dimworld> nbegin ();
+  UGGridIntersectionIterator<dim,dimworld> ibegin ();
 
   //! Reference to one past the last neighbor
-  UGGridIntersectionIterator<dim,dimworld> nend ();
+  UGGridIntersectionIterator<dim,dimworld> iend ();
 
   //! returns true if Entity has children 
   bool hasChildren (); 

@@ -32,15 +32,8 @@ public:
   //! Constructor
   UGGridLevelIterator(UGGrid<dim,dimworld> &grid, int travLevel);
 
-  //! Constructor
-//   UGGridLevelIterator(UGGrid<dim,dimworld> &grid, 
-//           UGMarkerVector * vec ,int travLevel);
-  
   //! prefix increment
   UGGridLevelIterator<codim,dim,dimworld>& operator ++();
-
-  //! postfix increment
-    //UGGridLevelIterator<codim,dim,dimworld>& operator ++(int i);
 
   //! equality
   bool operator== (const UGGridLevelIterator<codim,dim,dimworld>& i) const;
@@ -79,10 +72,6 @@ private:
   //! level 
   int level_;
     
-//   // knows on which element a point is viewed
-//   UGMarkerVector * vertexMarker_;
-  
-
     typename TargetType<codim,dim>::T* target_;
 
 };
