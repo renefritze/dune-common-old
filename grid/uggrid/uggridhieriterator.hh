@@ -1,6 +1,10 @@
 #ifndef __DUNE_UGHIERITERATOR_HH__
 #define __DUNE_UGHIERITERATOR_HH__
 
+#include <dune/common/stack.hh>
+
+namespace Dune {
+
 //**********************************************************************
 //
 // --UGGridHierarchicIterator
@@ -19,33 +23,23 @@ class UGGridHierarchicIterator :
 public HierarchicIteratorDefault <dim,dimworld, UGCtype,
                           UGGridHierarchicIterator,UGGridEntity>
 {
+
+    // Either UG3d::ELEMENT or UG2d:ELEMENT
+    typedef typename TargetType<0,dim>::T UGElementType;
+public:
+    // Stack entry
+    struct StackEntry {
+        UGElementType* element;
+        int level;
+    };
+
 public:
  
-#if 1
-
-#if 0
-  //! the normal Constructor
-  UGGridHierarchicIterator(UGGrid<dim,dimworld> &grid,
-    ALBERT TRAVERSE_STACK *travStack, int actLevel, int maxLevel);
-#endif
-
   //! the default Constructor
-  UGGridHierarchicIterator(UGGrid<dim,dimworld> &grid,
-        int actLevel,int maxLevel);
-#else 
-  //! the normal Constructor
-  UGGridHierarchicIterator(UGGrid<dim,dimworld> &grid,
-    ALBERT TRAVERSE_STACK *travStack, int travLevel);
+  UGGridHierarchicIterator(int actLevel,int maxLevel);
 
-  //! the default Constructor
-  UGGridHierarchicIterator(UGGrid<dim,dimworld> &grid);
-#endif
-  
   //! prefix increment
   UGGridHierarchicIterator& operator ++();
-
-  //! postfix increment
-  UGGridHierarchicIterator& operator ++(int i);
 
   //! equality
   bool operator== (const UGGridHierarchicIterator& i) const;
@@ -59,31 +53,22 @@ public:
   //! arrow
   UGGridEntity<0,dim,dimworld>* operator->();
 
-private:
   //! implement with virtual element
   UGGridEntity<0,dim,dimworld> virtualEntity_;
 
+private:
   //! know the grid were im comming from
-  UGGrid<dim,dimworld> &grid_;
-
-  //! the actual Level of this Hierarichic Iterator 
-  int level_;
+    //UGGrid<dim,dimworld> &grid_;
 
   //! max level to go down 
-  //int maxlevel_;
+  int maxlevel_;
 
-#if 0
-  //! we need this for Albert traversal, and we need ManageTravStack, which
-  //! does count References when copied
-  ALBERT ManageTravStack manageStack_;
+public:    
+    Stack<StackEntry> elemStack;
 
-  //! The nessesary things for Albert
-  ALBERT EL_INFO * recursiveTraverse(ALBERT TRAVERSE_STACK * stack);
-#endif
-
-  //! make empty HierarchicIterator
-  void makeIterator();
+    UGElementType* target_;
 };
 
+}  // end namespace Dune
 
 #endif
