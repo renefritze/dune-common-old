@@ -1344,7 +1344,7 @@ public:
     const FastBaseFunctionSetType & baseSet = getBaseFunctionSet(en);  
     
     Mat<dim,dim> & inv =
-      en.geometry().Jacobian_inverse(quad.getQuadraturePoint(quadPoint));
+      en.geometry().Jacobian_inverse(quad.point(quadPoint));
     baseSet.eval( baseFunc , quad, quadPoint , ret);
     ret = inv * ret;
     return true;
@@ -1558,7 +1558,7 @@ public:
     const FastBaseFunctionSetType & baseSet = getBaseFunctionSet(en);  
     
     Mat<dim,dim> & inv =
-      en.geometry().Jacobian_inverse(quad.getQuadraturePoint(quadPoint));
+      en.geometry().Jacobian_inverse(quad.point(quadPoint));
     baseSet.eval( baseFunc , quad, quadPoint , ret);
     ret = inv * ret;
     return true;
