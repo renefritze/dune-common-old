@@ -722,12 +722,11 @@ public:
 
     typedef typename GridType::template Traits<0>::LevelIterator LevelIterator;
     
-    int level = g.maxlevel();
-    int edgeSize = 3 * g.size ( g.maxlevel(), 0);
+    int edgeSize = 3 * g.size ( level , 0);
     edgeMap_.resize( edgeSize );
     for(int i=0; i<edgeSize; i++) edgeMap_[i] = -1;
     
-    LevelIterator it = g.lbegin<0>( level);
+    LevelIterator it = g.lbegin<0>(level);
     LevelIterator endit = g.lend<0>(level);
     
     // walktrough grid 
