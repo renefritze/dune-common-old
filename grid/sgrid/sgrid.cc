@@ -598,7 +598,9 @@ inline void SHierarchicIterator<dim,dimworld>::push_sons (int level, int fatheri
                 int sonid = grid.n(level+1,grid.expand(level+1,zz,partition));
 
                 // push son on stack
-                stack.push_front(StackElem(level+1,sonid));
+                StackElem son(level+1,sonid);
+                //stack.push_front(StackElem(level+1,sonid));
+                stack.push_front(son);
         }
 } 
 
@@ -615,7 +617,8 @@ inline SHierarchicIterator<dim,dimworld>::SHierarchicIterator (SGrid<dim,dimworl
         orig_id = e.id;
 
         // push original element on stack
-        stack.push_front(StackElem(orig_l,orig_id));
+        StackElem originalElement(orig_l, orig_id);
+        stack.push_front(originalElement);
 
         // compute maxlevel
         maxlevel = MIN(_maxlevel,grid.maxlevel());
