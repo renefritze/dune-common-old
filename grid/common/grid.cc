@@ -523,7 +523,7 @@ template<int dim, int dimworld, class ct,
 >  
 inline IntersectionIteratorImp<dim,dimworld> Entity<0,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,IntersectionIteratorImp,HierarchicIteratorImp>::ibegin ()
 {
-	return asImp().nbegin();
+	return asImp().ibegin();
 } 
 
 
@@ -536,7 +536,7 @@ template<int dim, int dimworld, class ct,
 >  
 inline IntersectionIteratorImp<dim,dimworld> Entity<0,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,IntersectionIteratorImp,HierarchicIteratorImp>::iend ()
 {
-	return asImp().nend();
+	return asImp().iend();
 } 
 
 
@@ -604,8 +604,8 @@ inline void Entity<0,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,Inter
 	count<dim>();
 	entity<0>(0);
 	entity<dim>(0);
-	nbegin();
-	nend();
+	ibegin();
+	iend();
 	father();
 	father_relative_local();
 	hbegin(0);
@@ -878,7 +878,7 @@ struct meta_grid_checkIF<0> {
 		// neighbor iterator
 		std::cout << "checking IntersectionIterator with dim=" << dim
 				  << ", dimworld=" << dimworld;
-		i->nbegin().checkIF();
+		i->ibegin().checkIF();
 		std::cout << " OK."  << std::endl;
 
 		// hierarchic iterator
