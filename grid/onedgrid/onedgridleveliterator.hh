@@ -27,43 +27,40 @@ class OneDGridLevelIterator :
     friend class OneDGridEntity<codim,dim,GridImp>;
     friend class OneDGridEntity<0,dim,GridImp>;
 
+    typedef typename GridImp::template codim<codim>::Entity Entity;
+
 protected:
 
     /** \brief Constructor from a given iterator */
-    OneDGridLevelIterator<codim,pitype, GridImp>(OneDGridEntity<codim,dim,GridImp>* it) {
+    OneDGridLevelIterator<codim,pitype, GridImp>(OneDEntityImp<dim-codim>* it) 
+        /*: virtualEntity_()*/ {
         target_ = it;
+        virtualEntity_.setToTarget(it);
     }
 
 public:
 
-  //! prefix increment
-    OneDGridLevelIterator<codim,pitype,GridImp>& operator ++() {
+    //! prefix increment
+    void increment() {
         target_ = target_->succ_;
-        return (*this);
     }
     
     //! equality
-    bool operator== (const OneDGridLevelIterator<codim, pitype, GridImp>& i) const {
-        return i.target_ == target_;
+    bool equals (const OneDGridLevelIterator<codim, pitype, GridImp>& other) const {
+        return other.target_ == target_;
     }
     
-  //! inequality
-    bool operator!= (const OneDGridLevelIterator<codim, pitype, GridImp>& i) const {
-        return i.target_ != target_;
-    }
+    //! dereferencing
+    Entity& dereference() const {return virtualEntity_;}
 
-  //! dereferencing
-    OneDGridEntity<codim,dim,GridImp>& operator*() {return *target_;}
-
-  //! arrow
-    OneDGridEntity<codim,dim,GridImp>* operator->() {return target_;}
-  
-  //! ask for level of entity
+    //! ask for level of entity
     int level () const {return target_->level();}
 
 private:
 
-    OneDGridEntity<codim,dim,GridImp>* target_;
+    mutable OneDEntityWrapper<codim,GridImp::dimension,GridImp> virtualEntity_;
+
+    OneDEntityImp<dim-codim>* target_;
 
 };
 

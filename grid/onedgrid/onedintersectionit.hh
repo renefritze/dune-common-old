@@ -30,7 +30,7 @@ class OneDGridIntersectionIterator :
     friend class OneDGridEntity<0,dim,GridImp>;
 
     //! Constructor for a given grid entity
-    OneDGridIntersectionIterator(const OneDGridEntity<0,1,GridImp>* center) : center_(center), neighbor_(0) 
+    OneDGridIntersectionIterator(const OneDEntityImp<1>* center) : center_(center), neighbor_(0) 
     {}
 
   //! The default Constructor makes empty Iterator 
@@ -71,14 +71,19 @@ public:
 
   //! access neighbor, dereferencing 
   Entity& dereference() const {
-        if (neighbor_==0) 
-            if (center_->pred_ && center_->pred_->geo_.vertex(1) == center_->geo_.vertex(0))
-                return *center_->pred_;
-        else
-            if (center_->succ_ && center_->succ_->geo_.vertex(0) == center_->geo_.vertex(1))
-                return *center_->succ_;
-
-        DUNE_THROW(GridError, "Trying to dereferentiate a NULL-pointer!");
+      if (neighbor_==0) {
+          if (center_->pred_ && center_->pred_->vertex_[1] == center_->vertex_[0]) {
+              virtualEntity_.setToTarget(center_->pred_);
+              return virtualEntity_;
+          }
+      } else {
+          if (center_->succ_ && center_->succ_->vertex_[0] == center_->vertex_[1]) {
+              virtualEntity_.setToTarget(center_->succ_);
+              return virtualEntity_;
+          }
+      }
+      
+      DUNE_THROW(GridError, "Trying to dereferentiate a NULL-pointer!");
     }
 
   //! return true if intersection is with boundary.
@@ -92,9 +97,9 @@ public:
             if (center_->pred_)
                 return false;
 
-            const OneDGridEntity<0,dim,GridImp>* ancestor = center_;
+            const OneDEntityImp<1>* ancestor = center_;
 
-            while (ancestor->level()!=0) {
+            while (ancestor->level_!=0) {
 
                 // Check if we're the left son of our father
                 if (ancestor != ancestor->father_->sons_[0])
@@ -115,9 +120,9 @@ public:
         if (center_->succ_)
             return false;
 
-        const OneDGridEntity<0,dim,GridImp>* ancestor = center_;
+        const OneDEntityImp<1>* ancestor = center_;
 
-        while (ancestor->level()!=0) {
+        while (ancestor->level_!=0) {
 
             // Check if we're the left son of our father
             if (ancestor != ancestor->father_->sons_[1])
@@ -135,9 +140,9 @@ public:
   //! return true if across the edge an neighbor on this level exists
     bool neighbor () const {
         if (neighbor_==0) 
-            return center_->pred_ && center_->pred_->geo_.vertex(1) == center_->geo_.vertex(0);
+            return center_->pred_ && center_->pred_->vertex_[1] == center_->vertex_[0];
         else
-            return center_->succ_ && center_->succ_->geo_.vertex(0) == center_->geo_.vertex(1);
+            return center_->succ_ && center_->succ_->vertex_[0] == center_->vertex_[1];
     }
 
 #if 0
@@ -158,18 +163,18 @@ public:
   //! iteration started. 
   //! Here returned element is in LOCAL coordinates of the element
   //! where iteration started.
-    LocalGeometry& intersectionSelfLocal ();
+    LocalGeometry& intersectionSelfLocal () const;
 
   //! intersection of codimension 1 of this neighbor with element where iteration started. 
   //! Here returned element is in GLOBAL coordinates of the element where iteration started.
-    Geometry& intersectionGlobal ();
+    Geometry& intersectionGlobal () const;
 
   //! local number of codim 1 entity in self where intersection is contained in 
     int numberInSelf () const {return neighbor_;}
 
   //! intersection of codimension 1 of this neighbor with element where iteration started. 
   //! Here returned element is in LOCAL coordinates of neighbor
-    LocalGeometry& intersectionNeighborLocal ();
+    LocalGeometry& intersectionNeighborLocal () const;
 
   //! local number of codim 1 entity in neighbor where intersection is contained
     int numberInNeighbor () const {
@@ -193,7 +198,7 @@ private:
   //  private methods 
   //**********************************************************
 
-    const OneDGridEntity<0,dim,GridImp>* center_;
+    const OneDEntityImp<1>* center_;
  
   //! vector storing the outer normal 
     FieldVector<OneDCType, dimworld> outerNormal_;
@@ -212,6 +217,8 @@ private:
   //! BoundaryEntity
   OneDGridBoundaryEntity<GridImp> boundaryEntity_;
 #endif  
+
+    mutable OneDEntityWrapper<0,dim,GridImp> virtualEntity_;
 
     //! count on which neighbor we are lookin' at
     int neighbor_;

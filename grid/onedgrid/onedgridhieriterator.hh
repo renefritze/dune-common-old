@@ -31,74 +31,64 @@ class OneDGridHierarchicIterator :
 
     // Stack entry
     struct StackEntry {
-        OneDGridEntity<0,1,GridImp>* element;
+        OneDEntityImp<1>* element;
         /** \todo Do we need the level ? */
         int level;
     };
+
+    typedef typename GridImp::template codim<0>::Entity Entity;
 
 public:
  
   //! the default Constructor
     OneDGridHierarchicIterator(int maxlevel) : elemStack() {
         maxlevel_ = maxlevel;
-        target_   = NULL;
+        //target_   = NULL;
     }
 
-  //! prefix increment
-  OneDGridHierarchicIterator& operator ++() {
+    //! prefix increment
+    void increment() {
       
-      if (elemStack.empty())
-          return (*this);
-      
-      StackEntry old_target = elemStack.pop();
-      
-      // Traverse the tree no deeper than maxlevel
-      if (old_target.level < maxlevel_) {
-          
-          // Load sons of old target onto the iterator stack
-          if (old_target.element->hasChildren()) {
-              StackEntry se0;
-              se0.element = old_target.element->sons_[0];
-              se0.level   = old_target.level + 1;
-              elemStack.push(se0);
-
-              // Add the second son only if it is different from the first one
-              // i.e. the son is not just a copy of the father
-              if (old_target.element->sons_[0] != old_target.element->sons_[1]) {
-                  StackEntry se1;
-                  se1.element = old_target.element->sons_[1];
-                  se1.level   = old_target.level + 1;
-                  elemStack.push(se1);
-              }
-          }
-
-      }
-
-      target_ = (elemStack.empty()) ? NULL : elemStack.top().element;
-      
-      return (*this);
-  }
-
-  //! equality
-  bool operator== (const OneDGridHierarchicIterator& other) const {
-      return ( (elemStack.size()==0 && other.elemStack.size()==0) ||
-               ((elemStack.size() == other.elemStack.size()) &&
-                (elemStack.top().element == other.elemStack.top().element)));
-  }
-
-  //! inequality
-    bool operator!= (const OneDGridHierarchicIterator& other) const {
-        return !((*this) == other);
+        if (elemStack.empty())
+            return;
+        
+        StackEntry old_target = elemStack.pop();
+        
+        // Traverse the tree no deeper than maxlevel
+        if (old_target.level < maxlevel_) {
+            
+            // Load sons of old target onto the iterator stack
+            if (!old_target.element->isLeaf()) {
+                StackEntry se0;
+                se0.element = old_target.element->sons_[0];
+                se0.level   = old_target.level + 1;
+                elemStack.push(se0);
+                
+                // Add the second son only if it is different from the first one
+                // i.e. the son is not just a copy of the father
+                if (old_target.element->sons_[0] != old_target.element->sons_[1]) {
+                    StackEntry se1;
+                    se1.element = old_target.element->sons_[1];
+                    se1.level   = old_target.level + 1;
+                    elemStack.push(se1);
+                }
+            }
+            
+        }
+        
+        virtualEntity_.setToTarget((elemStack.empty()) ? NULL : elemStack.top().element);
     }
 
-  //! dereferencing
-    OneDGridEntity<0,dim,GridImp>& operator*() {
-        return *target_;
+    //! equality
+    bool equals (const OneDGridHierarchicIterator& other) const {
+        return ( (elemStack.size()==0 && other.elemStack.size()==0) ||
+                 ((elemStack.size() == other.elemStack.size()) &&
+                  (elemStack.top().element == other.elemStack.top().element)));
     }
 
-  //! arrow
-    OneDGridEntity<0,dim,GridImp>* operator->() {
-        return target_;
+    //! dereferencing
+    Entity& dereference() const {
+        return virtualEntity_;
     }
 
 private:
@@ -108,12 +98,10 @@ private:
 
     Stack<StackEntry> elemStack;
 
-    OneDGridEntity<0,1,GridImp>* target_;
+    //! implement with virtual element
+    mutable OneDEntityWrapper<0,GridImp::dimension,GridImp> virtualEntity_;
 
 };
-
-    // Include class method definitions
-    //#include "uggridhieriterator.cc"
 
 }  // end namespace Dune
 
