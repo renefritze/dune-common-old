@@ -9,8 +9,8 @@ template<class DiscreteFunctionSpaceType >
 inline DiscFuncArray< DiscreteFunctionSpaceType >::
 DiscFuncArray(DiscreteFunctionSpaceType & f) : 
  DiscreteFunctionDefaultType ( f )  
- , built_ ( false ) , freeLocalFunc_ (NULL)  
- , allLevels_ (false) , level_ (-1), levOcu_ (0)
+ , built_ ( false ) , level_ (-1), freeLocalFunc_ (NULL)  
+ , allLevels_ (false) , levOcu_ (0)
  , localFunc_ ( f, dofVec_ ) {}
   
 // Constructor makeing discrete function  
@@ -269,13 +269,7 @@ read_xdr( const char *filename , int timestep )
 
     for(int lev=0; lev<=level_; lev++)
     {
-      int length = this->functionSpace_.size( lev );
       dofVec_[lev].processXdr(&xdrs);
-      //if(length != dofVec_[lev].size())
-      //{
-      //  std::cerr << "DiscFuncArray::read_xdr: ERROR wrong length! \n";
-      //  abort();
-      //}
     }
   }
   else 
@@ -284,13 +278,7 @@ read_xdr( const char *filename , int timestep )
     getMemory();
 
     int lev = level_;
-    int length = this->functionSpace_.size( lev );
     dofVec_[lev].processXdr(&xdrs);
-    //if(length != dofVec_[lev].size())
-    //{
-    //  std::cerr << "DiscFuncArray::read_xdr: ERROR wrong length! \n";
-    //  abort();
-    //}
   }
   
   xdr_destroy(&xdrs);
@@ -422,6 +410,7 @@ write_pgm( const char *filename , int timestep )
     out << (int)((*itdof)*255.) << "\n";
   }
   out.close();
+  return true;
 }
 
 template<class DiscreteFunctionSpaceType >
@@ -447,6 +436,7 @@ read_pgm( const char *filename , int timestep )
     (*itdof) = ((double)v)/255.;
   } 
   fclose( in );
+  return true;
 }
 
 template<class DiscreteFunctionSpaceType >
@@ -470,6 +460,7 @@ write_USPM( const char *filename , int timestep )
 
   out.close();
   std::cout << "Written Dof to file `" << filename << "' !\n";
+  return true;
 }
 
 template<class DiscreteFunctionSpaceType >

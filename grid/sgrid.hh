@@ -219,6 +219,8 @@ class SBoundaryEntity
 : public BoundaryEntityDefault <dim,dimworld,sgrid_ctype,SElement,SBoundaryEntity>
 {
 public: 
+  SBoundaryEntity() : elem_(true) {} 
+  
   //! return type of boundary segment 
   BoundaryType type () { return Dirichlet;  };
 
@@ -226,12 +228,15 @@ public:
   bool hasGeometry () { return false; };
 
   //! return outer ghost cell 
-  SElement<dim,dimworld> & geometry();
+  SElement<dim,dimworld> & geometry() { return elem_; };
 
   //! return outer barycenter of ghost cell 
-  Vec<dimworld,sgrid_ctype> & outerPoint ();
+  Vec<dimworld,sgrid_ctype> & outerPoint () { return outerPoint_; };
 private:
+  Vec<dimworld> outerPoint_;
+  SElement<dim,dimworld> elem_;
 };
+
 
 //************************************************************************
 /*! Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
@@ -262,7 +267,7 @@ public:
   //! return true if neighbor on this level exists
   bool neighbor ();
 
-  SBoundaryEntity<dim,dimworld> & boundaryEntity () {};
+  SBoundaryEntity<dim,dimworld> & boundaryEntity () { return boundaryElem_; };
 
         //! access neighbor, dereferencing 
         SEntity<0,dim,dimworld>& operator*();
@@ -324,6 +329,7 @@ private:
         SElement<dim-1,dim> is_self_local;      //!< intersection in own local coordinates
         SElement<dim-1,dimworld> is_global;     //!< intersection in global coordinates, map consistent with is_self_local
         SElement<dim-1,dim> is_nb_local;        //!< intersection in neighbors local coordinates
+        SBoundaryEntity<dim,dimworld> boundaryElem_; //!< BoundaryElement , to be revised 
 };
 
 

@@ -115,15 +115,17 @@ public:
 
 //*****************************************************************
 //
-//!    (0,1)
-//!     2|\    coordinates and local node numbers 
-//!      | \
-//!      |  \    
-//!      |   \
-//!      |    \
-//!      |     \
-//!     0|______\1
-//!    (0,0)    (1,0)
+/*!
+   (0,1)
+    2|\    coordinates and local node numbers 
+     | \
+     |  \    
+     |   \
+     |    \
+     |     \
+    0|______\1
+    (0,0)    (1,0)
+*/
 //
 //*****************************************************************
 template<class FunctionSpaceType>
@@ -621,7 +623,7 @@ public:
     mapper_->finish();
   }
   
-  ~LagrangeDiscreteFunctionSpace ( ) 
+  virtual ~LagrangeDiscreteFunctionSpace ( ) 
   {
     for(int i=0; i<numOfDiffBase_; i++)
      if (baseFuncSet_(i) != NULL)
@@ -1059,16 +1061,18 @@ public:
     : BaseFunctionInterface<FunctionSpaceType> (f) , baseNum_ (baseNum) 
     , point_ (0.0)
   {
-//    (0,1)
-//     1|\    coordinates and local node numbers 
-//      | \
-//      |  \    
-//     0|   \2
-//      |    \
-//      |     \
-//     2|______\0
-//    (0,0) 1  (1,0)
-//
+/*
+    (0,1)
+    1|\    coordinates and local node numbers 
+     | \
+     |  \    
+    0|   \2
+     |    \
+     |     \
+    2|______\0
+   (0,0) 1  (1,0)
+*/
+   
     std::cout << "Making Raviart Thomas Elements !\n";
     // we implement linear functions but we use them at only at the faces 
     switch (baseNum) 
