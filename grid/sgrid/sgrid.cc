@@ -260,7 +260,7 @@ inline void SEntityBase<codim,dim,dimworld>::make (int _l, int _id)
 }
 
 template<int codim, int dim, int dimworld> 
-inline int SEntityBase<codim,dim,dimworld>::level ()
+inline int SEntityBase<codim,dim,dimworld>::level () const
 {
         return l;
 }
@@ -269,13 +269,13 @@ inline int SEntityBase<codim,dim,dimworld>::level ()
 //                std::cout << std::endl;
 
 template<int codim, int dim, int dimworld> 
-inline int SEntityBase<codim,dim,dimworld>::index ()
+inline int SEntityBase<codim,dim,dimworld>::index () const
 {
         return id;
 }
 
 template<int codim, int dim, int dimworld> 
-inline int SEntityBase<codim,dim,dimworld>::global_index ()
+inline int SEntityBase<codim,dim,dimworld>::global_index () const
 {
   int ind = 0;
   for(int i=0; i<this->l; i++)

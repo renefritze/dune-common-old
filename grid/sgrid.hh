@@ -399,13 +399,13 @@ template<int codim, int dim, int dimworld>
 class SEntityBase {
 public:
         //! level of this element
-        int level ();
+        int level () const;
 
         //! index is unique and consecutive per level and codim used for access to degrees of freedom
-        int index (); 
+        int index () const; 
 
         //! global index is calculated from the index and grid size  
-        int global_index();
+        int global_index() const;
 
   //! return partition type attribute
   PartitionType partition_type ()
@@ -452,10 +452,10 @@ public:
 
         // disambiguate member functions with the same name in both bases
         //! level of this element
-        int level () {return SEntityBase<codim,dim,dimworld>::level();}
+        int level () const {return SEntityBase<codim,dim,dimworld>::level();}
 
         //! index is unique and consecutive per level and codim used for access to degrees of freedom
-        int index () {return SEntityBase<codim,dim,dimworld>::index();}
+        int index () const {return SEntityBase<codim,dim,dimworld>::index();}
 
         //! geometry of this entity
         SElement<dim-codim,dimworld>& geometry () {return SEntityBase<codim,dim,dimworld>::geometry();}
@@ -502,10 +502,10 @@ public:
 
         // disambiguate member functions with the same name in both bases
         //! level of this element
-        int level () {return SEntityBase<0,dim,dimworld>::level();}
+        int level () const {return SEntityBase<0,dim,dimworld>::level();}
 
         //! index is unique and consecutive per level and codim used for access to degrees of freedom
-        int index () {return SEntityBase<0,dim,dimworld>::index();}
+        int index () const {return SEntityBase<0,dim,dimworld>::index();}
 
         //! geometry of this entity
         SElement<dim,dimworld>& geometry () {return SEntityBase<0,dim,dimworld>::geometry();}
@@ -614,10 +614,10 @@ class SEntity<dim,dim,dimworld> : public SEntityBase<dim,dim,dimworld>,
 public:
         // disambiguate member functions with the same name in both bases
         //! level of this element
-        int level () {return SEntityBase<dim,dim,dimworld>::level();}
+        int level () const {return SEntityBase<dim,dim,dimworld>::level();}
 
         //! index is unique and consecutive per level and codim used for access to degrees of freedom
-        int index () {return SEntityBase<dim,dim,dimworld>::index();}
+        int index () const {return SEntityBase<dim,dim,dimworld>::index();}
 
         //! geometry of this entity
         SElement<0,dimworld>& geometry () {return SEntityBase<dim,dim,dimworld>::geometry();}
