@@ -3,114 +3,49 @@
 
 namespace Dune {
 
-//! class holding d-dimensional array of type T
-template<class T, int d>
-class Tupel {
-public:
-	//! make empty tupel
-	Tupel() {}
-
-	//! Tupel from components
-	Tupel(T t0)
-	{
-		for (int i=0; i<d; i++) x[i] = t0;
-	}
-
-	//! Tupel from components
-	Tupel(T t0, T t1)
-	{
-		x[0] = t0;
-		x[1] = t1;
-	}
-
-	//! Tupel from components
-	Tupel(T t0, T t1, T t2)
-	{
-		x[0] = t0;
-		x[1] = t1;
-		x[2] = t2;
-	}
-
-	//! Tupel from components
-	Tupel(T t0, T t1, T t2, T t3)
-	{
-		x[0] = t0;
-		x[1] = t1;
-		x[2] = t2;
-		x[3] = t3;
-	}
-
-	//! Tupel from components
-	Tupel(T t0, T t1, T t2, T t3, T t4)
-	{
-		x[0] = t0;
-		x[1] = t1;
-		x[2] = t2;
-		x[3] = t3;
-		x[4] = t4;
-	}
-
-	//! Tupel from components
-	Tupel(T t0, T t1, T t2, T t3, T t4, T t5)
-	{
-		x[0] = t0;
-		x[1] = t1;
-		x[2] = t2;
-		x[3] = t3;
-		x[4] = t4;
-		x[5] = t5;
-	}
-
-	//! read/write components
-	T& operator[] (int i) {return x[i];}
-
-private:
-	T x[d];
-};
-
 //! generate lexicographic ordering in a cube of dimension dim with arbitry size per direction
 template<int dim>
 class LexOrder {
 public:
-	//! preprocess ordering
-	void init (Tupel<int,dim>& _N);
+    //! preprocess ordering
+    void init (FixedArray<int, dim>& _N);
 
-	//! get total number of tupels
-	int tupels ();
+    //! get total number of tupels
+    int tupels ();
 
-	//! compute number from a given tupel
-	int n (Tupel<int,dim>& z);
+    //! compute number from a given tupel
+    int n (FixedArray<int,dim>& z);
 
-	//! compute tupel from number 0 <= n < tupels()
-	Tupel<int,dim> z (int n);
+    //! compute tupel from number 0 <= n < tupels()
+    FixedArray<int,dim> z (int n);
 
 private:
-	Tupel<int,dim> N; // number of elements per direction
-	int P[dim+1];     // P[i] = Prod_{i=0}^{i} N[i];
+    FixedArray<int,dim> N; // number of elements per direction
+    int P[dim+1];     // P[i] = Prod_{i=0}^{i} N[i];
 };
 
 //! generate consecutive numbering of dim sets of size N_i
 template<int dim>
 class JoinOrder {
 public:
-	//! preprocess ordering
-	void init (Tupel<int,dim>& _N);
+        //! preprocess ordering
+        void init (FixedArray<int,dim>& _N);
 
-	//! get total number of elements in all sets
-	int size ();
+        //! get total number of elements in all sets
+        int size ();
 
-	//! compute number from subset and index
-	int n (int subset, int index);
+        //! compute number from subset and index
+        int n (int subset, int index);
 
-	//! compute subset from number
-	int subset (int n);
+        //! compute subset from number
+        int subset (int n);
 
-	//! compute index in subset from number
-	int index (int n);
+        //! compute index in subset from number
+        int index (int n);
 
 private:
-	Tupel<int,dim> N;   // number of elements per direction
-	int offset[dim+1];  // P[i] = Sum_{i=0}^{i} N[i];
+        FixedArray<int,dim> N;   // number of elements per direction
+        int offset[dim+1];  // P[i] = Sum_{i=0}^{i} N[i];
 };
 
 
@@ -139,51 +74,51 @@ subsets are numbered consecutively.
 template<int dim>
 class CubeMapper {
 public:
-	//! construct with number of elements (of codim 0) in each direction
-	CubeMapper (Tupel<int,dim> _N);
+        //! construct with number of elements (of codim 0) in each direction
+        CubeMapper (FixedArray<int,dim> _N);
 
-	//! make cube of single element
-	CubeMapper ();
+        //! make cube of single element
+        CubeMapper ();
 
-	//! (re)initialize with number of elements (of codim 0) in each direction
-	void make (Tupel<int,dim>& _N);
+        //! (re)initialize with number of elements (of codim 0) in each direction
+        void make (FixedArray<int,dim>& _N);
 
-	//! get number of elements in each codimension
+        //! get number of elements in each codimension
         int elements (int codim) const;
 
-	//! compute codim from coordinate
-	int codim (Tupel<int,dim>& z);
+        //! compute codim from coordinate
+        int codim (FixedArray<int,dim>& z);
 
-	/*! compute number from coordinate 0 <= n < elements(codim(z)) 
-	     general implementation is O(2^dim)
+        /*! compute number from coordinate 0 <= n < elements(codim(z)) 
+             general implementation is O(2^dim)
      */
-	int n (Tupel<int,dim>& z);
+        int n (FixedArray<int,dim>& z);
 
-	//! compute coordinates from number and codimension
-	Tupel<int,dim> z (int i, int codim);
+        //! compute coordinates from number and codimension
+        FixedArray<int,dim> z (int i, int codim);
 
-	//! compress from expanded coordinates to grid for a single partition number
-	Tupel<int,dim> compress (Tupel<int,dim>& z); 
+        //! compress from expanded coordinates to grid for a single partition number
+        FixedArray<int,dim> compress (FixedArray<int,dim>& z); 
 
-	//! expand with respect to partition number
-	Tupel<int,dim> expand (Tupel<int,dim>& r, int b); 
+        //! expand with respect to partition number
+        FixedArray<int,dim> expand (FixedArray<int,dim>& r, int b); 
 
-	//! There are \f$2^d\f$ possibilities of having even/odd coordinates. The binary representation is called partition number
-	int partition (Tupel<int,dim>& z); 
+        //! There are \f$2^d\f$ possibilities of having even/odd coordinates. The binary representation is called partition number
+        int partition (FixedArray<int,dim>& z); 
 
-	//! print internal data
-	void print (std::ostream& ss, int indent);
+        //! print internal data
+        void print (std::ostream& ss, int indent);
 
 private:
-	Tupel<int,dim> N; // number of elements per direction
-	int ne[dim+1];    // number of elements per codimension
-	int nb[1<<dim];   // number of elements per binary partition
-	int cb[1<<dim];   // codimension of binary partition
-	LexOrder<dim> lex[1<<dim];     // lex ordering within binary partition
-	JoinOrder<1<<dim> join[dim+1]; // join subsets of codimension
+        FixedArray<int,dim> N; // number of elements per direction
+        int ne[dim+1];    // number of elements per codimension
+        int nb[1<<dim];   // number of elements per binary partition
+        int cb[1<<dim];   // codimension of binary partition
+        LexOrder<dim> lex[1<<dim];     // lex ordering within binary partition
+        JoinOrder<1<<dim> join[dim+1]; // join subsets of codimension
 
-	int power2 (int i) {return 1<<i;}
-	int ones (int b); // count number of bits set in binary rep of b
+        int power2 (int i) {return 1<<i;}
+        int ones (int b); // count number of bits set in binary rep of b
 };
 
 } // end namespace
