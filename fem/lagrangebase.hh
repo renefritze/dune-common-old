@@ -28,33 +28,44 @@ FastBaseFunctionSet < LagrangeDiscreteFunctionSpace
 < FunctionSpaceType , GridType, polOrd, DofManagerType > > >
 {
 public:
+    /** \todo Please doc me! */
   typedef LagrangeDiscreteFunctionSpace 
       < FunctionSpaceType , GridType , polOrd , DofManagerType > LagrangeDiscreteFunctionSpaceType;
   
+    /** \todo Please doc me! */
   typedef DiscreteFunctionSpaceInterface <
       FunctionSpaceType , GridType, LagrangeDiscreteFunctionSpaceType,
     FastBaseFunctionSet < LagrangeDiscreteFunctionSpaceType > >  DiscreteFunctionSpaceType;
 
+    /** \todo Please doc me! */
   typedef FastBaseFunctionSet <LagrangeDiscreteFunctionSpaceType > BaseFunctionSetType;
+    /** \todo Please doc me! */
   typedef BaseFunctionSetType FastBaseFunctionSetType;
 
   //! id is neighbor of the beast
   static const IdentifierType id = 665;
 
   // Lagrange 1 , to be revised in this matter 
+    /** \todo Please doc me! */
   enum { numOfDiffBase_ = 20 };
+    /** \todo Please doc me! */
   enum { DimRange = FunctionSpaceType::DimRange };
   
 public:
+    /** \todo Please doc me! */
   typedef LagrangeMapper<typename DofManagerType::IndexSetType,polOrd,DimRange> LagrangeMapperType; 
+    /** \todo Please doc me! */
   typedef typename DofManagerType::MemObjectType MemObjectType;
 
   // for gcc ( gcc sucks )
+    /** \todo Please doc me! */
   typedef typename FunctionSpaceType::Domain     Domain;  
+    /** \todo Please doc me! */
   typedef typename FunctionSpaceType::Range      Range;  
+    /** \todo Please doc me! */
   typedef typename FunctionSpaceType::RangeField DofType;  
 
-  // dimension of value 
+  //! dimension of value 
   enum { dimVal = 1 };
   
   //! remember polynomial order 
@@ -144,19 +155,23 @@ private:
 //  -- Discontinous Galerkin Space
 //
 //***************************************************************************
+    /** \todo Please doc me! */
 template <class IndexSetType, int polOrd> 
 class DGMapper 
 : public DofMapperDefault < DGMapper <IndexSetType,polOrd> > 
 {
   int numberOfDofs_;
 public: 
+    /** \todo Please doc me! */
   DGMapper ( int numDof ) : numberOfDofs_ (numDof) {};
 
+    /** \todo Please doc me! */
   int size (int level , int codim ) const 
   {
     return this->size(level);
   }
 
+    /** \todo Please doc me! */
   //template <class GridType>      
   int size (int level ) const 
   {
@@ -174,6 +189,7 @@ public:
   
 };
 
+    /** \todo Please doc me! */
 template< class FunctionSpaceType, class GridType, int polOrd , class
 DofManagerType = DofManager<GridType> >
 class DGDiscreteFunctionSpace 
@@ -182,11 +198,15 @@ class DGDiscreteFunctionSpace
   typedef LagrangeDiscreteFunctionSpace < FunctionSpaceType , GridType,polOrd >
         LagrangeSpaceType; 
 public:
+    /** \todo Please doc me! */
   typedef typename DofManagerType::MemObjectType MemObjectType;
+    /** \todo Please doc me! */
   typedef LagrangeDiscreteFunctionSpace 
       < FunctionSpaceType , GridType , polOrd > LagrangeDiscreteFunctionSpaceType;
+    /** \todo Please doc me! */
   typedef typename  LagrangeDiscreteFunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
 
+    /** \todo Please doc me! */
   DGDiscreteFunctionSpace ( GridType & g , DofManagerType & dm  ) : 
     LagrangeDiscreteFunctionSpace < FunctionSpaceType , GridType, polOrd > (g,dm ) 
   { 
@@ -206,22 +226,26 @@ public:
     }
   };
  
+    /** \todo Please doc me! */
   template <class DiscFuncType>
   MemObjectType & signIn (DiscFuncType & df)  
   {
   }
   
+    /** \todo Please doc me! */
   template <class DiscFuncType>
   bool signOut (DiscFuncType & df)  
   {
     return false;
   }
   
+    /** \todo Please doc me! */
   ~DGDiscreteFunctionSpace ()
   {
     if(mapper_) delete mapper_;
   }
   
+    /** \todo Please doc me! */
   DFSpaceIdentifier type () const 
   {
     return DGSpace_id;
@@ -354,12 +378,14 @@ public:
     }
   }  
 
+    /** \todo Please doc me! */
   virtual void evaluate ( const Vec<0, deriType> &diffVariable, 
                           const Domain & x, Range & phi) const 
   { // q(x) = (x - point_ ) * 1/(2|T|) mit |T|=0.5
     phi = (x - point_);
   }
 
+    /** \todo Please doc me! */
   virtual void evaluate ( const Vec<1, deriType> &diffVariable, 
                           const Domain & x, Range & phi) const 
   {
@@ -368,6 +394,7 @@ public:
     phi(comp) = 1.0; 
   }
 
+    /** \todo Please doc me! */
   virtual void evaluate ( const DiffVariable<2>::Type &diffVariable, 
                           const Domain & x, Range & phi) const 
   {
@@ -410,6 +437,7 @@ public:
   }  
 
 
+    /** \todo Please doc me! */
   virtual void evaluate ( const Vec<0, deriType> &diffVariable, 
                           const Domain & x, Range & phi) const 
   {
@@ -418,6 +446,7 @@ public:
       phi += factor[i] * x(i);
   }
 
+    /** \todo Please doc me! */
   virtual void evaluate ( const Vec<1, deriType> &diffVariable, 
                           const Domain & x, Range & phi) const 
   {
@@ -426,6 +455,7 @@ public:
     phi = factor[num];
   }
 
+    /** \todo Please doc me! */
   virtual void evaluate ( const DiffVariable<2>::Type &diffVariable, 
                           const Domain & x, Range & phi) const 
   {
@@ -466,6 +496,7 @@ struct EdgeDefinition< triangle , polOrd, dimrange >
   enum { numOfBaseFct = (3) }; 
 };
 
+    /** \todo Please doc me! */
 template<class FunctionSpaceType, ElementType ElType, int polOrd > 
 class RaviartThomasFastBaseFunctionSet 
   : public FastBaseFunctionSet<FunctionSpaceType > 
