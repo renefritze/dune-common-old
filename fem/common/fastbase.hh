@@ -86,8 +86,12 @@ template<class FunctionSpaceType>
 class FastBaseFunctionSet 
 : public BaseFunctionSetDefault <FunctionSpaceType, FastBaseFunctionSet<FunctionSpaceType> >  
 {
- 
+  typedef typename FunctionSpaceType::Domain Domain;
+  typedef typename FunctionSpaceType::Range  Range;
+  enum { DimDomain = FunctionSpaceType::DimDomain }; 
+  enum { DimRange  = FunctionSpaceType::DimRange  }; 
 public:
+  
   //! the BaseFunctionInterface type 
   typedef BaseFunctionInterface < FunctionSpaceType > BaseFunctionInterfaceType;
 

@@ -8,6 +8,9 @@
 
 #include "common/fastbase.hh"
 #include "common/discretefunctionspace.hh"
+#include "discfuncarray.hh"
+
+#include "dofmanager.hh"
 
 namespace Dune {
 
@@ -22,15 +25,16 @@ class LagrangeBaseFunction < FunctionSpaceType , ElType , 0 >
 {
   enum { DimRange = FunctionSpaceType::DimRange };
   int baseNum_;
+
+  typedef typename FunctionSpaceType::Domain Domain;
+  typedef typename FunctionSpaceType::Range Range;
+  typedef typename FunctionSpaceType::RangeField RangeField;
+  
 public:
   LagrangeBaseFunction ( FunctionSpaceType & f , int baseNum  ) 
     : BaseFunctionInterface<FunctionSpaceType> (f) , baseNum_ ( baseNum ) 
     { 
-      if((baseNum_ < 0) || (baseNum_ >= DimRange))
-      {
-        std::cout << "Wrong base number in LagrangeBaseFunction<polOrd = 0>!\n";
-        abort();
-      }
+      assert((baseNum_ >= 0) || (baseNum_ < DimRange));
     };
   
   virtual void evaluate ( const Vec<0, deriType> &diffVariable, 
@@ -65,6 +69,8 @@ template<class FunctionSpaceType>
 class LagrangeBaseFunction < FunctionSpaceType , line , 1 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
+  typedef typename FunctionSpaceType::Domain Domain;
+  typedef typename FunctionSpaceType::Range Range;
   typedef typename FunctionSpaceType::RangeField RangeField;  
   RangeField factor[2];
   
@@ -124,6 +130,8 @@ template<class FunctionSpaceType>
 class LagrangeBaseFunction < FunctionSpaceType , triangle , 1 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
+  typedef typename FunctionSpaceType::Domain Domain;
+  typedef typename FunctionSpaceType::Range Range;
   typedef typename FunctionSpaceType::RangeField RangeField;  
   RangeField factor[3];
   int baseNum_;
@@ -186,6 +194,8 @@ class LagrangeBaseFunction < FunctionSpaceType , tetrahedron , 1 >
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
   typedef typename FunctionSpaceType::RangeField RangeField;  
+  typedef typename FunctionSpaceType::Domain Domain;
+  typedef typename FunctionSpaceType::Range Range;
   RangeField factor[4];
 public:
  
@@ -246,9 +256,11 @@ template<class FunctionSpaceType>
 class LagrangeBaseFunction<FunctionSpaceType,quadrilateral,1> 
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
+  typedef typename FunctionSpaceType::RangeField RangeField;  
+  typedef typename FunctionSpaceType::Domain Domain;
+  typedef typename FunctionSpaceType::Range Range;
   enum { dim = 2 };
   //! phi(x,y) = (factor[0][0] + factor[0][1] * x) * ( factor[1][0] + factor[1][1] * y)   
-  typedef typename FunctionSpaceType::RangeField RangeField;  
   RangeField factor[dim][2];
 public:
 
@@ -256,11 +268,7 @@ public:
   LagrangeBaseFunction ( FunctionSpaceType & f , int baseNum ) 
     : BaseFunctionInterface<FunctionSpaceType>(f) 
   {
-    if((baseNum < 0) || (baseNum > 3))
-    {
-      std::cout << "Wrong baseNum given to LagrangeBase for quadrilaterals \n";
-      abort();
-    }
+    assert((baseNum >= 0) || (baseNum < 4));
     // looks complicated but works
     int fak[dim] = {0,0};
 
@@ -355,11 +363,13 @@ template<class FunctionSpaceType>
 class LagrangeBaseFunction<FunctionSpaceType,hexahedron,1> 
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
+  typedef typename FunctionSpaceType::RangeField RangeField;  
+  typedef typename FunctionSpaceType::Domain Domain;
+  typedef typename FunctionSpaceType::Range Range;
   enum { dim = 3 };
   //! phi(x,y,z) = (factor[0][0] + factor[0][1] * x) 
   //!            = (factor[1][0] + factor[1][1] * y) 
   //!            = (factor[2][0] + factor[2][1] * z) 
-  typedef typename FunctionSpaceType::RangeField RangeField;  
   RangeField factor[dim][2];
 public:
 
@@ -367,11 +377,7 @@ public:
   LagrangeBaseFunction ( FunctionSpaceType & f , int baseNum ) 
     : BaseFunctionInterface<FunctionSpaceType>(f) 
   {
-    if((baseNum < 0) || (baseNum > 7))
-    {
-      std::cout << "Wrong baseNum given to LagrangeBase for hexahedrons \n";
-      abort();
-    }
+    assert((baseNum >= 0) || (baseNum < 8));
     // looks complicated but works
     int fak[dim] = {0,0,0};
     fak[0] =  baseNum%2; // 0,2 ==> 0, 1,3 ==> 1
@@ -497,10 +503,10 @@ public:
       for(int k=0; k<dimrange; k++)
       {
         baseFuncList_(i*dimrange + k) = new LagrangeBaseFunctionType ( fuSpace, i ) ;
-        setBaseFunctionPointer ( i*dimrange + k , baseFuncList_ (i*dimrange + k) );
+        this->setBaseFunctionPointer ( i*dimrange + k , baseFuncList_ (i*dimrange + k) );
       }
     }
-    setNumOfDiffFct ( numOfDifferentFuncs );
+    this->setNumOfDiffFct ( numOfDifferentFuncs );
   };
 
   //! Destructor deleting the base functions 
@@ -520,72 +526,6 @@ public:
 private:
   //! Vector with all base functions corresponding to the base function set 
   Vec < numOfBaseFct , LagrangeBaseFunctionType *> baseFuncList_; 
-};
-
-//************************************************************************
-//
-//  --LagrangeMapper
-//
-//! This Class knows what the space dimension is and how to map for a
-//! given grid entity from local dof number to global dof number   
-//
-//************************************************************************
-template <int polOrd, int dimrange> 
-class LagrangeMapper 
-: public MapperDefault < LagrangeMapper <polOrd,dimrange> > 
-{
-  int numLocalDofs_;
-public: 
-  LagrangeMapper ( int numLocalDofs ) : numLocalDofs_ (numLocalDofs) {} 
-
-  //! default is Lagrange with polOrd = 1 
-  template <class GridType>      
-  int size (const GridType &grid , int level ) const 
-  {
-    // return number of vertices * dimrange
-    return (dimrange*grid.size( level , GridType::dimension ));     
-  };
-
-  //! map Entity an local Dof number to global Dof number 
-  //! for Lagrange with polOrd = 1
-  template <class EntityType>
-  int mapToGlobal (EntityType &en, int localNum ) const 
-  {
-    enum { codim = EntityType::dimension };
-    // Gaussklammer 
-    int locNum = (int) localNum / dimrange;
-    int locDim = localNum % dimrange;
-
-    // get global vertex number 
-    return (dimrange*en.template subIndex<codim>(locNum)) + locDim;
-  };
-  
-};
-
-template <int dimrange>
-class LagrangeMapper<0,dimrange>
-: public MapperDefault < LagrangeMapper <0,dimrange> > 
-{
-public: 
-  LagrangeMapper ( int numDofs ) {} 
-
-  //! default is Lagrange with polOrd = 0 
-  template <class GridType>      
-  int size (const GridType &grid , int level ) const 
-  {
-    // return number of vertices 
-    return dimrange*grid.size( level , 0 );     
-  };
-
-  //! map Entity an local Dof number to global Dof number 
-  //! for Lagrange with polOrd = 0
-  template <class EntityType>
-  int mapToGlobal (EntityType &en, int localNum ) const 
-  {
-    // get global vertex number 
-    return (dimrange*en.index()) + localNum;
-  };
-  
 };
 
 //****************************************************************
@@ -613,6 +553,9 @@ public:
 
   typedef LagrangeDiscreteFunctionSpace 
       < FunctionSpaceType , GridType , polOrd > LagrangeDiscreteFunctionSpaceType;
+
+  typedef FastBaseFunctionSet < LagrangeDiscreteFunctionSpace
+    < FunctionSpaceType , GridType, polOrd   > > BaseFunctionSetType;
   typedef BaseFunctionSetType FastBaseFunctionSetType;
 
   //! id is neighbor of the beast
@@ -620,9 +563,13 @@ public:
 
   // Lagrange 1 , to be revised in this matter 
   enum { numOfDiffBase_ = 20 };
+  enum { DimRange = FunctionSpaceType::DimRange };
   
-
+  friend class DiscFuncArray < LagrangeDiscreteFunctionSpaceType >;
+    
 public:
+  typedef DiscFuncArray < LagrangeDiscreteFunctionSpaceType > DiscFuncType; 
+
   // for gcc ( gcc sucks )
   typedef typename FunctionSpaceType::Domain Domain;  
   typedef typename FunctionSpaceType::Range Range;  
@@ -645,9 +592,10 @@ public:
     //std::cout << "Constructor of LagrangeDiscreteFunctionSpace! \n";
     for(int i=0; i<numOfDiffBase_; i++)
       baseFuncSet_(i) = NULL;
-    
+   
+    {
     // search the macro grid for diffrent element types 
-    typedef typename GridType::Traits<0>::LevelIterator LevelIteratorType;
+    typedef typename GridType::template Traits<0>::LevelIterator LevelIteratorType;
     LevelIteratorType endit = g.template lend<0>(0);
     for(LevelIteratorType it = g.template lbegin<0>(0); it != endit; ++it)
     {
@@ -655,7 +603,22 @@ public:
       if(baseFuncSet_( type ) == NULL ) 
         baseFuncSet_ ( type ) = setBaseFuncSetPointer(*it);
     }
+    }
 
+    mapper_->resize ( g );
+    for(int l=0; l<=g.maxlevel(); l++)
+    {
+      typedef typename GridType::template Traits<0>::LevelIterator LevelIteratorType;
+      LevelIteratorType endit = g.template lend<0>(l);
+      LevelIteratorType it = g.template lbegin<0>(l);
+
+      for( ; it != endit ; ++it)
+      {
+        int ind = (*it).global_index();
+        mapper_->insert( ind );
+      }
+    }
+    mapper_->finish();
   }
   
   ~LagrangeDiscreteFunctionSpace ( ) 
@@ -663,6 +626,19 @@ public:
     for(int i=0; i<numOfDiffBase_; i++)
      if (baseFuncSet_(i) != NULL)
        delete baseFuncSet_(i);
+
+    if(dfList_.size() > 0)
+    {
+      std::cout << "LagrangeDiscreteFunctionSpace::~ (): WARNING, dfList_ not empty! \n"; 
+      std::cout << dfList_ << "\n";
+    }
+  }
+
+  // return discrete function 
+  DiscFuncType newDiscreteFunction () 
+  {
+    DiscFuncType tmp ( *this , this->grid_.maxlevel(), 0 , true );
+    return tmp;
   }
 
   DFSpaceIdentifier type () const 
@@ -677,6 +653,112 @@ public:
     ElementType type =  en.geometry().type();
     return (*baseFuncSet_( type ));
   } 
+
+#if 0
+  template <class EntityType> 
+  void restrict (EntityType &en) const 
+  {
+    typedef typename DoubleLinkedList < DiscFuncType * >::Iterator IteratorType; 
+    IteratorType it    = dfList_.begin(); 
+    IteratorType endit = dfList_.end  (); 
+    for( ; it != endit; ++it )
+    {
+      (*it)->restrictLocal(en); 
+    }
+  }
+  
+  template <class EntityType> 
+  void prolong (EntityType &en) const 
+  {
+    typedef typename DoubleLinkedList < DiscFuncType * >::Iterator IteratorType; 
+    IteratorType it    = dfList_.begin(); 
+    IteratorType endit = dfList_.end  (); 
+    for( ; it != endit; ++it )
+    {
+      (*it)->prolongLocal(en); 
+    }
+  }
+
+  template <class EntityType>
+  void preProlong (EntityType &en) const 
+  {
+    GridType &g = this->grid_;
+    mapper_->resize ( g );
+    for(int l=0; l<=g.maxlevel(); l++)
+    {
+      typedef typename GridType::template Traits<0>::LevelIterator LevelIteratorType;
+      LevelIteratorType endit = g.template lend<0>(l);
+      LevelIteratorType it = g.template lbegin<0>(l);
+
+      for( ; it != endit ; ++it)
+      {
+        int ind = (*it).el_index();
+        mapper_->insert( ind );
+      }
+    }
+    mapper_->finish();
+    
+    typedef typename DoubleLinkedList < DiscFuncType * >::Iterator IteratorType; 
+    {
+      IteratorType it    = dfList_.begin(); 
+      IteratorType endit = dfList_.end  (); 
+      for( ; it != endit; ++it )
+      {
+        (*it)->preProlong(); 
+      }
+    }
+  }
+#endif
+   
+/*
+  // adapt function space if some elements were marked  
+  void adapt()
+  {
+    bool rest = grid_.preAdapt();
+
+    typedef typename DoubleLinkedList < DiscFuncType * >::Iterator IteratorType; 
+    {
+      IteratorType it    = dfList_.begin(); 
+      IteratorType endit = dfList_.end  (); 
+      for( ; it != endit; ++it )
+      {
+        (*it)->restrict(rest); 
+      }
+    }
+
+    bool ref = grid_.adapt();
+
+#if 0
+    GridType &g = grid_;
+    mapper_->resize ( g );
+    for(int l=0; l<=g.maxlevel(); l++)
+    {
+      typedef typename GridType::Traits<0>::LevelIterator LevelIteratorType;
+      LevelIteratorType endit = g.template lend<0>(l);
+      LevelIteratorType it = g.template lbegin<0>(l);
+
+      for( ; it != endit ; ++it)
+      {
+        int ind = (*it).el_index();
+        //std::cout << ind << " Index \n";
+        mapper_->insert( ind );
+      }
+    }
+    mapper_->finish();
+
+#endif
+    {
+      IteratorType it    = dfList_.begin(); 
+      IteratorType endit = dfList_.end  (); 
+      for( ; it != endit; ++it )
+      {
+        (*it)->prolong(ref); 
+      }
+    }
+
+    grid_.postAdapt();
+  }
+*/ 
 
   //! default for polOrd 0
   template <class EntityType> 
@@ -728,7 +810,7 @@ public:
   //! size knows the correct way to calculate the size of the functionspace
   int size ( int level ) const 
   {
-    return mapper_->size ( grid_ ,level );
+    return mapper_->size ( this->grid_ ,level );
   }
 
   //! for given entity map local dof number to global dof number 
@@ -738,7 +820,29 @@ public:
     return mapper_->mapToGlobal ( en , localNum );
   }
 
+  
+  void signIn (DiscFuncType * df)  
+  {
+    dfList_.insert_before ( dfList_.begin() , df );
+  }
+
+  void signOut (DiscFuncType * df)  
+  {
+    typedef typename DoubleLinkedList < DiscFuncType * >::Iterator IteratorType; 
+    IteratorType it    = dfList_.begin(); 
+    IteratorType endit = dfList_.end  (); 
+    for( ; it != endit; ++it )
+    {
+      if( (*it) == df )
+      {
+        dfList_.erase ( it );
+        break;
+      }
+    }
+  }
+  
 protected:
+  mutable DoubleLinkedList < DiscFuncType * > dfList_;
   //! get the right BaseFunctionSet for a given Entity 
   template <class EntityType> 
   FastBaseFunctionSetType* setBaseFuncSetPointer ( EntityType &en )  
@@ -829,20 +933,30 @@ public:
     LagrangeDiscreteFunctionSpace < FunctionSpaceType , GridType, polOrd > (g) 
   { 
     mapper_ = NULL;
-    typedef typename GridType::Traits<0>::LevelIterator LevelIteratorType;
+    typedef typename GridType::template Traits<0>::LevelIterator LevelIteratorType;
     LevelIteratorType endit = g.template lend<0>(0);
     for(LevelIteratorType it = g.template lbegin<0>(0); it != endit; ++it)
     {
       if(!mapper_)
       {
         ElementType type = (*it).geometry().type(); // Hack 
-        int numDofs = (*baseFuncSet_ ( type )).getNumberOfBaseFunctions();
+        int numDofs = (*(this->baseFuncSet_) ( type )).getNumberOfBaseFunctions();
       
         mapper_ = new DGMapper < polOrd > (numDofs);
         break;
       }
     }
   };
+ 
+  template <class DiscFuncType>
+  void signIn (DiscFuncType * df)  
+  {
+  }
+  
+  template <class DiscFuncType>
+  void signOut (DiscFuncType * df)  
+  {
+  }
   
   ~DGDiscreteFunctionSpace ()
   {
@@ -877,7 +991,7 @@ public:
   //! size knows the correct way to calculate the size of the functionspace
   int size ( int level ) const 
   {
-    return mapper_->size ( grid_ ,level );
+    return mapper_->size ( this->grid_ ,level );
   };
 
   //! for given entity map local dof number to global dof number 
@@ -933,9 +1047,11 @@ template<class FunctionSpaceType, ElementType ElType, int polOrd >
 class RaviartThomasBaseFunction   
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
-  typedef typename FunctionSpaceType::Domain DomainType; 
+  typedef typename FunctionSpaceType::RangeField RangeField;  
+  typedef typename FunctionSpaceType::Domain Domain;
+  typedef typename FunctionSpaceType::Range Range;
   
-  DomainType point_;
+  Domain point_;
   int baseNum_;
   
 public:
@@ -1005,6 +1121,8 @@ class EdgeBaseFunction
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
   typedef typename FunctionSpaceType::RangeField RangeField;  
+  typedef typename FunctionSpaceType::Domain Domain;
+  typedef typename FunctionSpaceType::Range Range;
   RangeField factor[3];
   int baseNum_;
   
@@ -1115,7 +1233,7 @@ public:
          new RaviartThomasBaseFunctionType ( fuSpace, i ) ;
       setBaseFunctionPointer ( i, baseFuncList_ (i) );
     }
-    setNumOfDiffFct ( numOfDifferentFuncs );
+    this->setNumOfDiffFct ( numOfDifferentFuncs );
   };
 
   //! Destructor deleting the base functions 
@@ -1170,7 +1288,7 @@ public:
          new EdgeBaseFunctionType ( fuSpace, i ) ;
       setBaseFunctionPointer ( i, baseFuncList_ (i) );
     }
-    setNumOfDiffFct ( numOfDifferentFuncs );
+    this->setNumOfDiffFct ( numOfDifferentFuncs );
   };
 
   //! Destructor deleting the base functions 
@@ -1224,6 +1342,9 @@ class RaviartThomasSpace
 FastBaseFunctionSet < RaviartThomasSpace 
 < FunctionSpaceType , GridType, polOrd   > > >
 {
+  typedef FastBaseFunctionSet < RaviartThomasSpace
+    < FunctionSpaceType , GridType, polOrd   > > BaseFunctionSetType;
+  
   typedef BaseFunctionSetType FastBaseFunctionSetType;
   enum {id = 77809 };
 
@@ -1254,7 +1375,7 @@ public:
       baseFuncSet_(i) = NULL;
     
     // search the macro grid for diffrent element types 
-    typedef typename GridType::Traits<0>::LevelIterator LevelIterator;
+    typedef typename GridType::template Traits<0>::LevelIterator LevelIterator;
     LevelIterator endit = g.template lend<0>(0);
     for(LevelIterator it = g.template lbegin<0>(0); it != endit; ++it)
     {
@@ -1311,7 +1432,7 @@ public:
   //! size knows the correct way to calculate the size of the functionspace
   int size ( int level ) const 
   {
-    return (*mapper_).size ( grid_ ,level );
+    return (*mapper_).size ( this->grid_ ,level );
   };
 
   //! for given entity map local dof number to global dof number 
@@ -1406,6 +1527,9 @@ class EdgeSpace
 FastBaseFunctionSet < EdgeSpace 
 < FunctionSpaceType , GridType, polOrd   > > >
 {
+  typedef FastBaseFunctionSet < EdgeSpace 
+    < FunctionSpaceType , GridType, polOrd   > > BaseFunctionSetType;
+  
   typedef BaseFunctionSetType FastBaseFunctionSetType;
   enum {id = 77809 };
 
@@ -1433,15 +1557,15 @@ public:
     for(int i=0; i<numOfDiffBase_; i++)
       baseFuncSet_(i) = NULL;
 
-    typedef typename GridType::Traits<0>::LevelIterator LevelIterator;
+    typedef typename GridType::template Traits<0>::LevelIterator LevelIterator;
     
-    int level = grid_.maxlevel();
+    int level = g.maxlevel();
     int edgeSize = 3 * g.size ( g.maxlevel(), 0);
     edgeMap_.resize( edgeSize );
     for(int i=0; i<edgeSize; i++) edgeMap_[i] = -1;
     
-    LevelIterator it = grid_.lbegin<0>( level);
-    LevelIterator endit = grid_.lend<0>(level);
+    LevelIterator it = g.lbegin<0>( level);
+    LevelIterator endit = g.lend<0>(level);
     
     // walktrough grid 
     int edge = 0;
@@ -1452,7 +1576,7 @@ public:
         baseFuncSet_ ( type ) = setBaseFuncSetPointer(*it);
 
       typedef typename
-        GridType::Traits<0>::Entity::Traits::IntersectionIterator EdgeIt;
+        GridType::template Traits<0>::Entity::Traits::IntersectionIterator EdgeIt;
 
       int index = it->index();
       EdgeIt nit    = it->ibegin();
@@ -1525,7 +1649,7 @@ public:
   //! size knows the correct way to calculate the size of the functionspace
   int size ( int level ) const 
   {
-    return grid_.size( level , 1);
+    return this->grid_.size( level , 1);
   };
 
   //! for given entity map local dof number to global dof number 

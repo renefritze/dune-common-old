@@ -25,15 +25,15 @@ scalarProductDofs( const DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
 
   RangeFieldType skp = 0.;
 
-  int level = getFunctionSpace().getGrid().maxlevel();
+  int level = this->getFunctionSpace().getGrid().maxlevel();
 
   // get DofIterator from this 
-  DofIteratorImp endit = dend ( level );
+  DofIteratorImp endit = this->dend ( level );
 
   // hack 
   DofIteratorImp git   = const_cast<DiscreteFunctionDefault &>( g ).dbegin ( level );
   // multiply
-  for(DofIteratorImp it = dbegin( level ); it != endit; ++it)
+  for(DofIteratorImp it = this->dbegin( level ); it != endit; ++it)
   {
     skp += (*it) * (*git);
     ++git;
@@ -56,11 +56,11 @@ assign( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g )
     const_cast<DiscreteFunctionDefaultType &>( static_cast<const DiscreteFunctionDefaultType &> ( g ));
   // we would need const_iterators.....
 
-  int level = getFunctionSpace().getGrid().maxlevel();
+  int level = this->getFunctionSpace().getGrid().maxlevel();
 
-  DofIteratorImp endit = dend ( level );
+  DofIteratorImp endit = this->dend ( level );
   DofIteratorImp git = gc.dbegin ( level );
-  for(DofIteratorImp it = dbegin( level ); it != endit; ++it) 
+  for(DofIteratorImp it = this->dbegin( level ); it != endit; ++it) 
   {
     *it = *git; 
     ++git;
@@ -84,11 +84,11 @@ operator = ( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g 
     const_cast<DiscreteFunctionDefaultType &>( static_cast<const DiscreteFunctionDefaultType &> ( g ));
   // we would need const_iterators.....
 
-  int level = getFunctionSpace().getGrid().maxlevel();
+  int level = this->getFunctionSpace().getGrid().maxlevel();
 
-  DofIteratorImp endit = dend ( level );
+  DofIteratorImp endit = this->dend ( level );
   DofIteratorImp git = gc.dbegin ( level );
-  for(DofIteratorImp it = dbegin( level ); it != endit; ++it) 
+  for(DofIteratorImp it = this->dbegin( level ); it != endit; ++it) 
   {
     *it = *git; 
     ++git;
@@ -112,11 +112,11 @@ operator += ( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g
     const_cast<DiscreteFunctionDefaultType &>( static_cast<const DiscreteFunctionDefaultType &> ( g ));
   // we would need const_iterators.....
 
-  int level = getFunctionSpace().getGrid().maxlevel();
+  int level = this->getFunctionSpace().getGrid().maxlevel();
 
-  DofIteratorImp endit = dend ( level );
+  DofIteratorImp endit = this->dend ( level );
   DofIteratorImp git = gc.dbegin ( level );
-  for(DofIteratorImp it = dbegin( level ); it != endit; ++it) 
+  for(DofIteratorImp it = this->dbegin( level ); it != endit; ++it) 
   {
     *it += *git;
     ++git;
@@ -139,11 +139,11 @@ addScaled( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g ,
     const_cast<DiscreteFunctionDefaultType &>( static_cast<const DiscreteFunctionDefaultType &> ( g ));
   // we would need const_iterators.....
 
-  int level = getFunctionSpace().getGrid().maxlevel();
+  int level = this->getFunctionSpace().getGrid().maxlevel();
 
-  DofIteratorImp endit = dend ( level );
+  DofIteratorImp endit = this->dend ( level );
   DofIteratorImp git = gc.dbegin ( level );
-  for(DofIteratorImp it = dbegin( level ); it != endit; ++it) 
+  for(DofIteratorImp it = this->dbegin( level ); it != endit; ++it) 
   {
     *it += (scalar* (*git));
     ++git;
@@ -165,11 +165,11 @@ operator -= ( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g
     const_cast<DiscreteFunctionDefaultType &>( static_cast<const DiscreteFunctionDefaultType &> ( g ));
   // we would need const_iterators.....
 
-  int level = getFunctionSpace().getGrid().maxlevel();
+  int level = this->getFunctionSpace().getGrid().maxlevel();
 
-  DofIteratorImp endit = dend ( level );
+  DofIteratorImp endit = this->dend ( level );
   DofIteratorImp git = gc.dbegin ( level );
-  for(DofIteratorImp it = dbegin( level ); it != endit; ++it) 
+  for(DofIteratorImp it = this->dbegin( level ); it != endit; ++it) 
   {
     *it -= *git;
     ++git;
@@ -185,10 +185,10 @@ DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
 operator *= ( const typename DiscreteFunctionSpaceType::RangeField & scalar ) 
 {
-  int level = getFunctionSpace().getGrid().maxlevel();
+  int level = this->getFunctionSpace().getGrid().maxlevel();
 
-  DofIteratorImp endit = dend ( level );
-  for(DofIteratorImp it = dbegin( level ); it != endit; ++it) 
+  DofIteratorImp endit = this->dend ( level );
+  for(DofIteratorImp it = this->dbegin( level ); it != endit; ++it) 
     *it *= scalar;
 
   return *this;
@@ -223,11 +223,11 @@ add ( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g ,
     const_cast<DiscreteFunctionDefaultType &>( static_cast<const DiscreteFunctionDefaultType &> ( g ));
   // we would need const_iterators.....
     
-  int level = getFunctionSpace().getGrid().maxlevel();
+  int level = this->getFunctionSpace().getGrid().maxlevel();
 
-  DofIteratorImp endit = dend ( level );
+  DofIteratorImp endit = this->dend ( level );
   DofIteratorImp git = gc.dbegin ( level );
-  for(DofIteratorImp it = dbegin( level ); it != endit; ++it) 
+  for(DofIteratorImp it = this->dbegin( level ); it != endit; ++it) 
   {
     *it += (*git) * scalar;
     ++git;
@@ -241,8 +241,8 @@ template<class DiscreteFunctionSpaceType, class DofIteratorImp,
 inline void DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >:: clearLevel ( int level  )
 {
-  DofIteratorImp enddof = dend ( level_ );
-  for(DofIteratorImp itdof = dbegin ( level_ );       
+  DofIteratorImp enddof = this->dend ( this->level_ );
+  for(DofIteratorImp itdof = this->dbegin ( this->level_ );       
       itdof != enddof; ++itdof)
   {
     *itdof = 0.;
@@ -264,8 +264,8 @@ write(const FileFormatType ftype, const char *filename, int timestep)
 
     file << d << " " << r << " ";
     file << n << " " << m << "\n";
-    file << functionSpace_.type() << " " << ftype << "\n";
-    file << functionSpace_.polynomOrder() << "\n";
+    file << this->functionSpace_.type() << " " << ftype << "\n";
+    file << this->functionSpace_.polynomOrder() << "\n";
     file.close();
   }
 

@@ -42,15 +42,23 @@ class DiscFuncArray
 
   enum { myId_ = 0};
 public:
+  typedef typename DiscreteFunctionSpaceType::RangeField RangeFieldType;
+  typedef typename DiscreteFunctionSpaceType::GridType GridType;
+
+  
   typedef DiscFuncArray <DiscreteFunctionSpaceType> DiscreteFunctionType;          
   typedef LocalFunctionArray < DiscreteFunctionSpaceType > LocalFunctionType;
+  typedef DofIteratorArray < typename DiscreteFunctionSpaceType::RangeField > DofIteratorType;
 
+#if 0
   template <class GridIteratorType>
   struct Traits 
   {
     typedef LocalFunctionArrayIterator < DiscreteFunctionType,
     GridIteratorType> LocalFunctionIteratorType;
   };
+#endif
+  
 
   typedef DiscreteFunctionSpaceType FunctionSpaceType;
   
@@ -160,20 +168,20 @@ private:
   void getMemory()
   {
     // for all grid levels we have at least a vector with length 0
-    int numLevel = functionSpace_.getGrid().maxlevel() +1;
+    int numLevel = this->functionSpace_.getGrid().maxlevel() +1;
     dofVec_.resize(numLevel);
     
     // this is done only if levOcu_ > 1
     for(int i=0; i<levOcu_-1; i++)
     {
-      int length = functionSpace_.size( i );
+      int length = this->functionSpace_.size( i );
       (dofVec_[i]).resize( length );
       for( int j=0; j<length; j++)
         (dofVec_[i])[j] = 0.0;
     }
 
     // the last level is done always
-    int length = functionSpace_.size( level_ );
+    int length = this->functionSpace_.size( level_ );
     (dofVec_[level_]).resize( length );
     for( int j=0; j<length; j++) (dofVec_[level_])[j] = 0.0;
   }
@@ -220,6 +228,10 @@ class LocalFunctionArray
   typedef DiscFuncArray <DiscreteFunctionSpaceType> DiscFuncType;
 
   enum { dimrange = DiscreteFunctionSpaceType::DimRange };
+  typedef typename DiscreteFunctionSpaceType::Domain DomainType;
+  typedef typename DiscreteFunctionSpaceType::Range RangeType;
+  typedef typename DiscreteFunctionSpaceType::RangeField RangeFieldType;
+  typedef typename DiscreteFunctionSpaceType::JacobianRange JacobianRangeType;
 
   friend class DiscFuncArray <DiscreteFunctionSpaceType>;
 public:

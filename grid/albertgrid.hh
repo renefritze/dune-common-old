@@ -7,7 +7,7 @@
 #include <vector>
 #include <assert.h>
 
-#ifdef __ALBERT++__
+#ifdef __ALBERTpp__
 #define ALBERT Albert:: 
 #else 
 #define ALBERT
@@ -20,7 +20,7 @@
 #include "../common/array.hh"
 #include "common/grid.hh"
  
-#ifndef __ALBERT++__
+#ifndef __ALBERTpp__
 extern "C" 
 {
 #endif
@@ -47,7 +47,7 @@ extern "C"
 // the original ALBERT header 
 #include <albert.h>
 
-#ifndef __ALBERT++__
+#ifndef __ALBERTpp__
 } // end extern "C"
 #endif
 

@@ -104,8 +104,8 @@ template<class DiscreteFunctionSpaceType >
 inline void DiscFuncArray< DiscreteFunctionSpaceType >::print(std::ostream &s, int level )
 {
   RangeFieldType sum = 0.;
-  DofIteratorType enddof = dend ( level );
-  for(DofIteratorType itdof = dbegin ( level ); itdof != enddof; ++itdof) 
+  DofIteratorType enddof = this->dend ( level );
+  for(DofIteratorType itdof = this->dbegin ( level ); itdof != enddof; ++itdof) 
   {
     //s << (*itdof) << " DofValue \n";
     sum += ABS(*itdof);
@@ -128,7 +128,7 @@ inline LocalFunctionArray<DiscreteFunctionSpaceType>
 DiscFuncArray< DiscreteFunctionSpaceType >::
 newLocalFunction ( )
 {
-  LocalFunctionArray<DiscreteFunctionSpaceType> tmp ( functionSpace_ , dofVec_ );
+  LocalFunctionArray<DiscreteFunctionSpaceType> tmp ( this->functionSpace_ , dofVec_ );
   return tmp;
 }
 
@@ -269,7 +269,7 @@ read_xdr( const char *filename , int timestep )
 
     for(int lev=0; lev<=level_; lev++)
     {
-      int length = functionSpace_.size( lev );
+      int length = this->functionSpace_.size( lev );
       dofVec_[lev].processXdr(&xdrs);
       if(length != dofVec_[lev].size())
       {
@@ -284,7 +284,7 @@ read_xdr( const char *filename , int timestep )
     getMemory();
 
     int lev = level_;
-    int length = functionSpace_.size( lev );
+    int length = this->functionSpace_.size( lev );
     dofVec_[lev].processXdr(&xdrs);
     if(length != dofVec_[lev].size())
     {
@@ -311,10 +311,10 @@ write_ascii( const char *filename , int timestep )
     outfile << level_ << "\n"; 
     for(int lev=0; lev<level_; lev++)
     {
-      int length = functionSpace_.size( lev );
+      int length = this->functionSpace_.size( lev );
       outfile << length << "\n";
-      DofIteratorType enddof = dend ( lev );
-      for(DofIteratorType itdof = dbegin ( lev );itdof != enddof; ++itdof) 
+      DofIteratorType enddof = this->dend ( lev );
+      for(DofIteratorType itdof = this->dbegin ( lev );itdof != enddof; ++itdof) 
       {
         outfile << (*itdof) << " ";
       }
@@ -323,10 +323,10 @@ write_ascii( const char *filename , int timestep )
   }
   {
     int lev = level_;
-    int length = functionSpace_.size( lev );
+    int length = this->functionSpace_.size( lev );
     outfile << length << "\n";
-    DofIteratorType enddof = dend ( lev );
-    for(DofIteratorType itdof = dbegin ( lev );itdof != enddof; ++itdof) 
+    DofIteratorType enddof = this->dend ( lev );
+    for(DofIteratorType itdof = this->dbegin ( lev );itdof != enddof; ++itdof) 
     {
       outfile << (*itdof) << " ";
     }
@@ -364,14 +364,14 @@ read_ascii( const char *filename , int timestep )
       int length; 
       fscanf(infile,"%d \n",&length); 
       std::cout << "Got Size of Level = "<< length << " " << lev << "\n";
-      std::cout << functionSpace_.size( lev ) << "\n";
-      if(length != functionSpace_.size( lev )) 
+      std::cout << this->functionSpace_.size( lev ) << "\n";
+      if(length != this->functionSpace_.size( lev )) 
       {
         std::cerr << "ERROR: wrong number of dofs stored in file!\n"; 
         abort();
       }
-      DofIteratorType enddof = dend ( lev );
-      for(DofIteratorType itdof = dbegin ( lev );itdof != enddof; ++itdof) 
+      DofIteratorType enddof = this->dend ( lev );
+      for(DofIteratorType itdof = this->dbegin ( lev );itdof != enddof; ++itdof) 
       {
         fscanf(infile,"%le \n",& (*itdof)); 
       }
@@ -384,13 +384,13 @@ read_ascii( const char *filename , int timestep )
     int lev = level_;
     int length;
     fscanf(infile,"%d \n",&length); 
-    if(length != functionSpace_.size( lev )) 
+    if(length != this->functionSpace_.size( lev )) 
     {
       std::cerr << "ERROR: wrong number of dofs stored in file!\n"; 
       abort();
     }
-    DofIteratorType enddof = dend ( lev );
-    for(DofIteratorType itdof = dbegin ( lev );itdof != enddof; ++itdof) 
+    DofIteratorType enddof = this->dend ( lev );
+    for(DofIteratorType itdof = this->dbegin ( lev );itdof != enddof; ++itdof) 
     {
       fscanf(infile,"%le \n",& (*itdof)); 
     }
@@ -411,14 +411,14 @@ write_pgm( const char *filename , int timestep )
   
   int danz = 129; 
   /*
-  int danz = functionSpace_.getGrid().size(level_, dim );
+  int danz = this->functionSpace_.getGrid().size(level_, dim );
   danz = (int) pow (( double ) danz, (double) (1.0/dim) );
   std::cout << danz << " Danz!\n";
   */
   
   out << "P2\n " << danz << " " << danz <<"\n255\n";
-  DofIteratorType enddof = dend ( level_ );
-  for(DofIteratorType itdof = dbegin ( level_ ); itdof != enddof; ++itdof) {
+  DofIteratorType enddof = this->dend ( level_ );
+  for(DofIteratorType itdof = this->dbegin ( level_ ); itdof != enddof; ++itdof) {
     out << (int)((*itdof)*255.) << "\n";
   }
   out.close();
@@ -432,7 +432,7 @@ read_pgm( const char *filename , int timestep )
   int v;
 
   // get the hole memory 
-  level_ = functionSpace_.getGrid().maxlevel();
+  level_ = this->functionSpace_.getGrid().maxlevel();
   allLevels_ = true;
   levOcu_ = level_+1;
   
@@ -441,8 +441,8 @@ read_pgm( const char *filename , int timestep )
   const char * fn = genFilename(path,filename,timestep); 
   in = fopen( fn, "r" );
   fscanf( in, "P2\n%d %d\n%d\n", &v, &v, &v );
-  DofIteratorType enddof = dend ( level_ );
-  for(DofIteratorType itdof = dbegin ( level_ ); itdof != enddof; ++itdof) {
+  DofIteratorType enddof = this->dend ( level_ );
+  for(DofIteratorType itdof = this->dbegin ( level_ ); itdof != enddof; ++itdof) {
     fscanf( in, "%d", &v );
     (*itdof) = ((double)v)/255.;
   } 
@@ -457,11 +457,12 @@ write_USPM( const char *filename , int timestep )
   std::fstream out( filename , std::ios::out );
   //ElementType eltype = triangle;
   //out << eltype << " 1 1\n"; 
-  int length = functionSpace_.size( level );
+  int level = this->functionSpace_.getGrid().maxlevel();
+  int length = this->functionSpace_.size( level );
   out << length << " 1 1\n";
 
-  DofIteratorType enddof = dend ( level );
-  for(DofIteratorType itdof = dbegin ( level );
+  DofIteratorType enddof = this->dend ( level );
+  for(DofIteratorType itdof = this->dbegin ( level );
       itdof != enddof; ++itdof)
   {
     out << (*itdof)  << "\n";
@@ -578,14 +579,14 @@ inline LocalFunctionArray < DiscreteFunctionSpaceType >::~LocalFunctionArray()
 }
 
 template<class DiscreteFunctionSpaceType >
-inline LocalFunctionArray < DiscreteFunctionSpaceType >::RangeFieldType & 
+inline typename LocalFunctionArray < DiscreteFunctionSpaceType >::RangeFieldType & 
 LocalFunctionArray < DiscreteFunctionSpaceType >::operator [] (int num) 
 {
   return (* (values_[num]));
 }
 
 template<class DiscreteFunctionSpaceType >
-inline const LocalFunctionArray < DiscreteFunctionSpaceType >::RangeFieldType & 
+inline const typename LocalFunctionArray < DiscreteFunctionSpaceType >::RangeFieldType & 
 LocalFunctionArray < DiscreteFunctionSpaceType >::read (int num) const
 {
   return (* (values_[num]));

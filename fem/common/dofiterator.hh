@@ -89,6 +89,7 @@ template <class DofImp, class DofIteratorImp>
 class DofIteratorDefault 
 : public DofIteratorInterface < DofImp , DofIteratorImp >
 {
+  typedef DofIteratorImp DofIteratorType;
 public:
   //! random access operator, for efficient implementation overload in the 
   //! implementation class DofIteratorImp

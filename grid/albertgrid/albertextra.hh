@@ -4,7 +4,7 @@
 #ifndef _ALBERTEXTRA_H_
 #define _ALBERTEXTRA_H_
 
-#ifdef __ALBERT++__
+#ifdef __ALBERTpp__
 namespace Albert { 
 #endif
 
@@ -1146,7 +1146,7 @@ inline void setElOwnerNew( MESH * mesh, DOF_INT_VEC * elOwn )
 #include "part.cc"
 } // end namespace AlbertHelp 
 
-#ifdef __ALBERT++__
+#ifdef __ALBERTpp__
 } // end namespace Albert  
 #endif
 

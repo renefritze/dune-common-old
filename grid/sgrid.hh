@@ -398,6 +398,9 @@ public:
         //! index is unique and consecutive per level and codim used for access to degrees of freedom
         int index (); 
 
+        //! so far equal to index 
+        int global_index() { return index(); }
+
         //! geometry of this entity
         SElement<dim-codim,dimworld>& geometry ();
 
@@ -707,6 +710,12 @@ public:
 
         //! number of grid entities per level and codim
         int size (int level, int codim) const;
+
+        //! number of grid entities per level and codim
+        int global_size (int codim) const
+        { 
+          return size(this->maxlevel(),codim); 
+        }
 
   //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ... 
   GridIdentifier type() const; 
