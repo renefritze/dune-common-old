@@ -8,12 +8,23 @@
 
 namespace Dune{
 
+/** @defgroup Quadrature The Quadrature Interface
+
+  This is the interface for qaudratures. It contains three methods, 
+  namely for geting the number of quadrature points, the quadrature points 
+  and the quadrature weights. 
+
+  @{
+ */
+
 //************************************************************************
 //
 //  --QuadraturePoints 
-//! Every specialization of this class implements a diffrent quadrature 
-//! for diffrent elements and polynomial order 
 //
+//! Every specialization of this class implements a diffrent quadrature 
+//! for diffrent elements and polynomial order. This implementation in left
+//! to the user.
+//!
 //************************************************************************ 
 template <class Domain, class RangeField, ElementType ElType, int polOrd>
 struct QuadraturePoints 
@@ -56,8 +67,8 @@ getWeight ( int i )
 //! Barton-Nackmen technique. There are two diffrent implementations of the
 //! Interface. One has to be parametrized by polynomial order as template
 //! parameter and the other uses dynamic polynomial order but the two have
-//! to be parametrized by the element type 
-//
+//! to be parametrized by the element type. 
+//!
 //**************************************************************************
 template< class FunctionSpaceType , class QuadratureImp>
 class QuadratureInterface : public DynamicType 
@@ -286,6 +297,9 @@ private:
     }
   };
 }; // end class Quadrature 
+
+/** @} end documentation group */
+
 
 } // end namespace Dune 
 
