@@ -129,16 +129,6 @@ struct AlbertGridReferenceElement<3>
 template<int dim>
 AlbertGridElement<dim,dim> AlbertGridReferenceElement<dim>::refelem(true);
 
-#if 0
-// singleton holding reference elements
-template<int dim>
-struct AlbertGridReferenceElement 
-{
-  static AlbertGridElement<dim,dim> refelem;
-  static ALBERT EL_INFO elInfo_;
-};
-#endif
-
 //****************************************************************
 //
 // --AlbertGridElement 
@@ -1251,32 +1241,6 @@ inline AlbertGridNeighborIterator<dim,dimworld>::AlbertGridNeighborIterator
 }
 
 template< int dim, int dimworld>
-inline void AlbertGridNeighborIterator<dim,dimworld>::
-makeVirtualEntity(int neighbor)
-{
-  virtualEntity_ = new AlbertGridEntity<0,dim,dimworld> (grid_);
-  virtualEntity_->setTraverseStack(NULL);
-  virtualEntity_->setElInfo(NULL,0,0,0,0);
-  if((neighbor >= 0) && (neighbor < dim+1))
-  {
-    if(elInfo_->neigh[neighbor] == NULL)
-    {
-      // if no neighbour exists, then return the 
-      // the default neighbour, which means boundary
-      initElInfo(&neighElInfo_);
-      virtualEntity_->setElInfo(&neighElInfo_);
-      return;
-    }
-    else
-    {
-      setNeighInfo(elInfo_,&neighElInfo_,neighbor);
-      virtualEntity_->setElInfo(&neighElInfo_);
-      return;
-    }
-  }
-}
-
-template< int dim, int dimworld>
 inline AlbertGridNeighborIterator<dim,dimworld>& 
 AlbertGridNeighborIterator<dim,dimworld>::
 operator ++()
@@ -1310,14 +1274,45 @@ operator !=(const AlbertGridNeighborIterator& I) const
 }
 
 template< int dim, int dimworld>
+inline void AlbertGridNeighborIterator<dim,dimworld>::
+setupVirtualEntity(int neighbor)
+{
+  if((neighbor >= 0) && (neighbor < dim+1))
+  {
+    if(elInfo_->neigh[neighbor] == NULL)
+    {
+      // if no neighbour exists, then return the 
+      // the default neighbour, which means boundary
+      initElInfo(&neighElInfo_);
+      virtualEntity_->setElInfo(&neighElInfo_);
+      return;
+    }
+    else
+    {
+      setNeighInfo(elInfo_,&neighElInfo_,neighbor);
+      virtualEntity_->setElInfo(&neighElInfo_);
+      return;
+    }
+  }
+  else 
+  {
+    std::cout << "No Neighbour for this number! \n";
+    abort();
+  }
+}
+
+template< int dim, int dimworld>
 inline AlbertGridEntity < 0, dim ,dimworld >& 
 AlbertGridNeighborIterator<dim,dimworld>::
 operator *()
 {
-  if(virtualEntity_)
-    return (*virtualEntity_);
+  if(!virtualEntity_)
+  {
+    virtualEntity_ = new AlbertGridEntity<0,dim,dimworld> (grid_);
+    virtualEntity_->setTraverseStack(NULL);
+  }
 
-  makeVirtualEntity(neighborCount_);
+  setupVirtualEntity(neighborCount_);
   return (*virtualEntity_);
 }
 
@@ -1326,10 +1321,13 @@ inline AlbertGridEntity < 0, dim ,dimworld >*
 AlbertGridNeighborIterator<dim,dimworld>::
 operator ->()
 {
-  if(virtualEntity_)
-    return virtualEntity_;
+  if(!virtualEntity_)
+  {
+    virtualEntity_ = new AlbertGridEntity<0,dim,dimworld> (grid_);
+    virtualEntity_->setTraverseStack(NULL);
+  }
 
-  makeVirtualEntity(neighborCount_);
+  setupVirtualEntity(neighborCount_);
   return virtualEntity_;
 }
 
@@ -2319,7 +2317,7 @@ inline void AlbertGrid <2,2>::writeGrid (int level)
   FILE *file = fopen("grid.uspm", "w");
   if(!file)
   {
-    std::cout << "Couldnt open out.uspm \n";
+    std::cout << "Couldnt open grid.uspm \n";
     abort();
   }
   fprintf(file, "USPM 2\n");
@@ -2345,7 +2343,7 @@ inline void AlbertGrid <2,2>::writeGrid (int level)
   }
 
   fclose(file);
-  std::cout << "\nUSPM grid 'out.uspm' writen !\n\n";
+  std::cout << "\nUSPM grid 'grid.uspm' written !\n\n";
 
   for (int i = 0; i < nvx; i++)
     delete [] coord[i];

@@ -650,8 +650,8 @@ public:
   int number_in_neighbor ();
 
 private:
-  //! create the vritual entity
-  void makeVirtualEntity(int neighbor);
+  //! setup the virtual entity
+  void setupVirtualEntity(int neighbor);
   
   void makeIterator();
   // makes empty neighElInfo
@@ -935,8 +935,9 @@ class AlbertMarkerVector
 {
   Array<int> vec_;
   int numVertex_;
-public:
   friend class AlbertGrid<2,2>;
+  friend class AlbertGrid<3,3>;
+public:
   
   AlbertMarkerVector ();
 
