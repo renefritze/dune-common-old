@@ -53,7 +53,7 @@ public:
   FieldVector<T,n>& operator[] (int j) {return a[j];}
 
   //! matrix/vector multiplication
-  FieldVector<T,n> operator* (const FieldVector<T,m>& x)
+  FieldVector<T,n> operator* (const FieldVector<T,m>& x) const
   {
     FieldVector<T,n> z(0.0);
     for (int j=0; j<m; j++)
@@ -63,7 +63,7 @@ public:
   }
 
   //! matrix/vector multiplication with vector stored in matrixform
-  Mat<n,1,T> mult_vector (const Mat<n,1,T>& x)
+  Mat<n,1,T> mult_vector (const Mat<n,1,T>& x) const
   {
     Mat<n,1,T> z(0.0);
     for (int j=0; j<m; j++)
@@ -124,6 +124,8 @@ public:
     return s;
   }
 
+    // can't overload operator* twice
+#if 0
   //! scalar product of two vectors; one of them stored in matrixform
   T operator* (const FieldVector<T,n>& b) const
   {
@@ -134,6 +136,7 @@ public:
     for (int i=0; i<n; i++) s += this->operator()(i,0) * b[i];
     return s;
   }
+#endif
 
 private:
   //! built-in array to hold the data
