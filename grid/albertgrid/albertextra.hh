@@ -184,7 +184,6 @@ inline void cutHierarchicStack(TRAVERSE_STACK* copy, TRAVERSE_STACK* org)
   return;
 }
 
-
 inline TRAVERSE_STACK & removeTraverseStack(TRAVERSE_STACK& copy)
 {
   FUNCNAME("removeStack");
@@ -226,7 +225,6 @@ inline void initTraverseStack(TRAVERSE_STACK *stack)
   stack->next = nil;
 
 }
-
 
 inline void enlargeTraverseStack(TRAVERSE_STACK *stack)
 {
