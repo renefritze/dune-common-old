@@ -64,6 +64,8 @@ public:
     }
   };
 
+  virtual ~FastQuad() {}
+  
   //! return number of quadrature points 
   int nop() const { return numberOfQuadPoints_; }
 
@@ -174,6 +176,8 @@ public:
     }
   };
 
+  virtual ~BaryCenterQuad () {}
+
   //! return number of quadrature points 
   int nop() const { return numberOfQuadPoints_; }
 
@@ -267,6 +271,8 @@ public:
       default : { std::cerr << "Element type is unkown in Constructor of QuadratureImp! \n"; abort(); }               
     }
   };
+
+  virtual ~QuadratureImp() {}
   
   //! return number of quadrature points 
   int nop () const { return numQuadPoints_; };
@@ -315,12 +321,12 @@ private:
 
   };
 
-  // remember which element type the quadrature was made for
-  const ElementType eltype_;
-
   // order of quadrature 
   int order_;
   
+  // remember which element type the quadrature was made for
+  const ElementType eltype_;
+
   //! number of quadrature points  
   int numQuadPoints_;
   
