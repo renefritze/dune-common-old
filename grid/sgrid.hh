@@ -1,7 +1,7 @@
-#ifndef __SGRID_HH__
-#define __SGRID_HH__
+#ifndef DUNE_SGRID_HH
+#define DUNE_SGRID_HH
 
-#include"../common/matvec.hh"
+#include <dune/common/fmatrix.hh>
 #include"../common/stack.hh"
 #include"../common/capabilities.hh"
 #include"common/grid.hh"
@@ -157,7 +157,7 @@ public:
         sgrid_ctype integrationElement (const FieldVector<sgrid_ctype, mydim>& local) const;
 
         //! can only be called for dim=dimworld!
-        const Mat<mydim,mydim,sgrid_ctype>& jacobianInverse (const FieldVector<sgrid_ctype, mydim>& local) const;
+        const FieldMatrix<sgrid_ctype,mydim,mydim>& jacobianInverse (const FieldVector<sgrid_ctype, mydim>& local) const;
 
         //! print internal data
         void print (std::ostream& ss, int indent) const;
@@ -166,16 +166,16 @@ public:
           Column dim is the position vector. This format allows a consistent
           treatement of all dimensions, including 0 (the vertex).
          */
-        void make (Mat<cdim,mydim+1,sgrid_ctype>& __As);
+        void make (FieldMatrix<sgrid_ctype,cdim,mydim+1>& __As);
 
         //! constructor with bool argument makes reference element if true, uninitialized else
         SGeometry (bool b);
 
 private:
         FieldVector<sgrid_ctype, cdim> s;         //!< position of element
-        Mat<cdim,mydim,sgrid_ctype> A;     //!< direction vectors as matrix
+        FieldMatrix<sgrid_ctype,cdim,mydim> A;     //!< direction vectors as matrix
         FixedArray<FieldVector<sgrid_ctype, cdim>, 1<<mydim> c; //!< coordinate vectors of corners
-        mutable Mat<mydim,mydim,sgrid_ctype> Jinv;       //!< storage for inverse of jacobian
+        mutable FieldMatrix<sgrid_ctype,mydim,mydim> Jinv;       //!< storage for inverse of jacobian
         mutable bool builtinverse;
 };
 
@@ -200,10 +200,19 @@ public:
         void print (std::ostream& ss, int indent) const;
 
         //! constructor, makes element from position and direction vectors
-        void make (Mat<cdim,1,sgrid_ctype>& __As);
+        void make (FieldMatrix<sgrid_ctype,cdim,1>& __As);
 
         //! constructor with bool argument makes reference element if true, uninitialized else
         SGeometry (bool b);
+
+    /** \brief This dummy routine always returns 1.0.
+     *
+     * This routine exists so that algorithms that integrate over grid
+     * boundaries can also be compiled for 1d-grids.
+     */
+    sgrid_ctype integration_element(const FieldVector<sgrid_ctype, 0>& local) const {
+        return 1;
+    }
 
 protected:
         FieldVector<sgrid_ctype, cdim> s;         //!< position of element
@@ -223,7 +232,8 @@ public:
   SMakeableGeometry() :
     Geometry<mydim, cdim, GridImp, SGeometry>(SGeometry<mydim, cdim, GridImp>(false))
     {};
-  void make (Mat<cdim,mydim+1,sgrid_ctype>& __As) { this->realGeometry.make(__As); }
+
+    void make (FieldMatrix<sgrid_ctype,cdim,mydim+1>& __As) { this->realGeometry.make(__As); }
 };
 
 template <class GridImp> 

@@ -1,5 +1,5 @@
-#ifndef __SGRID_CC__
-#define __SGRID_CC__
+#ifndef DUNE_SGRID_CC
+#define DUNE_SGRID_CC
 
 #include<algorithm>
 #include<iostream>
@@ -56,7 +56,7 @@ inline SGeometry<mydim,cdim,GridImp>::SGeometry (bool b)
 }
 
 template<int mydim, int cdim, class GridImp> 
-inline void SGeometry<mydim,cdim,GridImp>::make(Mat<cdim,mydim+1,sgrid_ctype>& __As)
+inline void SGeometry<mydim,cdim,GridImp>::make(FieldMatrix<sgrid_ctype,cdim,mydim+1>& __As)
 {
         // clear jacobian
         builtinverse = false;
@@ -147,7 +147,7 @@ inline sgrid_ctype SGeometry<mydim,cdim,GridImp>::integrationElement (const Fiel
 }
 
 template<int mydim, int cdim, class GridImp> 
-inline const Mat<mydim,mydim,sgrid_ctype>& SGeometry<mydim,cdim,GridImp>::jacobianInverse (const FieldVector<sgrid_ctype, mydim>& local) const
+inline const FieldMatrix<sgrid_ctype,mydim,mydim>& SGeometry<mydim,cdim,GridImp>::jacobianInverse (const FieldVector<sgrid_ctype, mydim>& local) const
 {
         for (int i=0; i<mydim; ++i)
                 for (int j=0; j<mydim; ++j)
@@ -194,7 +194,7 @@ inline SGeometry<0,cdim,GridImp>::SGeometry (bool b)
 }
 
 template<int cdim, class GridImp> 
-inline void SGeometry<0,cdim,GridImp>::make (Mat<cdim,1,sgrid_ctype>& __As)
+inline void SGeometry<0,cdim,GridImp>::make (FieldMatrix<sgrid_ctype,cdim,1>& __As)
 {
         s = __As[0];
 }
@@ -299,7 +299,7 @@ inline const typename GridImp::template codim<codim>::Geometry& SEntityBase<codi
         if (builtgeometry) return geo;
 
         // find dim-codim direction vectors and reference point
-        Mat<dimworld,dim-codim+1,sgrid_ctype> __As;
+        FieldMatrix<sgrid_ctype,dimworld,dim-codim+1> __As;
 
         // count number of direction vectors found
         int dir=0;
@@ -440,7 +440,7 @@ inline void SEntity<0,dim,GridImp>::make_father () const
         father_id = this->grid->n((this->l)-1,this->grid->expand((this->l)-1,zz,partition));
 
         // now make a subcube of size 1/2 in each direction
-        Mat<dimworld,dim+1,sgrid_ctype> __As;
+        FieldMatrix<sgrid_ctype,dimworld,dim+1> __As;
         FieldVector<sgrid_ctype, dim> v;
         for (int i=0; i<dim; i++)
         {
@@ -737,7 +737,7 @@ inline void SIntersectionIterator<GridImp>::makeintersections () const
                 z1[dir] -= 1; // even
 
         // z1 is even in direction dir, all others must be odd because it is codim 1
-        Mat<dim,dim,sgrid_ctype> __As;
+        FieldMatrix<sgrid_ctype,dim,dim> __As;
         FieldVector<sgrid_ctype, dim> p1,p2;
         int t;
 
