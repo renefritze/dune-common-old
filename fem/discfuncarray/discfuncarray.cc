@@ -416,7 +416,6 @@ inline LocalFunctionArray < DiscreteFunctionSpaceType >::
 LocalFunctionArray( const DiscreteFunctionSpaceType &f , 
               Array < RangeFieldType > & dofVec )
  : fSpace_ ( f ), dofVec_ ( dofVec )  , next_ (0)
- , baseFuncSet_ (0)
  , uniform_(true) {}
       
 template<class DiscreteFunctionSpaceType >
@@ -519,11 +518,10 @@ template<class DiscreteFunctionSpaceType > template <class EntityType>
 inline bool LocalFunctionArray < DiscreteFunctionSpaceType >::
 init (EntityType &en ) const
 {
-  if((!uniform_) || (!baseFuncSet_))
+  if(!uniform_)
   {
-    baseFuncSet_ = &(fSpace_.getBaseFunctionSet(en) );
-    numOfDof_ = baseFuncSet_->getNumberOfBaseFunctions();
-    numOfDifferentDofs_ = baseFuncSet_->getNumberOfDiffBaseFuncs();
+    numOfDof_ = fspace_.getBaseFunctionSet(en).getNumberOfBaseFunctions();
+    numOfDifferentDofs_ = getBaseFunctionSet(en).getNumberOfDiffBaseFuncs();
 
     if(numOfDof_ > values_.size())
       values_.resize( numOfDof_ );

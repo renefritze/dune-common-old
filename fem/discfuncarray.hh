@@ -48,8 +48,7 @@ public:
 
   
   //! the MyType
-  typedef DiscFuncArray <DiscreteFunctionSpaceType> DiscreteFunctionType;          
-
+  typedef DiscFuncArray <DiscreteFunctionSpaceType> DiscreteFunctionType;
   
   //! the local function type 
   typedef LocalFunctionArray<DiscreteFunctionSpaceType> LocalFunctionType;
@@ -265,9 +264,6 @@ protected:
   //! for example number of corners for linear elements 
   mutable int numOfDifferentDofs_;
  
-  //! the corresponding base function set 
-  mutable const BaseFunctionSetType *baseFuncSet_;
-
   //! do we have the same base function set for all elements
   bool uniform_;
   

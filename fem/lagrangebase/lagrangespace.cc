@@ -58,7 +58,7 @@ type () const
 
 template< class FunctionSpaceT, class GridType,int polOrd, class DofManagerType >
 template <class EntityType> 
-inline 
+inline const 
 typename LagrangeDiscreteFunctionSpace<FunctionSpaceT,GridType,polOrd,DofManagerType>::
 FastBaseFunctionSetType &  
 LagrangeDiscreteFunctionSpace<FunctionSpaceT,GridType,polOrd,DofManagerType>::
