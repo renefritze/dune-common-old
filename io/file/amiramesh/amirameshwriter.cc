@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <dune/istl/bvector.hh>
+
 #if _3
 /** \todo Make sure that the grid is three-dimensional */
 template<class GridType, class DiscFuncType>
@@ -26,7 +28,6 @@ void Dune::AmiraMeshWriter<GridType, DiscFuncType>::writeGrid(const GridType& gr
         }
     }
 
-    printf("This is the AmiraMesh writer!\n");
     int maxVerticesPerElement = (containsOnlyTetrahedra) ? 4 : 8;
 
     const int DIM = 3;
@@ -177,7 +178,6 @@ void Dune::AmiraMeshWriter<GridType, DiscFuncType>::writeGrid(const GridType& gr
         }
     }
 
-    printf("This is the 2D AmiraMesh writer!\n");
     int maxVerticesPerElement = (containsOnlyTetrahedra) ? 3 : 4;
 
     const int DIM = 2;
@@ -185,14 +185,9 @@ void Dune::AmiraMeshWriter<GridType, DiscFuncType>::writeGrid(const GridType& gr
     int noOfNodes = grid.size(level, DIM);
     int noOfElem  = grid.size(level, 0);
 
-    printf("noOfNodes %d,  nodeOfElem: %d\n", noOfNodes, noOfElem);
     int i;
-    //int tl, k, noOfBndTri, MarkKey, ncomp, maxSubDom;
 
-    std::string solFilename;
-
-   
-    // Construct the name for the geometry file
+    // Construct the name for the file
     std::string geoFilename(filename);
     geoFilename += ".am";
 
@@ -262,7 +257,6 @@ void Dune::AmiraMeshWriter<GridType, DiscFuncType>::writeGrid(const GridType& gr
                                                        McPrimType::mc_int32, maxVerticesPerElement);
    am_geometry.insert(element_data);  
 
-   //int *(dPtr[maxVerticesPerElement]) = (int*)element_data->dataPtr();
    int *dPtr = (int*)element_data->dataPtr();
 
    typename GridType::template Traits<0>::LevelIterator element2   = grid.template lbegin<0>(level);
@@ -355,4 +349,57 @@ void Dune::AmiraMeshWriter<GridType, DiscFuncType>::writeFunction(const DiscFunc
 
    std::cout << "Solution written successfully to: " << filename << std::endl;
 }
+
+
+
+template<class GridType, class DiscFuncType>
+void Dune::AmiraMeshWriter<GridType, DiscFuncType>::writeBlockVector(const Dune::BlockVector<Dune::FieldVector<double, 3> >& f,
+                                                                     const std::string& filename)
+{
+    typedef Dune::BlockVector<Dune::FieldVector<double, 3> > VectorType;
+
+    // Get number of components
+    /** \todo Must depend on the BlockVector and not on the grid! */
+    const int ncomp = GridType::dimension;
+
+    // Create AmiraMesh object
+    AmiraMesh am;
+
+    // Set the appropriate content type for 2D grid data
+    if (GridType::dimension==2)
+        am.parameters.set("ContentType", "HxTriangularData");
+
+    AmiraMesh::Location* sol_nodes = new AmiraMesh::Location("Nodes", f.size());
+    am.insert(sol_nodes);
+    
+    AmiraMesh::Data* nodeData = new AmiraMesh::Data("Data", sol_nodes, McPrimType::mc_double, ncomp);
+    am.insert(nodeData);
+
+    AmiraMesh::Field* nodeField = new AmiraMesh::Field("sol", ncomp, McPrimType::mc_double,
+                                                       AmiraMesh::t_linear, nodeData);
+    am.insert(nodeField);
+
+
+    // write the data into the AmiraMesh object
+    typedef typename VectorType::ConstIterator Iterator;
+    Iterator dit    = f.begin();
+    Iterator ditend = f.end();
+
+    int i=0;
+    for (; dit!=ditend; ++dit) {
+
+        for (int j=0; j<ncomp; j++)
+            ((double*)nodeData->dataPtr())[i++] = (*dit)[j];
+
+    }
+
+    // actually save the solution file
+    // (the 1 means: ascii)
+    if (!am.write(filename.c_str(), 1) )
+        DUNE_THROW(IOError, "An error has occured writing file " << filename);
+
+   std::cout << "Solution written successfully to: " << filename << std::endl;
+}
+
+
 
