@@ -51,7 +51,7 @@ namespace Dune {
   /*! \internal
 	Used for grid I/O
   */
-  enum GridIdentifier { SGrid_Id, AlbertGrid_Id , SimpleGrid_Id, UGGrid_Id, YaspGrid_Id };
+  enum GridIdentifier { SGrid_Id, AlbertGrid_Id , SimpleGrid_Id, UGGrid_Id, YaspGrid_Id , BSGrid_Id };
 
     /*! 
       Specify the format to store grid and vector data
@@ -1426,13 +1426,15 @@ public:
 
   //! Please doc me!
   class LeafIterator;
-  
+ 
+  /*
   //! return LeafIterator which points to the first entity in maxLevel
   LeafIterator leafbegin(int maxLevel);
 
   //! return LeafIterator which points behind the last entity in maxLevel
   LeafIterator leafend(int maxLevel);
-
+  */
+  
   //! refine all positive marked leaf entities 
   //! coarsen all negative marked entities if possible 
   //! return true if a least one element was refined 

@@ -1110,6 +1110,7 @@ inline void Grid<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::checkIF ()
 // G R I D Default
 //************************************************************************
 
+/*
 // return LeafIterator pointing to first leaf entity of maxlevel
 template< int dim, int dimworld, class ct, template<int,int> class GridImp, 
   template<int,int,int,PartitionIteratorType> class LevelIteratorImp, template<int,int,int> class EntityImp>  
@@ -1130,6 +1131,8 @@ GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::leafend (int ma
   LeafIterator tmp (asImp(),maxLevel,true);
   return tmp;
 };
+*/
+
 
 template< int dim, int dimworld, class ct, template<int,int> class GridImp, 
   template<int,int,int,PartitionIteratorType> class LevelIteratorImp, template<int,int,int> class EntityImp>  
