@@ -172,7 +172,7 @@ public:
      * \param heapSize The size of UG's internal memory in megabytes.  UG allocates 
      * memory only once.  I don't know what happens if you create UGGrids with 
      * differing heap sizes.
-     * \param envHeapSize The size of UG's environment heap.  
+     * \param envHeapSize The size of UG's environment heap, also in megabytes.  
      */
     UGGrid(unsigned int heapSize, unsigned int envHeapSize);
  
