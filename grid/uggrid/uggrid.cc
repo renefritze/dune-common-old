@@ -205,7 +205,7 @@ UGGrid < 2, 2 >::lbegin<2> (int level) const
     if (!theGrid)
         DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
-    UGGridLevelIterator<2,2,2,All_Partition> it((*const_cast<UGGrid< 2, 2 >* >(this)),level);
+    UGGridLevelIterator<2,2,2,All_Partition> it(level);
 
     UG2d::node* mytarget = theGrid->firstNode[0];
 
@@ -223,7 +223,7 @@ UGGrid < 2, 2 >::lbegin<0> (int level) const
     if (!theGrid)
         DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
-    UGGridLevelIterator<0,2,2,All_Partition> it((*const_cast<UGGrid< 2, 2 >* >(this)),level);
+    UGGridLevelIterator<0,2,2,All_Partition> it(level);
     it.setToTarget(theGrid->elements[0], level);
     return it;
 }
@@ -234,7 +234,7 @@ inline UGGridLevelIterator<codim, dim, dimworld, All_Partition>
 UGGrid<dim, dimworld>::lbegin (int level) const
 {
     printf("UGGrid<%d, %d>::lbegin<%d> not implemented\n", dim, dimworld, codim);
-    UGGridLevelIterator<codim,dim,dimworld, All_Partition> dummy((*const_cast<UGGrid< dim, dimworld >* >(this)),level);
+    UGGridLevelIterator<codim,dim,dimworld, All_Partition> dummy(level);
     return dummy;
 }
 
@@ -242,7 +242,7 @@ template < int dim, int dimworld > template<int codim>
 inline UGGridLevelIterator<codim,dim,dimworld, All_Partition> 
 UGGrid < dim, dimworld >::lend (int level) const
 {
-    UGGridLevelIterator<codim,dim,dimworld,All_Partition> it((*const_cast<UGGrid< dim, dimworld >* >(this)),level);
+    UGGridLevelIterator<codim,dim,dimworld,All_Partition> it(level);
     return it;
 }
 

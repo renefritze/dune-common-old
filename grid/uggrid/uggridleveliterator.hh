@@ -27,10 +27,7 @@ public:
   //friend class UGGrid<dim,dimworld>;
 
   //! Constructor
-  UGGridLevelIterator(int travLevel);
-
-  //! Constructor
-  UGGridLevelIterator(UGGrid<dim,dimworld> &grid, int travLevel);
+  explicit UGGridLevelIterator(int travLevel);
 
   //! prefix increment
   UGGridLevelIterator<codim,dim,dimworld,pitype>& operator ++();
