@@ -41,18 +41,6 @@ public:
     }
 
     /** \brief The index operator */
-    T& operator()(int row, int col) DUNE_DEPRECATED {
-        assert(0<=row && row<rows_ && 0<=col && col<cols_);
-        return data[row*cols_ + col];
-    }
-
-    /** \brief The const index operator */
-    const T& operator()(int row, int col) const DUNE_DEPRECATED {
-        assert(0<=row && row<rows_ && 0<=col && col<cols_);
-        return data[row*cols_ + col];
-    }
-
-    /** \brief The index operator */
     T* operator[](int row) {
         assert(0<=row && row<rows_);
         return &data[row*cols_];
@@ -88,7 +76,7 @@ public:
     Matrix<T> operator*=(const T& scalar) {
         for (int row=0; row<rows_; row++) 
             for (int col=0; col<cols_; col++)
-                (*this)(row, col) *= scalar;
+                (*this)[row][col] *= scalar;
         
         return (*this);
     }
@@ -98,7 +86,7 @@ public:
         Matrix out(cols(), rows());
         for (int i=0; i<rows(); i++)
             for (int j=0; j<cols(); j++)
-                out(j,i) = (*this)(i,j);
+                out[j][i] = (*this)[i][j];
 
         return out;
     }
@@ -111,7 +99,7 @@ public:
 
         for (int i=0; i<out.size(); i++ ) {
             for ( int j=0; j<vec.size(); j++ ) 
-                out[i] += (*this)(j,i)*vec[j];
+                out[i] += (*this)[j][i]*vec[j];
         }
 
         return out;
@@ -126,7 +114,7 @@ public:
         for (int i=0; i<out.rows(); i++ ) {
             for ( int j=0; j<out.cols(); j++ ) 
                 for (int k=0; k<m1.cols(); k++)
-                    out(i,j) += m1(i,k)*m2(k,j);
+                    out[i][j] += m1[i][k]*m2[k][j];
         }
 
         return out;
@@ -140,7 +128,7 @@ public:
 
         for (int i=0; i<out.size(); i++ ) {
             for ( int j=0; j<vec.size(); j++ ) 
-                out[i] += m(i,j)*vec[j];
+                out[i] += m[i][j]*vec[j];
         }
 
         return out;
