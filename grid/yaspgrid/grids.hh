@@ -25,13 +25,13 @@ namespace Dune {
   /** @defgroup Yaspgrid Yet Another Structured Parallel Grid
       \ingroup GridCommon
 
-  This is the basis of a parallel implementation of the dune grid interface
-  supporting codim 0 and dim.
+	  This is the basis of a parallel implementation of the dune grid interface
+	  supporting codim 0 and dim.
 
-  You can also use the structured interface and write really fast code.
+	  You can also use the structured interface and write really fast code.
 
-  @addtogroup YaspGrid
-  @{
+	  @addtogroup YaspGrid
+	  @{
   */
 
 
@@ -42,504 +42,516 @@ namespace Dune {
   static const double Ytolerance=1E-13;
  
   /*! The YGrid considered here describes a finite set \f$d\f$-tupels of the form 
-      \f[ G = \{ (k_0,\ldots,k_{d-1}) | o_o \leq k_i < o_i+s_i \}  \f]
+	\f[ G = \{ (k_0,\ldots,k_{d-1}) | o_o \leq k_i < o_i+s_i \}  \f]
 
-          togehter with an affine mapping
+	togehter with an affine mapping
 
-          \f[ t : G \to R^d, \ \ \ t(k)_i = k_i h_i + r_i \f].
+	\f[ t : G \to R^d, \ \ \ t(k)_i = k_i h_i + r_i \f].
 
-          Therefore a YGrid is characterized by the following four quantities:
+	Therefore a YGrid is characterized by the following four quantities:
 
-          - The origin \f$ o=(o_0,\ldots,o_{d-1}) \in Z^d\f$,
-          - the size \f$ s=(s_0,\ldots,s_{d-1}) \in Z^d\f$,
-          - the mesh width \f$ h=(h_0,\ldots,h_{d-1}) \in R^d\f$,
-          - The shift \f$ r=(r_0,\ldots,r_{d-1}) \in R^d\f$. The shift can be used to interpret the 
-        points of a grid as midpoints of cells, faces, edges, etc.
+	- The origin \f$ o=(o_0,\ldots,o_{d-1}) \in Z^d\f$,
+	- the size \f$ s=(s_0,\ldots,s_{d-1}) \in Z^d\f$,
+	- the mesh width \f$ h=(h_0,\ldots,h_{d-1}) \in R^d\f$,
+	- The shift \f$ r=(r_0,\ldots,r_{d-1}) \in R^d\f$. The shift can be used to interpret the 
+	points of a grid as midpoints of cells, faces, edges, etc.
 
-                The YGrid can be parametrized by the dimension d and the type to be used for the coordinates.
+	The YGrid can be parametrized by the dimension d and the type to be used for the coordinates.
 
     Here is a graphical illustration of a grid:
 
-        \image html  grid.png "A YGrid."
-        \image latex grid.eps "A YGrid." width=\textwidth
+	\image html  grid.png "A YGrid."
+	\image latex grid.eps "A YGrid." width=\textwidth
 
-        A grid can be manipulated either in the origin/size representation or in the
+	A grid can be manipulated either in the origin/size representation or in the
     min index / max index representation.
 
-        A YGrid allows to iterate over all its cells with an Iterator class.
+	A YGrid allows to iterate over all its cells with an Iterator class.
   */
   template<int d, typename ct>
   class YGrid {
   public:
-        //! define types used for arguments
-        typedef Dune::Vec<d,int>  iTupel;
-        typedef Dune::Vec<d,ct> fTupel;
-        typedef Dune::Vec<d,bool> bTupel;
+	//! define types used for arguments
+	typedef Dune::Vec<d,int>  iTupel;
+	typedef Dune::Vec<d,ct> fTupel;
+	typedef Dune::Vec<d,bool> bTupel;
 
-        //! Make an empty YGrid with origin 0
-        YGrid ()
-        {
-          _origin = 0;
-          _size = 0;
-          _h = 0.0;
-          _r = 0.0;
-        }
+	//! Make an empty YGrid with origin 0
+	YGrid ()
+	{
+	  _origin = 0;
+	  _size = 0;
+	  _h = 0.0;
+	  _r = 0.0;
+	}
 
-        //! Make YGrid from origin and size arrays
-        YGrid (iTupel o, iTupel s, fTupel h, fTupel r)
-        {
-          for (int i=0; i<d; ++i) 
-                {
-                  _origin[i] = o[i];
-                  _size[i] = s[i];
-                  if (_size[i]<0) {
-                        _size[i] = 0;
-                  }
-                 _h[i] = h[i];
-                  _r[i] = r[i];
-                }
-        }
+	//! Make YGrid from origin and size arrays
+	YGrid (iTupel o, iTupel s, fTupel h, fTupel r)
+	{
+	  for (int i=0; i<d; ++i) 
+		{
+		  _origin[i] = o[i];
+		  _size[i] = s[i];
+		  if (_size[i]<0) {
+			_size[i] = 0;
+		  }
+		  _h[i] = h[i];
+		  _r[i] = r[i];
+		}
+	}
 
-        //! Return origin in direction i
-        int origin (int i) 
-        {
-          return _origin[i];
-        }
+	//! Return origin in direction i
+	int origin (int i) 
+	{
+	  return _origin[i];
+	}
         
-        //! Set origin in direction i
-        void origin (int i, int oi) 
-        {
-          _origin[i] = oi;
-        }
+	//! Set origin in direction i
+	void origin (int i, int oi) 
+	{
+	  _origin[i] = oi;
+	}
 
-        //! return reference to origin 
-        iTupel& origin () 
-        {
-          return _origin;
-        }
+	//! return reference to origin 
+	iTupel& origin () 
+	{
+	  return _origin;
+	}
 
-        //! Return size in direction i
-        int size (int i) 
-        {
-          return _size[i];
-        }
+	//! Return size in direction i
+	int size (int i) 
+	{
+	  return _size[i];
+	}
 
-        //! Set size in direction i
-        void size (int i, int si) 
-        {
-          _size[i] = si;
-          if (_size[i]<0) _size[i] = 0;
-        }
+	//! Set size in direction i
+	void size (int i, int si) 
+	{
+	  _size[i] = si;
+	  if (_size[i]<0) _size[i] = 0;
+	}
         
-        //! Return reference to size tupel
-        iTupel& size () 
-        {
-          return _size;
-        }
+	//! Return reference to size tupel
+	iTupel& size () 
+	{
+	  return _size;
+	}
 
-        //! Return total size of index set which is the product of all size per direction.
-        int totalsize () 
-        {
-          int s=1;
-          for (int i=0; i<d; ++i) s=s*_size[i];
-          return s;
-        }
+	//! Return total size of index set which is the product of all size per direction.
+	int totalsize () 
+	{
+	  int s=1;
+	  for (int i=0; i<d; ++i) s=s*_size[i];
+	  return s;
+	}
 
-        //! Return minimum index in direction i
-        int min (int i) 
-        {
-          return _origin[i];
-        }
+	//! Return minimum index in direction i
+	int min (int i) 
+	{
+	  return _origin[i];
+	}
 
-        //! Set minimum index in direction i
-        void min (int i, int mi)
-        {
-          _size[i] = max(i)-mi+1;
-          _origin[i] = mi;
-          if (_size[i]<0) _size[i] = 0;
-        }
+	//! Set minimum index in direction i
+	void min (int i, int mi)
+	{
+	  _size[i] = max(i)-mi+1;
+	  _origin[i] = mi;
+	  if (_size[i]<0) _size[i] = 0;
+	}
 
-        //! Return maximum index in direction i
-        int max (int i) 
-        {
-          return _origin[i]+_size[i]-1;
-        }
+	//! Return maximum index in direction i
+	int max (int i) 
+	{
+	  return _origin[i]+_size[i]-1;
+	}
 
-        //! Set maximum index in direction i
-        void max (int i, int mi)
-        {
-          _size[i] = mi-min(i)+1;
-          if (_size[i]<0) _size[i] = 0;
-        }
+	//! Set maximum index in direction i
+	void max (int i, int mi)
+	{
+	  _size[i] = mi-min(i)+1;
+	  if (_size[i]<0) _size[i] = 0;
+	}
 
-        //! Return reference to mesh size tupel for read write access
-        fTupel& meshsize ()
-        {
-          return _h;
-        }
+	//! Return reference to mesh size tupel for read write access
+	fTupel& meshsize ()
+	{
+	  return _h;
+	}
         
-        //! Return mesh size in direction i
-        ct meshsize (int i) const
-        {
-          return _h[i];
-        }
+	//! Return mesh size in direction i
+	ct meshsize (int i) const
+	{
+	  return _h[i];
+	}
         
-        //! Set mesh size in direction i
-        void meshsize (int i, int hi) 
-        {
-          _h[i] = hi;
-        }
+	//! Set mesh size in direction i
+	void meshsize (int i, int hi) 
+	{
+	  _h[i] = hi;
+	}
 
-        //! Return shift tupel
-        fTupel& shift ()
-        {
-          return _r;
-        }
+	//! Return shift tupel
+	fTupel& shift ()
+	{
+	  return _r;
+	}
         
-        //! Return shift in direction i
-        ct shift (int i) 
-        {
-          return _r[i];
-        }
+	//! Return shift in direction i
+	ct shift (int i) 
+	{
+	  return _r[i];
+	}
         
-        //! Set shift in direction i
-        void shift (int i, int ri) 
-        {
-          _r[i] = ri;
-        }
+	//! Set shift in direction i
+	void shift (int i, int ri) 
+	{
+	  _r[i] = ri;
+	}
 
-        //! Return true if YGrid is empty, i.e. has size 0 in all directions.
-        bool empty () 
-        {
-          for (int i=0; i<d; ++i) if (_size[i]<=0) return true;
-          return false;
-        }
+	//! Return true if YGrid is empty, i.e. has size 0 in all directions.
+	bool empty () 
+	{
+	  for (int i=0; i<d; ++i) if (_size[i]<=0) return true;
+	  return false;
+	}
 
-        //! given a tupel compute its index in the lexicographic numbering
-        int index (const iTupel& coord) const
-        {
-          int index = (coord[d-1]-_origin[d-1]);
+	//! given a tupel compute its index in the lexicographic numbering
+	int index (const iTupel& coord) const
+	{
+	  int index = (coord[d-1]-_origin[d-1]);
           
-          for (int i=d-2; i>=0; i--) 
-                index = index*_size[i] + (coord[i]-_origin[i]);
+	  for (int i=d-2; i>=0; i--) 
+		index = index*_size[i] + (coord[i]-_origin[i]);
 
-          return index;
-        }
+	  return index;
+	}
 
-        //! given a coordinate, return true if it is in the grid
-        bool inside (const iTupel& coord) const
-        {
-          for (int i=0; i<d; i++)
-                {
-                  if (coord[i]<_origin[i] || coord[i]>=_origin[i]+_size[i]) return false;
-                }
-          return true;
-        }
+	//! given a coordinate, return true if it is in the grid
+	bool inside (const iTupel& coord) const
+	{
+	  for (int i=0; i<d; i++)
+		{
+		  if (coord[i]<_origin[i] || coord[i]>=_origin[i]+_size[i]) return false;
+		}
+	  return true;
+	}
 
-        //! Return new SubYGrid of self which is the intersection of self and another YGrid
-        virtual SubYGrid<d,ct> intersection ( YGrid<d,ct>& r) 
-        {
-          // check if the two grids can be intersected, must have same mesh size and shift
-          for (int i=0; i<d; i++)
-                if (fabs(meshsize(i)-r.meshsize(i))>Ytolerance) return SubYGrid<d,ct>();
-          for (int i=0; i<d; i++)
-                if (fabs(shift(i)-r.shift(i))>Ytolerance) return SubYGrid<d,ct>();
+	//! Return new SubYGrid of self which is the intersection of self and another YGrid
+	virtual SubYGrid<d,ct> intersection ( YGrid<d,ct>& r) 
+	{
+	  // check if the two grids can be intersected, must have same mesh size and shift
+	  for (int i=0; i<d; i++)
+		if (fabs(meshsize(i)-r.meshsize(i))>Ytolerance) return SubYGrid<d,ct>();
+	  for (int i=0; i<d; i++)
+		if (fabs(shift(i)-r.shift(i))>Ytolerance) return SubYGrid<d,ct>();
 
-          iTupel neworigin;
-          iTupel newsize;
-          iTupel offset;
+	  iTupel neworigin;
+	  iTupel newsize;
+	  iTupel offset;
 
-          for (int i=0; i<d; ++i)
-                {
-                  // intersect
-                  neworigin[i] = std::max(min(i),r.min(i));
-                  newsize[i] = std::min(max(i),r.max(i))-neworigin[i]+1;
-                  if (newsize[i]<0) {
-                        newsize[i] = 0;
-                        neworigin[i] = min(i);
-                  }
+	  for (int i=0; i<d; ++i)
+		{
+		  // intersect
+		  neworigin[i] = std::max(min(i),r.min(i));
+		  newsize[i] = std::min(max(i),r.max(i))-neworigin[i]+1;
+		  if (newsize[i]<0) {
+			newsize[i] = 0;
+			neworigin[i] = min(i);
+		  }
 
-                  // offset to own origin
-                  offset[i] = neworigin[i]-_origin[i];
-                }       
-          return SubYGrid<d,ct>(neworigin,newsize,offset,_size,_h,_r);
-        }
+		  // offset to own origin
+		  offset[i] = neworigin[i]-_origin[i];
+		}       
+	  return SubYGrid<d,ct>(neworigin,newsize,offset,_size,_h,_r);
+	}
 
-        //! return grid moved by the vector v
-        YGrid<d,ct> move (iTupel v)
-        {
-          for (int i=0; i<d; i++) v[i] += _origin[i];
-          return YGrid<d,ct>(v,_size,_h,_r);
-        }
+	//! return grid moved by the vector v
+	YGrid<d,ct> move (iTupel v)
+	{
+	  for (int i=0; i<d; i++) v[i] += _origin[i];
+	  return YGrid<d,ct>(v,_size,_h,_r);
+	}
 
-        /*! Iterator class allows one to run over all cells of a grid. 
-          The cells of the grid to iterate over are numbered consecutively starting
+	/*! Iterator class allows one to run over all cells of a grid. 
+	  The cells of the grid to iterate over are numbered consecutively starting
       with zero. Via the index() method the iterator provides a mapping of the 
       cells of the grid to a one-dimensional array. The number of entries
       in this array must be the size of the grid.
-        */
-        class Iterator {
-        public:
-          //! Make iterator pointing to first cell in a grid.
-          Iterator (YGrid<d,ct>& r)
-          {
-                // copy data coming from grid to iterate over 
-                for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
-                for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
+	*/
+	class Iterator {
+	public:
+	  //! Make iterator pointing to first cell in a grid.
+	  Iterator (YGrid<d,ct>& r)
+	  {
+		// copy data coming from grid to iterate over 
+		for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
+		for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
                 
-                // initialize to first position in index set
-                for (int i=0; i<d; ++i) _coord[i] = _origin[i];
-                _index = 0;
+		// initialize to first position in index set
+		for (int i=0; i<d; ++i) _coord[i] = _origin[i];
+		_index = 0;
                 
-                // compute increments;
-                int inc = 1;
-                for (int i=0; i<d; ++i)
-                  {
-                        _increment[i] = inc;
-                        inc *= r.size(i);
-                  }
-          }
-
-          Iterator (YGrid<d,ct>& r, iTupel& coord)
+		// compute increments;
+		int inc = 1;
+		for (int i=0; i<d; ++i)
 		  {
-			// copy data coming from grid to iterate over 
-			for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
-			for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
-                
-			// compute increments;
-			int inc = 1;
-			for (int i=0; i<d; ++i)
-			  {
-				_increment[i] = inc;
-				inc *= r.size(i);
-			  }
+			_increment[i] = inc;
+			inc *= r.size(i);
+		  }
+	  }
 
-			// initialize to given position in index set
-			for (int i=0; i<d; ++i) _coord[i] = coord[i];
-			_index = r.index(coord);
+	  Iterator (YGrid<d,ct>& r, iTupel& coord)
+	  {
+		// copy data coming from grid to iterate over 
+		for (int i=0; i<d; ++i) _origin[i] = r.origin(i);
+		for (int i=0; i<d; ++i) _end[i] = r.origin(i)+r.size(i)-1;
+                
+		// compute increments;
+		int inc = 1;
+		for (int i=0; i<d; ++i)
+		  {
+			_increment[i] = inc;
+			inc *= r.size(i);
 		  }
 
-          //! Return true when two iterators over the same grid are equal (!).
-          bool operator== (const Iterator& i) const
-          {
-                return _index == i._index;
-          }
+		// initialize to given position in index set
+		for (int i=0; i<d; ++i) _coord[i] = coord[i];
+		_index = r.index(coord);
+	  }
 
-          //! Return true when two iterators over the same grid are not equal (!).
-          bool operator!= (const Iterator& i) const
-          {
-                return _index != i._index;
-          }
+	  //! Return true when two iterators over the same grid are equal (!).
+	  bool operator== (const Iterator& i) const
+	  {
+		return _index == i._index;
+	  }
+
+	  //! Return true when two iterators over the same grid are not equal (!).
+	  bool operator!= (const Iterator& i) const
+	  {
+		return _index != i._index;
+	  }
         
-          //! Return index of the current cell in the consecutive numbering. 
-          int index () const
-          {
-                return _index;
-          }
+	  //! Return index of the current cell in the consecutive numbering. 
+	  int index () const
+	  {
+		return _index;
+	  }
           
-          //! Return coordinate of the cell in direction i.
-          int coord (int i) const
-          {
-                return _coord[i];
-          }
+	  //! Return coordinate of the cell in direction i.
+	  int coord (int i) const
+	  {
+		return _coord[i];
+	  }
 
-          //! Return coordinate of the cell as reference (do not modify).
-          iTupel& coord ()
-          {
-                return _coord;
-          }
+	  //! Return coordinate of the cell as reference (do not modify).
+	  iTupel& coord ()
+	  {
+		return _coord;
+	  }
 
-          //! Get index of cell which is dist cells away in direction i.
-          int neighbor (int i, int dist)
-          {
-                return _index+dist*_increment[i];
-          }
+	  //! Get index of cell which is dist cells away in direction i.
+	  int neighbor (int i, int dist)
+	  {
+		return _index+dist*_increment[i];
+	  }
 
-          //! Get index of neighboring cell which is -1 away in direction i.
-          int down (int i)
-          {
-                return _index-_increment[i];
-          }
+	  //! Get index of neighboring cell which is -1 away in direction i.
+	  int down (int i)
+	  {
+		return _index-_increment[i];
+	  }
 
-          //! Get index of neighboring cell which is +1 away in direction i.
-          int up (int i)
-          {
-                return _index+_increment[i];
-          }
+	  //! Get index of neighboring cell which is +1 away in direction i.
+	  int up (int i)
+	  {
+		return _index+_increment[i];
+	  }
 
-          //! move this iterator dist cells in direction i
-          void move (int i, int dist)
-          {
-			_coord[i] += dist;
-			_index += dist*_increment[i];
-          }
+	  //! move this iterator dist cells in direction i
+	  void move (int i, int dist)
+	  {
+		_coord[i] += dist;
+		_index += dist*_increment[i];
+	  }
 
-          //! Increment iterator to next cell.
-          Iterator& operator++ ()
-          {
-                ++_index;
-                for (int i=0; i<d; i++)
-                  if (++(_coord[i])<=_end[i])
-                        return *this;
-                  else { _coord[i]=_origin[i]; }
-                return *this;
-          }
+	  //! Increment iterator to next cell.
+	  Iterator& operator++ ()
+	  {
+		++_index;
+		for (int i=0; i<d; i++)
+		  if (++(_coord[i])<=_end[i])
+			return *this;
+		  else { _coord[i]=_origin[i]; }
+		return *this;
+	  }
           
-          //! Print position of iterator
-          void print (std::ostream& s)
-          {
-                s << index() << " : [";
-                for (int i=0; i<d-1; i++) s << coord(i) << ",";
-                s << coord(d-1) << "]";
-          }
+	  //! Print position of iterator
+	  void print (std::ostream& s) const
+	  {
+		s << index() << " : [";
+		for (int i=0; i<d-1; i++) s << coord(i) << ",";
+		s << coord(d-1) << "]";
+	  }
 
-        protected:
-          int _index;          //< current lexicographic position in index set
-          iTupel _coord;       //< current position in index set 
-          iTupel _increment;   //< increment for next neighbor in direction i 
-          iTupel _origin;      //< origin and
-          iTupel _end;         //< last index in direction i
-        };
+	protected:
+	  int _index;          //< current lexicographic position in index set
+	  iTupel _coord;       //< current position in index set 
+	  iTupel _increment;   //< increment for next neighbor in direction i 
+	  iTupel _origin;      //< origin and
+	  iTupel _end;         //< last index in direction i
+	};
 
-        //! return iterator to first element of index set
-        Iterator begin () {return Iterator(*this);}
+	//! return iterator to first element of index set
+	Iterator begin () {return Iterator(*this);}
         
-        //! return iterator to one past the last element of index set
-        Iterator end () {
-		  iTupel last;
-		  for (int i=0; i<d; i++) last = max(i);
-		  last[0] += 1;
-		  return Iterator(*this,last);
-		}
+	//! return iterator to one past the last element of index set
+	Iterator end () {
+	  iTupel last;
+	  for (int i=0; i<d; i++) last[i] = max(i);
+	  last[0] += 1;
+	  return Iterator(*this,last);
+	}
 
-        /*! TransformingIterator is an Iterator providing in addition a linear transformation
-        of the coordinates of the grid in the form \f$ y_i = x_i h_i + s_i \f$.
-        This can be used to interpret the grid cells as vertices, edges, faces, etc.
-        */
-        class TransformingIterator : public Iterator {
-        public:
-          //! Make iterator pointing to first cell in a grid.
-          TransformingIterator (YGrid<d,ct>& r) : Iterator(r)
-          {
-                for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
-                for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
-                for (int i=0; i<d; ++i) _position[i] = _begin[i];
-          }
+	/*! TransformingIterator is an Iterator providing in addition a linear transformation
+	  of the coordinates of the grid in the form \f$ y_i = x_i h_i + s_i \f$.
+	  This can be used to interpret the grid cells as vertices, edges, faces, etc.
+	*/
+	class TransformingIterator : public Iterator {
+	public:
+	  //! Make iterator pointing to first cell in a grid.
+	  TransformingIterator (YGrid<d,ct>& r) : Iterator(r)
+	  {
+		for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
+		for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
+		for (int i=0; i<d; ++i) _position[i] = _begin[i];
+	  }
 
-          //! Make iterator pointing to given cell in a grid.
-          TransformingIterator (YGrid<d,ct>& r, iTupel& coord) : Iterator(r,coord)
-          {
-                for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
-                for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
-                for (int i=0; i<d; ++i) _position[i] = coord[i]*r.meshsize(i)+r.shift(i);
-          }
+	  //! Make iterator pointing to given cell in a grid.
+	  TransformingIterator (YGrid<d,ct>& r, iTupel& coord) : Iterator(r,coord)
+	  {
+		for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
+		for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
+		for (int i=0; i<d; ++i) _position[i] = coord[i]*r.meshsize(i)+r.shift(i);
+	  }
 
-          //! Increment iterator to next cell with position.
-          TransformingIterator& operator++ ()
-          {
-                ++(this->_index);
-                for (int i=0; i<d; i++)
-                  if (++(this->_coord[i])<=this->_end[i])
-                        {
-                          _position[i] += _h[i];
-                          return *this;
-                        }
-                  else 
-                        { 
-                          this->_coord[i]=this->_origin[i]; 
-                          _position[i] = _begin[i];
-                        }
-                return *this;
-          }
+	  //! Make transforming iterator from iterator (used for automatic conversion of end)
+	  TransformingIterator (Iterator i) : Iterator(i)
+	  {	  }
+
+	  //! Increment iterator to next cell with position.
+	  TransformingIterator& operator++ ()
+	  {
+		++(this->_index);
+		for (int i=0; i<d; i++)
+		  if (++(this->_coord[i])<=this->_end[i])
+			{
+			  _position[i] += _h[i];
+			  return *this;
+			}
+		  else 
+			{ 
+			  this->_coord[i]=this->_origin[i]; 
+			  _position[i] = _begin[i];
+			}
+		return *this;
+	  }
           
-          //! Return position of current cell in direction i.
-          ct position (int i)
-          {
-                return _position[i];
-          }
+	  //! Return position of current cell in direction i.
+	  ct position (int i)
+	  {
+		return _position[i];
+	  }
 
-          //! Return position of current cell as reference.
-          fTupel& position ()
-          {
-                return _position;
-          }
+	  //! Return position of current cell as reference.
+	  fTupel& position ()
+	  {
+		return _position;
+	  }
 
-          //! Return meshsize in direction i
-          ct meshsize (int i)
-          {
-                return _h[i];
-          }
+	  //! Return meshsize in direction i
+	  ct meshsize (int i)
+	  {
+		return _h[i];
+	  }
 
-          //! Return meshsize of current cell as reference.
-          fTupel& meshsize ()
-          {
-                return _h;
-          }
+	  //! Return meshsize of current cell as reference.
+	  fTupel& meshsize ()
+	  {
+		return _h;
+	  }
 
-          //! Move cell position by dist cells in direction i.
-          void move (int i, int dist)
-          {
-			Iterator::move(i,dist);
-			_position[i] += dist*_h[i];
-          }
+	  //! Move cell position by dist cells in direction i.
+	  void move (int i, int dist)
+	  {
+		Iterator::move(i,dist);
+		_position[i] += dist*_h[i];
+	  }
 
-          //! Print contents of iterator
-          void print (std::ostream& s)
-          {
-                Iterator::print(s);
-                s << " " << _position;
-          }
+	  //! Print contents of iterator
+	  void print (std::ostream& s) const
+	  {
+		Iterator::print(s);
+		s << " " << _position;
+	  }
 
-        private:
-          fTupel _h;        //!< mesh size per direction
-          fTupel _begin;    //!< position of origin of grid
-          fTupel _position; //!< current position
-        };
+	private:
+	  fTupel _h;        //!< mesh size per direction
+	  fTupel _begin;    //!< position of origin of grid
+	  fTupel _position; //!< current position
+	};
 
-        //! return iterator to first element of index set
-        TransformingIterator tbegin () 
-        {
-          return TransformingIterator(*this);
-        }
+	//! return iterator to first element of index set
+	TransformingIterator tbegin () 
+	{
+	  return TransformingIterator(*this);
+	}
         
-        //! return iterator to one past the last element of the grid
-        TransformingIterator tend () 
-        {
-		  iTupel last;
-		  for (int i=0; i<d; i++) last = max(i);
-		  last[0] += 1;
-		  return TransformingIterator(*this,last);
-        }
+	//! return iterator to one past the last element of the grid
+	TransformingIterator tend () 
+	{
+	  iTupel last;
+	  for (int i=0; i<d; i++) last = max(i);
+	  last[0] += 1;
+	  return TransformingIterator(*this,last);
+	}
         
   protected:
-        //! internal representation uses origin/size
-        iTupel _origin; 
-        iTupel _size;
-        fTupel _h;        //!< mesh size per direction
-        fTupel _r;        //!< shift per direction
+	//! internal representation uses origin/size
+	iTupel _origin; 
+	iTupel _size;
+	fTupel _h;        //!< mesh size per direction
+	fTupel _r;        //!< shift per direction
   };
 
   //! Output operator for grids
   template <int d, typename ct>
   inline std::ostream& operator<< (std::ostream& s, YGrid<d,ct> e)
   {
-        s << "{";
-        for (int i=0; i<d-1; i++)
-          s << "[" << e.min(i) << "," << e.max(i) << "]x";
-        s << "[" << e.min(d-1) << "," << e.max(d-1) << "]";
-        s << " = [";
-        for (int i=0; i<d-1; i++) s << e.origin(i) << ",";
-        s << e.origin(d-1) << "]x[";
-        for (int i=0; i<d-1; i++) s << e.size(i) << ",";
-        s << e.size(d-1) << "]";
-        s << " h=[";
-        for (int i=0; i<d-1; i++) s << e.meshsize(i) << ",";
-        s << e.meshsize(d-1) << "]";
-        s << " r=[";
-        for (int i=0; i<d-1; i++) s << e.shift(i) << ",";
-        s << e.shift(d-1) << "]";
-        s << "}";
-        return s;
+	s << "{";
+	for (int i=0; i<d-1; i++)
+	  s << "[" << e.min(i) << "," << e.max(i) << "]x";
+	s << "[" << e.min(d-1) << "," << e.max(d-1) << "]";
+	s << " = [";
+	for (int i=0; i<d-1; i++) s << e.origin(i) << ",";
+	s << e.origin(d-1) << "]x[";
+	for (int i=0; i<d-1; i++) s << e.size(i) << ",";
+	s << e.size(d-1) << "]";
+	s << " h=[";
+	for (int i=0; i<d-1; i++) s << e.meshsize(i) << ",";
+	s << e.meshsize(d-1) << "]";
+	s << " r=[";
+	for (int i=0; i<d-1; i++) s << e.shift(i) << ",";
+	s << e.shift(d-1) << "]";
+	s << "}";
+	return s;
+  }
+
+  //! Output operator for Iterators
+  template <int d, typename ct>
+  inline std::ostream& operator<< (std::ostream& s, typename YGrid<d,ct>::Iterator& e)
+  {
+	e.print(s);
+	return s;
   }
 
 
@@ -547,8 +559,8 @@ namespace Dune {
     It is characterized by an offset and an enclosing grid as 
     shown in the following picture:
 
-        \image html  subgrid.png "The SubYGrid is shown in red, blue is the enclosing grid."
-        \image latex subgrid.eps "The SubYGrid is shown in red, blue is the enclosing grid." width=\textwidth
+	\image html  subgrid.png "The SubYGrid is shown in red, blue is the enclosing grid."
+	\image latex subgrid.eps "The SubYGrid is shown in red, blue is the enclosing grid." width=\textwidth
 
     SubYGrid has additional iterators that provide a mapping to 
     the consecutive index in the enclosing grid.
@@ -556,274 +568,328 @@ namespace Dune {
   template<int d, typename ct>
   class SubYGrid : public YGrid<d,ct> {
   public:
-        typedef typename YGrid<d,ct>::iTupel iTupel;
-        typedef typename YGrid<d,ct>::fTupel fTupel;
-        typedef typename YGrid<d,ct>::bTupel bTupel;
+	typedef typename YGrid<d,ct>::iTupel iTupel;
+	typedef typename YGrid<d,ct>::fTupel fTupel;
+	typedef typename YGrid<d,ct>::bTupel bTupel;
 
-        //! make uninitialized subgrid
-        SubYGrid () {}
+	//! make uninitialized subgrid
+	SubYGrid () {}
 
-        //! Make SubYGrid from origin, size, offset and supersize
-        SubYGrid (iTupel origin, iTupel size, iTupel offset, iTupel supersize, fTupel h, fTupel r) 
-		  : YGrid<d,ct>::YGrid(origin,size,h,r)
-        {
-          for (int i=0; i<d; ++i) 
-                {
-                  _offset[i] = offset[i];
-                  _supersize[i] = supersize[i];
-                  if (offset[i]<0) 
-                        std::cout << "warning: offset["
-                                          << i <<"] negative in SubYGrid"
-                                          << std::endl; 
-                  if (-offset[i]+supersize[i]<size[i]) 
-                        std::cout << "warning: subgrid larger than enclosing grid in direction "
-                                          << i <<" in SubYGrid"
-                                          << std::endl; 
-                }
-        }
+	//! Make SubYGrid from origin, size, offset and supersize
+	SubYGrid (iTupel origin, iTupel size, iTupel offset, iTupel supersize, fTupel h, fTupel r) 
+	  : YGrid<d,ct>::YGrid(origin,size,h,r)
+	{
+	  for (int i=0; i<d; ++i) 
+		{
+		  _offset[i] = offset[i];
+		  _supersize[i] = supersize[i];
+		  if (offset[i]<0) 
+			std::cout << "warning: offset["
+					  << i <<"] negative in SubYGrid"
+					  << std::endl; 
+		  if (-offset[i]+supersize[i]<size[i]) 
+			std::cout << "warning: subgrid larger than enclosing grid in direction "
+					  << i <<" in SubYGrid"
+					  << std::endl; 
+		}
+	}
 
-        //! Return offset to origin of enclosing grid
-        int offset (int i)
-        {
-          return _offset[i];
-        }
+	//! Make SubYGrid from YGrid
+	SubYGrid (YGrid<d,ct> base) : YGrid<d,ct>(base)
+	{
+	  for (int i=0; i<d; ++i) 
+		{
+		  _offset[i] = 0;
+		  _supersize[i] = this->size(i);
+		}
+	}
+ 
+	//! Return offset to origin of enclosing grid
+	int offset (int i)
+	{
+	  return _offset[i];
+	}
 
-        //! Return offset to origin of enclosing grid
-        iTupel offset ()
-        {
-          return _offset;
-        }
+	//! Return offset to origin of enclosing grid
+	iTupel offset ()
+	{
+	  return _offset;
+	}
 
-        //! return size of enclosing grid
-        int supersize (int i)
-        {
-          return _supersize[i];
-        }
+	//! return size of enclosing grid
+	int supersize (int i)
+	{
+	  return _supersize[i];
+	}
 
-        //! return size of enclosing grid
-        iTupel supersize ()
-        {
-          return _supersize;
-        }
+	//! return size of enclosing grid
+	iTupel supersize ()
+	{
+	  return _supersize;
+	}
 
-        //! Return SubYGrid of supergrid of self which is the intersection of self and another YGrid
-        virtual SubYGrid<d,ct> intersection ( YGrid<d,ct>& r) 
-        {
-          // check if the two grids can be intersected, must have same mesh size and shift
-          for (int i=0; i<d; i++)
-                if (fabs(this->meshsize(i)-r.meshsize(i))>Ytolerance) return SubYGrid<d,ct>();
-          for (int i=0; i<d; i++)
-                if (fabs(this->shift(i)-r.shift(i))>Ytolerance) return SubYGrid<d,ct>();
+	//! Return SubYGrid of supergrid of self which is the intersection of self and another YGrid
+	virtual SubYGrid<d,ct> intersection ( YGrid<d,ct>& r) 
+	{
+	  // check if the two grids can be intersected, must have same mesh size and shift
+	  for (int i=0; i<d; i++)
+		if (fabs(this->meshsize(i)-r.meshsize(i))>Ytolerance) return SubYGrid<d,ct>();
+	  for (int i=0; i<d; i++)
+		if (fabs(this->shift(i)-r.shift(i))>Ytolerance) return SubYGrid<d,ct>();
 
-          iTupel neworigin;
-          iTupel newsize;
-          iTupel offset;
+	  iTupel neworigin;
+	  iTupel newsize;
+	  iTupel offset;
 
-          for (int i=0; i<d; ++i)
-                {
-                  // intersect
-                  neworigin[i] = std::max(this->min(i),r.min(i));
-                  newsize[i] = std::min(this->max(i),r.max(i))-neworigin[i]+1;
-                  if (newsize[i]<0) {
-                        newsize[i] = 0;
-                        neworigin[i] = this->min(i);
-                  }
+	  for (int i=0; i<d; ++i)
+		{
+		  // intersect
+		  neworigin[i] = std::max(this->min(i),r.min(i));
+		  newsize[i] = std::min(this->max(i),r.max(i))-neworigin[i]+1;
+		  if (newsize[i]<0) {
+			newsize[i] = 0;
+			neworigin[i] = this->min(i);
+		  }
 
-                  // offset to my supergrid
-                  offset[i] = _offset[i]+neworigin[i]-this->origin(i);
-                }       
-          return SubYGrid<d,ct>(neworigin,newsize,offset,_supersize,this->meshsize(),this->shift());
-        }
+		  // offset to my supergrid
+		  offset[i] = _offset[i]+neworigin[i]-this->origin(i);
+		}       
+	  return SubYGrid<d,ct>(neworigin,newsize,offset,_supersize,this->meshsize(),this->shift());
+	}
 
-        /*! SubIterator is an Iterator that provides in addition the consecutive
-        index in the enclosing grid.
-         */
-        class SubIterator : public YGrid<d,ct>::Iterator {
-        public:
-          //! Make iterator pointing to first cell in subgrid.
-          SubIterator (SubYGrid<d,ct>& r) : YGrid<d,ct>::Iterator::Iterator (r)
-          {
-                //! store some grid information
-                for (int i=0; i<d; ++i) _size[i] = r.size(i);
+	/*! SubIterator is an Iterator that provides in addition the consecutive
+	  index in the enclosing grid.
+	*/
+	class SubIterator : public YGrid<d,ct>::Iterator {
+	public:
+	  //! Make iterator pointing to first cell in subgrid.
+	  SubIterator (SubYGrid<d,ct>& r) : YGrid<d,ct>::Iterator::Iterator (r)
+	  {
+		//! store some grid information
+		for (int i=0; i<d; ++i) _size[i] = r.size(i);
 
-                // compute superincrements 
-                int inc = 1;
-                for (int i=0; i<d; ++i)
-                  {
-                        _superincrement[i] = inc;
-                        inc *= r.supersize(i);
-                  }
+		// compute superincrements 
+		int inc = 1;
+		for (int i=0; i<d; ++i)
+		  {
+			_superincrement[i] = inc;
+			inc *= r.supersize(i);
+		  }
 
-                // move superindex to first cell in subgrid
-                _superindex = 0;
-                for (int i=0; i<d; ++i)
-                  _superindex += r.offset(i)*_superincrement[i];
-          }
+		// move superindex to first cell in subgrid
+		_superindex = 0;
+		for (int i=0; i<d; ++i)
+		  _superindex += r.offset(i)*_superincrement[i];
+	  }
 
-          //! Make iterator pointing to given cell in subgrid.
-          SubIterator (SubYGrid<d,ct>& r, iTupel& coord) : YGrid<d,ct>::Iterator::Iterator (r,coord)
-          {
-                //! store some grid information
-                for (int i=0; i<d; ++i) _size[i] = r.size(i);
+	  //! Make iterator pointing to given cell in subgrid.
+	  SubIterator (SubYGrid<d,ct>& r, iTupel& coord) : YGrid<d,ct>::Iterator::Iterator (r,coord)
+	  {
+		//! store some grid information
+		for (int i=0; i<d; ++i) _size[i] = r.size(i);
 
-                // compute superincrements 
-                int inc = 1;
-                for (int i=0; i<d; ++i)
-                  {
-                        _superincrement[i] = inc;
-                        inc *= r.supersize(i);
-                  }
+		// compute superincrements 
+		int inc = 1;
+		for (int i=0; i<d; ++i)
+		  {
+			_superincrement[i] = inc;
+			inc *= r.supersize(i);
+		  }
 
-                // move superindex to first cell in subgrid
-                _superindex = 0;
-                for (int i=0; i<d; ++i)
-                  _superindex += (r.offset(i)+coord[i]-r.origin(i))*_superincrement[i];
-          }
+		// move superindex to first cell in subgrid
+		_superindex = 0;
+		for (int i=0; i<d; ++i)
+		  _superindex += (r.offset(i)+coord[i]-r.origin(i))*_superincrement[i];
+	  }
 
-          //! Return consecutive index in enclosing grid
-          int superindex ()
-          {
-                return _superindex;
-          }
+	  //! Make transforming iterator from iterator (used for automatic conversion of end)
+	  SubIterator (typename YGrid<d,ct>::Iterator& i) : YGrid<d,ct>::Iterator::Iterator(i)
+	  {	  }
 
-          //! Get index of cell which is dist cells away in direction i in enclosing grid.
-          int superneighbor (int i, int dist)
-          {
-                return _superindex+dist*_superincrement[i];
-          }
+	  //! Return consecutive index in enclosing grid
+	  int superindex () const
+	  {
+		return _superindex;
+	  }
 
-          //! Get index of neighboring cell which is -1 away in direction i in enclosing grid.
-          int superdown (int i)
-          {
-                return _superindex-_superincrement[i];
-          }
+	  //! Get index of cell which is dist cells away in direction i in enclosing grid.
+	  int superneighbor (int i, int dist)
+	  {
+		return _superindex+dist*_superincrement[i];
+	  }
 
-          //! Get index of neighboring cell which is +1 away in direction i in enclosing grid.
-          int superup (int i)
-          {
-                return _superindex+_superincrement[i];
-          }
+	  //! Get index of neighboring cell which is -1 away in direction i in enclosing grid.
+	  int superdown (int i)
+	  {
+		return _superindex-_superincrement[i];
+	  }
 
-          //! Increment iterator to next cell in subgrid
-          SubIterator& operator++ ()
-          {
-                ++(this->_index);                       // update consecutive index in grid
-                for (int i=0; i<d; i++)         // check for wrap around
-                  {
-                        _superindex += _superincrement[i]; // move on cell in direction i
-                        if (++(this->_coord[i])<=this->_end[i])
-                          return *this;
-                        else 
-                          { 
-                                this->_coord[i]=this->_origin[i];     // move back to origin in direction i
-                                _superindex -= _size[i]*_superincrement[i]; 
-                          }
-                  }
-                return *this;
-          }
+	  //! Get index of neighboring cell which is +1 away in direction i in enclosing grid.
+	  int superup (int i)
+	  {
+		return _superindex+_superincrement[i];
+	  }
+
+	  //! move this iterator dist cells in direction i
+	  void move (int i, int dist)
+	  {
+		YGrid<d,ct>::Iterator::move(i,dist);    // move base iterator
+		_superindex += dist*_superincrement[i]; // move superindex
+	  }
+
+	  //! Increment iterator to next cell in subgrid
+	  SubIterator& operator++ ()
+	  {
+		++(this->_index);               // update consecutive index in grid
+		for (int i=0; i<d; i++)         // check for wrap around
+		  {
+			_superindex += _superincrement[i]; // move on cell in direction i
+			if (++(this->_coord[i])<=this->_end[i])
+			  return *this;
+			else 
+			  { 
+				this->_coord[i]=this->_origin[i];     // move back to origin in direction i
+				_superindex -= _size[i]*_superincrement[i]; 
+			  }
+		  }
+		return *this;
+	  }
           
-          //! Print position of iterator
-          void print (std::ostream& s)
-          {
-                YGrid<d,ct>::Iterator::print(s);
-                s << " super=" << superindex();
-          }
+	  //! Print position of iterator
+	  void print (std::ostream& s) const
+	  {
+		YGrid<d,ct>::Iterator::print(s);
+		s << " super=" << superindex();
+	  }
 
-        protected:
-          int _superindex;        //!< consecutive index in enclosing grid
-          iTupel _superincrement; //!< moves consecutive index by one in this direction in supergrid
-          iTupel _size;           //!< size of subgrid
-        };
+	protected:
+	  int _superindex;        //!< consecutive index in enclosing grid
+	  iTupel _superincrement; //!< moves consecutive index by one in this direction in supergrid
+	  iTupel _size;           //!< size of subgrid
+	};
 
-        //! return subiterator to first element of index set
-        SubIterator subbegin () {return SubIterator(*this);}
+	//! return subiterator to first element of index set
+	SubIterator subbegin () {return SubIterator(*this);}
         
-        /*! TransformingSubIterator is a SubIterator providing in addition a linear transformation
-        of the coordinates of the grid in the form \f$ y_i = x_i h_i + s_i \f$.
-        This can be used to interpret the grid cells as vertices, edges, faces, etc.
-        */
-        class TransformingSubIterator : public SubIterator {
-        public:
-          //! Make iterator pointing to first cell in a grid.
-          TransformingSubIterator (SubYGrid<d,ct>& r) : SubIterator(r)
-          {
-                for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
-                for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
-                for (int i=0; i<d; ++i) _position[i] = _begin[i];
-          }
+	//! return subiterator to last element of index set
+	SubIterator subend () 
+	{
+	  iTupel last;
+	  for (int i=0; i<d; i++) last[i] = this->max(i);
+	  last[0] += 1;
+	  return SubIterator(*this,last);
+	}
+        
+	/*! TransformingSubIterator is a SubIterator providing in addition a linear transformation
+	  of the coordinates of the grid in the form \f$ y_i = x_i h_i + s_i \f$.
+	  This can be used to interpret the grid cells as vertices, edges, faces, etc.
+	*/
+	class TransformingSubIterator : public SubIterator {
+	public:
+	  //! Make iterator pointing to first cell in a grid.
+	  TransformingSubIterator (SubYGrid<d,ct>& r) : SubIterator(r)
+	  {
+		for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
+		for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
+		for (int i=0; i<d; ++i) _position[i] = _begin[i];
+	  }
 
-          //! Make iterator pointing to given cell in a grid.
-          TransformingSubIterator (SubYGrid<d,ct>& r, iTupel& coord) : SubIterator(r,coord)
-          {
-                for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
-                for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
-                for (int i=0; i<d; ++i) _position[i] = coord[i]*r.meshsize(i)+r.shift(i);
-          }
+	  //! Make iterator pointing to given cell in a grid.
+	  TransformingSubIterator (SubYGrid<d,ct>& r, iTupel& coord) : SubIterator(r,coord)
+	  {
+		for (int i=0; i<d; ++i) _h[i] = r.meshsize(i);
+		for (int i=0; i<d; ++i) _begin[i] = r.origin(i)*r.meshsize(i)+r.shift(i);
+		for (int i=0; i<d; ++i) _position[i] = coord[i]*r.meshsize(i)+r.shift(i);
+	  }
 
-          //! Increment iterator to next cell with position.
-          TransformingSubIterator& operator++ ()
-          {
-                ++(this->_index);                       // update consecutive index in subgrid
-                for (int i=0; i<d; i++)         // check for wrap around
-                  {
-                        this->_superindex += this->_superincrement[i]; // move on cell in direction i
-                        if (++(this->_coord[i])<=this->_end[i])
-                          {
-                                _position[i] += _h[i];
-                                return *this;
-                          }
-                        else 
-                          { 
-                                this->_coord[i]=this->_origin[i];     // move back to origin in direction i
-                                this->_superindex -= this->size[i]*this->_superincrement[i]; 
-                                _position[i] = _begin[i];
-                          }
-                  }
-                return *this;
-          }
+	  //! Make transforming iterator from iterator (used for automatic conversion of end)
+	  TransformingSubIterator (SubIterator& i) : SubIterator(i)
+	  {	  }
 
-          //! Return position of current cell in direction i.
-          ct position (int i)
-          {
-                return _position[i];
-          }
+	  //! Increment iterator to next cell with position.
+	  TransformingSubIterator& operator++ ()
+	  {
+		++(this->_index);                       // update consecutive index in subgrid
+		for (int i=0; i<d; i++)         // check for wrap around
+		  {
+			this->_superindex += this->_superincrement[i]; // move on cell in direction i
+			if (++(this->_coord[i])<=this->_end[i])
+			  {
+				_position[i] += _h[i];
+				return *this;
+			  }
+			else 
+			  { 
+				this->_coord[i]=this->_origin[i];     // move back to origin in direction i
+				this->_superindex -= this->_size[i]*this->_superincrement[i]; 
+				_position[i] = _begin[i];
+			  }
+		  }
+		return *this;
+	  }
 
-          //! Return position of current cell as an array.
-          fTupel position ()
-          {
-                return _position;
-          }
+	  //! Return position of current cell in direction i.
+	  ct position (int i) const
+	  {
+		return _position[i];
+	  }
 
-          //! Move cell position by dist cells in direction i.
-          void move (int i, int dist)
-          {
-                _position[i] += dist*_h[i];
-          }
+	  //! Return position of current cell as reference.
+	  fTupel& position ()
+	  {
+		return _position;
+	  }
 
-          //! Print contents of iterator
-          void print (std::ostream& s)
-          {
-                SubIterator::print(s);
-                s << " [";
-                for (int i=0; i<d-1; i++) s << position(i) << ",";
-                s << position(d-1) << "]";
-          }
+	  //! Return meshsize in direction i
+	  ct meshsize (int i)
+	  {
+		return _h[i];
+	  }
 
-        private:
-          fTupel _h;        //!< mesh size per direction
-          fTupel _begin;    //!< position of origin of grid
-          fTupel _position; //!< current position
-        };
+	  //! Return meshsize of current cell as reference.
+	  fTupel& meshsize ()
+	  {
+		return _h;
+	  }
 
-        //! return iterator to first element of index set
-        TransformingSubIterator tsubbegin () 
-        {
-          return TransformingSubIterator(*this);
-        }
+	  //! Move cell position by dist cells in direction i.
+	  void move (int i, int dist)
+	  {
+		SubIterator::move(i,dist);
+		_position[i] += dist*_h[i];
+	  }
+
+	  //! Print contents of iterator
+	  void print (std::ostream& s) const
+	  {
+		SubIterator::print(s);
+		s << " [";
+		for (int i=0; i<d-1; i++) s << position(i) << ",";
+		s << position(d-1) << "]";
+	  }
+
+	private:
+	  fTupel _h;        //!< mesh size per direction
+	  fTupel _begin;    //!< position of origin of grid
+	  fTupel _position; //!< current position
+	};
+
+	//! return iterator to first element of index set
+	TransformingSubIterator tsubbegin () 
+	{
+	  return TransformingSubIterator(*this);
+	}
+        
+	//! return subiterator to last element of index set
+	TransformingSubIterator tsubend () 
+	{
+	  SubIterator endit = subend();
+	  return TransformingSubIterator(endit);
+	}
         
   private:
-        iTupel _offset;    //!< offset to origin of the enclosing grid
-        iTupel _supersize; //!< size of the enclosing grid
+	iTupel _offset;    //!< offset to origin of the enclosing grid
+	iTupel _supersize; //!< size of the enclosing grid
   };
 
 
@@ -836,16 +902,24 @@ namespace Dune {
 	return s;
   }
 
+  //! Output operator for subgrids
+  template <int d, typename ct>
+  inline std::ostream& operator<< (std::ostream& s, typename SubYGrid<d,ct>::TransformingSubIterator& e)
+  {
+	e.print(s);
+	return s;
+  }
+
 
   /*! Torus provides all the functionality to handle a toroidal communication structure:
 
   - Map a set of processes (given by an MPI communicator) to a torus of dimension d. The "optimal"
-    torus dimensions are determined by a coarse mesh. The maximum side length is minimized.
+  torus dimensions are determined by a coarse mesh. The maximum side length is minimized.
 
   - Provide lists of neighboring processes and a method for nearest neighbor exchange
-    using asynchronous communication with MPI. The periodic case is handled where one process
-    might have to exchange several messages with the same process. (Logically, a process has always
-    \f$3^d-1\f$ neighbors, but several of these logical neighbors might be identical)
+  using asynchronous communication with MPI. The periodic case is handled where one process
+  might have to exchange several messages with the same process. (Logically, a process has always
+  \f$3^d-1\f$ neighbors, but several of these logical neighbors might be identical)
 
   - Provide means to partition a grid to the torus.
 
@@ -853,583 +927,583 @@ namespace Dune {
   template<int d>
   class Torus {
   public:
-        //! type used to pass tupels in and out
-        typedef Dune::Vec<d,int> iTupel;
-        typedef Dune::Vec<d,bool> bTupel;
+	//! type used to pass tupels in and out
+	typedef Dune::Vec<d,int> iTupel;
+	typedef Dune::Vec<d,bool> bTupel;
 
 
   private:
-        struct CommPartner {
-          int rank;
-          iTupel delta;
-          int index;
-        };
+	struct CommPartner {
+	  int rank;
+	  iTupel delta;
+	  int index;
+	};
 
-        struct CommTask {
-          int rank;      // process to send to / receive from
-          void *buffer;  // buffer to send / receive
-          int size;      // size of buffer
-          MPI_Request request; // used by MPI to handle request
-          int flag;      // used by MPI 
-        };
+	struct CommTask {
+	  int rank;      // process to send to / receive from
+	  void *buffer;  // buffer to send / receive
+	  int size;      // size of buffer
+	  MPI_Request request; // used by MPI to handle request
+	  int flag;      // used by MPI 
+	};
 
   public:
-        //! constructor making uninitialized object
-        Torus () 
-        {  }
+	//! constructor making uninitialized object
+	Torus () 
+	{  }
 
-        //! make partitioner from communicator and coarse mesh size
-        Torus (MPI_Comm comm, int tag, iTupel size)
-        {
-          // MPI stuff
-          _comm = comm;
-          MPI_Comm_size(comm,&_procs);
-          MPI_Comm_rank(comm,&_rank);
-          _tag = tag;
+	//! make partitioner from communicator and coarse mesh size
+	Torus (MPI_Comm comm, int tag, iTupel size)
+	{
+	  // MPI stuff
+	  _comm = comm;
+	  MPI_Comm_size(comm,&_procs);
+	  MPI_Comm_rank(comm,&_rank);
+	  _tag = tag;
 
-          // determine dimensions
-          iTupel dims;
-          double opt=1E100;
-          optimize_dims(d-1,size,_procs,dims,opt);
-          if (_rank==0) std::cout << "Torus<" << d 
-                                                          << ">: mapping " << _procs << " processes onto "
-                                                          << _dims << " torus." << std::endl;
+	  // determine dimensions
+	  iTupel dims;
+	  double opt=1E100;
+	  optimize_dims(d-1,size,_procs,dims,opt);
+	  if (_rank==0) std::cout << "Torus<" << d 
+							  << ">: mapping " << _procs << " processes onto "
+							  << _dims << " torus." << std::endl;
 
-          // compute increments for lexicographic ordering
-          int inc = 1;
-          for (int i=0; i<d; i++)
-                {
-                  _increment[i] = inc;
-                  inc *= _dims[i];
-                }
+	  // compute increments for lexicographic ordering
+	  int inc = 1;
+	  for (int i=0; i<d; i++)
+		{
+		  _increment[i] = inc;
+		  inc *= _dims[i];
+		}
 
-          // make full schedule
-          proclists();
-        }
+	  // make full schedule
+	  proclists();
+	}
 
-        //! return own rank
-        int rank ()
-        {
-          return _rank;
-        }
+	//! return own rank
+	int rank ()
+	{
+	  return _rank;
+	}
 
-        //! return own coordinates
-        iTupel coord ()
-        {
-          return rank_to_coord(_rank);
-        }
+	//! return own coordinates
+	iTupel coord ()
+	{
+	  return rank_to_coord(_rank);
+	}
 
-        //! return number of processes
-        int procs ()
-        {
-          return _procs;
-        }
+	//! return number of processes
+	int procs ()
+	{
+	  return _procs;
+	}
 
-        //! return dimensions of torus
-        iTupel dims ()
-        {
-          return _dims;
-        }
+	//! return dimensions of torus
+	iTupel dims ()
+	{
+	  return _dims;
+	}
 
-        //! return dimensions of torus in direction i
-        int dims (int i)
-        {
-          return _dims[i];
-        }
+	//! return dimensions of torus in direction i
+	int dims (int i)
+	{
+	  return _dims[i];
+	}
 
-        //! return MPI communicator
-        MPI_Comm comm ()
-        {
-          return _comm;
-        }
+	//! return MPI communicator
+	MPI_Comm comm ()
+	{
+	  return _comm;
+	}
 
-        //! return tag used by torus
-        int tag ()
-        {
-          return _tag;
-        }
+	//! return tag used by torus
+	int tag ()
+	{
+	  return _tag;
+	}
 
-        //! return true if coordinate is inside torus
-        bool inside (iTupel c)
-        {
-          for (int i=d-1; i>=0; i--)
-                if (c[i]<0 || c[i]>=_dims[i]) return false;
-          return true;
-        }
+	//! return true if coordinate is inside torus
+	bool inside (iTupel c)
+	{
+	  for (int i=d-1; i>=0; i--)
+		if (c[i]<0 || c[i]>=_dims[i]) return false;
+	  return true;
+	}
 
-        //! map rank to coordinate in torus using lexicographic ordering
-        iTupel rank_to_coord (int rank)
-        {
-          iTupel coord;
-          rank = rank%_procs;
-          for (int i=d-1; i>=0; i--)
-                {
-                  coord[i] = rank/_increment[i];
-                  rank = rank%_increment[i];
-                }
-          return coord;
-        }
+	//! map rank to coordinate in torus using lexicographic ordering
+	iTupel rank_to_coord (int rank)
+	{
+	  iTupel coord;
+	  rank = rank%_procs;
+	  for (int i=d-1; i>=0; i--)
+		{
+		  coord[i] = rank/_increment[i];
+		  rank = rank%_increment[i];
+		}
+	  return coord;
+	}
 
-        //! map coordinate in torus to rank using lexicographic ordering
-        int coord_to_rank (iTupel coord)
-        {
-          for (int i=0; i<d; i++) coord[i] = coord[i]%_dims[i];
-          int rank = 0;
-          for (int i=0; i<d; i++) rank += coord[i]*_increment[i];
-          return rank;
-        }
+	//! map coordinate in torus to rank using lexicographic ordering
+	int coord_to_rank (iTupel coord)
+	{
+	  for (int i=0; i<d; i++) coord[i] = coord[i]%_dims[i];
+	  int rank = 0;
+	  for (int i=0; i<d; i++) rank += coord[i]*_increment[i];
+	  return rank;
+	}
 
-        //! return rank of process where its coordinate in direction dir has offset cnt (handles periodic case)
-        int rank_relative (int rank, int dir, int cnt)
-        {
-          iTupel coord = rank_to_coord(rank);
-          coord[dir] = (coord[dir]+dims[dir]+cnt)%dims[dir];
-          return coord_to_rank(coord);
-        }
+	//! return rank of process where its coordinate in direction dir has offset cnt (handles periodic case)
+	int rank_relative (int rank, int dir, int cnt)
+	{
+	  iTupel coord = rank_to_coord(rank);
+	  coord[dir] = (coord[dir]+dims[dir]+cnt)%dims[dir];
+	  return coord_to_rank(coord);
+	}
 
-        //! assign color to given coordinate
-        int color (iTupel coord)
-        {
-          int c = 0;
-          int power = 1;
+	//! assign color to given coordinate
+	int color (iTupel coord)
+	{
+	  int c = 0;
+	  int power = 1;
 
-          // interior coloring
-          for (int i=0; i<d; i++)
-                {
-                  if (coord[i]%2==1) c += power;
-                  power *= 2;
-                }
+	  // interior coloring
+	  for (int i=0; i<d; i++)
+		{
+		  if (coord[i]%2==1) c += power;
+		  power *= 2;
+		}
 
-          // extra colors for boundary processes
-          for (int i=0; i<d; i++)
-                {
-                  if (_dims[i]>1 && coord[i]==_dims[i]-1) c += power;
-                  power *= 2;
-                }
+	  // extra colors for boundary processes
+	  for (int i=0; i<d; i++)
+		{
+		  if (_dims[i]>1 && coord[i]==_dims[i]-1) c += power;
+		  power *= 2;
+		}
 
-          return c;
-        }
+	  return c;
+	}
 
-        //! assign color to given rank
-        int color (int rank)
-        {
-          return color(rank_to_coord(rank));
-        }
+	//! assign color to given rank
+	int color (int rank)
+	{
+	  return color(rank_to_coord(rank));
+	}
 
-        //! return the number of neighbors, which is \f$3^d-1\f$
-        int neighbors ()
-        {
-          int n=1;
-          for (int i=0; i<d; ++i)
-                n *= 3;
-          return n-1;
-        }
+	//! return the number of neighbors, which is \f$3^d-1\f$
+	int neighbors ()
+	{
+	  int n=1;
+	  for (int i=0; i<d; ++i)
+		n *= 3;
+	  return n-1;
+	}
 
-        //! return true if neighbor with given delta is a neighbor under the given periodicity
-        bool is_neighbor (iTupel delta, bTupel periodic)
-        {
-          iTupel coord = rank_to_coord(_rank); // my own coordinate with 0 <= c_i < dims_i
+	//! return true if neighbor with given delta is a neighbor under the given periodicity
+	bool is_neighbor (iTupel delta, bTupel periodic)
+	{
+	  iTupel coord = rank_to_coord(_rank); // my own coordinate with 0 <= c_i < dims_i
 
 
-          for (int i=0; i<d; i++)
-                {
-                  if (delta[i]<0)
-                        {
-                          // if I am on the boundary and domain is not periodic => no neighbor
-                          if (coord[i]==0 && periodic[i]==false) return false;
-                        }
-                  if (delta[i]>0)
-                        {
-                          // if I am on the boundary and domain is not periodic => no neighbor
-                          if (coord[i]==_dims[i]-1 && periodic[i]==false) return false;
-                        }
-                }
-          return true;
-        }
+	  for (int i=0; i<d; i++)
+		{
+		  if (delta[i]<0)
+			{
+			  // if I am on the boundary and domain is not periodic => no neighbor
+			  if (coord[i]==0 && periodic[i]==false) return false;
+			}
+		  if (delta[i]>0)
+			{
+			  // if I am on the boundary and domain is not periodic => no neighbor
+			  if (coord[i]==_dims[i]-1 && periodic[i]==false) return false;
+			}
+		}
+	  return true;
+	}
 
-        //! partition the given grid onto the torus and return the piece of the process with given rank; returns load imbalance
-        double partition (int rank, iTupel origin_in, iTupel size_in, iTupel& origin_out, iTupel& size_out)
-        {
-          iTupel coord = rank_to_coord(rank);
-          double maxsize = 1;
-          double sz = 1;
+	//! partition the given grid onto the torus and return the piece of the process with given rank; returns load imbalance
+	double partition (int rank, iTupel origin_in, iTupel size_in, iTupel& origin_out, iTupel& size_out)
+	{
+	  iTupel coord = rank_to_coord(rank);
+	  double maxsize = 1;
+	  double sz = 1;
 
-          // make a tensor product partition
-          for (int i=0; i<d; i++)
-                {
-                  // determine 
-                  int m = size_in[i]/_dims[i];
-                  int r = size_in[i]%_dims[i];
+	  // make a tensor product partition
+	  for (int i=0; i<d; i++)
+		{
+		  // determine 
+		  int m = size_in[i]/_dims[i];
+		  int r = size_in[i]%_dims[i];
 
-                  sz *= size_in[i];
+		  sz *= size_in[i];
 
-                  if (coord[i]<_dims[i]-r)
-                        {
-                          origin_out[i] = origin_in[i] + coord[i]*m;
-                          size_out[i] = m;
-                          maxsize *= m;
-                        }
-                  else
-                        {
-                          origin_out[i] = origin_in[i] + (_dims[i]-r)*m + (coord[i]-(_dims[i]-r))*(m+1);
-                          size_out[i] = m+1;
-                          maxsize *= m+1;
-                        }
-                }
-          return maxsize/(sz/_procs);
-        }
+		  if (coord[i]<_dims[i]-r)
+			{
+			  origin_out[i] = origin_in[i] + coord[i]*m;
+			  size_out[i] = m;
+			  maxsize *= m;
+			}
+		  else
+			{
+			  origin_out[i] = origin_in[i] + (_dims[i]-r)*m + (coord[i]-(_dims[i]-r))*(m+1);
+			  size_out[i] = m+1;
+			  maxsize *= m+1;
+			}
+		}
+	  return maxsize/(sz/_procs);
+	}
 
-        /*!
-          ProcListIterator provides access to a list of neighboring processes. There are always
+	/*!
+	  ProcListIterator provides access to a list of neighboring processes. There are always
       \f$ 3^d-1 \f$ entries in such a list. Two lists are maintained, one for sending and one for
       receiving. The lists are sorted in such a way that in sequence message delivery ensures that
       e.g. a message send to the left neighbor is received as a message from the right neighbor.
-         */
-        class ProcListIterator {
-        public:
-          //! make an iterator
-          ProcListIterator (typename std::deque<CommPartner>::iterator iter)
-          {
-                i = iter;
-          }
+	*/
+	class ProcListIterator {
+	public:
+	  //! make an iterator
+	  ProcListIterator (typename std::deque<CommPartner>::iterator iter)
+	  {
+		i = iter;
+	  }
 
-          //! return rank of neighboring process
-          int rank () 
-          {
-                return i->rank;
-          }
+	  //! return rank of neighboring process
+	  int rank () 
+	  {
+		return i->rank;
+	  }
 
-          //! return distance vector
-          iTupel delta () 
-          {
-                return i->delta;
-          }
+	  //! return distance vector
+	  iTupel delta () 
+	  {
+		return i->delta;
+	  }
 
-          //! return index in proclist
-          int index () 
-          {
-                return i->index;
-          }
+	  //! return index in proclist
+	  int index () 
+	  {
+		return i->index;
+	  }
 
-          //! return 1-norm of distance vector
-          int distance () 
-          {
-                int dist = 0;
-                iTupel delta=i->delta;
-                for (int i=0; i<d; ++i)
-                  dist += std::abs(delta[i]);
-                return dist;
-          }
+	  //! return 1-norm of distance vector
+	  int distance () 
+	  {
+		int dist = 0;
+		iTupel delta=i->delta;
+		for (int i=0; i<d; ++i)
+		  dist += std::abs(delta[i]);
+		return dist;
+	  }
 
-          //! Return true when two iterators point to same member
-          bool operator== (const ProcListIterator& iter)
-          {
-                return i == iter.i;
-          }
+	  //! Return true when two iterators point to same member
+	  bool operator== (const ProcListIterator& iter)
+	  {
+		return i == iter.i;
+	  }
 
 
-          //! Return true when two iterators do not point to same member
-          bool operator!= (const ProcListIterator& iter)
-          {
-                return i != iter.i;
-          }
+	  //! Return true when two iterators do not point to same member
+	  bool operator!= (const ProcListIterator& iter)
+	  {
+		return i != iter.i;
+	  }
         
-          //! Increment iterator to next cell.
-          ProcListIterator& operator++ ()
-          {
-                ++i;
-                return *this;
-          }
+	  //! Increment iterator to next cell.
+	  ProcListIterator& operator++ ()
+	  {
+		++i;
+		return *this;
+	  }
           
-        private:
-          typename std::deque<CommPartner>::iterator i;
-        };
+	private:
+	  typename std::deque<CommPartner>::iterator i;
+	};
 
-        //! first process in send list
-        ProcListIterator sendbegin () 
-        {
-          return ProcListIterator(_sendlist.begin());
-        }
+	//! first process in send list
+	ProcListIterator sendbegin () 
+	{
+	  return ProcListIterator(_sendlist.begin());
+	}
 
-        //! end of send list
-        ProcListIterator sendend () 
-        {
-          return ProcListIterator(_sendlist.end());
-        }
+	//! end of send list
+	ProcListIterator sendend () 
+	{
+	  return ProcListIterator(_sendlist.end());
+	}
 
-        //! first process in receive list
-        ProcListIterator recvbegin () 
-        {
-          return ProcListIterator(_recvlist.begin());
-        }
+	//! first process in receive list
+	ProcListIterator recvbegin () 
+	{
+	  return ProcListIterator(_recvlist.begin());
+	}
 
-        //! last process in receive list
-        ProcListIterator recvend () 
-        {
-          return ProcListIterator(_recvlist.end());
-        }
+	//! last process in receive list
+	ProcListIterator recvend () 
+	{
+	  return ProcListIterator(_recvlist.end());
+	}
 
-        //! store a send request; buffers are sent in order; handles also local requests with memcpy
-        void send (int rank, void* buffer, int size)
-        {
-          CommTask task;
-          task.rank = rank;
-          task.buffer = buffer;
-          task.size = size;
-          if (rank!=_rank)
-                _sendrequests.push_back(task);
-          else
-                _localsendrequests.push_back(task);
-        }
+	//! store a send request; buffers are sent in order; handles also local requests with memcpy
+	void send (int rank, void* buffer, int size)
+	{
+	  CommTask task;
+	  task.rank = rank;
+	  task.buffer = buffer;
+	  task.size = size;
+	  if (rank!=_rank)
+		_sendrequests.push_back(task);
+	  else
+		_localsendrequests.push_back(task);
+	}
  
-        //! store a receive request; buffers are received in order; handles also local requests with memcpy
-        void recv (int rank, void* buffer, int size)
-        {
-          CommTask task;
-          task.rank = rank;
-          task.buffer = buffer;
-          task.size = size;
-          if (rank!=_rank)
-                _recvrequests.push_back(task);
-          else
-                _localrecvrequests.push_back(task);
-        }
+	//! store a receive request; buffers are received in order; handles also local requests with memcpy
+	void recv (int rank, void* buffer, int size)
+	{
+	  CommTask task;
+	  task.rank = rank;
+	  task.buffer = buffer;
+	  task.size = size;
+	  if (rank!=_rank)
+		_recvrequests.push_back(task);
+	  else
+		_localrecvrequests.push_back(task);
+	}
  
-        //! exchange messages stored in request buffers; clear request buffers afterwards
-        void exchange ()
-        {
-          // handle local requests first
-          if (_localsendrequests.size()!=_localrecvrequests.size())
-                {
-                  std::cout << "[" << rank() << "]: ERROR: local sends/receives do not match in exchange!" << std::endl;
-                  return;
-                }
-          for (int i=0; i<_localsendrequests.size(); i++)
-                {
-                  if (_localsendrequests[i].size!=_localrecvrequests[i].size)
-                        {
-                          std::cout << "[" << rank() << "]: ERROR: size in local sends/receive does not match in exchange!" << std::endl;
-                          return;
-                        }
-                  memcpy(_localrecvrequests[i].buffer,_localsendrequests[i].buffer,_localsendrequests[i].size);
-                }
-          _localsendrequests.clear();
-          _localrecvrequests.clear();
+	//! exchange messages stored in request buffers; clear request buffers afterwards
+	void exchange ()
+	{
+	  // handle local requests first
+	  if (_localsendrequests.size()!=_localrecvrequests.size())
+		{
+		  std::cout << "[" << rank() << "]: ERROR: local sends/receives do not match in exchange!" << std::endl;
+		  return;
+		}
+	  for (int i=0; i<_localsendrequests.size(); i++)
+		{
+		  if (_localsendrequests[i].size!=_localrecvrequests[i].size)
+			{
+			  std::cout << "[" << rank() << "]: ERROR: size in local sends/receive does not match in exchange!" << std::endl;
+			  return;
+			}
+		  memcpy(_localrecvrequests[i].buffer,_localsendrequests[i].buffer,_localsendrequests[i].size);
+		}
+	  _localsendrequests.clear();
+	  _localrecvrequests.clear();
 
-          // handle foreign requests
-          int sends=0;
-          int recvs=0;
+	  // handle foreign requests
+	  int sends=0;
+	  int recvs=0;
 
-          // issue sends to foreign processes
-          for (int i=0; i<_sendrequests.size(); i++)
-                if (_sendrequests[i].rank!=rank())
-                  {
-                        MPI_Isend(_sendrequests[i].buffer, _sendrequests[i].size, MPI_BYTE, 
-                                          _sendrequests[i].rank, _tag, _comm, &(_sendrequests[i].request));
-                        _sendrequests[i].flag = false;
-                        sends++;
-                  }
+	  // issue sends to foreign processes
+	  for (int i=0; i<_sendrequests.size(); i++)
+		if (_sendrequests[i].rank!=rank())
+		  {
+			MPI_Isend(_sendrequests[i].buffer, _sendrequests[i].size, MPI_BYTE, 
+					  _sendrequests[i].rank, _tag, _comm, &(_sendrequests[i].request));
+			_sendrequests[i].flag = false;
+			sends++;
+		  }
 
-          // issue receives from foreign processes
-          for (int i=0; i<_recvrequests.size(); i++)
-                if (_recvrequests[i].rank!=rank())
-                  {
-                        MPI_Irecv(_recvrequests[i].buffer, _recvrequests[i].size, MPI_BYTE, 
-                                          _recvrequests[i].rank, _tag, _comm, &(_recvrequests[i].request));
-                        _recvrequests[i].flag = false;
-                        recvs++;
-                  }
+	  // issue receives from foreign processes
+	  for (int i=0; i<_recvrequests.size(); i++)
+		if (_recvrequests[i].rank!=rank())
+		  {
+			MPI_Irecv(_recvrequests[i].buffer, _recvrequests[i].size, MPI_BYTE, 
+					  _recvrequests[i].rank, _tag, _comm, &(_recvrequests[i].request));
+			_recvrequests[i].flag = false;
+			recvs++;
+		  }
 
-          // poll sends
-          while (sends>0)
-                {
-                  for (int i=0; i<_sendrequests.size(); i++)
-                        if (!_sendrequests[i].flag)
-                          {
-                                MPI_Status status;
-                                MPI_Test( &(_sendrequests[i].request), &(_sendrequests[i].flag), &status);
-                                if (_sendrequests[i].flag)
-                                  sends--;
-                          }
-                }
+	  // poll sends
+	  while (sends>0)
+		{
+		  for (int i=0; i<_sendrequests.size(); i++)
+			if (!_sendrequests[i].flag)
+			  {
+				MPI_Status status;
+				MPI_Test( &(_sendrequests[i].request), &(_sendrequests[i].flag), &status);
+				if (_sendrequests[i].flag)
+				  sends--;
+			  }
+		}
 
-          // poll receives
-          while (recvs>0)
-                {
-                  for (int i=0; i<_recvrequests.size(); i++)
-                        if (!_recvrequests[i].flag)
-                          {
-                                MPI_Status status;
-                                MPI_Test( &(_recvrequests[i].request), &(_recvrequests[i].flag), &status);
-                                if (_recvrequests[i].flag)
-                                  recvs--;
-                          }
-                }
+	  // poll receives
+	  while (recvs>0)
+		{
+		  for (int i=0; i<_recvrequests.size(); i++)
+			if (!_recvrequests[i].flag)
+			  {
+				MPI_Status status;
+				MPI_Test( &(_recvrequests[i].request), &(_recvrequests[i].flag), &status);
+				if (_recvrequests[i].flag)
+				  recvs--;
+			  }
+		}
 
-          // clear request buffers
-          _sendrequests.clear();
-          _recvrequests.clear();
-        }
+	  // clear request buffers
+	  _sendrequests.clear();
+	  _recvrequests.clear();
+	}
 
-        //! global sum
-        double global_sum (double x)
-        {
-          double res;
+	//! global sum
+	double global_sum (double x)
+	{
+	  double res;
         
-          if (_procs==1) return x;
-          MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_SUM,_comm);
-          return res;
-        }
+	  if (_procs==1) return x;
+	  MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_SUM,_comm);
+	  return res;
+	}
 
-        //! global max
-        double global_max (double x)
-        {
-          double res;
+	//! global max
+	double global_max (double x)
+	{
+	  double res;
         
-          if (_procs==1) return x;
-          MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_MAX,_comm);
-          return res;
-        }
+	  if (_procs==1) return x;
+	  MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_MAX,_comm);
+	  return res;
+	}
 
-        //! global min
-        double global_min (double x)
-        {
-          double res;
+	//! global min
+	double global_min (double x)
+	{
+	  double res;
         
-          if (_procs==1) return x;
-          MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_MIN,_comm);
-          return res;
-        }
+	  if (_procs==1) return x;
+	  MPI_Allreduce(&x,&res,1,MPI_DOUBLE,MPI_MIN,_comm);
+	  return res;
+	}
 
  
-        //! print contents of torus object
-        void print (std::ostream& s)
-          {
-                s << "[" << rank() <<  "]: Torus " << procs() << " processor(s) arranged as " << dims() << std::endl;
-                for (ProcListIterator i=sendbegin(); i!=sendend(); ++i)
-                  {
-                        s << "[" << rank() <<  "]: send to   " 
-                          << "rank=" << i.rank() 
-                          << " index=" << i.index() 
-                          << " delta=" << i.delta() << " dist=" << i.distance() << std::endl;
-                  }
-                for (ProcListIterator i=recvbegin(); i!=recvend(); ++i)
-                  {
-                        s << "[" << rank() <<  "]: recv from " 
-                          << "rank=" << i.rank() 
-                          << " index=" << i.index() 
-                          << " delta=" << i.delta() << " dist=" << i.distance() << std::endl;
-                  }
-          }
+	//! print contents of torus object
+	void print (std::ostream& s)
+	{
+	  s << "[" << rank() <<  "]: Torus " << procs() << " processor(s) arranged as " << dims() << std::endl;
+	  for (ProcListIterator i=sendbegin(); i!=sendend(); ++i)
+		{
+		  s << "[" << rank() <<  "]: send to   " 
+			<< "rank=" << i.rank() 
+			<< " index=" << i.index() 
+			<< " delta=" << i.delta() << " dist=" << i.distance() << std::endl;
+		}
+	  for (ProcListIterator i=recvbegin(); i!=recvend(); ++i)
+		{
+		  s << "[" << rank() <<  "]: recv from " 
+			<< "rank=" << i.rank() 
+			<< " index=" << i.index() 
+			<< " delta=" << i.delta() << " dist=" << i.distance() << std::endl;
+		}
+	}
 
   private:
 
-        void optimize_dims (int i, iTupel& size, int P, iTupel& dims, double &opt )
-        {
-          if (i>0) // test all subdivisions recursively
-                {
-                  for (int k=1; k<=P; k++)
-                        if (P%k==0)
-                          {
-                                // P divisible by k
-                                dims[i] = k;
-                                optimize_dims(i-1,size,P/k,dims,opt);
-                          }
-                }
-          else
-                {
-                  // found a possible combination
-                  dims[0] = P;
+	void optimize_dims (int i, iTupel& size, int P, iTupel& dims, double &opt )
+	{
+	  if (i>0) // test all subdivisions recursively
+		{
+		  for (int k=1; k<=P; k++)
+			if (P%k==0)
+			  {
+				// P divisible by k
+				dims[i] = k;
+				optimize_dims(i-1,size,P/k,dims,opt);
+			  }
+		}
+	  else
+		{
+		  // found a possible combination
+		  dims[0] = P;
 
-                  // check for optimality
-                  double m = -1.0;
+		  // check for optimality
+		  double m = -1.0;
 
-                  for (int k=0; k<d; k++)
-                        if ( ((double)size[k])/((double)dims[k]) > m ) 
-                          m = ((double)size[k])/((double)dims[k]);
-                  // if (_rank==0) std::cout << "testing " << dims << " norm=" << m << std::endl;
+		  for (int k=0; k<d; k++)
+			if ( ((double)size[k])/((double)dims[k]) > m ) 
+			  m = ((double)size[k])/((double)dims[k]);
+		  // if (_rank==0) std::cout << "testing " << dims << " norm=" << m << std::endl;
                 
-                  if (m<opt) 
-                        {
-                          opt = m;
-                          _dims = dims;
-                        }
-                }
-        }
+		  if (m<opt) 
+			{
+			  opt = m;
+			  _dims = dims;
+			}
+		}
+	}
 
-        void proclists ()
-        {
-          // compile the full neighbor list
-          CommPartner cp;
-          iTupel delta;
+	void proclists ()
+	{
+	  // compile the full neighbor list
+	  CommPartner cp;
+	  iTupel delta;
 
-          delta = -1;
-          bool ready = false;
-          iTupel me, nb;
-          me = rank_to_coord(_rank);
-          int index = 0;
-          int last = neighbors()-1;
-          while (!ready)
-                {
-                  // find neighbors coordinates
-                  for (int i=0; i<d; i++)
-                        nb[i] = ( me[i]+_dims[i]+delta[i] ) % _dims[i];
+	  delta = -1;
+	  bool ready = false;
+	  iTupel me, nb;
+	  me = rank_to_coord(_rank);
+	  int index = 0;
+	  int last = neighbors()-1;
+	  while (!ready)
+		{
+		  // find neighbors coordinates
+		  for (int i=0; i<d; i++)
+			nb[i] = ( me[i]+_dims[i]+delta[i] ) % _dims[i];
 
-                  // find neighbors rank
-                  int nbrank = coord_to_rank(nb);
+		  // find neighbors rank
+		  int nbrank = coord_to_rank(nb);
                   
-                  // check if delta is not zero
-                  for (int i=0; i<d; i++)
-                        if (delta[i]!=0) 
-                          {
-                                cp.rank = nbrank;
-                                cp.delta = delta;
-                                cp.index = index;
-                                _recvlist.push_back(cp);
-                                cp.index = last-index;
-                                _sendlist.push_front(cp);
-                                index++;
-                                break;
-                          }
+		  // check if delta is not zero
+		  for (int i=0; i<d; i++)
+			if (delta[i]!=0) 
+			  {
+				cp.rank = nbrank;
+				cp.delta = delta;
+				cp.index = index;
+				_recvlist.push_back(cp);
+				cp.index = last-index;
+				_sendlist.push_front(cp);
+				index++;
+				break;
+			  }
 
-                  // next neighbor
-                  ready = true;
-                  for (int i=0; i<d; i++)
-                        if (delta[i]<1)
-                          {
-                                (delta[i])++;
-                                ready=false;
-                                break;
-                          }
-                        else
-                          {
-                                delta[i] = -1;
-                          }
-                }
+		  // next neighbor
+		  ready = true;
+		  for (int i=0; i<d; i++)
+			if (delta[i]<1)
+			  {
+				(delta[i])++;
+				ready=false;
+				break;
+			  }
+			else
+			  {
+				delta[i] = -1;
+			  }
+		}
 
-        }
+	}
 
-        MPI_Comm _comm;
-        int _rank;
-        int _procs;
-        iTupel _dims;
-        iTupel _increment;
-        int _tag;
-        std::deque<CommPartner> _sendlist;
-        std::deque<CommPartner> _recvlist;
+	MPI_Comm _comm;
+	int _rank;
+	int _procs;
+	iTupel _dims;
+	iTupel _increment;
+	int _tag;
+	std::deque<CommPartner> _sendlist;
+	std::deque<CommPartner> _recvlist;
  
-        std::vector<CommTask> _sendrequests;
-        std::vector<CommTask> _recvrequests;
-        std::vector<CommTask> _localsendrequests;
-        std::vector<CommTask> _localrecvrequests;
+	std::vector<CommTask> _sendrequests;
+	std::vector<CommTask> _recvrequests;
+	std::vector<CommTask> _localsendrequests;
+	std::vector<CommTask> _localrecvrequests;
   };
 
   //! Output operator for Torus
   template <int d>
   inline std::ostream& operator<< (std::ostream& s, Torus<d> t)
   {
-        t.print(s);
-        return s;
+	t.print(s);
+	return s;
   }
 
 
@@ -1448,7 +1522,7 @@ namespace Dune {
 	struct YGridLevel {        // This stores all the information on one grid level 
 	  // cell (codim 0) data
 	  YGrid<d,ct> cell_global;         // the whole cell grid on that level
-	  YGrid<d,ct> cell_overlap;        // we have no ghost cells, so our part is overlap completely
+	  SubYGrid<d,ct> cell_overlap;     // we have no ghost cells, so our part is overlap completely
 	  SubYGrid<d,ct> cell_interior;    // interior cells are a subgrid of all cells
 
 	  std::deque<Intersection> send_cell_overlap_overlap;  // each intersection is a subgrid of overlap
@@ -1459,7 +1533,7 @@ namespace Dune {
 
 	  // vertex (codim dim) data
       YGrid<d,ct> vertex_global;           // the whole vertex grid on that level
-      YGrid<d,ct> vertex_overlapfront;     // all our vertices are overlap and front
+      SubYGrid<d,ct> vertex_overlapfront;  // all our vertices are overlap and front
       SubYGrid<d,ct> vertex_overlap;       // subgrid containing only overlap
       SubYGrid<d,ct> vertex_interiorborder;// subgrid containing only interior and border
       SubYGrid<d,ct> vertex_interior;      // subgrid containing only interior
@@ -1472,6 +1546,9 @@ namespace Dune {
 
 	  std::deque<Intersection> send_vertex_interiorborder_interiorborder; // each intersection is a subgrid of overlapfront
 	  std::deque<Intersection> recv_vertex_interiorborder_interiorborder; // each intersection is a subgrid of overlapfront
+        
+	  std::deque<Intersection> send_vertex_interiorborder_overlapfront; // each intersection is a subgrid of overlapfront
+	  std::deque<Intersection> recv_vertex_overlapfront_interiorborder; // each intersection is a subgrid of overlapfront
         
 	  // general
       MultiYGrid<d,ct>* mg;  // each grid level knows its multigrid
@@ -1511,6 +1588,7 @@ namespace Dune {
 	  if (_torus.rank()==0) std::cout << "MultiYGrid<" << d 
 									  << ">: coarse grid with size " << s 
 									  << " imbalance=" << (imbal-1)*100 << "%" << std::endl;
+	  print(std::cout);
 	}
 
 	//! do a global mesh refinement; true: keep overlap in absolute size; false: keep overlap in mesh cells
@@ -1550,13 +1628,13 @@ namespace Dune {
 	}
 
 	//! return the maximum level index (number of levels is maxlevel()+1)
-	int maxlevel ()
+	int maxlevel () const
 	{
 	  return _maxlevel;
 	}
 
 	//! return true if grid is periodic in given direction
-	bool periodic (int i)
+	bool periodic (int i) const
 	{
 	  return _periodic[i];
 	}
@@ -1620,7 +1698,7 @@ namespace Dune {
 	  }
 
 	  //! reference to local cell grid which is a subgrid of the global cell grid
-	  YGrid<d,ct>& cell_overlap ()
+	  SubYGrid<d,ct>& cell_overlap ()
 	  {
 		return i->cell_overlap;
 	  }
@@ -1657,7 +1735,7 @@ namespace Dune {
 		return i->vertex_global;
 	  }
 	  //! reference to vertex grid, up to front; there are no ghosts in this implementation
-	  YGrid<d,ct>& vertex_overlapfront ()
+	  SubYGrid<d,ct>& vertex_overlapfront ()
 	  {
 		return i->vertex_overlapfront;
 	  }
@@ -1702,6 +1780,14 @@ namespace Dune {
 	  {
 		return i->recv_vertex_interiorborder_interiorborder;
 	  }
+	  std::deque<Intersection>& send_vertex_interiorborder_overlapfront ()
+	  {
+		return i->send_vertex_interiorborder_overlapfront;
+	  }
+	  std::deque<Intersection>& recv_vertex_overlapfront_interiorborder ()
+	  {
+		return i->recv_vertex_overlapfront_interiorborder;
+	  }
 	};
 
 	//! return iterator pointing to coarsest level
@@ -1710,7 +1796,7 @@ namespace Dune {
 	  return YGridLevelIterator(_levels,0);
 	}
 
-	//! return iterator pointing to coarsest level
+	//! return iterator pointing to given level
 	YGridLevelIterator begin (int i)
 	{
 	  if (i<0 << i>maxlevel())
@@ -1866,7 +1952,7 @@ namespace Dune {
 			  s_overlap[i] = max-min+1;
 			}
 		}
-	  g.cell_overlap = YGrid<d,ct>(o_overlap,s_overlap,h,r);
+	  g.cell_overlap = SubYGrid<d,ct>(YGrid<d,ct>(o_overlap,s_overlap,h,r));
 
 	  // now make the interior grid a subgrid of the overlapping grid
 	  iTupel offset;
@@ -1891,7 +1977,7 @@ namespace Dune {
 	  iTupel s_vertex_overlapfront;
 	  for (int i=0; i<d; i++) o_vertex_overlapfront[i] = g.cell_overlap.origin(i);
 	  for (int i=0; i<d; i++) s_vertex_overlapfront[i] = g.cell_overlap.size(i)+1; // one more vertices than cells ...
-	  g.vertex_overlapfront = YGrid<d,ct>(o_vertex_overlapfront,s_vertex_overlapfront,h,r);
+	  g.vertex_overlapfront = SubYGrid<d,ct>(YGrid<d,ct>(o_vertex_overlapfront,s_vertex_overlapfront,h,r));
 
 	  // now overlap only (i.e. without front), is subgrid of overlapfront
 	  iTupel o_vertex_overlap;
@@ -1924,6 +2010,8 @@ namespace Dune {
 					g.send_vertex_overlap_overlapfront,g.recv_vertex_overlapfront_overlap);
 	  intersections(g.vertex_interiorborder,g.vertex_interiorborder,g.cell_global.size(),
 					g.send_vertex_interiorborder_interiorborder,g.recv_vertex_interiorborder_interiorborder);
+	  intersections(g.vertex_interiorborder,g.vertex_overlapfront,g.cell_global.size(),
+					g.send_vertex_interiorborder_overlapfront,g.recv_vertex_overlapfront_interiorborder);
 
 	  // return the whole thing
 	  return g;
@@ -1936,8 +2024,8 @@ namespace Dune {
     //   size: needed to shift local grid in periodic case
     //   returns two lists: Intersections to be sent and Intersections to be received
 	// Note: sendgrid/recvgrid may be SubYGrids. Since intersection method is virtual it should work properly
-	void intersections (YGrid<d,ct>& sendgrid, YGrid<d,ct>& recvgrid, iTupel& size, 
-					std::deque<Intersection>& sendlist, std::deque<Intersection>& recvlist)
+	void intersections (SubYGrid<d,ct>& sendgrid, SubYGrid<d,ct>& recvgrid, iTupel& size, 
+						std::deque<Intersection>& sendlist, std::deque<Intersection>& recvlist)
 	{
 	  // the exchange buffers
 	  std::vector<YGrid<d,ct> > send_recvgrid(_torus.neighbors()); 
