@@ -148,14 +148,6 @@ public:
   //! read function data from pgm fromat file
   bool read_pgm(const char *filename, int timestep); 
 
-  //***** methods that not belong to the interface ************
-  //***** but have to be public *******************************
-  
-  //! get local function pointer, if not exists new object is created
-  //LocalFunctionType * getLocalFunction ();
-  
-  //! free access to LocalFunction for next use 
-  //void freeLocalFunction (LocalFunctionType * lf );
 private:  
   
   // get memory for discrete function
@@ -265,7 +257,8 @@ protected:
   MyType * next_;
   
   //! needed once 
-  mutable RangeType tmp;
+  mutable RangeType tmp_;
+  mutable DomainType xtmp_;
 
   //! needed once 
   JacobianRangeType tmpGrad_;
