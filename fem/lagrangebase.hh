@@ -1342,10 +1342,6 @@ class RaviartThomasSpace
 FastBaseFunctionSet < RaviartThomasSpace 
 < FunctionSpaceType , GridType, polOrd   > > >
 {
-  typedef FastBaseFunctionSet < RaviartThomasSpace
-    < FunctionSpaceType , GridType, polOrd   > > BaseFunctionSetType;
-  
-  typedef BaseFunctionSetType FastBaseFunctionSetType;
   enum {id = 77809 };
 
   typedef RaviartThomasSpace < FunctionSpaceType , 
@@ -1361,6 +1357,9 @@ FastBaseFunctionSet < RaviartThomasSpace
     enum { dimVal = FunctionSpaceType::DimRange };
   
 public:
+  typedef FastBaseFunctionSet < RaviartThomasSpace
+    < FunctionSpaceType , GridType, polOrd   > > BaseFunctionSetType;
+  typedef BaseFunctionSetType FastBaseFunctionSetType;
 
   // for gcc   
   typedef typename FunctionSpaceType::Domain Domain;  
