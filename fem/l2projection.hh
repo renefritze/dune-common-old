@@ -1,5 +1,5 @@
-#ifndef __DUNE_L2_PROJECTION_CC__
-#define __DUNE_L2_PROJECTION_CC__
+#ifndef DUNE_L2_PROJECTION_HH
+#define DUNE_L2_PROJECTION_HH
 
 #include <dune/quadrature/fixedorder.hh>
 
@@ -7,19 +7,28 @@
 namespace Dune 
 {
 
-// projection of the rhs 
+    /** \brief Projects an analytical function orthogonally (in the L2-sense)
+        onto a FE-space
+    */
 template <class DiscreteFunctionType> 
 class L2Projection
 {
   typedef typename DiscreteFunctionType::FunctionSpaceType FunctionSpaceType;
   
-public:  
+public:
+    /** \brief Do the projection
+     *
+     * \tparam polOrd The order of the quadrature scheme used
+     * \tparam FunctionType The type of the class implementing the analytical function
+     */
   template <int polOrd, class FunctionType> 
-  void project (FunctionType &f, DiscreteFunctionType &discFunc, int level)
+  void project (FunctionType &f, DiscreteFunctionType &discFunc)
   {
     const typename DiscreteFunctionType::FunctionSpace 
         & functionSpace_= discFunc.getFunctionSpace();  
   
+    int level = functionSpace_.level();
+
     discFunc.clear();
   
     typedef typename FunctionSpaceType::GridType GridType;
