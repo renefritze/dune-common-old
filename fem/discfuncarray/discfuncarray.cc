@@ -79,7 +79,8 @@ inline void DiscFuncArray< DiscreteFunctionSpaceType >::print(std::ostream &s ) 
   ConstDofIteratorType enddof = this->dend ();
   for(ConstDofIteratorType itdof = this->dbegin (); itdof != enddof; ++itdof) 
   {
-      s << (*itdof) << " \n";
+      //s << (*itdof) << " \n";
+      printf("%3.15e \n", *itdof);
   } 
 }
 //*************************************************************************
@@ -460,14 +461,14 @@ evaluate (EntityType &en, const DomainType & x, RangeType & ret) const
       if(eval)
       {  
         for(int l=0; l<dimrange; l++)
-          ret(l) += (* (values_[i])) * tmp_(l);
+          ret[l] += (* (values_[i])) * tmp_[l];
       }
     }
   }
   else 
   {
     for(int l=0; l<dimrange; l++)
-      ret(l) = (* (values_[ l ]));
+      ret[l] = (* (values_[ l ]));
   } 
 }
 
