@@ -124,11 +124,11 @@ public:
 
   //! sign in to dofmanager, return is the memory 
   template <class DiscFuncType>
-  MemObjectType & signIn (DiscFuncType & df);
+  MemObjectType & signIn (DiscFuncType & df) const;
 
   //! sign out to dofmanager, dofmanager frees the memory 
   template <class DiscFuncType>
-  bool signOut (DiscFuncType & df);
+  bool signOut (DiscFuncType & df) const;
   
 protected:
   //! get the right BaseFunctionSet for a given Entity 
@@ -148,7 +148,7 @@ protected:
 
 protected:
   //! DofManager manages the memory 
-  DofManagerType & dm_;
+  mutable DofManagerType & dm_;
 
 private:
   //! the corresponding LagrangeMapper 

@@ -155,7 +155,7 @@ inline typename
 LagrangeDiscreteFunctionSpace<FunctionSpaceType,GridType,polOrd,DofManagerType>::
 MemObjectType &
 LagrangeDiscreteFunctionSpace<FunctionSpaceType,GridType,polOrd,DofManagerType>::
-signIn (DiscFuncType & df)
+signIn (DiscFuncType & df) const
 {
   // only for gcc to pass type DofType
   assert(mapper_ != 0);
@@ -167,7 +167,7 @@ template< class FunctionSpaceType, class GridType,int polOrd, class DofManagerTy
 template< class DiscFuncType> 
 inline bool 
 LagrangeDiscreteFunctionSpace<FunctionSpaceType,GridType,polOrd,DofManagerType>::
-signOut (DiscFuncType & df)  
+signOut (DiscFuncType & df) const  
 {
   return dm_.removeDofSet( df.memObj() );
 }
