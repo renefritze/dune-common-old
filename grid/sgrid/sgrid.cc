@@ -346,7 +346,7 @@ inline int SEntity<0,dim,dimworld>::count ()
 
 
 template<int dim, int dimworld> template<int cc> 
-inline SLevelIterator<cc,dim,dimworld> SEntity<0,dim,dimworld>::entity (int i)
+inline SLevelIterator<cc,dim,dimworld,All_Partition> SEntity<0,dim,dimworld>::entity (int i)
 {
         // find expanded coordinates of entity in reference cube
         // has components in {0,1,2}
@@ -357,7 +357,7 @@ inline SLevelIterator<cc,dim,dimworld> SEntity<0,dim,dimworld>::entity (int i)
         for (int i=0; i<dim; i++) zentity[i] = this->z[i] + zref[i] - 1;
 
         // make Iterator
-        return SLevelIterator<cc,dim,dimworld>(*(this->grid),this->l,(this->grid)->n(this->l,zentity));
+        return SLevelIterator<cc,dim,dimworld,All_Partition>(*(this->grid),this->l,(this->grid)->n(this->l,zentity));
 }
 
 // default implementation uses entity method 
@@ -458,13 +458,13 @@ inline void SEntity<0,dim,dimworld>::make_father ()
 }
 
 template<int dim, int dimworld>
-inline SLevelIterator<0,dim,dimworld> SEntity<0,dim,dimworld>::father ()
+inline SLevelIterator<0,dim,dimworld,All_Partition> SEntity<0,dim,dimworld>::father ()
 {
         if (!built_father) make_father();
         if (this->l>0)
-                return SLevelIterator<0,dim,dimworld>(*(this->grid),(this->l)-1,father_id);
+                return SLevelIterator<0,dim,dimworld,All_Partition>(*(this->grid),(this->l)-1,father_id);
         else
-                return SLevelIterator<0,dim,dimworld>(*(this->grid),this->l,this->id);
+                return SLevelIterator<0,dim,dimworld,All_Partition>(*(this->grid),this->l,this->id);
 }
 
 template<int dim, int dimworld>
@@ -555,13 +555,13 @@ inline void SEntity<dim,dim,dimworld>::make_father ()
 }
 
 template<int dim, int dimworld>
-inline SLevelIterator<0,dim,dimworld> SEntity<dim,dim,dimworld>::father ()
+inline SLevelIterator<0,dim,dimworld,All_Partition> SEntity<dim,dim,dimworld>::father ()
 {
         if (!built_father) make_father();
         if (this->l>0)
-                return SLevelIterator<0,dim,dimworld>(*(this->grid),(this->l)-1,father_id);
+                return SLevelIterator<0,dim,dimworld,All_Partition>(*(this->grid),(this->l)-1,father_id);
         else
-                return SLevelIterator<0,dim,dimworld>(*(this->grid),this->l,this->id);
+                return SLevelIterator<0,dim,dimworld,All_Partition>(*(this->grid),this->l,this->id);
 }
 
 template<int dim, int dimworld>
@@ -928,47 +928,47 @@ inline Vec<dimworld,sgrid_ctype>&
 //************************************************************************
 // inline methods for SLevelIterator
 
-template<int codim, int dim, int dimworld>
-inline SLevelIterator<codim,dim,dimworld>::SLevelIterator (SGrid<dim,dimworld>& _grid, int _l, int _id) : grid(_grid),e(_grid,_l,_id)
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline SLevelIterator<codim,dim,dimworld,pitype>::SLevelIterator (SGrid<dim,dimworld>& _grid, int _l, int _id) : grid(_grid),e(_grid,_l,_id)
 {
         l = _l;
         id = _id;
 }
 
-template<int codim, int dim, int dimworld>
-inline SLevelIterator<codim,dim,dimworld>& SLevelIterator<codim,dim,dimworld>::operator++ ()
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline SLevelIterator<codim,dim,dimworld,pitype>& SLevelIterator<codim,dim,dimworld,pitype>::operator++ ()
 {
         id++;
         e.make(l,id);
         return *this;
 }
 
-template<int codim, int dim, int dimworld>
-inline bool SLevelIterator<codim,dim,dimworld>::operator== (const SLevelIterator<codim,dim,dimworld>& i) const
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline bool SLevelIterator<codim,dim,dimworld,pitype>::operator== (const SLevelIterator<codim,dim,dimworld,pitype>& i) const
 {
         return (id==i.id)&&(l==i.l)&&(&grid==&i.grid);
 }
 
-template<int codim, int dim, int dimworld>
-inline bool SLevelIterator<codim,dim,dimworld>::operator!= (const SLevelIterator<codim,dim,dimworld>& i) const
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline bool SLevelIterator<codim,dim,dimworld,pitype>::operator!= (const SLevelIterator<codim,dim,dimworld,pitype>& i) const
 {
         return (id!=i.id)||(l!=i.l)||(&grid!=&i.grid);
 }
 
-template<int codim, int dim, int dimworld>
-inline SEntity<codim,dim,dimworld>& SLevelIterator<codim,dim,dimworld>::operator* () 
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline SEntity<codim,dim,dimworld>& SLevelIterator<codim,dim,dimworld,pitype>::operator* () 
 {
         return e;
 }
 
-template<int codim, int dim, int dimworld>
-inline SEntity<codim,dim,dimworld>* SLevelIterator<codim,dim,dimworld>::operator-> () 
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline SEntity<codim,dim,dimworld>* SLevelIterator<codim,dim,dimworld,pitype>::operator-> () 
 {
         return &e;
 }
 
-template<int codim, int dim, int dimworld>
-inline int SLevelIterator<codim,dim,dimworld>::level () 
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline int SLevelIterator<codim,dim,dimworld,pitype>::level () 
 {
         return l;
 }
@@ -1046,16 +1046,28 @@ inline int SGrid<dim,dimworld>::maxlevel () const
         return L-1;
 }
 
-template <int dim, int dimworld> template <int cd>
-inline SLevelIterator<cd,dim,dimworld> SGrid<dim,dimworld>::lbegin (int level)
+template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
+inline SLevelIterator<cd,dim,dimworld,pitype> SGrid<dim,dimworld>::lbegin (int level)
 {
-        return SLevelIterator<cd,dim,dimworld> (*this,level,0);
+        return SLevelIterator<cd,dim,dimworld,pitype> (*this,level,0);
+}
+
+template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
+inline SLevelIterator<cd,dim,dimworld,pitype> SGrid<dim,dimworld>::lend (int level)
+{
+        return SLevelIterator<cd,dim,dimworld,pitype> (*this,level,size(level,cd));
 }
 
 template <int dim, int dimworld> template <int cd>
-inline SLevelIterator<cd,dim,dimworld> SGrid<dim,dimworld>::lend (int level)
+inline SLevelIterator<cd,dim,dimworld,All_Partition> SGrid<dim,dimworld>::lbegin (int level)
 {
-        return SLevelIterator<cd,dim,dimworld> (*this,level,size(level,cd));
+        return SLevelIterator<cd,dim,dimworld,All_Partition> (*this,level,0);
+}
+
+template <int dim, int dimworld> template <int cd>
+inline SLevelIterator<cd,dim,dimworld,All_Partition> SGrid<dim,dimworld>::lend (int level)
+{
+        return SLevelIterator<cd,dim,dimworld,All_Partition> (*this,level,size(level,cd));
 }
 
 template<int dim, int dimworld>

@@ -64,7 +64,7 @@ typedef double sgrid_ctype;
 
 template<int dim, int dimworld> class SElement;
 template<int codim, int dim, int dimworld> class SEntity;
-template<int codim, int dim, int dimworld> class SLevelIterator;
+template<int codim, int dim, int dimworld, PartitionIteratorType> class SLevelIterator;
 template<int dim, int dimworld> class SGrid;
 template<int dim, int dimworld> class SIntersectionIterator;
 template<int dim, int dimworld> class SHierarchicIterator;
@@ -407,6 +407,12 @@ public:
         //! global index is calculated from the index and grid size  
         int global_index();
 
+  //! return partition type attribute
+  PartitionType partition_type ()
+  {
+	return InteriorEntity;
+  }
+
         //! geometry of this entity
         SElement<dim-codim,dimworld>& geometry ();
 
@@ -512,7 +518,7 @@ public:
         /*! Provide access to mesh entity i of given codimension. Entities
           are numbered 0 ... count<cc>()-1
          */ 
-        template<int cc> SLevelIterator<cc,dim,dimworld> entity (int i); // 0 <= i < count()
+        template<int cc> SLevelIterator<cc,dim,dimworld,All_Partition> entity (int i); // 0 <= i < count()
 
   //! return global index of entity<cc> number i 
   template <int cc> int subIndex ( int i );
@@ -530,7 +536,7 @@ public:
         void iend (SIntersectionIterator<dim,dimworld>&);
 
         //! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
-        SLevelIterator<0,dim,dimworld> father ();
+        SLevelIterator<0,dim,dimworld,All_Partition> father ();
         //! Inter-level access to father element on coarser grid. 
         //! Assumes that meshes are nested.
         void father (SEntity<0,dim,dimworld> & pa); 
@@ -620,7 +626,7 @@ public:
           This can speed up on-the-fly interpolation for linear conforming elements
           Possibly this is sufficient for all applications we want on-the-fly.
         */
-        SLevelIterator<0,dim,dimworld> father ();
+        SLevelIterator<0,dim,dimworld,All_Partition> father ();
 
         //! local coordinates within father
         Vec<dim,sgrid_ctype>& local ();
@@ -650,18 +656,18 @@ private:
 
 /*! Enables iteration over all entities of a given codimension and level of a grid.
  */
-template<int codim, int dim, int dimworld>
-class SLevelIterator : public LevelIteratorDefault <codim,dim,dimworld,sgrid_ctype,SLevelIterator,SEntity>
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+class SLevelIterator : public LevelIteratorDefault <codim,dim,dimworld,pitype,sgrid_ctype,SLevelIterator,SEntity>
 {
 public:
         //! prefix increment
-        SLevelIterator<codim,dim,dimworld>& operator++();
+        SLevelIterator<codim,dim,dimworld,pitype>& operator++();
 
         //! equality
-        bool operator== (const SLevelIterator<codim,dim,dimworld>& i) const;
+        bool operator== (const SLevelIterator<codim,dim,dimworld,pitype>& i) const;
 
         //! inequality
-        bool operator!= (const SLevelIterator<codim,dim,dimworld>& i) const;
+        bool operator!= (const SLevelIterator<codim,dim,dimworld,pitype>& i) const;
 
         //! dereferencing
         SEntity<codim,dim,dimworld>& operator*() ;
@@ -699,30 +705,67 @@ template<int dim, int dimworld>
 class SGrid : public GridDefault <dim,dimworld,sgrid_ctype,SGrid,SLevelIterator,SEntity>
 {
 public:
-        //! maximum number of levels allowed
-        enum { MAXL=32 };
+  //! maximum number of levels allowed
+  enum { MAXL=32 };
 
-        //! define type used for coordinates in grid module
-        typedef sgrid_ctype ctype;
+  //! define type used for coordinates in grid module
+  typedef sgrid_ctype ctype;
 
-        /*! Return maximum level defined in this grid. Levels are numbered
-          0 ... maxlevel with 0 the coarsest level.
+  /*! Return maximum level defined in this grid. Levels are numbered
+	0 ... maxlevel with 0 the coarsest level.   */
+  int maxlevel() const;
+
+  //! Iterator to first entity of given codim on level
+  template<int cd, PartitionIteratorType pitype>
+  SLevelIterator<cd,dim,dimworld,pitype> lbegin (int level);
+
+  //! one past the end on this level
+  template<int cd, PartitionIteratorType pitype>
+  SLevelIterator<cd,dim,dimworld,pitype> lend (int level);
+
+  //! Iterator to first entity of given codim on level
+  template<int cd>
+  SLevelIterator<cd,dim,dimworld,All_Partition> lbegin (int level);
+
+  //! one past the end on this level
+  template<int cd>
+  SLevelIterator<cd,dim,dimworld,All_Partition> lend (int level);
+
+  /*! The communication interface
+	@param T: array class holding data associated with the entities
+	@param P: type used to gather/scatter data in and out of the message buffer
+	@param codim: communicate entites of given codim
+	@param if: one of the predifined interface types, throws error if it is not implemented
+	@param level: communicate for entities on the given level
+
+	Implements a generic communication function sending an object of type P for each entity
+    in the intersection of two processors. P has two methods gather and scatter that implement
+    the protocol. Therefore P is called the "protocol class".
    */
-        int maxlevel() const;
+  template<class T, template<class> class P, int codim>
+  void communicate (T& t, InterfaceType iftype, CommunicationDirection dir, int level)
+  {
+	// SGrid is sequential and has no periodic boundaries, so do nothing ...
+	return;
+  }
 
-        //! Iterator to first entity of given codim on level
-        template<int cd>
-        SLevelIterator<cd,dim,dimworld> lbegin (int level);
+  //! number of grid entities per level and codim
+  int size (int level, int codim) const;
 
-        //! one past the end on this level
-        template<int cd>
-        SLevelIterator<cd,dim,dimworld> lend (int level);
+  //! number of grid entities of all level for given codim
+  int global_size (int codim) const;
 
-        //! number of grid entities per level and codim
-        int size (int level, int codim) const;
+  //! return size (= distance in graph) of overlap region
+  int overlap_size (int level, int codim)
+  {
+	return 0;
+  }
 
-        //! number of grid entities of all level for given codim
-        int global_size (int codim) const;
+  //! return size (= distance in graph) of ghost region
+  int ghost_size (int level, int codim)
+  {
+	return 0;
+  }
 
   //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ... 
   GridIdentifier type() const; 
@@ -735,66 +778,66 @@ public:
   template <FileFormatType ftype>
   bool readGrid ( const char * filename , sgrid_ctype &time );
   
-        // these are all members specific to sgrid
+  // these are all members specific to sgrid
 
-        /*! constructor, subject to change!
-        \param H_: array of size dim: length in each dimension
-        \param N_: array of size dim: coarse grid size, #elements in one direction
-        */
-        SGrid (const int* N_, const sgrid_ctype* H_);
+  /*! constructor, subject to change!
+	\param H_: array of size dim: length in each dimension
+	\param N_: array of size dim: coarse grid size, #elements in one direction
+  */
+  SGrid (const int* N_, const sgrid_ctype* H_);
   
-        /*! Constructor using a bounding box
-        \param L_: array of size dim: lower left corner of grid
-        \param H_: array of size dim: upper right corner of grid
-        \param N_: array of size dim: coarse grid size, #elements in one direction
-        */
-        SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_);
+  /*! Constructor using a bounding box
+	\param L_: array of size dim: lower left corner of grid
+	\param H_: array of size dim: upper right corner of grid
+	\param N_: array of size dim: coarse grid size, #elements in one direction
+  */
+  SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_);
 
   //! empty constructor making grid of unit square 
-        SGrid ();
+  SGrid ();
 
-    /** \brief Refine mesh globally by one level
-     *
-     * \param refCount gets ignored
-     */
+  /** \brief Refine mesh globally by one level
+   *
+   * \param refCount gets ignored
+   */
   void globalRefine (int refCount);
 
-        //! map expanded coordinates to position
-        Vec<dim,sgrid_ctype> pos (int level, FixedArray<int,dim>& z);
+  //! map expanded coordinates to position
+  Vec<dim,sgrid_ctype> pos (int level, FixedArray<int,dim>& z);
  
-        //! compute codim from coordinate
-        int codim (int level, FixedArray<int,dim>& z);
+  //! compute codim from coordinate
+  int codim (int level, FixedArray<int,dim>& z);
 
-        //! compute number from expanded coordinate
-        int n (int level, FixedArray<int,dim> z);
+  //! compute number from expanded coordinate
+  int n (int level, FixedArray<int,dim> z);
 
-        //! compute coordinates from number and codimension
-        FixedArray<int,dim> z (int level, int i, int codim);
+  //! compute coordinates from number and codimension
+  FixedArray<int,dim> z (int level, int i, int codim);
         
-        //! compress from expanded coordinates to grid for a single partition number
-        FixedArray<int,dim> compress (int level, FixedArray<int,dim>& z); 
+  //! compress from expanded coordinates to grid for a single partition number
+  FixedArray<int,dim> compress (int level, FixedArray<int,dim>& z); 
 
-        //! expand with respect to partition number
-        FixedArray<int,dim> expand (int level, FixedArray<int,dim>& r, int b); 
+  //! expand with respect to partition number
+  FixedArray<int,dim> expand (int level, FixedArray<int,dim>& r, int b); 
 
-        /*! There are \f$2^d\f$ possibilities of having even/odd coordinates. 
-            The binary representation is called partition number.
-        */
-        int partition (int level, FixedArray<int,dim>& z); 
+  /*! There are \f$2^d\f$ possibilities of having even/odd coordinates. 
+	The binary representation is called partition number.
+  */
+  int partition (int level, FixedArray<int,dim>& z); 
 
-        //! given reduced coordinates of an element, determine if element is in the grid
-        bool exists (int level, FixedArray<int,dim>& zred);
+  //! given reduced coordinates of an element, determine if element is in the grid
+  bool exists (int level, FixedArray<int,dim>& zred);
 
 private:
   // generate SGrid 
-    void makeSGrid (const int* N_,  const sgrid_ctype* L_, const sgrid_ctype* H_);
+  void makeSGrid (const int* N_,  const sgrid_ctype* L_, const sgrid_ctype* H_);
     
-    int L;                          // number of levels in hierarchic mesh 0<=level<L
-    FixedArray<sgrid_ctype,dim> low;     // lower left corner of the grid
-    FixedArray<sgrid_ctype,dim> H;       // length of cube per direction
-    FixedArray<int,dim> N[MAXL];         // number of elements per direction
-    Vec<dim,sgrid_ctype> h[MAXL];   // mesh size per direction
-    CubeMapper<dim> mapper[MAXL];   // a mapper for each level
+  int L;                          // number of levels in hierarchic mesh 0<=level<L
+  FixedArray<sgrid_ctype,dim> low;     // lower left corner of the grid
+  FixedArray<sgrid_ctype,dim> H;       // length of cube per direction
+  FixedArray<int,dim> N[MAXL];         // number of elements per direction
+  Vec<dim,sgrid_ctype> h[MAXL];   // mesh size per direction
+  CubeMapper<dim> mapper[MAXL];   // a mapper for each level
 
   // faster implemantation od subIndex 
   friend class SEntity<0,dim,dimworld>; 
