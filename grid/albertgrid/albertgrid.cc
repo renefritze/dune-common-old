@@ -3121,7 +3121,7 @@ AlbertGrid(AlbertGrid<dim,dimworld> & oldGrid, int proc , bool levInd) :
     ALBERT free_mesh(fakeMesh);
 
     // delete fake macro file 
-    //std::remove ( fakename );
+    std::remove ( fakename );
 
     // setup AlbertGrid Interface to Albert Mesh 
     initGrid(proc);
