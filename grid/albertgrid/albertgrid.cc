@@ -260,8 +260,9 @@ builtGeom(ALBERT EL_INFO *elInfo, int face,
   {
     for(int i=0; i<dim+1; i++)
     {
-      (coord_(i)) = static_cast< albertCtype  * > 
-                   ( elInfo_->coord[mapVertices(i)] );
+      const ALBERT REAL_D & elcoord = elInfo_->coord[mapVertices(i)];
+      for(int j=0; j<dimworld; j++)
+        coord_[i][j] = elcoord[j];
     }
     // geometry built 
     return true;
@@ -288,8 +289,11 @@ builtGeom(ALBERT EL_INFO *elInfo, int face,
   if(elInfo_)
   {
     for(int i=0; i<dim+1; i++)
-      (coord_(i)) = static_cast< albertCtype  * > 
-                    ( elInfo_->coord[mapVertices(i)] );
+    {
+      const ALBERT REAL_D & elcoord = elInfo_->coord[mapVertices(i)];
+      for(int j=0; j<dimworld; j++)
+        coord_[i][j] = elcoord[j];
+    }
     // geometry built 
     return true;
   }
@@ -313,8 +317,11 @@ builtGeom(ALBERT EL_INFO *elInfo, int face,
   if(elInfo_)
   {
     for(int i=0; i<dim+1; i++)
-      (coord_(i)) = static_cast< albertCtype  * > 
-                    ( elInfo_->coord[mapVertices(i)] );
+    {
+      const ALBERT REAL_D & elcoord = elInfo_->coord[mapVertices(i)];
+      for(int j=0; j<dimworld; j++)
+        coord_[i][j] = elcoord[j];
+    }
     // geometry built 
     return true;
   }
@@ -406,27 +413,27 @@ global(const FieldVector<albertCtype, dim>& local)
   
   // we calculate interal in barycentric coordinates  
   // fake the third local coordinate via localFake
-  albertCtype c = local(0);
+  albertCtype c = local[0];
   albertCtype localFake=1.0-c;
  
   // the initialize 
   // note that we have to swap the j and i 
   // in coord(j,i) means coord_(i)(j)  
   for(int j=0; j<dimworld; j++)
-    globalCoord_(j) = c * coord_(j,1);
+    globalCoord_[j] = c * coord_(j,1);
       
   // for all local coords 
   for (int i = 1; i < dim; i++)
   {
-    c = local(i);
+    c = local[i];
     localFake -= c;
     for(int j=0; j<dimworld; j++)
-      globalCoord_(j) += c * coord_(j,i+1);
+      globalCoord_[j] += c * coord_(j,i+1);
   }
 
   // for the last barycentric coord 
   for(int j=0; j<dimworld; j++)
-    globalCoord_(j) += localFake * coord_(j,0);
+    globalCoord_[j] += localFake * coord_(j,0);
 
   return globalCoord_;
 }
@@ -461,12 +468,12 @@ inline void AlbertGridElement<3,3>::calcElMatrix ()
   enum { dimworld = 3 };
   if( !builtElMat_)
   {
-      FieldVector<albertCtype, dimworld> & coord0 = coord_(0);
+    FieldVector<albertCtype, dimworld> & coord0 = coord_(0);
     for(int i=0 ;i<dimworld; i++)
     {
-      elMat_(i,0) = coord_(i,1) - coord0(i);
-      elMat_(i,1) = coord_(i,2) - coord0(i);
-      elMat_(i,2) = coord_(i,3) - coord0(i);
+      elMat_(i,0) = coord_(i,1) - coord0[i];
+      elMat_(i,1) = coord_(i,2) - coord0[i];
+      elMat_(i,2) = coord_(i,3) - coord0[i];
     }
     builtElMat_ = true;
   }
@@ -578,8 +585,8 @@ inline void AlbertGridElement<1,2>::
 buildJacobianInverse()
 {
   // volume is length of edge 
-    FieldVector<albertCtype, 2> vec = coord_(0) - coord_(1);
-  elDet_ = vec.norm2(); 
+  FieldVector<albertCtype, 2> vec = coord_(0) - coord_(1);
+  elDet_ = vec.two_norm(); 
 
   builtinverse_ = true;
 }
@@ -665,7 +672,7 @@ inline bool AlbertGridElement<2,2>::checkInverseMapping (int loc)
   tmp2 = Jinv_ * tmp2;
 
   for(int j=0; j<dim; j++)
-    if(ABS(tmp2(j) - refcoord(j)) > 1e-15)
+    if(ABS(tmp2[j] - refcoord[j]) > 1e-15)
     {
       std::cout << "AlbertGridElement<2,2>::checkInverseMapping: Mapping of coord " << loc << " incorrect! \n";
       return false;
@@ -687,7 +694,7 @@ inline bool AlbertGridElement<3,3>::checkInverseMapping (int loc)
   tmp2 = Jinv_ * tmp2;
 
   for(int j=0; j<dim; j++)
-    if(ABS(tmp2(j) - refcoord(j)) > 1e-15)
+    if(ABS(tmp2[j] - refcoord[j]) > 1e-15)
     {
       std::cout << "AlbertGridElement<3,3>::checkInverseMapping: Mapping of coord " << loc << " incorrect! \n";
       return false;
@@ -720,7 +727,7 @@ inline bool AlbertGridElement<2,2>::checkMapping (int loc)
   tmp2 += coord_(0);
 
   for(int j=0; j<dim; j++)
-    if(tmp2(j) != coord(j))
+    if(tmp2[j] != coord[j])
     {
       std::cout << coord; std::cout << tmp2; std::cout << "\n";
       std::cout << "AlbertGridElement<2,2>::checkMapping: Mapping of coord " << loc << " incorrect! \n";
@@ -747,7 +754,7 @@ inline bool AlbertGridElement<3,3>::checkMapping (int loc)
 
   for(int j=0; j<dim; j++)
   {
-    if(ABS(tmp2(j) - coord(j)) > 1e-15)
+    if(ABS(tmp2[j] - coord[j]) > 1e-15)
     {
       std::cout << "Checking of " << loc << " not ok!\n";
       std::cout << coord; std::cout << refcoord;
@@ -768,10 +775,10 @@ checkInside(const FieldVector<albertCtype, dim> &local)
   
   for(int i=0; i<dim; i++)
   {
-    sum += local(i);
-    if(local(i) < 0.0) 
+    sum += local[i];
+    if(local[i] < 0.0) 
     {
-      if(ABS(local(i)) > 1e-15) 
+      if(ABS(local[i]) > 1e-15) 
       {
         return false; 
       }
@@ -1857,8 +1864,8 @@ outer_normal()
   // seems to work   
   ALBERT REAL_D *coord = elInfo_->coord;
 
-  outNormal_(0) = -(coord[(neighborCount_+1)%3][1] - coord[(neighborCount_+2)%3][1]); 
-  outNormal_(1) =   coord[(neighborCount_+1)%3][0] - coord[(neighborCount_+2)%3][0];
+  outNormal_[0] = -(coord[(neighborCount_+1)%3][1] - coord[(neighborCount_+2)%3][1]); 
+  outNormal_[1] =   coord[(neighborCount_+1)%3][0] - coord[(neighborCount_+2)%3][0];
 
   return outNormal_; 
 }
@@ -1882,13 +1889,14 @@ outer_normal()
   const int * localFaces = ALBERT AlbertHelp::localTetraFaceNumber[neighborCount_]; 
   for(int i=0; i<dim; i++) 
   {
-    tmpV_(i) = coord[localFaces[1]][i] - coord[localFaces[0]][i]; 
-    tmpU_(i) = coord[localFaces[2]][i] - coord[localFaces[1]][i]; 
+    tmpV_[i] = coord[localFaces[1]][i] - coord[localFaces[0]][i]; 
+    tmpU_[i] = coord[localFaces[2]][i] - coord[localFaces[1]][i]; 
   }
 
   // outNormal_ has length 3 
   for(int i=0; i<dim; i++) 
-    outNormal_(i) = tmpU_((i+1)%dim) * tmpV_((i+2)%dim) - tmpU_((i+2)%dim) * tmpV_((i+1)%dim);
+    outNormal_[i] = tmpU_[(i+1)%dim] * tmpV_[(i+2)%dim] 
+                  - tmpU_[(i+2)%dim] * tmpV_[(i+1)%dim];
 
   outNormal_ *= val;
   return outNormal_; 
@@ -3686,7 +3694,7 @@ writeGridUSPM ( const char * filename, double time , int level)
 
       FieldVector<albertCtype, dimworld>& vec = (it->geometry())[i];
       for (int j = 0; j < dimworld; j++)
-        coord[k][j] = vec(j);
+        coord[k][j] = vec[j];
 
       ++nit;
     }
@@ -3773,7 +3781,7 @@ writeGridUSPM ( const char * filename, double time , int level)
 
       FieldVector<albertCtype, dimworld> vec = (it->geometry())[i];
       for (int j = 0; j < dimworld; j++)
-        coord[k][j] = vec(j);
+        coord[k][j] = vec[j];
     }
   }
 
