@@ -70,7 +70,7 @@ int testIteratorRemove(){
     iter+=8;
 
     iter.eraseToHere();
-
+    ++iter;
 
     if((*iter)!=10){
 	std::cerr<<"Removing from iterator failed! "<<__FILE__<<":"<<__LINE__<<std::endl;
@@ -79,7 +79,7 @@ int testIteratorRemove(){
 
     iter = alist.begin();
 
-    if((*iter)!=10){
+    if((*iter)!=9){
 	std::cerr<<"Removing from iterator failed! "<<__FILE__<<":"<<__LINE__<<std::endl;
 	return 1;
     }
@@ -88,9 +88,15 @@ int testIteratorRemove(){
     iter.eraseToHere();
     iter +=4;
 
-    if((*iter)!=14){
+    if((*iter)!=17){
 	std::cerr<<"Removing from iterator failed! "<<__FILE__<<":"<<__LINE__<<std::endl;
 	return 1;
+    }
+
+    alist.purge();
+    if(*(alist.begin())!=13){
+      std::cerr<<"Purging iterator failed! "<<__FILE__<<":"<<__LINE__<<std::endl;
+      return 1;
     }
     return 0;
 }
@@ -183,6 +189,10 @@ int main(){
 	cerr<< "Sorting failed!"<<endl;
     }
 
+    if(0!=testIteratorRemove()){
+	ret++;
+	cerr<< "Erasing failed!"<<endl;
+    }
     exit(ret);
 
 }
