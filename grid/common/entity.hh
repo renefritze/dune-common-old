@@ -6,8 +6,9 @@
 namespace Dune
 {
 
-/*
- * ENTITY
+    /** \brief The wrapper class for entities of arbitrary codimension
+     * \ingroup GridCommon
+ * 
  */
 template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
 class Entity {
@@ -61,6 +62,9 @@ public:
 
 };
 
+    /** \brief The wrapper class for entities of codimension zero, i.e. elements 
+     * \ingroup GridCommon
+     */
 template<int dim, class GridImp, template<int,int,class> class EntityImp>
 class Entity <0,dim,GridImp,EntityImp> 
 {
@@ -209,6 +213,9 @@ public:
   Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {};  
 };
 
+    /** \brief The wrapper class for entities representing vertices 
+     * \ingroup GridCommon
+     */
 template<int dim, class GridImp, template<int,int,class> class EntityImp>
 class Entity <dim,dim,GridImp,EntityImp> 
 {
