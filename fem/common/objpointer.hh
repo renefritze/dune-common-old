@@ -20,7 +20,7 @@ struct ObjPointer
   ObjPointer (ObjType  *t) : item (t) , next (0) {}
 
   //! delete the next ObjPointer and the item 
-  ~ObjPointer ()
+  virtual ~ObjPointer ()
   {
     if(next) delete next; next = 0;
     if(item) delete item; item = 0;
@@ -35,9 +35,8 @@ public:
   //! make new operator with item points to null 
   ObjPointerStorage () : item_ (0) {}
 
-  ~ObjPointerStorage ()
+  virtual ~ObjPointerStorage ()
   {
-    std::cout << "delete Operator "<< this << " \n";
     if(item_) delete item_; item_ = 0;
   }
 
