@@ -49,7 +49,7 @@ void AlbertLeafRefine(EL *parent, EL *child[2]);
 void AlbertLeafCoarsen(EL *parent, EL *child[2]);
 void initLeafData(LEAF_DATA_INFO *linfo);
 void initDofAdmin(MESH *mesh);
-  
+
 const BOUNDARY *initBoundary(MESH *Spmesh, int bound);
 
 #ifdef __ALBERTNAME__
@@ -59,7 +59,6 @@ const BOUNDARY *initBoundary(MESH *Spmesh, int bound);
 
 namespace Dune 
 {
-
 
 typedef ALBERT REAL albertCtype;
 
@@ -98,11 +97,36 @@ struct AlbertGridReferenceElement
 {
   enum { dofs = dim+1 };
   enum { dimension = dim };
-  enum { type = dim+1 };  
+  enum { type = unknown };  
   
   static AlbertGridElement<dim,dim> refelem;
   static ALBERT EL_INFO elInfo_;
 };
+
+// singleton holding reference elements
+template<>
+struct AlbertGridReferenceElement<2> 
+{
+  enum { dimension = 2 };
+  enum { dofs = dimension+1 };
+  enum { type = triangle };  
+  
+  static AlbertGridElement<dimension,dimension> refelem;
+  static ALBERT EL_INFO elInfo_;
+};
+
+// singleton holding reference elements
+template<>
+struct AlbertGridReferenceElement<3> 
+{
+  enum { dimension = 3 };
+  enum { dofs = dimension+1 };
+  enum { type = tetrahedron };  
+  
+  static AlbertGridElement<dimension,dimension> refelem;
+  static ALBERT EL_INFO elInfo_;
+};
+
 
 
 //**********************************************************************
@@ -175,7 +199,7 @@ public:
   bool pointIsInside(const Vec<dimworld,albertCtype> &point);
 
   /*! 
-    Copy from Peter Bastian:
+    Copy from sgrid.hh:
 
     Integration over a general element is done by integrating over the reference element
     and using the transformation from the reference element to the global element as follows:
@@ -196,6 +220,8 @@ public:
     will directly translate in substantial savings in the computation of finite element
     stiffness matrices.
    */
+
+  // A(l) 
   albertCtype integration_element (const Vec<dim,albertCtype>& local);
 
   //! can only be called for dim=dimworld!
@@ -237,7 +263,7 @@ private:
   { return ((face_+1)+ (edge_+1) +i)%N_VERTICES; };
   template <> int mapVertices< 3 > (int i) 
   { return ((face_+1)+ (edge_+1) +(vertex_+1) +i)%N_VERTICES; };
-
+  
   Mat<dimworld,dim+1,albertCtype> coord_;
 
   Vec<dimworld,albertCtype> globalCoord_;
@@ -401,7 +427,6 @@ public:
   //! index is unique and consecutive per level and codim used for access to degrees of freedo
   int index ();
 
-  
   //! geometry of this entity
   AlbertGridElement<dim,dimworld>& geometry ();
 
@@ -410,8 +435,10 @@ public:
     with codimension cc.
    */
   template<int cc> int count   () { return dim+1; };   //!< Default codim 1 Faces
+
   template<> int count<2<<dim> () { return (dim*2); }; //!< Edges Codim = 2, only 3d 
   template<> int count<dim>    () { return dim+1; };   //!< Vertices codim = dim
+
 
   /*! Provide access to mesh entity i of given codimension. Entities
     are numbered 0 ... count<cc>()-1
@@ -435,8 +462,7 @@ public:
       return tmp;
     }
   };
-  
-  // spezialization for dim = dimworld = 3 ind albertgrid.cc 
+  // spezialization for codim = dim in albertgrid.cc 
   template<> AlbertGridLevelIterator<dim,dim,dimworld> entity<dim> (int i)
   {
     AlbertGridLevelIterator<dim,dim,dimworld> tmp(elInfo_,0,0,i);
@@ -513,6 +539,7 @@ private:
 //**********************************************************************
 //
 // --AlbertGridHierarchicIterator
+// --HierarchicIterator
 /*!
   Mesh entities of codimension 0 ("elements") allow to visit all entities of
   codimension 0 obtained through nested, hierarchic refinement of the entity.
@@ -539,6 +566,9 @@ public:
 
   // the default Constructor
   AlbertGridHierarchicIterator();
+
+  // the default Constructor
+  ~AlbertGridHierarchicIterator();
 
   // the Copy Constructor
   AlbertGridHierarchicIterator(const AlbertGridHierarchicIterator& I);
@@ -581,6 +611,7 @@ private:
 //**********************************************************************
 //
 // --AlbertGridNeighborIterator
+// --NeighborIterator
 /*!
   Mesh entities of codimension 0 ("elements") allow to visit all neighbors, wh
   a neighbor is an entity of codimension 0 which has a common entity of codimens
@@ -787,7 +818,6 @@ private:
   {
     return goNextVertex(stack,elinfo_old); 
   };
-
   
   // the real go next methods
   ALBERT EL_INFO * goNextElInfo(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old);
@@ -828,7 +858,13 @@ class AlbertGrid : public Grid < dim, dimworld,
 // The Interface Methods
 //**********************************************************
 public: 
-  typedef AlbertGridLevelIterator<0,dim,dimworld> LevelIterator;
+  template <int codim> 
+  struct Traits
+  {
+    typedef AlbertGridLevelIterator<codim,dim,dimworld> LevelIterator;
+  };
+
+  typedef Traits<0> LevelIterator;
 
   typedef AlbertGridReferenceElement<dim> ReferenceElement;
   

@@ -175,7 +175,8 @@ struct AlbertGridReferenceElement
 
 //****************************************************************
 //
-// AlbertGridElement 
+// --AlbertGridElement 
+// --Element 
 //
 //****************************************************************
 template< int dim, int dimworld>
@@ -340,7 +341,9 @@ builtGeom(ALBERT EL_INFO *elInfo, unsigned char face,
   {
     for(int i=0; i<dim+1; i++)
       for(int j=0; j<dimworld; j++)
-        coord_(i)(j) = elInfo_->coord[mapVertices<dimworld-dim>(i)][j];
+      {
+        (coord_(i))(j) = elInfo_->coord[mapVertices<dimworld-dim>(i)][j];
+      }
   }
 }
 
@@ -572,7 +575,6 @@ template< int dim, int dimworld>
 inline albertCtype AlbertGridElement<dim,dimworld>:: 
 integration_element (const Vec<dim,albertCtype>& local)
 {
-  //std::cout << "integration_element not implemented yet! \n";
   return ALBERT el_volume(elInfo_);
 }
 
@@ -619,6 +621,41 @@ Jacobian_inverse (const Vec<dim,albertCtype>& local)
   return(det);
 }
 #endif
+  return Jinv_;  
+}
+
+inline Mat<2,2>& AlbertGridElement<2,2>:: 
+Jacobian_inverse (const Vec<2,albertCtype>& local)
+{
+  enum { dim = 2 };
+  enum { dimworld = 2 };
+
+   /*                   ( a  b )
+        Matrix A  =     (      )
+                        ( c  d )  */
+
+   /*                   (  d -b )
+        Matrix A^-1  =  (       )
+                        ( -c  a )  */
+
+  // look ALBERT Reference Manual to see that Point 2 of reference element
+  // has the coordinates (0,0) 
+  // P1 - P0
+  Jinv_(0) = coord_(0) - coord_(2);
+  // P2 - P0
+  Jinv_(1) = coord_(1) - coord_(2);
+
+  double det = Jinv_(0,0)*Jinv_(1,1) - Jinv_(0,1)*Jinv_(1,0);
+
+  Jinv_ *= (1.0/det);
+
+  double swap = Jinv_(0,0);
+  Jinv_(0,0) = Jinv_(1,1);
+  Jinv_(1,1) = swap;
+
+  Jinv_(0,1) *= -1.0;
+  Jinv_(1,0) *= -1.0;
+
   return Jinv_;  
 }
 
@@ -866,7 +903,6 @@ index()
   return elInfo_->el->index;
 }
 
-
 template< int dim, int dimworld>
 inline void AlbertGridEntity < 0, dim ,dimworld >::
 setElInfo(ALBERT EL_INFO * elInfo,  unsigned char face,
@@ -935,16 +971,30 @@ AlbertGridHierarchicIterator()
   makeIterator();
 }
 
+template< int dim, int dimworld>
+inline AlbertGridHierarchicIterator<dim,dimworld>::
+~AlbertGridHierarchicIterator()
+{
+ // travStack_ = removeStack(travStack_);
+}
 
 template< int dim, int dimworld>
 inline AlbertGridHierarchicIterator<dim,dimworld>::
 AlbertGridHierarchicIterator(ALBERT TRAVERSE_STACK travStack,int travLevel)
 {
+#if 1
   travStack_ = travStack;
+  travStack_.traverse_level = travLevel;
   // default Einstellungen fuer den TraverseStack, siehe 
   // traverse_first, traverse_nr_common.cc 
+  //
+  // is done in hardCopyStack (albertextra.hh) 
+#else  
+  travStack_ = hardCopyStack(travStack_, travStack);
   travStack_.traverse_level = travLevel;
+#endif
 
+  
   virtualEntity_.setTraverseStack(&travStack_);
   // Hier kann ein beliebiges Element uebergeben werden,
   // da jedes AlbertElement einen Zeiger auf das Macroelement
@@ -1044,9 +1094,12 @@ recursiveTraverse(ALBERT TRAVERSE_STACK * stack)
       /*
        * go up in tree until we can go down again 
        */
+
+      //std::cout << " stack level = " << stack->traverse_level << std::endl;
       while((stack->stack_used > 0) &&
-        ((stack->info_stack[stack->stack_used] >= 2) ||
-          (el->child[0] == NULL)))
+	    ((stack->info_stack[stack->stack_used] >= 2) || (el->child[0]==nil)
+	     || ( stack->traverse_level <=
+		  (stack->elinfo_stack+stack->stack_used)->level)) )
       {
         stack->stack_used--;
         el = stack->elinfo_stack[stack->stack_used].el;
@@ -1062,7 +1115,9 @@ recursiveTraverse(ALBERT TRAVERSE_STACK * stack)
     /*
      * go down next child 
      */
-    if(el->child[0])
+
+   
+    if(el->child[0] && (stack->traverse_level > (stack->elinfo_stack+stack->stack_used)->level) )
     {
       if(stack->stack_used >= stack->stack_size - 1)
         ALBERT enlargeTraverseStack(stack);
@@ -1475,8 +1530,7 @@ template< int dim, int dimworld>
 inline int AlbertGridNeighborIterator<dim,dimworld>::
 number_in_self () 
 {
-  std::cout << "number_in_self not implemented yet! \n";
-  return -1;
+  return neighborCount_;
 }
 
 template< int dim, int dimworld>
@@ -1581,15 +1635,6 @@ AlbertGridLevelIterator(ALBERT MESH * mesh, AlbertMarkerVector * vertexMark,
     makeIterator();
 
 };
-
-
-template<int codim, int dim, int dimworld>
-inline AlbertGridLevelIterator<codim,dim,dimworld >::
-AlbertGridLevelIterator(const AlbertGridLevelIterator<codim,dim,dimworld > &I) 
-{
-  manageStack_ = I.manageStack_;
-  virtualEntity_ = I.virtualEntity_;  
-}
 
 template<int codim, int dim, int dimworld>
 inline bool AlbertGridLevelIterator<codim,dim,dimworld >::
@@ -1699,14 +1744,14 @@ AlbertGridLevelIterator < codim,dim,dimworld >::operator++(int steps)
 }
 
 template<int codim, int dim, int dimworld>
-inline typename AlbertGridEntity< codim,dim,dimworld >& 
+inline AlbertGridEntity<codim, dim, dimworld> & 
 AlbertGridLevelIterator< codim,dim,dimworld >::operator *()
 {
   return virtualEntity_;
 }
 
 template<int codim, int dim, int dimworld>
-inline typename AlbertGridEntity< codim,dim,dimworld >* 
+inline AlbertGridEntity< codim,dim,dimworld >* 
 AlbertGridLevelIterator< codim,dim,dimworld >::operator ->()
 {
   return &virtualEntity_;
@@ -1890,6 +1935,10 @@ AlbertGridEntity < 0, dim ,dimworld >::hbegin(int maxlevel)
   // sich deshalb die Werte anedern koennen, der elinfo_stack bleibt jedoch
   // der gleiche, deshalb kann man auch nur nach unten, d.h. zu den Kindern
   // laufen
+  
+  //std::cout << " stack level " << travStack_->traverse_level << std::endl;
+  //std::cout << " stack size " << travStack_->stack_size << std::endl;
+
   AlbertGridHierarchicIterator<dim,dimworld> it((*travStack_),maxlevel);  
   return it;
 }
@@ -2134,7 +2183,9 @@ inline int AlbertGrid < dim, dimworld >::size (int level, int codim)
     return numberOfElements;
   }
   else 
+  {
     return mesh_->n_elements;
+  }
 }
 
 template < int dim, int dimworld >
@@ -2199,7 +2250,7 @@ inline void AlbertGrid <2,2>::writeGrid ()
     {
       ALBERT EL_INFO * elInfo = it->getElInfo();
 
-      int k = elInfo->el->dof[i][0];
+      int k = it->entity<dim>(i)->index();
       vertex[elNum][i] = k;
 
       int neighNum = nit->index();

@@ -8,23 +8,23 @@ namespace Dune
 
 //! Spezialization for const base functions 
 template<int ddef, ElementType elType>
-inline Vec<LocalBase<ddef,elType,Const>::dimrange> 
-LocalBase<ddef,elType,Const>::phi(Vec<ddef> &x)
+inline typename LocalBase<ddef,elType,Const>::RETtype 
+LocalBase<ddef,elType,Const>::phi(COORDtype &x)
 {
-  Vec<dimrange> tmp(1.0);
+  RETtype tmp(1.0);
   return tmp;
 }
 //! Spezialization for const base functions 
 template<int ddef, ElementType elType>
-inline LocalBase<ddef,elType,Const>::DRVType
-LocalBase<ddef,elType,Const>::drv1st(Vec<dimdef> &x)
+inline typename LocalBase<ddef,elType,Const>::DRVType
+LocalBase<ddef,elType,Const>::drv1st(COORDtype &x)
 {
-  Mat<ddef,dimrange> tmp(0.0);
+  DRVType tmp(0.0);
   return tmp;
 }
 
 template <int ddef, ElementType elType>
-inline LocalBase<ddef,elType,Const>::FUNC* 
+inline typename LocalBase<ddef,elType,Const>::FUNC* 
 LocalBase<ddef,elType,Const>::
 getBaseFunc(int i)
 {
@@ -32,7 +32,7 @@ getBaseFunc(int i)
 }
 
 template <int ddef, ElementType elType>
-inline LocalBase<ddef,elType,Const>::DRV1st* 
+inline typename LocalBase<ddef,elType,Const>::DRV1st* 
 LocalBase<ddef,elType,Const>::
 getDrv1st(int i)
 {
@@ -40,7 +40,7 @@ getDrv1st(int i)
 }
 
 template <int ddef, ElementType elType>
-inline LocalBase<ddef,elType,Const>::DRV2nd* 
+inline typename LocalBase<ddef,elType,Const>::DRV2nd* 
 LocalBase<ddef,elType,Const>::
 getDrv2nd(int i)
 {
@@ -51,7 +51,7 @@ getDrv2nd(int i)
 //! Spezialization for LagrangeOne (linear Lagrange elements)
 //**************************************************************
 template <int ddef>
-inline LocalBase<ddef,triangle,LagrangeOne>::FUNC*
+inline typename LocalBase<ddef,triangle,LagrangeOne>::FUNC*
 LocalBase<ddef,triangle,LagrangeOne>::
 getBaseFunc(int i)
 {
@@ -65,7 +65,7 @@ getBaseFunc(int i)
   return NULL;
 }
 template<int ddef>
-inline LocalBase<ddef,triangle,LagrangeOne>::DRV1st*
+inline typename LocalBase<ddef,triangle,LagrangeOne>::DRV1st*
 LocalBase<ddef,triangle,LagrangeOne>::
 getDrv1st(int i)
 {
@@ -80,7 +80,7 @@ getDrv1st(int i)
 }
 
 template<int ddef>
-inline LocalBase<ddef,triangle,LagrangeOne>::DRV2nd*
+inline typename LocalBase<ddef,triangle,LagrangeOne>::DRV2nd*
 LocalBase<ddef,triangle,LagrangeOne>::
 getDrv2nd(int i)
 {
@@ -95,9 +95,28 @@ getDrv2nd(int i)
 }
 
 
+
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,LagrangeOne>::dimrange> 
-LocalBase<ddef,triangle,LagrangeOne>::phi0(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,LagrangeOne>::RETtype 
+LocalBase<ddef,triangle,LagrangeOne>::phi0(COORDtype &x)
+{
+  //std::cout << "phi1 \n";
+  Vec<dimrange> tmp(x(0)); 
+  return tmp;
+}
+
+template<int ddef>
+inline typename LocalBase<ddef,triangle,LagrangeOne>::RETtype 
+LocalBase<ddef,triangle,LagrangeOne>::phi1(COORDtype &x)
+{
+  //std::cout << "phi2 \n";
+  Vec<dimrange> tmp(x(1)); 
+  return tmp;
+}
+
+template<int ddef>
+inline typename LocalBase<ddef,triangle,LagrangeOne>::RETtype 
+LocalBase<ddef,triangle,LagrangeOne>::phi2(COORDtype &x)
 {
   //std::cout << "phi0 \n";
   // Achtung nur 2d
@@ -107,55 +126,41 @@ LocalBase<ddef,triangle,LagrangeOne>::phi0(Vec<dimdef> &x)
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,LagrangeOne>::dimrange> 
-LocalBase<ddef,triangle,LagrangeOne>::phi1(Vec<dimdef> &x)
-{
-  //std::cout << "phi1 \n";
-  Vec<dimrange> tmp(x(0)); 
-  return tmp;
-}
-
-template<int ddef>
-inline Vec<LocalBase<ddef,triangle,LagrangeOne>::dimrange> 
-LocalBase<ddef,triangle,LagrangeOne>::phi2(Vec<dimdef> &x)
-{
-  //std::cout << "phi2 \n";
-  Vec<dimrange> tmp(x(1)); 
-  return tmp;
-}
-template<int ddef>
-inline LocalBase<ddef,triangle,LagrangeOne>::DRVType 
-LocalBase<ddef,triangle,LagrangeOne>::drv1st0(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,LagrangeOne>::DRVType 
+LocalBase<ddef,triangle,LagrangeOne>::drv1st0(COORDtype &x)
 {
   // triangle ==> 3 corners 
-  Mat<numDof,dimrange> tmp(0.0); 
+  DRVType tmp(0.0); 
   tmp(0,0) = 1.0;
   return tmp;
 }
 template<int ddef>
-inline LocalBase<ddef,triangle,LagrangeOne>::DRVType 
-LocalBase<ddef,triangle,LagrangeOne>::drv1st1(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,LagrangeOne>::DRVType 
+LocalBase<ddef,triangle,LagrangeOne>::drv1st1(COORDtype &x)
 {
   // triangle ==> 3 corners 
-  Mat<numDof,dimrange> tmp(0.0); 
+  DRVType tmp(0.0); 
   tmp(1,0) = 1.0;
   return tmp;
 }
 template<int ddef>
-inline LocalBase<ddef,triangle,LagrangeOne>::DRVType 
-LocalBase<ddef,triangle,LagrangeOne>::drv1st2(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,LagrangeOne>::DRVType 
+LocalBase<ddef,triangle,LagrangeOne>::drv1st2(COORDtype &x)
 {
+  // look in ALBERT Reference manual to see that point 2 of reference
+  // element has the coordinates (0,0)
+  
   // triangle ==> 3 corners 
-  Mat<numDof,dimrange> tmp(0.0); 
-  tmp(2,0) = 1.0;
+  //
+  DRVType tmp(-1.0); 
   return tmp;
 }
 
 template<int ddef>
-inline LocalBase<ddef,triangle,LagrangeOne>::DRVType 
-LocalBase<ddef,triangle,LagrangeOne>::drv2nd(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,LagrangeOne>::DRVType 
+LocalBase<ddef,triangle,LagrangeOne>::drv2nd(COORDtype &x)
 {
-  Mat<numDof,dimrange> tmp(0.0); 
+  DRVType tmp(0.0); 
   return tmp;
 }
 
@@ -164,7 +169,7 @@ LocalBase<ddef,triangle,LagrangeOne>::drv2nd(Vec<dimdef> &x)
 //! Spezialization for DGOne (Discontinous Galerkin elements)
 //**************************************************************
 template<int ddef>
-inline LocalBase<ddef,triangle,DGOne>::FUNC*
+inline typename LocalBase<ddef,triangle,DGOne>::FUNC*
 LocalBase<ddef,triangle,DGOne>::
 getBaseFunc(int i)
 {
@@ -179,7 +184,7 @@ getBaseFunc(int i)
 }
 
 template<int ddef>
-inline LocalBase<ddef,triangle,DGOne>::DRV1st*
+inline typename LocalBase<ddef,triangle,DGOne>::DRV1st*
 LocalBase<ddef,triangle,DGOne>::
 getDrv1st(int i)
 {
@@ -194,7 +199,7 @@ getDrv1st(int i)
 }
 
 template<int ddef>
-inline LocalBase<ddef,triangle,DGOne>::DRV2nd*
+inline typename LocalBase<ddef,triangle,DGOne>::DRV2nd*
 LocalBase<ddef,triangle,DGOne>::
 getDrv2nd(int i)
 {
@@ -209,63 +214,62 @@ getDrv2nd(int i)
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,DGOne>::dimrange> 
-LocalBase<ddef,triangle,DGOne>::phi0(Vec<dimdef> &x)
-{
-  double val = 1.0-x(0)-x(1);
-  Vec<dimrange> tmp(val); 
-  return tmp;
-}
-
-template<int ddef>
-inline Vec<LocalBase<ddef,triangle,DGOne>::dimrange> 
-LocalBase<ddef,triangle,DGOne>::phi1(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,DGOne>::RETtype 
+LocalBase<ddef,triangle,DGOne>::phi0(COORDtype &x)
 {
   Vec<dimrange> tmp(x(0)); 
   return tmp;
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,DGOne>::dimrange> 
-LocalBase<ddef,triangle,DGOne>::phi2(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,DGOne>::RETtype 
+LocalBase<ddef,triangle,DGOne>::phi1(COORDtype &x)
 {
   Vec<dimrange> tmp(x(1)); 
   return tmp;
 }
+template<int ddef>
+inline typename LocalBase<ddef,triangle,DGOne>::RETtype 
+LocalBase<ddef,triangle,DGOne>::phi2(COORDtype &x)
+{
+  double val = 1.0-x(0)-x(1);
+  Vec<dimrange> tmp(val); 
+  return tmp;
+}
+
 
 template<int ddef>
-inline LocalBase<ddef,triangle,DGOne>::DRVType 
-LocalBase<ddef,triangle,DGOne>::drv1st0(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,DGOne>::DRVType 
+LocalBase<ddef,triangle,DGOne>::drv1st0(COORDtype &x)
 {
   // triangle ==> 3 corners 
-  Mat<numDof,dimrange> tmp(0.0); 
+  DRVType tmp(0.0); 
   tmp(0,0) = 1.0;
   return tmp;
 }
 template<int ddef>
-inline LocalBase<ddef,triangle,DGOne>::DRVType 
-LocalBase<ddef,triangle,DGOne>::drv1st1(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,DGOne>::DRVType 
+LocalBase<ddef,triangle,DGOne>::drv1st1(COORDtype &x)
 {
   // triangle ==> 3 corners 
-  Mat<numDof,dimrange> tmp(0.0); 
+  DRVType tmp(0.0); 
   tmp(1,0) = 1.0;
   return tmp;
 }
 template<int ddef>
-inline LocalBase<ddef,triangle,DGOne>::DRVType 
-LocalBase<ddef,triangle,DGOne>::drv1st2(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,DGOne>::DRVType 
+LocalBase<ddef,triangle,DGOne>::drv1st2(COORDtype &x)
 {
   // triangle ==> 3 corners 
-  Mat<numDof,dimrange> tmp(0.0); 
-  tmp(2,0) = 1.0;
+  DRVType tmp(-1.0); 
   return tmp;
 }
 
 template<int ddef>
-inline LocalBase<ddef,triangle,DGOne>::DRVType 
-LocalBase<ddef,triangle,DGOne>::drv2nd(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,DGOne>::DRVType 
+LocalBase<ddef,triangle,DGOne>::drv2nd(COORDtype &x)
 {
-  Mat<numDof,dimrange> tmp(0.0); 
+  DRVType tmp(0.0); 
   return tmp;
 }
 
@@ -273,7 +277,7 @@ LocalBase<ddef,triangle,DGOne>::drv2nd(Vec<dimdef> &x)
 //! Spezialization for DGTwo (quadratic DG elements)
 //*****************************************************************
 template<int ddef>
-inline LocalBase<ddef,triangle,DGTwo>::FUNC*
+inline typename LocalBase<ddef,triangle,DGTwo>::FUNC*
 LocalBase<ddef,triangle,DGTwo>::
 getBaseFunc(int i)
 {
@@ -291,55 +295,55 @@ getBaseFunc(int i)
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,DGTwo>::dimrange> 
-LocalBase<ddef,triangle,DGTwo>::phi0(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,DGTwo>::RETtype 
+LocalBase<ddef,triangle,DGTwo>::phi0(COORDtype &x)
 {
   Vec<dimrange> tmp(x(0)*(2.0*x(0) - 1.0)); 
   return tmp;
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,DGTwo>::dimrange> 
-LocalBase<ddef,triangle,DGTwo>::phi1(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,DGTwo>::RETtype 
+LocalBase<ddef,triangle,DGTwo>::phi1(COORDtype &x)
 {
   Vec<dimrange> tmp(x(1)*(2.0*x(1) - 1.0)); 
   return tmp;
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,DGTwo>::dimrange> 
-LocalBase<ddef,triangle,DGTwo>::phi2(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,DGTwo>::RETtype 
+LocalBase<ddef,triangle,DGTwo>::phi2(COORDtype &x)
 {
   Vec<dimrange> tmp(x(2)*(2.0*x(2) - 1.0)); 
   return tmp;
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,DGTwo>::dimrange> 
-LocalBase<ddef,triangle,DGTwo>::phiEdge0(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,DGTwo>::RETtype 
+LocalBase<ddef,triangle,DGTwo>::phiEdge0(COORDtype &x)
 {
   Vec<dimrange> tmp(4.0*x(1)*x(2)); 
   return tmp;
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,DGTwo>::dimrange> 
-LocalBase<ddef,triangle,DGTwo>::phiEdge1(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,DGTwo>::RETtype 
+LocalBase<ddef,triangle,DGTwo>::phiEdge1(COORDtype &x)
 {
   Vec<dimrange> tmp(4.0*x(0)*x(2)); 
   return tmp;
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,DGTwo>::dimrange> 
-LocalBase<ddef,triangle,DGTwo>::phiEdge2(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,DGTwo>::RETtype 
+LocalBase<ddef,triangle,DGTwo>::phiEdge2(COORDtype &x)
 {
   Vec<dimrange> tmp(4.0*x(0)*x(1)); 
   return tmp;
 }
 
 template<int ddef>
-inline LocalBase<ddef,triangle,LagrangeTwo>::FUNC*
+inline typename LocalBase<ddef,triangle,LagrangeTwo>::FUNC*
 LocalBase<ddef,triangle,LagrangeTwo>::
 getBaseFunc(int i)
 {
@@ -356,48 +360,48 @@ getBaseFunc(int i)
   return NULL;
 }
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,LagrangeTwo>::dimrange> 
-LocalBase<ddef,triangle,LagrangeTwo>::phi0(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,LagrangeTwo>::RETtype 
+LocalBase<ddef,triangle,LagrangeTwo>::phi0(COORDtype &x)
 {
   Vec<dimrange> tmp(x(0)*(2.0*x(0) - 1.0)); 
   return tmp;
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,LagrangeTwo>::dimrange> 
-LocalBase<ddef,triangle,LagrangeTwo>::phi1(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,LagrangeTwo>::RETtype 
+LocalBase<ddef,triangle,LagrangeTwo>::phi1(COORDtype &x)
 {
   Vec<dimrange> tmp(x(1)*(2.0*x(1) - 1.0)); 
   return tmp;
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,LagrangeTwo>::dimrange> 
-LocalBase<ddef,triangle,LagrangeTwo>::phi2(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,LagrangeTwo>::RETtype 
+LocalBase<ddef,triangle,LagrangeTwo>::phi2(COORDtype &x)
 {
   Vec<dimrange> tmp(x(2)*(2.0*x(2) - 1.0)); 
   return tmp;
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,LagrangeTwo>::dimrange> 
-LocalBase<ddef,triangle,LagrangeTwo>::phiEdge0(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,LagrangeTwo>::RETtype 
+LocalBase<ddef,triangle,LagrangeTwo>::phiEdge0(COORDtype &x)
 {
   Vec<dimrange> tmp(4.0*x(1)*x(2)); 
   return tmp;
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,LagrangeTwo>::dimrange> 
-LocalBase<ddef,triangle,LagrangeTwo>::phiEdge1(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,LagrangeTwo>::RETtype 
+LocalBase<ddef,triangle,LagrangeTwo>::phiEdge1(COORDtype &x)
 {
   Vec<dimrange> tmp(4.0*x(0)*x(2)); 
   return tmp;
 }
 
 template<int ddef>
-inline Vec<LocalBase<ddef,triangle,LagrangeTwo>::dimrange> 
-LocalBase<ddef,triangle,LagrangeTwo>::phiEdge2(Vec<dimdef> &x)
+inline typename LocalBase<ddef,triangle,LagrangeTwo>::RETtype 
+LocalBase<ddef,triangle,LagrangeTwo>::phiEdge2(COORDtype &x)
 {
   Vec<dimrange> tmp(4.0*x(0)*x(1)); 
   return tmp;
@@ -408,25 +412,26 @@ LocalBase<ddef,triangle,LagrangeTwo>::phiEdge2(Vec<dimdef> &x)
 // --LocalBaseFunction
 //
 //****************************************************************  
-template <class RefElement, class BaseFuncType, int dimrange, int dimdef>
-inline Vec<dimrange> LocalBaseFunction<RefElement,BaseFuncType,dimrange,dimdef>::
-eval (Vec<dimdef> & localCoords)
+template <class RefElement, BaseType basetype, int dimrange, int dimdef>
+inline typename LocalBaseFunction<RefElement,basetype,dimrange,dimdef>::RETtype
+LocalBaseFunction<RefElement,basetype,dimrange,dimdef>::
+eval (COORDtype & localCoords)
 {
   return phi_(localCoords);
 }
 
-template <class RefElement, class BaseFuncType, int dimrange, int dimdef>
-inline typename LocalBaseFunction<RefElement,BaseFuncType,dimrange,dimdef>::DRVType
-LocalBaseFunction<RefElement,BaseFuncType,dimrange,dimdef>::
-evalFirstDrv (Vec<dimdef> &localCoords)
+template <class RefElement, BaseType basetype, int dimrange, int dimdef>
+inline typename LocalBaseFunction<RefElement,basetype,dimrange,dimdef>::DRVType
+LocalBaseFunction<RefElement,basetype,dimrange,dimdef>::
+evalFirstDrv (COORDtype &localCoords)
 {
   return drv1st_(localCoords);
 }
 
-template <class RefElement, class BaseFuncType, int dimrange, int dimdef>
-inline typename LocalBaseFunction<RefElement,BaseFuncType,dimrange,dimdef>::DRVType
-LocalBaseFunction<RefElement,BaseFuncType,dimrange,dimdef>::
-evalSecondDrv (Vec<dimdef> &localCoords)
+template <class RefElement, BaseType basetype, int dimrange, int dimdef>
+inline typename LocalBaseFunction<RefElement,basetype,dimrange,dimdef>::DRVType
+LocalBaseFunction<RefElement,basetype,dimrange,dimdef>::
+evalSecondDrv (COORDtype &localCoords)
 {
   return drv2nd_(localCoords);
 }
