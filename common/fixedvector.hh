@@ -4,7 +4,7 @@
 #include<iostream>
 #include<math.h>
 
-#include"misc.hh"
+#include "misc.hh"
 #include "fixedarray.hh"
 
 namespace Dune {
@@ -96,6 +96,19 @@ public:
   {
     for (int i=0; i<dim; i++) this->a[i] *= k; 
     return *this;
+  }
+
+  //! operator ==
+  bool operator== (const Vec<dim,T> & b) const
+  {
+    for (int i=0; i<dim; i++) if (this->a[i] != b.a[i]) return false; 
+    return true;
+  }
+
+  //! operator !=
+  bool operator!= (const Vec<dim,T> & b) const
+  {
+    return ! operator== (b);
   }
 
   //! 1 norm
