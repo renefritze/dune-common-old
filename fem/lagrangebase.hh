@@ -1,10 +1,11 @@
 #ifndef __DUNE__LAGRANGEBASE_H__
 #define __DUNE__LAGRANGEBASE_H__
 
-#include "../grid/common/grid.hh"
-#include "fastbase.hh"
-#include "discretefunctionspace.hh"
-#include "quadtriangle.hh"
+#include <dune/grid/common/grid.hh>
+
+#include "common/fastbase.hh"
+#include "common/discretefunctionspace.hh"
+#include "quadtetratri.hh"
 #include "quadlqh.hh"
 
 
@@ -686,7 +687,6 @@ public:
   LagrangeDiscreteFunctionSpace ( GridType & g ) : 
     DiscreteFunctionSpaceType (g,id) // ,baseFuncSet_(*this)  { };
   {
-//    g.globalRefine ( maxLevel );
     mapper_ = NULL;
     
     //std::cout << "Constructor of LagrangeDiscreteFunctionSpace! \n";
