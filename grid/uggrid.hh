@@ -6,15 +6,16 @@
 //#include <assert.h>
 
 #include "../../UG/ug/gm/gm.h"
+// for debugging
+#include "../../UG/ug/dev/ugdevices.h"
 
 // undef stuff defined by UG
-#undef DIM
-
+#include "uggrid/ug_undefs.hh"
 
 
 //#include "../common/misc.hh"
 //#include "../common/matvec.hh"
-//#include "../common/array.hh"
+#include "../common/array.hh"
 #include "common/grid.hh"
 
 //#include "albertgrid/agmemory.hh"
@@ -231,7 +232,7 @@ public EntityDefault <codim,dim,dimworld, UGCtype,
               UGGridNeighborIterator,UGGridHierarchicIterator>
 {
   friend class UGGrid < dim , dimworld >;
-  friend class UGGridEntity < 0, dim, dimworld>;
+    //friend class UGGridEntity < 0, dim, dimworld>;
   friend class UGGridLevelIterator < codim, dim, dimworld>;
   //friend class UGGridLevelIterator < dim, dim, dimworld>;
 public:
@@ -911,24 +912,22 @@ public:
      */
   template <FileFormatType ftype>
   bool readGrid( const char * filename, UGCtype & time );
-
+#endif
   UGCtype getTime () const { return time_; };
   
-private:
+    //private:
+public:
   // make the calculation of indexOnLevel and so on.
   // extra method because of Reihenfolge
   void calcExtras(); 
- 
-  // read and write mesh_ via ALBERT routines 
-  bool writeGridXdr  ( const char * filename, UGCtype time );
-  bool writeGridUSPM ( const char * filename, UGCtype time, int level );
-  bool readGridXdr   ( const char * filename, UGCtype & time );
-    
+
+#if 0 
   //! access to mesh pointer, needed by some methods
   ALBERT MESH* getMesh () const { return mesh_; }; 
+#endif
 
   // pointer to a UG multigrid, which contains the data
-  multigrid *mesh_;
+  UG3d::multigrid *mesh_;
 
   // number of maxlevel of the mesh
   int maxlevel_;
@@ -939,6 +938,7 @@ private:
   // number of entitys of each level an codim 
   Array<int> size_;
 
+#if 0
   // remember on which level an ALBERT EL lives, is needed for the new
   // fillElInfo method that takes the level of an element into account
   // for calculation of the neighbor realtions 
