@@ -5,30 +5,8 @@
 
 namespace Dune{
 
-
-// strorage class for new generated operators during operator + on
-// DiscreteOperator
-template <class ObjType>
-struct ObjPointer
-{
-  typedef ObjPointer<ObjType> ObjPointerType;
-  // remember object item and next pointer 
-  ObjType * item;
-  ObjPointerType *next;
-
-  // new ObjPointer is only created with pointer for item 
-  ObjPointer () : item (NULL) , next (NULL) {}
-
-  // new ObjPointer is only created with pointer for item 
-  ObjPointer (ObjType  *t) : item (t) , next (NULL) {}
-
-  // delete the next ObjPointer and the item 
-  ~ObjPointer ()
-  {
-    if(next) delete next; next = NULL;
-    if(item) delete item; item = NULL;
-  }
-};
+// object pointer management for combined discrete operators 
+#include "objpointer.hh"
 
 /** @defgroup DiscreteOperator DiscreteOperator
     @ingroup OperatorCommon
@@ -51,11 +29,12 @@ class DiscreteOperatorDefault
 : public Operator <typename DF_DomainType::RangeFieldType, 
                    typename DF_RangeType::RangeFieldType, 
                    DF_DomainType , DF_RangeType>
+, public ObjPointerStorage
 {
   typedef DiscreteOperatorDefault<DF_DomainType,DF_RangeType> MyType;
 public:
   //! make new operator with item points to null 
-  DiscreteOperatorDefault () : item_ (NULL) {}
+  DiscreteOperatorDefault () : level_ (0) {}
 
   // set level 
   void initLevel (int level) const 
@@ -81,29 +60,7 @@ public:
     std::cerr << "ERROR: DiscreteOperatorDefault::operator () called! \n";
   }
 
-  
-  //! delete all other operators with are generated 
-  //! using the operator + of derived operators  
-  ~DiscreteOperatorDefault ()
-  {
-    std::cout << "delete Operator "<< this << " \n";
-    if(item_) delete item_; item_ = NULL;
-  }
-
 protected:
-  // store the objects created by operator + in here 
-  typedef ObjPointer<MyType> ObjPointerType;
-  ObjPointer<MyType> * item_;
-
-  // store new generated DiscreteOperator Pointer 
-  template <class DiscrOpType>
-  void saveObjPointer ( DiscrOpType * discrOp )
-  {
-    ObjPointerType *next = new ObjPointerType ( discrOp );
-    next->next = item_;
-    item_ = next;
-  }
-
   // current level of operator 
   mutable int level_;
 }; // end class DiscreteOperatorDefault 
