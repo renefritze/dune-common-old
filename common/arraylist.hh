@@ -583,7 +583,7 @@ namespace Dune
     {
 	return list_->elementAt(position_);
     }
-
+  
     template<class T, int N, class A>
     int ArrayListIterator<T,N,A>::distanceTo(const ArrayListIterator<T,N,A>& other) const
     {
