@@ -3360,6 +3360,54 @@ inline int AlbertGrid < dim, dimworld >::size (int level, int codim)
   }
 }
 
+template < int dim, int dimworld >
+inline int AlbertGrid < dim, dimworld >::leafSize (int level, int codim) const
+{
+  return const_cast<AlbertGrid<dim,dimworld> *> (this)->leafSize(level,codim);
+}
+
+template < int dim, int dimworld >
+inline int AlbertGrid < dim, dimworld >::leafSize (int level, int codim) 
+{
+  enum { numCodim = dim+1 };
+  int ind = (level * numCodim) + codim;
+  
+  if(leafSize_[ind] == -1)
+  {
+    int numberOfElements = 0;
+    
+    assert ( codim == 0 );
+    
+    if(codim == 0)
+    {
+      LeafIterator endit = leafend(level);
+      for(LeafIterator it = leafbegin(level);
+          it != endit; ++it)
+        numberOfElements++;
+    }
+    if(codim == 1)
+    {
+      
+    }
+    if(codim == 2)
+    {
+     
+    }
+    
+    if(codim == 3)
+    {
+    
+    }
+    
+    leafSize_[ind] = numberOfElements; 
+    return numberOfElements;
+  }
+  else
+  { 
+    return leafSize_[ind]; 
+  }
+}
+
 
 template < int dim, int dimworld > 
 inline void AlbertGrid < dim, dimworld >::arrangeDofVec()
@@ -3739,6 +3787,9 @@ inline void AlbertGrid < dim, dimworld >::markNew()
   // make new size and set all levels to -1 ==> new calc
   if((maxlevel_+1)*(numCodim) > size_.size())
     makeNewSize(size_, 2*((maxlevel_+1)*numCodim));
+
+  if((maxlevel_+1)*(numCodim) > leafSize_.size())
+    makeNewSize(leafSize_, 2*((maxlevel_+1)*numCodim));
 
   // the easiest way, in Albert all elements have unique global element
   // numbers, therefore we make one big array from which we get with the

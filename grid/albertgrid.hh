@@ -1075,6 +1075,13 @@ public:
      */
   int size (int level, int codim) const; 
 
+
+   //! number of leaf grid entities 
+  int leafSize (int level, int codim);
+
+  int leafSize (int level, int codim) const; 
+
+
   //! refine all positive marked leaf entities 
   //! coarsen all negative marked entities if possible 
   //! return true if a least one element was refined 
@@ -1164,6 +1171,9 @@ private:
   
   // number of entitys of each level an codim 
   mutable Array<int> size_;
+
+  // number of entitys of each level an codim 
+  mutable Array<int> leafSize_;
 
   // help vector for setNewCoords 
   mutable Array<int> macroVertices_;
