@@ -17,7 +17,7 @@ inline typename DiscreteFunctionSpaceType::RangeField
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
 scalarProductDofs( const DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-                DofIteratorImp ,LocalFunctionIteratorImp, DiscreteFunctionImp > &g ) 
+                DofIteratorImp ,LocalFunctionIteratorImp, DiscreteFunctionImp > &g ) const
 {
   typedef typename DiscreteFunctionSpaceType::RangeField RangeFieldType; 
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
@@ -28,12 +28,15 @@ scalarProductDofs( const DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
   int level = this->getFunctionSpace().getGrid().maxlevel();
 
   // get DofIterator from this 
-  DofIteratorImp endit = this->dend ( level );
 
-  // hack 
+  /** \todo The const_casts are only necessary because we don't have
+   * const iterators */
+  DofIteratorImp endit = const_cast<DiscreteFunctionDefault*>(this)->dend ( level );
   DofIteratorImp git   = const_cast<DiscreteFunctionDefault &>( g ).dbegin ( level );
+  DofIteratorImp it = const_cast<DiscreteFunctionDefault*>(this)->dbegin( level );
+
   // multiply
-  for(DofIteratorImp it = this->dbegin( level ); it != endit; ++it)
+  for(; it != endit; ++it)
   {
     skp += (*it) * (*git);
     ++git;
