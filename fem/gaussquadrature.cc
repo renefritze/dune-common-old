@@ -207,7 +207,7 @@ inline GaussQuadrature<dim,ct>::GaussQuadrature (int order)
 			local[i](k) = G[x(k)];
 			weight[i] *= W[x(k)];
 		}
-//		std::cout << i << " " << x << " " << ip_local[i] << " " << ip_w[i] << std::endl;
+//		std::cout << i << " " << x << " " << local[i] << " " << w[i] << std::endl;
 	}
 }
 

@@ -172,7 +172,7 @@ inline void DoubleLinkedList<T>::erase (Iterator i)
 }
 
 template <class T>
-inline ostream& operator<< (ostream& s, DoubleLinkedList<T>& a)
+inline std::ostream& operator<< (std::ostream& s, DoubleLinkedList<T>& a)
 {
 	T t;
 	s << "dlist " << a.size() << " elements = (" << std::endl;

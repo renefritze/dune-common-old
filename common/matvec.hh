@@ -55,6 +55,11 @@ public:
 		for (int i=0; i<n; i++) x[i]=t;
 		return *this;
 	}
+	Vec<n,T>& operator= (T* t)
+	{
+		for (int i=0; i<n; i++) x[i]=t[i];
+		return *this;
+	}
 
 	//! operator () for read/write access to element of the vector
 	T& operator() (int i) {return x[i];}

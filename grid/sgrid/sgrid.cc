@@ -212,11 +212,28 @@ static inline Tupel<int,n>& coarsen (Tupel<int,n>& in)
 }
 
 template<int codim, int dim, int dimworld>
-inline SEntityBase<codim,dim,dimworld>::SEntityBase (SGrid<dim,dimworld>& _grid, int _l, int _id) : grid(_grid),geo(true)
+inline SEntityBase<codim,dim,dimworld>::SEntityBase (SGrid<dim,dimworld>& _grid, int _l, int _id) : geo(true)
 {
+    grid = &_grid;
 	l = _l;
 	id = _id;
-	z = _grid.z(_l,_id,codim);
+	z = grid->z(_l,_id,codim);
+	builtgeometry = false;
+}
+
+template<int codim, int dim, int dimworld>
+inline SEntityBase<codim,dim,dimworld>::SEntityBase () : geo(true)
+{
+	builtgeometry = false;
+}
+
+template<int codim, int dim, int dimworld>
+inline void SEntityBase<codim,dim,dimworld>::make (SGrid<dim,dimworld>& _grid, int _l, int _id)
+{
+    grid = &_grid;
+	l = _l;
+	id = _id;
+	z = grid->z(_l,_id,codim);
 	builtgeometry = false;
 }
 
@@ -225,7 +242,7 @@ inline void SEntityBase<codim,dim,dimworld>::make (int _l, int _id)
 {
 	l = _l;
 	id = _id;
-	z = grid.z(_l,_id,codim);
+	z = grid->z(_l,_id,codim);
 	builtgeometry = false;
 }
 
@@ -234,6 +251,9 @@ inline int SEntityBase<codim,dim,dimworld>::level ()
 {
 	return l;
 }
+// 		  std::cout << i->index() << " " ;
+// 		  for (int z=0; z<N; ++z) std::cout << "["<<j[z]<<","<<A[z]<<"] ";
+// 		  std::cout << std::endl;
 
 template<int codim, int dim, int dimworld> 
 inline int SEntityBase<codim,dim,dimworld>::index ()
@@ -260,9 +280,9 @@ inline SElement<dim-codim,dimworld>& SEntityBase<codim,dim,dimworld>::geometry (
 		{
 			// coordinate i is odd => gives one direction vector
 			t[i] += 1; // direction i => even
-			p2 = grid.pos(l,t);
+			p2 = grid->pos(l,t);
 			t[i] -= 2; // direction i => even
-			p1 = grid.pos(l,t);
+			p1 = grid->pos(l,t);
 			t[i] += 1; // revert t to original state
 			As(dir) = p2-p1;
 			dir++;
@@ -272,7 +292,7 @@ inline SElement<dim-codim,dimworld>& SEntityBase<codim,dim,dimworld>::geometry (
 	for (int i=0; i<dim; i++)
 		if (t[i]%2==1)
 			t[i] -= 1;
-	As(dir) =grid.pos(l,t); // all components of t are even
+	As(dir) =grid->pos(l,t); // all components of t are even
 	
 	// make element
 	geo.make(As);
@@ -316,19 +336,31 @@ inline SLevelIterator<cc,dim,dimworld> SEntity<0,dim,dimworld>::entity (int i)
 	for (int i=0; i<dim; i++) zentity[i] = z[i] + zref[i] - 1;
 
 	// make Iterator
-	return SLevelIterator<cc,dim,dimworld>(grid,l,grid.n(l,zentity));
+	return SLevelIterator<cc,dim,dimworld>(*grid,l,grid->n(l,zentity));
 }
 
 template<int dim, int dimworld>
 inline SNeighborIterator<dim,dimworld> SEntity<0,dim,dimworld>::nbegin ()
 {
-	return SNeighborIterator<dim,dimworld>(grid,*this,0);
+	return SNeighborIterator<dim,dimworld>(*grid,*this,0);
+}
+
+template<int dim, int dimworld>
+inline void SEntity<0,dim,dimworld>::nbegin (SNeighborIterator<dim,dimworld>& i)
+{
+	return i.make(*grid,*this,0);
 }
 
 template<int dim, int dimworld>
 inline SNeighborIterator<dim,dimworld> SEntity<0,dim,dimworld>::nend ()
 {
-	return SNeighborIterator<dim,dimworld>(grid,*this,count<1>());
+	return SNeighborIterator<dim,dimworld>(*grid,*this,count<1>());
+}
+
+template<int dim, int dimworld>
+inline void SEntity<0,dim,dimworld>::nend (SNeighborIterator<dim,dimworld>& i)
+{
+	return i.make(*grid,*this,count<1>());
 }
 
 
@@ -344,7 +376,7 @@ inline void SEntity<0,dim,dimworld>::make_father ()
 	}
 
 	// reduced coordinates from expanded coordinates
-	Tupel<int,dim> zz = grid.compress(l,z); 
+	Tupel<int,dim> zz = grid->compress(l,z); 
 
 	// look for odd coordinates
 	Vec<dim,sgrid_ctype> delta;
@@ -364,8 +396,8 @@ inline void SEntity<0,dim,dimworld>::make_father ()
 		}
 
 	// zz is now the reduced coordinate of the father, compute id
-	int partition = grid.partition(l,z); 
-	father_id = grid.n(l-1,grid.expand(l-1,zz,partition));
+	int partition = grid->partition(l,z); 
+	father_id = grid->n(l-1,grid->expand(l-1,zz,partition));
 
 	// now make a subcube of size 1/2 in each direction
 	Mat<dim,dim+1,sgrid_ctype> As;
@@ -387,9 +419,9 @@ inline SLevelIterator<0,dim,dimworld> SEntity<0,dim,dimworld>::father ()
 {
 	if (!built_father) make_father();
 	if (l>0)
-		return SLevelIterator<0,dim,dimworld>(grid,l-1,father_id);
+		return SLevelIterator<0,dim,dimworld>(*grid,l-1,father_id);
 	else
-		return SLevelIterator<0,dim,dimworld>(grid,l,id);
+		return SLevelIterator<0,dim,dimworld>(*grid,l,id);
 }
 
 template<int dim, int dimworld>
@@ -402,13 +434,13 @@ inline SElement<dim,dim>& SEntity<0,dim,dimworld>::father_relative_local ()
 template<int dim, int dimworld>
 inline SHierarchicIterator<dim,dimworld> SEntity<0,dim,dimworld>::hbegin (int maxlevel)
 {
-	return SHierarchicIterator<dim,dimworld>(grid,*this,maxlevel,false);
+	return SHierarchicIterator<dim,dimworld>(*grid,*this,maxlevel,false);
 }
 
 template<int dim, int dimworld>
 inline SHierarchicIterator<dim,dimworld> SEntity<0,dim,dimworld>::hend (int maxlevel)
 {
-	return SHierarchicIterator<dim,dimworld>(grid,*this,maxlevel,true);
+	return SHierarchicIterator<dim,dimworld>(*grid,*this,maxlevel,true);
 }
 
 
@@ -427,7 +459,7 @@ inline void SEntity<dim,dim,dimworld>::make_father ()
 	// reduced coordinates from expanded coordinates
 	// reduced coordinates of a fine grid vertex can be interpreted as 
 	// expanded coordinates on the next coarser level !
-	Tupel<int,dim> zz = grid.compress(l,z); 
+	Tupel<int,dim> zz = grid->compress(l,z); 
 
 	// to find father, make all coordinates odd
 	Vec<dim,sgrid_ctype> delta;
@@ -453,7 +485,7 @@ inline void SEntity<dim,dim,dimworld>::make_father ()
 		}
 
 	// zz is now an expanded coordinate on the coarse grid
-	father_id = grid.n(l-1,zz);
+	father_id = grid->n(l-1,zz);
 
 	// compute the local coordinates in father
 	in_father_local = 0.5;
@@ -467,9 +499,9 @@ inline SLevelIterator<0,dim,dimworld> SEntity<dim,dim,dimworld>::father ()
 {
 	if (!built_father) make_father();
 	if (l>0)
-		return SLevelIterator<0,dim,dimworld>(grid,l-1,father_id);
+		return SLevelIterator<0,dim,dimworld>(*grid,l-1,father_id);
 	else
-		return SLevelIterator<0,dim,dimworld>(grid,l,id);
+		return SLevelIterator<0,dim,dimworld>(*grid,l,id);
 }
 
 template<int dim, int dimworld>
@@ -591,7 +623,7 @@ inline void SNeighborIterator<dim,dimworld>::make (int _count)
 	count = _count;
 
 	// check if count is valid
-	if (count<0 || count>=self.count<1>()) return; // done, this is end iterator
+	if (count<0 || count>=self->count<1>()) return; // done, this is end iterator
 	valid_count = true;
 
 	// and compute compressed coordinates of neighbor
@@ -609,26 +641,50 @@ inline void SNeighborIterator<dim,dimworld>::make (int _count)
 		normal(count/2) = -1.0; // even
 
 	// now check if neighbor exists
-	is_on_boundary = !grid.exists(self.level(),zrednb);
+	is_on_boundary = !grid->exists(self->level(),zrednb);
 	if (is_on_boundary) return; // ok, done it
 
 	// now neighbor is in the grid and must be initialized. 
 	// First compute its id
-	int nbid = grid.n(self.level(),grid.expand(self.level(),zrednb,partition));
+	int nbid = grid->n(self->level(),grid->expand(self->level(),zrednb,partition));
 
 	// and make it
-	e.make(self.level(),nbid);
+	e.make(self->level(),nbid);
 }
 
 template<int dim, int dimworld>
 inline SNeighborIterator<dim,dimworld>::SNeighborIterator 
 (SGrid<dim,dimworld>& _grid, SEntity<0,dim,dimworld>& _self, int _count) 
-	: grid(_grid), self(_self), e(_grid,_self.l, _self.id), is_self_local(false), is_global(false),
+	: e(_grid,_self.l, _self.id), is_self_local(false), is_global(false),
 	  is_nb_local(false)
 {
+    grid = &_grid;
+    self = &_self;
+
 	// compute own compressed coordinates once
-	zred = grid.compress(self.l,self.z);
-	partition = grid.partition(self.l,self.z); 
+	zred = grid->compress(self->l,self->z);
+	partition = grid->partition(self->l,self->z); 
+
+	// make neighbor
+	make(_count);
+}
+
+template<int dim, int dimworld>
+inline SNeighborIterator<dim,dimworld>::SNeighborIterator () 
+	: is_self_local(false), is_global(false), is_nb_local(false)
+{ }
+
+template<int dim, int dimworld>
+inline void SNeighborIterator<dim,dimworld>::make (SGrid<dim,dimworld>& _grid, SEntity<0,dim,dimworld>& _self, int _count) 
+{
+    grid = &_grid;
+    self = &_self;
+
+	e.make(_grid,_self.l, _self.id);
+
+	// compute own compressed coordinates once
+	zred = grid->compress(self->l,self->z);
+	partition = grid->partition(self->l,self->z); 
 
 	// make neighbor
 	make(_count);
@@ -645,13 +701,13 @@ inline SNeighborIterator<dim,dimworld>& SNeighborIterator<dim,dimworld>::operato
 template<int dim, int dimworld>
 inline bool SNeighborIterator<dim,dimworld>::operator== (const SNeighborIterator<dim,dimworld>& i) const
 {
-	return (count==i.count)&&(&self==&(i.self));
+	return (count==i.count)&&(self==i.self);
 }
 
 template<int dim, int dimworld>
 inline bool SNeighborIterator<dim,dimworld>::operator!= (const SNeighborIterator<dim,dimworld>& i) const
 {
-	return (count!=i.count)||(&self!=&(i.self));
+	return (count!=i.count)||(self!=i.self);
 }
 
 template<int dim, int dimworld>
@@ -683,7 +739,7 @@ inline void SNeighborIterator<dim,dimworld>::makeintersections ()
 	int c = count%2;
 
 	// compute expanded coordinates of entity
-	Tupel<int,dim> z1 = self.z;
+	Tupel<int,dim> z1 = self->z;
 	if (c==1)
 		z1[dir] += 1; // odd
 	else
@@ -733,9 +789,9 @@ inline void SNeighborIterator<dim,dimworld>::makeintersections ()
 		{
 			// each i!=dir gives one direction vector
 			z1[i] += 1; // direction i => even
-			p2 = grid.pos(self.level(),z1);
+			p2 = grid->pos(self->level(),z1);
 			z1[i] -= 2; // direction i => even
-			p1 = grid.pos(self.level(),z1);
+			p1 = grid->pos(self->level(),z1);
 			z1[i] += 1; // revert t to original state
 			As(t) = p2-p1;
 			++t;
@@ -743,7 +799,7 @@ inline void SNeighborIterator<dim,dimworld>::makeintersections ()
 	for (int i=0; i<dim; i++)
 		if (i!=dir)
 			z1[i] -= 1;
-	As(t) =grid.pos(self.level(),z1);
+	As(t) =grid->pos(self->level(),z1);
 	is_global.make(As); // build geometry
 
 	built_intersections = true;
@@ -856,31 +912,36 @@ inline int SLevelIterator<codim,dim,dimworld>::level ()
 // inline methods for SGrid
 
 template<int dim, int dimworld>
-inline SGrid<dim,dimworld>::SGrid (Tupel<int,dim> N_, Tupel<sgrid_ctype,dim> H_, int L_)
+inline SGrid<dim,dimworld>::SGrid (int* N_, sgrid_ctype* H_)
 {
-	L = L_;
-	H = H_;
+	L = 1;
+	for (int i=0; i<dim; i++) H[i] = H_[i];
+	for (int i=0; i<dim; i++) N[0][i] = N_[i];
 
 	// define coarse mesh
-	N[0] = N_;
 	mapper[0].make(N[0]);
+	for (int i=0; i<dim; i++) 
+	  h[0](i) = H[0]/((sgrid_ctype)N[0][i]);
 
-	// refine the mesh
-	for (int l=1; l<L; l++)
-	{
-		for (int i=0; i<dim; i++) N[l][i] = 2*N[l-1][i];
-		mapper[l].make(N[l]);
-	}
+  std::cout << "level=" << L-1 << " size=(" << N[L-1][0];
+  for (int i=1; i<dim; i++) std::cout << "," <<  N[L-1][i];
+  std::cout << ")" << std::endl;
+}
 
-	// compute mesh size
-	for (int l=0; l<L; l++)
-	{
-		for (int i=0; i<dim; i++) h[l](i) = H[i]/((sgrid_ctype)N[l][i]);
-	}
+template<int dim, int dimworld>
+inline void SGrid<dim,dimworld>::globalRefine (int refCount)
+{
+  // refine the mesh
+  for (int i=0; i<dim; i++) N[L][i] = 2*N[L-1][i];
+  mapper[L].make(N[L]);
 
-//	std::cout << "Making SGrid with " << L << " level(s)." << std::endl;
-//	for (int l=0; l<L; l++)
-//		mapper[l].print(std::cout,0);
+  // compute mesh size
+  for (int i=0; i<dim; i++) h[L](i) = H[i]/((sgrid_ctype)N[L][i]);
+  L++;
+
+  std::cout << "level=" << L-1 << " size=(" << N[L-1][0];
+  for (int i=1; i<dim; i++) std::cout << "," <<  N[L-1][i];
+  std::cout << ")" << std::endl;
 }
 
 template<int dim, int dimworld>
