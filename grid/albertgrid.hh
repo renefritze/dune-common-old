@@ -548,6 +548,10 @@ public:
   //! return the global unique index in grid , same as el_index
   int global_index(); 
 
+  albertCtype maxEdgeWidth ();
+  
+  albertCtype diam();
+
 private: 
   // called from HierarchicIterator, because only this 
   // class changes the level of the entity, otherwise level is set by
@@ -1147,6 +1151,10 @@ public:
 
   //! transform grid N = scalar * x + trans
   void setNewCoords(const Vec<dimworld,albertCtype> & trans, const albertCtype scalar);
+
+  //! calculate max edge length 
+  double calcGridWidth ();
+  
 private:
   // initialize of some members 
   void initGrid(int proc);
