@@ -13,7 +13,7 @@
 #include<string>
 #include<rpc/xdr.h>
 
-#include <array.hh>
+#include "array.hh"
 
 namespace Dune 
 {
