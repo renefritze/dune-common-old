@@ -11,6 +11,7 @@
 namespace Dune
 {
 
+// because of gcc bug 14479 
 #ifdef HAVE_ICC
 #define TEMPPARAM2
 #endif
@@ -1180,6 +1181,7 @@ inline int AlbertGridEntity<0,dim,dimworld>::subIndex ( int i )
   return entity<cc>(i)->index();
 }
 
+
 // subIndex 
 template <> 
 #ifdef TEMPPARAM2
@@ -1211,6 +1213,7 @@ inline int AlbertGridEntity<0,3,3>::subIndex<3> ( int i )
   //return grid_.indexOnLevel<3>(elInfo_->el->dof[i][0],level_);
   return (elInfo_->el->dof[i][0]);
 }
+
 
 // default is faces 
 template <int dim, int dimworld> template <int cc>
@@ -2930,6 +2933,11 @@ inline AlbertGrid < dim, dimworld >::AlbertGrid() :
 template < int dim, int dimworld >
 inline void AlbertGrid < dim, dimworld >::initGrid(int proc)
 {
+#if DIM == 3
+  // because of bug in Albert , until bug fixed its ok 
+  RC_LIST_EL * rclist = ALBERT get_rc_list(mesh_);
+#endif
+  
   ALBERT AlbertHelp::getDofVecs(&dofvecs_);
   ALBERT AlbertHelp::setDofVec ( dofvecs_.owner, -1 );
 
