@@ -2,6 +2,7 @@
 #define __DUNE_FEOPERATOR_HH__
 
 #include <dune/fem/common/discreteoperator.hh>
+#include <dune/fem/common/localoperator.hh>
 
 namespace Dune {
 
@@ -21,10 +22,6 @@ public:
   typedef typename FunctionSpaceType::Domain DomainVecType;  
   typedef typename GridType::Traits<0>::Entity EntityType;
 
-  void prepare( EntityType &entity ) const {
-    asImp().prepare( entity );
-  }
-
   double getLocalMatrixEntry( EntityType &entity, const int i, const int j ) const {
     return asImp().getLocalMatrixEntry( entity, i, j );
   }
@@ -41,19 +38,24 @@ protected:
 };
 
 template <class DiscFunctionType, class MatrixType, class FEOpImp>
-class FiniteElementOperator : public FiniteElementOperatorInterface<DiscFunctionType,MatrixType,FEOpImp> 
+class FiniteElementOperator : public FiniteElementOperatorInterface<DiscFunctionType,MatrixType,FEOpImp> ,
+public LocalOperatorDefault <DiscFunctionType,DiscFunctionType, typename
+DiscFunctionType::RangeFieldType , FEOpImp  >
 {
   
   typedef FiniteElementOperator <DiscFunctionType,MatrixType,FEOpImp> MyType;
-  
+
 protected:
   mutable MatrixType *matrix_;
   const typename DiscFunctionType::FunctionSpaceType & functionSpace_;
   mutable bool matrix_assembled_;
-
+ 
+  // storage of argument and destination
+  const DiscFunctionType * arg_;
+  DiscFunctionType * dest_;
+  
   void assemble ( ) const 
   {
-    std::cout << "Assemble FiniteElementOperator \n";
     typedef typename DiscFunctionType::FunctionSpace FunctionSpaceType;
     typedef typename FunctionSpaceType::GridType GridType; 
     typedef typename GridType::Traits<0>::LevelIterator LevelIterator; 
@@ -67,8 +69,6 @@ protected:
     
     for( it ; it != endit; ++it ) 
     {
-      prepare( *it );
-      
       const BaseFunctionSetType & baseSet = functionSpace_.getBaseFunctionSet( *it );
       int numOfBaseFct = baseSet.getNumberOfBaseFunctions();  
       
@@ -183,7 +183,7 @@ protected:
     LevelIterator endit = grid.template lend<0> ( grid.maxlevel() );
     for( ; it != endit; ++it ) 
     {
-      prepare( *it );
+      //prepare( *it );
       
       const BaseFunctionSetType & baseSet = functionSpace_.getBaseFunctionSet( *it );
       int numOfBaseFct = baseSet.getNumberOfBaseFunctions();  
@@ -195,7 +195,9 @@ protected:
         {
           int col = functionSpace_.mapToGlobal( *it , j );    
 
-          double val = getLocalMatrixEntry( *it, i, j );
+          // scalar comes from LocalOperatorDefault, if operator is scaled,
+          // i.e. with timestepsize
+          double val = (this->scalar_) * getLocalMatrixEntry( *it, i, j );
     
           dest_it[col] += arg_it[ row ] * val;
         }
@@ -236,23 +238,26 @@ public:
   }
 
 public:
-  template <class GridIteratorType>
-  void prepareLocal(GridIteratorType &it , const DiscFunctionType &Arg,
-      DiscFunctionType & Dest )  { }
+  // store argument and destination 
+  void prepareGlobal(const DiscFunctionType &Arg, DiscFunctionType & Dest )  
+  { 
+    arg_  = &Arg.argument();
+    dest_ = &Dest.destination();
+    assert(arg_ != NULL); assert(dest_ != NULL);
+  }
+  // set argument and dest to NULL 
+  void finalizeGlobal()  
+  { 
+    arg_  = NULL; dest_ = NULL;
+  }
 
-  template <class GridIteratorType>
-  void finalizeLocal(GridIteratorType &it , const DiscFunctionType &Arg,
-      DiscFunctionType & Dest ) { }
-
-  
   // makes local multiply on the fly
-  template <class GridIteratorType>
-  void applyLocal ( GridIteratorType &it , 
-      const DiscFunctionType &arg , DiscFunctionType &dest ) const 
+  template <class EntityType>
+  void applyLocal ( EntityType &en ) const 
   {
-    typedef typename GridType::Traits<0>::Entity EntityType; 
-    EntityType &en = (*it);
-    
+    DiscFunctionType & arg  = const_cast<DiscFunctionType &> (*arg_);
+    DiscFunctionType & dest = (*dest_);
+
     typedef typename DiscFunctionType::FunctionSpace FunctionSpaceType;
     typedef typename FunctionSpaceType::GridType GridType; 
     
@@ -261,7 +266,7 @@ public:
     
     typedef typename FunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
 
-    GridType &grid = const_cast<GridType &> (functionSpace_.getGrid());
+    GridType &grid = functionSpace_.getGrid();
 
     typedef typename FunctionSpaceType::Range RangeVecType;
     typedef typename FunctionSpaceType::JacobianRange JacobianRange;
@@ -275,26 +280,43 @@ public:
       
     const BaseFunctionSetType & baseSet = functionSpace_.getBaseFunctionSet( en );
     int numOfBaseFct = baseSet.getNumberOfBaseFunctions();  
-    
-    for(int i=0; i<numOfBaseFct; i++) 
-    { 
-      int row = functionSpace_.mapToGlobal( en , i );
-      for (int j=0; j<numOfBaseFct; j++ ) 
-      {
-        int col = functionSpace_.mapToGlobal( en , j );   
-        double val = getLocalMatrixEntry( en , i, j );
+   
+    if(scalar_ == 1.)
+    {
+      for(int i=0; i<numOfBaseFct; i++) 
+      {  
+        int row = functionSpace_.mapToGlobal( en , i );
+        for (int j=0; j<numOfBaseFct; j++ ) 
+        {
+          int col = functionSpace_.mapToGlobal( en , j );   
 
-        dest_it[ row ] += arg_it[ col ] * val;
+          // scalar comes from LocalOperatorDefault, if operator is scaled,
+          // i.e. with timestepsize
+          double val = getLocalMatrixEntry( en, i, j );
+
+          dest_it[ row ] += arg_it[ col ] * val;
+        }
+      }
+    }
+    else 
+    {
+      for(int i=0; i<numOfBaseFct; i++) 
+      {  
+        int row = functionSpace_.mapToGlobal( en , i );
+        for (int j=0; j<numOfBaseFct; j++ ) 
+        {
+          int col = functionSpace_.mapToGlobal( en , j );   
+
+          // scalar comes from LocalOperatorDefault, if operator is scaled,
+          // i.e. with timestepsize
+          double val = (this->scalar_) * getLocalMatrixEntry( en, i, j );
+
+          dest_it[ row ] += arg_it[ col ] * val;
+        }
       }
     }
   } // end applyLocal
 
-
-  // find Dirichlet points and erase them
-  void finalizeGlobal (const DiscFunctionType &arg , DiscFunctionType &dest ) 
-  {
-  }
-  
 private:
   OpMode opMode_;
 };
