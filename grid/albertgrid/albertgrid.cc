@@ -1447,16 +1447,6 @@ AlbertGridHierarchicIterator< dim,dimworld >::operator ++()
 }
 
 template< int dim, int dimworld>
-inline AlbertGridHierarchicIterator<dim,dimworld>& 
-AlbertGridHierarchicIterator<dim,dimworld>::
-operator ++(int steps)
-{
-  for(int i=0; i<steps; i++)
-    ++(*this);
-  return (*this);
-}
-
-template< int dim, int dimworld>
 inline bool AlbertGridHierarchicIterator<dim,dimworld>::
 operator ==(const AlbertGridHierarchicIterator& I) const 
 {
@@ -1680,17 +1670,6 @@ operator ++()
   builtNeigh_ = false;
   // is like go to the next neighbour
   neighborCount_++;
-  return (*this);
-}
-
-template< int dim, int dimworld>
-inline AlbertGridIntersectionIterator<dim,dimworld>& 
-AlbertGridIntersectionIterator<dim,dimworld>::operator ++(int steps)
-{
-  neighborCount_ += steps;
-  if(neighborCount_ > dim+1) neighborCount_ = dim+1;
-  builtNeigh_ = false;
-  
   return (*this);
 }
 
@@ -2259,22 +2238,6 @@ goNextVertex(ALBERT TRAVERSE_STACK *stack, ALBERT EL_INFO *elInfo)
   return elInfo;
 }
 
-
-// gehe zum i Schritte weiter , wie auch immer
-template<int codim, int dim, int dimworld>
-inline AlbertGridLevelIterator < codim,dim,dimworld >& 
-AlbertGridLevelIterator < codim,dim,dimworld >::operator++(int steps)
-{
-  // die 0 ist wichtig, weil Face 0, heist hier jetzt Element
-  ALBERT EL_INFO *elInfo = 
-    goNextEntity(manageStack_.getStack(), virtualEntity_.getElInfo());
-  for(int i=1; i<= steps; i++)
-    elInfo = goNextEntity(manageStack_.getStack(),virtualEntity_.getElInfo());
-
-  virtualEntity_.setElInfo(elInfo,face_,edge_,vertex_);
-
-  return (*this);
-}
 
 template<int codim, int dim, int dimworld>
 inline AlbertGridEntity<codim, dim, dimworld> & 

@@ -613,9 +613,6 @@ public:
   //! prefix increment
   AlbertGridHierarchicIterator& operator ++();
 
-  //! postfix increment
-  AlbertGridHierarchicIterator& operator ++(int i);
-
   //! equality
   bool operator== (const AlbertGridHierarchicIterator& i) const;
 
@@ -729,9 +726,6 @@ public  IntersectionIteratorDefault <dim,dimworld,albertCtype,
 public:
   //! prefix increment
   AlbertGridIntersectionIterator& operator ++();
-
-  //! postfix increment
-  AlbertGridIntersectionIterator& operator ++(int i);
 
   //! The default Constructor makes empty Iterator 
   AlbertGridIntersectionIterator();
@@ -907,9 +901,6 @@ public:
   
   //! prefix increment
   AlbertGridLevelIterator<codim,dim,dimworld>& operator ++();
-
-  //! postfix increment
-  AlbertGridLevelIterator<codim,dim,dimworld>& operator ++(int i);
 
   //! equality
   bool operator== (const AlbertGridLevelIterator<codim,dim,dimworld>& i) const;
