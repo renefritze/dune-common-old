@@ -26,6 +26,7 @@ typedef double OneDCType;
 
 // forward declarations 
     template<int codim, int dim, class GridImp> class OneDGridEntity;
+    template<int codim, class GridImp> class OneDGridEntityPointer;
     template<int codim, PartitionIteratorType pitype, class GridImp> class OneDGridLevelIterator;
 
     template<int mydim, int coordworld, class GridImp>            class OneDGridGeometry;
@@ -198,7 +199,7 @@ public:
                        OneDGridGeometry, 
                        OneDGridEntity,
                        OneDGridBoundaryEntity,
-                       OneDGridLevelIterator, // to be replaced by  EntityPointer
+		       OneDGridEntityPointer,
                        OneDGridLevelIterator,
                        OneDGridIntersectionIterator, 
                        OneDGridHierarchicIterator> Traits;
