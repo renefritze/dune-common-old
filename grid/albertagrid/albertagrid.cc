@@ -1635,11 +1635,11 @@ grid_( &grid ), level_ (level) , neighborCount_ (dim+1), virtualEntity_ (0)
   , manageObj_ (0) 
   , manageInterEl_ (0) 
   , manageNeighEl_ (0) 
+  , manageBndEntity_ (0) 
   , fakeNeigh_ (0) 
   , neighGlob_ (0)  
-  , manageBndEntity_ (0) 
-  , manageNeighInfo_ (0) 
   , boundaryEntity_ (0) 
+  , manageNeighInfo_ (0) 
   , neighElInfo_ (0) {}
 
 
@@ -1653,9 +1653,11 @@ inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator
   , manageObj_ (0) 
   , manageInterEl_ (0) 
   , manageNeighEl_ (0) 
-  , fakeNeigh_ (0) , neighGlob_ (0)  
   , manageBndEntity_ (0) 
+  , fakeNeigh_ (0) 
+  , neighGlob_ (0)  
   , boundaryEntity_ (0) 
+  , manageNeighInfo_ (0)
   , neighElInfo_ (0) 
 {
   manageNeighInfo_ = elinfoProvider.getNewObjectEntity();
@@ -1674,10 +1676,11 @@ inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator
   , manageObj_ (0) 
   , manageInterEl_ (0) 
   , manageNeighEl_ (0) 
-  , fakeNeigh_ (0) , neighGlob_ (0)  
   , manageBndEntity_ (0) 
-  , manageNeighInfo_ ( (elInfo_) ? elinfoProvider.getNewObjectEntity() : 0 ) 
+  , fakeNeigh_ (0) 
+  , neighGlob_ (0)  
   , boundaryEntity_ (0) 
+  , manageNeighInfo_ ( (elInfo_) ? elinfoProvider.getNewObjectEntity() : 0 ) 
   , neighElInfo_ ( (manageNeighInfo_) ? manageNeighInfo_->item : 0 ) 
 {
 }
@@ -2983,7 +2986,11 @@ inline void AlbertaGrid < dim, dimworld >::removeMesh()
 #if DIM == 3
   // because of bug in Alberta 1.2 , here until bug fixed  
   if((maxlevel() <= 0) && mesh_ )
+  {
     RC_LIST_EL * rclist = ALBERTA get_rc_list(mesh_);
+    rclist = 0;
+  }
+  
 #endif
   if(mesh_) ALBERTA free_mesh(mesh_);
 }
