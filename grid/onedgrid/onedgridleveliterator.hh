@@ -43,6 +43,7 @@ public:
     //! prefix increment
     void increment() {
         target_ = target_->succ_;
+        virtualEntity_.setToTarget(target_);
     }
     
     //! equality

@@ -18,10 +18,10 @@ class OneDEntityImp<0>
 {
 public:
 
-    OneDEntityImp(int level, double pos) : level_(level), pos_(pos) 
+    OneDEntityImp(int level, double pos) : level_(level), pos_(pos), pred_(NULL), succ_(NULL)
     {}
 
-    OneDEntityImp(int level, const FieldVector<double, 1>& pos) : level_(level), pos_(pos) 
+    OneDEntityImp(int level, const FieldVector<double, 1>& pos) : level_(level), pos_(pos), pred_(NULL), succ_(NULL)
     {}
     //private: 
 
@@ -49,7 +49,7 @@ class OneDEntityImp<1>
 {
 public:
 
-    OneDEntityImp(int level) : level_(level)
+    OneDEntityImp(int level) : level_(level), pred_(NULL), succ_(NULL)
     {}
 
     bool isLeaf() const {
