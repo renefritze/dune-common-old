@@ -385,14 +385,13 @@ public:
   //! local coordinates within father
   FieldVector<albertCtype, dim>& local () const ;
   
+  // needed for the LevelIterator 
+  ALBERTA EL_INFO *getElInfo () const;
 private: 
   // methods for setting the infos from the albert mesh
   void setTraverseStack (ALBERTA TRAVERSE_STACK *travStack);
   void setElInfo (ALBERTA EL_INFO *elInfo, int elNum, int face,
                   int edge, int vertex );
-  // needed for the LevelIterator 
-  ALBERTA EL_INFO *getElInfo () const;
-
   // private Methods
   void makeDescription();
 
@@ -573,6 +572,8 @@ public:
   //! return the global unique index in grid , same as el_index
   int globalIndex() const ; 
 
+  // needed for LevelIterator to compare 
+  ALBERTA EL_INFO *getElInfo () const;
 private: 
   // called from HierarchicIterator, because only this 
   // class changes the level of the entity, otherwise level is set by
@@ -587,9 +588,6 @@ private:
                   int face = 0,
                   int edge = 0,
                   int vertex = 0 );
-
-  // needed for LevelIterator to compare 
-  ALBERTA EL_INFO *getElInfo () const;
 
   //! make a new AlbertaGridEntity 
   void makeDescription();
