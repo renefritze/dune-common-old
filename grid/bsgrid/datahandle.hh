@@ -50,7 +50,11 @@ public:
   virtual void recvData ( ObjectStreamType & str , HGhostType & ghost )
   {
     // set ghost as entity
-    en_.setGhost( static_cast <PLLBndFaceType &> (ghost) );
+    //en_.setGhost( static_cast <PLLBndFaceType &> (ghost) );
+
+    PLLBndFaceType & gh = static_cast <PLLBndFaceType &> (ghost);
+    en_.setGhost( *(gh.getGhost()) );
+            
     dc_.gather(str, en_);
   }
 
