@@ -865,7 +865,6 @@ private:
   // tmp memory for normal calculation 
   Vec<dimworld,albertCtype> tmpU_;
   Vec<dimworld,albertCtype> tmpV_;
- 
 };
 
 
@@ -1036,11 +1035,19 @@ public:
 
   //! Constructor which reads an Albert Macro Triang file 
   //! or given GridFile 
-  AlbertGrid(const char* macroTriangFilename);
+  //! levInd = true means that a consecutive level index is generated 
+  //! if levInd == true the the element number of first macro element is
+  //! set to 1 so hasLevelIndex_ can be identified we grid is read from
+  //! file 
+  AlbertGrid(const char* macroTriangFilename, bool levInd = true);
   
   //! Constructor which reads an Albert Macro Triang file 
-  //! or given GridFile 
-  AlbertGrid(AlbertGrid<dim,dimworld> & oldGrid, int proc);
+  //! or given GridFile , proc is the number of domain , 
+  //! levInd = true means that a consecutive level index is generated 
+  //! if levInd == true the the element number of first macro element is
+  //! set to 1 so hasLevelIndex_ can be identified we grid is read from
+  //! file 
+  AlbertGrid(AlbertGrid<dim,dimworld> & oldGrid, int proc,bool levInd = true);
   
   //! empty Constructor 
   AlbertGrid();
@@ -1205,15 +1212,9 @@ private:
   // contains the index on level for each unique el->index of Albert
   enum { AG_MAXLEVELS = 100 };
   Array<int> levelIndex_[dim+1][AG_MAXLEVELS];
-  Array<int> oldLevelIndex_[dim+1][AG_MAXLEVELS];
   
   void makeNewSize(Array<int> &a, int newNumberOfEntries);
   void markNew();
-  //**********************************************************
-  //! map the global index from the Albert Mesh to the local index on Level
-  // returns -1 if no index exists, i.e. element is new 
-  template <int codim> 
-  int oldIndexOnLevel(int globalIndex, int level ) ;
 
   //! map the global index from the Albert Mesh to the local index on Level
   template <int codim>
@@ -1226,6 +1227,8 @@ private:
 
   //! actual time of Grid
   albertCtype time_;
+
+  bool hasLevelIndex_;
 
 //***********************************************************************
 //  MemoryManagement for Entitys and Elements 
