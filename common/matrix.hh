@@ -1,5 +1,5 @@
-#ifndef __DUNE_MATRIX_HH__
-#define __DUNE_MATRIX_HH__
+#ifndef DUNE_MATRIX_HH
+#define DUNE_MATRIX_HH
 
 #include <vector>
 #include <assert.h>
@@ -8,6 +8,7 @@
 namespace Dune {
 
     /** \brief A generic dynamic matrix 
+        \ingroup Common
      */
 template<class T>
 class Matrix
@@ -40,23 +41,36 @@ public:
     }
 
     /** \brief The index operator */
-    T& operator()(int row, int col) {
+    T& operator()(int row, int col) DUNE_DEPRECATED {
         assert(0<=row && row<rows_ && 0<=col && col<cols_);
         return data[row*cols_ + col];
     }
 
     /** \brief The const index operator */
-    const T& operator()(int row, int col) const {
+    const T& operator()(int row, int col) const DUNE_DEPRECATED {
         assert(0<=row && row<rows_ && 0<=col && col<cols_);
         return data[row*cols_ + col];
     }
 
+    /** \brief The index operator */
+    T* operator[](int row) {
+        assert(0<=row && row<rows_);
+        return &data[row*cols_];
+    }
+
+    /** \brief The const index operator */
+    const T* operator[](int row) const {
+        assert(0<=row && row<rows_);
+        return &data[row*cols_];
+    }
+
+    /** \brief Send the matrix content to the screen*/
     void print() const {
         for (int row=0; row<rows_; row++) {
             for (int col=0; col<cols_; col++)
-                printf("%g  ", (*this)(row, col));
+                std::cout << (*this)[row][col] << "  ";
 
-            printf("\n");
+            std::cout << std::endl;
         }
     }
 
