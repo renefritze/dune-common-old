@@ -1,5 +1,5 @@
-#ifndef __MATVEC_HH__
-#define __MATVEC_HH__
+#ifndef DUNE_MATVEC_HH
+#define DUNE_MATVEC_HH
 
 #include<iostream>
 #include<math.h>
@@ -47,7 +47,7 @@ public:
   const T& operator() (int i, int j) const {return a[j][i];} 
 
   //! operator () for read/write access to column vector
-  FieldVector<T,n>& operator() (int j) {return a[j];}
+  FieldVector<T,n>& operator() (int j) DUNE_DEPRECATED {return a[j];} 
 
   //! operator [] for read/write access to column vector
   FieldVector<T,n>& operator[] (int j) {return a[j];}
@@ -123,20 +123,6 @@ public:
     for (int i=0; i<n; i++) s += this->operator()(i,0) * b(i,0);
     return s;
   }
-
-    // can't overload operator* twice
-#if 0
-  //! scalar product of two vectors; one of them stored in matrixform
-  T operator* (const FieldVector<T,n>& b) const
-  {
-    if (m != 1)
-      DUNE_THROW(MathError,
-                 "scalar product only defined for (m x 1) matrizes");
-    T s=0;
-    for (int i=0; i<n; i++) s += this->operator()(i,0) * b[i];
-    return s;
-  }
-#endif
 
 private:
   //! built-in array to hold the data
