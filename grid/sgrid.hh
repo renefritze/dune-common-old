@@ -222,6 +222,7 @@ class SBoundaryEntity
 public: 
   SBoundaryEntity() : elem_(true) {} 
 
+  //! return id of boundary segment 
   int id () const { return -1; } 
   
   //! return true if ghost cell was calced
