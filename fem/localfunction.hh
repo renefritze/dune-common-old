@@ -52,13 +52,6 @@ public:
     asImp().evaluate(en,x,ret);
   }
 
-  //! initialize local function for given entity en  
-  template <class EntityType>
-  void init (EntityType &en)
-  {
-    asImp().init(en);
-  }
-
 private:
   //! Barton-Nackman trick 
   LocalFunctionImp & asImp() 
@@ -87,86 +80,6 @@ DiscreteFunctionSpaceType , LocalFunctionImp >
 public: 
   // notin' 
 }; // end LocalFunctionDefault
-
-//**************************************************************************
-//
-//  --LocalFunctionIteratorInterface
-//
-//! Interface for iterators to iterate over all local functions of one
-//! discrete function.
-//!
-//**************************************************************************
-template < class DiscFunctionSpaceType , class
-LocalFunctionIteratorImp , class LocalFunctionImp > 
-class LocalFunctionIteratorInterface
-{
-public:
-  //! know the object typ for iteration
-  typedef LocalFunctionImp LocalFunctionType;
-  
-  //! return reference to local function 
-  LocalFunctionType & operator *() 
-  { 
-    return localFunc_; 
-  };
- 
-  //! go next local function 
-  LocalFunctionIteratorImp& operator++ () 
-  {
-    return asImp(). operator ++ ();
-  };
-
-  //! go next i steps   
-  LocalFunctionIteratorImp& operator++ (int i) 
-  {
-    return asImp().operator ++ ( i );
-  };
- 
-  //! compare with other iterators 
-  bool operator == (const LocalFunctionIteratorImp & I )
-  {
-    return asImp().operator == (I);
-  }
-  
-  //! compare with other iterators 
-  bool operator != (const LocalFunctionIteratorImp & I )
-  {
-    return asImp().operator != (I);
-  }
-
-private:
-  //! Barton-Nackman trick 
-  LocalFunctionIteratorImp & asImp() 
-  { 
-    return static_cast<LocalFunctionIteratorImp&>(*this);
-  }
-  const LocalFunctionIteratorImp &asImp() const  
-  {
-    return static_cast<const LocalFunctionIteratorImp&>(*this);
-  }
-}; // end class LocalFunctionIteratorInterface 
-
-
-//*************************************************************************
-//
-//  --LocalFunctionIteratorDefault 
-//  
-//! Defaultimplementation. At the moment there is no default
-//! implementation. 
-//
-//*************************************************************************
-template < class DiscFunctionSpaceType , class
-LocalFunctionIteratorImp , class LocalFunctionImp > 
-class LocalFunctionIteratorDefault 
-: public LocalFunctionIteratorInterface < DiscFunctionSpaceType ,
-  LocalFunctionIteratorImp , LocalFunctionImp > 
-{
-public:
-  // notin' 
-}; // end class LocalFunctionIteratorDefault 
-
-/** @} end documentation group */
-
 
 } // end namespace Dune 
 
