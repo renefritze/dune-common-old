@@ -42,6 +42,10 @@ public:
 
   //! copy constructor from EntityImp
   Entity(const EntityImp<codim,dim,GridImp> & e) : realEntity(e) {};  
+
+  typedef typename RemoveConst<GridImp>::Type mutableGridImp;
+
+  friend EntityImp<codim,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<codim>::Entity& e );
 };
 
 template<int dim, class GridImp, template<int,int,class> class EntityImp>
@@ -50,10 +54,9 @@ class Entity <0,dim,GridImp,EntityImp>
   enum { dimworld = GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
 
-    typedef typename RemoveConst<GridImp>::Type mutableGridImp;
+  typedef typename RemoveConst<GridImp>::Type mutableGridImp;
 
-    template <int cd>
-    friend EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<cd>::Entity& e );
+  friend EntityImp<0,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<0>::Entity& e );
 
 protected:
   EntityImp<0,dim,GridImp> realEntity;
@@ -187,10 +190,9 @@ class Entity <dim,dim,GridImp,EntityImp>
   enum { dimworld = GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
 
-    typedef typename RemoveConst<GridImp>::Type mutableGridImp;
+  typedef typename RemoveConst<GridImp>::Type mutableGridImp;
 
-    template <int cd>
-    friend EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<cd>::Entity& e );
+  friend EntityImp<dim,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<dim>::Entity& e );
 
 protected:
   EntityImp<dim,dim,GridImp> realEntity;
