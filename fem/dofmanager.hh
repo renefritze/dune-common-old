@@ -92,16 +92,6 @@ public:
       return false;
   } 
 
-  template <class T>
-  void print() const 
-  {
-    for(int i=0; i<size_; i++)
-    {
-      std::cout << this->template get<T>(i) << " Val\n";
-    }
-    std::cout << size_ << " Size\n";
-  }
-
 private:
   // set new memory, to be called only from MemObject  
   void resize (MemPointerType * mem, int newSize ) 
@@ -301,11 +291,6 @@ public:
     return array_; 
   } 
 
-  void print() const 
-  {
-    array_.template print<double>();
-  }
-
   //! get new mem from dof manager 
   void resize ( MemPointerType * mem, int newMemSize, int newVecSize )
   {
@@ -439,7 +424,6 @@ public:
     for( ; it != endit ; ++it)
     {
       int memSize  = (*it)->memSize();
-      int mySize   = (*it)->size();
 
       // create new memory, which smaller than the mem we have  
       int newSize  = indexSet_.tmpSize();
