@@ -4,8 +4,6 @@
 
 namespace Dune {
 
-#define NEIGH_DEBUG
-
 /** \todo Please doc me! */
 template<int dim, int dimworld>  
 class UGGridBoundaryEntity 
@@ -20,31 +18,25 @@ public:
   //! return type of boundary , i.e. Neumann, Dirichlet ... 
   BoundaryType type () 
   {
-#ifdef NEIGH_DEBUG
-    if(_elInfo->boundary[_neigh] == NULL) 
-    {
-      std::cerr << "No Boundary, fella! \n";
-      abort();
-    }
-#endif
-    return (( _elInfo->boundary[_neigh]->bound < 0 ) ? Neumann : Dirichlet ); 
+      std::cerr << "UGGridBoundaryEntity::type(): Preliminary implementation,"
+          "always returns 'Dirichlet'\n";
+      return Dirichlet;
   }
 
   //! return identifier of boundary segment, number 
   int id ()
   {
-#ifdef NEIGH_DEBUG
-    if(_elInfo->boundary[_neigh] == NULL) 
-    {
-      std::cerr << "No Boundary, fella! \n";
-      abort();
-    }
-#endif
-    return _elInfo->boundary[_neigh]->bound; 
+      std::cerr << "UGGridBoundaryEntity::id() Preliminary implementation,"
+          "always returns -1\n";
+    return -1; 
   }
 
   //! return true if geometry of ghost cells was filled  
-  bool hasGeometry () { return _geom.builtGeom(_elInfo,0,0,0); }
+  bool hasGeometry () { 
+      std::cerr << "UGGridBoundaryEntity::hasGeometry() Preliminary implementation,"
+          "always returns 'false'\n";
+      return false; 
+  }
 
   //! return geometry of the ghost cell 
   UGGridElement<dim,dimworld> geometry () 
@@ -56,7 +48,6 @@ private:
 
   int _neigh;
   
-  // UGGrid<dim,dimworld> & _grid;
   UGGridElement<dim,dimworld> _geom;
 
 };
