@@ -20,7 +20,7 @@
 #define _DUNE_USES_BSGRID_
 
 #include <dune/grid/common/indexstack.hh>
-#include <dune/common/matvec.hh>
+#include <dune/common/fvector.hh>
 
 namespace BernhardSchuppGrid {
 
@@ -196,9 +196,17 @@ struct BSLevelIterator<3>
 template <int codim> 
 struct BSLeafIterator 
 {
-  typedef Insert <AccessIterator <GitterType::helement_STI>::Handle,
-    TreeIterator <GitterType::helement_STI, 
-    leaf_or_has_level <GitterType::helement_STI> > > IteratorType;
+  // A 
+  typedef AccessIterator <GitterType::helement_STI>::Handle A;
+  typedef ListIterator   <GitterType::helement_STI> ListIteratorType; 
+  // B
+  typedef TreeIterator <GitterType::helement_STI,leaf_or_has_level <GitterType::helement_STI> > B;
+
+  typedef Insert < A, B > IteratorType;
+
+  //typedef Insert < AccessIterator <GitterType::helement_STI>::Handle,
+  //    TreeIterator <GitterType::helement_STI, 
+  //    leaf_or_has_level <GitterType::helement_STI> > > IteratorType;
 };
 
 /*
