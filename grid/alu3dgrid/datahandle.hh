@@ -1,7 +1,7 @@
-#ifndef __DUNE_BSGRID_DATAHANDLE_HH__
-#define __DUNE_BSGRID_DATAHANDLE_HH__
+#ifndef __DUNE_ALU3DGRID_DATAHANDLE_HH__
+#define __DUNE_ALU3DGRID_DATAHANDLE_HH__
 
-namespace BernhardSchuppGrid {
+namespace ALU3dGridSpace {
 
 //! the corresponding interface class is defined in bsinclude.hh
 template <class GridType, class EntityType, class DataCollectorType >
