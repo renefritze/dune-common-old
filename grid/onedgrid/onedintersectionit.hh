@@ -135,7 +135,9 @@ public:
     }
 
   //! return information about the Boundary 
-  OneDGridBoundaryEntity<dim,dimworld> & boundaryEntity (); 
+    OneDGridBoundaryEntity<dim,dimworld> & boundaryEntity () {
+        return boundaryEntity_;
+    }
       
   //! return unit outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
