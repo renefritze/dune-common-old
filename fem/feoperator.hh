@@ -355,11 +355,11 @@ public:
   void finalizeLocal ( EntityType &en ) const 
   {
     // eliminate the Dirichlet rows and columns 
-    typedef typename GridType::template Traits<0>::Entity EntityType;
+    typedef typename DiscFunctionType::FunctionSpaceType FunctionSpaceType;
+    typedef typename FunctionSpaceType::GridType GridType;
     typedef typename EntityType::Traits::IntersectionIterator NeighIt;
     typedef typename NeighIt::Traits::BoundaryEntity BoundaryEntityType;
-    typedef typename FunctionSpaceType::GridType GridType; 
-    
+ 
     GridType &grid = functionSpace_.getGrid();
 
     DiscFunctionType & arg  = const_cast<DiscFunctionType &> (*arg_);
