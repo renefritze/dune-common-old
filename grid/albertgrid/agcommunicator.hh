@@ -5,14 +5,15 @@
 #include <config.h> 
 #endif
 
+#ifndef MPI_ACTIVE 
 #undef HAVE_MPI
+#endif
 
 #ifdef HAVE_MPI
 #include <mpi.h>
 #endif
 
 #include <dune/common/dlist.hh>
-
 
 namespace Dune {
 
@@ -30,16 +31,18 @@ class ProcListElement
 {
 public: 
   //! Constructor 
-  ProcListElement(int owner) : owner_ (owner) ,
-    recvCount(0), sendCount(0), recive_(100) , send_(100) , 
-    sendBuffer_ (NULL) , recvBuffer_ (NULL) 
+  ProcListElement(const int owner, const int numFuncs ) 
+  : owner_ (owner) , numFuncs_ (numFuncs)   
+  , recvCount(0), sendCount(0)
+  , sendBuffer_ (0) , recvBuffer_ (0) 
+  , recive_(100) , send_(100) 
   { }
 
   //! Destructor 
   ~ProcListElement() 
   {
-    if(sendBuffer_) std::free(sendBuffer_); sendBuffer_ = NULL;
-    if(recvBuffer_) std::free(recvBuffer_); recvBuffer_ = NULL;
+    if(sendBuffer_) std::free(sendBuffer_); sendBuffer_ = 0;
+    if(recvBuffer_) std::free(recvBuffer_); recvBuffer_ = 0;
   }
  
   //! return my processor number 
@@ -48,14 +51,14 @@ public:
   //! set 
   void setSize( int recvSize , int sendSize ) 
   { 
-    recvSize_ = recvSize; 
-    sendSize_ = sendSize;
+    recvCount = recvSize; 
+    sendCount = sendSize;
   }  
  
   //! insert new recive element 
   void insertRecive( int num ) 
   {
-    if(recvCount >= recive_.size())
+    if(recvCount >= (int) recive_.size())
     {
       recive_.resize( 2*recvCount );
     }
@@ -66,7 +69,7 @@ public:
   //! insert new send element 
   void insertSend( int num ) 
   {
-    if(sendCount >= send_.size())
+    if(sendCount >= (int)send_.size())
     {
       send_.resize( 2*sendCount );
     }
@@ -76,44 +79,52 @@ public:
 
   //! write elements to buffer 
   template <class DofArrayType> 
-  void loadSendBuffer (DofArrayType & vec)
+  void loadSendBuffer (DofArrayType & vec, int pos=0)
   {
-    for(int i=0 ;i<sendSize(); i++)
+    int beg = pos * sendSize();
+    for(int i=beg; i<beg+sendSize(); i++)
     {
-      sendBuffer_[i] = vec[send_[i]];
+      sendBuffer_[i] = vec[send_[i-beg]];
     }
   }
 
   //! read elements from buffer 
   template <class DofArrayType> 
-  void unloadRecvBuffer (DofArrayType & vec)
+  void unloadRecvBuffer (DofArrayType & vec, int pos=0)
   {
-    for(int i=0 ;i<recvSize(); i++)
+    int beg = pos * recvSize();
+    for(int i=beg; i<beg+recvSize(); i++)
     {
-      vec[recive_[i]] = recvBuffer_[i];
+      vec[recive_[i-beg]] = recvBuffer_[i];
     }
   }
 
   //! allocate memory for buffers 
   void makeBuffer() 
   {
-    recvBuffer_ = (BufferType *) std::malloc( recvSize()*sizeof(BufferType) );
-    for(int i=0 ;i<recvSize(); i++)
+    recvBuffer_ = (BufferType *) std::malloc( realRecvSize()*sizeof(BufferType) );
+    for(int i=0 ;i<realRecvSize(); i++)
     {
       recvBuffer_[i] = -1.0;
     }
       
-    sendBuffer_ = (BufferType *) std::malloc( sendSize()*sizeof(BufferType) );
+    sendBuffer_ = (BufferType *) std::malloc( realSendSize()*sizeof(BufferType) );
   }
 
-  //! size of send buffer 
+  //! size of list of send elements  
   int sendSize () const { return sendCount; }
+
+  //! size of send buffer 
+  int realSendSize () const { return numFuncs_ * sendSize(); }
 
   //! pointer to send buffer 
   BufferType * getSendBuffer() const { return sendBuffer_; }
 
-  //! size of recive buffer 
+  //! size of list of recive elements 
   int recvSize () const { return recvCount; }
+
+  //! size of recive buffer 
+  int realRecvSize () const { return numFuncs_ * recvSize(); }
 
   //! pointer to recive buffer 
   BufferType * getRecvBuffer() const { return recvBuffer_; }
@@ -137,17 +148,18 @@ public:
   };
 
   //! the send and recive MPI_Request 
-  MPI_Request * sendreq() const { return &sendreq_; }
-  MPI_Request * recvreq() const { return &recvreq_; }
+  MPI_Request * sendreq() { return &sendreq_; }
+  MPI_Request * recvreq() { return &recvreq_; }
 
 private:
   const int owner_; 
+  const int numFuncs_;
 
   int recvCount;
   int sendCount;
 
-  BufferType * recvBuffer_;
   BufferType * sendBuffer_;
+  BufferType * recvBuffer_;
 
   MPI_Request sendreq_;
   MPI_Request recvreq_;
@@ -165,15 +177,16 @@ private:
 */
 
 #ifdef HAVE_MPI 
-template <class GridType>
+template <class GridType, class IndexSetType>
 class AlbertGridCommunicator 
 {
-  typedef typename DoubleLinkedList<ProcListElement<double> > ProcessorListType;
+  typedef DoubleLinkedList< ProcListElement<double> > ProcessorListType;
 public: 
 
   //! Constructor
-  AlbertGridCommunicator(GridType &grid) 
-    : grid_ (grid) , myProc_ (grid.myProcessor() )
+  AlbertGridCommunicator(GridType &grid, IndexSetType &indexSet, int numFuncs) 
+    : grid_ (grid) , indexSet_(indexSet), numFuncs_ (numFuncs)
+    , myProc_ (grid.myProcessor() )
   {
     initialize();
   }
@@ -181,6 +194,15 @@ public:
   //! send and recive DiscreteFunction 
   template <class DiscFuncType>
   void sendRecive( DiscFuncType & vec)
+  {
+    loadSendBuffer(vec);  
+    communicate();
+    unloadRecvBuffer(vec);
+  }
+
+  //! send and recive DiscreteFunction 
+  template <class DiscFuncType>
+  void loadSendBuffer( DiscFuncType & vec, int pos=0)
   {
     {
       typedef typename DiscFuncType::DofIteratorType DofIteratorType;
@@ -193,12 +215,15 @@ public:
 
       for( ; procit != procend; ++procit)
       {
-        (*procit).loadSendBuffer(it);
+        (*procit).loadSendBuffer(it,pos);
       }
     }
+  }
     
-    communicate();
-       
+  //! send and recive DiscreteFunction 
+  template <class DiscFuncType>
+  void unloadRecvBuffer( DiscFuncType & vec, int pos=0)
+  {
     {
       typedef typename DiscFuncType::DofIteratorType DofIteratorType;
       typedef typename ProcessorListType::Iterator ListIterator;
@@ -212,7 +237,44 @@ public:
         (*procit).unloadRecvBuffer(it);
       }
     }
+  }
 
+  //! send and recive DiscreteFunction 
+  template <class DiscFuncList>
+  void sendReciveList( DiscFuncList & list)
+  {
+    assert(numFuncs_ == list.size());
+    {
+      typedef typename DiscFuncList::Iterator DLIterator;
+
+      DLIterator dl = list.begin();
+      DLIterator de = list.end();
+
+      int count = 0;
+     
+      for(; dl != de ; ++dl )
+      {
+        loadSendBuffer(* (*dl) ,count );
+        count++;
+      }
+    }
+    
+    communicate();
+       
+    {
+      typedef typename DiscFuncList::Iterator DLIterator;
+
+      DLIterator dl = list.begin();
+      DLIterator de = list.end();
+
+      int count = 0;
+     
+      for(; dl != de ; ++dl )
+      {
+        unloadRecvBuffer(* (*dl) , count);
+        count++;    
+      }
+    }
   }
 
   // minimize timestepsize over all processors 
@@ -266,7 +328,7 @@ private:
       ListIterator procit   = otherProcs_.begin(); 
       ListIterator procend = otherProcs_.end(); 
 
-      int tag = myProc_;
+      //int tag = myProc_;
       int no=0;
 
       for( ; procit != procend; ++procit)
@@ -284,7 +346,7 @@ private:
     MPI_Status  status; 
     // recive date 
     {
-      int tag = myProc_;
+      //int tag = myProc_;
       typedef typename ProcessorListType::Iterator ListIterator;
       ListIterator procit   = otherProcs_.begin(); 
       ListIterator procend = otherProcs_.end(); 
@@ -333,7 +395,7 @@ private:
   // build address book 
   void initialize () 
   {
-    typedef typename GridType::Traits<0>::LevelIterator LevelIteratorType;
+    typedef typename GridType::template Traits<0>::LevelIterator LevelIteratorType;
     
     LevelIteratorType it    = grid_.template lbegin<0> (0,Ghosts);
     LevelIteratorType endit = grid_.template lend  <0> (0,Ghosts);
@@ -354,8 +416,10 @@ private:
         }
 
         if(!wehaveit) 
-          otherProcs_.insert_before(
-              otherProcs_.begin(),ProcListElement<double>(owner));
+        {
+          ProcListElement<double> tmp (owner, numFuncs_ );
+          otherProcs_.insert_before(otherProcs_.begin(), tmp);
+        }
       }
     }
     // now we have the link list for the processors 
@@ -374,7 +438,7 @@ private:
 
           for(; it != endit; ++it)
           {
-            (*procit).insertSend( it->global_index() );
+            (*procit).insertSend( indexSet_.template index<0> (*it, 0 ) );
           }
         }
         {
@@ -383,7 +447,7 @@ private:
 
           for(; it != endit; ++it)
           {
-            (*procit).insertRecive( it->global_index() );
+            (*procit).insertRecive( indexSet_.template index<0>(*it, 0 ) );
           }
         }
 
@@ -394,22 +458,33 @@ private:
     }
   }
 
+  // reference to corresponding grid 
+  GridType & grid_;
+
+  // the index set 
+  IndexSetType & indexSet_;
+
+  int numFuncs_;
+  
   // rank of my thread 
   const int myProc_;
 
   // links to other processors 
   ProcessorListType otherProcs_;
-
-  // reference to corresponding grid 
-  GridType & grid_;
 };
 #else 
-template <class GridType>
+template <class GridType, class IndexSetType>
 class AlbertGridCommunicator 
 {
 public: 
+  AlbertGridCommunicator(GridType &grid, IndexSetType &indexSet, int numFuncs) {}
+
   template <class DiscFuncType>
   void sendRecive( DiscFuncType & vec)  {}
+  
+  //! send and recive DiscreteFunction 
+  template <class DiscFuncList>
+  void sendReciveList( DiscFuncList & list) {}
 
   template <typename T>
   T timeStepSize(T timestep)
@@ -419,6 +494,24 @@ public:
 
 };
 #endif
+
+template <class GridType, class CritType>
+void makeParallelGrid (GridType &grid, CritType &crit)
+{
+  for(int l=0; l <= grid.maxlevel(); l++)
+  {
+    typedef typename GridType::template Traits<0>::LevelIterator LevelIteratorType;
+    
+    LevelIteratorType it    = grid.template lbegin<0> (l);
+    LevelIteratorType endit = grid.template lend  <0> (l);
+ 
+    for( ; it != endit; ++it )
+    {
+      crit.classify( *it ); 
+    }
+  }
+}
+
 
 } // end namespace Dune 
 
