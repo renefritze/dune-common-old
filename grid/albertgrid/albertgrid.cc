@@ -161,7 +161,7 @@ namespace Albert
 namespace Dune
 {
 
-static ALBERT EL_INFO statElInfo;  
+static ALBERT EL_INFO statElInfo[DIM+1];  
 
 // singleton holding reference elements
 template<int dim>
@@ -189,8 +189,7 @@ template< int dim, int dimworld>
 inline ALBERT EL_INFO * AlbertGridElement<dim,dimworld>:: 
 makeEmptyElInfo()
 {
-  // heikel, da man elInfo im Destructor wieder freigeben muss
-  ALBERT EL_INFO * elInfo = &statElInfo; //new ALBERT EL_INFO (); 
+  ALBERT EL_INFO * elInfo = &statElInfo[dim]; 
   
   elInfo->mesh = NULL;
   elInfo->el = NULL;
@@ -406,7 +405,6 @@ template< int dim, int dimworld>
 inline Vec<dimworld> AlbertGridElement<dim,dimworld>:: 
 globalBary(Vec<dim+1> local)
 {
-  static ALBERT REAL_D world;
   ALBERT REAL *v = NULL;
   ALBERT REAL c;
   Vec<dimworld> ret(0.0);
@@ -445,7 +443,7 @@ template <int dim, int dimworld>
 inline Vec<dim+1> AlbertGridElement<dim,dimworld>:: 
 localBary(Vec<dimworld> global)
 {
-  std::cout << "localBary for dim != dimworld not implemented!";
+  std::cout << "localBary for dim != dimworld not implemented yet!";
   Vec<dim+1> tmp (0.0);  
   return tmp;
 }
@@ -459,11 +457,9 @@ localBary(Vec<2> global)
   ALBERT REAL edge[dim][dimworld], x[dimworld];
   ALBERT REAL x0, det, det0, det1, lmin;
   int j, k;
-  ALBERT REAL_D xy;
-  ALBERT REAL lambda[dim+1];
+  Vec<dim+1,albertCtype> lambda;
+  ALBERT REAL *v = NULL;
 
-  for(int i=0; i<dimworld; i++)
-    xy[i] = global(i);
   /*
    * wir haben das gleichungssystem zu loesen: 
    */
@@ -474,13 +470,14 @@ localBary(Vec<2> global)
    * ( q1y q2y ) (lambda2) = (qy) 
    */
   /*
-   * mit qi=pi-p3, q=xy-p3 
+   * mit qi=pi-p3, q=global-p3 
    */
 
+  v = static_cast<ALBERT REAL *> (elInfo_->coord[0]);
   for (int j = 0; j < dimworld; j++)
   {
     x0 = elInfo_->coord[dim][j];
-    x[j] = xy[j] - x0;
+    x[j] = global(j) - x0;
     for (int i = 0; i < dim; i++)
       edge[i][j] = elInfo_->coord[i][j] - x0;
   }
@@ -496,28 +493,12 @@ localBary(Vec<2> global)
     abort();
   }
 
-  lambda[0] = det0 / det;
-  lambda[1] = det1 / det;
-  lambda[2] = 1.0 - lambda[0] - lambda[1];
+  // lambda is initialized here 
+  lambda(0) = det0 / det;
+  lambda(1) = det1 / det;
+  lambda(2) = 1.0 - lambda(0) - lambda(1);
 
-  k = -1;
-  lmin = 0.0;
-  j = 0;
-  for (int i = 0; i <= dim; i++)
-  {
-    if(lambda[i] < -1.E-5)
-    {
-      if(lambda[i] < lmin)
-      {
-        k = i;
-        lmin = lambda[i];
-      }
-      j++;
-    }
-  }
-
-  Vec<dim+1> lam(lambda);
-  return lam;
+  return lambda;
 }
 
 //template< int dim, int dimworld>
@@ -527,16 +508,10 @@ localBary(Vec<3> global)
   enum { dim = 3};
   enum { dimworld = 3};
   
-//  realWorldToCoord3D(VERTEXtype vertex,REAL * xy, REAL lambda[dim + 1])
   ALBERT REAL edge[dim][dimworld], x[dimworld];
   ALBERT REAL x0, det, det0, det1, det2, lmin;
-  ALBERT REAL_D xy;
-  ALBERT REAL lambda[dim+1];
+  Vec<dim+1,albertCtype> lambda;
   int j, k;
-
-  for(int i=0; i<dimworld; i++)
-    xy[i] = global(i);
-  
 
   //! wir haben das gleichungssystem zu loesen: 
   //! ( q1x q2x q3x) (lambda1) (qx) 
@@ -547,7 +522,7 @@ localBary(Vec<3> global)
   for (int j = 0; j < dimworld; j++)
   {
     x0 = elInfo_->coord[dim][j];
-    x[j] = xy[j] - x0;
+    x[j] = global(j) - x0;
     for (int i = 0; i < dim; i++)
       edge[i][j] = elInfo_->coord[i][j] - x0;
   }
@@ -580,29 +555,13 @@ localBary(Vec<3> global)
     return (-2);
   }
 
-  lambda[0] = det0 / det;
-  lambda[1] = det1 / det;
-  lambda[2] = det2 / det;
-  lambda[3] = 1.0 - lambda[0] - lambda[1] - lambda[2];
+  // lambda is initialized here
+  lambda(0) = det0 / det;
+  lambda(1) = det1 / det;
+  lambda(2) = det2 / det;
+  lambda(3) = 1.0 - lambda(0) - lambda(1) - lambda(2);
 
-  k = -1;
-  lmin = 0.0;
-  j = 0;
-  for (int i = 0; i <= dim; i++)
-  {
-    if(lambda[i] < -1.E-5)
-    {
-      if(lambda[i] < lmin)
-      {
-        k = i;
-        lmin = lambda[i];
-      }
-      j++;
-    }
-  }
-  Vec<dim+1> lam(lambda);
-  
-  return lam;
+  return lambda;
 }
 
 
