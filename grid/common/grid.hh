@@ -9,7 +9,6 @@
 namespace Dune {
 
 
-#define DUNE_DEPRECATED 
 /** @defgroup GridCommon Grid Interface
 
   The Dune Grid module defines a general interface to a hierarchical finite element mesh.
@@ -1443,11 +1442,11 @@ public:
     
   //! write Grid to file filename and store time 
   template <FileFormatType ftype>
-  bool writeGrid ( const char * filename , ctype time );
+  bool writeGrid ( const char * filename , ct time );
 
   //! read Grid from file filename and also read time of grid
   template <FileFormatType ftype>
-  bool readGrid ( const char * filename , ctype &time );
+  bool readGrid ( const char * filename , ct &time );
 
 protected:
     //! Barton-Nackman trick 
