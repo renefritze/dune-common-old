@@ -34,6 +34,7 @@ namespace Dune {
     friend class PMGStubs::Restrict<GRID,SMOOTHER,PMGStubs::Border>;
     friend class PMGStubs::Prolongate<GRID,SMOOTHER,PMGStubs::Inner>;
     friend class PMGStubs::Prolongate<GRID,SMOOTHER,PMGStubs::Border>;
+    friend class PMGStubs::RelocateIterator<GRID>;
     friend class PMGStubs::InitIterator<GRID>;
 
     enum { DIM = GRID::griddim };
@@ -44,9 +45,10 @@ namespace Dune {
     GRID &g;
     int n1, n2; // Vor-/Nachglaetter-Zyklen
     double reduction; // defekt-reduction
-    int Processes; // Anzahl der Prozesse
+    int Processes; /**< number of der processes */
     int rank;
-    bool need_recalc; // true if no dirichlet-condition is specified
+    bool need_relocate; /**< true if no dirichlet-condition is specified */
+    double relocate_array[2]; /**< array for average calulation */
     Discrete<GRID> & discrete;
     Vector<GRID> & x; /**< solution vector */
     Vector<GRID> & b; /**< rhs vector */ 
@@ -55,13 +57,17 @@ namespace Dune {
     double defect(level l) const;
     void   restrict(level l);
     void   prolongate(level l);
-    void   smoother(level l) {
+    void   relocate(level l);
+    void   smoother(level l) {      
+      relocate_array[0] = 0;
+      relocate_array[1] = 0;
       switch (SMOOTHER) {
       case GaussSeidel: smootherGaussSeidel(l); break;
       case Jacobi: smootherJacobi(l); break;
       default:
 	throw std::string("Unknown Smoother");
       }
+      relocate(l);
     };
     void   smootherGaussSeidel(level l);
     void   smootherJacobi(level l);
