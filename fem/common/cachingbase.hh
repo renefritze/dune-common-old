@@ -83,6 +83,10 @@ public:
                   const FieldVector<deriType, diffOrd> &diffVariable, 
                   QuadratureType & quad, int quadPoint, Range & phi ) const;   
  
+  template <class QuadratureType>
+  void evaluate(int numberInSelf, int baseFunct, QuadratureType& quad, 
+                int quadPoint, Range& phi) const;
+
   //! Alternative access to precomputed base function values.
   template <class QuadratureType>
   const std::vector<Range>& values(int baseFunct,
