@@ -50,7 +50,7 @@ inline DFAdapt< DiscreteFunctionSpaceType >::
 {
   //std::cout << "Deleting DF " << this->name() << "\n";
   // * Temporary hack (burriad)
-  FunctionSpaceType& spc = const_cast<FunctionSpaceType&>(this->functionSpace_);
+  const FunctionSpaceType& spc = this->functionSpace_;
   bool removed = spc.signOut(*this);
   if(!removed)
   {

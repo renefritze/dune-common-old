@@ -521,7 +521,7 @@ init (EntityType &en ) const
 {
   if((!uniform_) || (!baseFuncSet_))
   {
-    baseFuncSet_ = & (const_cast<BaseFunctionSetType*>(fSpace_.getBaseFunctionSet(en) ));
+    baseFuncSet_ = &(fSpace_.getBaseFunctionSet(en) );
     numOfDof_ = baseFuncSet_->getNumberOfBaseFunctions();
     numOfDifferentDofs_ = baseFuncSet_->getNumberOfDiffBaseFuncs();
 
