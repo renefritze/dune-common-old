@@ -4103,18 +4103,18 @@ inline void AlbertaGrid < dim, dimworld >::setNewCoords
         macroVertices_[dof] = 1;
         for(int j=0; j<dimworld; j++)
         {
-          mel->coord[i][j] -= trans_(j);
+          mel->coord[i][j] -= trans_[j];
           mel->coord[i][j] /= scalar_;
 
           mel->coord[i][j] *= scalar;
-          mel->coord[i][j] += trans(j);
+          mel->coord[i][j] += trans[j];
         }
       }
     }
   }
 
   for (int i=0; i<dimworld; i++)
-    trans_(i) = trans(i);
+    trans_[i] = trans[i];
 
   scalar_ = scalar;
 }
