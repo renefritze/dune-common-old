@@ -1,4 +1,4 @@
-// no define of include varialbe because the file can be included more than
+// no define of include variable because the file can be included more than
 // once 
 
 #ifndef PARAM_CLASSNAME 

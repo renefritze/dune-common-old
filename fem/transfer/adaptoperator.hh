@@ -11,10 +11,10 @@ namespace Dune{
   @{
  */
 
-/*! this could be seen as a hack, but is not
-  With this mehtod we define the class CombineRestProl which is only 
-  for combining of local grid operations without using virtual mehtods.
-  The Interface of the two defined methods of the class (restrictLocal and
+/*! This could be seen as a hack, but is not
+  With this method we define the class CombineRestProl which is only 
+  for combining of local grid operations without using virtual methods.
+  The interface of the two defined methods of the class (restrictLocal and
   prolongLocal) is given by the implementation (see below ) and 
   has to be the same for all local operators you want to combine 
 */
@@ -23,9 +23,10 @@ namespace Dune{
 #define PARAM_FUNC_2 prolongLocal 
 #include <dune/fem/common/combine.hh>
 
-/*!
+/*! Combination of different AdaptOperators
+
  This Class is the result of a combination of different
- AdaptationOperators. It ist the same principle as with Mapping and
+ AdaptationOperators. It is the same principle as with Mapping and
  DiscreteOperatorImp. 
 */ 
 class AdaptMapping 
@@ -45,8 +46,10 @@ public:
     }
   };
 
+    //! Assignement operator
   AdaptMapping & operator = (const AdaptMapping & am)
   {
+      /** \todo This const-casting seems strange to me! */
     am_ = const_cast<AdaptMapping *> (&am);
     return (*this);
   }
@@ -54,6 +57,9 @@ private:
   AdaptMapping *am_;
 };
   
+    /** \brief ???
+     * \todo Please doc me!
+     */
 template <class GridType, class RestProlOperatorImp, class DofManagerType >
 class AdaptOperator
 : 
@@ -222,16 +228,21 @@ private:
 
 //***********************************************************************
 
+    /** \brief ???
+     * \todo Please doc me!
+     */
 template <class DiscreteFunctionType>
 class RestProlOperatorFV
 {
   typedef typename DiscreteFunctionType::LocalFunctionType LocalFunctionType;
 public:  
+    //! ???
   RestProlOperatorFV ( DiscreteFunctionType & df ) : df_ (df) , 
   vati_ ( df_.newLocalFunction() ) , sohn_ ( df_.newLocalFunction() ) 
   {
   }
   
+    //! ???
   template <class EntityType>
   void restrictLocal ( EntityType &father, EntityType &son, bool initialize ) const
   {
@@ -260,6 +271,7 @@ public:
     }
   }
 
+    //! ???
   template <class EntityType>
   void prolongLocal ( EntityType &father, EntityType &son, bool initialize ) const
   {
