@@ -34,6 +34,18 @@ public:
         return PFIRSTNODE(grid);
     }
 
+    /** \brief The FIRSTNODE macro which returns the first node in a
+     * grid even in a parallel setting.
+     */
+    static typename TargetType<dim,dim>::T* FirstNode(typename UGTypes<dim>::GridType* grid) {
+        using UG::PrioHGhost;
+        using UG::PrioVGhost;
+        using UG::PrioVHGhost;
+        using UG::PrioMaster;
+        using UG::PrioBorder;
+        return FIRSTNODE(grid);
+    }
+
     /** \brief The PFIRSTELEMENT macro which returns the first element in a
      * grid even in a parallel setting.
      */
@@ -46,6 +58,17 @@ public:
         return PFIRSTELEMENT(grid);
     }
 
+    /** \brief The FIRSTELEMENT macro which returns the first element in a
+     * grid even in a parallel setting.
+     */
+    static typename TargetType<0,dim>::T* FirstElement(typename UGTypes<dim>::GridType* grid) {
+        using UG::PrioHGhost;
+        using UG::PrioVGhost;
+        using UG::PrioVHGhost;
+        using UG::PrioMaster;
+        using UG::PrioBorder;
+        return FIRSTELEMENT(grid);
+    }
 
     /** \brief Returns pointers to the coordinate arrays of an UG element */
     static void Corner_Coordinates(typename TargetType<0,dim>::T* theElement, double* x[]) {
@@ -168,7 +191,7 @@ public:
 
     //! Gets the index of a UG node
     static int index(const typename TargetType<dim,dim>::T* theNode) {
-        return theNode->myvertex->iv.id;
+        return theNode->id;
     }
 
     //! Calm the compiler
