@@ -211,7 +211,7 @@ add ( const Vector< DiscreteFunctionSpaceType::RangeField > & g ,
 template<class DiscreteFunctionSpaceType,
          class DofIteratorImp, class DiscreteFunctionImp >
 inline void DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-  DofIteratorImp , DiscreteFunctionImp >:: clear ( )
+  DofIteratorImp , DiscreteFunctionImp >:: clearLevel ( int level  )
 {
   DofIteratorImp enddof = dend ( level_ );
   for(DofIteratorImp itdof = dbegin ( level_ );       
@@ -220,7 +220,6 @@ inline void DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
     *itdof = 0.;
   }
 }
-
 
 } // end namespace Dune
 
