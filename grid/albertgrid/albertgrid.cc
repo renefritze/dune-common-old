@@ -328,7 +328,7 @@ initGeom()
 }
 
 template< int dim, int dimworld>
-inline void AlbertGridElement<dim,dimworld>:: 
+inline bool AlbertGridElement<dim,dimworld>:: 
 builtGeom(ALBERT EL_INFO *elInfo, unsigned char face, 
           unsigned char edge, unsigned char vertex)
 {
@@ -344,7 +344,11 @@ builtGeom(ALBERT EL_INFO *elInfo, unsigned char face,
       {
         (coord_(i))(j) = elInfo_->coord[mapVertices<dimworld-dim>(i)][j];
       }
+    // geometry built 
+    return true;
   }
+  // geometry not built 
+  return false;
 }
 
 
@@ -737,6 +741,7 @@ outer_normal()
 //*************************************************************************
 //
 //  --AlbertGridEntity 
+//  --Entity 
 //
 //*************************************************************************
 //
@@ -750,7 +755,8 @@ inline void AlbertGridEntity < codim, dim ,dimworld >::
 makeDescription()
 {
   elInfo_ = NULL;
-  geo_.initGeom();
+  builtgeometry_ = false;
+  //geo_.initGeom();
 }
 
 template<int codim, int dim, int dimworld>
@@ -793,7 +799,7 @@ setElInfo(ALBERT EL_INFO * elInfo, unsigned char face,
   edge_ = edge;
   vertex_ = vertex;
   elInfo_ = elInfo;
-  geo_.builtGeom(elInfo_,face,edge,vertex);
+  builtgeometry_ = geo_.builtGeom(elInfo_,face,edge,vertex);
 }
 
 template<int codim, int dim, int dimworld>
@@ -852,7 +858,10 @@ inline void AlbertGridEntity < 0, dim ,dimworld >::
 makeDescription()
 {
   elInfo_ = NULL;
-  geo_.initGeom();
+  builtgeometry_ = false;
+
+  // not fast 
+  //geo_.initGeom();
 }
 
 template<int dim, int dimworld>
@@ -870,14 +879,14 @@ setTraverseStack(ALBERT TRAVERSE_STACK * travStack)
   travStack_ = travStack;
 }
 
-
-
 template< int dim, int dimworld>
 inline AlbertGridEntity < 0, dim ,dimworld >::
 AlbertGridEntity()
 {
   travStack_ = NULL;
-  makeDescription();
+  elInfo_ = NULL;
+  builtgeometry_ = false;
+  //makeDescription();
 }
 
 
@@ -911,13 +920,16 @@ setElInfo(ALBERT EL_INFO * elInfo,  unsigned char face,
   // in this case the face, edge and vertex information is not used,
   // because we are in the element case
   elInfo_ = elInfo;
-  geo_.builtGeom(elInfo_,face,edge,vertex);
+  builtgeometry_ = geo_.builtGeom(elInfo_,face,edge,vertex);
 }
 
 template< int dim, int dimworld>
 inline AlbertGridElement<dim,dimworld>& 
 AlbertGridEntity < 0, dim ,dimworld >::geometry()
 {
+  if(!builtgeometry_) 
+    std::cout << "Warning: geometry has not been built \n";
+
   return geo_;
 }
 
@@ -958,7 +970,6 @@ template< int dim, int dimworld>
 inline void AlbertGridHierarchicIterator<dim,dimworld>::
 makeIterator()
 {
-  //initTraverseStack(&travStack_);
   manageStack_.init();
   virtualEntity_.setTraverseStack(NULL);
   virtualEntity_.setElInfo(NULL,0,0,0);
@@ -978,18 +989,25 @@ AlbertGridHierarchicIterator(ALBERT TRAVERSE_STACK *travStack,int travLevel)
 {
   if(travStack)
   {
-    startLevel_ = (travStack->elinfo_stack[travStack->stack_used]).level;
+    // get new ALBERT TRAVERSE STACK 
     manageStack_.makeItNew(true);
     ALBERT TRAVERSE_STACK *stack = manageStack_.getStack();
     
-    // make explicit memory copy of travStack 
-    hardCopyStack(stack, travStack);
+    // cut old traverse stack, kepp only actual element 
+    cutHierarchicStack(stack, travStack);
 
+    // set new traverse level
+    if(travLevel < 0) 
+    {
+      // this means, we go until leaf level 
+      stack->traverse_fill_flag = CALL_LEAF_EL | stack->traverse_fill_flag;
+      // exact here has to stand Grid->maxlevel, but is ok anyway
+      travLevel = 123456789;
+    }
     // set new traverse level
     stack->traverse_level = travLevel;
 
     virtualEntity_.setTraverseStack(stack);
-
     // Hier kann ein beliebiges Element uebergeben werden,
     // da jedes AlbertElement einen Zeiger auf das Macroelement
     // enthaelt.
@@ -1007,7 +1025,6 @@ inline AlbertGridHierarchicIterator<dim,dimworld>&
 AlbertGridHierarchicIterator< dim,dimworld >::operator ++()
 {
   // die 0 ist wichtig, weil Face 0, heist hier jetzt Element
-  //virtualEntity_.setElInfo(recursiveTraverse(&travStack_)); 
   virtualEntity_.setElInfo(recursiveTraverse(manageStack_.getStack())); 
   return (*this);
 }
@@ -1057,67 +1074,43 @@ inline ALBERT EL_INFO *
 AlbertGridHierarchicIterator<dim,dimworld>::
 recursiveTraverse(ALBERT TRAVERSE_STACK * stack)
 {
-    // siehe die Funktion 
+    // see function 
     // static EL_INFO *traverse_leaf_el(TRAVERSE_STACK *stack)
-    // Common/traverse_nr_common.cc Zeile 392 
+    // Common/traverse_nr_common.cc, line 392 
     ALBERT EL * el=NULL;
-    int i=0;
 
-    if(stack->stack_used == 0)
-    { /* first call */
-      if(stack->traverse_mel == NULL)
-        return (NULL);
-
-      stack->stack_used = 1;
-      fill_macro_info(stack->traverse_mel,
-        stack->elinfo_stack + stack->stack_used);
-      stack->info_stack[stack->stack_used] = 0;
-
-      el = stack->elinfo_stack[stack->stack_used].el;
-      if((el == NULL) || (el->child[0] == nil))
-      {
-        return (stack->elinfo_stack + stack->stack_used);
-      }
+    if(!stack->elinfo_stack)
+    {
+      /* somethin' wrong */
+      return NULL;
     }
     else
     {
       el = stack->elinfo_stack[stack->stack_used].el;
 
-      /*
-       * go up in tree until we can go down again 
-       */
-
       while((stack->stack_used > 0) &&
-	    ((stack->info_stack[stack->stack_used] >= 2) || (el->child[0]==nil)
+	    ((stack->info_stack[stack->stack_used] >= 2) 
+       || (el->child[0]==NULL)
 	     || ( stack->traverse_level <=
 		  (stack->elinfo_stack+stack->stack_used)->level)) )
       {
         stack->stack_used--;
         el = stack->elinfo_stack[stack->stack_used].el;
-
-        // dont go higher than the level we started 
-        if( (stack->elinfo_stack[stack->stack_used]).level < startLevel_ )
-          return NULL;
       }
 
-      /*
-       * goto next macro element is done by LevelIterator 
-       */
+      // goto next father is done by other iterator and not our problem  
       if(stack->stack_used < 1)
         return NULL;
     }
 
-    /*
-     * go down next child 
-     */
-
-   
-    if(el->child[0] && (stack->traverse_level > (stack->elinfo_stack+stack->stack_used)->level) )
+    // go down next child 
+    if(el->child[0] && (stack->traverse_level > 
+          (stack->elinfo_stack+stack->stack_used)->level) )
     {
       if(stack->stack_used >= stack->stack_size - 1)
         ALBERT enlargeTraverseStack(stack);
 
-      i = stack->info_stack[stack->stack_used];
+      int i = stack->info_stack[stack->stack_used];
       el = el->child[i];
       stack->info_stack[stack->stack_used]++;
       ALBERT fill_elinfo(i, stack->elinfo_stack + stack->stack_used,
@@ -1491,6 +1484,7 @@ AlbertGridNeighborIterator<dim,dimworld>::
 intersection_self_local()
 {
   std::cout << "intersection_self_local not implemented yet! \n";
+  //fakeNeighBuilt_ = fakeNeigh_.builtGeom(neighElInfo_,neighborCount_,0,0);
   return fakeNeigh_;
 }
 
@@ -1499,7 +1493,7 @@ inline AlbertGridElement< dim-1, dimworld >&
 AlbertGridNeighborIterator<dim,dimworld>::
 intersection_self_global()
 {
-  neighGlob_.builtGeom(elInfo_,neighborCount_,0,0);  
+  neighGlobBuilt_ = neighGlob_.builtGeom(elInfo_,neighborCount_,0,0);  
   return neighGlob_;
 }
 
@@ -1509,6 +1503,7 @@ AlbertGridNeighborIterator<dim,dimworld>::
 intersection_neighbor_local()
 {
   std::cout << "intersection_neighbor_local not implemented yet! \n";
+  //fakeNeighBuilt_ = fakeNeigh_.builtGeom(elInfo_,neighborCount_,0,0);
   return fakeNeigh_;
 }
 
@@ -1517,7 +1512,7 @@ inline AlbertGridElement< dim-1, dimworld >&
 AlbertGridNeighborIterator<dim,dimworld>::
 intersection_neighbor_global()
 {
-  neighGlob_.builtGeom(elInfo_,neighborCount_,0,0);  
+  neighGlobBuilt_ = neighGlob_.builtGeom(elInfo_,neighborCount_,0,0);  
   return neighGlob_;
 }
 
@@ -1585,7 +1580,6 @@ AlbertGridLevelIterator(ALBERT EL_INFO *elInfo,int face,int edge,int vertex)
 
     // diese Methode muss neu geschrieben werden, da man 
     // die ParentElement explizit speichern moechte. 
-   
     virtualEntity_.setElInfo(elInfo,face_,edge_,vertex_);
   }
   else
@@ -1623,8 +1617,6 @@ AlbertGridLevelIterator(ALBERT MESH * mesh, AlbertMarkerVector * vertexMark,
     // die ParentElement explizit speichern moechte. 
     ALBERT EL_INFO* elInfo = 
       goFirstElement(manageStack_.getStack(), mesh, travLevel,travFlags);
-
-    //std::cout << manageStack_.getStack()->stack_size << "LevelStack \n";
 
     virtualEntity_.setElInfo(elInfo,face_,edge_,vertex_);
   }

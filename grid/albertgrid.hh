@@ -239,7 +239,7 @@ public:
   //***********************************************************************
   //  Methods that not belong to the Interface, but have to be public
   //***********************************************************************
-  void builtGeom(ALBERT EL_INFO *elInfo, unsigned char face, 
+  bool builtGeom(ALBERT EL_INFO *elInfo, unsigned char face, 
                  unsigned char edge, unsigned char vertex);
   void initGeom();
   
@@ -417,6 +417,7 @@ public:
   //! know your own dimension of world
   enum { dimensionworld=dimworld };
 
+  //! Default Constructor, needed, but empty 
   AlbertGridEntity();
 
   AlbertGridEntity(ALBERT TRAVERSE_STACK * travStack);
@@ -594,9 +595,6 @@ private:
   //! does count References when copied
   ALBERT ManageTravStack manageStack_;
 
-  //! remember on which level we started
-  int startLevel_;
-
   //! The nessesary things for Albert
   ALBERT EL_INFO * recursiveTraverse(ALBERT TRAVERSE_STACK * stack);
 
@@ -712,7 +710,10 @@ private:
   Vec<dimworld,albertCtype> outerNormal_;
 
   AlbertGridElement<dim-1,dim> fakeNeigh_;
+  bool fakeNeighBuilt_;
+  
   AlbertGridElement<dim-1,dimworld> neighGlob_;
+  bool neighGlobBuilt_;
 
   ALBERT EL_INFO * elInfo_;
 
