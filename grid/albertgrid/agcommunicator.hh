@@ -3,15 +3,13 @@
 
 #ifdef HAVE_CONFIG_H
 #include <config.h> 
-#endif
-
-#ifndef MPI_ACTIVE 
-#undef HAVE_MPI
-#endif
-
-#ifdef HAVE_MPI
+#if !HAVE_MPI 
+#undef ALBERT_USES_MPI
+#else 
 #include <mpi.h>
 #endif
+#endif
+
 
 #include <dune/common/dlist.hh>
 
@@ -25,7 +23,7 @@ namespace Dune {
   these two procs.
 */
 
-#ifdef HAVE_MPI
+#ifdef ALBERT_USES_MPI
 template <class BufferType>
 class ProcListElement 
 {
@@ -180,24 +178,24 @@ private:
 template <class T> 
 class GathScatt 
 {
-  T fuck;
+  T fake;
 public:
 
   template <class VecType>
   void gather (VecType & t, int index )
   {
-    fuck = t[index];
+    fake = t[index];
   }
 
   template <class VecType>
   void scatter(VecType & t , int index)
   {
-    t[index] = fuck;  
+    t[index] = fake;  
   }
   
 };
 
-#ifdef HAVE_MPI 
+#ifdef ALBERT_USES_MPI 
 template <class GridType, class IndexSetType>
 class AlbertGridCommunicator 
 {
