@@ -69,7 +69,7 @@ public:
   */
   FieldVector<ct, dimworld> outerNormal (const FieldVector<ct, dim-1>& local) const
     {
-      realIterator.outerNormal(local);
+      return realIterator.outerNormal(local);
     }
 
   /*! intersection of codimension 1 of this neighbor with element where iteration started.
