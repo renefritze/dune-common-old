@@ -1,8 +1,7 @@
-#ifndef __DLIST_CC__
-#define __DLIST_CC__
+#ifndef DLIST_CC
+#define DLIST_CC
 
-#include<iostream>
-#include<new> // fuer std::nothrow
+#include<new> // for std::nothrow
 
 namespace Dune {
 
@@ -84,11 +83,14 @@ namespace Dune {
   inline typename DoubleLinkedList<T>::Iterator DoubleLinkedList<T>::insert_after (Iterator i, T& t)
   {
 	// Teste Eingabe
-	if (i.p==0 && head.p!=0) {std::cerr << "wo einfuegen?" << std::endl; return end();} 
+	if (i.p==0 && head.p!=0)
+	  DUNE_THROW(DoubleLinkedListError, 
+		     "invalid iterator for insert_after");
 
 	// neues Listenelement erzeugen, 
 	Element* e = new(std::nothrow) Element(t);
-	if (e==0) {std::cerr << "Kein Platz mehr" << std::endl; return end();}
+	if (e==0) 
+	  DUNE_THROW(OutOfMemoryError, "cannot insert into DoubleLinkedList");
 
 	// einfuegen
 	if (head.p==0) 
@@ -118,11 +120,14 @@ namespace Dune {
   inline typename DoubleLinkedList<T>::Iterator DoubleLinkedList<T>::insert_before (Iterator i, T& t)
   {
 	// Teste Eingabe
-	if (i.p==0 && head.p!=0) {std::cerr << "wo einfuegen?" << std::endl; return end();} 
+	if (i.p==0 && head.p!=0) 
+	  DUNE_THROW(DoubleLinkedListError, 
+		     "invalid iterator for insert_before");
 
 	// neues Listenelement erzeugen, 
 	Element* e = new(std::nothrow) Element(t);
-	if (e==0) {std::cerr << "Kein Platz mehr" << std::endl; return end();}
+	if (e==0)
+	  DUNE_THROW(OutOfMemoryError, "cannot insert into DoubleLinkedList"); 
 
 	// einfuegen
 	if (head.p==0) 

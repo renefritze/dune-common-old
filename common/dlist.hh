@@ -1,5 +1,7 @@
-#ifndef __DUNE_DLIST_HH__
-#define __DUNE_DLIST_HH__
+#ifndef DUNE_DLIST_HH
+#define DUNE_DLIST_HH
+
+#include <dune/common/exceptions.hh>
 
 namespace Dune {
 
@@ -12,6 +14,9 @@ namespace Dune {
   Declaration of a doubly linked list
    */
   
+
+  //! exception thrown on illegal element access
+  class DoubleLinkedListError : public RangeError {};
 
     /*! A doubly-linked list */
   template <class T> 
