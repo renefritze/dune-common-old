@@ -75,9 +75,15 @@ public:
   LocalFunctionArray<DiscreteFunctionSpaceType> newLocalFunction ( );
 
   //! return reference to this 
-  //! this methods is only to fullfil the interface os parameter classes 
+  //! this methods is only to fullfill the interface as parameter classes 
   DiscreteFunctionType & argument    () { return *this; }
+
+  //! return reference to this 
+  //! this methods is only to fullfill the interface as parameter classes 
   const DiscreteFunctionType & argument () const { return *this; }
+
+  //! return reference to this 
+  //! this methods is only to fullfill the interface as parameter classes 
   DiscreteFunctionType & destination () { return *this; }
  
   //! update LocalFunction to given Entity en  
@@ -103,15 +109,21 @@ public:
 
   //! set all dofs to zero  
   void clearLevel( int level );
+
+  //! set all dofs to zero  
   void clear( );
 
   //! set all dof to value x 
   void set( RangeFieldType x ); 
+
+  //! set all dof to value x 
   void setLevel( RangeFieldType x, int level ); 
 
+    /** \todo Please to me! */
   void addScaled (int level, const DiscFuncArray <DiscreteFunctionSpaceType> & g,
       const RangeFieldType &scalar); 
   
+    /** \todo Please to me! */
   template <class GridIteratorType>
   void addScaledLocal (GridIteratorType &it, 
       const DiscFuncArray <DiscreteFunctionSpaceType> & g,
@@ -127,6 +139,7 @@ public:
   void substractLocal (GridIteratorType &it, 
       const DiscFuncArray <DiscreteFunctionSpaceType> & g); 
   
+    /** \todo Please to me! */
   template <class GridIteratorType>
   void setLocal (GridIteratorType &it, const RangeFieldType &scalar);
   
