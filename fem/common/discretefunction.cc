@@ -2,6 +2,7 @@
 #define __DUNE_DISCRETE_FUNCTION_CC__
 
 #include <fstream>
+#include <dune/io/file/asciiparser.hh>
 
 namespace Dune 
 {
@@ -193,7 +194,8 @@ template<class DiscreteFunctionSpaceType, class DofIteratorImp,
          template <class,class> class LocalFunctionIteratorImp, class DiscreteFunctionImp >
 inline bool DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
-write(const FileFormatType ftype, const char *filename, int timestep)
+write(const FileFormatType ftype, const char *filename, int timestep, int
+    precision )
 {
   {
     enum { n = DiscreteFunctionSpaceType::DimDomain };
@@ -202,19 +204,26 @@ write(const FileFormatType ftype, const char *filename, int timestep)
     StringType d = typeIdentifier<DomainFieldType>();
     StringType r = typeIdentifier<RangeFieldType>();
 
-    file << d << " " << r << " ";
-    file << n << " " << m << "\n";
-    file << this->functionSpace_.type() << " " << ftype << "\n";
-    file << this->functionSpace_.polynomOrder() << "\n";
+    file << "DomainField: " << d << std::endl; 
+    file << "RangeField: " << r << std::endl;
+    file << "Dim_Domain: " << n << std::endl; 
+    file << "Dim_Range: " << m << std::endl;
+    file << "Space: " << this->functionSpace_.type() << std::endl;
+    file << "Format: " << ftype << std::endl;
+    file << "Precision: " << precision << std::endl;
+    file << "Polynom_order: " << this->functionSpace_.polynomOrder() << std::endl;
     file.close();
   }
 
+  const char * path = 0;
+  const char * fn = genFilename(path,filename,timestep,precision); 
+
   if(ftype == xdr)
-    return asImp().write_xdr(filename,timestep);
+    return asImp().write_xdr(fn);
   if(ftype == ascii)
-    return asImp().write_ascii(filename,timestep);
+    return asImp().write_ascii(fn);
   if(ftype == pgm)
-    return asImp().write_pgm(filename,timestep);
+    return asImp().write_pgm(fn);
   
   return false;
 }
@@ -227,25 +236,24 @@ read(const char *filename, int timestep)
 {
     enum { tn = DiscreteFunctionSpaceType::DimDomain };
     enum { tm = DiscreteFunctionSpaceType::DimRange };
-    std::fstream file ( filename , std::ios::in );
-
-    if(!file) 
-    {
-      std::cerr << "Couldn't open file <"<<filename<<"> \n";
-      abort();
-    }
 
     int n,m;
     std::basic_string <char> r,d;
     std::basic_string <char> tr (typeIdentifier<RangeFieldType>());
     std::basic_string <char> td (typeIdentifier<DomainFieldType>());
 
-    file >> d;
-    file >> r;
-    file >> n >> m;
-    int id,type;
-    file >> id >> type;
-    FileFormatType ftype = static_cast<FileFormatType> (type);
+    readParameter(filename,"DomainField",d,false);
+    readParameter(filename,"RangeField",r,false);
+    readParameter(filename,"Dim_Domain",n,false);
+    readParameter(filename,"Dim_Range",m,false);
+    int space;
+    readParameter(filename,"Space",space,false);
+    int filetype;
+    readParameter(filename,"Format",filetype,false);
+    FileFormatType ftype = static_cast<FileFormatType> (filetype);
+    int precision;
+    readParameter(filename,"Precision",precision,false);
+    
     if((d != td) || (r != tr) || (n != tn) || (m != tm) )
     {
       std::cerr << d << " | " << td << " DomainField in read!\n";
@@ -255,14 +263,16 @@ read(const char *filename, int timestep)
       std::cerr << "Can not initialize DiscreteFunction with wrong FunctionSpace! \n";
       abort();
     }
-    file.close();
 
+  const char * path = 0;
+  const char * fn = genFilename(path,filename,timestep,precision);
+    
   if(ftype == xdr)
-    return asImp().read_xdr(filename,timestep);
+    return asImp().read_xdr(fn);
   if(ftype == ascii)
-    return asImp().read_ascii(filename,timestep);
+    return asImp().read_ascii(fn);
   if(ftype == pgm)
-    return asImp().read_pgm(filename,timestep);
+    return asImp().read_pgm(fn);
 
   std::cerr << ftype << " FileFormatType not supported at the moment! in file " << __FILE__ << " line " << __LINE__ << "\n";
   abort();
