@@ -1,3 +1,4 @@
+// $Id$
 #ifndef DUNE__SLLIST_HH
 #define DUNE__SLLIST_HH
 
@@ -7,16 +8,16 @@
 
 namespace Dune
 {  
+  /** 
+   * @addtogroup Common
+   *
+   * @{
+   */
   /**
    * @file 
    * This file implements a single linked list together with
    * the necessary iterators.
    * @author Markus Blatt
-   */
-  /** 
-   * @addtogroup Common
-   *
-   * @{
    */
   template<typename T, class A>
   class SLListIterator;
@@ -98,6 +99,29 @@ namespace Dune
      * element or the end if the list is empty.
      */
     inline const_iterator begin() const;
+
+    /**
+     * @brief Get an iterator pointing before the first 
+     * element in the list.
+     *
+     * To be positioned at a valid entry the operator++()
+     * has to be called once.
+     * @return An iterator pointing before the first 
+     * element.
+     */
+    inline iterator oneBeforeBegin();
+    
+    /**
+     * @brief Get an iterator pointing before the first 
+     * element in the list.
+     *
+     * To be positioned at a valid entry the operator++()
+     * has to be called once.
+     * @return An iterator pointing before the first 
+     * element.
+     */
+    inline const_iterator oneBeforeBegin() const;
+
     /**
      * @brief Get an iterator pointing to the
      * end of the list.
@@ -146,6 +170,13 @@ namespace Dune
 
     /** @brief The first element in the list. */
     Element* head_;
+    
+    /** 
+     * @brief iterator position at the first element.
+     * 
+     * Needed for oneBeforeBegin().
+     */
+    iterator ihead_;
 
     /** @brief The last element in the list. */
     Element* tail_;
@@ -164,7 +195,8 @@ namespace Dune
   class SLListIterator : public Dune::ForwardIteratorFacade<SLListIterator<T,A>, T, T&, std::size_t>
   {
     friend class SLListConstIterator<T,A>;
-      
+    friend class SLList<T,A>;
+    
   public:
     inline SLListIterator(typename SLList<T,A>::Element* item)
       : current_(item)
@@ -224,6 +256,7 @@ namespace Dune
   class SLListConstIterator : public Dune::ForwardIteratorFacade<SLListConstIterator<T,A>, const T, const T&, std::size_t>
   {
     friend class SLListIterator<T,A>;
+    friend class SLList<T,A>;
 
   public:
     inline SLListConstIterator()
@@ -290,7 +323,7 @@ namespace Dune
   
   template<typename T, class A>
   SLList<T,A>::SLList()
-    : head_(0), tail_(0), allocator_(), size_(0)
+    : head_(0), ihead_(head_), tail_(0), allocator_(), size_(0)
   {}
   
   template<typename T, class A>
@@ -303,6 +336,7 @@ namespace Dune
       tail_->next_=0;
     }else{
       tail_=head_=allocator_.allocate(1, 0);
+      ihead_.current_=head_;
       tail_->next_=0;
       tail_->item_=item;
     }
@@ -322,6 +356,7 @@ namespace Dune
       added->next_=head_;
       head_=added;
     }
+    ihead_.current_ = head_;
     ++size_;
   }
   
@@ -331,6 +366,7 @@ namespace Dune
     assert(head_!=0);
     Element* tmp = head_;
     head_=head_->next_;
+    ihead_.current_ = head_;
     allocator_.destroy(tmp);
     allocator_.deallocate(tmp, 1);  
     --size_;
@@ -346,6 +382,7 @@ namespace Dune
       allocator_.deallocate(current, 1);
     }
     tail_ = head_;
+    ihead_.current_ = head_;
     size_=0;
   }
 
@@ -371,9 +408,24 @@ namespace Dune
   inline SLListConstIterator<T,A> SLList<T,A>::begin() const
   {
     return const_iterator(head_);
+  } 
+  
+  template<typename T, class A>
+  inline SLListIterator<T,A> SLList<T,A>::oneBeforeBegin()
+  {
+    iterator tmp();
+    tmp.current_ = reinterpret_cast<Element*>(&ihead_);
+    return tmp;
+  }
+  
+  template<typename T, class A>
+  inline SLListConstIterator<T,A> SLList<T,A>::oneBeforeBegin() const
+  {
+    const_iterator tmp();
+    tmp.current_ = reinterpret_cast<Element*>(&ihead_);
+    return tmp;
   }
 
-         
   template<typename T, class A>
   inline SLListIterator<T,A> SLList<T,A>::end()
   {
