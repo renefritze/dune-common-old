@@ -100,7 +100,7 @@ namespace Dune {
 
 namespace Dune 
 {
-/** @defgroup AlbertGrid AlbertGrid
+/** @defgroup AlbertGrid Albert Grid
   @ingroup GridCommon
 
   This is one implementation of the grid interface providing 2d triangle 

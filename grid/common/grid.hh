@@ -7,7 +7,7 @@
 
 namespace Dune {
 
-/** @defgroup GridCommon Dune Grid
+/** @defgroup GridCommon Grid Interface
 
   The Dune Grid module defines a general interface to a hierarchical finite element mesh.
   The interface is independent of dimension and element type. Various implementations
@@ -33,6 +33,8 @@ namespace Dune {
   of the interface. As with STL containers, all implementations must implement the
   same classes with exactly the same members to be used in generic algorithms.
 
+  \sa AlbertGrid UGGrid SPGrid SGrid YaspGrid
+  
 
   @{
  */
