@@ -105,9 +105,8 @@ inline UGGrid < dim, dimworld >::~UGGrid()
 template < int dim, int dimworld >
 inline int UGGrid < dim, dimworld >::maxlevel() const
 {
-    /** \todo Use a member variable instead of search by name */
-    typename UGTypes<dimworld>::MultiGridType* theMG = UG<dim>::GetMultigrid("DuneMG");
-    return theMG->topLevel;
+    assert(multigrid_);
+    return multigrid_->topLevel;
 }
 
 #ifdef _3
@@ -115,10 +114,8 @@ template <>
 inline UGGridLevelIterator<3,3,3> 
 UGGrid < 3, 3 >::lbegin<3> (int level) const
 {
-    /** \todo Use a member variable instead of search by name */
-    UG3d::multigrid* theMG = UG3d::GetMultigrid("DuneMG");
-    assert(theMG);
-    UG3d::grid* theGrid = theMG->grids[level];
+    assert(multigrid_);
+    UG3d::grid* theGrid = multigrid_->grids[level];
 
     UGGridLevelIterator<3,3,3> it((*const_cast<UGGrid< 3, 3 >* >(this)),level);
 
@@ -132,10 +129,8 @@ template <>
 inline UGGridLevelIterator<0,3,3> 
 UGGrid < 3, 3 >::lbegin<0> (int level) const
 {
-    /** \todo Use a member variable instead of search by name */
-    UG3d::multigrid* theMG = UG3d::GetMultigrid("DuneMG");
-    assert(theMG);
-    UG3d::grid* theGrid = theMG->grids[level];
+    assert(multigrid_);
+    UG3d::grid* theGrid = multigrid_->grids[level];
 
     UGGridLevelIterator<0,3,3> it((*const_cast<UGGrid< 3, 3 >* >(this)),level);
     it.setToTarget(theGrid->elements[0]);
@@ -148,10 +143,8 @@ template <>
 inline UGGridLevelIterator<2,2,2> 
 UGGrid < 2, 2 >::lbegin<2> (int level) const
 {
-    /** \todo Use a member variable instead of search by name */
-    UG2d::multigrid* theMG = UG2d::GetMultigrid("DuneMG");
-    assert(theMG);
-    UG2d::grid* theGrid = theMG->grids[level];
+    assert(multigrid_);
+    UG2d::grid* theGrid = multigrid_->grids[level];
 
     UGGridLevelIterator<2,2,2> it((*const_cast<UGGrid< 2, 2 >* >(this)),level);
 
@@ -165,10 +158,8 @@ template <>
 inline UGGridLevelIterator<0,2,2> 
 UGGrid < 2, 2 >::lbegin<0> (int level) const
 {
-    /** \todo Use a member variable instead of search by name */
-    UG2d::multigrid* theMG = UG2d::GetMultigrid("DuneMG");
-    assert(theMG);
-    UG2d::grid* theGrid = theMG->grids[level];
+    assert(multigrid_);
+    UG2d::grid* theGrid = multigrid_->grids[level];
 
     UGGridLevelIterator<0,2,2> it((*const_cast<UGGrid< 2, 2 >* >(this)),level);
     it.setToTarget(theGrid->elements[0]);
@@ -274,6 +265,10 @@ inline void UGGrid < dim, dimworld >::makeNewUGMultigrid()
     /** \bug The newArgs array needs to be deleted here or when shutting down UG */
 //     for (int i=0; i<4; i++)
 //         free(newArgs[i]);
+
+    // Get a direct pointer to the newly created multigrid
+    multigrid_ = UG<dim>::GetMultigrid("DuneMG");
+    assert(multigrid_);
 }
 
 template < int dim, int dimworld >
@@ -282,9 +277,7 @@ inline bool UGGrid < dim, dimworld >::adapt()
     int rv;
     int mode;
 
-    /** \todo Use a member variable instead of search by name */
-    typename UGTypes<dimworld>::MultiGridType* theMG = UG<dim>::GetMultigrid("DuneMG");
-    assert(theMG);
+    assert(multigrid_);
 
 #ifdef _3
     mode = UG3d::GM_REFINE_TRULY_LOCAL;
@@ -296,7 +289,7 @@ inline bool UGGrid < dim, dimworld >::adapt()
     // I don't really know what this means either
     int mgtest = UG3d::GM_REFINE_NOHEAPTEST;
 
-    rv = AdaptMultiGrid(theMG,mode,seq,mgtest);
+    rv = AdaptMultiGrid(multigrid_,mode,seq,mgtest);
 #else
     mode = UG2d::GM_REFINE_TRULY_LOCAL;
     mode = mode | UG2d::GM_COPY_ALL;
@@ -307,7 +300,7 @@ inline bool UGGrid < dim, dimworld >::adapt()
     // I don't really know what this means either
     int mgtest = UG2d::GM_REFINE_NOHEAPTEST;
 
-    rv = AdaptMultiGrid(theMG,mode,seq,mgtest);
+    rv = AdaptMultiGrid(multigrid_,mode,seq,mgtest);
 #endif
 
     std::cout << "adapt():  error code " << rv << "\n";
