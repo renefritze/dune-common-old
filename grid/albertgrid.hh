@@ -1080,15 +1080,10 @@ private:
   
   // max global index in Grid 
   int maxHierIndex_[dim+1];
-  int realMaxIndex_; 
-  int newRealMaxIndex_; 
 
   // max global index in Grid 
   int minHierIndex_[dim+1];
 
-  // return true if entity with global number num is new 
-  bool checkElNew ( ALBERT EL * el ) const;
-  
   // make the calculation of indexOnLevel and so on.
   // extra method because of Reihenfolge
   void calcExtras(); 
@@ -1180,9 +1175,12 @@ private:
   
   // storage of unique element numbers 
   DOF_INT_VEC * elNumbers_;
+  DOF_INT_VEC * elNewCheck_;
+  
   const DOF_ADMIN * elAdmin_;
   // pointer to vec of elNumbers_
   const int * elNumVec_;
+  const int * elNewVec_;
 
   const int nv_;
   const int dof_; 
@@ -1194,6 +1192,9 @@ private:
   // read global element number form elNumbers_  
   int getElementNumber ( ALBERT EL * el ) const; 
 
+  // return true if el is new 
+  bool checkElNew ( ALBERT EL * el ) const;
+  
   //****************************************//
 
 }; // end Class AlbertGridGrid

@@ -2101,7 +2101,7 @@ goNextFace(ALBERT TRAVERSE_STACK *stack, ALBERT EL_INFO *elInfo)
     return elInfo;  // if no more Faces, return
   
   if( (elInfo->neigh[face_]) &&
-      (elInfo->el->index > elInfo->neigh[face_]->index))
+      (grid_.getElementNumber(elInfo->el) > grid_.getElementNumber(elInfo->neigh[face_])))
   {
     // if reachedFace before, go next 
     elInfo = goNextFace(stack,elInfo);
@@ -2509,12 +2509,11 @@ inline AlbertGrid < dim, dimworld >::AlbertGrid(const char *MacroTriangFilename)
     ALBERT read_macro(mesh_, MacroTriangFilename, ALBERT AlbertHelp::initBoundary);
 
     elNumbers_ = AlbertHelp::getElNumbers();
+    elNewCheck_ = AlbertHelp::getElNewCheck();
 
     // dont delete dof on higher levels 
     mesh_->preserve_coarse_dofs = 1;
     
-    newRealMaxIndex_ = realMaxIndex_ = mesh_->n_hier_elements-1;
-        
     numberOfEntitys_[0]     = mesh_->n_hier_elements;
     numberOfEntitys_[1]     = 0;
     numberOfEntitys_[dim-1] = 0;
@@ -2628,9 +2627,8 @@ inline void AlbertGrid < dim, dimworld >::setMark (bool isMarked)
 template < int dim, int dimworld >
 inline bool AlbertGrid < dim, dimworld >::checkElNew (ALBERT EL *el) const 
 {
-  // new elements in ALBERT get really new el->index, 
-  // that means the el->index is always larger than the old realMaxIndex 
-  return ( INDEX(el) > realMaxIndex_ );
+  // if element is new then entry in dofVec is 1 
+  return (elNewVec_[el->dof[dof_][nv_]] > 0);
 }
 
 template < int dim, int dimworld >
@@ -2642,8 +2640,7 @@ inline bool AlbertGrid < dim, dimworld >::adapt()
  
   // set global pointer to index manager in elmem.cc
   initIndexManager_elmem_cc(indexManager_);
-
-  realMaxIndex_ = newRealMaxIndex_;
+  AlbertHelp::clearDofVec ( elNewCheck_ );
 
   flag = ALBERT AlbertRefine ( mesh_ );
   refined = (flag == 0) ? false : true;
@@ -2743,6 +2740,7 @@ inline void AlbertGrid < dim, dimworld >::arrangeDofVec()
 {
   // make it easier for getElementNumber ()  
   ALBERT GET_DOF_VEC(elNumVec_ , elNumbers_ );
+  ALBERT GET_DOF_VEC(elNewVec_ , elNewCheck_ );
   elAdmin_ = elNumbers_->fe_space->admin;
 
   // see Albert Doc. , should stay the same 
@@ -2776,7 +2774,7 @@ inline void AlbertGrid < dim, dimworld >::calcExtras ()
 
   // determine new maxlevel and mark neighbours 
   maxlevel_ = ALBERT AlbertHelp::calcMaxLevelAndMarkNeighbours
-            ( mesh_, elNumbers_, neighOnLevel_ , maxHierIndex_[0] , minHierIndex_[0] , newRealMaxIndex_ );
+            ( mesh_, elNumbers_, neighOnLevel_ , maxHierIndex_[0] , minHierIndex_[0]);
 
   // mark vertices on elements 
   vertexMarker_->markNewVertices(*this);
@@ -2834,12 +2832,13 @@ inline bool AlbertGrid < dim, dimworld >::readGridXdr (const char * filename, al
   // read element numbering from file 
   char elnumfile[2048];
   sprintf(elnumfile,"%s_num",filename);
-  elNumbers_ = read_dof_int_vec_xdr(elnumfile, mesh_ , NULL );
+  elNumbers_  = read_dof_int_vec_xdr(elnumfile, mesh_ , NULL );
+  elNewCheck_ = AlbertHelp::getDofNewCheck(elNumbers_->fe_space); 
 
   // calc maxlevel and indexOnLevel and so on 
   calcExtras();
   // set el_index of index manager to max element index 
-  indexManager_->el_index = newRealMaxIndex_+1;
+  indexManager_->el_index = maxHierIndex_[0];
   
   return true;
 }
