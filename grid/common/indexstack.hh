@@ -20,8 +20,8 @@ class IndexStack
   typedef typename Dune::DoubleLinkedList< StackType * > StackListType;
   
   
-  typename StackListType fullStackList_;
-  typename StackListType emptyStackList_;
+  StackListType fullStackList_;
+  StackListType emptyStackList_;
   
   typedef typename StackListType::Iterator DListIteratorType;
   StackType * stack_; 
