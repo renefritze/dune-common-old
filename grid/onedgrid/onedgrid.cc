@@ -97,7 +97,7 @@ OneDGrid<dim,dimworld>::getLeftUpperVertex(const ElementContainer::Iterator& eIt
     // return the right vertex of the right son
     ElementContainer::Iterator rightSon = l->sons_[1];
     VertexContainer::Iterator rightVertex = rightSon->geo_.vertex[1];
-    const OneDGridElement<1,1>& geo = rightSon->geo_;
+    //const OneDGridElement<1,1>& geo = rightSon->geo_;
 
     return l->sons_[1]->geo_.vertex[1];
 
@@ -147,6 +147,9 @@ bool OneDGrid<dim,dimworld>::adapt()
 
     ElementContainer::Iterator eIt;
 
+    // for the return value:  true if the grid was changed
+    bool changedGrid = false;
+
     // remove all elements that have been marked for coarsening
     for (int i=1; i<=maxlevel(); i++) {
 
@@ -179,6 +182,9 @@ bool OneDGrid<dim,dimworld>::adapt()
 
                 // Actually delete element
                 elements[i].erase(eIt);
+
+                // The grid has been changed
+                changedGrid = true;
 
             }
 
@@ -222,6 +228,7 @@ bool OneDGrid<dim,dimworld>::adapt()
                 if (eIt->index()!=0) continue;
 #if 1
                 std::cout << "Refining element " << eIt->index() << " on level " << i << std::endl;
+
                 // Does the left vertex exist on the next-higher level?
                 // If no create it
                 VertexContainer::Iterator leftUpperVertex = getLeftUpperVertex(eIt);
@@ -311,6 +318,8 @@ bool OneDGrid<dim,dimworld>::adapt()
                 eIt->sons_[0] = newIt0;
                 eIt->sons_[1] = newIt1;
 
+                // The grid has been modified
+                changedGrid = true;
 #endif
             }
 
@@ -340,6 +349,8 @@ bool OneDGrid<dim,dimworld>::adapt()
             eIt->index_ = idx++;
 
     }
+
+    return changedGrid;
 
 }
 
