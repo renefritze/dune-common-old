@@ -3,6 +3,7 @@
 
 #include"../common/matvec.hh"
 #include"../common/stack.hh"
+#include"../common/capabilities.hh"
 #include"common/grid.hh"
 #include"sgrid/numbering.hh"
 
@@ -870,6 +871,23 @@ private:
 };
 
 /** @} end documentation group */
+
+namespace Capabilities
+{
+
+  template<int dim,int dimw>
+  struct hasLeafIterator< SGrid<dim,dimw> >
+  {
+    static const bool v = true;
+  };
+  
+  template<int dim, int dimw, int cdim>
+  struct hasEntity< SGrid<dim,dimw>, SEntity<cdim,dim,dimw> >
+  {
+    static const bool v = true;
+  };
+  
+}
 
 } // end namespace
 

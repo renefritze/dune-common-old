@@ -3,6 +3,7 @@
 
 
 #include "../common/matvec.hh"
+#include "../common/capabilities.hh"
 
 // All UG includes have to be includes via the file ugincludes.hh
 // for easier parsing by undefAllMacros.pl
@@ -303,7 +304,28 @@ protected:
 
 }; // end Class UGGrid
 
+namespace Capabilities
+{
 
+  template<int dim,int dimw>
+  struct hasLeafIterator< UGGrid<dim,dimw> >
+  {
+    static const bool v = true;
+  };
+  
+  template<int dim, int dimw, int cdim>
+  struct hasEntity< UGGrid<dim,dimw>, UGGridEntity<cdim,dim,dimw> >
+  {
+    static const bool v = true;
+  };
+  
+  template<int dim,int dimw>
+  struct isParallel< UGGrid<dim,dimw> >
+  {
+    static const bool v = true;
+  };
+  
+}
 
 } // namespace Dune
 
