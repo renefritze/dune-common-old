@@ -861,6 +861,10 @@ private:
   ALBERT EL_INFO * neighElInfo_;
 
   Vec<dimworld,albertCtype> outNormal_;
+  
+  // tmp memory for normal calculation 
+  Vec<dimworld,albertCtype> tmpU_;
+  Vec<dimworld,albertCtype> tmpV_;
  
 };
 
