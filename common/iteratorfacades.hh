@@ -1,8 +1,9 @@
 // $Id$
-#ifndef __DUNE_ITERATORFACADES_HH__
-#define __DUNE_ITERATORFACADES_HH__
+#ifndef DUNE_ITERATORFACADES_HH
+#define DUNE_ITERATORFACADES_HH
 #include<iterator>
-#include<dune/common/typetraits.hh>
+#include"typetraits.hh"
+
 namespace Dune
 {
   /*! \defgroup IteratorFacades Iterator facades 

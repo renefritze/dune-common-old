@@ -1,8 +1,8 @@
-#ifndef __DUNE__SLLIST_HH__
-#define __DUNE__SLLIST_HH__
+#ifndef DUNE__SLLIST_HH
+#define DUNE__SLLIST_HH
 
 #include<memory>
-#include<dune/common/iteratorfacades.hh>
+#include"iteratorfacades.hh"
 
 namespace Dune
 {  

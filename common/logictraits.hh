@@ -1,5 +1,6 @@
-#ifndef __DUNE_LOCICTRAITS_H__
-#define __DUNE_LOCICTRAITS_H__
+// $ Id $
+#ifndef DUNE_LOCICTRAITS_H
+#define DUNE_LOCICTRAITS_H
 
 namespace Dune{ 
   /** @addtogroup Common

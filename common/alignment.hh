@@ -1,6 +1,6 @@
 // $Id$
-#ifndef __DUNE_ALIGNMENT_HH__
-#define __DUNE_ALIGNMENT_HH__
+#ifndef DUNE_ALIGNMENT_HH
+#define DUNE_ALIGNMENT_HH
 #include<cstddef>
 
 namespace Dune
