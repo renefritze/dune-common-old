@@ -1,5 +1,5 @@
-#ifndef __DUNE_BASEFUNCTIONS_HH__
-#define __DUNE_BASEFUNCTIONS_HH__
+#ifndef DUNE_BASEFUNCTIONS_HH
+#define DUNE_BASEFUNCTIONS_HH
 
 #include <dune/common/matvec.hh>  
 #include <dune/common/mapping.hh>
@@ -242,7 +242,7 @@ public:
     {
       asImp().evaluate( baseFunct, jacobianDiffVar_[i] , quad, quadPoint, tmp_ );
       for(int j=0; j<dimRow; j++)
-        phi(i,j) = tmp_[j];
+        phi[j][i] = tmp_[j];
     }
     return;
   }
