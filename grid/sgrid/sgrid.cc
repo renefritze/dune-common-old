@@ -1135,15 +1135,19 @@ readGrid (const char * filename , sgrid_ctype &time)
   
   std::fstream file (filename,std::ios::in);
   file >> d; 
+
   if(d != dim) 
   {
     std::cerr << "Wrong dimension in grid file! \n";
+    assert(d == dim);
     return false;
   }
+  
   file >> dw;  
   if(dw != dimworld) 
   {
     std::cerr << "Wrong dimensionworld in grid file! \n";
+    assert(dw == dimworld);
     return false;
   }
 
