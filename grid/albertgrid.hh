@@ -3,7 +3,7 @@
 
 #include "../common/matvec.hh"
 #include "../common/misc.hh"
-#include "../common/Stack.hh"
+//#include "../common/Stack.hh"
 #include "common/grid.hh"
 
 
@@ -41,11 +41,14 @@ typedef struct albert_leaf_data
 
 } AlbertLeafData;
 
+const FE_SPACE *feSpace;
+
 void initialReached(const EL_INFO *elInfo);
 void setReached(const EL_INFO *elInfo);
 void AlbertLeafRefine(EL *parent, EL *child[2]);
 void AlbertLeafCoarsen(EL *parent, EL *child[2]);
 void initLeafData(LEAF_DATA_INFO *linfo);
+void initDofAdmin(MESH *mesh);
   
 const BOUNDARY *initBoundary(MESH *Spmesh, int bound);
 
@@ -135,31 +138,64 @@ public:
   /*! return reference element corresponding to this element. If this is
     a reference element then self is returned.
   */
-  AlbertGridElement<dim,dim> refelem ();
+  static AlbertGridElement<dim,dim>& refelem ();
 
   //! maps a local coordinate within reference element to global coordinate in element 
   Vec<dimworld,albertCtype>& global (Vec<dim,albertCtype> local);
   
-  //! maps a local coordinate within reference element to global coordinate in element 
+  //! maps a barycentric coordinate within element to global coordinate in element 
   Vec<dimworld,albertCtype> globalBary (Vec<dim+1,albertCtype> local);
 
   //! maps a global coordinate within the element to a local coordinate in its reference eleme
   Vec<dim,albertCtype>& local (Vec<dimworld,albertCtype> global);
   
+  //! maps a global coordinate within the elements local barycentric
+  //! koordinates 
   Vec<dim+1,albertCtype> localBary (Vec<dimworld,albertCtype> global);
+
+  //! returns true if the point is in the current element
+  bool pointIsInside(const Vec<dimworld,albertCtype> &point);
+
+  /*! 
+    Copy from Peter Bastian:
+
+    Integration over a general element is done by integrating over the reference element
+    and using the transformation from the reference element to the global element as follows:
+    \f[\int\limits_{\Omega_e} f(x) dx = \int\limits_{\Omega_{ref}} f(g(l)) A(l) dl \f] where
+    \f$g\f$ is the local to global mapping and \f$A(l)\f$ is the integration element. 
+
+    For a general map \f$g(l)\f$ involves partial derivatives of the map (surface element of
+    the first kind if \f$d=2,w=3\f$, determinant of the Jacobian of the transformation for
+    \f$d=w\f$, \f$\|dg/dl\|\f$ for \f$d=1\f$).
+
+    For linear elements, the derivatives of the map with respect to local coordinates
+    do not depend on the local coordinates and are the same over the whole element.
+
+    For a structured mesh where all edges are parallel to the coordinate axes, the 
+    computation is the length, area or volume of the element is very simple to compute.
+ 
+    Each grid module implements the integration element with optimal efficieny. This
+    will directly translate in substantial savings in the computation of finite element
+    stiffness matrices.
+   */
+  albertCtype integration_element (const Vec<dim,albertCtype>& local);
+
+  //! can only be called for dim=dimworld!
+  Mat<dim,dim>& Jacobian_inverse (const Vec<dim,albertCtype>& local);
 
   //! print internal data
   void print (std::ostream& ss, int indent);
 
-  //! Methods for Albert
+  //***********************************************************************
+  //  Methods that not belong to the Interface, but have to be public
+  //***********************************************************************
   void builtGeom(ALBERT EL_INFO *elInfo, unsigned char face, 
                  unsigned char edge, unsigned char vertex);
-
   void initGeom();
   
 private:
-  Mat<dimworld,dim+1,albertCtype> coord_;
-  
+  // template method for map the vertices of EL_INFO to the actual 
+  // coords with face_,edge_ and vertex_ , needes for operator []
   template <int cc>
   int mapVertices (int i) { return i; }; 
 
@@ -167,6 +203,11 @@ private:
   template <> int mapVertices< 2 > (int i) { return ((face_+1)+ (edge_+1) +i); };
   template <> int mapVertices< 3 > (int i) { return ((face_+1)+ (edge_+1) +(vertex_+1) +i); };
 
+  Mat<dimworld,dim+1,albertCtype> coord_;
+
+  Vec<dimworld,albertCtype> globalCoord_;
+  Vec<dim,albertCtype> localCoord_;
+  
   ALBERT EL_INFO * makeEmptyElInfo();
   
   ALBERT EL_INFO * elInfo_;
@@ -179,6 +220,10 @@ private:
   
   //! Which Edge of the Face of the Element 0...dim-1
   unsigned char vertex_;
+
+  Mat<dim,dim,albertCtype> Jinv_;  //!< storage for inverse of jacobian
+  bool builtinverse;
+    
 };
 
 
@@ -221,9 +266,19 @@ public:
   //! geometry of this entity
   AlbertGridElement<dim-codim,dimworld>& geometry ();
 
-//************************************************************
-//  Methoden zum Anbinden von Albert
-//************************************************************
+  /*! Location of this vertex within a mesh entity of codimension 0 on the coarse grid.
+    This can speed up on-the-fly interpolation for linear conforming elements
+    Possibly this is sufficient for all applications we want on-the-fly.
+  */
+  AlbertGridLevelIterator<0,dim,dimworld> father ();
+
+  //! local coordinates within father
+  Vec<dim,albertCtype>& local ();
+  
+
+  //***********************************************************************
+  //  Methods that not belong to the Interface, but have to be public
+  //***********************************************************************
   void setTraverseStack (ALBERT TRAVERSE_STACK *travStack);
   void setElInfo (ALBERT EL_INFO *elInfo, unsigned char face,
                   unsigned char edge, unsigned char vertex );
@@ -247,6 +302,8 @@ private:
   //! the cuurent geometry
   AlbertGridElement<dim-codim,dimworld> geo_;
   bool builtgeometry_;               //!< true if geometry has been constructed
+
+  Vec<dim,albertCtype> localFatherCoords_; 
 
   //! Which Face of the Element 
   unsigned char face_;
@@ -278,6 +335,9 @@ public Entity<0,dim,dimworld,albertCtype,AlbertGridEntity,AlbertGridElement,
               AlbertGridHierarchicIterator>
 {
 public:
+  typedef AlbertGridNeighborIterator<dim,dimworld> NeighborIterator; 
+
+  
   //! know your own codimension
   enum { codimension=0 };
 
@@ -297,7 +357,6 @@ public:
   //! index is unique and consecutive per level and codim used for access to degrees of freedo
   int index ();
 
-  bool pointInEntity (const Vec<dimworld,albertCtype> &point);
   
   //! geometry of this entity
   AlbertGridElement<dim,dimworld>& geometry ();
@@ -336,7 +395,7 @@ public:
     implementation of numerical algorithms is only done for simple discretizations.
     Assumes that meshes are nested.
   */
-  AlbertGridElement<dim,dim> father_relative_local ();
+  AlbertGridElement<dim,dim>& father_relative_local ();
   
   /*! Inter-level access to son elements on higher levels<=maxlevel.
     This is provided for sparsely stored nested unstructured meshes.
@@ -372,6 +431,8 @@ private:
   
   //! pointer to the Albert TRAVERSE_STACK data
   ALBERT TRAVERSE_STACK * travStack_;
+
+  AlbertGridElement <dim,dim> fatherReLocal_;
   
 }; // end of AlbertGridEntity codim = 0
 
@@ -452,9 +513,9 @@ private:
  */
 template<int dim, int dimworld>
 class AlbertGridNeighborIterator : 
- public  NeighborIterator<dim,dimworld,albertCtype,
-                          AlbertGridNeighborIterator,AlbertGridEntity,
-                          AlbertGridElement>
+public  NeighborIterator<dim,dimworld,albertCtype,
+                         AlbertGridNeighborIterator,AlbertGridEntity,
+                         AlbertGridElement>
 {
 public:
   //! know your own dimension
@@ -492,6 +553,19 @@ public:
   //! access neighbor, arrow
   AlbertGridEntity<0,dim,dimworld>* operator->();
 
+  //! return true if intersection is with boundary. \todo connection with boundary information, processor/outer bo
+  bool boundary ();
+
+  //! return unit outer normal, this should be dependent on local 
+  //! coordinates for higher order boundary 
+  Vec<dimworld,albertCtype>& unit_outer_normal (Vec<dim-1,albertCtype>& local);
+
+  //! return unit outer normal, if you know it is constant use this function instead
+  Vec<dimworld,albertCtype>& unit_outer_normal ();
+  
+  //! return unit outer normal, if you know it is constant use this function instead
+  Vec<dimworld,albertCtype>& outer_normal ();
+
   /*! intersection of codimension 1 of this neighbor with element where iteratio
     Here returned element is in LOCAL coordinates of the element where iteration
   */
@@ -521,11 +595,21 @@ public:
 private:
   void makeIterator();
   void initElInfo(ALBERT EL_INFO * elInfo); 
+  void setNeighInfo(ALBERT EL_INFO * elInfo, int neigh);
+  
   //! implement with virtual element
   AlbertGridEntity<0,dim,dimworld> virtualEntity_;
 
+  Vec<dimworld,albertCtype> outerNormal_;
+
+  AlbertGridElement<dim-1,dim> fakeNeigh_;
+  AlbertGridElement<dim-1,dimworld> neighGlob_;
+
   ALBERT EL_INFO * elInfo_;
+
   ALBERT EL_INFO neighElInfo_;
+  ALBERT EL boundEl_;
+  
   ALBERT TRAVERSE_STACK * travStack_;
   
   int neighborCount_;
@@ -577,6 +661,9 @@ public:
 
   //! arrow
   AlbertGridEntity<codim,dim,dimworld>* operator->() ;
+  
+  //! ask for level of entity
+  int level ();
 
 private:
   // private Methods
@@ -586,30 +673,38 @@ private:
                             ALBERT MESH *mesh,
                            int level, ALBERT FLAGS fill_flag);
   ALBERT EL_INFO * traverseLeafElLevel(ALBERT TRAVERSE_STACK * stack);
+ 
+  // the default is, go to next entity
+  template <int cc>  ALBERT EL_INFO * 
+  goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
+  { 
+    return goNextElInfo(stack,elinfo_old); 
+  };
 
-  template <int codim>
-  ALBERT EL_INFO * goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
-  { return(goNextElInfo(stack,elinfo_old)); };
-  
+  // codim 1 is always go to next face
   template <> ALBERT EL_INFO * 
   goNextEntity<1>(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
   {
     return goNextFace(stack,elinfo_old); 
   };
-  
-#if 0
+ 
+  // Problem, da es diese Methode nur fuer 3D geben soll, denn in 2D sind
+  // die Dreieckskanten Faces
   template <> ALBERT EL_INFO * 
-  goNextEntity<2>(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
+  goNextEntity<2 << dim>(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
   {
     return goNextEdge(stack,elinfo_old); 
   };
-#endif
+  // Problem, da es diese Methode nur fuer 2D und 3D geben soll,
+  // denn in 1D sind Vertices auch Faces, 
+  // template <> ALBERT EL_INFO * 
   template <> ALBERT EL_INFO * 
   goNextEntity<dim>(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
   {
     return goNextVertex(stack,elinfo_old); 
   };
 
+  
   // the real go next methods
   ALBERT EL_INFO * goNextElInfo(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old);
   ALBERT EL_INFO * goNextFace(ALBERT TRAVERSE_STACK *stack,
@@ -622,7 +717,7 @@ private:
 
   // private Members
   AlbertGridEntity<codim,dim,dimworld> virtualEntity_;
-  //ALBERT TRAVERSE_STACK travStack_;
+
   ALBERT ManageTravStack manageStack_;
 
   unsigned char face_;
@@ -657,11 +752,7 @@ public:
 
   AlbertGrid(char* macroTriangFilename);
   
-  ~AlbertGrid()
-  {
-    ALBERT free_mesh(mesh_);  
-    delete vertexMarker_;
-  };
+  ~AlbertGrid();
    
   //! Return maximum level defined in this grid. Levels are numbered
   //! 0 ... maxlevel with 0 the coarsest level.  
@@ -669,19 +760,13 @@ public:
 
   //! Iterator to first entity of given codim on level
   template<int codim>
-  AlbertGridLevelIterator<codim,dim,dimworld> lbegin (int level)
-  {
-    AlbertGridLevelIterator<codim,dim,dimworld> it(mesh_,vertexMarker_,level);
-    return it;
-  }
+  AlbertGridLevelIterator<codim,dim,dimworld> lbegin (int level);
 
   //! one past the end on this level
   template<int codim>
-  AlbertGridLevelIterator<codim,dim,dimworld> lend (int level)
-  {
-    AlbertGridLevelIterator<codim,dim,dimworld> it;
-    return it;
-  };
+  AlbertGridLevelIterator<codim,dim,dimworld> lend (int level);
+
+  //! Number of Vertices of the Mesh
   int numberVertices ();
 
   //! number of grid entities per level and codim
@@ -690,59 +775,9 @@ public:
   //! number of grid entities per level and codim
   int hiersize (int level, int codim);
 
-#if 0
-  //! inlcude level iterator in scope
-  template<int codim>
-  class LevelIterator : public AlbertGridLevelIterator<codim,dim,dimworld> 
-  {
-  public:
-    //! constructor without argument needed because copy constructor is explicitely defined
-    LevelIterator () : AlbertGridLevelIterator<codim,dim,dimworld>(mesh_,0) {}
-
-    //! copy constructor for initializing derived class object with base class object
-    LevelIterator (const AlbertGridLevelIterator<codim,dim,dimworld>& y) :
-      AlbertGridLevelIterator<codim,dim,dimworld>(y) {}
-
-    //! assignement operator for assigning derived class object to base class object
-    LevelIterator<codim>& operator= (const AlbertGridLevelIterator<codim,dim,dimworld>& y)
-    {
-      asBase().operator=(y);
-      return *this;
-    }
-  private:
-    AlbertGridLevelIterator<codim,dim,dimworld>& asBase() {
-      return static_cast<AlbertGridLevelIterator<codim,dim,dimworld>&>(*this);
-    }
-  };
-
-  // include entity in scope
-  template<int codim>
-  class Entity : public AlbertGridEntity<codim,dim,dimworld> {
-  public:
-    //! constructor without argument needed because copy constructor is explicitely defined
-    Entity () : AlbertGridEntity<codim,dim,dimworld>() {}
-
-    //! copy constructor for initializing derived class object with base class object
-    Entity (const AlbertGridEntity<codim,dim,dimworld>& y) : AlbertGridEntity<codim,dim,dimworld>(y) {}
-
-    //! assignement operator for assigning derived class object to base class object
-    Entity<codim>& operator= (const AlbertGridEntity<codim,dim,dimworld>& y)
-    {
-      asBase().operator=(y);
-      return *this;
-    }
-  private:
-    AlbertGridEntity<codim,dim,dimworld>& asBase() {
-      return static_cast<AlbertGridEntity<codim,dim,dimworld>&>(*this);
-    }
-  };
-
-#endif
-  
 //**********************************************************
 // End of Interface Methods
 //**********************************************************
- 
   void globalRefine(int refCount);
   void coarsenLocal();
   void refineLocal();
@@ -755,7 +790,7 @@ private:
   AlbertMarkerVector *vertexMarker_; 
     
 }; // end Class AlbertGridGrid
- 
+
 
 }; // namespace Dune
 
