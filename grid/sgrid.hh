@@ -408,12 +408,6 @@ public:
         //! global index is calculated from the index and grid size  
         int global_index() const;
 
-  //! return partition type attribute
-  PartitionType partition_type ()
-  {
-        return InteriorEntity;
-  }
-
         //! geometry of this entity
         SElement<dim-codim,dimworld>& geometry ();
 
@@ -507,6 +501,9 @@ public:
 
         //! index is unique and consecutive per level and codim used for access to degrees of freedom
         int index () const {return SEntityBase<0,dim,dimworld>::index();}
+
+        //! only interior entities
+        PartitionType partition_type () { return InteriorEntity; }
 
         //! geometry of this entity
         SElement<dim,dimworld>& geometry () {return SEntityBase<0,dim,dimworld>::geometry();}
@@ -619,6 +616,9 @@ public:
 
         //! index is unique and consecutive per level and codim used for access to degrees of freedom
         int index () const {return SEntityBase<dim,dim,dimworld>::index();}
+
+        //! only interior entities
+        PartitionType partition_type () { return InteriorEntity; }
 
         //! geometry of this entity
         SElement<0,dimworld>& geometry () {return SEntityBase<dim,dim,dimworld>::geometry();}
