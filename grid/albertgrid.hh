@@ -262,7 +262,7 @@ private:
   void makeRefElemCoords();
   
   //! built the jacobian inverse and store the volume 
-  void buildJacobianInverse (const Vec<dim,albertCtype>& local); 
+  void buildJacobianInverse (); 
 
   Vec<dim+1,albertCtype> tmpVec_;
   //! maps a global coordinate within the elements local barycentric
