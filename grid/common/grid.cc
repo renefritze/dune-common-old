@@ -928,9 +928,9 @@ write ( const FileFormatType ftype, const char * filename , ct time, int timeste
   file.close();
   switch (ftype)
   {
-    case xdr  :   return asImp().writeGrid<xdr>(fn,time);
-    case ascii:   return asImp().writeGrid<ascii>(fn,time);
-    case pgm  :   return asImp().writeGrid<pgm>(fn,time);
+    case xdr  :   return asImp().template writeGrid<xdr>(fn,time);
+    case ascii:   return asImp().template writeGrid<ascii>(fn,time);
+    case pgm  :   return asImp().template writeGrid<pgm>(fn,time);
     default: 
         {
           std::cerr << ftype << " FileFormatType not supported at the moment! \n";
@@ -970,9 +970,9 @@ read ( const char * filename , ct & time, int timestep ,
 
   switch (ftype)
   {
-    case xdr  :   return asImp().readGrid<xdr>  (fn,time);
-    case ascii:   return asImp().readGrid<ascii>(fn,time);
-    case pgm  :   return asImp().readGrid<pgm>  (fn,time);
+    case xdr  :   return asImp().template readGrid<xdr>  (fn,time);
+    case ascii:   return asImp().template readGrid<ascii>(fn,time);
+    case pgm  :   return asImp().template readGrid<pgm>  (fn,time);
     default: 
         {
           std::cerr << ftype << " FileFormatType not supported at the moment! \n";
@@ -995,8 +995,8 @@ inline GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::
 LeafIterator::LeafIterator (GridType &grid, int maxlevel, bool end) :
               maxLev_ ( maxlevel ) , end_ ( end )
 {
-  it_    = new LevelIterator ( grid.lbegin<0>( 0 ) );
-  endit_ = new LevelIterator ( grid.lend<0>( 0 ) );
+  it_    = new LevelIterator ( grid.template lbegin<0>( 0 ) );
+  endit_ = new LevelIterator ( grid.template lend<0>( 0 ) );
 
   hierit_ = NULL;
   endhierit_ = NULL;
