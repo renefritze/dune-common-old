@@ -228,7 +228,6 @@ inline int AlbertGridElement<3,3>::mapVertices<3> (int i)
 }
 
 // end specializations for mapVertices 
- 
 
 template< int dim, int dimworld>
 inline AlbertGridElement<dim,dimworld>:: 
