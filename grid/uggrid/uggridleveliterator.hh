@@ -59,9 +59,11 @@ private:
         virtualEntity_.setToTarget(target);
     }
 
-  //! the grid were it all comes from
-    /** \todo Do we need this variable? */
-    //UGGrid<dim,dimworld> &grid_; 
+    void setToTarget(typename TargetType<codim,dim>::T* target, int level) {
+        target_ = target;
+        level_  = level;
+        virtualEntity_.setToTarget(target, level);
+    }
 
   // private Members
   UGGridEntity<codim,dim,dimworld> virtualEntity_;

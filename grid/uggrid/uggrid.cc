@@ -129,7 +129,7 @@ inline int UGGrid < dim, dimworld >::maxlevel() const
 
 #ifdef _3
 template <> 
-inline UGGridLevelIterator<3,3,3> 
+inline UGGridLevelIterator<3,3,3,All_Partition> 
 UGGrid < 3, 3 >::lbegin<3> (int level) const
 {
     assert(multigrid_);
@@ -139,19 +139,19 @@ UGGrid < 3, 3 >::lbegin<3> (int level) const
 
     UG3d::node* mytarget = theGrid->firstNode[0];
 
-    it.setToTarget(mytarget);
+    it.setToTarget(mytarget, level);
     return it;
 }
 
 template <> 
-inline UGGridLevelIterator<0,3,3> 
+inline UGGridLevelIterator<0,3,3, All_Partition> 
 UGGrid < 3, 3 >::lbegin<0> (int level) const
 {
     assert(multigrid_);
     UG3d::grid* theGrid = multigrid_->grids[level];
 
     UGGridLevelIterator<0,3,3> it((*const_cast<UGGrid< 3, 3 >* >(this)),level);
-    it.setToTarget(theGrid->elements[0]);
+    it.setToTarget(theGrid->elements[0], level);
     return it;
 }
 #endif
@@ -168,7 +168,7 @@ UGGrid < 2, 2 >::lbegin<2> (int level) const
 
     UG2d::node* mytarget = theGrid->firstNode[0];
 
-    it.setToTarget(mytarget);
+    it.setToTarget(mytarget, level);
     return it;
 }
 
@@ -180,7 +180,7 @@ UGGrid < 2, 2 >::lbegin<0> (int level) const
     UG2d::grid* theGrid = multigrid_->grids[level];
 
     UGGridLevelIterator<0,2,2,All_Partition> it((*const_cast<UGGrid< 2, 2 >* >(this)),level);
-    it.setToTarget(theGrid->elements[0]);
+    it.setToTarget(theGrid->elements[0], level);
     return it;
 }
 #endif
