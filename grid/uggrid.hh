@@ -129,7 +129,7 @@ namespace Dune {
  * \todo Please doc me!
  */
 template <int dim, int dimworld>
-class UGGrid : public GridDefault  <dim, dimworld,UGCtype, UGGrid>
+class UGGrid : public GridDefault  <dim, dimworld,UGCtype, UGGrid<dim,dimworld> >
 {
 
     friend class UGGridEntity <0,dim,UGGrid<dim,dimworld> >;
@@ -157,7 +157,7 @@ public:
       
       typedef GridTraits<dim,
                          dimworld,
-                         Dune::UGGrid,
+                         Dune::UGGrid<dim,dimworld> ,
                          UGGridGeometry,
                          UGGridEntity,
                          UGGridBoundaryEntity,
