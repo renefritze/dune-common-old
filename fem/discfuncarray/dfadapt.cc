@@ -383,7 +383,7 @@ inline LocalFunctionAdapt < DiscreteFunctionSpaceType >::
 LocalFunctionAdapt( const DiscreteFunctionSpaceType &f , 
               DofArrayType & dofVec )
  : fSpace_ ( f ), dofVec_ ( dofVec ) 
- , uniform_(true) {}
+ , uniform_(true), init_(false) {}
       
 template<class DiscreteFunctionSpaceType >
 inline LocalFunctionAdapt < DiscreteFunctionSpaceType >::~LocalFunctionAdapt() 
@@ -497,7 +497,7 @@ template<class DiscreteFunctionSpaceType > template <class EntityType>
 inline bool LocalFunctionAdapt < DiscreteFunctionSpaceType >::
 init (EntityType &en ) const
 {
-  if(!uniform_)
+  if(!uniform_ || !init_)
   {
     numOfDof_ = 
       fSpace_.getBaseFunctionSet(en).getNumberOfBaseFunctions();
@@ -506,6 +506,8 @@ init (EntityType &en ) const
 
     if(numOfDof_ > this->values_.size())
       this->values_.resize( numOfDof_ );
+
+    init_ = true;
   }
 
   for(int i=0; i<numOfDof_; i++)
