@@ -1,5 +1,5 @@
-#ifndef __DUNE_CACHINGBASE_HH__
-#define __DUNE_CACHINGBASE_HH__
+#ifndef DUNE_CACHINGBASE_HH
+#define DUNE_CACHINGBASE_HH
 
 #include <map>
 
@@ -93,6 +93,12 @@ public:
   const std::vector<JacobianRange>& gradients(int baseFunct, 
                                               const QuadratureType& quad) const;
   
+  //! Alternative acces to precomputed base function values on the faces
+  template <class QuadratureType>
+  const std::vector<Range>& faces(int faceIndex,
+                                  int baseFunct,
+                                  const QuadratureType& quad) const;
+
   //! get a reference of the base function baseFunct 
   //! this is the same concept for all basis, we have a number of
   //! base functions, and store the pointers in a vector
@@ -108,9 +114,19 @@ public:
   template <class QuadratureType>
   void registerQuadrature(const QuadratureType & quad);
 
+  //! Register face quadrature
+  template <class QuadratureType, class EntityType>
+  void registerQuadrature(const QuadratureType& quad, 
+                          const EntityType& en);
+
 private:
   //- Local typedefs
-  typedef typename std::map<IdentifierType, std::vector<std::vector<Range> > > RangeMap;
+  typedef typename std::map<IdentifierType,
+                            std::vector<std::vector<std::vector<Range> > > > FaceMap;
+  typedef typename FaceMap::iterator FaceMapIterator;
+  typedef typename FaceMap::const_iterator ConstFaceMapIterator;
+  typedef typename std::map<IdentifierType, 
+                            std::vector<std::vector<Range> > > RangeMap;
   typedef typename RangeMap::iterator RangeMapIterator;
   typedef typename RangeMap::const_iterator ConstRangeMapIterator;
   typedef typename std::map<IdentifierType,
@@ -133,6 +149,9 @@ private:
   
   //! map with cached values for base function gradients
   JacobianMap grads_;
+
+  //! map with cached values for face values of base functions
+  FaceMap faces_;
   
 }; // end class CachingBaseFunctionSet
 
