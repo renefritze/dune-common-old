@@ -103,14 +103,15 @@ class AdaptiveLeafIndexSet : public DefaultGridIndexSetBase <GridType>
   // size of old index set 
   int oldSize_;
 
+  bool marked_;
+
 public:
   enum { ncodim = GridType::dimension + 1 };
   AdaptiveLeafIndexSet ( GridType & grid ) : DefaultGridIndexSetBase <GridType> (grid) , 
-    nextFreeIndex_ (0), actSize_(0), actHole_(0), oldSize_(0)
+    nextFreeIndex_ (0), actSize_(0), actHole_(0), oldSize_(0), marked_(false)
   {
     // create index set 
     resize();
-    markAllUsed();
   }
 
   //! create index for father entity, needed for restriction  
@@ -118,6 +119,7 @@ public:
   void createFatherIndex (EntityType &en ) 
   {
     this->insert( en );
+    marked_ = false;
   }
 
   //! if grid has changed, resize index vectors, and create 
@@ -126,8 +128,7 @@ public:
   void resize () 
   {
     int oldSize = leafIndex_.size();
-   
-    //std::cout << leafIndex_.size() << " " << this->grid_.global_size(0) << " Leaf Grid Size \n";
+  
     if(leafIndex_.size() < this->grid_.global_size(0))
     {
       leafIndex_.resizeAndCopy(this->grid_.global_size(0),1); 
@@ -141,6 +142,7 @@ public:
     for(int i=oldSize; i<leafIndex_.size(); i++)
     {
       leafIndex_[i] = -1;
+      state_[i] = UNUSED;
     }
 
     // give all entities that lie below the old entities new numbers 
@@ -151,7 +153,7 @@ public:
   //! for dof manager, to check whether it has to copy dof or not 
   bool indexNew (int num) 
   {
-    assert(num < state_.size());
+    assert((num >= 0) && (num < state_.size()));
     return state_[num] == NEW;
   }
 
@@ -159,10 +161,11 @@ public:
   //! return true, if at least one hole was closed 
   bool compress ()
   {
+    // true if a least one dof must be copied 
     bool haveToCopy = false;
 
-    // mark which indices are still used 
-    markAllUsed();
+    // if not marked, mark which indices are still used 
+    if(!marked_) markAllUsed();
 
     // mark holes 
     actHole_ = 0;
@@ -177,7 +180,7 @@ public:
 
     // copy index, for copying in dof manager 
     oldLeafIndex_ = leafIndex_;
-   
+  
     // close holes 
     for(int i=0; i<leafIndex_.size(); i++)
     { 
@@ -187,6 +190,7 @@ public:
         {
           // serach next hole that is smaler than actual size 
           actHole_--;
+          assert(actHole_ >= 0);
           while ( holes_[actHole_] >= actSize_)
           {
             actHole_--;
@@ -208,7 +212,8 @@ public:
     // the next index that can be given away is equal to size
     nextFreeIndex_ = actSize_;
 
-    //print(true);
+    // next turn mark again 
+    marked_ = false;
 
     return haveToCopy;
   }
@@ -234,7 +239,12 @@ public:
   template <int codim, class EntityType>
   int index (EntityType & en, int num) const
   {
+    // this index set works only for codim = 0 at the moment
     assert(codim == 0);
+
+    // check if we have index for given entity
+    assert(leafIndex_[en.global_index()] >= 0);
+
     return leafIndex_[en.global_index()];
   }
   
@@ -258,23 +268,40 @@ public:
   }
 
 private:
-  // memorise index 
+  // insert index if entities lies below used entity, return 
+  // false if not , otherwise return true
   template <class EntityType>
-  bool insertNewIndex (EntityType & en, bool canInsert )
+  bool insertNewIndex (EntityType & en, bool hasChildren , bool canInsert )
   {
+    // if entity has no children, we can insert, because we are at
+    // leaflevel 
+    if(!hasChildren)
+    {
+      // count leaf entities 
+      actSize_++;
+      this->insert ( en );
+      return true;
+    }
+    
     // which is the case if we havent reached a entity which has 
     // already a number 
     if(!canInsert) 
     {
       // from now on, indices can be inserted 
       if(leafIndex_[en.global_index()] >= 0)
+      {
         return true; 
+      }
 
       // we have to go deeper 
       return false;
     }
     else 
+    {
       this->insert ( en );
+      // set unused here, because index is only needed for prolongation 
+      state_[en.global_index()] = UNUSED;
+    }
    
     return true;
   }
@@ -302,7 +329,8 @@ private:
     
     LeafIterator it    = this->grid_.leafbegin ( this->grid_.maxlevel());
     LeafIterator endit = this->grid_.leafend   ( this->grid_.maxlevel());
-   
+  
+    // remember size 
     oldSize_ = nextFreeIndex_;
     
     actSize_ = 0;
@@ -313,6 +341,7 @@ private:
       this->insert( *it );
       actSize_++;
     }
+    marked_ = true;
   }
 
   //! give all entities that lie below the old entities new numbers 
@@ -325,22 +354,37 @@ private:
 
     int maxlevel = this->grid_.maxlevel();
     
+    for(int i=0; i<state_.size(); i++) state_[i] = UNUSED;
+
+    // remember size 
+    oldSize_ = nextFreeIndex_;
+
+    // actSize is increased be insertNewIndex 
+    actSize_ = 0;
+    
     for( ; macroit != macroend; ++macroit )
     {
       typedef typename GridType::template Traits<0>::
             Entity::Traits::HierarchicIterator HierarchicIterator; 
      
-      bool areNew = false;
+      // if we have index all entities below need new numbers 
+      bool areNew = false; 
+
+      // check whether we can insert or not 
+      areNew = insertNewIndex  ( *macroit , macroit->hasChildren() , areNew ); 
       
       HierarchicIterator it    = macroit->hbegin ( maxlevel );
       HierarchicIterator endit = macroit->hend   ( maxlevel );
       
       for( ; it != endit ; ++it )
       {
-        // areNEw == true, then index is inserted 
-        areNew = insertNewIndex  ( *it , areNew ); 
+        // areNew == true, then index is inserted 
+        areNew = insertNewIndex  ( *it , it->hasChildren(), areNew ); 
       }
-    }
+    } // end grid walk trough
+    
+    //std::cout << actSize_ << " actual size \n";
+    marked_ = true;
   }
  
   // print interal data, for debugging only 
