@@ -30,7 +30,7 @@ class OneDGridIntersectionIterator :
     friend class OneDGridEntity<0,dim,GridImp>;
 
     //! Constructor for a given grid entity
-    OneDGridIntersectionIterator(OneDGridEntity<0,1,GridImp>* center) : center_(center), neighbor_(0) 
+    OneDGridIntersectionIterator(const OneDGridEntity<0,1,GridImp>* center) : center_(center), neighbor_(0) 
     {}
 
   //! The default Constructor makes empty Iterator 
@@ -53,7 +53,6 @@ public:
             center_ = NULL;
             neighbor_ = -1;
         }
-        return *this;
     }
 
   //! equality
@@ -93,7 +92,7 @@ public:
             if (center_->pred_)
                 return false;
 
-            OneDGridEntity<0,dim,GridImp>* ancestor = center_;
+            const OneDGridEntity<0,dim,GridImp>* ancestor = center_;
 
             while (ancestor->level()!=0) {
 
@@ -116,7 +115,7 @@ public:
         if (center_->succ_)
             return false;
 
-        OneDGridEntity<0,dim,GridImp>* ancestor = center_;
+        const OneDGridEntity<0,dim,GridImp>* ancestor = center_;
 
         while (ancestor->level()!=0) {
 
@@ -141,11 +140,13 @@ public:
             return center_->succ_ && center_->succ_->geo_.vertex(0) == center_->geo_.vertex(1);
     }
 
+#if 0
   //! return information about the Boundary 
     OneDGridBoundaryEntity<GridImp> & boundaryEntity () {
         return boundaryEntity_;
     }
-      
+#endif     
+ 
   //! return unit outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
     FieldVector<OneDCType, dimworld>& unitOuterNormal (const FieldVector<OneDCType, dim-1>& local);
@@ -192,7 +193,7 @@ private:
   //  private methods 
   //**********************************************************
 
-    OneDGridEntity<0,dim,GridImp>* center_;
+    const OneDGridEntity<0,dim,GridImp>* center_;
  
   //! vector storing the outer normal 
     FieldVector<OneDCType, dimworld> outerNormal_;
@@ -207,9 +208,11 @@ private:
   OneDGridGeometry<dim-1,dimworld> neighGlob_;
 #endif
 
+#if 0
   //! BoundaryEntity
   OneDGridBoundaryEntity<GridImp> boundaryEntity_;
-  
+#endif  
+
     //! count on which neighbor we are lookin' at
     int neighbor_;
 

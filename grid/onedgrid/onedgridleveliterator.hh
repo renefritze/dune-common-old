@@ -24,8 +24,8 @@ class OneDGridLevelIterator :
     enum {dim=GridImp::dimension};
     friend class OneDGridLevelIteratorFactory<codim>;
     friend class OneDGrid<dim,GridImp::dimensionworld>;
-    //friend class OneDGridEntity<codim,dim,dimworld>;
-//     friend class OneDGridEntity<0,dim,dimworld>;
+    friend class OneDGridEntity<codim,dim,GridImp>;
+    friend class OneDGridEntity<0,dim,GridImp>;
 
 protected:
 
