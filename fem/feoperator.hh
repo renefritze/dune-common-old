@@ -84,6 +84,7 @@ protected:
     //! Stores the destination
   DiscFunctionType * dest_;
   
+public:
     //! ???
   void assemble ( ) const 
   {
@@ -244,7 +245,7 @@ protected:
   }
   
 public:
-    //! Operator mode
+    //! %Operator mode
     enum OpMode { ON_THE_FLY, ASSEMBLED };
 
     //! ???
@@ -287,6 +288,24 @@ public:
     else 
     {
       multiplyOnTheFly( arg, dest );
+    }
+  }
+
+    //! ???
+  void assembleMatrix() const 
+  {
+    if ( opMode_ == ASSEMBLED ) 
+    {
+      if ( !matrix_assembled_ ) 
+      {
+        matrix_ = this->newEmptyMatrix( );
+        assemble();     
+      }
+      //matrix_->apply( arg, dest );
+    } 
+    else 
+    {
+        //multiplyOnTheFly( arg, dest );
     }
   }
 
@@ -374,7 +393,7 @@ public:
   } // end applyLocal
 
 
-  //! ???
+  //! Eliminates the Dirichlet rows and columns
   template <class EntityType>
   void finalizeLocal ( EntityType &en ) const 
   {
