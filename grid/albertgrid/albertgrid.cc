@@ -562,8 +562,6 @@ template <>
 inline void AlbertGridElement<2,3>:: 
 buildJacobianInverse(const Vec<2,albertCtype>& local)
 {
-  //std::cout << "To be implemented! \n";
-  //abort();
   enum { dim = 2 };
   enum { dimworld = 3 };
   
@@ -863,6 +861,21 @@ index()
   return elNum_;
 }
 
+template<int codim, int dim, int dimworld>
+inline int AlbertGridEntity < codim, dim ,dimworld >::
+el_index()
+{
+  assert(codim == dim);
+  return elInfo_->el->dof[vertex_][0];
+}
+
+template<int codim, int dim, int dimworld>
+inline int AlbertGridEntity < codim, dim ,dimworld >::
+global_index()
+{
+  return el_index();
+}
+
 template< int codim, int dim, int dimworld>
 inline AlbertGridElement<dim-codim,dimworld>& 
 AlbertGridEntity < codim, dim ,dimworld >::geometry()
@@ -940,18 +953,12 @@ state()
     return COARSEND; 
   }
   
-  if( grid_.checkElNew( el_index() ) )
+  if( grid_.checkElNew( elInfo_->el ) )
   {
-    std::cout << global_index() << " El is new \n";
+    //std::cout << global_index() << " El is new \n";
     return REFINED;   
   }
-/*
-  if( elInfo_->el->mark < 0 )
-  {
-    std::cout << " Return Coarsend!\n";
-    return COARSEND; 
-  }
-*/
+
   return NONE;
 }
 
@@ -1158,11 +1165,19 @@ index()
   return grid_.template indexOnLevel<0>( el_index() , level_ );
 }
 
+// --el_index 
+template<int dim, int dimworld>
+inline int AlbertGridEntity < 0, dim ,dimworld >::
+el_index()
+{
+  return grid_.getElementNumber( elInfo_->el );
+}
+
 template<int dim, int dimworld>
 inline int AlbertGridEntity < 0, dim ,dimworld >::
 global_index()
 {
-  return grid_.globalIndexConsecutive<0>(el_index());
+  return el_index();
 }
 
 template< int dim, int dimworld>
@@ -1200,11 +1215,8 @@ AlbertGridEntity < 0, dim ,dimworld >::father()
   int fatherLevel = level_-1;
   // if this level > 0 return father = elInfoStack -1, 
   // else return father = this 
-  if(!travStack_)
-  {
-    std::cout << "No traverse stack in father! \n";
-    abort();
-  }
+  assert(travStack_ != NULL);
+
   if(level_ > 0)
     fatherInfo = & (travStack_->elinfo_stack)[travStack_->stack_used-1];
   else
@@ -1214,7 +1226,7 @@ AlbertGridEntity < 0, dim ,dimworld >::father()
     fatherLevel = 0;
   }
 
-  int fatherIndex = grid_.template indexOnLevel<0>(fatherInfo->el->index,fatherLevel);
+  int fatherIndex = grid_.template indexOnLevel<0>(grid_.getElementNumber(fatherInfo->el),fatherLevel);
   // new LevelIterator with EL_INFO one level above 
   AlbertGridLevelIterator <0,dim,dimworld> it(grid_,fatherLevel,fatherInfo,fatherIndex,0,0,0);
   return it;  
@@ -1238,11 +1250,8 @@ father(AlbertGridEntity < 0, dim ,dimworld >& vati )
   int fatherLevel = level_-1;
   // if this level > 0 return father = elInfoStack -1, 
   // else return father = this 
-  if(!travStack_)
-  {
-    std::cout << "No traverse stack in father! \n";
-    abort();
-  }
+  assert(travStack_ != NULL);
+
   if(level_ > 0)
     fatherInfo = & (travStack_->elinfo_stack)[travStack_->stack_used-1];
   else
@@ -1798,7 +1807,10 @@ intersection_self_global()
   if(neighGlob_->builtGeom(elInfo_,neighborCount_,0,0))
     return (*neighGlob_);
   else 
+  {
+    std::cerr << "intersection_self_global: ERROR ! \n";
     abort();
+  }
   return (*neighGlob_);
 }
 
@@ -1807,7 +1819,7 @@ inline AlbertGridElement< dim-1, dim >&
 AlbertGridIntersectionIterator<dim,dimworld>::
 intersection_neighbor_local()
 {
-  std::cout << "intersection_neighbor_local not check until now! \n";
+  std::cout << "intersection_neighbor_local not checked until now! \n";
   if(!manageInterEl_)
   {
     manageInterEl_ = grid_->interSelfProvider_.getNewObjectEntity();
@@ -2123,7 +2135,8 @@ goNextVertex(ALBERT TRAVERSE_STACK *stack, ALBERT EL_INFO *elInfo)
     return elInfo;  // if no more Vertices, return
 
   // go next, if Vertex is not treated on this Element 
-  if(vertexMarker_->notOnThisElement(elInfo->el,level_,vertex_))
+  if(vertexMarker_->notOnThisElement(elInfo->el,
+        grid_.getElementNumber(elInfo->el),level_,vertex_))
     elInfo = goNextVertex(stack,elInfo);
 
   return elInfo;
@@ -2402,9 +2415,9 @@ iend(AlbertGridIntersectionIterator<dim,dimworld> &it)
 //
 //*********************************************************************
 inline bool AlbertMarkerVector::
-notOnThisElement(ALBERT EL * el, int level, int localNum) 
+notOnThisElement(ALBERT EL * el, int elIndex, int level, int localNum) 
 {
-  return (vec_[ numVertex_ * level + el->dof[localNum][0]] != el->index);
+  return (vec_[ numVertex_ * level + el->dof[localNum][0]] != elIndex);
 }
 
 template <class GridType>
@@ -2423,6 +2436,7 @@ inline void AlbertMarkerVector::markNewVertices(GridType &grid)
   
   int number = (maxlevel+1) * nvx;
   if(vec_.size() < number) vec_.resize( 2 * number );
+  
   for(int i=0; i<vec_.size(); i++) vec_[i] = -1;
 
   for(int level=0; level <= maxlevel; level++)
@@ -2458,15 +2472,16 @@ inline void AlbertMarkerVector::print()
 template < int dim, int dimworld >
 inline AlbertGrid < dim, dimworld >::AlbertGrid() : 
  mesh_ (NULL), maxlevel_ (0) , wasChanged_ (false), time_ (0.0) 
-  , isMarked_ (false)  
+  , isMarked_ (false) , indexManager_ (NULL)  
 {
   vertexMarker_ = new AlbertMarkerVector ();
+  indexManager_ = get_index_manager();
 }
 
 template < int dim, int dimworld >
 inline AlbertGrid < dim, dimworld >::AlbertGrid(const char *MacroTriangFilename) : 
  mesh_ (NULL), maxlevel_ (0) , wasChanged_ (false), time_ (0.0) 
-  , isMarked_ (false)  
+  , isMarked_ (false) , indexManager_ (NULL) 
 {
   assert(dimworld == DIM_OF_WORLD);
   assert(dim      == DIM);
@@ -2482,11 +2497,22 @@ inline AlbertGrid < dim, dimworld >::AlbertGrid(const char *MacroTriangFilename)
   }
 
   vertexMarker_ = new AlbertMarkerVector ();
+  indexManager_ = get_index_manager();
+  initIndexManager_elmem_cc(indexManager_);
+
   if(makeNew)
   {
+    
     mesh_ = ALBERT get_mesh("AlbertGrid", ALBERT AlbertHelp::initDofAdmin, ALBERT AlbertHelp::initLeafData); 
     ALBERT read_macro(mesh_, MacroTriangFilename, ALBERT AlbertHelp::initBoundary);
 
+    elNumbers_ = AlbertHelp::getElNumbers();
+
+    // dont delete dof on higher levels 
+    mesh_->preserve_coarse_dofs = 1;
+    
+    newRealMaxIndex_ = realMaxIndex_ = mesh_->n_hier_elements-1;
+        
     numberOfEntitys_[0]     = mesh_->n_hier_elements;
     numberOfEntitys_[1]     = 0;
     numberOfEntitys_[dim-1] = 0;
@@ -2494,21 +2520,20 @@ inline AlbertGrid < dim, dimworld >::AlbertGrid(const char *MacroTriangFilename)
     
     // we have at least one level, level 0
     maxlevel_ = 0;
-    maxHierIndex_ = mesh_->n_hier_elements;
-    neighOnLevel_.resize( maxHierIndex_ );
+    maxHierIndex_[0] = mesh_->n_hier_elements;
+    neighOnLevel_.resize( maxHierIndex_[0] );
 
-    vertexMarker_->markNewVertices( *this );
+    calcExtras();
 
-    markNew();
     wasChanged_ = true;
     isMarked_ = false;
+
   }
   else 
   {
     read (MacroTriangFilename,time_,0);
   }
 }
-
 
 template < int dim, int dimworld >
 inline AlbertGrid < dim, dimworld >::~AlbertGrid()
@@ -2599,9 +2624,11 @@ inline void AlbertGrid < dim, dimworld >::setMark (bool isMarked)
 }
 
 template < int dim, int dimworld >
-inline bool AlbertGrid < dim, dimworld >::checkElNew (int num) const 
+inline bool AlbertGrid < dim, dimworld >::checkElNew (ALBERT EL *el) const 
 {
-  return gIndex_.isNew(num);
+  // new elements in ALBERT get really new el->index, 
+  // that means the el->index is always larger than the old realMaxIndex 
+  return ( INDEX(el) > realMaxIndex_ );
 }
 
 template < int dim, int dimworld >
@@ -2610,12 +2637,17 @@ inline bool AlbertGrid < dim, dimworld >::adapt()
   unsigned char flag;
   bool refined = false;
   wasChanged_ = false;
+ 
+  // set global pointer to index manager in elmem.cc
+  initIndexManager_elmem_cc(indexManager_);
+
+  realMaxIndex_ = newRealMaxIndex_;
 
   flag = ALBERT AlbertRefine ( mesh_ );
   refined = (flag == 0) ? false : true;
  
   if(isMarked_) // true if a least on element is marked for coarseing
-    flag = ALBERT AlbertCoarsen( mesh_ );
+    flag = ALBERT AlbertCoarsen( mesh_ , elNumbers_ );
 
   if(!refined)
   {
@@ -2630,6 +2662,9 @@ inline bool AlbertGrid < dim, dimworld >::adapt()
     isMarked_ = false;
   }
 
+  // remove global pointer in elmem.cc
+  removeIndexManager_elmem_cc();
+
   return refined;
 }
 
@@ -2637,6 +2672,12 @@ template < int dim, int dimworld >
 inline int AlbertGrid < dim, dimworld >::maxlevel() const
 {
   return maxlevel_;
+}
+
+template < int dim, int dimworld >
+inline int AlbertGrid < dim, dimworld >::global_size (int codim) const
+{
+  return maxHierIndex_[codim];
 }
 
 template < int dim, int dimworld >
@@ -2694,19 +2735,37 @@ inline int AlbertGrid < dim, dimworld >::size (int level, int codim)
   }
 }
 
+
 template < int dim, int dimworld > 
-inline int AlbertGrid < dim, dimworld >::hierSize () const
+inline void AlbertGrid < dim, dimworld >::arrangeDofVec()
 {
-  return gIndex_.size();
+  // make it easier for getElementNumber ()  
+  ALBERT GET_DOF_VEC(elNumVec_ , elNumbers_ );
+  elAdmin_ = elNumbers_->fe_space->admin;
+
+  // see Albert Doc. , should stay the same 
+  const_cast<int &> (nv_)  = elAdmin_->n0_dof[CENTER];
+  const_cast<int &> (dof_) = elAdmin_->mesh->node[CENTER];
 }
+
+
+template < int dim, int dimworld > 
+inline int AlbertGrid < dim, dimworld >::getElementNumber ( ALBERT EL * el ) const
+{
+  return elNumVec_[el->dof[dof_][nv_]];
+};
+
 
 template < int dim, int dimworld > 
 inline void AlbertGrid < dim, dimworld >::calcExtras ()
 {
+  arrangeDofVec ();
+  
   // save number of old entities 
   for(int i=0; i<dim+1; i++) 
     oldNumberOfEntities_[i] = numberOfEntitys_[i];
 
+  
   // calc new number of entities 
   numberOfEntitys_[0]     = mesh_->n_hier_elements; // elements 
   numberOfEntitys_[1]     = 1;                      // faces 
@@ -2714,7 +2773,8 @@ inline void AlbertGrid < dim, dimworld >::calcExtras ()
   numberOfEntitys_[dim]   = mesh_->n_vertices;      // vertices 
 
   // determine new maxlevel and mark neighbours 
-  maxlevel_ = ALBERT AlbertHelp::calcMaxLevelAndMarkNeighbours( mesh_, neighOnLevel_ , maxHierIndex_ );
+  maxlevel_ = ALBERT AlbertHelp::calcMaxLevelAndMarkNeighbours
+            ( mesh_, elNumbers_, neighOnLevel_ , maxHierIndex_[0] , minHierIndex_[0] , newRealMaxIndex_ );
 
   // mark vertices on elements 
   vertexMarker_->markNewVertices(*this);
@@ -2738,47 +2798,46 @@ inline bool AlbertGrid < dim, dimworld >::writeGrid (const char * filename, albe
                  return writeGridUSPM ( filename , time , maxlevel_ ); 
                };
   }
-  std::cerr << "Only xdr Format support in writeGrid!\n";
-  abort();
+
+  assert((ftype == xdr) || (ftype == USPM)); 
   return false;
 }
 
 template < int dim, int dimworld >  template <FileFormatType ftype> 
 inline bool AlbertGrid < dim, dimworld >::readGrid (const char * filename, albertCtype &time )
 {
-  if(ftype != xdr)
-  {
-    std::cerr << "Only xdr Format support in readGrid!\n";
-    abort();
-  }
+  assert(ftype == xdr);
   return readGridXdr (filename , time );
 }
 
 template < int dim, int dimworld > 
 inline bool AlbertGrid < dim, dimworld >::writeGridXdr (const char * filename, albertCtype time )
 {
-  // use write_mesh_xdr, but works mot correctly 
-  //return static_cast<bool> (ALBERT write_mesh (mesh_ , filename, time) );
-  return static_cast<bool> 
-    (ALBERT AlbertWrite::new_write_mesh_xdr (mesh_ , filename, time, gIndex_ ) );
+  // strore element numbering to file 
+  char elnumfile[2048];
+  sprintf(elnumfile,"%s_num",filename);
+  write_dof_int_vec_xdr(elNumbers_,elnumfile);
+  
+  // use write_mesh_xdr, but works not correctly 
+  return static_cast<bool> (ALBERT write_mesh (mesh_ , filename, time) );
 }
 
 template < int dim, int dimworld > 
 inline bool AlbertGrid < dim, dimworld >::readGridXdr (const char * filename, albertCtype & time )
 {
   // use read_mesh_xdr, but works not correctly 
-#if 0
   mesh_ = (ALBERT read_mesh (filename, &time , ALBERT AlbertHelp::initLeafData , 
                                 ALBERT AlbertHelp::initBoundary) );
-#else 
-  mesh_ = (ALBERT AlbertRead::new_read_mesh_xdr 
-            (filename, &time , ALBERT AlbertHelp::initLeafData , 
-                               ALBERT AlbertHelp::initBoundary , 
-                               gIndex_ ) );
-#endif
+  
+  // read element numbering from file 
+  char elnumfile[2048];
+  sprintf(elnumfile,"%s_num",filename);
+  elNumbers_ = read_dof_int_vec_xdr(elnumfile, mesh_ , NULL );
 
   // calc maxlevel and indexOnLevel and so on 
   calcExtras();
+  // set el_index of index manager to max element index 
+  indexManager_->el_index = newRealMaxIndex_+1;
   
   return true;
 }
@@ -2787,8 +2846,9 @@ template < int dim, int dimworld >
 inline bool AlbertGrid < dim, dimworld >::
 writeGridUSPM ( const char * filename, double time , int level)
 {
+  bool fake = true;
   printf("Not implemented for dim=%d , dimworld=%d \n",dim,dimworld);
-  abort();
+  assert(fake != true);
   return false;
 }
 
@@ -2976,19 +3036,14 @@ template < int dim, int dimworld >
 inline void AlbertGrid < dim, dimworld >::
 makeNewSize(Array<int> &a, int newNumberOfEntries)
 {
-  a.resize(newNumberOfEntries);
+  //std::cout << newNumberOfEntries << " nE \n";
+  if(newNumberOfEntries > a.size())
+  {
+    a.resize(newNumberOfEntries);
+  }
   for(Array<int>::Iterator it = a.begin(); it != a.end(); ++it)
     (*it) = -1;
 } 
-
-template < int dim, int dimworld > template <int codim>
-inline int AlbertGrid < dim, dimworld >::
-globalIndexConsecutive(int num)  
-{
-  assert(codim == 0);
-  assert(num >= 0);
-  return gIndex_[num];
-}
 
 template < int dim, int dimworld > template <int codim>
 inline int AlbertGrid < dim, dimworld >::
@@ -3024,6 +3079,7 @@ oldIndexOnLevel(int globalIndex, int level)
 template < int dim, int dimworld > 
 inline void AlbertGrid < dim, dimworld >::markNew()
 {
+  //std::cout << "Start markNew \n";
   // only for gcc, means notin' 
   //typedef AlbertGrid < dim ,dimworld > GridType;
   for(int i=0; i<dim+1; i++)
@@ -3032,9 +3088,7 @@ inline void AlbertGrid < dim, dimworld >::markNew()
       levelIndex_[i][l].swap ( oldLevelIndex_[i][l] );
   }
 
-  gIndex_.resize ( maxHierIndex_ );
-  
-  int nElements = maxHierIndex_; 
+  int nElements = maxHierIndex_[0]; 
   int nVertices = mesh_->n_vertices;
 
   for(int l=0; l<=maxlevel_; l++)
@@ -3055,11 +3109,9 @@ inline void AlbertGrid < dim, dimworld >::markNew()
     typedef AlbertGridLevelIterator<0,dim,dimworld> LevelIterator;
     int num = 0;
     LevelIterator endit = lend<0>(level);
-    //std::cout << levelIndex_[0][level].size() << " Size \n"; 
     for(LevelIterator it = lbegin<0> (level); it != endit; ++it)
     {
       int no = it->el_index();
-      gIndex_.insert( no );
 
       levelIndex_[0][level][no] = num;
       num++;
@@ -3067,8 +3119,6 @@ inline void AlbertGrid < dim, dimworld >::markNew()
     // remember the number of entity on level and codim = 0
     size_[level*numCodim /* +0 */] = num;
   };
-
-  gIndex_.finish();
 
   for(int l=0; l<=maxlevel_; l++)
   {
@@ -3092,11 +3142,11 @@ inline void AlbertGrid < dim, dimworld >::markNew()
       levelIndex_[dim][level][no] = num;
       num++;
     }
- //   std::cout << "Done LevelIt \n";
+    // std::cout << "Done LevelIt \n";
     // remember the number of entity on level and codim = 0
     size_[level*numCodim + dim] = num;
   };
-
+  //std::cout << "End markNew \n";
 } 
 
 // if defined some debugging test were made that reduce the performance
@@ -3125,7 +3175,7 @@ fillElInfo(int ichild, int actLevel , const ALBERT EL_INFO *elinfo_old, ALBERT E
 if(el->child[0])
 {
 #ifdef DEBUG_FILLELINFO
-  printf("Called fillElInfo with El %d \n",el->index);
+  printf("Called fillElInfo with El %d \n",getElementNumber(el));
 #endif
   
   ALBERT_TEST_EXIT((elinfo->el = el->child[ichild]))("missing child %d?\n", ichild);
@@ -3201,7 +3251,7 @@ if(el->child[0])
           if( oppV == 0)
             nextNb = elinfo->neigh[2]->child[1];
 
-          if(neighOnLevel_[nextNb->index] <= actLevel )
+          if(neighOnLevel_[ getElementNumber( nextNb )] <= actLevel )
             elinfo->neigh[2] = nextNb;
           // if we go down the opposite vertex now must be 2
           elinfo->opp_vertex[2] = 2;
@@ -3235,7 +3285,7 @@ if(el->child[0])
 
       if(chi1->child[0])
       {
-        if(neighOnLevel_[chi1->child[1]->index] <= actLevel )
+        if(neighOnLevel_[ getElementNumber( chi1->child[1] )] <= actLevel )
           goDownNextChi = true;
       }
 
@@ -3286,10 +3336,8 @@ if(el->child[0])
       {
         // the neighbour across the refinement edge 
 #ifdef DEBUG_FILLELINFO
-        printf("El  %d , Neigh %d \n",el->index,nb->index);
-        printf("El  %d , Neigh %d \n",el->child[0]->index,nb->index);
-        //printf("OppVx %d \n",elinfo_old->opp_vertex[2]);
-        //printf("El  %d , Neigh %d \n",el->index,nb->index);
+        printf("fillElInfo: El  %d , Neigh %d \n",getElementNumber (el), getElementNumber (nb));
+        printf("fillElInfo: El  %d , Neigh %d \n",getElementNumber (el->child[0]),getElementNumber (nb));
         ALBERT_TEST_EXIT(elinfo_old->opp_vertex[2] == 2)("invalid neighbour\n"); 
         //ALBERT_TEST_EXIT((nb->child[0]))("missing child[0] of nb2 ?\n");
 #endif
@@ -3297,16 +3345,18 @@ if(el->child[0])
         {
           ALBERT_TEST_EXIT((nb = nb->child[1]))("missing child[1]?\n");
         }
+#if 0
         else 
         {
-          printf("El  %d , Neigh %d \n",el->child[0]->index,nb->index);
+          // seems ok
+          //printf("fillElInfo: El  %d , Neigh %d \n", getElementNumber (el->child[0]),getElementNumber(nb));
           //nb = nb->child[0];
         }
-          
+#endif
         if (nb->child[0]) 
         {
           bool goDownNextChi = false;
-          if(neighOnLevel_[nb->child[0]->index] <= actLevel )
+          if(neighOnLevel_[getElementNumber(nb->child[0])] <= actLevel )
             goDownNextChi = true;
 
           if(goDownNextChi)  
@@ -3368,7 +3418,7 @@ if(el->child[0])
           if( oppV == 0 )
             nextNb = elinfo->neigh[2]->child[1];
           
-          if(neighOnLevel_[nextNb->index] <= actLevel )
+          if(neighOnLevel_[getElementNumber(nextNb)] <= actLevel )
             elinfo->neigh[2] = nextNb;
           // if we go down the opposite vertex now must be 2
           elinfo->opp_vertex[2] = 2;
@@ -3401,7 +3451,7 @@ if(el->child[0])
       
       if (chi0->child[0])
       {
-        if(neighOnLevel_[chi0->child[0]->index] <= actLevel )
+        if(neighOnLevel_[getElementNumber(chi0->child[0])] <= actLevel )
           goDownChild = true;
       }
         
@@ -3449,7 +3499,7 @@ if(el->child[0])
       bool goDownChild = false;
       if (nb->child[0])
       {
-        if(neighOnLevel_[nb->child[1]->index] <= actLevel )
+        if(neighOnLevel_[getElementNumber(nb->child[1])] <= actLevel )
           goDownChild = true;
       }
 
