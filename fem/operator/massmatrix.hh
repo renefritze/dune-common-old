@@ -1,5 +1,8 @@
-#ifndef __DUNE_MASSMATRIX_HH__
-#define __DUNE_MASSMATRIX_HH__
+#ifndef DUNE_MASSMATRIX_HH
+#define DUNE_MASSMATRIX_HH
+
+#include <dune/fem/feoperator.hh>
+#include <dune/fem/feop/spmatrix.hh>
 
 namespace Dune {
   
@@ -68,8 +71,7 @@ namespace Dune {
       RangeType v1 (0.0);
       RangeType v2 (0.0);
       
-      const double vol = 
-        entity.geometry().integration_element( tmp ); 
+      const double vol = entity.geometry().integrationElement( tmp ); 
       for ( int pt=0; pt < quad.nop(); pt++ ) 
         {      
           baseSet.eval(i,quad,pt,v1); 
@@ -91,7 +93,7 @@ namespace Dune {
       
       /** \todo What's the correct type here? */
       static  FieldVector<double, GridType::dimension> tmp(1.0);
-      const double vol = entity.geometry().integration_element(tmp);
+      const double vol = entity.geometry().integrationElement(tmp);
       
       static RangeType v[4];
       // Check magic constant. Otherwise program will fail in loop below
@@ -99,7 +101,7 @@ namespace Dune {
 
       for(i=0; i<matSize; i++) 
         for (j=0; j<=i; j++ ) 
-          mat(i,j)=0.0;
+          mat[j][i]=0.0;
       
       for ( int pt=0; pt < quad.nop(); pt++ )
         {
@@ -108,19 +110,19 @@ namespace Dune {
           
           for(i=0; i<matSize; i++) 
             for (j=0; j<=i; j++ ) 
-              mat(i,j) += ( v[i] * v[j] ) * quad.weight( pt );
+              mat[j][i] += ( v[i] * v[j] ) * quad.weight( pt );
         }
       
       for(i=0; i<matSize; i++) 
         for (j=0; j<=i; j++ ) 
-          mat(i,j) *= vol;
+          mat[j][i] *= vol;
       
       for(i=0; i<matSize; i++) 
         for (j=matSize; j>i; j--) 
-          mat(i,j) = mat(j,i);
+          mat[j][i] = mat[i][j];
       
-      return;
     }
+
   protected:
     DiscFunctionType *_tmp;
   };
