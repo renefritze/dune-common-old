@@ -140,7 +140,7 @@ public:
     typedef OneDGridHierarchicIterator<dim,dimworld> HierarchicIterator; 
     
     //! Constructo
-    OneDGridEntity(int level) : adaptationState(NONE), level_(level), pred_(NULL), succ_(NULL) {
+    OneDGridEntity(int level) : level_(level), adaptationState(NONE), pred_(NULL), succ_(NULL) {
         sons_[0] = NULL;
         sons_[1] = NULL;
         father_ = NULL;
