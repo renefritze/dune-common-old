@@ -5,17 +5,17 @@ namespace Dune {
   
 // singleton holding reference elements
 template<int dim, class GridImp>
-struct BSGridReferenceGeometry
+struct ALU3dGridReferenceGeometry
 {
-  BSGridMakeableGeometry<dim,dim,GridImp> refelem;
-  BSGridReferenceGeometry () : refelem (true) {};
+  ALU3dGridMakeableGeometry<dim,dim,GridImp> refelem;
+  ALU3dGridReferenceGeometry () : refelem (true) {};
 };
   
 //! singelton holding reference element   
-//static BSGridGeometry<3,3> refelem3d(true);
+//static ALU3dGridGeometry<3,3> refelem3d(true);
 
 template <int dim, int dimworld>
-inline BSGrid<dim,dimworld>::BSGrid(const char* macroTriangFilename
+inline ALU3dGrid<dim,dimworld>::ALU3dGrid(const char* macroTriangFilename
 #ifdef _BSGRID_PARALLEL_
     , MPI_Comm mpiComm
 #endif
@@ -50,7 +50,7 @@ inline BSGrid<dim,dimworld>::BSGrid(const char* macroTriangFilename
 
 #ifdef _BSGRID_PARALLEL_
 template <int dim, int dimworld>
-inline BSGrid<dim,dimworld>::BSGrid(MPI_Comm mpiComm) 
+inline ALU3dGrid<dim,dimworld>::ALU3dGrid(MPI_Comm mpiComm) 
   : mygrid_ (0) , maxlevel_(0) 
   , coarsenMark_(false)
   , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
@@ -60,7 +60,7 @@ inline BSGrid<dim,dimworld>::BSGrid(MPI_Comm mpiComm)
 }
 #else 
 template <int dim, int dimworld>
-inline BSGrid<dim,dimworld>::BSGrid(int myrank) 
+inline ALU3dGrid<dim,dimworld>::ALU3dGrid(int myrank) 
   : mygrid_ (0) , maxlevel_(0) 
   , coarsenMark_(false)
   , myRank_(myrank) 
@@ -72,43 +72,43 @@ inline BSGrid<dim,dimworld>::BSGrid(int myrank)
 #endif
 
 template <int dim, int dimworld>
-inline BSGrid<dim,dimworld>::BSGrid(const BSGrid<dim,dimworld> & g)
+inline ALU3dGrid<dim,dimworld>::ALU3dGrid(const ALU3dGrid<dim,dimworld> & g)
   : mygrid_ (0) , maxlevel_(0) 
   , coarsenMark_(false) , myRank_(-1) 
   , hIndexSet_(*this,globalSize_) , levelIndexSet_(0)
 {
-  DUNE_THROW(BSGridError,"Do not use copy constructor of BSGrid! \n");
+  DUNE_THROW(ALU3dGridError,"Do not use copy constructor of ALU3dGrid! \n");
 }
 
 template <int dim, int dimworld>
-inline BSGrid<dim,dimworld> & BSGrid<dim,dimworld>::operator = (const BSGrid<dim,dimworld> & g)
+inline ALU3dGrid<dim,dimworld> & ALU3dGrid<dim,dimworld>::operator = (const ALU3dGrid<dim,dimworld> & g)
 {
-  DUNE_THROW(BSGridError,"Do not use assignment operator of BSGrid! \n");
+  DUNE_THROW(ALU3dGridError,"Do not use assignment operator of ALU3dGrid! \n");
   return (*this);
 }
 
 template <int dim, int dimworld>
-inline BSGrid<dim,dimworld>::~BSGrid()
+inline ALU3dGrid<dim,dimworld>::~ALU3dGrid()
 {
   if(levelIndexSet_) delete levelIndexSet_;
   if(mygrid_) delete mygrid_;
 }
 
 template <int dim, int dimworld>
-inline int BSGrid<dim,dimworld>::size(int level, int codim) const 
+inline int ALU3dGrid<dim,dimworld>::size(int level, int codim) const 
 {
   return levelIndexSet().size(level,codim);
 }
 
 template <int dim, int dimworld>
-inline void BSGrid<dim,dimworld>::updateStatus()  
+inline void ALU3dGrid<dim,dimworld>::updateStatus()  
 {
   calcMaxlevel();
   calcExtras();
 }
 
 template <int dim, int dimworld>
-inline void BSGrid<dim,dimworld>::calcMaxlevel()  
+inline void ALU3dGrid<dim,dimworld>::calcMaxlevel()  
 {
   maxlevel_ = 0;
   assert(mygrid_ != 0);
@@ -120,7 +120,7 @@ inline void BSGrid<dim,dimworld>::calcMaxlevel()
 }
   
 template <int dim, int dimworld>
-inline void BSGrid<dim,dimworld>::calcExtras()  
+inline void ALU3dGrid<dim,dimworld>::calcExtras()  
 {
   // set max index of grid 
   for(int i=0; i<dim+1; i++)
@@ -134,7 +134,7 @@ inline void BSGrid<dim,dimworld>::calcExtras()
 }
 
 template <int dim, int dimworld>
-inline void BSGrid<dim,dimworld>::recalcGlobalSize()  
+inline void ALU3dGrid<dim,dimworld>::recalcGlobalSize()  
 {
   for(int i=0; i<dim+1; i++) globalSize_[i] = -1;
 
@@ -158,7 +158,7 @@ inline void BSGrid<dim,dimworld>::recalcGlobalSize()
 }
 
 template <int dim, int dimworld>
-inline int BSGrid<dim,dimworld>::global_size(int codim) const 
+inline int ALU3dGrid<dim,dimworld>::global_size(int codim) const 
 {
   assert(globalSize_[codim] >= 0);
   std::cout << globalSize_[codim] << " Size of cd " << codim << "\n";
@@ -166,13 +166,13 @@ inline int BSGrid<dim,dimworld>::global_size(int codim) const
 }
 
 template <int dim, int dimworld>
-inline int BSGrid<dim,dimworld>::maxlevel() const 
+inline int ALU3dGrid<dim,dimworld>::maxlevel() const 
 { 
   return maxlevel_;
 }
 
 template <int dim, int dimworld>
-inline BSSPACE BSGitterType & BSGrid<dim,dimworld>::myGrid() 
+inline BSSPACE BSGitterType & ALU3dGrid<dim,dimworld>::myGrid() 
 {
   return *mygrid_;
 }
@@ -180,56 +180,56 @@ inline BSSPACE BSGitterType & BSGrid<dim,dimworld>::myGrid()
 // lbegin methods 
 template <int dim, int dimworld>
 template <int cd, PartitionIteratorType pitype>
-inline typename BSGrid<dim,dimworld>::Traits::template codim<cd>::template partition<pitype>::LevelIterator 
-BSGrid<dim,dimworld>::lbegin(int level) const {
-  BSGridLevelIterator<cd,pitype,const MyType>  it (*this,level);
+inline typename ALU3dGrid<dim,dimworld>::Traits::template codim<cd>::template partition<pitype>::LevelIterator 
+ALU3dGrid<dim,dimworld>::lbegin(int level) const {
+  ALU3dGridLevelIterator<cd,pitype,const MyType>  it (*this,level);
   return it;
 }
 
 template <int dim, int dimworld>
 template <int cd, PartitionIteratorType pitype>
-inline typename BSGrid<dim,dimworld>::Traits::template codim<cd>::template partition<pitype>::LevelIterator 
-BSGrid<dim,dimworld>::lend(int level) const {
-  BSGridLevelIterator<cd,pitype,const MyType> it (*this,level,true);
+inline typename ALU3dGrid<dim,dimworld>::Traits::template codim<cd>::template partition<pitype>::LevelIterator 
+ALU3dGrid<dim,dimworld>::lend(int level) const {
+  ALU3dGridLevelIterator<cd,pitype,const MyType> it (*this,level,true);
   return it;
 }
 
 // lbegin methods 
 template <int dim, int dimworld>
 template <int cd>
-inline typename BSGrid<dim,dimworld>::Traits::template codim<cd>::template partition<All_Partition>::LevelIterator 
-BSGrid<dim,dimworld>::lbegin(int level) const {
-  BSGridLevelIterator<cd,All_Partition,const MyType> it (*this,level);
+inline typename ALU3dGrid<dim,dimworld>::Traits::template codim<cd>::template partition<All_Partition>::LevelIterator 
+ALU3dGrid<dim,dimworld>::lbegin(int level) const {
+  ALU3dGridLevelIterator<cd,All_Partition,const MyType> it (*this,level);
   return it;
 }
 
 template <int dim, int dimworld>
 template <int cd>
-inline typename BSGrid<dim,dimworld>::Traits::template codim<cd>::template partition<All_Partition>::LevelIterator 
-BSGrid<dim,dimworld>::lend(int level) const {
-  BSGridLevelIterator<cd,All_Partition,const MyType> it (*this,level,true);
+inline typename ALU3dGrid<dim,dimworld>::Traits::template codim<cd>::template partition<All_Partition>::LevelIterator 
+ALU3dGrid<dim,dimworld>::lend(int level) const {
+  ALU3dGridLevelIterator<cd,All_Partition,const MyType> it (*this,level,true);
   return it;
 }
 
 // leaf methods 
 template <int dim, int dimworld>
-inline typename BSGrid<dim,dimworld>::LeafIteratorType 
-BSGrid<dim,dimworld>::leafbegin(int level, PartitionIteratorType pitype) const
+inline typename ALU3dGrid<dim,dimworld>::LeafIteratorType 
+ALU3dGrid<dim,dimworld>::leafbegin(int level, PartitionIteratorType pitype) const
 {
-  BSGridLeafIterator<const MyType> it ((*this),level,false,pitype);
+  ALU3dGridLeafIterator<const MyType> it ((*this),level,false,pitype);
   return it;
 }
 template <int dim, int dimworld>
-inline typename BSGrid<dim,dimworld>::LeafIteratorType 
-BSGrid<dim,dimworld>::leafend(int level, PartitionIteratorType pitype) const
+inline typename ALU3dGrid<dim,dimworld>::LeafIteratorType 
+ALU3dGrid<dim,dimworld>::leafend(int level, PartitionIteratorType pitype) const
 {
-  BSGridLeafIterator<const MyType> it ((*this),level,true,pitype);
+  ALU3dGridLeafIterator<const MyType> it ((*this),level,true,pitype);
   return it;
 }
 
 // global refine 
 template <int dim, int dimworld>
-inline bool BSGrid<dim,dimworld>::
+inline bool ALU3dGrid<dim,dimworld>::
 mark(int ref, const typename Traits::template codim<0>::Entity & ep ) const 
 {
   return (this->template getRealEntity<0> (ep)).mark(ref);
@@ -237,7 +237,7 @@ mark(int ref, const typename Traits::template codim<0>::Entity & ep ) const
   
 // global refine 
 template <int dim, int dimworld>
-inline bool BSGrid<dim,dimworld>::globalRefine(int anzahl) 
+inline bool ALU3dGrid<dim,dimworld>::globalRefine(int anzahl) 
 {
   bool ref = false;
   for (;anzahl>0;anzahl--) 
@@ -256,21 +256,21 @@ inline bool BSGrid<dim,dimworld>::globalRefine(int anzahl)
 
 // adapt grid  
 template <int dim, int dimworld>
-inline void BSGrid<dim,dimworld>:: setCoarsenMark () const  
+inline void ALU3dGrid<dim,dimworld>:: setCoarsenMark () const  
 {
   coarsenMark_ = true;
 }
 
 // preprocess grid  
 template <int dim, int dimworld>
-inline bool BSGrid<dim,dimworld>::preAdapt() 
+inline bool ALU3dGrid<dim,dimworld>::preAdapt() 
 {
   return coarsenMark_;
 }
 
 // adapt grid  
 template <int dim, int dimworld>
-inline bool BSGrid<dim,dimworld>::adapt() 
+inline bool ALU3dGrid<dim,dimworld>::adapt() 
 {
 #ifdef _BSGRID_PARALLEL_
   bool ref = myGrid().duneAdapt(); // adapt grid 
@@ -288,7 +288,7 @@ inline bool BSGrid<dim,dimworld>::adapt()
 
 // post process grid  
 template <int dim, int dimworld>
-inline void BSGrid<dim,dimworld>::postAdapt() 
+inline void ALU3dGrid<dim,dimworld>::postAdapt() 
 {
 #ifdef _BSGRID_PARALLEL_
   for(int l=0; l<= maxlevel(); l++)
@@ -314,7 +314,7 @@ inline void BSGrid<dim,dimworld>::postAdapt()
 }
 
 template <int dim, int dimworld> 
-inline double BSGrid<dim,dimworld>::communicateValue(double val) const
+inline double ALU3dGrid<dim,dimworld>::communicateValue(double val) const
 {
 #ifdef _BSGRID_PARALLEL_
   //std::cout << "communicateValue " << val << " on proc " << mpAccess_.myrank() << " \n";
@@ -327,7 +327,7 @@ inline double BSGrid<dim,dimworld>::communicateValue(double val) const
 }
 
 template <int dim, int dimworld> 
-inline double BSGrid<dim,dimworld>::communicateSum(double val) const
+inline double ALU3dGrid<dim,dimworld>::communicateSum(double val) const
 {
 #ifdef _BSGRID_PARALLEL_
   //std::cout << "communicateValue " << val << " on proc " << mpAccess_.myrank() << " \n";
@@ -340,7 +340,7 @@ inline double BSGrid<dim,dimworld>::communicateSum(double val) const
 }
 
 template <int dim, int dimworld>
-inline int BSGrid<dim,dimworld>::communicateInt(int val) const
+inline int ALU3dGrid<dim,dimworld>::communicateInt(int val) const
 {
 #ifdef _BSGRID_PARALLEL_
   //std::cout << "communicateInt " << val << " on proc " << mpAccess_.myrank() << " \n";
@@ -353,7 +353,7 @@ inline int BSGrid<dim,dimworld>::communicateInt(int val) const
 }
 
 template <int dim, int dimworld>
-inline bool BSGrid<dim,dimworld>::loadBalance() 
+inline bool ALU3dGrid<dim,dimworld>::loadBalance() 
 {
 #ifdef _BSGRID_PARALLEL_
   bool changed = myGrid().duneLoadBalance();
@@ -370,13 +370,13 @@ inline bool BSGrid<dim,dimworld>::loadBalance()
   
 // adapt grid  
 template <int dim, int dimworld> template <class DataCollectorType> 
-inline bool BSGrid<dim,dimworld>::loadBalance(DataCollectorType & dc) 
+inline bool ALU3dGrid<dim,dimworld>::loadBalance(DataCollectorType & dc) 
 {
 #ifdef _BSGRID_PARALLEL_
-  typedef BSGridEntity<0,dim,GridImp> EntityType;
+  typedef ALU3dGridEntity<0,dim,GridImp> EntityType;
   EntityType en (*this);    
   
-  BSSPACE GatherScatterImpl< BSGrid<dim,dimworld> , EntityType , 
+  BSSPACE GatherScatterImpl< ALU3dGrid<dim,dimworld> , EntityType , 
         DataCollectorType > gs(*this,en,dc);
   
   bool changed = myGrid().duneLoadBalance(gs);
@@ -394,12 +394,12 @@ inline bool BSGrid<dim,dimworld>::loadBalance(DataCollectorType & dc)
 
 // adapt grid  
 template <int dim, int dimworld> template <class DataCollectorType> 
-inline bool BSGrid<dim,dimworld>::communicate(DataCollectorType & dc) 
+inline bool ALU3dGrid<dim,dimworld>::communicate(DataCollectorType & dc) 
 {
 #ifdef _BSGRID_PARALLEL_
-  typedef BSGridEntity<0,dim,GridImp> EntityType;
+  typedef ALU3dGridEntity<0,dim,GridImp> EntityType;
   EntityType en (*this);    
-  BSSPACE GatherScatterImpl< BSGrid<dim,dimworld> , EntityType , 
+  BSSPACE GatherScatterImpl< ALU3dGrid<dim,dimworld> , EntityType , 
     DataCollectorType > gs(*this,en,dc);
 
   myGrid().duneExchangeData(gs);
@@ -411,17 +411,17 @@ inline bool BSGrid<dim,dimworld>::communicate(DataCollectorType & dc)
 
 template <int dim, int dimworld>
 template <FileFormatType ftype>
-inline bool BSGrid<dim,dimworld>::
+inline bool ALU3dGrid<dim,dimworld>::
 writeGrid( const char * filename, bs_ctype time ) const
 {
-  BSSPACE BSGitterType & mygrd = const_cast<BSGrid<dim,dimworld> &> (*this).myGrid();
+  BSSPACE BSGitterType & mygrd = const_cast<ALU3dGrid<dim,dimworld> &> (*this).myGrid();
   mygrd.duneBackup(filename);
   // write time and maxlevel 
   {
     char *extraName = new char[strlen(filename)+20];
     if(!extraName) 
     {
-      std::cerr << "BSGrid::writeGrid: couldn't allocate extraName! \n";
+      std::cerr << "ALU3dGrid::writeGrid: couldn't allocate extraName! \n";
       abort();
     }
     sprintf(extraName,"%s.extra",filename);
@@ -435,7 +435,7 @@ writeGrid( const char * filename, bs_ctype time ) const
     }
     else 
     {
-      std::cerr << "BSGrid::writeGrid: couldn't open <" << extraName << ">! \n";
+      std::cerr << "ALU3dGrid::writeGrid: couldn't open <" << extraName << ">! \n";
     }
     delete [] extraName;
   }
@@ -444,7 +444,7 @@ writeGrid( const char * filename, bs_ctype time ) const
 
 template <int dim, int dimworld>
 template <FileFormatType ftype>
-inline bool BSGrid<dim,dimworld>::
+inline bool ALU3dGrid<dim,dimworld>::
 readGrid( const char * filename, bs_ctype & time )
 {
   {
@@ -480,7 +480,7 @@ readGrid( const char * filename, bs_ctype & time )
     }
     else 
     {
-      std::cerr << "BSGrid::readGrid: couldn't open <" << extraName << ">! \n";
+      std::cerr << "ALU3dGrid::readGrid: couldn't open <" << extraName << ">! \n";
     }
     if(extraName) delete [] extraName;
   }
@@ -493,9 +493,9 @@ readGrid( const char * filename, bs_ctype & time )
 
 // return Grid type  
 template <int dim, int dimworld>
-inline GridIdentifier BSGrid<dim,dimworld>::type () const
+inline GridIdentifier ALU3dGrid<dim,dimworld>::type () const
 {
-  return BSGrid_Id;
+  return ALU3dGrid_Id;
 }
 
 /*************************************************************************
@@ -508,8 +508,8 @@ inline GridIdentifier BSGrid<dim,dimworld>::type () const
 *************************************************************************/
 //--LevelIterator 
 template<int codim, PartitionIteratorType pitype, class GridImp >
-inline BSGridLevelIterator<codim,pitype,GridImp> :: 
-  BSGridLevelIterator(const GridImp & grid, int level,bool end)
+inline ALU3dGridLevelIterator<codim,pitype,GridImp> :: 
+  ALU3dGridLevelIterator(const GridImp & grid, int level,bool end)
   : grid_(grid)
   , index_(-1) 
   , level_(level)
@@ -532,8 +532,8 @@ inline BSGridLevelIterator<codim,pitype,GridImp> ::
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp >
-inline BSGridLevelIterator<codim,pitype,GridImp> :: 
-  BSGridLevelIterator(const GridImp & grid, const BSSPACE HElementType &item)
+inline ALU3dGridLevelIterator<codim,pitype,GridImp> :: 
+  ALU3dGridLevelIterator(const GridImp & grid, const BSSPACE HElementType &item)
   : grid_(grid)
   , index_(-1) 
   , level_(item.level())
@@ -549,7 +549,7 @@ inline BSGridLevelIterator<codim,pitype,GridImp> ::
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp >
-inline void BSGridLevelIterator<codim,pitype,GridImp> :: increment () 
+inline void ALU3dGridLevelIterator<codim,pitype,GridImp> :: increment () 
 {
   assert(index_ >= 0);
 
@@ -567,21 +567,21 @@ inline void BSGridLevelIterator<codim,pitype,GridImp> :: increment ()
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp >
-inline bool BSGridLevelIterator<codim,pitype,GridImp>::
-equals (const BSGridLevelIterator<codim,pitype,GridImp>& i) const 
+inline bool ALU3dGridLevelIterator<codim,pitype,GridImp>::
+equals (const ALU3dGridLevelIterator<codim,pitype,GridImp>& i) const 
 {
   return (index_ == i.index_);
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp >
-inline typename BSGridLevelIterator<codim,pitype,GridImp>::Entity & 
-BSGridLevelIterator<codim,pitype,GridImp>::dereference () const
+inline typename ALU3dGridLevelIterator<codim,pitype,GridImp>::Entity & 
+ALU3dGridLevelIterator<codim,pitype,GridImp>::dereference () const
 {
   return (*objEntity_);
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp >
-inline int BSGridLevelIterator<codim,pitype,GridImp>::level () const
+inline int ALU3dGridLevelIterator<codim,pitype,GridImp>::level () const
 {
   return level_;
 }
@@ -593,8 +593,8 @@ inline int BSGridLevelIterator<codim,pitype,GridImp>::level () const
 //--LeafIterator 
 //*******************************************************************
 template<class GridImp>
-inline BSGridLeafIterator<GridImp> :: 
-  BSGridLeafIterator(const GridImp &grid, int level, 
+inline ALU3dGridLeafIterator<GridImp> :: 
+  ALU3dGridLeafIterator(const GridImp &grid, int level, 
       bool end, PartitionIteratorType pitype) 
   : grid_ ( grid ) 
   , index_(-1) 
@@ -619,7 +619,7 @@ inline BSGridLeafIterator<GridImp> ::
 }
 
 template<class GridImp> 
-inline void BSGridLeafIterator<GridImp> :: increment () 
+inline void ALU3dGridLeafIterator<GridImp> :: increment () 
 {
   assert(index_  >= 0);
 
@@ -637,22 +637,22 @@ inline void BSGridLeafIterator<GridImp> :: increment ()
 }
 
 template<class GridImp>
-inline bool BSGridLeafIterator<GridImp> :: 
-equals (const BSGridLeafIteratorType & i) const 
+inline bool ALU3dGridLeafIterator<GridImp> :: 
+equals (const ALU3dGridLeafIteratorType & i) const 
 {
   return (index_ == i.index_);
 }
 
 template<class GridImp>
-inline typename BSGridLeafIterator<GridImp>::Entity & 
-BSGridLeafIterator<GridImp> :: dereference () const 
+inline typename ALU3dGridLeafIterator<GridImp>::Entity & 
+ALU3dGridLeafIterator<GridImp> :: dereference () const 
 {
   assert( objEntity_.operator -> ());
   return (*objEntity_);
 }
 
 template<class GridImp>
-inline int BSGridLeafIterator<GridImp> :: level() const
+inline int ALU3dGridLeafIterator<GridImp> :: level() const
 {
   return level_;
 }
@@ -669,8 +669,8 @@ inline int BSGridLeafIterator<GridImp> :: level() const
 ************************************************************************************/
 // --HierarchicIterator 
 template <class GridImp>
-inline BSGridHierarchicIterator<GridImp> :: 
-  BSGridHierarchicIterator(const GridImp & grid , 
+inline ALU3dGridHierarchicIterator<GridImp> :: 
+  ALU3dGridHierarchicIterator(const GridImp & grid , 
    const BSSPACE HElementType & elem, int maxlevel ,bool end)
   : grid_(grid), elem_(elem) , item_(0) , maxlevel_(maxlevel) 
 {
@@ -696,7 +696,7 @@ inline BSGridHierarchicIterator<GridImp> ::
 }
 
 template <class GridImp>
-inline BSSPACE HElementType * BSGridHierarchicIterator<GridImp>::
+inline BSSPACE HElementType * ALU3dGridHierarchicIterator<GridImp>::
 goNextElement(BSSPACE HElementType * oldelem ) 
 {
   // strategy is:
@@ -732,7 +732,7 @@ goNextElement(BSSPACE HElementType * oldelem )
 }
 
 template <class GridImp>
-inline void BSGridHierarchicIterator<GridImp> :: increment () 
+inline void ALU3dGridHierarchicIterator<GridImp> :: increment () 
 {
   assert(item_   != 0);
 
@@ -744,50 +744,50 @@ inline void BSGridHierarchicIterator<GridImp> :: increment ()
 }
 
 template <class GridImp>
-inline bool BSGridHierarchicIterator<GridImp>::
-equals(const BSGridHierarchicIterator<GridImp>& i) const 
+inline bool ALU3dGridHierarchicIterator<GridImp>::
+equals(const ALU3dGridHierarchicIterator<GridImp>& i) const 
 {
   return item_==i.item_;
 }
 
 template <class GridImp>
-inline typename BSGridHierarchicIterator<GridImp>::Entity & 
-BSGridHierarchicIterator<GridImp>::dereference () const
+inline typename ALU3dGridHierarchicIterator<GridImp>::Entity & 
+ALU3dGridHierarchicIterator<GridImp>::dereference () const
 {
   return (*objEntity_);
 }
 //************************************************************************
 //
-//  --BSGridBoundaryEntity 
+//  --ALU3dGridBoundaryEntity 
 //  --BoundaryEntity
 //
 //************************************************************************
 template <class GridImp>
-inline BSGridBoundaryEntity<GridImp>::BSGridBoundaryEntity () : 
+inline ALU3dGridBoundaryEntity<GridImp>::ALU3dGridBoundaryEntity () : 
 _geom (false) , _id(-1) {}
 
 template <class GridImp>
-inline int BSGridBoundaryEntity<GridImp>::id () const 
+inline int ALU3dGridBoundaryEntity<GridImp>::id () const 
 {
   return _id;
 }
 
 template <class GridImp>
-inline bool BSGridBoundaryEntity<GridImp>::hasGeometry () const 
+inline bool ALU3dGridBoundaryEntity<GridImp>::hasGeometry () const 
 {
   return false;
 }
 
 template <class GridImp>
-inline const typename BSGridBoundaryEntity<GridImp>::Geometry & 
-BSGridBoundaryEntity<GridImp>::geometry () const 
+inline const typename ALU3dGridBoundaryEntity<GridImp>::Geometry & 
+ALU3dGridBoundaryEntity<GridImp>::geometry () const 
 {
   assert(hasGeometry());
   return _geom;
 }
 
 template <class GridImp>
-inline void BSGridBoundaryEntity<GridImp>::setId ( int id )
+inline void ALU3dGridBoundaryEntity<GridImp>::setId ( int id )
 {
   _id = id;
 }
@@ -803,8 +803,8 @@ inline void BSGridBoundaryEntity<GridImp>::setId ( int id )
 ************************************************************************************/
 // --IntersectionIterator 
 template<class GridImp>
-inline BSGridIntersectionIterator<GridImp> :: 
-BSGridIntersectionIterator(const GridImp & grid,
+inline ALU3dGridIntersectionIterator<GridImp> :: 
+ALU3dGridIntersectionIterator(const GridImp & grid,
   BSSPACE HElementType *el, int wLevel,bool end) :
   entity_( grid , wLevel )
   , item_(0), neigh_(0), ghost_(0)
@@ -827,7 +827,7 @@ BSGridIntersectionIterator(const GridImp & grid,
 }
 
 template<class GridImp>
-inline void BSGridIntersectionIterator<GridImp> :: resetBools () const
+inline void ALU3dGridIntersectionIterator<GridImp> :: resetBools () const
 {
   needSetup_   = true;
   needNormal_  = true;
@@ -835,7 +835,7 @@ inline void BSGridIntersectionIterator<GridImp> :: resetBools () const
 }
 
 template<class GridImp>
-inline void BSGridIntersectionIterator<GridImp> :: checkGhost () const
+inline void ALU3dGridIntersectionIterator<GridImp> :: checkGhost () const
 {
 #ifdef _BSGRID_PARALLEL_
   isGhost_ = false;
@@ -854,7 +854,7 @@ inline void BSGridIntersectionIterator<GridImp> :: checkGhost () const
 }
 
 template<class GridImp>
-inline void BSGridIntersectionIterator<GridImp> :: 
+inline void ALU3dGridIntersectionIterator<GridImp> :: 
 first (BSSPACE HElementType & elem, int wLevel) 
 {
   item_  = static_cast<BSSPACE GEOElementType *> (&elem);
@@ -876,17 +876,17 @@ first (BSSPACE HElementType & elem, int wLevel)
 }
 
 template<class GridImp>
-inline void BSGridIntersectionIterator<GridImp> :: done () 
+inline void ALU3dGridIntersectionIterator<GridImp> :: done () 
 {
   item_  = 0;
   index_ = 4;
 }
 
 template<class GridImp>
-inline BSGridIntersectionIterator<GridImp> :: ~BSGridIntersectionIterator() {}
+inline ALU3dGridIntersectionIterator<GridImp> :: ~ALU3dGridIntersectionIterator() {}
 
 template<class GridImp>
-inline void BSGridIntersectionIterator<GridImp> :: increment () 
+inline void ALU3dGridIntersectionIterator<GridImp> :: increment () 
 {
   assert(item_ != 0);
 
@@ -923,15 +923,15 @@ inline void BSGridIntersectionIterator<GridImp> :: increment ()
 }
 
 template<class GridImp>
-inline bool BSGridIntersectionIterator<GridImp> :: 
-equals (const BSGridIntersectionIterator<GridImp>& i) const 
+inline bool ALU3dGridIntersectionIterator<GridImp> :: 
+equals (const ALU3dGridIntersectionIterator<GridImp>& i) const 
 {
   return (item_ == i.item_);
 }
 
 // set new neighbor 
 template<class GridImp>
-inline void BSGridIntersectionIterator<GridImp> :: 
+inline void ALU3dGridIntersectionIterator<GridImp> :: 
 setNeighbor () const
 {
   assert( this->neighbor() );
@@ -1020,33 +1020,33 @@ setNeighbor () const
 }
 
 template<class GridImp>
-inline typename BSGridIntersectionIterator<GridImp>::Entity & 
-BSGridIntersectionIterator<GridImp>::dereference () const
+inline typename ALU3dGridIntersectionIterator<GridImp>::Entity & 
+ALU3dGridIntersectionIterator<GridImp>::dereference () const
 {
   if(needSetup_) setNeighbor(); 
   return entity_;
 }
 
 template<class GridImp>
-inline bool BSGridIntersectionIterator<GridImp> :: boundary () const
+inline bool ALU3dGridIntersectionIterator<GridImp> :: boundary () const
 {
   return isBoundary_;
 }
 
 template<class GridImp>
-inline bool BSGridIntersectionIterator<GridImp>::neighbor () const
+inline bool ALU3dGridIntersectionIterator<GridImp>::neighbor () const
 {
   return !(this->boundary());
 }
 
 template<class GridImp>
-inline int BSGridIntersectionIterator<GridImp>::numberInSelf () const
+inline int ALU3dGridIntersectionIterator<GridImp>::numberInSelf () const
 {
   return index_;
 }
 
 template<class GridImp>
-inline int BSGridIntersectionIterator<GridImp>::numberInNeighbor () const
+inline int ALU3dGridIntersectionIterator<GridImp>::numberInNeighbor () const
 {
   assert(item_ != 0);
   
@@ -1055,16 +1055,16 @@ inline int BSGridIntersectionIterator<GridImp>::numberInNeighbor () const
 }
 
 template<class GridImp>
-inline const typename BSGridIntersectionIterator<GridImp>::NormalType & 
-BSGridIntersectionIterator<GridImp>::
+inline const typename ALU3dGridIntersectionIterator<GridImp>::NormalType & 
+ALU3dGridIntersectionIterator<GridImp>::
 integrationOuterNormal(const FieldVector<bs_ctype, dim-1>& local) const
 {
   return this->outerNormal(local);
 }
 
 template<class GridImp>
-inline const typename BSGridIntersectionIterator<GridImp>::NormalType & 
-BSGridIntersectionIterator<GridImp>::
+inline const typename ALU3dGridIntersectionIterator<GridImp>::NormalType & 
+ALU3dGridIntersectionIterator<GridImp>::
 outerNormal(const FieldVector<bs_ctype, dim-1>& local) const
 {
   assert(item_ != 0);
@@ -1072,7 +1072,7 @@ outerNormal(const FieldVector<bs_ctype, dim-1>& local) const
   { 
     // NOTE: &(outNormal_[0]) is a pointer to the inside vector 
     // of the FieldVector class, we need this here, because 
-    // in BSGrid we dont now the type FieldVector 
+    // in ALU3dGrid we dont now the type FieldVector 
     
     if( boundary() || ( !daOtherSituation_ ) )
     {
@@ -1103,8 +1103,8 @@ outerNormal(const FieldVector<bs_ctype, dim-1>& local) const
 }
 
 template<class GridImp>
-inline const typename BSGridIntersectionIterator<GridImp>::NormalType & 
-BSGridIntersectionIterator<GridImp>::
+inline const typename ALU3dGridIntersectionIterator<GridImp>::NormalType & 
+ALU3dGridIntersectionIterator<GridImp>::
 unitOuterNormal(const FieldVector<bs_ctype, dim-1>& local) const
 {
   unitOuterNormal_  = this->outerNormal(local);
@@ -1113,8 +1113,8 @@ unitOuterNormal(const FieldVector<bs_ctype, dim-1>& local) const
 }
 
 template<class GridImp>
-inline const typename BSGridIntersectionIterator<GridImp>::Geometry &
-BSGridIntersectionIterator<GridImp>::intersectionGlobal () const
+inline const typename ALU3dGridIntersectionIterator<GridImp>::Geometry &
+ALU3dGridIntersectionIterator<GridImp>::intersectionGlobal () const
 {
   if(initInterGl_) return interSelfGlobal_;
   
@@ -1133,8 +1133,8 @@ BSGridIntersectionIterator<GridImp>::intersectionGlobal () const
 }
 
 template<class GridImp>
-inline const typename BSGridIntersectionIterator<GridImp>::BoundaryEntity &
-BSGridIntersectionIterator<GridImp>::boundaryEntity () const
+inline const typename ALU3dGridIntersectionIterator<GridImp>::BoundaryEntity &
+ALU3dGridIntersectionIterator<GridImp>::boundaryEntity () const
 {
   assert(boundary());
   BSSPACE BNDFaceType * bnd = dynamic_cast<BSSPACE BNDFaceType *> (item_->myneighbour(index_).first);
@@ -1155,8 +1155,8 @@ BSGridIntersectionIterator<GridImp>::boundaryEntity () const
 ************************************************************************************/
 // --0Entity
 template<int dim, class GridImp>
-inline BSGridEntity<0,dim,GridImp> :: 
-BSGridEntity(const GridImp  &grid,
+inline ALU3dGridEntity<0,dim,GridImp> :: 
+ALU3dGridEntity(const GridImp  &grid,
              //BSSPACE HElementType & element,int index, 
              int wLevel) 
   : grid_(grid)
@@ -1173,7 +1173,7 @@ BSGridEntity(const GridImp  &grid,
 
 template<int dim, class GridImp>
 inline void 
-BSGridEntity<0,dim,GridImp> :: setElement(BSSPACE HElementType & element) 
+ALU3dGridEntity<0,dim,GridImp> :: setElement(BSSPACE HElementType & element) 
 {
   item_= static_cast<BSSPACE IMPLElementType *> (&element);
   isGhost_ = false;
@@ -1186,7 +1186,7 @@ BSGridEntity<0,dim,GridImp> :: setElement(BSSPACE HElementType & element)
 
 template<int dim, class GridImp>
 inline void 
-BSGridEntity<0,dim,GridImp> :: setGhost(BSSPACE HElementType & element) 
+ALU3dGridEntity<0,dim,GridImp> :: setGhost(BSSPACE HElementType & element) 
 {
   item_= static_cast<BSSPACE GEOElementType *> (&element);
   isGhost_ = true;
@@ -1199,7 +1199,7 @@ BSGridEntity<0,dim,GridImp> :: setGhost(BSSPACE HElementType & element)
 
 template<int dim, class GridImp>
 inline void 
-BSGridEntity<0,dim,GridImp> :: setGhost(BSSPACE PLLBndFaceType & ghost) 
+ALU3dGridEntity<0,dim,GridImp> :: setGhost(BSSPACE PLLBndFaceType & ghost) 
 {
   item_    = 0;
   ghost_   = &ghost;
@@ -1212,14 +1212,14 @@ BSGridEntity<0,dim,GridImp> :: setGhost(BSSPACE PLLBndFaceType & ghost)
 
 template<int dim, class GridImp>
 inline int
-BSGridEntity<0,dim,GridImp> :: level() const
+ALU3dGridEntity<0,dim,GridImp> :: level() const
 {
   return level_;
 }
 
 template<int dim, class GridImp>
-inline const typename BSGridEntity<0,dim,GridImp>::Geometry & 
-BSGridEntity<0,dim,GridImp> :: geometry () const
+inline const typename ALU3dGridEntity<0,dim,GridImp>::Geometry & 
+ALU3dGridEntity<0,dim,GridImp> :: geometry () const
 {
   assert((ghost_ != 0) || (item_ != 0));
 #ifdef _BSGRID_PARALLEL_
@@ -1240,8 +1240,8 @@ BSGridEntity<0,dim,GridImp> :: geometry () const
 }
 
 template<int dim, class GridImp>
-inline const typename BSGridEntity<0,dim,GridImp>::Geometry & 
-BSGridEntity<0,dim,GridImp> :: geometryInFather () const
+inline const typename ALU3dGridEntity<0,dim,GridImp>::Geometry & 
+ALU3dGridEntity<0,dim,GridImp> :: geometryInFather () const
 {
   const Geometry & vati   = (*this->father()).geometry();
   const Geometry & myself = this->geometry();
@@ -1253,20 +1253,20 @@ BSGridEntity<0,dim,GridImp> :: geometryInFather () const
 }
 
 template<int dim, class GridImp>
-inline int BSGridEntity<0,dim,GridImp> :: index() const
+inline int ALU3dGridEntity<0,dim,GridImp> :: index() const
 {
   const Entity en (*this);
   return grid_.levelIndexSet().index(en);
 }
 
 template<int dim, class GridImp>
-inline int BSGridEntity<0,dim,GridImp> :: globalIndex() const
+inline int ALU3dGridEntity<0,dim,GridImp> :: globalIndex() const
 {
   return glIndex_;
 }
 
 template<int dim, class GridImp>
-inline int BSGridEntity<0,dim,GridImp> :: getIndex() const
+inline int ALU3dGridEntity<0,dim,GridImp> :: getIndex() const
 {
   return glIndex_;
 }
@@ -1275,96 +1275,96 @@ inline int BSGridEntity<0,dim,GridImp> :: getIndex() const
 
 template<int dim, class GridImp>
 template<int cc> 
-inline int BSGridEntity<0,dim,GridImp> :: subIndex (int i) const
+inline int ALU3dGridEntity<0,dim,GridImp> :: subIndex (int i) const
 {
   assert(cc == dim);
   assert(item_ != 0);
   return IndexWrapper<cc>::subIndex ( *item_ ,i);
 }
 
-template <class GridImp, int dim, int cc> struct BSGridCount {
+template <class GridImp, int dim, int cc> struct ALU3dGridCount {
   static int count () { return dim+1; }
 };
-template <class GridImp> struct BSGridCount<GridImp,3,2> {
+template <class GridImp> struct ALU3dGridCount<GridImp,3,2> {
   static int count () { return 6; }
 };
 
 template<int dim, class GridImp>
 template<int cc> 
-inline int BSGridEntity<0,dim,GridImp> :: count () const
+inline int ALU3dGridEntity<0,dim,GridImp> :: count () const
 {
-  return BSGridCount<GridImp,dim,cc>::count();
+  return ALU3dGridCount<GridImp,dim,cc>::count();
 }
 
 template<int dim, class GridImp>
 template<int cc> 
-inline typename BSGridEntity<0,dim,GridImp> :: template codim<cc>:: EntityPointer 
-BSGridEntity<0,dim,GridImp> :: entity (int i) const
+inline typename ALU3dGridEntity<0,dim,GridImp> :: template codim<cc>:: EntityPointer 
+ALU3dGridEntity<0,dim,GridImp> :: entity (int i) const
 {
-  BSGridLevelIterator<cc,All_Partition,GridImp> ep (grid_,level());
+  ALU3dGridLevelIterator<cc,All_Partition,GridImp> ep (grid_,level());
   return ep;
 }
 
 template<int dim, class GridImp>
-inline PartitionType BSGridEntity<0,dim,GridImp> ::
+inline PartitionType ALU3dGridEntity<0,dim,GridImp> ::
 partitionType () const
 {
   return ((isGhost_) ?  GhostEntity : InteriorEntity);
 }
 
 template<int dim, class GridImp>
-inline bool BSGridEntity<0,dim,GridImp> :: isLeaf() const
+inline bool ALU3dGridEntity<0,dim,GridImp> :: isLeaf() const
 {
   assert(item_ != 0);
   return (item_->down() == 0);
 }
 
 template<int dim, class GridImp>
-inline BSGridHierarchicIterator<GridImp> BSGridEntity<0,dim,GridImp> :: hbegin (int maxlevel) const
+inline ALU3dGridHierarchicIterator<GridImp> ALU3dGridEntity<0,dim,GridImp> :: hbegin (int maxlevel) const
 {
   assert(item_ != 0);
-  return BSGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel);
+  return ALU3dGridHierarchicIterator<GridImp>(grid_,*item_,maxlevel);
 }
 
 template<int dim, class GridImp>
-inline BSGridHierarchicIterator<GridImp> BSGridEntity<0,dim,GridImp> :: hend (int maxlevel) const 
+inline ALU3dGridHierarchicIterator<GridImp> ALU3dGridEntity<0,dim,GridImp> :: hend (int maxlevel) const 
 {
   assert(item_ != 0);
-  return BSGridHierarchicIterator<GridImp> (grid_,*item_,maxlevel,true);
+  return ALU3dGridHierarchicIterator<GridImp> (grid_,*item_,maxlevel,true);
 }
 
 template<int dim, class GridImp>
-inline BSGridIntersectionIterator<GridImp> BSGridEntity<0,dim,GridImp> :: ibegin () const 
+inline ALU3dGridIntersectionIterator<GridImp> ALU3dGridEntity<0,dim,GridImp> :: ibegin () const 
 {
   assert(item_ != 0);
-  return BSGridIntersectionIterator<GridImp> (grid_,item_,walkLevel_);
+  return ALU3dGridIntersectionIterator<GridImp> (grid_,item_,walkLevel_);
 }
 
 template<int dim, class GridImp>
-inline BSGridIntersectionIterator<GridImp> BSGridEntity<0,dim,GridImp> :: iend () const
+inline ALU3dGridIntersectionIterator<GridImp> ALU3dGridEntity<0,dim,GridImp> :: iend () const
 {
   assert(item_ != 0);
-  return BSGridIntersectionIterator<GridImp> (grid_, 0 ,walkLevel_,true);
+  return ALU3dGridIntersectionIterator<GridImp> (grid_, 0 ,walkLevel_,true);
 }
 
 template<int dim, class GridImp>
-inline typename BSGridEntity<0,dim,GridImp> :: EntityPointer 
-BSGridEntity<0,dim,GridImp> :: father() const
+inline typename ALU3dGridEntity<0,dim,GridImp> :: EntityPointer 
+ALU3dGridEntity<0,dim,GridImp> :: father() const
 {
   if(! item_->up() )
   {
-    std::cerr << "BSGridEntity<0," << dim << "," << dimworld << "> :: father() : no father of entity globalid = " << globalIndex() << "\n";
-    BSGridLevelIterator<0,All_Partition,GridImp> vati (grid_, static_cast<BSSPACE HElementType &> (*item_));
+    std::cerr << "ALU3dGridEntity<0," << dim << "," << dimworld << "> :: father() : no father of entity globalid = " << globalIndex() << "\n";
+    ALU3dGridLevelIterator<0,All_Partition,GridImp> vati (grid_, static_cast<BSSPACE HElementType &> (*item_));
     return vati; 
   }
     
-  BSGridLevelIterator<0,All_Partition,GridImp> vati (grid_, static_cast<BSSPACE HElementType &> (*(item_->up())));
+  ALU3dGridLevelIterator<0,All_Partition,GridImp> vati (grid_, static_cast<BSSPACE HElementType &> (*(item_->up())));
   return vati;
 }
 
 // Adaptation methods 
 template<int dim, class GridImp>
-inline bool BSGridEntity<0,dim,GridImp> :: mark (int ref) const
+inline bool ALU3dGridEntity<0,dim,GridImp> :: mark (int ref) const
 {
   // refine_element_t and coarse_element_t are defined in bsinclude.hh
   if(ghost_) return false;
@@ -1397,7 +1397,7 @@ inline bool BSGridEntity<0,dim,GridImp> :: mark (int ref) const
 
 // Adaptation methods 
 template<int dim, class GridImp>
-inline AdaptationState BSGridEntity<0,dim,GridImp> :: state () const 
+inline AdaptationState ALU3dGridEntity<0,dim,GridImp> :: state () const 
 {
   assert(item_ != 0);
   if((*item_).requestrule() == BSSPACE coarse_element_t) 
@@ -1424,8 +1424,8 @@ inline AdaptationState BSGridEntity<0,dim,GridImp> :: state () const
 ************************************************************************************/
 // --Entity
 template <int cd, int dim, class GridImp> 
-inline BSGridEntity<cd,dim,GridImp> :: 
-BSGridEntity(const GridImp  &grid, int level)
+inline ALU3dGridEntity<cd,dim,GridImp> :: 
+ALU3dGridEntity(const GridImp  &grid, int level)
   : grid_(grid), gIndex_(-1)
   , item_(0) , father_(0) 
   , geo_(false) , builtgeometry_(false)
@@ -1434,7 +1434,7 @@ BSGridEntity(const GridImp  &grid, int level)
 }
 
 template<int cd, int dim, class GridImp>
-inline void BSGridEntity<cd,dim,GridImp> :: setElement(const BSElementType & item) 
+inline void ALU3dGridEntity<cd,dim,GridImp> :: setElement(const BSElementType & item) 
 {
   item_   = static_cast<const BSIMPLElementType *> (&item);
   gIndex_ = (*item_).getIndex();
@@ -1443,7 +1443,7 @@ inline void BSGridEntity<cd,dim,GridImp> :: setElement(const BSElementType & ite
 }
 
 template<>
-inline void BSGridEntity<3,3,const BSGrid<3,3> > :: 
+inline void ALU3dGridEntity<3,3,const ALU3dGrid<3,3> > :: 
 setElement(const BSSPACE HElementType &el, const BSSPACE VertexType &vx)
 {
   item_   = static_cast<const BSIMPLElementType *> (&vx);
@@ -1454,53 +1454,53 @@ setElement(const BSSPACE HElementType &el, const BSSPACE VertexType &vx)
 }
 
 template<int cd, int dim, class GridImp>
-inline int BSGridEntity<cd,dim,GridImp> :: index () const
+inline int ALU3dGridEntity<cd,dim,GridImp> :: index () const
 {
   const Entity en (*this);
   return grid_.levelIndexSet().index(en);
 }
 
 template<int cd, int dim, class GridImp>
-inline int BSGridEntity<cd,dim,GridImp> :: globalIndex () const
+inline int ALU3dGridEntity<cd,dim,GridImp> :: globalIndex () const
 {
   return gIndex_;
 }
 
 template<int cd, int dim, class GridImp>
-inline int BSGridEntity<cd,dim,GridImp> :: getIndex () const
+inline int ALU3dGridEntity<cd,dim,GridImp> :: getIndex () const
 {
   return gIndex_;
 }
 
 template<int cd, int dim, class GridImp>
-inline int BSGridEntity<cd,dim,GridImp> :: level () const
+inline int ALU3dGridEntity<cd,dim,GridImp> :: level () const
 {
   assert(item_);
   return item_->level();
 }
 
 template<int cd, int dim, class GridImp>
-inline const typename BSGridEntity<cd,dim,GridImp>::Geometry & 
-BSGridEntity<cd,dim,GridImp>:: geometry() const
+inline const typename ALU3dGridEntity<cd,dim,GridImp>::Geometry & 
+ALU3dGridEntity<cd,dim,GridImp>:: geometry() const
 {
   if(!builtgeometry_) builtgeometry_ = geo_.buildGeom(item_);
   return geo_;
 }
 
 template<int cd, int dim, class GridImp>
-inline typename BSGridEntity<cd,dim,GridImp>::EntityPointer  
-BSGridEntity<cd,dim,GridImp>:: ownersFather() const
+inline typename ALU3dGridEntity<cd,dim,GridImp>::EntityPointer  
+ALU3dGridEntity<cd,dim,GridImp>:: ownersFather() const
 {
   assert(cd == dim);
   assert(father_);
 
-  BSGridLevelIterator<cd,All_Partition,const GridImp> vati(grid_,(*father_)); 
+  ALU3dGridLevelIterator<cd,All_Partition,const GridImp> vati(grid_,(*father_)); 
   return vati;
 }
 
 template<int cd, int dim, class GridImp>
 inline FieldVector<bs_ctype, dim> &  
-BSGridEntity<cd,dim,GridImp>:: positionInOwnersFather() const
+ALU3dGridEntity<cd,dim,GridImp>:: positionInOwnersFather() const
 {
   assert( cd == dim );
   if(!localFCoordCalced_)
@@ -1522,7 +1522,7 @@ BSGridEntity<cd,dim,GridImp>:: positionInOwnersFather() const
 ***********************************************************************/
 // --Geometry
 template<int mydim, int cdim, class GridImp>
-inline BSGridGeometry<mydim,cdim,GridImp> :: BSGridGeometry(bool makeRefElement) 
+inline ALU3dGridGeometry<mydim,cdim,GridImp> :: ALU3dGridGeometry(bool makeRefElement) 
   : builtinverse_ (false) , builtA_ (false) , builtDetDF_ (false) 
 {
   // create reference element 
@@ -1537,7 +1537,7 @@ inline BSGridGeometry<mydim,cdim,GridImp> :: BSGridGeometry(bool makeRefElement)
 //   B U I L T G E O M   - - -
 
 template<int mydim, int cdim, class GridImp>
-inline void BSGridGeometry<mydim,cdim,GridImp> :: calcElMatrix () const
+inline void ALU3dGridGeometry<mydim,cdim,GridImp> :: calcElMatrix () const
 {
   if(!builtA_)
   {
@@ -1556,7 +1556,7 @@ inline void BSGridGeometry<mydim,cdim,GridImp> :: calcElMatrix () const
 
 // matrix for mapping from reference element to current element 
 template<>
-inline void BSGridGeometry<3,3, const BSGrid<3,3> > :: calcElMatrix () const
+inline void ALU3dGridGeometry<3,3, const ALU3dGrid<3,3> > :: calcElMatrix () const
 {
   if(!builtA_)
   {
@@ -1578,7 +1578,7 @@ inline void BSGridGeometry<3,3, const BSGrid<3,3> > :: calcElMatrix () const
 
 //dim = dimworld = 3
 template<int mydim, int cdim, class GridImp>
-inline void BSGridGeometry<mydim,cdim,GridImp> :: buildJacobianInverse() const
+inline void ALU3dGridGeometry<mydim,cdim,GridImp> :: buildJacobianInverse() const
 {
   if(!builtinverse_)
   {
@@ -1591,13 +1591,13 @@ inline void BSGridGeometry<mydim,cdim,GridImp> :: buildJacobianInverse() const
 }
 
 template<>  //dim = 2 , dimworld = 3
-inline void BSGridGeometry<2,3, const BSGrid<3,3> > :: buildJacobianInverse() const
+inline void ALU3dGridGeometry<2,3, const ALU3dGrid<3,3> > :: buildJacobianInverse() const
 {
   if(!builtinverse_)
   {
     enum { dim = 3 };
     
-    //std::cerr << "WARNING: BSGridGeometry::buildJacobianInverse not tested yet! " << __LINE__ <<"\n";
+    //std::cerr << "WARNING: ALU3dGridGeometry::buildJacobianInverse not tested yet! " << __LINE__ <<"\n";
     // create vectors of face 
     tmpV_ = coord_[1] - coord_[0];
     tmpU_ = coord_[2] - coord_[1];
@@ -1615,12 +1615,12 @@ inline void BSGridGeometry<2,3, const BSGrid<3,3> > :: buildJacobianInverse() co
 }
 
 template<>  //dim = 1 , dimworld = 3
-inline void BSGridGeometry<1,3, const BSGrid<3,3> > :: buildJacobianInverse() const
+inline void ALU3dGridGeometry<1,3, const ALU3dGrid<3,3> > :: buildJacobianInverse() const
 {
   if(!builtinverse_)
   {
     enum { dim = 3 };
-    //std::cerr << "WARNING: BSGridGeometry::buildJacobianInverse not tested yet! " << __LINE__ <<"\n";
+    //std::cerr << "WARNING: ALU3dGridGeometry::buildJacobianInverse not tested yet! " << __LINE__ <<"\n";
     // create vectors of face 
     globalCoord_ = coord_[1] - coord_[0];
     detDF_ = std::abs ( globalCoord_.two_norm() );
@@ -1629,7 +1629,7 @@ inline void BSGridGeometry<1,3, const BSGrid<3,3> > :: buildJacobianInverse() co
 }
 
 template<>  //dim = 1 , dimworld = 3
-inline void BSGridGeometry<0,3, const BSGrid<3,3> > :: buildJacobianInverse() const
+inline void ALU3dGridGeometry<0,3, const ALU3dGrid<3,3> > :: buildJacobianInverse() const
 {
   if(!builtinverse_)
   {
@@ -1640,7 +1640,7 @@ inline void BSGridGeometry<0,3, const BSGrid<3,3> > :: buildJacobianInverse() co
 }
 
 template <> 
-inline bool BSGridGeometry<3,3, const BSGrid<3,3> > :: 
+inline bool ALU3dGridGeometry<3,3, const ALU3dGrid<3,3> > :: 
 buildGeom(const BSSPACE IMPLElementType & item) 
 {
   enum { dim = 3 };
@@ -1660,7 +1660,7 @@ buildGeom(const BSSPACE IMPLElementType & item)
 }
 
 template <> 
-inline bool BSGridGeometry<3,3, const BSGrid<3,3> > :: buildGhost(const BSSPACE PLLBndFaceType & ghost) 
+inline bool ALU3dGridGeometry<3,3, const ALU3dGrid<3,3> > :: buildGhost(const BSSPACE PLLBndFaceType & ghost) 
 {
   enum { dim = 3 };
   enum { dimworld = 3};
@@ -1695,7 +1695,7 @@ inline bool BSGridGeometry<3,3, const BSGrid<3,3> > :: buildGhost(const BSSPACE 
 }
 
 template <>
-inline bool BSGridGeometry<2,3, const BSGrid<3,3> > :: buildGeom(const BSSPACE HFaceType & item) 
+inline bool ALU3dGridGeometry<2,3, const ALU3dGrid<3,3> > :: buildGeom(const BSSPACE HFaceType & item) 
 {
   enum { dim = 2 };
   enum { dimworld = 3};
@@ -1716,7 +1716,7 @@ inline bool BSGridGeometry<2,3, const BSGrid<3,3> > :: buildGeom(const BSSPACE H
 }
 
 template <> // for edges 
-inline bool BSGridGeometry<1,3, const BSGrid<3,3> > :: buildGeom(const BSSPACE HEdgeType & item) 
+inline bool ALU3dGridGeometry<1,3, const ALU3dGrid<3,3> > :: buildGeom(const BSSPACE HEdgeType & item) 
 {
   enum { dim = 1 };
   enum { dimworld = 3};
@@ -1737,7 +1737,7 @@ inline bool BSGridGeometry<1,3, const BSGrid<3,3> > :: buildGeom(const BSSPACE H
 }
 
 template <> // for Vertices ,i.e. Points 
-inline bool BSGridGeometry<0,3, const BSGrid<3,3> > :: buildGeom(const BSSPACE VertexType & item) 
+inline bool ALU3dGridGeometry<0,3, const ALU3dGrid<3,3> > :: buildGeom(const BSSPACE VertexType & item) 
 {
   enum { dim = 0 };
   enum { dimworld = 3};
@@ -1752,37 +1752,37 @@ inline bool BSGridGeometry<0,3, const BSGrid<3,3> > :: buildGeom(const BSSPACE V
 }
 
 
-template <GeometryType eltype , int dim> struct BSGridElType {  
+template <GeometryType eltype , int dim> struct ALU3dGridElType {  
   static GeometryType type () { return unknown; }
 };
-template <GeometryType eltype> struct BSGridElType<eltype,3> {
+template <GeometryType eltype> struct ALU3dGridElType<eltype,3> {
   static GeometryType type () { return tetrahedron; }
 };
-template <GeometryType eltype> struct BSGridElType<eltype,2> {
+template <GeometryType eltype> struct ALU3dGridElType<eltype,2> {
   static GeometryType type () { return triangle; }
 };
-template <GeometryType eltype> struct BSGridElType<eltype,1> {
+template <GeometryType eltype> struct ALU3dGridElType<eltype,1> {
   static GeometryType type () { return line; }
 };
-template <GeometryType eltype> struct BSGridElType<eltype,0> {
+template <GeometryType eltype> struct ALU3dGridElType<eltype,0> {
   static GeometryType type () { return vertex; }
 };
 
 template<int mydim, int cdim, class GridImp>
-inline GeometryType BSGridGeometry<mydim,cdim,GridImp> ::type () const
+inline GeometryType ALU3dGridGeometry<mydim,cdim,GridImp> ::type () const
 {
-  return BSGridElType<tetrahedron,mydim>::type(); 
+  return ALU3dGridElType<tetrahedron,mydim>::type(); 
 }
 
 template<int mydim, int cdim, class GridImp>
-inline int BSGridGeometry<mydim,cdim,GridImp> ::corners () const 
+inline int ALU3dGridGeometry<mydim,cdim,GridImp> ::corners () const 
 {
   return dimbary;
 }
 
 template<int mydim, int cdim, class GridImp>
 inline const FieldVector<bs_ctype, cdim>& 
-BSGridGeometry<mydim,cdim,GridImp> :: operator[] (int i) const
+ALU3dGridGeometry<mydim,cdim,GridImp> :: operator[] (int i) const
 {
   assert((i>=0) && (i < mydim+1));
   return coord_[i]; 
@@ -1790,7 +1790,7 @@ BSGridGeometry<mydim,cdim,GridImp> :: operator[] (int i) const
 
 template<int mydim, int cdim, class GridImp>
 inline FieldVector<bs_ctype, cdim>& 
-BSGridGeometry<mydim,cdim,GridImp> :: getCoordVec (int i) 
+ALU3dGridGeometry<mydim,cdim,GridImp> :: getCoordVec (int i) 
 {
   assert((i>=0) && (i < mydim+1));
   return coord_[i]; 
@@ -1801,7 +1801,7 @@ BSGridGeometry<mydim,cdim,GridImp> :: getCoordVec (int i)
 
 // dim = 1,2,3 dimworld = 3
 template<int mydim, int cdim, class GridImp>
-inline FieldVector<bs_ctype, cdim> BSGridGeometry<mydim,cdim,GridImp>::
+inline FieldVector<bs_ctype, cdim> ALU3dGridGeometry<mydim,cdim,GridImp>::
 global(const FieldVector<bs_ctype, mydim>& local) const
 {
   calcElMatrix();
@@ -1812,7 +1812,7 @@ global(const FieldVector<bs_ctype, mydim>& local) const
 }
 
 template<>
-inline FieldVector<bs_ctype, 3> BSGridGeometry<3,3, const BSGrid<3,3> >::
+inline FieldVector<bs_ctype, 3> ALU3dGridGeometry<3,3, const ALU3dGrid<3,3> >::
 global(const FieldVector<bs_ctype, 3> & local) const
 {
   calcElMatrix();
@@ -1824,7 +1824,7 @@ global(const FieldVector<bs_ctype, 3> & local) const
 
 template<>  // dim = dimworld = 3
 inline FieldVector<bs_ctype, 3> 
-BSGridGeometry<3,3,const BSGrid<3,3> > :: 
+ALU3dGridGeometry<3,3,const ALU3dGrid<3,3> > :: 
 local(const FieldVector<bs_ctype, 3>& global) const
 {
   if (!builtinverse_) buildJacobianInverse();
@@ -1837,7 +1837,7 @@ local(const FieldVector<bs_ctype, 3>& global) const
 }
 
 template<int mydim, int cdim, class GridImp>
-inline bool BSGridGeometry<mydim,cdim,GridImp> :: 
+inline bool ALU3dGridGeometry<mydim,cdim,GridImp> :: 
 checkInside(const FieldVector<bs_ctype, mydim>& local) const
 {
   bs_ctype sum = 0.0; 
@@ -1865,7 +1865,7 @@ checkInside(const FieldVector<bs_ctype, mydim>& local) const
 
 template<int mydim, int cdim, class GridImp>
 inline bs_ctype 
-BSGridGeometry<mydim,cdim,GridImp> ::integrationElement (const FieldVector<bs_ctype, mydim>& local) const 
+ALU3dGridGeometry<mydim,cdim,GridImp> ::integrationElement (const FieldVector<bs_ctype, mydim>& local) const 
 {
   if(builtDetDF_)
     return detDF_;
@@ -1884,7 +1884,7 @@ BSGridGeometry<mydim,cdim,GridImp> ::integrationElement (const FieldVector<bs_ct
 
 template<>  // dim = dimworld = 3
 inline const FieldMatrix<bs_ctype,3,3> & 
-BSGridGeometry<3,3, const BSGrid<3,3> >:: jacobianInverse (const FieldVector<bs_ctype, 3>& local) const
+ALU3dGridGeometry<3,3, const ALU3dGrid<3,3> >:: jacobianInverse (const FieldVector<bs_ctype, 3>& local) const
 {
   if (!builtinverse_) buildJacobianInverse();
   return Jinv_;
@@ -1892,9 +1892,9 @@ BSGridGeometry<3,3, const BSGrid<3,3> >:: jacobianInverse (const FieldVector<bs_
 
 // print the ElementInformation
 template<int mydim, int cdim, class GridImp>
-inline void BSGridGeometry<mydim,cdim,GridImp>::print (std::ostream& ss) const
+inline void ALU3dGridGeometry<mydim,cdim,GridImp>::print (std::ostream& ss) const
 {
-  ss << "BSGridGeometry<" << mydim << "," << cdim << "> = {\n";
+  ss << "ALU3dGridGeometry<" << mydim << "," << cdim << "> = {\n";
   for(int i=0; i<corners(); i++)
   {
     ss << " corner " << i << " ";
@@ -1907,34 +1907,34 @@ inline void BSGridGeometry<mydim,cdim,GridImp>::print (std::ostream& ss) const
 //**********************************************************
 //  Reference Element 
 //**********************************************************
-template <class GridImp, int dim> struct BSGridRefElem;
-template <class GridImp> struct BSGridRefElem<GridImp,1> {
-  static const Dune::Geometry<1,1,GridImp,Dune::BSGridGeometry> & refelem ()
+template <class GridImp, int dim> struct ALU3dGridRefElem;
+template <class GridImp> struct ALU3dGridRefElem<GridImp,1> {
+  static const Dune::Geometry<1,1,GridImp,Dune::ALU3dGridGeometry> & refelem ()
   {
-    static BSGridReferenceGeometry<1,GridImp> ref;
+    static ALU3dGridReferenceGeometry<1,GridImp> ref;
     return ref.refelem;
   }
 };
 
-template <class GridImp> struct BSGridRefElem<GridImp,2> {
-  static const Dune::Geometry<2,2,GridImp,Dune::BSGridGeometry> & refelem ()
+template <class GridImp> struct ALU3dGridRefElem<GridImp,2> {
+  static const Dune::Geometry<2,2,GridImp,Dune::ALU3dGridGeometry> & refelem ()
   {
-    static BSGridReferenceGeometry<2,GridImp> ref;
+    static ALU3dGridReferenceGeometry<2,GridImp> ref;
     return ref.refelem;
   }
 };
-template <class GridImp> struct BSGridRefElem<GridImp,3> {
-  static const Dune::Geometry<3,3,GridImp,Dune::BSGridGeometry> & refelem ()
+template <class GridImp> struct ALU3dGridRefElem<GridImp,3> {
+  static const Dune::Geometry<3,3,GridImp,Dune::ALU3dGridGeometry> & refelem ()
   {
-    static BSGridReferenceGeometry<3,GridImp> ref;
+    static ALU3dGridReferenceGeometry<3,GridImp> ref;
     return ref.refelem;
   }
 };
 
 template<int mydim, int cdim, class GridImp>
-inline const Dune::Geometry<mydim,mydim,GridImp,Dune::BSGridGeometry> & 
-BSGridGeometry<mydim,cdim,GridImp>:: refelem () {
-  return BSGridRefElem<GridImp,mydim>::refelem();
+inline const Dune::Geometry<mydim,mydim,GridImp,Dune::ALU3dGridGeometry> & 
+ALU3dGridGeometry<mydim,cdim,GridImp>:: refelem () {
+  return ALU3dGridRefElem<GridImp,mydim>::refelem();
 }
 
 }

@@ -85,7 +85,7 @@ typedef pair < HasFace3Type*    , int > NeighbourPairType;
 typedef pair < PLLBndFaceType * , int > GhostPairType; 
 
 //*************************************************************
-//  definition of original LeafIterators of BSGrid 
+//  definition of original LeafIterators of ALU3dGrid 
 //
 // default is element (codim = 0)
 template <int codim> 
@@ -138,9 +138,9 @@ template <> struct BSIMPLElementType<3> {
 //*********************************************************
 //  LevelIterator Wrapper 
 //*********************************************************
-template <int codim> class BSGridLevelIteratorWrapper;
+template <int codim> class ALU3dGridLevelIteratorWrapper;
 template <> 
-class BSGridLevelIteratorWrapper<0>
+class ALU3dGridLevelIteratorWrapper<0>
 {
   typedef BSHElementType<0>::ElementType ElType; 
   typedef Insert < AccessIterator < ElType >::Handle ,
@@ -150,7 +150,7 @@ class BSGridLevelIteratorWrapper<0>
   typedef IteratorType :: val_t val_t;
 public:
   template <class GridImp> 
-  BSGridLevelIteratorWrapper (const GridImp & grid, int level ) 
+  ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level ) 
     : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
 
   int size  ()    { return it_.size(); }
@@ -162,7 +162,7 @@ public:
 };
 
 template <>
-class BSGridLevelIteratorWrapper<1>
+class ALU3dGridLevelIteratorWrapper<1>
 {
   typedef BSHElementType<1>::ElementType ElType; 
   typedef Insert < AccessIterator < ElType >::Handle ,
@@ -172,7 +172,7 @@ class BSGridLevelIteratorWrapper<1>
   typedef IteratorType :: val_t val_t;
 public:
   template <class GridImp> 
-  BSGridLevelIteratorWrapper (const GridImp & grid, int level ) 
+  ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level ) 
     : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
 
   int size  ()    { return it_.size(); }
@@ -184,7 +184,7 @@ public:
 };
 
 template <>
-class BSGridLevelIteratorWrapper<2>
+class ALU3dGridLevelIteratorWrapper<2>
 {
   typedef BSHElementType<2>::ElementType ElType; 
   typedef Insert < AccessIterator < ElType >::Handle ,
@@ -194,7 +194,7 @@ class BSGridLevelIteratorWrapper<2>
   typedef IteratorType :: val_t val_t;
 public:
   template <class GridImp> 
-  BSGridLevelIteratorWrapper (const GridImp & grid, int level ) 
+  ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level ) 
     : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
 
   int size  ()    { return it_.size(); }
@@ -206,7 +206,7 @@ public:
 };
 
 template <>
-class BSGridLevelIteratorWrapper<3>
+class ALU3dGridLevelIteratorWrapper<3>
 {
   typedef LeafIterator < GitterType::vertex_STI > IteratorType;
 
@@ -217,7 +217,7 @@ class BSGridLevelIteratorWrapper<3>
   int level_; 
 public:
   template <class GridImp> 
-  BSGridLevelIteratorWrapper (const GridImp & grid, int level ) 
+  ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level ) 
     : it_(const_cast<GridImp &> (grid).myGrid()),
       level_(level)  {}
       
@@ -237,12 +237,12 @@ public:
 
 };
 
-template <int codim> class BSGridLeafIteratorWrapper;
+template <int codim> class ALU3dGridLeafIteratorWrapper;
 //**********************************************************
 //  LeafIterator Wrapper 
 //**********************************************************
 template <>
-class BSGridLeafIteratorWrapper<0>
+class ALU3dGridLeafIteratorWrapper<0>
 {
   typedef BSHElementType<0>::ElementType ElType; 
   typedef Insert < AccessIterator < ElType >::Handle,
@@ -252,7 +252,7 @@ class BSGridLeafIteratorWrapper<0>
   typedef IteratorType :: val_t val_t;
 public:
   template <class GridImp> 
-  BSGridLeafIteratorWrapper (const GridImp & grid, int level ) 
+  ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level ) 
     : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
 
   int size  ()    { return it_.size(); }
@@ -264,7 +264,7 @@ public:
 };
 
 template <>
-class BSGridLeafIteratorWrapper<1>
+class ALU3dGridLeafIteratorWrapper<1>
 {
   typedef BSHElementType<1>::ElementType ElType; 
   typedef Insert < AccessIterator < ElType >::Handle,
@@ -274,7 +274,7 @@ class BSGridLeafIteratorWrapper<1>
   typedef IteratorType :: val_t val_t;
 public:
   template <class GridImp> 
-  BSGridLeafIteratorWrapper (const GridImp & grid, int level ) 
+  ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level ) 
     : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
 
   int size  ()    { return it_.size(); }
@@ -286,7 +286,7 @@ public:
 };
 
 template <>
-class BSGridLeafIteratorWrapper<2>
+class ALU3dGridLeafIteratorWrapper<2>
 {
   typedef BSHElementType<2>::ElementType ElType; 
   typedef Insert < AccessIterator < ElType >::Handle,
@@ -296,7 +296,7 @@ class BSGridLeafIteratorWrapper<2>
   typedef IteratorType :: val_t val_t;
 public:
   template <class GridImp> 
-  BSGridLeafIteratorWrapper (const GridImp & grid, int level ) 
+  ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level ) 
     : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
 
   int size  ()    { return it_.size(); }
@@ -308,14 +308,14 @@ public:
 };
 
 template <>
-class BSGridLeafIteratorWrapper<3>
+class ALU3dGridLeafIteratorWrapper<3>
 {
   typedef LeafIterator < GitterType::vertex_STI > IteratorType;
   IteratorType it_;
   typedef IteratorType :: val_t val_t;
 public:
   template <class GridImp> 
-  BSGridLeafIteratorWrapper (const GridImp & grid, int level ) 
+  ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level ) 
     : it_(const_cast<GridImp &> (grid).myGrid()) {}
 
   int size  ()    { return it_->size(); }

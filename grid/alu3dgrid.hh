@@ -10,14 +10,14 @@
 #include "common/grid.hh"
 #include "common/defaultindexsets.hh"
 
-#include "bsgrid/bsinclude.hh"
+#include "alu3dgrid/alu3dinclude.hh"
 
 #include <dune/common/exceptions.hh>
 
 namespace Dune 
 {
 
-/** @defgroup BSGrid BSGrid 
+/** @defgroup ALU3dGrid ALU3dGrid 
  @ingroup GridCommon
  Adaptive parallel grid supporting dynamic load balancing, written by 
  Bernard Schupp. This grid supports hexahedrons and tetrahedrons.
@@ -34,32 +34,32 @@ namespace Dune
   @{
  */
 
-class BSGridError : public Exception {};   
+class ALU3dGridError : public Exception {};   
 
-enum BSGridElementType { tetra = 4, hexa = 7 };  
+enum ALU3dGridElementType { tetra = 4, hexa = 7 };  
   
 // i.e. double or float 
 typedef double bs_ctype;
 
-template<int cd, int dim, class GridImp> class BSGridEntity;
-template<int cd, PartitionIteratorType pitype, class GridImp > class BSGridLevelIterator;
+template<int cd, int dim, class GridImp> class ALU3dGridEntity;
+template<int cd, PartitionIteratorType pitype, class GridImp > class ALU3dGridLevelIterator;
 
-template<int mydim, int coorddim, class GridImp>  class BSGridGeometry;
-template<class GridImp>            class BSGridBoundaryEntity;
-template<class GridImp>            class BSGridHierarchicIterator;
-template<class GridImp>            class BSGridIntersectionIterator;
-template<class GridImp>            class BSGridLeafIterator;
-template<int dim, int dimworld>            class BSGrid;
+template<int mydim, int coorddim, class GridImp>  class ALU3dGridGeometry;
+template<class GridImp>            class ALU3dGridBoundaryEntity;
+template<class GridImp>            class ALU3dGridHierarchicIterator;
+template<class GridImp>            class ALU3dGridIntersectionIterator;
+template<class GridImp>            class ALU3dGridLeafIterator;
+template<int dim, int dimworld>            class ALU3dGrid;
 
 // the hierarhic index set 
-template<int dim, int dimworld> class BSGridHierarchicIndexSet;
+template<int dim, int dimworld> class ALU3dGridHierarchicIndexSet;
 
 // singleton holding reference elements
-template<int dim,class GridImp> struct BSGridReferenceGeometry;
+template<int dim,class GridImp> struct ALU3dGridReferenceGeometry;
 
 //**********************************************************************
 //
-// --BSGridGeometry
+// --ALU3dGridGeometry
 // --Geometry
 /*!
   Defines the geometry part of a mesh entity. Works for all dimensions, element types and dime
@@ -79,15 +79,15 @@ static int __MyRank__ = -1;
 
 //! MakeableGeometry 
 template<int mydim, int coorddim, class GridImp>
-class BSGridMakeableGeometry : public Geometry<mydim, coorddim,
-                                      GridImp, BSGridGeometry>
+class ALU3dGridMakeableGeometry : public Geometry<mydim, coorddim,
+                                      GridImp, ALU3dGridGeometry>
 {
-  typedef Geometry<mydim, coorddim, GridImp, BSGridGeometry> GeometryType;
+  typedef Geometry<mydim, coorddim, GridImp, ALU3dGridGeometry> GeometryType;
 public:
-  BSGridMakeableGeometry(bool makeRefelem=false) :
-    GeometryType (BSGridGeometry<mydim, coorddim,GridImp>(makeRefelem)) {}
+  ALU3dGridMakeableGeometry(bool makeRefelem=false) :
+    GeometryType (ALU3dGridGeometry<mydim, coorddim,GridImp>(makeRefelem)) {}
   
-  //! build geometry out of different BSGrid Geometrys
+  //! build geometry out of different ALU3dGrid Geometrys
   //! ItemType are HElementType, HFaceType, HEdgeType and VertexType 
   template <class ItemType> 
   bool buildGeom(const ItemType & item)
@@ -115,19 +115,19 @@ public:
 
 };
 
-//! BSGridGeometry 
+//! ALU3dGridGeometry 
 template<int mydim, int cdim, class GridImp>  
-class BSGridGeometry : 
-public GeometryDefault <mydim,cdim,GridImp,BSGridGeometry>
+class ALU3dGridGeometry : 
+public GeometryDefault <mydim,cdim,GridImp,ALU3dGridGeometry>
 { 
-  friend class BSGridBoundaryEntity<GridImp>;
+  friend class ALU3dGridBoundaryEntity<GridImp>;
 
   //! know dimension of barycentric coordinates
   enum { dimbary=mydim+1};
 public:
   //! for makeRefGeometry == true a Geometry with the coordinates of the 
   //! reference element is made 
-  BSGridGeometry(bool makeRefGeometry=false);
+  ALU3dGridGeometry(bool makeRefGeometry=false);
 
   //! return the element type identifier
   //! line , triangle or tetrahedron, depends on dim 
@@ -142,7 +142,7 @@ public:
   /*! return reference element corresponding to this element. If this is
     a reference element then self is returned.
   */
-  static const Dune::Geometry<mydim,mydim,GridImp,Dune::BSGridGeometry> & refelem ();
+  static const Dune::Geometry<mydim,mydim,GridImp,Dune::ALU3dGridGeometry> & refelem ();
 
   //! maps a local coordinate within reference element to 
   //! global coordinate in element 
@@ -164,7 +164,7 @@ public:
   //***********************************************************************
   //!  Methods that not belong to the Interface, but have to be public
   //***********************************************************************
-  //! generate the geometry for out of given BSGridElement  
+  //! generate the geometry for out of given ALU3dGridElement  
   bool buildGeom(const BSSPACE IMPLElementType & item);
   bool buildGeom(const BSSPACE HFaceType & item);
   bool buildGeom(const BSSPACE HEdgeType & item);
@@ -210,22 +210,22 @@ private:
 
 //**********************************************************************
 //
-// --BSGridEntity
+// --ALU3dGridEntity
 // --Entity
 //
 //**********************************************************************
 template<int codim, int dim, class GridImp>
-class BSGridMakeableEntity :
+class ALU3dGridMakeableEntity :
   public GridImp::template codim<codim>::Entity
 {
   // typedef typename GridImp::template codim<codim>::Entity EntityType;
-  friend class BSGridEntity<codim, dim, GridImp>;
+  friend class ALU3dGridEntity<codim, dim, GridImp>;
 public:
    
   // Constructor creating the realEntity 
-  BSGridMakeableEntity(const GridImp & grid, int level) :
+  ALU3dGridMakeableEntity(const GridImp & grid, int level) :
     GridImp::template codim<codim>::
-      Entity (BSGridEntity<codim, dim, GridImp>(grid,level)) {} 
+      Entity (ALU3dGridEntity<codim, dim, GridImp>(grid,level)) {} 
 
   //! set element as normal entity
   //! ItemTypes are HElementType, HFaceType, HEdgeType and VertexType 
@@ -255,16 +255,16 @@ public:
   Here: the general template
  */
 template<int cd, int dim, class GridImp>
-class BSGridEntity : 
-public EntityDefault <cd,dim,GridImp,BSGridEntity> 
+class ALU3dGridEntity : 
+public EntityDefault <cd,dim,GridImp,ALU3dGridEntity> 
 {
   enum { dimworld = GridImp::dimensionworld };
   
-  friend class BSGrid < dim , dimworld >;
-  friend class BSGridEntity < 0, dim, GridImp >;
-  friend class BSGridLevelIterator < cd, All_Partition, GridImp >;
+  friend class ALU3dGrid < dim , dimworld >;
+  friend class ALU3dGridEntity < 0, dim, GridImp >;
+  friend class ALU3dGridLevelIterator < cd, All_Partition, GridImp >;
 
-  friend class BSGridHierarchicIndexSet<dim,dimworld>;
+  friend class ALU3dGridHierarchicIndexSet<dim,dimworld>;
 
 public:
   typedef typename BSSPACE BSHElementType<cd>::ElementType BSElementType;
@@ -272,7 +272,7 @@ public:
   
   typedef typename GridImp::template codim<cd>::Entity Entity;  
   typedef typename GridImp::template codim<cd>::Geometry Geometry;
-  typedef BSGridMakeableGeometry<dim-cd,GridImp::dimensionworld,GridImp> GeometryImp;
+  typedef ALU3dGridMakeableGeometry<dim-cd,GridImp::dimensionworld,GridImp> GeometryImp;
   typedef typename GridImp::template codim<0>::EntityPointer EntityPointer;
 
   //! level of this element
@@ -286,7 +286,7 @@ public:
   int globalIndex () const;
 
   //! Constructor 
-  BSGridEntity(const GridImp &grid, int level);
+  ALU3dGridEntity(const GridImp &grid, int level);
 
   //! geometry of this entity
   const Geometry & geometry () const;
@@ -313,7 +313,7 @@ private:
 
   int gIndex_; //! hierarchic index 
 
-  // corresponding BSGridElement
+  // corresponding ALU3dGridElement
   const BSIMPLElementType * item_;
   const BSSPACE HElementType * father_;
     
@@ -340,26 +340,26 @@ private:
  */
 //***********************
 //  
-//  --BSGridEntity
+//  --ALU3dGridEntity
 //  --0Entity
 //
 //***********************
 template<int dim, class GridImp>
-class BSGridEntity<0,dim,GridImp> 
-: public EntityDefault<0,dim,GridImp,BSGridEntity>
+class ALU3dGridEntity<0,dim,GridImp> 
+: public EntityDefault<0,dim,GridImp,ALU3dGridEntity>
 {
   enum { dimworld = GridImp::dimensionworld };
 
-  friend class BSGrid < dim , dimworld >;
-  friend class BSGridIntersectionIterator < GridImp >;
-  friend class BSGridHierarchicIterator   < GridImp >;
-  friend class BSGridLevelIterator <0,All_Partition,GridImp>;
-  friend class BSGridLevelIterator <1,All_Partition,GridImp>;
-  friend class BSGridLevelIterator <2,All_Partition,GridImp>;
-  friend class BSGridLevelIterator <3,All_Partition,GridImp>;
-  friend class BSGridLeafIterator <GridImp>;
+  friend class ALU3dGrid < dim , dimworld >;
+  friend class ALU3dGridIntersectionIterator < GridImp >;
+  friend class ALU3dGridHierarchicIterator   < GridImp >;
+  friend class ALU3dGridLevelIterator <0,All_Partition,GridImp>;
+  friend class ALU3dGridLevelIterator <1,All_Partition,GridImp>;
+  friend class ALU3dGridLevelIterator <2,All_Partition,GridImp>;
+  friend class ALU3dGridLevelIterator <3,All_Partition,GridImp>;
+  friend class ALU3dGridLeafIterator <GridImp>;
 
-  friend class BSGridHierarchicIndexSet<dim,dimworld>;
+  friend class ALU3dGridHierarchicIndexSet<dim,dimworld>;
 
   // partial specialisation of subIndex 
   template <int codim> 
@@ -385,7 +385,7 @@ class BSGridEntity<0,dim,GridImp>
   
 public:
   typedef typename GridImp::template codim<0>::Geometry   Geometry;
-  typedef  BSGridMakeableGeometry<dim,dimworld,GridImp> GeometryImp;
+  typedef  ALU3dGridMakeableGeometry<dim,dimworld,GridImp> GeometryImp;
   
   typedef typename GridImp::template codim<0>::Entity     Entity;
   typedef typename GridImp::template codim<0>::EntityPointer EntityPointer;
@@ -397,7 +397,7 @@ public:
   };
   
   //! Constructor creating empty Entity 
-  BSGridEntity(const GridImp &grid, int level);
+  ALU3dGridEntity(const GridImp &grid, int level);
 
   //! level of this element
   int level () const ;
@@ -433,10 +433,10 @@ public:
     which has an entity of codimension 1 in commen with this entity. Access to neighbors
     is provided using iterators. This allows meshes to be nonmatching. Returns iterator
     referencing the first neighbor. */
-  BSGridIntersectionIterator<GridImp> ibegin () const;
+  ALU3dGridIntersectionIterator<GridImp> ibegin () const;
 
   //! Reference to one past the last intersection with neighbor
-  BSGridIntersectionIterator<GridImp> iend () const;
+  ALU3dGridIntersectionIterator<GridImp> iend () const;
   
   //! returns true if Entity is leaf (i.e. has no children) 
   bool isLeaf () const; 
@@ -460,10 +460,10 @@ public:
     This is provided for sparsely stored nested unstructured meshes.
     Returns iterator to first son.
   */
-  BSGridHierarchicIterator<GridImp> hbegin (int maxlevel) const;
+  ALU3dGridHierarchicIterator<GridImp> hbegin (int maxlevel) const;
   
   //! Returns iterator to one past the last son
-  BSGridHierarchicIterator<GridImp> hend (int maxlevel) const;
+  ALU3dGridHierarchicIterator<GridImp> hend (int maxlevel) const;
 
   //***************************************************************
   //  Interface for Adaptation
@@ -519,11 +519,11 @@ private:
   int level_;    //!< level of element 
 
   mutable GeometryImp geoInFather_;
-}; // end of BSGridEntity codim = 0
+}; // end of ALU3dGridEntity codim = 0
 
 //**********************************************************************
 //
-// --BSGridHierarchicIterator
+// --ALU3dGridHierarchicIterator
 // --HierarchicIterator
 /*!
   Mesh entities of codimension 0 ("elements") allow to visit all entities of
@@ -535,24 +535,24 @@ private:
  */
 
 template<class GridImp>
-class BSGridHierarchicIterator :
-public HierarchicIteratorDefault <GridImp,BSGridHierarchicIterator>
+class ALU3dGridHierarchicIterator :
+public HierarchicIteratorDefault <GridImp,ALU3dGridHierarchicIterator>
 {
   enum { dim = GridImp::dimension };
 public:
   typedef typename GridImp::template codim<0>::Entity Entity;
   typedef typename GridImp::ctype ctype;
-  typedef BSGridMakeableEntity<0,dim,GridImp> EntityImp;
+  typedef ALU3dGridMakeableEntity<0,dim,GridImp> EntityImp;
 
   //! the normal Constructor
-  BSGridHierarchicIterator(const GridImp &grid,
+  ALU3dGridHierarchicIterator(const GridImp &grid,
       const BSSPACE HElementType & elem, int maxlevel, bool end=false);
  
   //! increment
   void increment();
 
   //! equality
-  bool equals (const BSGridHierarchicIterator<GridImp>& i) const;
+  bool equals (const ALU3dGridHierarchicIterator<GridImp>& i) const;
 
   //! dereferencing
   Entity & dereference() const;
@@ -561,7 +561,7 @@ private:
   // go to next valid element 
   BSSPACE HElementType * goNextElement (BSSPACE HElementType * oldEl);
   
-  const GridImp & grid_;  //!< the corresponding BSGrid 
+  const GridImp & grid_;  //!< the corresponding ALU3dGrid 
   const BSSPACE HElementType & elem_; //!< the start  element of this iterator  
   BSSPACE HElementType * item_; //!< the actual element of this iterator 
   int maxlevel_; //!< maxlevel 
@@ -572,17 +572,17 @@ private:
 
 //*******************************************************************
 //
-//  --BSGridBoundaryEntity
+//  --ALU3dGridBoundaryEntity
 //  --BoundaryEntity
 //
 //*******************************************************************
 template<class GridImp>
-class BSGridMakeableBoundaryEntity :
+class ALU3dGridMakeableBoundaryEntity :
  public GridImp::template codim<0>::BoundaryEntity
 {
 public:
-  BSGridMakeableBoundaryEntity () :
-    GridImp::template codim<0>::BoundaryEntity (BSGridBoundaryEntity<GridImp>()) {};
+  ALU3dGridMakeableBoundaryEntity () :
+    GridImp::template codim<0>::BoundaryEntity (ALU3dGridBoundaryEntity<GridImp>()) {};
 
   // set boundary Id, done by IntersectionIterator 
   void setId ( int id ) 
@@ -591,20 +591,20 @@ public:
   }
 };
 
-/** BoundaryEntity of the BSGrid module */
+/** BoundaryEntity of the ALU3dGrid module */
 template<class GridImp>  
-class BSGridBoundaryEntity 
-: public BoundaryEntityDefault <GridImp,BSGridBoundaryEntity>
+class ALU3dGridBoundaryEntity 
+: public BoundaryEntityDefault <GridImp,ALU3dGridBoundaryEntity>
 { 
   enum {dim = GridImp::dimension };
-  friend class BSGridIntersectionIterator<GridImp>;
-  friend class BSGridIntersectionIterator<const GridImp>;
+  friend class ALU3dGridIntersectionIterator<GridImp>;
+  friend class ALU3dGridIntersectionIterator<const GridImp>;
 public:
   typedef typename GridImp::template codim<0>::Geometry Geometry;
-  typedef BSGridMakeableGeometry<dim,dim,GridImp> GeometryImp;
+  typedef ALU3dGridMakeableGeometry<dim,dim,GridImp> GeometryImp;
   
   //! Constructor 
-  BSGridBoundaryEntity ();
+  ALU3dGridBoundaryEntity ();
 
   /*! \brief return identifier of boundary segment which is an 
       abitrary integer not zero */
@@ -625,7 +625,7 @@ private:
 
 //**********************************************************************
 //
-// --BSGridIntersectionIterator
+// --ALU3dGridIntersectionIterator
 // --IntersectionIterator
 /*!
   Mesh entities of codimension 0 ("elements") allow to visit all neighbors, wh
@@ -635,38 +635,38 @@ private:
   of an element!
  */
 template<class GridImp>
-class BSGridIntersectionIterator : 
-public  IntersectionIteratorDefault <GridImp,BSGridIntersectionIterator>
+class ALU3dGridIntersectionIterator : 
+public  IntersectionIteratorDefault <GridImp,ALU3dGridIntersectionIterator>
 {
   enum { dim       = GridImp::dimension };
   enum { dimworld  = GridImp::dimensionworld };
     
-  friend class BSGridEntity<0,dim,GridImp>;
+  friend class ALU3dGridEntity<0,dim,GridImp>;
 
 public:
   typedef typename GridImp::template codim<0>::Entity Entity;
   typedef typename GridImp::template codim<0>::BoundaryEntity BoundaryEntity;
-  typedef BSGridMakeableBoundaryEntity<GridImp> MakeableBndEntityImp;
+  typedef ALU3dGridMakeableBoundaryEntity<GridImp> MakeableBndEntityImp;
   typedef typename GridImp::template codim<1>::Geometry Geometry;
   typedef typename GridImp::template codim<1>::LocalGeometry LocalGeometry;
-  typedef BSGridMakeableEntity<0,dim,GridImp> EntityImp;
-  typedef BSGridMakeableGeometry<dim-1,dimworld,GridImp> GeometryImp;
-  typedef BSGridMakeableGeometry<dim-1,dimworld,GridImp> LocalGeometryImp;
+  typedef ALU3dGridMakeableEntity<0,dim,GridImp> EntityImp;
+  typedef ALU3dGridMakeableGeometry<dim-1,dimworld,GridImp> GeometryImp;
+  typedef ALU3dGridMakeableGeometry<dim-1,dimworld,GridImp> LocalGeometryImp;
 
   
   //! The default Constructor , level tells on which level we want
   //! neighbours 
-  BSGridIntersectionIterator(const GridImp & grid, BSSPACE HElementType *el,
+  ALU3dGridIntersectionIterator(const GridImp & grid, BSSPACE HElementType *el,
              int wLevel,bool end=false);
 
   //! The Destructor 
-  ~BSGridIntersectionIterator();
+  ~ALU3dGridIntersectionIterator();
 
   //! increment iterator 
   void increment ();
 
   //! equality
-  bool equals(const BSGridIntersectionIterator<GridImp> & i) const;
+  bool equals(const ALU3dGridIntersectionIterator<GridImp> & i) const;
 
   //! access neighbor, dereferencing 
   Entity & dereference () const;
@@ -769,43 +769,43 @@ private:
 
 //**********************************************************************
 //
-// --BSGridLevelIterator
+// --ALU3dGridLevelIterator
 // --LevelIterator
 /*!
  Enables iteration over all entities of a given codimension and level of a grid.
  */
 template<int cd, PartitionIteratorType pitype, class GridImp>
-class BSGridLevelIterator : 
-public LevelIteratorDefault <cd,pitype,GridImp,BSGridLevelIterator>
+class ALU3dGridLevelIterator : 
+public LevelIteratorDefault <cd,pitype,GridImp,ALU3dGridLevelIterator>
 {
   enum { dim       = GridImp::dimension };
   enum { dimworld  = GridImp::dimensionworld };
     
-  friend class BSGridEntity<3,dim,GridImp>;
-  friend class BSGridEntity<2,dim,GridImp>;
-  friend class BSGridEntity<1,dim,GridImp>;
-  friend class BSGridEntity<0,dim,GridImp>;
-  friend class BSGrid < dim , dimworld >;
+  friend class ALU3dGridEntity<3,dim,GridImp>;
+  friend class ALU3dGridEntity<2,dim,GridImp>;
+  friend class ALU3dGridEntity<1,dim,GridImp>;
+  friend class ALU3dGridEntity<0,dim,GridImp>;
+  friend class ALU3dGrid < dim , dimworld >;
   
 public:
   typedef typename GridImp::template codim<cd>::Entity Entity;
 
-  typedef BSGridMakeableEntity<cd,dim,GridImp> EntityImp;
+  typedef ALU3dGridMakeableEntity<cd,dim,GridImp> EntityImp;
   
   //! typedef of my type 
-  typedef BSGridLevelIterator<cd,pitype,GridImp> BSGridLevelIteratorType;
+  typedef ALU3dGridLevelIterator<cd,pitype,GridImp> ALU3dGridLevelIteratorType;
   
   //! Constructor
-  BSGridLevelIterator(const GridImp & grid, int level , bool end=false);
+  ALU3dGridLevelIterator(const GridImp & grid, int level , bool end=false);
   
   //! Constructor for father 
-  BSGridLevelIterator(const GridImp & grid, const BSSPACE HElementType & item);
+  ALU3dGridLevelIterator(const GridImp & grid, const BSSPACE HElementType & item);
   
   //! prefix increment
   void increment ();
 
   //! equality
-  bool equals (const BSGridLevelIteratorType& i) const;
+  bool equals (const ALU3dGridLevelIteratorType& i) const;
 
   //! dereferencing
   Entity & dereference () const ;
@@ -823,8 +823,8 @@ private:
   // actual level
   int level_;
   
-  // the wrapper for the original iterator of the BSGrid  
-  typedef typename BSSPACE BSGridLevelIteratorWrapper<cd> IteratorType; 
+  // the wrapper for the original iterator of the ALU3dGrid  
+  typedef typename BSSPACE ALU3dGridLevelIteratorWrapper<cd> IteratorType; 
   BSSPACE AutoPointer< IteratorType > iter_;
     
   // holds the entity, copy pointer and delete if no refcount is left 
@@ -833,34 +833,34 @@ private:
 
 //********************************************************************
 //
-//  --BSGridLeafIterator 
+//  --ALU3dGridLeafIterator 
 //  --LeafIterator 
 //
 //********************************************************************
 template<class GridImp>
-class BSGridLeafIterator 
+class ALU3dGridLeafIterator 
 {
   enum { dim = GridImp :: dimension };
   
-  friend class BSGridEntity<0,dim,GridImp>;
-  //friend class BSGrid < dim , dimworld >;
+  friend class ALU3dGridEntity<0,dim,GridImp>;
+  //friend class ALU3dGrid < dim , dimworld >;
   enum { codim = 0 }; 
   
 public:
   typedef typename GridImp::template codim<0>::Entity Entity;
-  typedef BSGridMakeableEntity<0,dim,GridImp> EntityImp;
+  typedef ALU3dGridMakeableEntity<0,dim,GridImp> EntityImp;
   
-  typedef BSGridLeafIterator<GridImp> BSGridLeafIteratorType;
+  typedef ALU3dGridLeafIterator<GridImp> ALU3dGridLeafIteratorType;
   
   //! Constructor
-  BSGridLeafIterator(const GridImp & grid, int level , bool end,
+  ALU3dGridLeafIterator(const GridImp & grid, int level , bool end,
       PartitionIteratorType pitype );
 
   //! prefix increment
   void increment ();
 
   //! equality
-  bool equals (const BSGridLeafIteratorType & i) const;
+  bool equals (const ALU3dGridLeafIteratorType & i) const;
 
   //! dereferencing
   Entity & dereference () const ;
@@ -878,8 +878,8 @@ private:
   // actual level
   int level_;
 
-  // the wrapper for the original iterator of the BSGrid  
-  typedef typename BSSPACE BSGridLeafIteratorWrapper<codim> IteratorType; 
+  // the wrapper for the original iterator of the ALU3dGrid  
+  typedef typename BSSPACE ALU3dGridLeafIteratorWrapper<codim> IteratorType; 
   BSSPACE AutoPointer < IteratorType > iter_;
   
   // holds the entity, copy pointer and delete if no refcount is left 
@@ -892,7 +892,7 @@ private:
 
 //**********************************************************************
 //
-// --BSGrid
+// --ALU3dGrid
 // --Grid
 //
 //**********************************************************************
@@ -902,16 +902,16 @@ private:
  * \todo Please doc me!
  */
 template <int dim, int dimworld>
-class BSGrid : public GridDefault  < dim, dimworld, bs_ctype,BSGrid<dim,dimworld> >
+class ALU3dGrid : public GridDefault  < dim, dimworld, bs_ctype,ALU3dGrid<dim,dimworld> >
 {
-  //CompileTimeChecker<dim      == 3>   BSGrid_only_implemented_for_3dp;   
-  //CompileTimeChecker<dimworld == 3>   BSGrid_only_implemented_for_3dw;   
-  //CompileTimeChecker< (eltype == BSSPACE tetra_t) || (eltype == BSSPACE hexa_t ) > BSGrid_only_implemented_for_tetra_or_hexa;
+  //CompileTimeChecker<dim      == 3>   ALU3dGrid_only_implemented_for_3dp;   
+  //CompileTimeChecker<dimworld == 3>   ALU3dGrid_only_implemented_for_3dw;   
+  //CompileTimeChecker< (eltype == BSSPACE tetra_t) || (eltype == BSSPACE hexa_t ) > ALU3dGrid_only_implemented_for_tetra_or_hexa;
 
-  typedef BSGrid<dim,dimworld> MyType; 
-  friend class BSGridEntity <0,dim,MyType>;
-  friend class BSGridEntity <0,dim,const MyType>;
-  friend class BSGridIntersectionIterator<MyType>;
+  typedef ALU3dGrid<dim,dimworld> MyType; 
+  friend class ALU3dGridEntity <0,dim,MyType>;
+  friend class ALU3dGridEntity <0,dim,const MyType>;
+  friend class ALU3dGridIntersectionIterator<MyType>;
 
   
 //**********************************************************
@@ -920,24 +920,24 @@ class BSGrid : public GridDefault  < dim, dimworld, bs_ctype,BSGrid<dim,dimworld
 public: 
   enum { myElementType = tetra };
   typedef GridTraits<dim,dimworld, MyType ,
-              BSGridGeometry,BSGridEntity,
-              BSGridBoundaryEntity,BSGridLevelIterator,
-              BSGridIntersectionIterator,BSGridHierarchicIterator,
-              BSGridLeafIterator>  Traits;
+              ALU3dGridGeometry,ALU3dGridEntity,
+              ALU3dGridBoundaryEntity,ALU3dGridLevelIterator,
+              ALU3dGridIntersectionIterator,ALU3dGridHierarchicIterator,
+              ALU3dGridLeafIterator>  Traits;
 
   
-  typedef BSGridLeafIterator<MyType>       LeafIteratorImp;
-  typedef BSGridHierarchicIterator<MyType> HierarchicIteratorImp;
+  typedef ALU3dGridLeafIterator<MyType>       LeafIteratorImp;
+  typedef ALU3dGridHierarchicIterator<MyType> HierarchicIteratorImp;
 
   typedef typename Traits::LeafIterator LeafIteratorType;  
-  //typedef BSGridReferenceGeometry<dim> ReferenceGeometry;
+  //typedef ALU3dGridReferenceGeometry<dim> ReferenceGeometry;
 
   typedef BSSPACE ObjectStream ObjectStreamType;
 
-  //typedef typename std::pair < ObjectStreamType * , BSGridEntity<0,dim,dimworld> * > 
+  //typedef typename std::pair < ObjectStreamType * , ALU3dGridEntity<0,dim,dimworld> * > 
   //              DataCollectorParamType;
   
-  typedef BSGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSetType;
+  typedef ALU3dGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSetType;
   typedef DefaultLevelIndexSet<MyType>           LevelIndexSetType; 
  
   typedef typename Traits::LeafIterator LeafIterator;
@@ -947,19 +947,19 @@ public:
   //! maximal number of levels 
   enum { MAXL = 64 };
 
-  //! Constructor which reads an BSGrid Macro Triang file 
+  //! Constructor which reads an ALU3dGrid Macro Triang file 
   //! or given GridFile 
 #ifdef _BSGRID_PARALLEL_
-  BSGrid(const char* macroTriangFilename , MPI_Comm mpiComm);
-  BSGrid(MPI_Comm mpiComm);
+  ALU3dGrid(const char* macroTriangFilename , MPI_Comm mpiComm);
+  ALU3dGrid(MPI_Comm mpiComm);
 #else 
-  BSGrid(const char* macroTriangFilename );
+  ALU3dGrid(const char* macroTriangFilename );
   //! empty Constructor 
-  BSGrid(int myrank = -1);
+  ALU3dGrid(int myrank = -1);
 #endif
   
   //! Desctructor 
-  ~BSGrid();
+  ~ALU3dGrid();
 
   //! for type identification 
   GridIdentifier type  () const; 
@@ -1050,7 +1050,7 @@ public:
   template <FileFormatType ftype>
   bool readGrid( const char * filename, bs_ctype & time );
 
-  //! return pointer to org BSGrid 
+  //! return pointer to org ALU3dGrid 
   //! private method, but otherwise we have to friend class all possible
   //! types of LevelIterator ==> later
   BSSPACE BSGitterType & myGrid();
@@ -1072,7 +1072,7 @@ public:
   bool mark( int refCount , const typename Traits::template codim<0>::Entity & en ) const;
 
   template <int cd>
-  BSGridEntity<cd,dim,const BSGrid<dim,dimworld> >&
+  ALU3dGridEntity<cd,dim,const ALU3dGrid<dim,dimworld> >&
   getRealEntity(typename Traits::template codim<cd>::Entity& entity)
   {
       return entity.realEntity;
@@ -1080,7 +1080,7 @@ public:
 
 //private:
   template <int cd>
-  const BSGridEntity<cd,dim,const BSGrid<dim,dimworld> >&
+  const ALU3dGridEntity<cd,dim,const ALU3dGrid<dim,dimworld> >&
   getRealEntity(const typename Traits::template codim<cd>::Entity& entity) const
   {
       return entity.realEntity;
@@ -1088,10 +1088,10 @@ public:
 
 private:
   //! Copy constructor should not be used  
-  BSGrid( const BSGrid<dim,dimworld> & g);
+  ALU3dGrid( const ALU3dGrid<dim,dimworld> & g);
   
   //! assignment operator should not be used  
-  BSGrid<dim,dimworld> & operator = (const BSGrid<dim,dimworld> & g); 
+  ALU3dGrid<dim,dimworld> & operator = (const ALU3dGrid<dim,dimworld> & g); 
   
   // reset size and global size 
   void calcExtras();
@@ -1127,19 +1127,19 @@ private:
   // the level index set ( default type )
   mutable LevelIndexSetType * levelIndexSet_;
 
-}; // end Class BSGridGrid
+}; // end Class ALU3dGridGrid
 
-//! hierarchic index set of BSGrid 
+//! hierarchic index set of ALU3dGrid 
 template <int dim, int dimworld> 
-class BSGridHierarchicIndexSet
+class ALU3dGridHierarchicIndexSet
 {
-  typedef BSGrid<dim,dimworld> GridType;
+  typedef ALU3dGrid<dim,dimworld> GridType;
   enum { numCodim = 4 };
 
 public:
   typedef typename GridType::Traits::template codim<0>::Entity EntityCodim0Type;
   
-  BSGridHierarchicIndexSet(const GridType & grid, const int (& s)[numCodim]) : grid_(grid) , size_(s) {}
+  ALU3dGridHierarchicIndexSet(const GridType & grid, const int (& s)[numCodim]) : grid_(grid) , size_(s) {}
 
   //! return hierarchic index of given entity
   template <class EntityType>
@@ -1154,7 +1154,7 @@ public:
   int subIndex (const EntityCodim0Type & ep, int i) const
   {
     assert(cd == dim);
-    const BSGridEntity<0,dim,const GridType> & en = (grid_.template getRealEntity<0>(ep));
+    const ALU3dGridEntity<0,dim,const GridType> & en = (grid_.template getRealEntity<0>(ep));
     int idx = en.template getSubIndex<cd>(i);
     std::cout << idx << " index \n";
     return idx;
@@ -1178,7 +1178,7 @@ private:
 
 }; // namespace Dune
 
-#include "bsgrid/datahandle.hh"
-#include "bsgrid/bsgrid.cc"
+#include "alu3dgrid/datahandle.hh"
+#include "alu3dgrid/alu3dgrid.cc"
 
 #endif
