@@ -650,13 +650,16 @@ FastBaseFunctionSet < LagrangeDiscreteFunctionSpace
       < FunctionSpaceType , GridType , polOrd > LagrangeDiscreteFunctionSpaceType;
   typedef BaseFunctionSetType FastBaseFunctionSetType;
 
-  //! id is  neighbor of the beast
+  //! id is neighbor of the beast
   static const IdentifierType id = 665;
 
   // Lagrange 1 , to be revised in this matter 
   enum { numOfDiffBase_ = 20 };
 
 public:
+  //! remember polynomial order 
+  enum { polynomialOrder =  polOrd };
+  
   //! Constructor generating for each different element type of the grid a 
   //! LagrangeBaseSet with polOrd 
   LagrangeDiscreteFunctionSpace ( GridType & g ) : 
@@ -767,7 +770,7 @@ protected:
   //! the corresponding LagrangeMapper 
   LagrangeMapper<polOrd> mapper_; 
 
-}; // end class LinDiscreteFunctionSpace
+}; // end class LagrangeDiscreteFunctionSpace
 
 
 } // end namespace Dune
