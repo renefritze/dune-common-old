@@ -1,5 +1,5 @@
-#ifndef __DUNE__LAGRANGEBASE_H__
-#define __DUNE__LAGRANGEBASE_H__
+#ifndef __DUNE__LAGRANGEBASE_HH__
+#define __DUNE__LAGRANGEBASE_HH__
 
 #include <dune/common/matvec.hh>
 #include <dune/common/array.hh>
@@ -8,9 +8,6 @@
 
 #include "common/fastbase.hh"
 #include "common/discretefunctionspace.hh"
-#include "quadtetratri.hh"
-#include "quadlqh.hh"
-
 
 namespace Dune {
 
@@ -113,13 +110,13 @@ public:
 //*****************************************************************
 //
 //!    (0,1)
-//!     1|\    coordinates and local node numbers 
+//!     2|\    coordinates and local node numbers 
 //!      | \
 //!      |  \    
 //!      |   \
 //!      |    \
 //!      |     \
-//!     2|______\0
+//!     0|______\1
 //!    (0,0)    (1,0)
 //
 //*****************************************************************
@@ -136,16 +133,16 @@ public:
     : BaseFunctionInterface<FunctionSpaceType> (f) 
   {
     baseNum_ = baseNum;
-    if(baseNum == 2)
+    if(baseNum == 0)
     { // 1 - x - y 
-      factor[0] = -1.0;
+      factor[0] =  1.0;
       factor[1] = -1.0;
-      factor[2] =  1.0;
+      factor[2] = -1.0;
     }
     else 
     {
-      factor[2] = 0.0;
-      for(int i=0; i<2; i++) // x , y
+      factor[0] = 0.0;
+      for(int i=1; i<3; i++) // x , y
         if(baseNum == i) 
           factor[i] = 1.0;
         else 
@@ -155,9 +152,9 @@ public:
   virtual void evaluate ( const Vec<0, deriType> &diffVariable, 
                           const Domain & x, Range & phi) const 
   {
-    phi = factor[2];
-    for(int i=0; i<2; i++)
-      phi += factor[i] * x(i);
+    phi = factor[0];
+    for(int i=1; i<3; i++)
+      phi += factor[i] * x(i-1);
   }
 
   virtual void evaluate ( const Vec<1, deriType> &diffVariable, 
@@ -165,7 +162,8 @@ public:
   {
     // x or y ==> 1 or 2 
     int num = diffVariable(0);
-    phi = factor[num];
+    assert( (num >= 0) && ( num <= 1));
+    phi = factor[num+1];
   }
 
   virtual void evaluate ( const DiffVariable<2>::Type &diffVariable, 
@@ -179,18 +177,8 @@ public:
 //*****************************************************************
 //
 //! LagrangeBaseFunction for tetrahedrons and polynom order = 1
-//!
-//!
-//!             1 (1,1,1)
-//!            /|\        coordinate and local node numbers
-//!           / | \       ok, this is ascii drawing
-//!          /  |  \
-//!(1,1,0) 2/...|...\3 (1,0,0)          z
-//!         \   |   /              y\   |   /x  coordinate 
-//!          \  |  /                 \  |  /    system
-//!           \ | /                   \ | /
-//!            \|/                     \|/
-//!             0 (0,0,0)
+//! 
+//  see reference element Dune tetrahedra 
 //
 //*****************************************************************
 template<class FunctionSpaceType>
@@ -236,7 +224,6 @@ public:
     // num = 0 ==> derivative respect to x 
     int num = diffVariable(0);
     phi = factor[num+1];
-    //phi.print(std::cout,1); std::cout << "\n*************\n";
   }
 
   //! second Derivative 
