@@ -752,7 +752,7 @@ public:
 
 	/*! Return maximum level defined in this grid. Levels are numbered
 	  0 ... maxlevel with 0 the coarsest level.
-     */
+   */
 	int maxlevel() const;
 
 	//! Iterator to first entity of given codim on level
@@ -766,7 +766,17 @@ public:
 	//! number of grid entities per level and codim
 	int size (int level, int codim) const;
 
+  //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ... 
+  GridIdentifier type() const; 
 
+  //! write Grid to file filename and store time  
+  template <FileFormatType ftype>
+  bool writeGrid ( const char * filename , sgrid_ctype time);
+
+  //! read Grid from file filename and store time of grid in time
+  template <FileFormatType ftype>
+  bool readGrid ( const char * filename , sgrid_ctype &time );
+  
 	// these are all members specific to sgrid
 
 	/*! constructor, subject to change!
@@ -775,9 +785,12 @@ public:
 	  L_: number of levels 0,...,L_-1, maxlevel = L_-1
 	*/
 	SGrid (int* N_, sgrid_ctype* H_);
+  
+  //! empty constructor making grid of unit square 
+	SGrid ();
 
-    // refine mesh globally by one level
-    void globalRefine (int refCount);
+  // refine mesh globally by one level
+  void globalRefine (int refCount);
 
 	//! map expanded coordinates to position
 	Vec<dim,sgrid_ctype> pos (int level, Tupel<int,dim>& z);
@@ -806,6 +819,9 @@ public:
 	bool exists (int level, Tupel<int,dim>& zred);
 
 private:
+  // generate SGrid 
+	void makeSGrid (int* N_, sgrid_ctype* H_);
+  
 	int L;                          // number of levels in hierarchic mesh 0<=level<L
 	Tupel<sgrid_ctype,dim> H;       // length of cube per direction
 	Tupel<int,dim> N[MAXL];         // number of elements per direction
