@@ -198,6 +198,7 @@ public:
                        OneDGridGeometry, 
                        OneDGridEntity,
                        OneDGridBoundaryEntity,
+                       OneDGridLevelIterator, // to be replaced by  EntityPointer
                        OneDGridLevelIterator,
                        OneDGridIntersectionIterator, 
                        OneDGridHierarchicIterator> Traits;

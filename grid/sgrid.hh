@@ -752,7 +752,8 @@ class SGrid : public GridDefault <dim,dimworld,sgrid_ctype,SGrid<dim,dimworld> >
 {
 public:
   typedef GridTraits<dim,dimworld,Dune::SGrid<dim,dimworld> ,SGeometry,SEntity,
-                     SBoundaryEntity,SLevelIterator,SIntersectionIterator,SHierarchicIterator> Traits;
+                     SBoundaryEntity,SLevelIterator, // to be replaced by SGridEntityPointer 
+                     SLevelIterator,SIntersectionIterator,SHierarchicIterator> Traits;
 
   //! maximum number of levels allowed
   enum { MAXL=32 };
