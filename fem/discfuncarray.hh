@@ -211,7 +211,9 @@ class LocalFunctionArray
   typedef FastBaseFunctionSet < DiscreteFunctionSpaceType > BaseFunctionSetType;
   typedef LocalFunctionArray < DiscreteFunctionSpaceType > MyType;
   typedef DiscFuncArray <DiscreteFunctionSpaceType> DiscFuncType;
-  
+
+  enum { dimrange = DiscreteFunctionSpaceType::DimRange };
+
   friend class DiscFuncArray <DiscreteFunctionSpaceType>;
 public:
   //! Constructor 
@@ -230,7 +232,11 @@ public:
   //! sum over all local base functions 
   template <class EntityType> 
   void evaluate (EntityType &en, const DomainType & x, RangeType & ret);
-
+  
+  //! sum over all local base functions evaluated on given quadrature point
+  template <class EntityType, class QuadratureType> 
+  void evaluate (EntityType &en, QuadratureType &quad, int quadPoint , RangeType & ret);
+  
   //********* Method that no belong to the interface *************
   //! methods that do not belong to the interface but have to be public 
   //! used like setElInfo and so on 
@@ -246,14 +252,20 @@ protected:
   //! needed once 
   RangeType tmp;
 
+  //! needed once 
+  JacobianRangeType tmpGrad_;
+
   //! remember pointer to next LocalFunction 
   MyType * next_;
 
   //! diffVar for evaluate, is empty 
   const DiffVariable<0>::Type diffVar;
 
-  //! number of dofs 
+  //! number of all dofs 
   int numOfDof_;
+
+  //! for example number of corners for linear elements 
+  int numOfDifferentDofs_;
  
   //! the corresponding function space which provides the base function set
   const DiscreteFunctionSpaceType &fSpace_;
