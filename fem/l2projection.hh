@@ -42,7 +42,6 @@ public:
     for( ; it != endit ; ++it)
     {
       discFunc.localFunction( *it , lf ); 
-      double det = (*it).geometry().integration_element(quad.point(0));
       
       const typename FunctionSpaceType::BaseFunctionSetType & set = 
             functionSpace_.getBaseFunctionSet(*it);
@@ -51,6 +50,7 @@ public:
       {
         for(int qP = 0; qP < quad.nop(); qP++)
         {
+	  double det = (*it).geometry().integration_element(quad.point(qP));
           f.evaluate((*it).geometry().global( quad.point(qP) ), ret);
           set.eval(i,quad,qP,phi);
           lf[i] += det * quad.weight(qP) * (ret * phi);
