@@ -180,8 +180,8 @@ void SparseRowMatrix<T>::set(int row, int col, const T& val)
   int whichCol = colIndex(row,col);
   if(whichCol < 0)
   {
-    std::cerr << "Error in SparseRowMatrix::set: Entry could neither be found "
-	      << "nor newly allocated!\n";
+    std::cerr << "Error in SparseRowMatrix::set: Entry (" << row << ", " << col << ") "
+	      << "could neither be found nor newly allocated!\n";
   }
   else
   {
@@ -192,12 +192,15 @@ void SparseRowMatrix<T>::set(int row, int col, const T& val)
 
 template <class T> 
 void SparseRowMatrix<T>::add(int row, int col, const T& val)
-{
+{  
+  if(ABS(val) < EPS)
+    return;
+
   int whichCol = colIndex(row,col);
   if(whichCol < 0)
   {
-    std::cerr << "Error in SparseRowMatrix::add: Entry could neither be found "
-              << "nor newly allocated!\n";
+    std::cerr << "Error in SparseRowMatrix::add: Entry (" << row << ", " << col << ") "
+	      << "could neither be found nor newly allocated!\n";
   }
   else
   {
@@ -212,8 +215,8 @@ void SparseRowMatrix<T>::multScalar(int row, int col, const T& val)
   int whichCol = colIndex(row,col);
   if(whichCol < 0)
   {
-    std::cerr << "Error in SparseRowMatrix::multScalar: Entry could neither be found "
-              << "nor newly allocated!\n";
+    std::cerr << "Error in SparseRowMatrix::multScalar: Entry Entry (" << row << ", " << col << ") "
+	      << "could neither be found nor newly allocated!\n";
   }
   else
   {
