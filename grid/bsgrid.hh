@@ -16,8 +16,12 @@ namespace Dune
 {
 
 /** @defgroup BSGrid BSGrid Module 
+ @ingroup GridCommon
  Adaptive parallel grid supporting dynamic load balancing, written by 
- Bernard Schupp. 
+ Bernard Schupp. (See Bernhard Schupp:  Entwicklung eines 
+  effizienten Verfahrens zur Simulation kompressibler Stroemungen 
+    in 3D auf Parallelrechnern. 1999 
+  http://www.freidok.uni-freiburg.de/volltexte/68/
   @{
  */
   
@@ -127,8 +131,10 @@ public:
   //***********************************************************************
   //! generate the geometry for the ALBERT EL_INFO 
   //! no interface method
-  bool builtGeom(const BSSPACE HElementType & item);
+  bool builtGeom(const BSSPACE GEOElementType & item);
   bool builtGeom(const BSSPACE HFaceType & item);
+  
+  bool builtGhost(const BSSPACE HFaceType & face, const BSSPACE PLLFaceType & ghost);
  
   //! print internal data
   //! no interface method
@@ -291,6 +297,9 @@ public:
 
   //! set original element pointer to fake entity
   void setelement(BSSPACE HElementType &element,int index);
+  
+  //! set original element pointer to fake entity
+  void setGhost(BSSPACE HFaceType &face, BSSPACE PLLFaceType &ghost,int index);
 
   //! level of this element
   int level ();
@@ -383,6 +392,8 @@ public:
 private:
   BSGrid<dim,dimworld> &grid_;
   BSSPACE GEOElementType *item_;
+  
+  BSSPACE PLLFaceType *ghost_;
 
   //! the cuurent geometry
   BSGridElement<dim,dimworld> geo_;
@@ -391,6 +402,9 @@ private:
 
   bool builtgeometry_;  //!< true if geometry has been constructed
   int index_;
+  
+  int glIndex_;
+  int level_;
 
   //BSGridElement <dim,dim> fatherReLocal_;
 }; // end of BSGridEntity codim = 0
@@ -598,6 +612,7 @@ private:
                           //! see bsgrid.cc for descritption     
   
   bool isBoundary_; //! true if intersection is with boundary 
+  bool ghost_;
 
   FieldVector<bs_ctype, dimworld> outNormal_;  //! outerNormal ro current intersection
   FieldVector<bs_ctype, dimworld> unitOuterNormal_;
@@ -723,6 +738,10 @@ public:
   typedef BSGridReferenceElement<dim> ReferenceElement;
   typedef BSGridLeafIterator LeafIterator; 
 
+  typedef BSSPACE ObjectStream ObjectStreamType;
+
+  typedef typename std::pair < ObjectStreamType * , BSGridEntity<0,dim,dimworld> * > DataCollectorParamType;
+
     /** \todo Please doc me! */
   enum { numCodim = dim+1 };
 
@@ -730,7 +749,12 @@ public:
 
   //! Constructor which reads an Baum Macro Triang file 
   //! or given GridFile 
-  BSGrid(const char* macroTriangFilename);
+#ifdef _BSGRID_PARALLEL_
+  BSGrid(const char* macroTriangFilename , MPI_Comm mpiComm);
+  BSGrid(MPI_Comm mpiComm);
+#else 
+  BSGrid(const char* macroTriangFilename );
+#endif
   
   //! empty Constructor 
   BSGrid();
@@ -762,10 +786,12 @@ public:
   BSGridLevelIterator<codim,dim,dimworld,All_Partition> lend (int level);
 
   //! Iterator to first entity of given codim on leaf level
-  LeafIterator leafbegin (int level);
+  LeafIterator leafbegin (int level, 
+      PartitionIteratorType pitype=InteriorBorder_Partition );
 
   //! one past the end on this leaf level 
-  LeafIterator leafend (int level);
+  LeafIterator leafend (int level,
+      PartitionIteratorType pitype=InteriorBorder_Partition );
 
   //! number of grid entities per level and codim
   int size (int level, int codim);
@@ -774,14 +800,20 @@ public:
   //! number of grid entities on all levels for given codim
   int global_size (int codim);
 
-  /** \brief Number of grid entities per level and codim
-   * \todo Why is there a non-const version of this method?
-   */
-  //int size (int level, int codim) const; 
-
   //! refine all positive marked leaf entities 
   //! return true if the grid was changed
   bool adapt ( );
+
+  //! calculate load of each proc and repartition if neccessary 
+  bool loadBalance ();
+  
+  //! calculate load of each proc and repartition if neccessary 
+  template <class DofManagerType>
+  bool loadBalance (DofManagerType & dm);
+  
+  //! calculate load of each proc and repartition if neccessary 
+  template <class DofManagerType>
+  bool communicate (DofManagerType & dm);
   
   //! coarsen all negative marked leaf entities 
   //! return true if the grid was changed
@@ -814,8 +846,10 @@ public:
   //! calculate max edge length 
   double calcGridWidth () { return 1; }
    
-  BSSPACE GitterBasisImpl *mygrid();
- 
+  BSSPACE BSGitterType *mygrid();
+
+  const int myRank () const { return mpAccess_.myrank(); }
+   
 private:
   void calcExtras();
 
@@ -824,7 +858,10 @@ private:
   // set _coarsenMark to true
   void setCoarsenMark();
   
-  BSSPACE GitterBasisImpl *mygrid_;
+  BSSPACE BSGitterType * mygrid_;
+#ifdef _BSGRID_PARALLEL_
+  BSSPACE MpAccessMPI mpAccess_;
+#endif
 
   // save size of grid 
   mutable int size_[MAXL][dim+1];
@@ -849,7 +886,8 @@ public:
     typedef BSGridLeafIterator BSGridLeafIteratorType;
     
     //! Constructor
-    BSGridLeafIterator(BSGrid<dim,dimworld> &grid, int level , bool end=false);
+    BSGridLeafIterator(BSGrid<dim,dimworld> &grid, int level , bool end,
+        PartitionIteratorType pitype );
   
     //! prefix increment
     BSGridLeafIteratorType& operator ++();
@@ -880,9 +918,10 @@ public:
     
     // holds the entity, copy pointer and delete if no refcount is left 
     AutoPointer< BSGridEntity<codim,dim,dimworld> > objEntity_;
+
+    const PartitionIteratorType pitype_; 
   };
 
-  
 
 }; // end Class BSGridGrid
 
@@ -891,6 +930,7 @@ public:
 
 }; // namespace Dune
 
+#include "bsgrid/datahandle.hh"
 #include "bsgrid/bsgrid.cc"
 
 #endif
