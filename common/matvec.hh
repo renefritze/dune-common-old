@@ -18,18 +18,21 @@ namespace Dune {
 
 //************************************************************************
 /*!
-  Generic vector class for short vectors in d dimensions. Used e.g. for global or local coordinates.
+  Generic vector class for short vectors in d dimensions. Used e.g. 
+  for global or local coordinates.
  */
 template<int dim, class T = double>
 class Vec {
-  enum { n = ( dim > 0 ) ? dim : 1 };
 public:
+  
   //! remember the storage type 
-  typedef T MemberType;
-
+  typedef T MemberType; 
+ 
+  enum { n = (dim > 0) ? dim : 1 };
+  
   //! know length 
   enum { dimension = dim};
- 
+  
 	//! Constructor making uninizialized vector
 	Vec() {}
 
@@ -44,11 +47,11 @@ public:
 	}
  
 	//! Constructor making unit vector in direction k
-	Vec (int k)
-	{
-		for (int i=0; i<n; i++) x[i] = 0; 
-		x[k] = 1;
-	}
+	//Vec (int k)
+	//{
+	//	for (int i=0; i<n; i++) x[i] = 0; 
+	//	x[k] = 1;
+	//}
  
 	//! Constructor making vector with identical coordinates
 	Vec (T t)
@@ -56,6 +59,13 @@ public:
 		for (int i=0; i<n; i++) x[i] = t;
 	}
  
+	//! assign component type to all components
+	Vec<n,T>& operator= (const Vec<n,T>& b)
+	{
+		for (int i=0; i<n; i++) x[i] = b.x[i]; 
+		return *this;
+	}
+
 	//! assign component type to all components
 	Vec<n,T>& operator= (T t)
 	{
@@ -71,8 +81,14 @@ public:
 	//! operator () for read/write access to element of the vector
 	T& operator() (int i) {return x[i];}
 
+	//! operator () for read/write access to element of the vector
+	const T& operator() (int i) const {return x[i];}
+
 	//! read only operation needed
-	T read (int i) const {return x[i];}
+	T read (int i) const { return x[i];}
+
+	//! read only operation needed
+	const T & get (int i) const { return x[i];}
 
 	//! operator+ adds two vectors
 	Vec<n,T>& operator+= (const Vec<n,T>& b)
@@ -80,7 +96,6 @@ public:
 		for (int i=0; i<n; i++) x[i] += b.x[i]; 
 		return *this;
 	}
-
 	Vec<n,T> operator+ (const Vec<n,T>& b) const
 	{
 		Vec<n,T> z = *this; 
@@ -191,14 +206,9 @@ inline std::ostream& operator<< (std::ostream& s, Vec<n,T>& v)
  */
 template<int n, int dim, class T = double>
 class Mat {
-  enum { m = ( dim > 0 ) ? dim : 1 };
 public:
-  //! remember the storage type 
-  typedef T MemberType;
-
-  //! know length 
-  enum { dimension = dim };
- 
+  enum { m = (dim > 0) ? dim : 1 };
+  
 	//! Constructor making uninizialized matrix
 	Mat() {}
 
@@ -208,6 +218,7 @@ public:
     for(int j=0; j<m; j++)
 		  for (int i=0; i<n; i++) a[j](i) = t;
 	}
+
   
 	//! operator () for read/write access to element in matrix
 	T& operator() (int i, int j) {return a[j](i);}

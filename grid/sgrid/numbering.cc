@@ -178,7 +178,7 @@ inline void  CubeMapper<dim>::print (std::ostream& ss, int indent)
 }
 
 template<int dim>
-inline int CubeMapper<dim>::elements (int codim)
+inline int CubeMapper<dim>::elements (int codim) const
 {
 	return ne[codim];
 }

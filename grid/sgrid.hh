@@ -722,7 +722,7 @@ public:
 	/*! Return maximum level defined in this grid. Levels are numbered
 	  0 ... maxlevel with 0 the coarsest level.
      */
-	int maxlevel();
+	int maxlevel() const;
 
 	//! Iterator to first entity of given codim on level
 	template<int cd>
@@ -733,7 +733,7 @@ public:
 	SLevelIterator<cd,dim,dimworld> lend (int level);
 
 	//! number of grid entities per level and codim
-	int size (int level, int codim);
+	int size (int level, int codim) const;
 
 
 	// these are all members specific to sgrid
