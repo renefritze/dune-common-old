@@ -654,6 +654,63 @@ inline int ALU3dGridLeafIterator<GridImp> :: level() const
   return level_;
 }
 
+//*******************************************************************
+//
+//  --EntityPointer
+//  --EnPointer
+//
+//*******************************************************************
+template<int codim, PartitionIteratorType pitype, class GridImp >
+inline ALU3dGridEntityPointer<codim,pitype,GridImp> :: 
+  ALU3dGridEntityPointer(const GridImp & grid, const ALU3DSPACE HElementType &item)
+  : grid_(grid) , entity_ ( grid_.entityProvider_.getNewObjectEntity( grid_, item.level())) 
+{
+  (*entity_).setElement( const_cast<ALU3DSPACE HElementType &> (item) );
+}
+
+template<int codim, PartitionIteratorType pitype, class GridImp >
+inline ALU3dGridEntityPointer<codim,pitype,GridImp> :: 
+  ALU3dGridEntityPointer(const GridImp & grid)
+  : grid_(grid) , entity_ ( grid_.entityProvider_.getNewObjectEntity( grid_, 0 )) 
+{
+  assert(false);
+}
+
+template<int codim, PartitionIteratorType pitype, class GridImp >
+inline ALU3dGridEntityPointer<codim,pitype,GridImp> :: 
+  ~ALU3dGridEntityPointer()
+{
+  grid_.entityProvider_.freeObjectEntity ( entity_ );
+}
+
+template<int codim, PartitionIteratorType pitype, class GridImp >
+inline void ALU3dGridEntityPointer<codim,pitype,GridImp> :: increment () 
+{
+  // do not increment EntityPointers 
+  assert(false); 
+  DUNE_THROW(ALU3dGridError,"Do not increment EntityPointers \n");
+  return ;
+}
+
+template<int codim, PartitionIteratorType pitype, class GridImp >
+inline bool ALU3dGridEntityPointer<codim,pitype,GridImp>::
+equals (const ALU3dGridEntityPointer<codim,pitype,GridImp>& i) const 
+{
+  return (entity_ == (i.entity_));
+}
+
+template<int codim, PartitionIteratorType pitype, class GridImp >
+inline typename ALU3dGridEntityPointer<codim,pitype,GridImp>::Entity & 
+ALU3dGridEntityPointer<codim,pitype,GridImp>::dereference () const
+{
+  return (*entity_);
+}
+
+template<int codim, PartitionIteratorType pitype, class GridImp >
+inline int ALU3dGridEntityPointer<codim,pitype,GridImp>::level () const
+{
+  return (*entity_).level();
+}
 
 /************************************************************************************
 #     #
@@ -670,6 +727,7 @@ inline ALU3dGridHierarchicIterator<GridImp> ::
   ALU3dGridHierarchicIterator(const GridImp & grid , 
    const ALU3DSPACE HElementType & elem, int maxlevel ,bool end)
   : grid_(grid), elem_(elem) , item_(0) , maxlevel_(maxlevel) 
+  //, entity_ ( grid_.entityProvider_.getNewObjectEntity( grid_, maxlevel) )
 {
   if (!end) 
   {
@@ -679,6 +737,8 @@ inline ALU3dGridHierarchicIterator<GridImp> ::
       // we have children and they lie in the disired level range 
       if(item_->level() <= maxlevel_)
       {
+        //(*entity_).reset( maxlevel_ );
+        //(*entity_).setElement(*item_);
         EntityImp * obj = new EntityImp (grid_,maxlevel_);
         (*obj).setElement(*item_);
         // objEntity deletes entity pointer when no refCount is left 
@@ -690,6 +750,12 @@ inline ALU3dGridHierarchicIterator<GridImp> ::
       }
     }
   }
+}
+template <class GridImp>
+inline ALU3dGridHierarchicIterator<GridImp> :: 
+~ALU3dGridHierarchicIterator() 
+{
+  //grid_.entityProvider_.freeObjectEntity ( entity_ );
 }
 
 template <class GridImp>
@@ -736,6 +802,7 @@ inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   item_ = goNextElement( item_ );
   if(!item_) return ;
 
+  //(*entity_).setElement(*item_);
   (*objEntity_).setElement(*item_);
   return ;
 }
@@ -751,6 +818,7 @@ template <class GridImp>
 inline typename ALU3dGridHierarchicIterator<GridImp>::Entity & 
 ALU3dGridHierarchicIterator<GridImp>::dereference () const
 {
+  //return (*entity_);
   return (*objEntity_);
 }
 //************************************************************************
@@ -802,8 +870,11 @@ inline void ALU3dGridBoundaryEntity<GridImp>::setId ( int id )
 template<class GridImp>
 inline ALU3dGridIntersectionIterator<GridImp> :: 
 ALU3dGridIntersectionIterator(const GridImp & grid,
-  ALU3DSPACE HElementType *el, int wLevel,bool end) :
-  entity_( grid , wLevel )
+  ALU3DSPACE HElementType *el, int wLevel,bool end) 
+  : grid_ ( grid ) 
+  //, fEntity_ ( grid, wLevel )
+  //, entity_( &fEntity_ ) 
+  , entity_( grid_.entityProvider_.getNewObjectEntity( grid_ , wLevel ) )
   , item_(0), neigh_(0), ghost_(0)
   , index_(0) , numberInNeigh_ (-1)
   , theSituation_ (false) , daOtherSituation_ (false)
@@ -821,6 +892,12 @@ ALU3dGridIntersectionIterator(const GridImp & grid,
   {
     done();
   }
+}
+
+template<class GridImp>
+inline ALU3dGridIntersectionIterator<GridImp> :: ~ALU3dGridIntersectionIterator() 
+{
+  grid_.entityProvider_.freeObjectEntity( entity_ );
 }
 
 template<class GridImp>
@@ -878,9 +955,6 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: done ()
   item_  = 0;
   index_ = 4;
 }
-
-template<class GridImp>
-inline ALU3dGridIntersectionIterator<GridImp> :: ~ALU3dGridIntersectionIterator() {}
 
 template<class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp> :: increment () 
@@ -991,7 +1065,7 @@ setNeighbor () const
     assert( ghost_->getGhost() );
     
     //entity_.setGhost( *ghost_ ); // old method 
-    entity_.setGhost( *(ghost_->getGhost()) ); 
+    (*entity_).setGhost( *(ghost_->getGhost()) ); 
    
     needSetup_ = false;
     neigh_ = 0;
@@ -1011,7 +1085,7 @@ setNeighbor () const
   assert(neigh_ != item_);
   assert(neigh_ != 0);
 
-  entity_.setElement(*neigh_);
+  (*entity_).setElement(*neigh_);
   ghost_ = 0;
   needSetup_ = false;
 }
@@ -1021,7 +1095,7 @@ inline typename ALU3dGridIntersectionIterator<GridImp>::Entity &
 ALU3dGridIntersectionIterator<GridImp>::dereference () const
 {
   if(needSetup_) setNeighbor(); 
-  return entity_;
+  return (*entity_);
 }
 
 template<class GridImp>
@@ -1157,16 +1231,28 @@ ALU3dGridEntity(const GridImp  &grid,
              //ALU3DSPACE HElementType & element,int index, 
              int wLevel) 
   : grid_(grid)
-  //, item_(static_cast<ALU3DSPACE IMPLElementType *> (&element))
   , item_(0) 
   , ghost_(0), isGhost_(false), geo_(false) , builtgeometry_(false)
-  //, index_(index) 
   , walkLevel_ (wLevel) 
-  //, glIndex_ (element.getIndex()) , level_ (element.level())
   , glIndex_(-1), level_(-1)
   , geoInFather_ (false)
 {
 }
+
+template<int dim, class GridImp>
+inline void ALU3dGridEntity<0,dim,GridImp> :: 
+reset (int walkLevel ) 
+{
+  item_       = 0;
+  ghost_      = 0;
+  isGhost_    = false; 
+  builtgeometry_ = false;
+  walkLevel_     = walkLevel; 
+  glIndex_    = -1; 
+  level_      = -1;
+}
+
+
 
 template<int dim, class GridImp>
 inline void 
@@ -1298,7 +1384,7 @@ template<int cc>
 inline typename ALU3dGridEntity<0,dim,GridImp> :: template codim<cc>:: EntityPointer 
 ALU3dGridEntity<0,dim,GridImp> :: entity (int i) const
 {
-  ALU3dGridLevelIterator<cc,All_Partition,GridImp> ep (grid_,level());
+  ALU3dGridEntityPointer<cc,All_Partition,GridImp> ep (grid_);
   return ep;
 }
 
@@ -1351,11 +1437,11 @@ ALU3dGridEntity<0,dim,GridImp> :: father() const
   if(! item_->up() )
   {
     std::cerr << "ALU3dGridEntity<0," << dim << "," << dimworld << "> :: father() : no father of entity globalid = " << globalIndex() << "\n";
-    ALU3dGridLevelIterator<0,All_Partition,GridImp> vati (grid_, static_cast<ALU3DSPACE HElementType &> (*item_));
+    ALU3dGridEntityPointer<0,All_Partition,GridImp> vati (grid_, static_cast<ALU3DSPACE HElementType &> (*item_));
     return vati; 
   }
     
-  ALU3dGridLevelIterator<0,All_Partition,GridImp> vati (grid_, static_cast<ALU3DSPACE HElementType &> (*(item_->up())));
+  ALU3dGridEntityPointer<0,All_Partition,GridImp> vati (grid_, static_cast<ALU3DSPACE HElementType &> (*(item_->up())));
   return vati;
 }
 
