@@ -176,10 +176,10 @@ public:
         int bit=0;
         for (int k=0; k<dimworld; k++)
           if (k==missing)
-                g(k) = midpoint(k);
+                g[k] = midpoint[k];
           else
                 {
-                  g(k) = midpoint(k) + (local(bit)-0.5)*extension(k);
+                  g[k] = midpoint[k] + (local[bit]-0.5)*extension[k];
                   bit++;
                 }
         return g;
@@ -205,7 +205,7 @@ public:
   {
         yaspgrid_ctype volume=1.0;
         for (int k=0; k<dimworld; k++)
-          if (k!=missing) volume *= extension(k);
+          if (k!=missing) volume *= extension[k];
         return volume;
   }
 
@@ -307,7 +307,7 @@ public:
   {
       FieldVector<yaspgrid_ctype,dim> g;
         for (int k=0; k<dim; k++)
-          g(k) = midpoint(k) + (local(k)-0.5)*extension(k);
+          g[k] = midpoint[k] + (local[k]-0.5)*extension[k];
         return g;
   }
 
@@ -325,7 +325,7 @@ public:
     yaspgrid_ctype integration_element (const FieldVector<yaspgrid_ctype, dim>& local)
   {
         yaspgrid_ctype volume=1.0;
-        for (int k=0; k<dim; k++) volume *= extension(k);
+        for (int k=0; k<dim; k++) volume *= extension[k];
         return volume;
   }
 
