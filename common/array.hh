@@ -155,6 +155,18 @@ namespace Dune
 
       /** \todo This the same as resize! */
       void realloc (int m) {resize(m);}
+
+      //! just for some tests 
+      void swap ( Array<T> &copy)
+      {
+        T *tmp = copy.p;
+        copy.p = p;
+        p = tmp;
+       
+        int fake=copy.n;
+        copy.n = n;
+        n = fake;
+      }
       
       //! return number of components in array
       int size () const;
@@ -208,13 +220,16 @@ namespace Dune
        */
       bool processXdr(XDR *xdrs)
       {
-          if(xdrs != NULL)
-              {
-                  xdr_vector(xdrs,(char *) p,n,sizeof(T),(xdrproc_t)xdr_double);
-                  return true;
-              }
-          else 
-              return false;
+        if(xdrs != NULL)
+        {
+          int len = n;
+          xdr_int( xdrs, &len );
+          if(len != n) resize(len);
+          xdr_vector(xdrs,(char *) p,n,sizeof(T),(xdrproc_t)xdr_double);
+          return true;
+        }
+        else 
+          return false;
       }
 
   protected:
@@ -277,9 +292,17 @@ namespace Dune
   {
         if (m!=n)
           {
-                if (n>0) delete[] p;
+                if (n>0) 
+                {
+                  delete[] p;
+                  p = NULL;
+                }
                 n = m;
-                if (n==0) return;
+                if (n==0) 
+                {
+                  p = NULL;
+                  return;
+                }
                 try {
                   p = new T[n];
                 }
