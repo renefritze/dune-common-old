@@ -1191,7 +1191,7 @@ GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::leafend (int ma
 template< int dim, int dimworld, class ct, template<int,int> class GridImp, 
 template<int,int,int,PartitionIteratorType> class LevelIteratorImp, template<int,int,int> class EntityImp>  
 inline bool GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::
-write ( const FileFormatType ftype, const char * filename , ct time, int timestep)
+write ( const FileFormatType ftype, const char * filename , double time, int timestep)
 {
   const char *fn;
   const char *path = 0;
@@ -1206,7 +1206,8 @@ write ( const FileFormatType ftype, const char * filename , ct time, int timeste
     case ascii:   return asImp().template writeGrid<ascii>(fn,time);
     default: 
         {
-          std::cerr << ftype << " FileFormatType not supported at the moment! \n";
+          std::cerr << ftype << " FileFormatType not supported at the moment! " << __FILE__ << __LINE__ << "\n";
+          assert(false);
           abort();
           return false;
         }
@@ -1217,7 +1218,7 @@ write ( const FileFormatType ftype, const char * filename , ct time, int timeste
 template< int dim, int dimworld, class ct, template<int,int> class GridImp, 
   template<int,int,int,PartitionIteratorType> class LevelIteratorImp, template<int,int,int> class EntityImp>  
 inline bool GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::
-read ( const char * filename , ct & time, int timestep)
+read ( const char * filename , double & time, int timestep)
 {
   const char * fn;
   std::fstream file (filename,std::ios::in);
@@ -1228,7 +1229,7 @@ read ( const char * filename , ct & time, int timestep)
   type = ( GridIdentifier ) helpType;
   if(type != asImp().type())
   {
-      std::cerr << "\nERROR: " << GridName(asImp().type()) << " tries to read " << GridName(type) << " file. \n\n";
+    std::cerr << "\nERROR: " << GridName(asImp().type()) << " tries to read " << GridName(type) << " file. \n\n";
     assert(type == asImp().type());
     abort();
   }
@@ -1248,6 +1249,7 @@ read ( const char * filename , ct & time, int timestep)
     default: 
         {
           std::cerr << ftype << " FileFormatType not supported at the moment! \n";
+          assert(false);
           abort();
           return false;
         }
@@ -1259,7 +1261,7 @@ template< int dim, int dimworld, class ct, template<int,int> class GridImp,
 template<int,int,int,PartitionIteratorType> class LevelIteratorImp, template<int,int,int> class EntityImp>  
 template <FileFormatType ftype> 
 inline bool GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::
-writeGrid ( const char * filename , ct time )
+writeGrid ( const char * filename , double time )
 {
   std::cerr << "WARNING: writeGrid not implemented! \n";
   return false;
@@ -1269,13 +1271,11 @@ template< int dim, int dimworld, class ct, template<int,int> class GridImp,
 template<int,int,int,PartitionIteratorType> class LevelIteratorImp, template<int,int,int> class EntityImp>  
 template <FileFormatType ftype> 
 inline bool GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::
-readGrid ( const char * filename , ct & time )
+readGrid ( const char * filename , double & time )
 {
   std::cerr << "WARNING: readGrid not implemented! \n";
   return false;
 }
-
-
 
 //************************************************************************
 //  G R I D Default :: LeafIterator 
