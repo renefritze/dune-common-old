@@ -33,19 +33,28 @@ public:
     typedef typename GridImp::template codim<codim>::Entity Entity;
 
   //! Constructor
-  explicit UGGridLevelIterator(int travLevel);
+    explicit UGGridLevelIterator(int travLevel) : virtualEntity_(0), 
+                                                  level_(travLevel),
+                                                  target_(0)
+    {
+        virtualEntity_.setToTarget(0);
+    }
 
     //! prefix increment
-    void increment();
+    void increment() {
+        setToTarget(UG_NS<GridImp::dimension>::succ(target_));
+    }
 
     //! equality
-    bool equals(const UGGridLevelIterator<codim,pitype,GridImp>& i) const;
+    bool equals(const UGGridLevelIterator<codim,pitype,GridImp>& other) const {
+        return target_ == other.target_;
+    }
 
     //! dereferencing
-    Entity& dereference() const;
+    Entity& dereference() const {return virtualEntity_;}
 
   //! ask for level of entity
-  int level ();
+    int level () const {return level_;}
 
 private:
 
@@ -74,9 +83,6 @@ private:
     typename TargetType<codim,GridImp::dimension>::T* target_;
 
 };
-
-    // Include method definitions
-#include "uggridleveliterator.cc"
 
 }  // namespace Dune
   
