@@ -139,7 +139,7 @@ public:
     return sqrt(s);
   }
 
-  //! \infty norm
+  //! Infinity norm
   T norminfty () const
   {
     T s=0.0;
