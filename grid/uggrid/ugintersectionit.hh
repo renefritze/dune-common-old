@@ -109,27 +109,10 @@ private:
   //**********************************************************
 
     //! \todo Please doc me!
-    UG3d::ELEMENT* target() const;
+    typename TargetType<0,dimworld>::T* target() const;
     
     //! \todo Please doc me!
-    void setToTarget(UG3d::element* center, int nb);
-
-#if 0
-  //! make Iterator set to begin of actual entitys intersection Iterator
-  void makeBegin (UGGrid<dim,dimworld> &grid,int level, ALBERT EL_INFO * elInfo );
-  
-  //! set Iterator to end of actual entitys intersection Iterator
-  void makeEnd (UGGrid<dim,dimworld> &grid,int level );
-
-  // put objects on stack 
-  void freeObjects ();
-  
-  //! setup the virtual neighbor 
-  void setupVirtEn ();
-
-  //! know the grid were im coming from
-  UGGrid<dim,dimworld> *grid_;
-#endif
+    void setToTarget(typename TargetType<0,dimworld>::T* center, int nb);
 
   //! the actual level
   int level_;
@@ -158,7 +141,7 @@ private:
   Vec<dimworld,UGCtype> outNormal_;
  
     //! The element whose neighbors we are looking at
-    UG3d::ELEMENT* center_;
+    typename TargetType<0,dimworld>::T* center_;
     
     //! count on which neighbor we are lookin' at
     int neighborCount_;

@@ -43,6 +43,7 @@ index()
     return -1;
 }
 
+#ifdef _3
 template<>
 inline int UGGridEntity < 3, 3 ,3 >::
 index()
@@ -56,6 +57,7 @@ index()
 {
     return target_->ge.id;
 }
+#endif
 
 template< int codim, int dim, int dimworld>
 inline UGGridElement<dim-codim,dimworld>& 
@@ -65,15 +67,7 @@ geometry()
   return geo_;
 }
 
-#if 0
-template<int codim, int dim, int dimworld>
-inline Vec<dim,albertCtype>& 
-AlbertGridEntity < codim, dim ,dimworld >::local()
-{
-  return localFatherCoords_;
-}
-#endif
-
+#ifdef _3
 //template<int codim, int dim, int dimworld>
 template<>
 inline UGGridLevelIterator<0,3,3> 
@@ -92,6 +86,7 @@ UGGridEntity < 0, 3 ,3>::father()
     it.setToTarget(fatherTarget);
     return it;
 }
+#endif
 
 //************************************
 //
@@ -103,13 +98,21 @@ template< int dim, int dimworld>
 inline bool UGGridEntity < 0, dim ,dimworld >::
 mark( int refCount )
 {
-
+#ifdef _3
     if (!UG3d::EstimateHere(target_))
         return false;
 
     return UG3d::MarkForRefinement(target_, 
                                    UG3d::RED, 
                                    0);  // no user data
+#else
+        if (!UG2d::EstimateHere(target_))
+        return false;
+
+    return UG2d::MarkForRefinement(target_, 
+                                   UG2d::RED, // red refinement rule
+                                   0);  // no user data
+#endif
 }
 
 template< int dim, int dimworld>
@@ -126,10 +129,10 @@ geometry()
 template <int codim, int dim, int dimworld> template <int cc> 
 inline int UGGridEntity<codim,dim,dimworld>::count ()
 {
-#define TAG(p) ReadCW(p, UG3d::TAG_CE)
-#define SIDES_OF_ELEM(p) (UG3d::element_descriptors[TAG(p)]->sides_of_elem)
-#define EDGES_OF_ELEM(p) (UG3d::element_descriptors[TAG(p)]->edges_of_elem)
-#define CORNERS_OF_ELEM(p)(UG3d::element_descriptors[TAG(p)]->corners_of_elem)
+// #define TAG(p) ReadCW(p, UG3d::TAG_CE)
+// #define SIDES_OF_ELEM(p) (UG3d::element_descriptors[TAG(p)]->sides_of_elem)
+// #define EDGES_OF_ELEM(p) (UG3d::element_descriptors[TAG(p)]->edges_of_elem)
+// #define CORNERS_OF_ELEM(p)(UG3d::element_descriptors[TAG(p)]->corners_of_elem)
 
     if (dim==3) {
 
@@ -138,11 +141,11 @@ inline int UGGridEntity<codim,dim,dimworld>::count ()
         return 1;
         case 1:
 
-            return SIDES_OF_ELEM(target_);
+            return UG<3>::Sides_Of_Elem(target_);
         case 2:
-            return EDGES_OF_ELEM(target_);
+            return UG<3>::Edges_Of_Elem(target_);
         case 3:
-            return CORNERS_OF_ELEM(target_);
+            return UG<3>::Corners_Of_Elem(target_);
         } 
 
     } else {
@@ -151,23 +154,25 @@ inline int UGGridEntity<codim,dim,dimworld>::count ()
         case 0:
         return 1;
         case 1:
-            return EDGES_OF_ELEM(target_);
+            return UG<2>::Edges_Of_Elem(target_);
         case 2:
-            return CORNERS_OF_ELEM(target_);
+            return UG<2>::Corners_Of_Elem(target_);
         } 
 
     }
   return -1;
-#undef SIDES_OF_ELEM
-#undef EDGES_OF_ELEM
-#undef CORNERS_OF_ELEM
-#undef TAG
+// #undef SIDES_OF_ELEM
+// #undef EDGES_OF_ELEM
+// #undef CORNERS_OF_ELEM
+// #undef TAG
 }
 
 template <int codim, int dim, int dimworld>
 template <int cc>
 inline int UGGridEntity<codim, dim, dimworld>::subIndex(int i)
 {
+#if 0
+
 #define TAG(p) ReadCW(p, UG3d::TAG_CE)
 #define CORNER(p,i) ((UG3d::node *) (p)->ge.refs[UG3d::n_offset[TAG(p)]+(i)])
     UG3d::node* node = CORNER(target_,i);
@@ -175,6 +180,15 @@ inline int UGGridEntity<codim, dim, dimworld>::subIndex(int i)
 #undef TAG
     UG3d::vertex* vertex = node->myvertex;
     return vertex->iv.id;
+
+#else
+
+    typename TargetType<dim,dim>::T* node = CORNER(target_,i);
+    //UG3d::vertex* vertex = node->myvertex;
+    return node->myvertex->iv.id;
+
+#endif
+
 }
 
 
@@ -231,6 +245,8 @@ template <int dim, int dimworld>
 template <int cc>
 inline int UGGridEntity<0, dim, dimworld>::subIndex(int i)
 {
+#if 0
+
 #define TAG(p) ReadCW(p, UG3d::TAG_CE)
 #define CORNER(p,i) ((UG3d::node *) (p)->ge.refs[UG3d::n_offset[TAG(p)]+(i)])
     UG3d::node* node = CORNER(target_,i);
@@ -238,6 +254,13 @@ inline int UGGridEntity<0, dim, dimworld>::subIndex(int i)
 #undef TAG
     UG3d::vertex* vertex = node->myvertex;
     return vertex->iv.id;
+
+#else
+
+    typename TargetType<dim,dim>::T* node = CORNER(target_,i);
+    return node->myvertex->iv.id;
+
+#endif
 }
 
 template<int dim, int dimworld>

@@ -9,9 +9,11 @@ UGGridIntersectionIterator() : center_(NULL), neighborCount_(-1),
 }
 
 template< int dim, int dimworld>
-inline UG3d::ELEMENT* UGGridIntersectionIterator<dim,dimworld>::
+inline typename TargetType<0,dimworld>::T* UGGridIntersectionIterator<dim,dimworld>::
 target() const 
 {
+
+#if 0
 #define TAG(p) ReadCW(p, UG3d::TAG_CE)
 #define SIDES_OF_ELEM(p) (UG3d::element_descriptors[TAG(p)]->sides_of_elem)
     if (!center_
@@ -19,18 +21,26 @@ target() const
         || neighborCount_>=SIDES_OF_ELEM(center_))
         return NULL;
 #undef SIDES_OF_ELEM
-  
-        
 
-#define NBELEM(p,i) ((UG3d::ELEMENT *) (p)->ge.refs[UG3d::nb_offset[TAG(p)]+(i)])
-  return NBELEM(center_, neighborCount_);
-#undef NBELEM
-#undef TAG
+#else
+  
+    if (!center_
+        || neighborCount_<0 
+        || neighborCount_>=UG<dimworld>::Sides_Of_Elem(center_))
+        return NULL;
+#endif  
+
+
+    //#define NBELEM(p,i) ((UG3d::ELEMENT *) (p)->ge.refs[UG3d::nb_offset[TAG(p)]+(i)])
+    //return NBELEM(center_, neighborCount_);
+  return UG<dimworld>::NbElem(center_, neighborCount_);
+  //#undef NBELEM
+  //#undef TAG
 }
 
 template< int dim, int dimworld>
 inline void UGGridIntersectionIterator<dim,dimworld>::
-setToTarget(UG3d::element* center, int nb)
+setToTarget(typename TargetType<0,dimworld>::T* center, int nb)
 {
     //printf("entering II::setToTarget %d %d\n", center, nb);
     center_ = center;
@@ -66,6 +76,7 @@ UGGridIntersectionIterator< dim,dimworld >::operator *()
   return virtualEntity_;
 }
 
+#ifdef _3
 template<>
 inline UGGridIntersectionIterator < 3,3 >& 
 UGGridIntersectionIterator < 3,3 >::operator++()
@@ -79,7 +90,9 @@ UGGridIntersectionIterator < 3,3 >::operator++()
     
     return (*this);
 }
+#endif
 
+#ifdef _3
 template<>
 inline bool
 UGGridIntersectionIterator < 3,3 >::boundary()
@@ -90,7 +103,9 @@ UGGridIntersectionIterator < 3,3 >::boundary()
 #undef TAG
 #undef NBELEM
 }
+#endif
 
+#ifdef _3
 /** \brief Why can't I leave dimworld unspezialized? */
 template<>
 inline Vec<3,UGCtype>&
@@ -100,6 +115,7 @@ UGGridIntersectionIterator < 3,3 >::unit_outer_normal ()
     return outNormal_;
 
 }
+#endif
 
 template<>
 inline Vec<2,UGCtype>&
@@ -213,6 +229,7 @@ template< int dim, int dimworld>
 inline int UGGridIntersectionIterator<dim,dimworld>::
 number_in_neighbor () 
 {
+#if 0
 #define TAG(p) ReadCW(p, UG3d::TAG_CE)
 #define SIDES_OF_ELEM(p) (UG3d::element_descriptors[TAG(p)]->sides_of_elem)
 #define NBELEM(p,i) ((UG3d::ELEMENT *) (p)->ge.refs[UG3d::nb_offset[TAG(p)]+(i)])
@@ -226,6 +243,18 @@ number_in_neighbor ()
 #undef SIDES_OF_ELEM
 #undef NBELEM
 #undef TAG
+
+#else
+
+    const typename TargetType<0,dimworld>::T* other = target();
+    int i;
+    for (i=0; i<Sides_Of_Elem(other); i++)
+        if (NbElem(other,i) == center_)
+            break;
+
+    return i;
+
+#endif
 }
 
 };
