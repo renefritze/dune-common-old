@@ -249,11 +249,12 @@ public:
       and to the underlying operators 
   */
 private: 
-  bool printMSG_;
-  
   //! operator A and B 
   A & _a; 
   B & _b; 
+
+  // if true some messages in Constructor and Destructor are printed 
+  bool printMSG_;
 };
 
 
@@ -417,15 +418,15 @@ public:
   template<class EntityType>
   void applyLocal(EntityType & en1, EntityType &en2); 
 protected: 
-  bool printMSG_;
-  
   //! reference to local operator A  
   A & _a; 
 
   //! scale factor for operator _a 
   const ScalarType scalar_;
   ScalarType tmpScalar_;
-
+ 
+  // if true some messages in Contructor and Destructor are printed  
+  bool printMSG_;
 }; // end class ScaledLocalOperator
 
 //****************************************************
