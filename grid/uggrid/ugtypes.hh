@@ -4,6 +4,7 @@
 namespace UG2d {
     struct multigrid;
     struct domain;
+    struct grid;
 
     union element;
     struct node;
@@ -12,6 +13,7 @@ namespace UG2d {
 namespace UG3d {
     struct multigrid;
     struct domain;
+    struct grid;
 
     union element;
     struct node;
@@ -35,6 +37,8 @@ class UGTypes<2>
 public:
     typedef UG2d::multigrid MultiGridType;
 
+    typedef UG2d::grid GridType;
+
     typedef UG2d::domain DomainType;
 };
 
@@ -43,6 +47,8 @@ class UGTypes<3>
 {
 public:
     typedef UG3d::multigrid MultiGridType;
+
+    typedef UG3d::grid GridType;
 
     typedef UG3d::domain DomainType;
 };
