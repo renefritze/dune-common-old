@@ -1101,7 +1101,6 @@ template< int dim, int dimworld, class ct, template<int,int> class GridImp,
 class GridDefault : public Grid <dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp> 
 {
 public:
-
   //! remember the types of template parameters
   template <int codim> 
   struct Traits 
@@ -1127,19 +1126,19 @@ public:
   LeafIterator leafbegin (int maxLevel);
 
   //! return LeafIterator which points behind the last entity in maxLevel
-  LeafIterator leafend( int maxLevel);
+  LeafIterator leafend(int maxLevel);
 
   //! write Grid with GridType file filename and time 
   //! this method use the Grid Interface Method writeGrid 
   //! is not the same 
   template <FileFormatType ftype>
-  bool grid2File ( const char * filename , int processor =0, ct time=0.0, 
-                   bool adaptive=false , int timestep = 0);
+  bool grid2File ( const char * filename , ct time=0.0, int timestep=0, 
+                   bool adaptive=false , int processor = 0);
 
   //! get Grid from file with time and timestep , return true if ok 
   template <FileFormatType ftype> 
-  bool file2Grid ( const char * filename , ct & time , int processor=0, 
-                   bool adaptive= false, int timestep=0 );
+  bool file2Grid ( const char * filename , ct & time , int timestep, 
+                   bool adaptive= false, int processor=0 );
   
 private:
   //! Barton-Nackman trick 
@@ -1151,7 +1150,6 @@ private:
 template< int dim, int dimworld, class ct, template<int,int> class GridImp, 
   template<int,int,int> class LevelIteratorImp, template<int,int,int> class EntityImp>  
 class GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::LeafIterator
-//: public LevelIterator <0,dim,dimworld,ct,LevelIteratorImp,EntityImp> 
 {
     // some typedefs  
     typedef GridImp<dim,dimworld> GridType;
