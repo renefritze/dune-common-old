@@ -76,8 +76,8 @@ template<class DiscreteFunctionSpaceType >
 inline void DiscFuncArray< DiscreteFunctionSpaceType >::print(std::ostream &s ) const
 {
     s << "DiscFuncArray '" << name_ << "'\n";
-  DofIteratorType enddof = this->dend ();
-  for(DofIteratorType itdof = this->dbegin (); itdof != enddof; ++itdof) 
+  ConstDofIteratorType enddof = this->dend ();
+  for(ConstDofIteratorType itdof = this->dbegin (); itdof != enddof; ++itdof) 
   {
     s << (*itdof) << " \n";
   } 
