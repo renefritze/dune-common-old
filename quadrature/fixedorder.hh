@@ -1,7 +1,5 @@
-#ifndef __DUNE_DUNEQUAD_HH__
-#define __DUNE_DUNEQUAD_HH__
-
-#include <dune/common/matvec.hh>
+#ifndef DUNE_FIXED_ORDER_QUAD_HH
+#define DUNE_FIXED_ORDER_QUAD_HH
 
 #include "common/quadrature.hh"
 

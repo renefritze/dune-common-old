@@ -1,7 +1,5 @@
-#ifndef __DUNE_BARYCENTER_HH__
-#define __DUNE_BARYCENTER_HH__
-
-#include <dune/common/matvec.hh>
+#ifndef DUNE_BARYCENTER_HH
+#define DUNE_BARYCENTER_HH
 
 #include "common/quadrature.hh"
 
