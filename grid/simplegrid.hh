@@ -1149,14 +1149,8 @@ public:
         //! maximum number of levels allowed
     enum { MAXL=64 };
 
-        //! know your own dimension
-        enum { dimension=dim };
-
-        //! know your own dimension of world
-        enum { dimensionworld=dimworld };
-
-        //! define type used for coordinates in grid module
-        typedef simplegrid_ctype ctype;
+    //! define type used for coordinates in grid module
+    typedef simplegrid_ctype ctype;
 
   //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ... 
   GridIdentifier type() const { return SimpleGrid_id; };
