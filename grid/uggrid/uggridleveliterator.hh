@@ -13,9 +13,9 @@ namespace Dune {
  */
 
 
-template<int codim, int dim, int dimworld>
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
 class UGGridLevelIterator : 
-    public LevelIteratorDefault <codim,dim,dimworld, UGCtype,
+    public LevelIteratorDefault <codim,dim,dimworld, pitype, UGCtype,
                                  UGGridLevelIterator,UGGridEntity>
 {
   friend class UGGridEntity<2,dim,dimworld>;
@@ -33,13 +33,13 @@ public:
   UGGridLevelIterator(UGGrid<dim,dimworld> &grid, int travLevel);
 
   //! prefix increment
-  UGGridLevelIterator<codim,dim,dimworld>& operator ++();
+  UGGridLevelIterator<codim,dim,dimworld,pitype>& operator ++();
 
   //! equality
-  bool operator== (const UGGridLevelIterator<codim,dim,dimworld>& i) const;
+  bool operator== (const UGGridLevelIterator<codim,dim,dimworld, pitype>& i) const;
 
   //! inequality
-  bool operator!= (const UGGridLevelIterator<codim,dim,dimworld>& i) const;
+  bool operator!= (const UGGridLevelIterator<codim,dim,dimworld, pitype>& i) const;
 
   //! dereferencing
   UGGridEntity<codim,dim,dimworld>& operator*() ;

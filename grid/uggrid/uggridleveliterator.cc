@@ -7,8 +7,8 @@
 
 
 // Make LevelIterator with point to element from previous iterations
-template<int codim, int dim, int dimworld>
-inline UGGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline UGGridLevelIterator<codim,dim,dimworld,pitype>::
 UGGridLevelIterator(int travLevel) : virtualEntity_(0), level_ (travLevel)
 {
     target_ = NULL;
@@ -17,8 +17,9 @@ UGGridLevelIterator(int travLevel) : virtualEntity_(0), level_ (travLevel)
 }
 
 // Make LevelIterator with point to element from previous iterations
-template<int codim, int dim, int dimworld>
-inline UGGridLevelIterator<codim,dim,dimworld >::UGGridLevelIterator(UGGrid<dim,dimworld> &grid, int travLevel) :
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline UGGridLevelIterator<codim,dim,dimworld,pitype>::
+UGGridLevelIterator(UGGrid<dim,dimworld> &grid, int travLevel) :
     virtualEntity_(0), level_ (travLevel)
 {
     target_ = NULL;
@@ -52,8 +53,8 @@ UGGridLevelIterator < 0,3,3 >::operator++()
 
 #ifdef _2
 template<>
-inline UGGridLevelIterator < 2,2,2 >& 
-UGGridLevelIterator < 2,2,2 >::operator++()
+inline UGGridLevelIterator < 2,2,2,All_Partition >& 
+UGGridLevelIterator < 2,2,2,All_Partition>::operator++()
 {
 
     target_ = target_->succ;
@@ -65,8 +66,8 @@ UGGridLevelIterator < 2,2,2 >::operator++()
 }
 
 template<>
-inline UGGridLevelIterator < 0,2,2 >& 
-UGGridLevelIterator < 0,2,2 >::operator++()
+inline UGGridLevelIterator < 0,2,2,All_Partition >& 
+UGGridLevelIterator < 0,2,2,All_Partition >::operator++()
 {
     setToTarget(target_->ge.succ);
     virtualEntity_.elNum_++;
@@ -75,9 +76,9 @@ UGGridLevelIterator < 0,2,2 >::operator++()
 #endif
 
 // gehe zum i Schritte weiter , wie auch immer
-template<int codim, int dim, int dimworld>
-inline UGGridLevelIterator < codim,dim,dimworld >& 
-UGGridLevelIterator < codim,dim,dimworld >::operator++()
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline UGGridLevelIterator < codim,dim,dimworld, pitype >& 
+UGGridLevelIterator < codim,dim,dimworld,pitype >::operator++()
 {
     printf("LevelIterator< %d, %d, %d >::operator++  Unimplemented case!\n",
            codim, dim, dimworld);
@@ -85,36 +86,36 @@ UGGridLevelIterator < codim,dim,dimworld >::operator++()
 }
 
 
-template<int codim, int dim, int dimworld>
-inline bool UGGridLevelIterator<codim,dim,dimworld >::
-operator ==(const UGGridLevelIterator<codim,dim,dimworld > &I) const 
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline bool UGGridLevelIterator<codim,dim,dimworld,pitype >::
+operator ==(const UGGridLevelIterator<codim,dim,dimworld,pitype > &I) const 
 {
     return target_==I.target_;
 }
 
-template<int codim, int dim, int dimworld>
-inline bool UGGridLevelIterator < codim,dim,dimworld >::
-operator !=(const UGGridLevelIterator< codim,dim,dimworld > & I) const
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline bool UGGridLevelIterator < codim,dim,dimworld,pitype >::
+operator !=(const UGGridLevelIterator< codim,dim,dimworld,pitype > & I) const
 {
     return !((*this)==I); 
 }
 
-template<int codim, int dim, int dimworld>
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
 inline UGGridEntity<codim, dim, dimworld> & 
-UGGridLevelIterator< codim,dim,dimworld >::operator *()
+UGGridLevelIterator< codim,dim,dimworld,pitype >::operator *()
 {
   return virtualEntity_;
 }
 
-template<int codim, int dim, int dimworld>
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
 inline UGGridEntity< codim,dim,dimworld >* 
-UGGridLevelIterator< codim,dim,dimworld >::operator ->()
+UGGridLevelIterator< codim,dim,dimworld,pitype >::operator ->()
 {
   return &virtualEntity_;
 }
 
-template<int codim, int dim, int dimworld>
-inline int UGGridLevelIterator<codim,dim,dimworld >::level()
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
+inline int UGGridLevelIterator<codim,dim,dimworld,pitype >::level()
 {
   return level_;
 }
