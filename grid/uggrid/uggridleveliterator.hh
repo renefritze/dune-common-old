@@ -58,8 +58,6 @@ public:
 
 private:
 
-    void makeIterator();
-
     void setToTarget(typename TargetType<codim,GridImp::dimension>::T* target) {
         target_ = target;
         virtualEntity_.setToTarget(target);
@@ -73,9 +71,6 @@ private:
 
   // private Members
     mutable UGMakeableEntity<codim,GridImp::dimension,GridImp> virtualEntity_;
-
-  //! element number 
-  int elNum_; 
 
   //! level 
   int level_;
