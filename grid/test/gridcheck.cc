@@ -230,8 +230,6 @@ struct EntityInterface<Grid, 0, dim>
       e.mark(0);
       e.state();
 
-      e.newEntity();
-      
       // recursively check sub-entities
       EntityInterface<Grid, 1, dim>();      
     }
