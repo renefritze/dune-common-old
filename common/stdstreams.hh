@@ -6,6 +6,9 @@
 
 */
 
+#ifndef DUNE_COMMON_STDSTREAMS_HH
+#define DUNE_COMMON_STDSTREAMS_HH
+
 #include "debugstream.hh"
 
 namespace Dune {
@@ -53,3 +56,5 @@ namespace Dune {
 
   //! }@
 }
+
+#endif
