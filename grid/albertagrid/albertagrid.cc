@@ -1677,9 +1677,9 @@ inline void AlbertaGridIntersectionIterator<GridImp>::freeObjects () const
   if(manageNeighEl_) 
     manageNeighEl_ = grid_->interNeighProvider_.freeObjectEntity(manageNeighEl_);
 
-  if(boundaryEntity_) 
+  if(manageBndEntity_) 
   {
-    delete boundaryEntity_;
+    manageBndEntity_ = grid_->interBndProvider_.freeObjectEntity(manageBndEntity_);
     boundaryEntity_ = 0;
   }
 
@@ -1703,8 +1703,10 @@ grid_( &grid ), level_ (level) , neighborCount_ (dim+1), virtualEntity_ (0)
   , manageNeighEl_ (0) 
   , fakeNeigh_ (0) 
   , neighGlob_ (0)  
+  , manageBndEntity_ (0) 
+  , manageNeighInfo_ (0) 
   , boundaryEntity_ (0) 
-  , manageNeighInfo_ (0) , neighElInfo_ (0) {}
+  , neighElInfo_ (0) {}
 
 
 template< class GridImp >
@@ -1718,43 +1720,11 @@ inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator
   , manageInterEl_ (0) 
   , manageNeighEl_ (0) 
   , fakeNeigh_ (0) , neighGlob_ (0)  
+  , manageBndEntity_ (0) 
   , boundaryEntity_ (0) 
 {
   manageNeighInfo_ = elinfoProvider.getNewObjectEntity();
   neighElInfo_ = manageNeighInfo_->item;
-}
-
-template< class GridImp >
-inline void AlbertaGridIntersectionIterator<GridImp>::makeBegin
-(const GridImp & grid, 
- int level, 
- ALBERTA EL_INFO *elInfo ) const
-{
-  grid_ = &grid;
-  level_ = level;
-  elInfo_ = elInfo;
-  neighborCount_ = 0;
-  builtNeigh_ = false; 
-
-  // remove old objects 
-  freeObjects();
-  
-  manageNeighInfo_ = elinfoProvider.getNewObjectEntity();
-  neighElInfo_ = manageNeighInfo_->item;
-}
-
-template< class GridImp >
-inline void AlbertaGridIntersectionIterator<GridImp>::makeEnd
-(const GridImp & grid, int level ) const
-{
-  grid_ = &grid;
-  level_ = level;
-  elInfo_ = 0;
-  neighborCount_ = dim+1;
-  builtNeigh_ = false; 
-  
-  // remove old objects 
-  freeObjects();
 }
 
 template< class GridImp >
@@ -1797,10 +1767,12 @@ template< class GridImp >
 inline typename AlbertaGridIntersectionIterator<GridImp>::BoundaryEntity & 
 AlbertaGridIntersectionIterator<GridImp>::boundaryEntity () const
 {
-  if(!boundaryEntity_) 
+  if(!manageBndEntity_) 
   {
-    boundaryEntity_ = new  MakeableBndEntityType ();
+    manageBndEntity_ = grid_->interBndProvider_.getNewObjectEntity();
+    boundaryEntity_  = manageBndEntity_->item;
   } 
+  assert( boundaryEntity_ );
   (*boundaryEntity_).setElInfo(elInfo_,neighborCount_);
   return (*boundaryEntity_);
 }
