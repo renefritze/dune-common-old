@@ -141,8 +141,8 @@ public:
     //! Iterator over descendants of the entity
     typedef OneDGridHierarchicIterator<dim,dimworld> HierarchicIterator; 
     
-    //! Default constructor
-    OneDGridEntity() : adaptationState(NONE) {}
+    //! Constructo
+    OneDGridEntity(int level) : adaptationState(NONE), level_(level) {}
 
     //! Destructor
     ~OneDGridEntity() {};
