@@ -2,6 +2,7 @@
 #define __DUNE_BASEFUNCTIONS_HH__
 
 #include "../common/matvec.hh"  
+#include "../common/mapping.hh"
 #include "quadrature.hh"
 
 namespace Dune{
@@ -23,11 +24,14 @@ struct DiffVariable
 //
 //*************************************************************************
 template<class FunctionSpaceType>
-class BaseFunctionInterface : Mapping < typename FunctionSpaceType::RangeField, typename FunctionSpaceType::Domain, typename FunctionSpaceType::Range > {
+class BaseFunctionInterface 
+: public Mapping< typename FunctionSpaceType::RangeField, 
+    typename FunctionSpaceType::Domain, typename FunctionSpaceType::Range > 
+{
     
 public:
-  typedef typename FunctionSpaceType::Domain Domain ;
-  typedef typename FunctionSpaceType::Range Range ;
+  typedef typename FunctionSpaceType::Domain Domain;
+  typedef typename FunctionSpaceType::Range Range;
   enum { DimDomain = FunctionSpaceType::DimDomain };
   enum { DimRange  = FunctionSpaceType::DimRange  };
 
