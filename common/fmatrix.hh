@@ -1411,6 +1411,15 @@ static void multAssign(const FieldMatrix<K,dim,dim> &matrix, const FieldVector<K
   }
 }
 
+//! calculates ret = matrix * x 
+template <typename K, int dim>
+static FieldVector<K,dim> mult(const FieldMatrix<K,dim,dim> &matrix, const FieldVector<K,dim> & x) 
+{
+  FieldVector<K,dim> ret;
+  multAssign(matrix,x,ret);
+  return ret; 
+}
+
 } // end namespace FMatrixHelp 
 
 
