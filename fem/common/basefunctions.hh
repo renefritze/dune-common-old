@@ -1,7 +1,6 @@
 #ifndef DUNE_BASEFUNCTIONS_HH
 #define DUNE_BASEFUNCTIONS_HH
 
-#include <dune/common/matvec.hh>  
 #include <dune/common/mapping.hh>
 
 #include <dune/quadrature/common/quadrature.hh>
@@ -52,7 +51,7 @@ public:
   enum { DimDomain = FunctionSpaceType::DimDomain };
   enum { DimRange  = FunctionSpaceType::DimRange  };
 
-  BaseFunctionInterface ( FunctionSpaceType & f ) : functionSpace_ (f) {} ;  
+  BaseFunctionInterface (const FunctionSpaceType & f ) : functionSpace_ (f) {} ;  
 
   //! evaluate the function at Domain x, and store the value in Range Phi
   //! diffVariable stores information about which gradient is to be
@@ -73,7 +72,7 @@ public:
                           const Domain & , Range &) const {}; // = 0 ?
 
 private:
-  FunctionSpaceType & functionSpace_;
+    const FunctionSpaceType & functionSpace_;
 
 };
 
@@ -190,8 +189,8 @@ class BaseFunctionSetDefault
 {
 public:
   typedef typename FunctionSpaceType::JacobianRange JacobianRange;
-  enum { dimRow = JacobianRange::dimRow };
-  enum { dimCol = JacobianRange::dimCol };
+  enum { dimRow = JacobianRange::rows };
+  enum { dimCol = JacobianRange::cols };
   
   typedef typename FunctionSpaceType::Domain Domain ;
   typedef typename FunctionSpaceType::Range Range ;
