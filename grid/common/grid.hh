@@ -351,6 +351,7 @@ public:
     typedef EntityImp<0,dim,dimworld>         Entity;
     typedef ElementImp<dim,dimworld>          Element;
     typedef NeighborIteratorImp<dim,dimworld> NeighborIterator;
+    typedef BoundaryEntityImp<dim,dimworld>   BoundaryEntity;
   };
 
   //! know your own dimension
