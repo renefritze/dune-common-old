@@ -34,7 +34,7 @@ class FastQuad
   FastQuad < RangeFieldType, DomainType, poly_order > >  
 {
 private:    
-  enum { dim = DomainType::dimension };
+  enum { dim = DomainType::size };
   
   //! my Type 
   typedef FastQuad <  RangeFieldType , DomainType , poly_order > FastQuadType;
@@ -87,13 +87,13 @@ public:
   //! return weight for point i
   const RangeFieldType& weight ( int i) const
   {
-    return (weights_(i)); 
+    return weights_[i]; 
   }
   
   //! return point i local coordinates 
   const DomainType& point (int i) const 
   {
-    return (points_(i));
+    return points_[i];
   }
 
 private:
@@ -110,8 +110,8 @@ private:
 
     for(int i=0; i<numberOfQuadPoints_; i++)
     {
-      points_(i)  = QuadInitializer::getPoint(i);
-      weights_(i) = QuadInitializer::getWeight(i);
+      points_[i]  = QuadInitializer::getPoint(i);
+      weights_[i] = QuadInitializer::getWeight(i);
     }
 
     int myType = (int) ElType;
@@ -128,8 +128,8 @@ private:
   int order_;
 
   //! Vecs with constant length holding the weights and points 
-  Vec < maxQuadPoints , RangeFieldType > weights_;
-  Vec < maxQuadPoints , DomainType >     points_;
+    FieldVector<RangeFieldType, maxQuadPoints> weights_;
+    FieldVector<DomainType, maxQuadPoints>     points_;
 
 }; // end class FastQuadrature 
 
@@ -239,8 +239,8 @@ private:
   int order_;
 
   //! Vecs with constant length holding the weights and points 
-  Vec < maxQuadPoints , RangeFieldType > weights_;
-  Vec < maxQuadPoints , DomainType >     points_;
+    FieldVector<RangeFieldType, maxQuadPoints> weights_;
+    FieldVector<DomainType, maxQuadPoints>     points_;
 
 }; // end class FastQuadrature 
 

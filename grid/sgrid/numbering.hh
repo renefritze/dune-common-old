@@ -1,5 +1,7 @@
-#ifndef __NUMBERING_HH__
-#define __NUMBERING_HH__
+#ifndef __DUNE_NUMBERING_HH__
+#define __DUNE_NUMBERING_HH__
+
+#include <dune/common/fixedarray.hh>
 
 namespace Dune {
 

@@ -112,7 +112,7 @@ UGGridIntersectionIterator < 2,2 >::boundary()
 #endif
 
 template<>
-inline Vec<3,UGCtype>&
+inline FieldVector<UGCtype, 3>&
 UGGridIntersectionIterator < 3,3 >::unit_outer_normal ()
 {
 #ifdef _3
@@ -124,7 +124,7 @@ UGGridIntersectionIterator < 3,3 >::unit_outer_normal ()
     UG3d::VERTEX* c = UG_NS<3>::Corner(center_,CORNER_OF_SIDE(center_, neighborCount_, 2))->myvertex;
 #undef CORNER_OF_SIDE
 
-    Vec<3,UGCtype> aPos, bPos, cPos;
+    FieldVector<UGCtype, 3> aPos, bPos, cPos;
 
 #define CVECT(p)   ((p)->iv.x)
 #define V3_COPY(A,C)    {(C)[0] = (A)[0];   (C)[1] = (A)[1];   (C)[2] = (A)[2];}
@@ -134,8 +134,8 @@ UGGridIntersectionIterator < 3,3 >::unit_outer_normal ()
 #undef CVECT
 #undef V3_COPY
 
-    Vec<3> ba = bPos - aPos;
-    Vec<3> ca = cPos - aPos;
+    FieldVector<UGCtype, 3> ba = bPos - aPos;
+    FieldVector<UGCtype, 3> ca = cPos - aPos;
 
 //     std::cout << "aPos: " << aPos << std::endl;
 //     std::cout << "bPos: " << bPos << std::endl;
@@ -156,7 +156,7 @@ UGGridIntersectionIterator < 3,3 >::unit_outer_normal ()
 }
 
 template<>
-inline Vec<2,UGCtype>&
+inline FieldVector<UGCtype, 2>&
 UGGridIntersectionIterator < 2,2 >::unit_outer_normal ()
 {
 #ifdef _2
@@ -171,15 +171,15 @@ UGGridIntersectionIterator < 2,2 >::unit_outer_normal ()
     outerNormal_[1] = aPos[0] - bPos[0];
 
     // normalize
-    outerNormal_ *= (1/outerNormal_.norm2());
+    outerNormal_ *= (1/outerNormal_.two_norm());
 #endif
     return outerNormal_;
 }
 
 template<int dim, int dimworld>
-inline Vec<dimworld,UGCtype>&
+inline FieldVector<UGCtype, dimworld>&
 UGGridIntersectionIterator < dim,dimworld >::
-unit_outer_normal (Vec<dim-1,UGCtype>& local)
+unit_outer_normal (const FieldVector<UGCtype, dim-1>& local)
 {
     return unit_outer_normal();
 }

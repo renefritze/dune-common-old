@@ -14,7 +14,7 @@ DiscreteFunctionSpaceType (g,id) , dm_ ( dm )
 
   //std::cout << "Constructor of LagrangeDiscreteFunctionSpace! \n";
   for(int i=0; i<numOfDiffBase_; i++)
-    baseFuncSet_(i) = 0;
+    baseFuncSet_[i] = 0;
 
   {
     // search the macro grid for diffrent element types 
@@ -23,15 +23,15 @@ DiscreteFunctionSpaceType (g,id) , dm_ ( dm )
     for(LevelIteratorType it = g.template lbegin<0>(0); it != endit; ++it)
     {
       ElementType type = (*it).geometry().type(); // Hack 
-      if(baseFuncSet_( type ) == 0 )
-        baseFuncSet_ ( type ) = setBaseFuncSetPointer(*it);
+      if(baseFuncSet_[type] == 0 )
+        baseFuncSet_[type] = setBaseFuncSetPointer(*it);
     }
   }
 
   for(int i=0; i<numOfDiffBase_; i++)
   {
-    if(baseFuncSet_(i))
-      maxNumBase_ = MAX(baseFuncSet_(i)->getNumberOfBaseFunctions(),maxNumBase_);
+    if(baseFuncSet_[i])
+      maxNumBase_ = MAX(baseFuncSet_[i]->getNumberOfBaseFunctions(),maxNumBase_);
   }
 }
   
@@ -40,8 +40,8 @@ inline LagrangeDiscreteFunctionSpace<FunctionSpaceType,GridType,polOrd,DofManage
 ~LagrangeDiscreteFunctionSpace () 
 {
   for(int i=0; i<numOfDiffBase_; i++)
-    if (baseFuncSet_(i) != 0)
-      delete baseFuncSet_(i);
+    if (baseFuncSet_[i] != 0)
+      delete baseFuncSet_[i];
 }  
 
 template< class FunctionSpaceType, class GridType,int polOrd, class DofManagerType >
@@ -60,7 +60,7 @@ LagrangeDiscreteFunctionSpace<FunctionSpaceType,GridType,polOrd,DofManagerType>:
 getBaseFunctionSet (EntityType &en) const 
 {
   ElementType type =  en.geometry().type();
-  return (*baseFuncSet_( type ));
+  return *baseFuncSet_[type];
 }
 
 template< class FunctionSpaceType, class GridType,int polOrd, class DofManagerType >

@@ -45,11 +45,11 @@ namespace Dune {
  */
 
   enum ElementType {vertex=0,line=1, triangle=2, quadrilateral=3, tetrahedron=4, 
-					pyramid=5, prism=6, hexahedron=7,
-					iso_triangle=8, iso_quadrilateral=9, unknown=127};
+                                        pyramid=5, prism=6, hexahedron=7,
+                                        iso_triangle=8, iso_quadrilateral=9, unknown=127};
 
   /*! \internal
-	Used for grid I/O
+        Used for grid I/O
   */
   enum GridIdentifier { SGrid_Id, AlbertGrid_Id , SimpleGrid_Id, UGGrid_Id, YaspGrid_Id , BSGrid_Id };
 
@@ -73,48 +73,48 @@ namespace Dune {
     
   enum AdaptationState { 
              NONE ,   //!< notin' to do and notin' was done 
-						 COARSEN, //!< entity could be coarsend in adaptation step  
-						 REFINED  //!< enity was refined in adaptation step
+                                                 COARSEN, //!< entity could be coarsend in adaptation step  
+                                                 REFINED  //!< enity was refined in adaptation step
   };
 
    
   /*! Parameter to be used for the communication functions 
    */
   enum InterfaceType { 
-	InteriorBorder_InteriorBorder_Interface=0,
-	InteriorBorder_All_Interface=1,
-	Overlap_OverlapFront_Interface=2,
-	Overlap_All_Interface=3,
-	All_All_Interface=4
+        InteriorBorder_InteriorBorder_Interface=0,
+        InteriorBorder_All_Interface=1,
+        Overlap_OverlapFront_Interface=2,
+        Overlap_All_Interface=3,
+        All_All_Interface=4
   };
 
   /*! Parameter to be used for the parallel level iterators 
    */
   enum PartitionIteratorType {
-	Interior_Partition=0,
-	InteriorBorder_Partition=1,
-	Overlap_Partition=2,
-	OverlapFront_Partition=3,
-	All_Partition=4,
-	Ghost_Partition=5
+        Interior_Partition=0,
+        InteriorBorder_Partition=1,
+        Overlap_Partition=2,
+        OverlapFront_Partition=3,
+        All_Partition=4,
+        Ghost_Partition=5
   };
 
 
   /*! Define a type for communication direction parameter
    */
   enum CommunicationDirection {
-	ForwardCommunication,
-	BackwardCommunication
+        ForwardCommunication,
+        BackwardCommunication
   };
 
   /*! Attributes used in the generic overlap model
    */
   enum PartitionType { 
-	InteriorEntity=0, //!< all interior entities 
-	BorderEntity=1  , //!< on boundary between interior and overlap
-	OverlapEntity=2 , //!< all entites lying in the overlap zone
-	FrontEntity=3  ,  //!< on boundary between overlap and ghost
-	GhostEntity=4     //!< ghost entities 
+        InteriorEntity=0, //!< all interior entities 
+        BorderEntity=1  , //!< on boundary between interior and overlap
+        OverlapEntity=2 , //!< all entites lying in the overlap zone
+        FrontEntity=3  ,  //!< on boundary between overlap and ghost
+        GhostEntity=4     //!< ghost entities 
   };
 
   //! provide names for the partition types
@@ -135,10 +135,10 @@ namespace Dune {
   };
 
   /*! GridIndexType specifies which Index of the Entities of the grid
-	should be used, i.e. global_index() or index() 
+        should be used, i.e. global_index() or index() 
   */
   enum GridIndexType { GlobalIndex , //!< use global_index() of entity 
-					   LevelIndex    //!< use index() of entity 
+                                           LevelIndex    //!< use index() of entity 
   };
         
 //************************************************************************
@@ -166,10 +166,10 @@ public:
   ReferenceTopology ();
 
   //! return local coordinates of center in reference element
-  Vec<dim,ct>& center_codim0_local (int elemtype);
+    FieldVector<ct, dim>& center_codim0_local (int elemtype);
 
   //! return local coordinates of center of ith codim 1 subentity
-  Vec<dim-1,ct>& center_codim1_local (int elemtype, int i);
+    FieldVector<ct, dim-1>& center_codim1_local (int elemtype, int i);
 };
 
 // Specialization dim=1 
@@ -180,14 +180,14 @@ public:
   ReferenceTopology ();
 
   //! return local coordinates of center in reference element
-  Vec<1,ct>& center_codim0_local (int elemtype);
+    FieldVector<ct, 1>& center_codim0_local (int elemtype);
 
   //! return local coordinates of center of ith codim 1 subentity
-  Vec<0,ct>& center_codim1_local (int elemtype, int i);
+    FieldVector<ct, 0>& center_codim1_local (int elemtype, int i);
 
 private:
-  Vec<1,ct> center0_local[1];    // ElementType
-  Vec<0,ct> center1_local[1];    // ElementType x faces
+    FieldVector<ct, 1> center0_local[1];    // ElementType
+    FieldVector<ct, 0> center1_local[1];    // ElementType x faces
 };
 
 // Specialization dim=2 
@@ -198,14 +198,14 @@ public:
   ReferenceTopology ();
 
   //! return local coordinates of center in reference element
-  Vec<2,ct>& center_codim0_local (int elemtype);
+    FieldVector<ct, 2>& center_codim0_local (int elemtype);
 
   //! return local coordinates of center of ith codim 1 subentity
-  Vec<1,ct>& center_codim1_local (int elemtype, int i);
+    FieldVector<ct, 1>& center_codim1_local (int elemtype, int i);
 
 private:
-  Vec<2,ct> center0_local[2];    // ElementType
-  Vec<1,ct> center1_local[2];    // ElementType x faces
+    FieldVector<ct, 2> center0_local[2];    // ElementType
+    FieldVector<ct, 1> center1_local[2];    // ElementType x faces
 };
 
 
@@ -217,14 +217,14 @@ public:
   ReferenceTopology ();
 
   //! return local coordinates of center in reference element
-  Vec<3,ct>& center_codim0_local (int elemtype);
+    FieldVector<ct, 3>& center_codim0_local (int elemtype);
 
   //! return local coordinates of center of ith codim 1 subentity
-  Vec<2,ct>& center_codim1_local (int elemtype, int i);
+    FieldVector<ct, 2>& center_codim1_local (int elemtype, int i);
 
 private:
-  Vec<3,ct> center0_local[4];      // ElementType
-  Vec<2,ct> center1_local[4][6];   // ElementType x faces
+    FieldVector<ct, 3> center0_local[4];      // ElementType
+    FieldVector<ct, 2> center1_local[4][6];   // ElementType x faces
 };
 
 
@@ -290,7 +290,7 @@ public:
   int corners ();                  
 
   //! access to coordinates of corners. Index is the number of the corner 
-  Vec<dimworld,ct>& operator[] (int i);
+  FieldVector<ct, dimworld>& operator[] (int i);
 
   /*! return reference element corresponding to this element. If this is
     a reference element then self is returned. A reference to a reference
@@ -300,13 +300,13 @@ public:
   ElementImp<dim,dim>& refelem ();      
 
   //! maps a local coordinate within reference element to global coordinate in element 
-  Vec<dimworld,ct> global (const Vec<dim,ct>& local);
+  FieldVector<ct, dimworld> global (const FieldVector<ct, dim>& local);
 
   //! maps a global coordinate within the element to a local coordinate in its reference element
-  Vec<dim,ct> local (const Vec<dimworld,ct>& global);
+  FieldVector<ct, dim> local (const FieldVector<ct, dimworld>& global);
 
   //! return true if the point in local coordinates lies inside the reference element
-  bool checkInside (const Vec<dim,ct>& local);
+  bool checkInside (const FieldVector<ct, dim>& local);
 
   /*! Integration over a general element is done by integrating over the reference element
     and using the transformation from the reference element to the global element as follows:
@@ -327,10 +327,10 @@ public:
     will directly translate in substantial savings in the computation of finite element
     stiffness matrices.
    */
-  ct integration_element (const Vec<dim,ct>& local);
+  ct integration_element (const FieldVector<ct, dim>& local);
 
   //! can only be called for dim=dimworld!
-  Mat<dim,dim>& Jacobian_inverse (const Vec<dim,ct>& local);
+  Mat<dim,dim>& Jacobian_inverse (const FieldVector<ct, dim>& local);
 
   /*! \internal 
     Checking presence and format of all interface functions. With
@@ -389,7 +389,7 @@ public:
   int corners ();                  
 
   //! access to coordinates of corners. Index is the number of the corner 
-  Vec<dimworld,ct>& operator[] (int i);
+  FieldVector<ct, dimworld>& operator[] (int i);
 
   /*! \internal Checking presence and format of all interface functions. With
     this method all derived classes can check their correct definition.
@@ -473,7 +473,7 @@ public:
   ElementImp<dim,dimworld> & geometry ();  
 
   //! return barycenter of ghostcell 
-  Vec<dimworld,ct>& outerPoint ();
+  FieldVector<ct, dimworld>& outerPoint ();
 
 private:
   //!  Barton-Nackman trick 
@@ -566,10 +566,10 @@ public:
   BoundaryEntityImp<dim,dimworld> & boundaryEntity (); 
 
   //! return unit outer normal, this should be dependent on local coordinates for higher order boundary 
-  Vec<dimworld,ct>& unit_outer_normal (Vec<dim-1,ct>& local);
+  FieldVector<ct, dimworld>& unit_outer_normal (FieldVector<ct, dim-1>& local);
 
   //! return unit outer normal, if you know it is constant use this function instead
-  Vec<dimworld,ct>& unit_outer_normal ();
+  FieldVector<ct, dimworld>& unit_outer_normal ();
 
   /*! intersection of codimension 1 of this neighbor with element where iteration started. 
     Here returned element is in LOCAL coordinates of the element where iteration started.
@@ -629,19 +629,19 @@ class IntersectionIteratorDefault
 public:
   //! return outer normal, which is the unit_outer_normal() scaled with the 
   //! volume of the intersection_self_global () 
-  Vec<dimworld,ct>& outer_normal ();
+  FieldVector<ct, dimworld>& outer_normal ();
   
   //! return unit outer normal, this should be dependent on 
   //! local coordinates for higher order boundary 
   //! the normal is scaled with the integration element
-  Vec<dimworld,ct>& outer_normal (Vec<dim-1,ct>& local);
+  FieldVector<ct, dimworld>& outer_normal (FieldVector<ct, dim-1>& local);
 
 protected:
   //! the outer normal 
-  Vec<dimworld,ct> outerNormal_;
+  FieldVector<ct, dimworld> outerNormal_;
 
   //! tmp Vec for integration_element 
-  Vec<dim-1,ct> tmp_;
+  FieldVector<ct, dim-1> tmp_;
 
 private:
   //!  Barton-Nackman trick 
@@ -1102,7 +1102,7 @@ public:
   LevelIteratorImp<0,dim,dimworld,All_Partition> father ();
 
   //! local coordinates within father
-  Vec<dim,ct>& local ();
+  FieldVector<ct, dim>& local ();
 
   /*! \internal Checking presence and format of all interface functions. With
     this method all derived classes can check their correct definition.
@@ -1149,11 +1149,11 @@ class LevelIterator
       /** \brief Remember the template types */
       struct Traits
       {
-		/** \todo Please doc me! */
-		typedef ct                                   CoordType;
-		
-		/** \todo Please doc me! */
-		typedef EntityImp<codim,dim,dimworld>        Entity;
+                /** \todo Please doc me! */
+                typedef ct                                   CoordType;
+                
+                /** \todo Please doc me! */
+                typedef EntityImp<codim,dim,dimworld>        Entity;
 
         //! Please doc me!
         typedef LevelIteratorImp<codim,dim,dimworld,All_Partition>             LevelIterator;
@@ -1396,32 +1396,32 @@ public:
   struct Traits 
   {
   
-	//! Please doc me!
-	typedef ct                                    CoordType;
+        //! Please doc me!
+        typedef ct                                    CoordType;
 
-	//! Please doc me!
-	typedef GridImp<dim,dimworld>                 ImpGrid;
+        //! Please doc me!
+        typedef GridImp<dim,dimworld>                 ImpGrid;
 
-	//! Please doc me!
-	typedef LevelIteratorImp<codim,dim,dimworld,All_Partition>             LevelIterator;
+        //! Please doc me!
+        typedef LevelIteratorImp<codim,dim,dimworld,All_Partition>             LevelIterator;
 
-	//! Please doc me!
-	typedef LevelIteratorImp<codim,dim,dimworld,Interior_Partition>        InteriorLevelIterator;
+        //! Please doc me!
+        typedef LevelIteratorImp<codim,dim,dimworld,Interior_Partition>        InteriorLevelIterator;
 
-	//! Please doc me!
-	typedef LevelIteratorImp<codim,dim,dimworld,InteriorBorder_Partition>  InteriorBorderLevelIterator;
+        //! Please doc me!
+        typedef LevelIteratorImp<codim,dim,dimworld,InteriorBorder_Partition>  InteriorBorderLevelIterator;
 
-	//! Please doc me!
-	typedef LevelIteratorImp<codim,dim,dimworld,Overlap_Partition>         OverlapLevelIterator;
+        //! Please doc me!
+        typedef LevelIteratorImp<codim,dim,dimworld,Overlap_Partition>         OverlapLevelIterator;
 
-	//! Please doc me!
-	typedef LevelIteratorImp<codim,dim,dimworld,OverlapFront_Partition>    OverlapFrontLevelIterator;
+        //! Please doc me!
+        typedef LevelIteratorImp<codim,dim,dimworld,OverlapFront_Partition>    OverlapFrontLevelIterator;
 
-	//! Please doc me!
-	typedef LevelIteratorImp<codim,dim,dimworld,Ghost_Partition>           GhostLevelIterator;
+        //! Please doc me!
+        typedef LevelIteratorImp<codim,dim,dimworld,Ghost_Partition>           GhostLevelIterator;
 
-	//! Please doc me!
-	typedef EntityImp<codim,dim,dimworld>         Entity;
+        //! Please doc me!
+        typedef EntityImp<codim,dim,dimworld>         Entity;
   };
 
   //! Please doc me!

@@ -55,10 +55,10 @@ public:
       
   //! return unit outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
-  Vec<dimworld,UGCtype>& unit_outer_normal (Vec<dim-1,UGCtype>& local);
+    FieldVector<UGCtype, dimworld>& unit_outer_normal (const FieldVector<UGCtype, dim-1>& local);
   
   //! return unit outer normal, if you know it is constant use this function instead
-  Vec<dimworld,UGCtype>& unit_outer_normal ();
+    FieldVector<UGCtype, dimworld>& unit_outer_normal ();
  
   //! intersection of codimension 1 of this neighbor with element where
   //! iteration started. 
@@ -86,10 +86,10 @@ public:
   
   //! return outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
-  Vec<dimworld,UGCtype>& outer_normal (Vec<dim-1,UGCtype>& local);
+    FieldVector<UGCtype, dimworld>& outer_normal (const FieldVector<UGCtype, dim-1>& local);
 
   //! return unit outer normal, if you know it is constant use this function instead
-  Vec<dimworld,UGCtype>& outer_normal ();
+    FieldVector<UGCtype, dimworld>& outer_normal ();
 
 private:
   //**********************************************************
@@ -112,7 +112,7 @@ private:
     UGGridEntity<0,dim,dimworld> virtualEntity_;
  
   //! vector storing the outer normal 
-    Vec<dimworld,UGCtype> outerNormal_;
+    FieldVector<UGCtype, dimworld> outerNormal_;
 
   //! pointer to element holding the self_local and self_global information.
   //! This element is created on demand.

@@ -114,7 +114,7 @@ public:
         int corners ();                  
 
         //! access to coordinates of corners. Index is the number of the corner 
-        Vec<dimworld,sgrid_ctype>& operator[] (int i);
+        FieldVector<sgrid_ctype, dimworld>& operator[] (int i);
 
         /*! return reference element corresponding to this element. If this is
           a reference element then self is returned. A reference to a reference
@@ -124,13 +124,13 @@ public:
         static SElement<dim,dim>& refelem ();      
 
         //! maps a local coordinate within reference element to global coordinate in element 
-        Vec<dimworld,sgrid_ctype> global (const Vec<dim,sgrid_ctype>& local);
+        FieldVector<sgrid_ctype, dimworld> global (const FieldVector<sgrid_ctype, dim>& local);
 
         //! maps a global coordinate within the element to a local coordinate in its reference element
-        Vec<dim,sgrid_ctype> local (const Vec<dimworld,sgrid_ctype>& global);
+        FieldVector<sgrid_ctype, dim> local (const FieldVector<sgrid_ctype, dimworld>& global);
 
         //! returns true if the point in local coordinates is located within the refelem 
-        bool checkInside (const Vec<dim,sgrid_ctype>& local);
+        bool checkInside (const FieldVector<sgrid_ctype, dim>& local);
   
         /*! Integration over a general element is done by integrating over the reference element
           and using the transformation from the reference element to the global element as follows:
@@ -151,10 +151,10 @@ public:
           will directly translate in substantial savings in the computation of finite element
           stiffness matrices.
          */
-        sgrid_ctype integration_element (const Vec<dim,sgrid_ctype>& local);
+        sgrid_ctype integration_element (const FieldVector<sgrid_ctype, dim>& local);
 
         //! can only be called for dim=dimworld!
-        Mat<dim,dim>& Jacobian_inverse (const Vec<dim,sgrid_ctype>& local);
+        Mat<dim,dim>& Jacobian_inverse (const FieldVector<sgrid_ctype, dim>& local);
 
         //! print internal data
         void print (std::ostream& ss, int indent);
@@ -169,9 +169,9 @@ public:
         SElement (bool b);
 
 private:
-        Vec<dimworld,sgrid_ctype> s;         //!< position of element
+        FieldVector<sgrid_ctype, dimworld> s;         //!< position of element
         Mat<dimworld,dim,sgrid_ctype> A;     //!< direction vectors as matrix
-        Vec<dimworld,sgrid_ctype> c[1<<dim]; //!< coordinate vectors of corners
+        FieldVector<sgrid_ctype, dimworld> c[1<<dim]; //!< coordinate vectors of corners
         Mat<dim,dim,sgrid_ctype> Jinv;       //!< storage for inverse of jacobian
         bool builtinverse;
 };
@@ -191,7 +191,7 @@ public:
         int corners ();                  
 
         //! access to coordinates of corners. Index is the number of the corner 
-        Vec<dimworld,sgrid_ctype>& operator[] (int i);
+        FieldVector<sgrid_ctype, dimworld>& operator[] (int i);
 
         //! print internal data
         void print (std::ostream& ss, int indent);
@@ -203,7 +203,7 @@ public:
         SElement (bool b);
 
 protected:
-        Vec<dimworld,sgrid_ctype> s;         //!< position of element
+        FieldVector<sgrid_ctype, dimworld> s;         //!< position of element
 };
 
 template <int dim, int dimworld>
@@ -231,9 +231,9 @@ public:
   SElement<dim,dimworld> & geometry() { return elem_; };
 
   //! return outer barycenter of ghost cell 
-  Vec<dimworld,sgrid_ctype> & outerPoint () { return outerPoint_; };
+  FieldVector<sgrid_ctype, dimworld> & outerPoint () { return outerPoint_; };
 private:
-  Vec<dimworld> outerPoint_;
+    FieldVector<sgrid_ctype, dimworld> outerPoint_;
   SElement<dim,dimworld> elem_;
 };
 
@@ -276,10 +276,10 @@ public:
         SEntity<0,dim,dimworld>* operator->();
 
         //! return unit outer normal, this should be dependent on local coordinates for higher order boundary 
-        Vec<dimworld,sgrid_ctype>& unit_outer_normal (Vec<dim-1,sgrid_ctype>& local);
+    FieldVector<sgrid_ctype, dimworld>& unit_outer_normal (FieldVector<sgrid_ctype, dim-1>& local);
 
         //! return unit outer normal, if you know it is constant use this function instead
-        Vec<dimworld,sgrid_ctype>& unit_outer_normal ();
+        FieldVector<sgrid_ctype, dimworld>& unit_outer_normal ();
 
         /*! intersection of codimension 1 of this neighbor with element where iteration started. 
           Here returned element is in LOCAL coordinates of the element where iteration started.
@@ -324,7 +324,7 @@ private:
         bool valid_count;                       //!< true if count is in range
         bool is_on_boundary;                    //!< true if neighbor is otside the domain
         SEntity<0,dim,dimworld> e;              //!< virtual neighbor entity
-        Vec<dimworld,sgrid_ctype> normal;       //!< outer unit normal direction
+        FieldVector<sgrid_ctype, dimworld> normal;       //!< outer unit normal direction
         bool built_intersections;               //!< true if all intersections have been built
         SElement<dim-1,dim> is_self_local;      //!< intersection in own local coordinates
         SElement<dim-1,dimworld> is_global;     //!< intersection in global coordinates, map consistent with is_self_local
@@ -410,7 +410,7 @@ public:
   //! return partition type attribute
   PartitionType partition_type ()
   {
-	return InteriorEntity;
+        return InteriorEntity;
   }
 
         //! geometry of this entity
@@ -629,7 +629,7 @@ public:
         SLevelIterator<0,dim,dimworld,All_Partition> father ();
 
         //! local coordinates within father
-        Vec<dim,sgrid_ctype>& local ();
+        FieldVector<sgrid_ctype, dim>& local ();
 
         // members specific to SEntity
         //! constructor
@@ -648,7 +648,7 @@ public:
 private:
         bool built_father;
         int father_id;
-        Vec<dim,sgrid_ctype> in_father_local;
+        FieldVector<sgrid_ctype, dim> in_father_local;
         void make_father();
 };
 
@@ -712,7 +712,7 @@ public:
   typedef sgrid_ctype ctype;
 
   /*! Return maximum level defined in this grid. Levels are numbered
-	0 ... maxlevel with 0 the coarsest level.   */
+        0 ... maxlevel with 0 the coarsest level.   */
   int maxlevel() const;
 
   //! LeafIterator is the same as LevelIterator with codim = 0
@@ -743,21 +743,21 @@ public:
   LeafIterator leafend (int level);
   
   /*! The communication interface
-	@param T: array class holding data associated with the entities
-	@param P: type used to gather/scatter data in and out of the message buffer
-	@param codim: communicate entites of given codim
-	@param if: one of the predifined interface types, throws error if it is not implemented
-	@param level: communicate for entities on the given level
+        @param T: array class holding data associated with the entities
+        @param P: type used to gather/scatter data in and out of the message buffer
+        @param codim: communicate entites of given codim
+        @param if: one of the predifined interface types, throws error if it is not implemented
+        @param level: communicate for entities on the given level
 
-	Implements a generic communication function sending an object of type P for each entity
+        Implements a generic communication function sending an object of type P for each entity
     in the intersection of two processors. P has two methods gather and scatter that implement
     the protocol. Therefore P is called the "protocol class".
    */
   template<class T, template<class> class P, int codim>
   void communicate (T& t, InterfaceType iftype, CommunicationDirection dir, int level)
   {
-	  // SGrid is sequential and has no periodic boundaries, so do nothing ...
-	  return;
+          // SGrid is sequential and has no periodic boundaries, so do nothing ...
+          return;
   }
 
   //! number of grid entities per level and codim
@@ -769,13 +769,13 @@ public:
   //! return size (= distance in graph) of overlap region
   int overlap_size (int level, int codim)
   {
-	return 0;
+        return 0;
   }
 
   //! return size (= distance in graph) of ghost region
   int ghost_size (int level, int codim)
   {
-	return 0;
+        return 0;
   }
 
   //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ... 
@@ -792,15 +792,15 @@ public:
   // these are all members specific to sgrid
 
   /*! constructor, subject to change!
-	\param H_: array of size dim: length in each dimension
-	\param N_: array of size dim: coarse grid size, #elements in one direction
+        \param H_: array of size dim: length in each dimension
+        \param N_: array of size dim: coarse grid size, #elements in one direction
   */
   SGrid (const int* N_, const sgrid_ctype* H_);
   
   /*! Constructor using a bounding box
-	\param L_: array of size dim: lower left corner of grid
-	\param H_: array of size dim: upper right corner of grid
-	\param N_: array of size dim: coarse grid size, #elements in one direction
+        \param L_: array of size dim: lower left corner of grid
+        \param H_: array of size dim: upper right corner of grid
+        \param N_: array of size dim: coarse grid size, #elements in one direction
   */
   SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_);
 
@@ -813,8 +813,23 @@ public:
    */
   void globalRefine (int refCount);
 
+    /** \brief Get number of elements in each coordinate direction */
+    const FixedArray<int, dim>& dims(int level) const {
+        return N[level];
+    }
+
+    /** \brief Get lower left corner */
+    const FieldVector<sgrid_ctype, dimworld>& lowerLeft() const {
+        return low;
+    }
+
+    /** \brief Get upper right corner */
+    FieldVector<sgrid_ctype, dimworld> upperRight() const {
+        return low+H;
+    }
+
   //! map expanded coordinates to position
-  Vec<dim,sgrid_ctype> pos (int level, FixedArray<int,dim>& z);
+  FieldVector<sgrid_ctype, dim> pos (int level, FixedArray<int,dim>& z);
  
   //! compute codim from coordinate
   int codim (int level, FixedArray<int,dim>& z);
@@ -832,7 +847,7 @@ public:
   FixedArray<int,dim> expand (int level, FixedArray<int,dim>& r, int b); 
 
   /*! There are \f$2^d\f$ possibilities of having even/odd coordinates. 
-	The binary representation is called partition number.
+        The binary representation is called partition number.
   */
   int partition (int level, FixedArray<int,dim>& z); 
 
@@ -844,10 +859,10 @@ private:
   void makeSGrid (const int* N_,  const sgrid_ctype* L_, const sgrid_ctype* H_);
     
   int L;                          // number of levels in hierarchic mesh 0<=level<L
-  FixedArray<sgrid_ctype,dim> low;     // lower left corner of the grid
-  FixedArray<sgrid_ctype,dim> H;       // length of cube per direction
+    FieldVector<sgrid_ctype, dim> low;     // lower left corner of the grid
+    FieldVector<sgrid_ctype, dim> H;       // length of cube per direction
   FixedArray<int,dim> N[MAXL];         // number of elements per direction
-  Vec<dim,sgrid_ctype> h[MAXL];   // mesh size per direction
+  FieldVector<sgrid_ctype, dim> h[MAXL];   // mesh size per direction
   CubeMapper<dim> mapper[MAXL];   // a mapper for each level
 
   // faster implemantation od subIndex 

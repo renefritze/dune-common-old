@@ -1,5 +1,5 @@
-#ifndef __DUNE_DISFUNCARRAY_HH__
-#define __DUNE_DISFUNCARRAY_HH__
+#ifndef __DUNE_DISCFUNCARRAY_HH__
+#define __DUNE_DISCFUNCARRAY_HH__
 
 #include <dune/common/array.hh>
 
@@ -42,14 +42,21 @@ class DiscFuncArray
 
   enum { myId_ = 0};
 public:
+
+    //! ???
   typedef typename DiscreteFunctionSpaceType::RangeField RangeFieldType;
+    //! ???
   typedef typename DiscreteFunctionSpaceType::GridType GridType;
 
   
+    //! ???
   typedef DiscFuncArray <DiscreteFunctionSpaceType> DiscreteFunctionType;          
+    //! ???
   typedef LocalFunctionArray < DiscreteFunctionSpaceType > LocalFunctionType;
+    //! ???
   typedef DofIteratorArray < typename DiscreteFunctionSpaceType::RangeField > DofIteratorType;
 
+    //! ???
   typedef DiscreteFunctionSpaceType FunctionSpaceType;
   
   //! Constructor make empty DiscFuncArray 
@@ -106,6 +113,9 @@ public:
 
   //! return if allLevels are used 
   bool allLevels () { return allLevels_; }
+
+    //! Return the name of the discrete function
+    const std::string& name() const {return name_;}
 
   //! set all dofs to zero  
   void clearLevel( int level );
@@ -321,6 +331,7 @@ protected:
 //  --DofIteratorArray
 //
 //***********************************************************************
+  /** \brief ??? */
 template < class DofType >
 class DofIteratorArray : public
 DofIteratorDefault < DofType , DofIteratorArray < DofType > >

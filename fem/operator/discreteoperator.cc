@@ -148,7 +148,7 @@ inline void LinFEM::assembleMatrix(DiscFunc &func, int level)
 
   enum { dimdef = 2};
   
-  Vec<GRID::dimension> tmp(1.0);
+  FieldVector<double, GRID::dimension> tmp(1.0);
   GRID &grid = (*func.getGrid());
 
   FuncSpace &funcSpace = (*func.getFuncSpace());
@@ -166,7 +166,7 @@ inline void LinFEM::assembleMatrix(DiscFunc &func, int level)
     for(int p=0;p<vx; p++)
     {
       row = funcSpace.mapIndex((*it),p);
-      Vec<FuncSpace::dimdef,double> vec1 = 
+      FieldVector<double, FuncSpace::dimdef> vec1 = 
         //grad[p];
         (funcSpace.getLocalBaseFunc(p)->evalFirstDrv(tmp))(0);
       vec1 = inv*vec1;
@@ -180,7 +180,7 @@ inline void LinFEM::assembleMatrix(DiscFunc &func, int level)
       val = vol;
         
       col = funcSpace.mapIndex((*it),oth);
-      Vec<FuncSpace::dimdef,double> vec2 = 
+      FieldVector<double, FuncSpace::dimdef> vec2 = 
         //grad[oth];
       (funcSpace.getLocalBaseFunc(oth)->evalFirstDrv(tmp))(0);
         
@@ -326,7 +326,7 @@ inline DiscFunc& TimeEulerFV<SpaceDiscr>::operator() (DiscFunc &f)
   }
 
   SpaceDiscr& fake = (*fv_);
-  Vec<1> tmp(0.0);
+  FieldVector<double, 1> tmp(0.0);
 
   TimeGrid::LevelIterator endit = timegrid_->lend<0>(0);
   for(TimeGrid::LevelIterator it = timegrid_->lbegin<0>(0); it != endit; ++it)

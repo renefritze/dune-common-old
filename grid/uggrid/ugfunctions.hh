@@ -77,8 +77,8 @@ public:
     }
 
     static void Local_To_Global(int n, DOUBLE** y, 
-                                const Dune::Vec<dim, double>& local,  
-                                Dune::Vec<dim, double>& global) {
+                                const FieldVector<double, dim>& local,
+                                FieldVector<double, dim>& global) {
         LOCAL_TO_GLOBAL(n,y,local,global);
     }
 
@@ -89,8 +89,7 @@ public:
      *
      */
     static void Transformation(int n, double** x, 
-                        const Vec<dim, double>& local, Mat<dim,dim,double>& mat) {
-        //TRANSFORMATION(n, x, local, mat);
+                               const FieldVector<double, dim>& local, Mat<dim,dim,double>& mat) {
         typedef DOUBLE  DOUBLE_VECTOR[dim];
         double det;
         INVERSE_TRANSFORMATION(n, x, local, mat, det);
@@ -143,6 +142,18 @@ public:
         return UG2d::GetMultigrid(name);
 #endif
     }
+
+    static void SetSubdomain(typename TargetType<0,dim>::T* theElement, int id) {
+#ifdef _2
+        using UG2d::control_entries;
+        using UG2d::SUBDOMAIN_CE;
+#else
+        using UG3d::control_entries;
+        using UG3d::SUBDOMAIN_CE;
+#endif
+        SETSUBDOMAIN(theElement, id);
+    }
+
 };
 
 

@@ -75,7 +75,7 @@ public:
   int corners ();
 
   //! access to coordinates of corners. Index is the number of the corner 
-  Vec<dimworld,bs_ctype>& operator[] (int i);
+    FieldVector<bs_ctype, dimworld>& operator[] (int i);
 
   /*! return reference element corresponding to this element. If this is
     a reference element then self is returned.
@@ -84,14 +84,14 @@ public:
 
   //! maps a local coordinate within reference element to 
   //! global coordinate in element 
-  Vec<dimworld,bs_ctype> global (const Vec<dim,bs_ctype>& local);
+    FieldVector<bs_ctype, dimworld> global (const FieldVector<bs_ctype, dim>& local);
   
   //! maps a global coordinate within the element to a 
   //! local coordinate in its reference element
-  Vec<dim,bs_ctype> local (const Vec<dimworld,bs_ctype>& global);
+    FieldVector<bs_ctype, dim> local (const FieldVector<bs_ctype, dimworld>& global);
   
   //! returns true if the point in local coordinates is inside reference element
-  bool checkInside(const Vec<dim,bs_ctype>& local);
+    bool checkInside(const FieldVector<bs_ctype, dim>& local);
 
   /*! 
     Copy from grid.hh:
@@ -117,10 +117,10 @@ public:
    */
 
   //! A(l) 
-  bs_ctype integration_element (const Vec<dim,bs_ctype>& local);
+  bs_ctype integration_element (const FieldVector<bs_ctype, dim>& local);
 
   //! can only be called for dim=dimworld!
-  Mat<dim,dim>& Jacobian_inverse (const Vec<dim,bs_ctype>& local);
+  Mat<dim,dim>& Jacobian_inverse (const FieldVector<bs_ctype, dim>& local);
 
   //***********************************************************************
   //!  Methods that not belong to the Interface, but have to be public
@@ -156,7 +156,7 @@ private:
   bs_ctype detDF_;               //!< storage of integration_element
   Mat<dimworld,dim,bs_ctype> A_; //!< for map2world NORMALE Nr.(ZEILE/SPALTE)
 
-  Vec<dimworld,bs_ctype> tmpVec_;
+  FieldVector<bs_ctype, dimworld> tmpVec_;
 };
 
 
@@ -206,7 +206,7 @@ public:
   BSGridLevelIterator<0,dim,dimworld,All_Partition> father ();
 
   //! local coordinates within father
-  Vec<dim,bs_ctype>& local ();
+  FieldVector<bs_ctype, dim>& local ();
 private: 
 
   BSGrid<dim,dimworld> &grid_;
@@ -510,10 +510,10 @@ public:
       
   //! return unit outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
-  Vec<dimworld,bs_ctype>& unit_outer_normal (Vec<dim-1,bs_ctype>& local);
+    FieldVector<bs_ctype, dimworld>& unit_outer_normal (FieldVector<bs_ctype, dim-1>& local);
   
   //! return unit outer normal, if you know it is constant use this function instead
-  Vec<dimworld,bs_ctype>& unit_outer_normal ();
+  FieldVector<bs_ctype, dimworld>& unit_outer_normal ();
  
   //! intersection of codimension 1 of this neighbor with element where
   //! iteration started. 
@@ -541,10 +541,10 @@ public:
   
   //! return outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
-  Vec<dimworld,bs_ctype>& outer_normal (Vec<dim-1,bs_ctype>& local);
+    FieldVector<bs_ctype, dimworld>& outer_normal (FieldVector<bs_ctype, dim-1>& local);
 
   //! return unit outer normal, if you know it is constant use this function instead
-  Vec<dimworld,bs_ctype>& outer_normal ();
+  FieldVector<bs_ctype, dimworld>& outer_normal ();
 
 private:
   // if neighbour exists , do setup of new neighbour 
@@ -567,8 +567,8 @@ private:
 
   bool theSituation_; //! true if the "situation" occurs :-) 
 
-  Vec<dimworld,bs_ctype> outerNormal_;  //! outerNormal ro current intersection
-  Vec<dimworld,bs_ctype> unitOuterNormal_;
+  FieldVector<bs_ctype, dimworld> outerNormal_;  //! outerNormal ro current intersection
+  FieldVector<bs_ctype, dimworld> unitOuterNormal_;
 
   bool needSetup_; //! true if setup is needed
   bool needNormal_;

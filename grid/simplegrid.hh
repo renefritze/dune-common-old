@@ -142,7 +142,7 @@ public:
   }
 
   //! access to coordinates of corners. Index is the number of the corner 
-  Vec<dimworld,simplegrid_ctype>& operator[] (int i)
+  FieldVector<simplegrid_ctype, dimworld>& operator[] (int i)
   {
         int lk=0;
 
@@ -170,9 +170,9 @@ public:
   }
 
   //! maps a local coordinate within reference element to global coordinate in element 
-  Vec<dimworld,simplegrid_ctype> global (const Vec<dim,simplegrid_ctype>& local)
+  FieldVector<simplegrid_ctype, dimworld> global (const FieldVector<simplegrid_ctype, dim>& local)
   {
-        Vec<dimworld,simplegrid_ctype> g;
+        FieldVector<simplegrid_ctype, dimworld> g;
         int lk=0;
         for (int k=0; k<dimworld; k++)
           {
@@ -188,10 +188,10 @@ public:
   }
 
   //! maps a global coordinate within the element to a local coordinate in its reference element
-  Vec<dim,simplegrid_ctype> local (const Vec<dimworld,simplegrid_ctype>& global)
+  FieldVector<simplegrid_ctype, dim> local (const FieldVector<simplegrid_ctype, dimworld>& global)
   {
-        Vec<dim,simplegrid_ctype> l; // result
-        Vec<dimworld,simplegrid_ctype> rhs;
+        FieldVector<simplegrid_ctype, dim> l; // result
+        FieldVector<simplegrid_ctype, dimworld> rhs;
         int k;
         for (k=0; k<dimworld; k++)
           if (k!=c) rhs(k) = global(k)-e.s[k];
@@ -207,7 +207,7 @@ public:
         return l;
   }
 
-  bool checkInside (const Vec<dim,simplegrid_ctype>& local)
+  bool checkInside (const FieldVector<simplegrid_ctype, dim>& local)
   {
     // check wether they are in the reference element 
     for(int i=0; i<dim; i++)
@@ -221,7 +221,7 @@ public:
 
   /*! Integration over a general element is done by integrating over the reference element
    */
-  simplegrid_ctype integration_element (const Vec<dim,simplegrid_ctype>& local)
+  simplegrid_ctype integration_element (const FieldVector<simplegrid_ctype, dim>& local)
   {
         return e.li->facevol[c];
   }
@@ -240,7 +240,7 @@ public:
   //! print function
   void print (std::ostream& ss)
   {
-        Vec<dim,simplegrid_ctype> local = 0.5;
+        FieldVector<simplegrid_ctype, dim> local = 0.5;
         ss << "SimpleElement<"<<dim<<","<<dimworld<< "> ";
         ss << "position " << s << " mesh size " << h << " directions " << dir << " vol " << integration_element(local);
   }
@@ -249,7 +249,7 @@ private:
   SimpleElement<dim+1,dimworld>& e; // my element
   int c;                            // direction
   int d;                            // face number in direction d=0,1
-  Vec<dimworld,simplegrid_ctype> corn; //!< coordinate vector of corner
+  FieldVector<simplegrid_ctype, dimworld> corn; //!< coordinate vector of corner
 };
 
 
@@ -284,7 +284,7 @@ public:
   }
   
   //! access to coordinates of corners. Index is the number of the corner 
-  Vec<dim,simplegrid_ctype>& operator[] (int i)
+  FieldVector<simplegrid_ctype, dim>& operator[] (int i)
   {
         for (int k=0; k<dim; k++)
           {
@@ -305,30 +305,30 @@ public:
   }
 
   //! maps a local coordinate within reference element to global coordinate in element 
-  Vec<dim,simplegrid_ctype> global (const Vec<dim,simplegrid_ctype>& local)
+  FieldVector<simplegrid_ctype, dim> global (const FieldVector<simplegrid_ctype, dim>& local)
   {
-        Vec<dim,simplegrid_ctype> g;
+        FieldVector<simplegrid_ctype, dim> g;
         for (int k=0; k<dim; k++) g(k) = s[k] + local(k)*li->h[k];
         return g;
   }
 
   //! maps a global coordinate within the element to a local coordinate in its reference element
-  Vec<dim,simplegrid_ctype> local (const Vec<dim,simplegrid_ctype>& global)
+  FieldVector<simplegrid_ctype, dim> local (const FieldVector<simplegrid_ctype, dim>& global)
   {
-        Vec<dim,simplegrid_ctype> l; // result
+        FieldVector<simplegrid_ctype, dim> l; // result
         for (int k=0; k<dim; k++) l(k) = (global(k)-s[k])/li->h[k];
         return l;
   }
 
   /*! Integration over a general element is done by integrating over the reference element
    */
-  simplegrid_ctype integration_element (const Vec<dim,simplegrid_ctype>& local)
+  simplegrid_ctype integration_element (const FieldVector<simplegrid_ctype, dim>& local)
   {
         return li->volume;
   }
 
   //! can only be called for dim=dim!
-  Mat<dim,dim>& Jacobian_inverse (const Vec<dim,simplegrid_ctype>& local)
+  Mat<dim,dim>& Jacobian_inverse (const FieldVector<simplegrid_ctype, dim>& local)
   {
           for (int i=0; i<dim; ++i) 
           {
@@ -378,7 +378,7 @@ public:
   //! print function
   void print (std::ostream& ss)
   {
-        Vec<dim,simplegrid_ctype> local = 0.5;
+        FieldVector<simplegrid_ctype, dim> local = 0.5;
         ss << "SimpleElement<"<<dim<<","<<dim<< "> ";
         ss << "position ";
         for (int i=0; i<dim; i++) ss << s[i] << " ";
@@ -455,7 +455,7 @@ private:
   levelinfo<dim>* li;          // access to information common to all elements on a level
   Mat<dim,dim,sgrid_ctype> Jinv; //!< storage for inverse of jacobian
 
-  Vec<dim,simplegrid_ctype> c; // needed for returning references
+  FieldVector<simplegrid_ctype, dim> c; // needed for returning references
 };
 
 
@@ -482,7 +482,7 @@ public:
   }     
 
   //! access to coordinates of corners. Index is the number of the corner 
-  Vec<dimworld,simplegrid_ctype>& operator[] (int i)
+  FieldVector<simplegrid_ctype, dimworld>& operator[] (int i)
   {
         return s;
   }
@@ -554,7 +554,7 @@ public:
 private:
   int id;                           //!< my id
   int coord[dimworld];              //!< my integer position             
-  Vec<dimworld,simplegrid_ctype> s; //!< pos
+  FieldVector<simplegrid_ctype, dimworld> s; //!< pos
   levelinfo<dimworld>& li;          //!< common information for all vertices
 };
 
@@ -592,7 +592,7 @@ public:
   };
 
   //! return outer barycenter of ghost cell 
-  Vec<dimworld,simplegrid_ctype> & outerPoint () {};
+  FieldVector<simplegrid_ctype, dimworld> & outerPoint () {};
 private:
 };
 
@@ -684,13 +684,13 @@ public:
   }
 
   //! return unit outer normal, this should be dependent on local coordinates for higher order boundary 
-  Vec<dimworld,sgrid_ctype>& unit_outer_normal (Vec<dim-1,sgrid_ctype>& local)
+    FieldVector<simplegrid_ctype, dimworld>& unit_outer_normal (FieldVector<simplegrid_ctype, dim-1>& local)
   {
         return normal;
   }
 
   //! return unit outer normal, if you know it is constant use this function instead
-  Vec<dimworld,sgrid_ctype>& unit_outer_normal ()
+  FieldVector<simplegrid_ctype, dimworld>& unit_outer_normal ()
   {
         return normal;
   }
@@ -790,7 +790,7 @@ private:
   SimpleElement<dim-1,dim> is_self_local;  //!< intersection in own local coordinates
   SimpleElement<dim-1,dim> is_nb_local;    //!< intersection in neighbors local coordinates
   SimpleElement<dim-1,dimworld> is_global; //!< intersection in global coordinates
-  Vec<dimworld,sgrid_ctype> normal;
+  FieldVector<simplegrid_ctype, dimworld> normal;
 };
 
 /*! 
@@ -1050,7 +1050,7 @@ public:
   }
   
   //! local coordinates within father
-  Vec<dim,simplegrid_ctype>& local () {return loc;} // not implemented yet
+  FieldVector<simplegrid_ctype, dim>& local () {return loc;} // not implemented yet
 
   // members specific to SimpleEntity
   SimpleEntity (SimpleElement<0,dimworld>& _geo) : geo(_geo)
@@ -1058,7 +1058,7 @@ public:
  
 private:
   SimpleElement<0,dimworld>& geo;  // reference to geometry which is updated outside of here
-  Vec<dim,simplegrid_ctype> loc;   // needed for returning a reference
+  FieldVector<simplegrid_ctype, dim> loc;   // needed for returning a reference
 };
 
 //************************************************************************

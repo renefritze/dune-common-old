@@ -67,7 +67,7 @@ public:
   //! evaluate base function baseFunct with the given diffVariable and a
   //! point x and range phi 
   template <int diffOrd>
-  void evaluate ( int baseFunct, const Vec<diffOrd, deriType> &diffVariable, 
+  void evaluate ( int baseFunct, const FieldVector<deriType, diffOrd> &diffVariable, 
                   const Domain & x,  Range & phi ) const;
  
   //! evaluate base fucntion baseFunct at a given quadrature point 
@@ -75,7 +75,7 @@ public:
   //! qaudrature has changed an the values at the quadrature have to be
   //! calulated again 
   template <int diffOrd, class QuadratureType>
-  void evaluate ( int baseFunct, const Vec<diffOrd, deriType> &diffVariable, 
+  void evaluate ( int baseFunct, const FieldVector<deriType, diffOrd> &diffVariable, 
                   QuadratureType & quad, int quadPoint, Range & phi ) const;   
  
   //! get a reference of the base function baseFunct 
@@ -112,12 +112,12 @@ private:
   //! method to navigate through the vector vecEvaluate, which holds
   //! precalculated values  
   template <int diffOrd>
-  int index( int baseFunct, const Vec<diffOrd, deriType> &diffVariable, 
+  int index( int baseFunct, const FieldVector<deriType, diffOrd> &diffVariable, 
              int quadPt, int numQuadPoints ) const 
   {
     int n = 0;
     for ( int i = 0; i < diffOrd; i++ ) 
-      n = diffVariable(i) + i * DimDomain;
+      n = diffVariable[i] + i * DimDomain;
     
     return numQuadPoints*(getNumberOfBaseFunctions()*n + baseFunct) + quadPt;   
   };

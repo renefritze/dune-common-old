@@ -49,7 +49,7 @@ public:
   template <int derivation>
 
   //! ???
-  void evaluate  ( const Vec<derivation,deriType> &diffVariable, 
+  void evaluate  ( const FieldVector<deriType, derivation> &diffVariable, 
                    const Domain & , Range &) const {};
 
   //! ???

@@ -77,7 +77,7 @@ public:
   UGGridLevelIterator<0,dim,dimworld,All_Partition> father ();
 
   //! local coordinates within father
-  Vec<dim, UGCtype>& local ();
+    FieldVector<UGCtype, dim>& local ();
 
 
     
@@ -95,7 +95,7 @@ public:
   UGGridElement<dim-codim,dimworld> geo_;
   bool builtgeometry_;         //!< true if geometry has been constructed
 
-  Vec<dim,UGCtype> localFatherCoords_; 
+    FieldVector<UGCtype, dim> localFatherCoords_; 
 public:
   //! element number 
   int elNum_;

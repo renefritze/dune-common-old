@@ -139,7 +139,7 @@ protected:
 
   //! the corresponding vector of base function sets
   //! length is different element types 
-  Vec< numOfDiffBase_ , FastBaseFunctionSetType * > baseFuncSet_;
+    FieldVector<FastBaseFunctionSetType*, numOfDiffBase_ > baseFuncSet_;
 
 protected:
   //! DofManager manages the memory 
@@ -241,17 +241,17 @@ public:
   }  
 
     /** \todo Please doc me! */
-  virtual void evaluate ( const Vec<0, deriType> &diffVariable, 
+    virtual void evaluate ( const FieldVector<deriType, 0> &diffVariable, 
                           const Domain & x, Range & phi) const 
   { // q(x) = (x - point_ ) * 1/(2|T|) mit |T|=0.5
     phi = (x - point_);
   }
 
     /** \todo Please doc me! */
-  virtual void evaluate ( const Vec<1, deriType> &diffVariable, 
+    virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
                           const Domain & x, Range & phi) const 
   {
-    int comp = diffVariable(0);
+    int comp = diffVariable[0];
     phi = 0.0;
     phi(comp) = 1.0; 
   }
@@ -300,7 +300,7 @@ public:
 
 
     /** \todo Please doc me! */
-  virtual void evaluate ( const Vec<0, deriType> &diffVariable, 
+    virtual void evaluate ( const FieldVector<deriType, 0> &diffVariable, 
                           const Domain & x, Range & phi) const 
   {
     phi = factor[2];
@@ -309,11 +309,11 @@ public:
   }
 
     /** \todo Please doc me! */
-  virtual void evaluate ( const Vec<1, deriType> &diffVariable, 
+    virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
                           const Domain & x, Range & phi) const 
   {
     // x or y ==> 1 or 2 
-    int num = diffVariable(0);
+    int num = diffVariable[0];
     phi = factor[num];
   }
 
@@ -406,7 +406,7 @@ public:
   }
 private:
   //! Vector with all base functions corresponding to the base function set 
-  Vec < numOfBaseFct , RaviartThomasBaseFunctionType *> baseFuncList_; 
+    FieldVector <RaviartThomasBaseFunctionType*, numOfBaseFct> baseFuncList_; 
 };
 
 //*******************************************************************
@@ -461,7 +461,7 @@ public:
   }
 private:
   //! Vector with all base functions corresponding to the base function set 
-  Vec < numOfBaseFct , EdgeBaseFunctionType *> baseFuncList_; 
+    FieldVector<EdgeBaseFunctionType*, numOfBaseFct> baseFuncList_; 
 };
 
 
@@ -649,7 +649,7 @@ private:
 
   //! the corresponding vector of base function sets
   //! lenght is diffrent element types 
-  Vec< numOfDiffBase_ , FastBaseFunctionSetType * > baseFuncSet_;
+    FieldVector< FastBaseFunctionSetType*, numOfDiffBase_ > baseFuncSet_;
 
   //! make base function set depending on ElementType and polynomial order 
   template <ElementType ElType, int pO > 
@@ -870,7 +870,7 @@ private:
 
   //! the corresponding vector of base function sets
   //! lenght is diffrent element types 
-  Vec< numOfDiffBase_ , FastBaseFunctionSetType * > baseFuncSet_;
+    FieldVector<FastBaseFunctionSetType*, numOfDiffBase_ > baseFuncSet_;
 
   //! make base function set depending on ElementType and polynomial order 
   template <ElementType ElType, int pO > 

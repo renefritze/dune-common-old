@@ -62,7 +62,7 @@ getPoint(int i)
   QUADRATURE * quad = UG_Quadratures::GetQuadrature(dim,numberOfCorners,polOrd);
   Domain tmp;
   for(int j=0; j<dim; j++)
-    tmp(j) = quad->local[i][j];
+    tmp[j] = quad->local[i][j];
   return tmp;
 }
 
@@ -175,7 +175,7 @@ getPoint(int i)
   QUADRATURE * quad = UG_Quadratures::GetQuadrature(dim,numberOfCorners,polOrd);
   Domain tmp;
   for(int j=0; j<dim; j++)
-    tmp(j) = quad->local[i][j];
+    tmp[j] = quad->local[i][j];
   return tmp;
 }
 

@@ -357,7 +357,7 @@ inline int AlbertGridElement<dim,dimworld>::corners()
 
 ///////////////////////////////////////////////////////////////////////
 template< int dim, int dimworld>
-inline Vec<dimworld,albertCtype>& AlbertGridElement<dim,dimworld>:: 
+inline FieldVector<albertCtype, dimworld>& AlbertGridElement<dim,dimworld>:: 
 operator [](int i)
 {
   return coord_(i);
@@ -399,8 +399,8 @@ refelem()
 }
 
 template< int dim, int dimworld>
-inline Vec<dimworld,albertCtype> AlbertGridElement<dim,dimworld>:: 
-global(const Vec<dim>& local)
+inline FieldVector<albertCtype, dimworld> AlbertGridElement<dim,dimworld>:: 
+global(const FieldVector<albertCtype, dim>& local)
 {
   // 1hecked, works  
   
@@ -461,7 +461,7 @@ inline void AlbertGridElement<3,3>::calcElMatrix ()
   enum { dimworld = 3 };
   if( !builtElMat_)
   {
-    Vec<dimworld,albertCtype> & coord0 = coord_(0);
+      FieldVector<albertCtype, dimworld> & coord0 = coord_(0);
     for(int i=0 ;i<dimworld; i++)
     {
       elMat_(i,0) = coord_(i,1) - coord0(i);
@@ -475,8 +475,8 @@ inline void AlbertGridElement<3,3>::calcElMatrix ()
 
 // uses the element matrix, because faster 
 template<>
-inline Vec<2,albertCtype> AlbertGridElement<2,2>:: 
-global(const Vec<2>& local)
+inline FieldVector<albertCtype, 2> AlbertGridElement<2,2>:: 
+global(const FieldVector<albertCtype, 2>& local)
 {
   calcElMatrix();
   globalCoord_  = elMat_ * local;
@@ -485,8 +485,8 @@ global(const Vec<2>& local)
 }
 
 template<>
-inline Vec<3,albertCtype> AlbertGridElement<3,3>:: 
-global(const Vec<3>& local)
+inline FieldVector<albertCtype, 3> AlbertGridElement<3,3>:: 
+global(const FieldVector<albertCtype, 3>& local)
 {
   calcElMatrix();
   globalCoord_  = elMat_ * local;
@@ -496,17 +496,17 @@ global(const Vec<3>& local)
 
 
 template< int dim, int dimworld>
-inline Vec<dim> AlbertGridElement<dim,dimworld>:: 
-local(const Vec<dimworld>& global)
+inline FieldVector<albertCtype, dim> AlbertGridElement<dim,dimworld>:: 
+local(const FieldVector<albertCtype, dimworld>& global)
 {
-  std::cerr << "local for dim != dimworld not implemented! \n";
+  std::cerr << "global for dim != dimworld not implemented! \n";
   abort();
   return localCoord_; 
 }
 
 template <>
-inline Vec<2> AlbertGridElement<2,2>:: 
-local(const Vec<2>& global)
+inline FieldVector<albertCtype, 2> AlbertGridElement<2,2>:: 
+local(const FieldVector<albertCtype, 2>& global)
 {
   if(!builtinverse_)
     buildJacobianInverse();
@@ -516,8 +516,8 @@ local(const Vec<2>& global)
 }
 
 template <>
-inline Vec<3> AlbertGridElement<3,3>:: 
-local(const Vec<3>& global)
+inline FieldVector<albertCtype, 3> AlbertGridElement<3,3>:: 
+local(const FieldVector<albertCtype, 3>& global)
 {
   if(!builtinverse_)
     buildJacobianInverse();
@@ -578,7 +578,7 @@ inline void AlbertGridElement<1,2>::
 buildJacobianInverse()
 {
   // volume is length of edge 
-  Vec<2,albertCtype> vec = coord_(0) - coord_(1);
+    FieldVector<albertCtype, 2> vec = coord_(0) - coord_(1);
   elDet_ = vec.norm2(); 
 
   builtinverse_ = true;
@@ -610,7 +610,7 @@ inline albertCtype AlbertGridElement<3,3>::elDeterminant ()
   
 template< int dim, int dimworld>
 inline albertCtype AlbertGridElement<dim,dimworld>:: 
-integration_element (const Vec<dim,albertCtype>& local)
+integration_element (const FieldVector<albertCtype, dim>& local)
 {
   // if inverse was built, volume was calced already 
   if(builtinverse_)
@@ -622,7 +622,7 @@ integration_element (const Vec<dim,albertCtype>& local)
 
 template <>
 inline Mat<1,1>& AlbertGridElement<1,2>:: 
-Jacobian_inverse (const Vec<1,albertCtype>& global)
+Jacobian_inverse (const FieldVector<albertCtype, 1>& global)
 {
   std::cout << "Jaconbian_inverse for dim=1,dimworld=2 not implemented yet! \n";
   return Jinv_;
@@ -630,7 +630,7 @@ Jacobian_inverse (const Vec<1,albertCtype>& global)
 
 template< int dim, int dimworld>
 inline Mat<dim,dim>& AlbertGridElement<dim,dimworld>:: 
-Jacobian_inverse (const Vec<dim,albertCtype>& global)
+Jacobian_inverse (const FieldVector<albertCtype, dim>& global)
 {
   if(builtinverse_)
     return Jinv_;
@@ -657,11 +657,11 @@ inline bool AlbertGridElement<2,2>::checkInverseMapping (int loc)
   // checks if F^-1 (x_i) == xref_i  
   enum { dim =2 };
   
-  Vec<dim> & coord    = coord_(loc);
-  Vec<dim> & refcoord = refelem()[loc];
+  FieldVector<albertCtype, dim> & coord    = coord_(loc);
+  FieldVector<albertCtype, dim> & refcoord = refelem()[loc];
   buildJacobianInverse();
   
-  Vec<dim> tmp2 = coord - coord_(0);     
+  FieldVector<albertCtype, dim> tmp2 = coord - coord_(0);     
   tmp2 = Jinv_ * tmp2;
 
   for(int j=0; j<dim; j++)
@@ -679,11 +679,11 @@ inline bool AlbertGridElement<3,3>::checkInverseMapping (int loc)
   // checks if F^-1 (x_i) == xref_i  
   enum { dim = 3 };
   
-  Vec<dim> & coord    = coord_(loc);
-  Vec<dim> & refcoord = refelem()[loc];
+  FieldVector<albertCtype, dim> & coord    = coord_(loc);
+  FieldVector<albertCtype, dim> & refcoord = refelem()[loc];
   buildJacobianInverse();
   
-  Vec<dim> tmp2 = coord - coord_(0);     
+  FieldVector<albertCtype, dim> tmp2 = coord - coord_(0);     
   tmp2 = Jinv_ * tmp2;
 
   for(int j=0; j<dim; j++)
@@ -713,10 +713,10 @@ inline bool AlbertGridElement<2,2>::checkMapping (int loc)
   
   calcElMatrix ();
   
-  Vec<dim> & coord    = coord_(loc);
-  Vec<dim> & refcoord = refelem()[loc];
+  FieldVector<albertCtype, dim> & coord    = coord_(loc);
+  FieldVector<albertCtype, dim> & refcoord = refelem()[loc];
   
-  Vec<dim> tmp2 =  elMat_ * refcoord;     
+  FieldVector<albertCtype, dim> tmp2 =  elMat_ * refcoord;     
   tmp2 += coord_(0);
 
   for(int j=0; j<dim; j++)
@@ -739,10 +739,10 @@ inline bool AlbertGridElement<3,3>::checkMapping (int loc)
   
   calcElMatrix ();
   
-  Vec<dim> & coord    = coord_(loc);
-  Vec<dim> & refcoord = refelem()[loc];
+  FieldVector<albertCtype, dim> & coord    = coord_(loc);
+  FieldVector<albertCtype, dim> & refcoord = refelem()[loc];
   
-  Vec<dim> tmp2 =  elMat_ * refcoord;     
+  FieldVector<albertCtype, dim> tmp2 =  elMat_ * refcoord;     
   tmp2 += coord_(0);
 
   for(int j=0; j<dim; j++)
@@ -762,7 +762,7 @@ inline bool AlbertGridElement<3,3>::checkMapping (int loc)
 
 template<int dim, int dimworld>
 inline bool AlbertGridElement <dim ,dimworld >::
-checkInside(const Vec<dim,albertCtype> &local)
+checkInside(const FieldVector<albertCtype, dim> &local)
 {
   albertCtype sum = 0.0;
   
@@ -943,7 +943,7 @@ AlbertGridEntity < codim, dim ,dimworld >::geometry()
 }
 
 template<int codim, int dim, int dimworld>
-inline Vec<dim,albertCtype>& 
+inline FieldVector<albertCtype, dim>& 
 AlbertGridEntity < codim, dim ,dimworld >::local()
 {
   return localFatherCoords_;
@@ -977,7 +977,7 @@ template< int dim, int dimworld>
 inline albertCtype AlbertGridEntity < 0, dim ,dimworld >::
 diam()
 {
-  Vec<dim> tmp;
+  FieldVector<albertCtype, dim> tmp;
   
   return sqrt(geometry().integration_element(tmp)); 
 }
@@ -992,8 +992,8 @@ maxEdgeWidth()
   InterIt it    = ibegin();
   InterIt endit = iend ();  
 
-  Vec<dim> tmp;
-  Vec<dim-1> tmp1;
+  FieldVector<albertCtype, dim> tmp;
+  FieldVector<albertCtype, dim-1> tmp1;
  
   albertCtype vol = 0.5*geometry().integration_element(tmp);
   albertCtype fak = 2.0;
@@ -1803,11 +1803,11 @@ inline bool AlbertGridIntersectionIterator<dim,dimworld>::neighbor()
 }
 
 template< int dim, int dimworld>
-inline Vec<dimworld,albertCtype>& AlbertGridIntersectionIterator<dim,dimworld>:: 
-unit_outer_normal(Vec<dim-1,albertCtype>& local)
+inline FieldVector<albertCtype, dimworld>& AlbertGridIntersectionIterator<dim,dimworld>:: 
+unit_outer_normal(FieldVector<albertCtype, dim-1>& local)
 {
   // calculates the outer_normal
-  Vec<dimworld,albertCtype>& tmp = outer_normal(local);
+    FieldVector<albertCtype, dimworld>& tmp = outer_normal(local);
 
   double norm_1 = (1.0/tmp.norm2());
   assert(norm_1 > 0.0);
@@ -1817,11 +1817,11 @@ unit_outer_normal(Vec<dim-1,albertCtype>& local)
 }
 
 template< int dim, int dimworld>
-inline Vec<dimworld,albertCtype>& AlbertGridIntersectionIterator<dim,dimworld>:: 
+inline FieldVector<albertCtype, dimworld>& AlbertGridIntersectionIterator<dim,dimworld>:: 
 unit_outer_normal()
 {
   // calculates the outer_normal
-  Vec<dimworld,albertCtype>& tmp = outer_normal();
+    FieldVector<albertCtype, dimworld>& tmp = outer_normal();
 
   double norm_1 = (1.0/tmp.norm2());
   assert(norm_1 > 0.0);
@@ -1831,8 +1831,8 @@ unit_outer_normal()
 }
 
 template< int dim, int dimworld>
-inline Vec<dimworld,albertCtype>& AlbertGridIntersectionIterator<dim,dimworld>:: 
-outer_normal(Vec<dim-1,albertCtype>& local)
+inline FieldVector<albertCtype, dimworld>& AlbertGridIntersectionIterator<dim,dimworld>:: 
+outer_normal(FieldVector<albertCtype, dim-1>& local)
 {
   // we dont have curved boundary
   // therefore return outer_normal
@@ -1840,7 +1840,7 @@ outer_normal(Vec<dim-1,albertCtype>& local)
 }
 
 template< int dim, int dimworld>
-inline Vec<dimworld,albertCtype>& AlbertGridIntersectionIterator<dim,dimworld>:: 
+inline FieldVector<albertCtype, dimworld>& AlbertGridIntersectionIterator<dim,dimworld>:: 
 outer_normal()
 {
   std::cout << "outer_normal() not correctly implemented yet! \n";
@@ -1851,7 +1851,7 @@ outer_normal()
 }
 
 template <>
-inline Vec<2,albertCtype>& AlbertGridIntersectionIterator<2,2>:: 
+inline FieldVector<albertCtype, 2>& AlbertGridIntersectionIterator<2,2>:: 
 outer_normal()
 {
   // seems to work   
@@ -1864,7 +1864,7 @@ outer_normal()
 }
 
 template <>
-inline Vec<3,albertCtype>& AlbertGridIntersectionIterator<3,3>:: 
+inline FieldVector<albertCtype, 3>& AlbertGridIntersectionIterator<3,3>:: 
 outer_normal()
 {
   enum { dim = 3 };
@@ -3684,7 +3684,7 @@ writeGridUSPM ( const char * filename, double time , int level)
       nb[elNum][i] = nit->index();
       //std::cout << nb[elNum][i] << " Neigh \n";
 
-      Vec<dimworld>& vec = (it->geometry())[i];
+      FieldVector<albertCtype, dimworld>& vec = (it->geometry())[i];
       for (int j = 0; j < dimworld; j++)
         coord[k][j] = vec(j);
 
@@ -3771,7 +3771,7 @@ writeGridUSPM ( const char * filename, double time , int level)
 
       vertex[elNum][i] = k;
 
-      Vec<dimworld> vec = (it->geometry())[i];
+      FieldVector<albertCtype, dimworld> vec = (it->geometry())[i];
       for (int j = 0; j < dimworld; j++)
         coord[k][j] = vec(j);
     }
@@ -4494,9 +4494,9 @@ fillElInfo(int ichild, int actLevel , const ALBERT EL_INFO *elinfo_old, ALBERT E
 
 template < int dim, int dimworld >
 inline void AlbertGrid < dim, dimworld >::setNewCoords
-(const Vec<dimworld,albertCtype> & trans, const albertCtype scalar)
+(const FieldVector<albertCtype, dimworld> & trans, const albertCtype scalar)
 {
-  static Vec<dimworld,albertCtype> trans_(0.0);
+    static FieldVector<albertCtype, dimworld> trans_(0.0);
   static albertCtype scalar_ (1.0);
 
   for(int i=0; i<macroVertices_.size(); i++)
