@@ -1041,12 +1041,14 @@ AlbertaGridEntity<codim,dim,GridImp>::ownersFather () const
   return vati;  
 }
 
+/*
 // coords for 2d 
 static double fatherref [2][3][2] =
   {
     { {0.0,1.0},{0.0,0.0 }, {0.5,0.0 } }  ,
     { {1.0,0.0},{0.0,1.0 }, {0.5,0.0 } }
   };
+*/
 
 template<int codim, int dim, class GridImp>
 inline FieldVector<albertCtype, dim>&
@@ -1172,8 +1174,8 @@ AlbertaGridEntity(const GridImp &grid, int level)
   , level_ (level)
   //, vxEntity_ ( grid_ , -1, 0, 0, 0, 0, 0) 
   , travStack_ (0) , elInfo_ (0) 
-  , geo_(false) 
   , fatherReLocal_(false)
+  , geo_(false) 
   , builtgeometry_ (false)
 {
 }
