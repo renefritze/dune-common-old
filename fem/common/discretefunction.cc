@@ -265,6 +265,7 @@ write(const FileFormatType ftype, const char *filename, int timestep)
     file << d << " " << r << " ";
     file << n << " " << m << "\n";
     file << myId_ << " " << ftype << "\n";
+    //file << functionSpace_.continuous() << " " << functionSpace_.polynomOrder() << "\n";
     file.close();
   }
 

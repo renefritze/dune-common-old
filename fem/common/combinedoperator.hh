@@ -129,7 +129,7 @@ protected:
   RangeFieldType _fB;
 
   //! for temporary use 
-  Range *_tmp;
+  mutable Range *_tmp;
    
 private:
   //! Barton Nackman 
@@ -165,7 +165,7 @@ public:
   }
   
   template <class GridIteratorType>
-  void applyLocal ( GridIteratorType &it , const Domain & arg , Range & dest )   
+  void applyLocal ( GridIteratorType &it , const Domain & arg , Range & dest ) const  
   {
     std::cerr << "Combined Operator::applyLocal: No Default Implemenation is provieded!\n";
     abort();
@@ -198,6 +198,7 @@ public:
   template <class GridIteratorType>
   void applyLocal ( GridIteratorType &it , const Domain & arg , Range & dest )  const  
   {
+    std::cout << "Warning: CombinedOperator<ADD>::applyLocal not correct! \n";
     _b.applyLocal ( it , arg , dest );
     _a.applyLocal ( it , arg , dest );
     
