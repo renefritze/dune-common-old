@@ -204,7 +204,7 @@ private:
   // coords with face_,edge_ and vertex_ , needes for operator []
   template <int cc>
   int mapVertices (int i) { return i; }; 
-
+  
   template <> int mapVertices< 1 > (int i) 
   { return ((face_+1+i)%N_VERTICES); };
   
@@ -244,6 +244,7 @@ private:
 //**********************************************************************
 //
 // --AlbertGridEntity
+// --Entity
 //
 /*! 
   A Grid is a container of grid entities. An entity is parametrized by the codimension.
@@ -257,6 +258,7 @@ public Entity<codim,dim,dimworld,albertCtype,
               AlbertGridEntity,AlbertGridElement,AlbertGridLevelIterator,
               AlbertGridNeighborIterator,AlbertGridHierarchicIterator>
 {
+  friend class AlbertGrid < dim , dimworld >;
 public:
   //! know your own codimension
   enum { codimension=codim };
@@ -299,9 +301,10 @@ public:
                   unsigned char edge, unsigned char vertex );
   ALBERT EL_INFO *getElInfo () const;
 
-  // returns the global vertex number 
-  int globalIndex() { return elInfo_->el->dof[vertex_][0]; };
 private: 
+  // returns the global vertex number 
+  int globalIndex() { return elInfo_->el->dof[vertex_][0]; }
+
   // private Methods
   void makeDescription();
 
@@ -346,7 +349,7 @@ private:
 //***********************
 //  
 //  --AlbertGridEntity
-//  --Entity
+//  --0Entity
 //
 //***********************
 template<int dim, int dimworld>
@@ -355,6 +358,8 @@ public Entity<0,dim,dimworld,albertCtype,AlbertGridEntity,AlbertGridElement,
               AlbertGridLevelIterator,AlbertGridNeighborIterator,
               AlbertGridHierarchicIterator>
 {
+  friend class AlbertGrid < dim , dimworld >;
+  friend class AlbertMarkerVector;
 public:
   typedef AlbertGridNeighborIterator<dim,dimworld> NeighborIterator; 
   typedef AlbertGridHierarchicIterator<dim,dimworld> HierarchicIterator; 
@@ -393,19 +398,18 @@ public:
    */
   template<int cc> int count   () { return dim+1; };   //!< Default codim 1 Faces
 
+  // works not with gcc, but somthing else does ?
   template<> int count<2<<dim> () { return (dim*2); }; //!< Edges Codim = 2, only 3d 
   template<> int count<dim>    () { return dim+1; };   //!< Vertices codim = dim
 
-  /*! Provide access to mesh entity i of given codimension. Entities
-    are numbered 0 ... count<cc>()-1
-   */
-  template<int cc> AlbertGridLevelIterator<cc,dim,dimworld>& entity (int i); // 0 <= i < count()
+  //! Provide access to mesh entity i of given codimension. Entities
+  //!  are numbered 0 ... count<cc>()-1
+  template<int cc> AlbertGridLevelIterator<cc,dim,dimworld>& entity (int i); 
 
   /*! Intra-level access to neighboring elements. A neighbor is an entity of codimension 0
     which has an entity of codimension 1 in commen with this entity. Access to neighbors
     is provided using iterators. This allows meshes to be nonmatching. Returns iterator
-    referencing the first neighbor.
-   */
+    referencing the first neighbor. */
   AlbertGridNeighborIterator<dim,dimworld> nbegin ();
 
   //! Reference to one past the last neighbor
@@ -447,9 +451,10 @@ public:
                   unsigned char edge = 0,
                   unsigned char vertex = 0 );
   ALBERT EL_INFO *getElInfo () const;
-  // return the global unique index in mesh 
-  int globalIndex() { return elInfo_->el->index; };
 private: 
+  // return the global unique index in mesh 
+  int globalIndex() { return elInfo_->el->index; }
+
   //! make a new AlbertGridEntity 
   void makeDescription();
 
@@ -463,7 +468,7 @@ private:
   //! these objects are created on demand
   //! for the face access, __created__ on demand
   AlbertGridLevelIterator<1,dim,dimworld> * faceEntity_;
- 
+
   //! only needed if dim == 3, __created__ on demand
   AlbertGridLevelIterator<dim-1,dim,dimworld> * edgeEntity_;
 
@@ -703,9 +708,10 @@ class AlbertGridLevelIterator :
 public LevelIterator<codim,dim,dimworld,albertCtype,
           AlbertGridLevelIterator,AlbertGridEntity>
 {
-  friend class AlbertGrid<dim,dimworld>;
-  friend class AlbertGridEntity<codim,dim,dimworld>;
+  enum { fake = (codim == 0) ? 1 : codim };
+  friend class AlbertGridEntity<fake,dim,dimworld>;
   friend class AlbertGridEntity<0,dim,dimworld>;
+  friend class AlbertGrid < dim , dimworld >;
 public:
 
   //friend class AlbertGrid<dim,dimworld>;
@@ -790,6 +796,7 @@ private:
     return goNextVertex(stack,elinfo_old); 
   };
   
+  
   // the real go next methods
   ALBERT EL_INFO * goNextElInfo(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old);
   ALBERT EL_INFO * goNextFace(ALBERT TRAVERSE_STACK *stack,
@@ -834,7 +841,11 @@ class AlbertGrid : public Grid < dim, dimworld,
                           albertCtype,AlbertGrid,
                           AlbertGridLevelIterator,AlbertGridEntity>
 {
-
+  friend class AlbertGridEntity <0,dim,dimworld>;
+  //friend class AlbertGridEntity <1,dim,dimworld>;
+  //friend class AlbertGridEntity <1 << dim-1 ,dim,dimworld>;
+  friend class AlbertGridEntity <dim,dim,dimworld>;
+      
 //**********************************************************
 // The Interface Methods
 //**********************************************************
@@ -888,16 +899,6 @@ public:
   void refineLocal(int refCount);
   void writeGrid(int level=-1);
 
-  //! map the global index from the Albert Mesh to the local index on Level
-  template <int codim>
-  int indexOnLevel(int globalIndex, int level );
-  //! map the global index from the Albert Mesh to the local index on Level
-  template <>
-  int indexOnLevel<dim>(int globalIndex, int level)
-  {
-    return levelIndex_[dim][level*mesh_->n_vertices + globalIndex];
-  };
-
   //! access to mesh pointer, needed by some methods
   ALBERT MESH* getMesh () const { return mesh_; }; 
 
@@ -921,9 +922,18 @@ private:
   void makeNewSize(Array<int> &a, int newNumberOfEntries);
   void markNew();
   //**********************************************************
-  
-  void print();
     
+  //! map the global index from the Albert Mesh to the local index on Level
+  template <int codim>
+  int indexOnLevel(int globalIndex, int level );
+
+  //! map the global index from the Albert Mesh to the local index on Level
+  template <>
+  int indexOnLevel<dim>(int globalIndex, int level)
+  {
+    return levelIndex_[dim][level*mesh_->n_vertices + globalIndex];
+  };
+
 }; // end Class AlbertGridGrid
 
 
