@@ -249,10 +249,9 @@ inline void DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
 
 template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
          template <class,class> class LocalFunctionIteratorImp, class DiscreteFunctionImp >
-template <FileFormatType ftype>
 inline bool DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
-write(const char *filename, int timestep)
+write(const FileFormatType ftype, const char *filename, int timestep)
 {
   {
     enum { n = DiscreteFunctionSpaceType::DimDomain };
@@ -277,12 +276,10 @@ write(const char *filename, int timestep)
 
 template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
          template <class,class> class LocalFunctionIteratorImp, class DiscreteFunctionImp >
-template <FileFormatType ftype>
 inline bool DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
 read(const char *filename, int timestep)
 {
-  {
     enum { tn = DiscreteFunctionSpaceType::DimDomain };
     enum { tm = DiscreteFunctionSpaceType::DimRange };
     std::fstream file( filename , std::ios::in );
@@ -296,19 +293,17 @@ read(const char *filename, int timestep)
     file >> n >> m;
     int id,type;
     file >> id >> type;
-    FileFormatType ft = static_cast<FileFormatType> (type);
-    if((d != td) || (r != tr) || (n != tn) || (m != tm) || (ft != ftype) )
+    FileFormatType ftype = static_cast<FileFormatType> (type);
+    if((d != td) || (r != tr) || (n != tn) || (m != tm) )
     {
       std::cerr << d << " | " << td << " DomainField in read!\n";
       std::cerr << r << " | " << tr << " RangeField  in read!\n";
       std::cerr << n << " | " << tn << " in read!\n";
       std::cerr << m << " | " << tm << " in read!\n";
-      std::cerr << ftype << " Wrong FileFormat! \n";
       std::cerr << "Can not initialize DiscreteFunction with wrong FunctionSpace! \n";
       abort();
     }
     file.close();
-  }
 
   if(ftype == xdr)
     return asImp().read_xdr(filename,timestep);
@@ -316,6 +311,10 @@ read(const char *filename, int timestep)
     return asImp().read_ascii(filename,timestep);
   if(ftype == pgm)
     return asImp().read_pgm(filename,timestep);
+
+  std::cerr << ftype << " FileFormatType not supported at the moment! \n";
+  abort();
+  return false;
 };
 
 
