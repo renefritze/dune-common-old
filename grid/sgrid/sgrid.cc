@@ -5,6 +5,8 @@
 #include<iostream>
 #include<assert.h>
 
+#include <dune/common/stdstreams.hh>
+
 namespace Dune {
 
 
@@ -999,9 +1001,9 @@ inline void SGrid<dim,dimworld>::makeSGrid (const int* N_,
     for (int i=0; i<dim; i++) 
         h[0][i] = (H[i]-low[i])/((sgrid_ctype)N[0][i]);
     
-    std::cout << "level=" << L-1 << " size=(" << N[L-1][0];
-    for (int i=1; i<dim; i++) std::cout << "," <<  N[L-1][i];
-    std::cout << ")" << std::endl;
+    dinfo << "level=" << L-1 << " size=(" << N[L-1][0];
+    for (int i=1; i<dim; i++) dinfo << "," <<  N[L-1][i];
+    dinfo << ")" << std::endl;
 }
 
 template<int dim, int dimworld>
