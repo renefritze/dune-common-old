@@ -1160,10 +1160,6 @@ inline void setElOwnerNew( MESH * mesh, DOF_INT_VEC * elOwn )
   elOwner = NULL;
 }
 
-#ifndef _ALBERTA_H_
-//#include "part.cc"
-#endif
-
 } // end namespace AlbertHelp 
 
 #ifdef __ALBERTApp__
