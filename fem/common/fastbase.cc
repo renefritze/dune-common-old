@@ -37,7 +37,7 @@ evaluate( int baseFunct, const Vec<diffOrd, deriType> &diffVariable, QuadratureT
   }
 
   int idex = index( baseFunct, diffVariable, quadPoint, 
-                      quad.getNumberOfQuadPoints());
+                      quad.nop());
   //! copy the value to phi 
   phi = vecEvaluate_[diffOrd][ idex ];
 }
@@ -53,11 +53,11 @@ evaluateInit( const QuadratureType &quad )
   for ( int i = 0; i < diffOrd; i++ ) { p *= DimDomain; }
   
   // resize the cache vector if nessesary 
-  vecEvaluate_[ diffOrd ].resize( p * baseFunctionList_.size() * quad.getNumberOfQuadPoints () );
+  vecEvaluate_[ diffOrd ].resize( p * baseFunctionList_.size() * quad.nop () );
  
   // cache the basefunction evaluation 
   DiffVariable<diffOrd>::Type diffVariable (0);
-  int count = index( 0, diffVariable, 0, quad.getNumberOfQuadPoints ());
+  int count = index( 0, diffVariable, 0, quad.nop ());
 
   int diffCount = 0;
   // for all posible diffVariable values 
@@ -76,9 +76,9 @@ evaluateInit( const QuadratureType &quad )
     
     for ( int baseFunc = 0; baseFunc < baseFunctionList_.size(); baseFunc++ ) 
     {
-      for ( int quadPt = 0; quadPt < quad.getNumberOfQuadPoints (); quadPt++ ) 
+      for ( int quadPt = 0; quadPt < quad.nop(); quadPt++ ) 
       {
-        getBaseFunction( baseFunc ).evaluate( diffVariable, quad.getQuadraturePoint ( quadPt ), 
+        getBaseFunction( baseFunc ).evaluate( diffVariable, quad.point( quadPt ), 
                vecEvaluate_[ diffOrd ][ count ] );
         count++;
       }
