@@ -83,7 +83,7 @@ levelinfo<dim> SimpleReferenceElement<dim>::li;
   Its geometry can then be computed from the codimension 0 object and an integer face specification.
  */
 template<int dim, int dimworld> 
-class SimpleElement : public Element<dim,dimworld,simplegrid_ctype,SimpleElement>
+class SimpleElement : public ElementDefault<dim,dimworld,simplegrid_ctype,SimpleElement>
 {
 public:
   //! know dimension
@@ -215,7 +215,7 @@ private:
 
 //! specialize for dim=dimworld
 template<int dim> 
-class SimpleElement<dim,dim> : public Element<dim,dim,simplegrid_ctype,SimpleElement>
+class SimpleElement<dim,dim> : public ElementDefault<dim,dim,simplegrid_ctype,SimpleElement>
 {
 public:
   friend class SimpleElement<dim-1,dim>; // access granted for faces
@@ -424,7 +424,7 @@ private:
 
 //! specialization for dim=0, this is a vertex
 template<int dimworld> 
-class SimpleElement<0,dimworld> : public Element<0,dimworld,simplegrid_ctype,SimpleElement>
+class SimpleElement<0,dimworld> : public ElementDefault<0,dimworld,simplegrid_ctype,SimpleElement>
 {
 public:
   //! know dimension
@@ -532,14 +532,40 @@ inline std::ostream& operator<< (std::ostream& s, SimpleElement<dim,dimworld>& e
 	return s;
 }
 
+
+//***********************************************************************
+//
+//  SimpleBoundaryEntity
+//
+//***********************************************************************
+template <int dim, int dimworld>
+class SimpleBoundaryEntity
+: public BoundaryEntityDefault <dim,dimworld,simplegrid_ctype,SimpleElement,SimpleBoundaryEntity>
+{
+public:
+  //! return type of boundary segment 
+  BoundaryType type () {};
+
+  //! return true if ghost cell was calced
+  bool hasGeometry ();
+
+  //! return outer ghost cell 
+  SimpleElement<dim,dimworld> & geometry();
+
+  //! return outer barycenter of ghost cell 
+  Vec<dimworld,simplegrid_ctype> & outerPoint ();
+private:
+};
+
+
 //************************************************************************
 /*!
   NeighborIterator
  */
 
 template<int dim, int dimworld>
-class SimpleNeighborIterator : public NeighborIterator<dim,dimworld,simplegrid_ctype,
-													   SimpleNeighborIterator,SimpleEntity,SimpleElement>
+class SimpleNeighborIterator : public NeighborIteratorDefault<dim,dimworld,simplegrid_ctype,
+													   SimpleNeighborIterator,SimpleEntity,SimpleElement,SimpleBoundaryEntity>
 {
 public:
   //! know your own dimension
@@ -599,6 +625,12 @@ public:
   bool boundary ()
   {
 	return nb_geo.boundary(count/2) ;
+  }
+  
+  //! return true if neihgbor across intersection exists. \todo connection with boundary information, processor/outer boundary
+  bool neighbor ()
+  {
+	  return !(nb_geo.boundary(count/2)) ;
   }
 
   //! access neighbor, dereferencing 
@@ -735,7 +767,7 @@ public:
  */
 
 template<int codim, int dim, int dimworld>
-class SimpleEntity : public Entity<codim,dim,dimworld,simplegrid_ctype,SimpleEntity,SimpleElement,
+class SimpleEntity : public EntityDefault<codim,dim,dimworld,simplegrid_ctype,SimpleEntity,SimpleElement,
 	                   SimpleLevelIterator,SimpleNeighborIterator,SimpleHierarchicIterator>
 {
   SimpleEntity () {}
@@ -877,7 +909,7 @@ private:
 
 // codimension dim -- the vertices
 template<int dim, int dimworld>
-class SimpleEntity<dim,dim,dimworld> : public Entity<dim,dim,dimworld,simplegrid_ctype,SimpleEntity,SimpleElement,
+class SimpleEntity<dim,dim,dimworld> : public EntityDefault<dim,dim,dimworld,simplegrid_ctype,SimpleEntity,SimpleElement,
                                          SimpleLevelIterator,SimpleNeighborIterator,SimpleHierarchicIterator>
 {
 public:
@@ -926,14 +958,14 @@ private:
   General version is dummy, only specializations for codim=0 and codim=dim can be used
  */
 template<int codim, int dim, int dimworld>
-class SimpleLevelIterator : public LevelIterator<codim,dim,dimworld,simplegrid_ctype,SimpleLevelIterator,SimpleEntity>
+class SimpleLevelIterator : public LevelIteratorDefault<codim,dim,dimworld,simplegrid_ctype,SimpleLevelIterator,SimpleEntity>
 {
   SimpleLevelIterator () {}
 };
 
 // specialization for codim==0 -- the elements
 template<int dim, int dimworld>
-class SimpleLevelIterator<0,dim,dimworld> : public LevelIterator<0,dim,dimworld,simplegrid_ctype,SimpleLevelIterator,SimpleEntity>
+class SimpleLevelIterator<0,dim,dimworld> : public LevelIteratorDefault<0,dim,dimworld,simplegrid_ctype,SimpleLevelIterator,SimpleEntity>
 {
 public:
   //! know your own codimension
@@ -995,7 +1027,7 @@ private:
 
 // specialization for codim==dim -- the vertices
 template<int dim, int dimworld>
-class SimpleLevelIterator<dim,dim,dimworld> : public LevelIterator<dim,dim,dimworld,simplegrid_ctype,SimpleLevelIterator,SimpleEntity>
+class SimpleLevelIterator<dim,dim,dimworld> : public LevelIteratorDefault<dim,dim,dimworld,simplegrid_ctype,SimpleLevelIterator,SimpleEntity>
 {
 public:
   //! know your own codimension
@@ -1069,7 +1101,7 @@ private:
   data structures (which are not part of this module).
  */
 template<int dim, int dimworld>
-class SimpleGrid : public Grid<dim,dimworld,simplegrid_ctype,SimpleGrid,SimpleLevelIterator,SimpleEntity>
+class SimpleGrid : public GridDefault<dim,dimworld,simplegrid_ctype,SimpleGrid,SimpleLevelIterator,SimpleEntity>
 {
 public:
 	//! maximum number of levels allowed
