@@ -30,6 +30,7 @@ namespace Dune {
   You can change the type for coordinates by changing this single typedef.
  */
 typedef double simplegrid_ctype; 
+typedef simplegrid_ctype sgrid_ctype; 
 
 //************************************************************************
 // forward declaration of templates
@@ -1116,17 +1117,20 @@ public:
 	//! define type used for coordinates in grid module
 	typedef simplegrid_ctype ctype;
 
+  //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ... 
+  GridIdentifier type() const { return SimpleGrid_id; };
+  
 	/*! Return maximum level defined in this grid. Levels are numbered
 	  0 ... maxlevel with 0 the coarsest level.
      */
-  int maxlevel() {return L-1;}
+  int maxlevel() const {return L-1;}
 
 	//! Iterator to first entity of given codim on level
 	template<int cd>
 	SimpleLevelIterator<cd,dim,dimworld> lbegin (int level)
     {
 	  assert(cd==0 || cd==dim)
-	  return SimpleLevelIterator<cd,dim,dimworld>(li[level[,-1);
+	  return SimpleLevelIterator<cd,dim,dimworld>(li[level],-1);
     }
 	template<>
 	SimpleLevelIterator<0,dim,dimworld> lbegin (int level)
@@ -1158,7 +1162,7 @@ public:
     }
 
 	//! number of grid entities per level and codim
-  int size (int level, int codim)
+  int size (int level, int codim) const 
   {
 	if (codim==0)
 	  {
@@ -1168,6 +1172,7 @@ public:
 	  {
 		return li[level].nvertices;
 	  }
+  std::cout << "No Entitys of Codim these codim " << codim << " \n";
 	return -1;
   }
 
@@ -1222,6 +1227,11 @@ public:
  	std::cout << "level=" << L-1 << " size=(" << li[L-1].ne[0];
 	for (int i=1; i<dim; i++) std::cout << "," <<  li[L-1].ne[i];
 	std::cout << ")" << std::endl;
+
+  // calc number of elemnts 
+  li[L-1].nelements = 1;
+	for (int i=0; i<dim; i++) 
+    li[L-1].nelements *= li[L-1].ne[i];
  }
 
   void globalRefine (int refCount)
@@ -1272,9 +1282,28 @@ public:
 	std::cout << "level=" << L-1 << " size=(" << li[L-1].ne[0];
 	for (int i=1; i<dim; i++) std::cout << "," <<  li[L-1].ne[i];
 	std::cout << ")" << std::endl;
+
+  // calc number of elemnts 
+  li[L-1].nelements = 1;
+	for (int i=0; i<dim; i++) 
+    li[L-1].nelements *= li[L-1].ne[i];
   }
 
   levelinfo<dim>* get_levelinfo (int l) {return &li[l];}
+
+  //! write Grid to file filename and store time  
+  template <FileFormatType ftype>
+  bool writeGrid ( const char * filename , sgrid_ctype time)
+  {
+    return true;
+  };
+
+  //! read Grid from file filename and store time of grid in time
+  template <FileFormatType ftype>
+  bool readGrid ( const char * filename , sgrid_ctype &time )
+  {
+    return true;
+  };
 
 private:
   int L;                              // number of levels in hierarchic mesh 0<=level<L
