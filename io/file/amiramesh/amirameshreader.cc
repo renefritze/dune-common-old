@@ -12,6 +12,8 @@ void Dune::AmiraMeshReader<GridType>::readFunction(DiscFuncType& f, const std::s
 
     float* am_values_float = NULL;
     int i, j;
+
+    f = 0;
         
     // We allow fields defined on the whole grid and fields defined
     // only on the boundary.  We now check the file and proceed accordingly
