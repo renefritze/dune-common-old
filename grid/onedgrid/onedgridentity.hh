@@ -2,7 +2,8 @@
 #define DUNE_ONE_D_GRID_ENTITY_HH
 
 #include <dune/common/fixedarray.hh>
-#include <dune/common/dlist.hh>
+
+#include "onedgridelement.hh"
 
 /** \file
  * \brief The OneDGridEntity class and its specializations
@@ -66,7 +67,7 @@ public:
     OneDGridLevelIterator<cc,All_Partition, GridImp> entity (int i);
 
   //! geometry of this entity
-    const OneDGridGeometry<dim-codim,dim,GridImp>& geometry () const {return geo_;}
+    const Geometry& geometry () const {return geo_;}
 
     /** \brief Location of this vertex within a mesh entity of codimension 0 on the coarse grid.
      *
@@ -80,8 +81,7 @@ public:
 private: 
 
     //! the current geometry
-    OneDGridGeometry<0,dim, GridImp> geo_;
-    //Geometry geo_;
+    OneDMakeableGeometry<dim-codim,dim,GridImp> geo_;
 
     FieldVector<OneDCType, dim> localFatherCoords_; 
 
@@ -123,16 +123,16 @@ class OneDGridEntity<0,dim, GridImp> :
 public EntityDefault<0,dim,GridImp, OneDGridEntity>
 {
     friend class OneDGrid <dim, GridImp::dimensionworld>;
-//     friend class OneDGridIntersectionIterator < dim, dimworld>;
-//     friend class OneDGridHierarchicIterator < dim, dimworld>;
-//     friend class OneDGridLevelIterator <0,dim,dimworld,All_Partition>;
+    friend class OneDGridIntersectionIterator <GridImp>;
+    friend class OneDGridHierarchicIterator <GridImp>;
+    friend class OneDGridLevelIterator <0,All_Partition,GridImp>;
 
     template <int cc_, int dim_, class GridImp_>
     friend class OneDGridSubEntityFactory;
 
 
 public:
-    //typedef typename GridImp::template codim<0>::Geometry Geometry;
+    typedef typename GridImp::template codim<0>::Geometry Geometry;
     typedef typename GridImp::template codim<0>::LevelIterator LevelIterator;
     typedef typename GridImp::template codim<0>::IntersectionIterator IntersectionIterator;
     typedef typename GridImp::template codim<0>::HierarchicIterator HierarchicIterator;
@@ -159,7 +159,7 @@ public:
     int globalIndex() { return index(); }
 
     //! Geometry of this entity
-    const OneDGridGeometry<dim,dim,GridImp>& geometry () const {return geo_;}
+    const Geometry& geometry () const {return geo_;}
 
     /** \brief Return the number of subentities of codimension cc.
      */
@@ -188,18 +188,18 @@ public:
       which has an entity of codimension 1 in commen with this entity. Access to neighbors
       is provided using iterators. This allows meshes to be nonmatching. Returns iterator
       referencing the first neighbor. */
-    IntersectionIterator ibegin (){
-        return IntersectionIterator(this);
+    IntersectionIterator ibegin () const {
+        return OneDGridIntersectionIterator<GridImp>(this);
     }
     
     //! Reference to one past the last neighbor
-    IntersectionIterator iend (){
+    IntersectionIterator iend () const {
         return IntersectionIterator(NULL);
     }
     
-    //! returns true if Entity has children 
-    bool hasChildren () const {
-        return (sons_[0]!=NULL) || (sons_[1]!=NULL);
+    //! returns true if Entity has no children 
+    bool isLeaf () const {
+        return (sons_[0]==NULL) && (sons_[1]==NULL);
     }
     
     //! Inter-level access to father element on coarser grid. 
@@ -233,7 +233,7 @@ public:
         if (level()<maxlevel) {
 
           // Load sons of old target onto the iterator stack
-          if (hasChildren()) {
+            if (!isLeaf()) {
               typename HierarchicIterator::StackEntry se0;
               se0.element = sons_[0];
               se0.level   = level() + 1;
@@ -283,7 +283,7 @@ public:
 private: 
 
     //! the current geometry
-    OneDGridGeometry<dim,dim,GridImp> geo_;
+    OneDMakeableGeometry<dim,dim,GridImp> geo_;
 
     FixedArray<OneDGridEntity<0,dim,GridImp>*, 2> sons_;
 
