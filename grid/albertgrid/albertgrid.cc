@@ -2900,6 +2900,8 @@ inline void AlbertGrid < dim, dimworld >::initGrid(int proc)
 
   wasChanged_ = true;
   isMarked_ = false;
+
+  macroVertices_.resize( mesh_->n_vertices );
   
   ALBERT AlbertHelp::initProcessor(mesh_,proc);
 }
@@ -4415,5 +4417,31 @@ fillElInfo(int ichild, int actLevel , const ALBERT EL_INFO *elinfo_old,
 #endif
 }
 #endif
+
+template < int dim, int dimworld >
+inline void AlbertGrid < dim, dimworld >::setNewCoords 
+(const Vec<dimworld,albertCtype> & trans, const albertCtype scalar)
+{
+  for(int i=0; i<macroVertices_.size(); i++)
+    macroVertices_[i] = 0;
+  
+  for(ALBERT MACRO_EL * mel = mesh_->first_macro_el; mel; mel=mel->next)
+  {
+    for(int i=0; i<dim+1; i++)
+    {
+      int dof = mel->el->dof[i][0];
+      if( macroVertices_[dof] != 1)
+      {
+        macroVertices_[dof] = 1;
+        for(int j=0; j<dimworld; j++)
+        {
+          mel->coord[i][j] *= scalar;
+          mel->coord[i][j] += trans(j);
+        }
+      }
+    }
+  }
+}
+
 
 } // namespace Dune
