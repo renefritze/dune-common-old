@@ -126,7 +126,7 @@ public:
     FieldVector<UGCtype, mydim> local (const FieldVector<UGCtype, coorddim>& global) const;
   
   //! Returns true if the point is in the current element
-    bool checkInside(const FieldVector<UGCtype, coorddim> &global) const;
+    bool checkInside(const FieldVector<UGCtype, coorddim> &local) const;
 
     /**
     Integration over a general element is done by integrating over the reference element
@@ -221,8 +221,8 @@ public:
   
   //! Returns true if the point is in the current element
     /** \todo Not implemented yet! */
-    bool checkInside(const FieldVector<UGCtype, 3> &global) const {
-        DUNE_THROW(GridError, "UGGridGeometry::checkInside() not implemented yet!");
+    bool checkInside(const FieldVector<UGCtype, 3> &local) const {
+        DUNE_THROW(GridError, "UGGridGeometry<2,3>::checkInside() not implemented yet!");
         return true;
     }
 
@@ -305,8 +305,8 @@ public:
   
   //! Returns true if the point is in the current element
     /** \todo Not implemented yet! */
-    bool checkInside(const FieldVector<UGCtype, 1> &global) const {
-        DUNE_THROW(GridError, "UGGridGeometry::checkInside() not implemented yet!");
+    bool checkInside(const FieldVector<UGCtype, 1>& local) const {
+        DUNE_THROW(GridError, "UGGridGeometry<1,2>::checkInside() not implemented yet!");
         return true;
     }
 
