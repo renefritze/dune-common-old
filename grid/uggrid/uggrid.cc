@@ -11,20 +11,15 @@
 namespace Dune
 {
 
-#include "uggridelement.cc"
-#include "uggridentity.cc"
-#include "uggridhieriterator.cc"
-#include "uggridleveliterator.cc"
-
 
     // *********************************************************************
     //
-    //  -- LevelIteratorFactory
+    //  -- UGGridLevelIteratorFactory
     //
     // *********************************************************************
 
     template <int codim, int dim, int dimworld, PartitionIteratorType PiType>
-    class LevelIteratorFactory
+    class UGGridLevelIteratorFactory
     {
     public:
         static inline
@@ -35,16 +30,11 @@ namespace Dune
     };
 
     template <>
-    class LevelIteratorFactory<2,2,2,All_Partition>
+    class UGGridLevelIteratorFactory<2,2,2,All_Partition>
     {
     public:
         static inline
         UGGridLevelIterator<2,2,2,All_Partition> getIterator(UG2d::grid* theGrid, int level) {
-//             assert(multigrid_);
-//             UG2d::grid* theGrid = multigrid_->grids[level];
-            
-//             if (!theGrid)
-//                 DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
             
             UGGridLevelIterator<2,2,2,All_Partition> it(level);
             it.setToTarget(theGrid->firstNode[0], level);
@@ -54,16 +44,11 @@ namespace Dune
     };
 
     template <>
-    class LevelIteratorFactory<0,2,2,All_Partition>
+    class UGGridLevelIteratorFactory<0,2,2,All_Partition>
     {
     public:
         static inline
         UGGridLevelIterator<0,2,2,All_Partition> getIterator(UG2d::grid* theGrid, int level) {
-//             assert(multigrid_);
-//             UG2d::grid* theGrid = multigrid_->grids[level];
-            
-//             if (!theGrid)
-//                 DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
             
             UGGridLevelIterator<0,2,2,All_Partition> it(level);
             it.setToTarget(theGrid->elements[0], level);
@@ -306,7 +291,7 @@ UGGrid<dim, dimworld>::lbegin (int level) const
     if (!theGrid)
         DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
-    return LevelIteratorFactory<codim,dim,dimworld,All_Partition>::getIterator(theGrid, level);
+    return UGGridLevelIteratorFactory<codim,dim,dimworld,All_Partition>::getIterator(theGrid, level);
 }
 
 template<int dim, int dimworld> 
@@ -323,7 +308,7 @@ UGGrid<dim, dimworld>::lbegin (int level) const
     if (!theGrid)
         DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
-    return LevelIteratorFactory<codim,dim,dimworld,PiType>::getIterator(theGrid, level);
+    return UGGridLevelIteratorFactory<codim,dim,dimworld,PiType>::getIterator(theGrid, level);
 }
 
 template < int dim, int dimworld > template<int codim>
@@ -346,50 +331,30 @@ UGGrid < dim, dimworld >::lend (int level) const
 template < int dim, int dimworld >
 inline int UGGrid < dim, dimworld >::size (int level, int codim) const
 {
-//     enum { numCodim = dim+1 };
-//     int ind = (level * numCodim) + codim;
+    int numberOfElements = 0;
     
-//     if(size_[ind] == -1)
+    if(codim == 0)
         {
-            int numberOfElements = 0;
-            
-            if(codim == 0)
-                {
-                    UGGridLevelIterator<0,dim,dimworld, All_Partition> endit = lend<0>(level);
-                    for(UGGridLevelIterator<0,dim,dimworld, All_Partition> it = lbegin<0>(level);
-                        it != endit; ++it)
-                        numberOfElements++;
-                }
-            if(codim == 1)
-                {
-                    UGGridLevelIterator<1,dim,dimworld, All_Partition> endit = lend<1>(level);
-                    for(UGGridLevelIterator<1,dim,dimworld, All_Partition> it = lbegin<1>(level);
-                        it != endit; ++it)
-                        numberOfElements++;
-                }
-            if(codim == 2)
-                {
-                    UGGridLevelIterator<2,dim,dimworld, All_Partition> endit = lend<2>(level);
-                    for(UGGridLevelIterator<2,dim,dimworld, All_Partition> it = lbegin<2>(level);
-                        it != endit; ++it)
-                        numberOfElements++;
-                }
-            
-            if(codim == 3)
-                {
-                    UGGridLevelIterator<3,dim,dimworld, All_Partition> endit = lend<3>(level);
-                    for(UGGridLevelIterator<3,dim,dimworld, All_Partition> it = lbegin<3>(level);
-                        it != endit; ++it)
-                        numberOfElements++;
-                }
-            
-            //            size_[ind] = numberOfElements; 
-            return numberOfElements;
+            UGGridLevelIterator<0,dim,dimworld, All_Partition> endit = lend<0>(level);
+            for(UGGridLevelIterator<0,dim,dimworld, All_Partition> it = lbegin<0>(level);
+                it != endit; ++it)
+                numberOfElements++;
+        } else
+    if(codim == dim)
+        {
+            UGGridLevelIterator<dim,dim,dimworld, All_Partition> endit = lend<dim>(level);
+            for(UGGridLevelIterator<dim,dim,dimworld, All_Partition> it = lbegin<dim>(level);
+                it != endit; ++it)
+                numberOfElements++;
+        } 
+    else
+        {
+            DUNE_THROW(GridError, "UGGrid<" << dim << ", " << dimworld 
+                       << ">::size(int level, int codim) is only implemented"
+                       << " for codim==0 and codim==dim!");
         }
-//     else
-//         { 
-//             return size_[ind]; 
-//         }
+    
+    return numberOfElements;
 }
 
 

@@ -1,5 +1,3 @@
-namespace Dune {
-
 template< int dim, int dimworld>
 inline UGGridIntersectionIterator<dim,dimworld>::
 UGGridIntersectionIterator() : virtualEntity_(-1), center_(0), neighborCount_(-1)
@@ -285,5 +283,3 @@ boundaryEntity ()
 {
     return boundaryEntity_;
 }
-
-};

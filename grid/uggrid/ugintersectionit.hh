@@ -7,7 +7,8 @@ namespace Dune {
 //
 // --UGGridIntersectionIterator
 // --IntersectionIterator
-/*!
+  /** \brief Iterator over all element neighbors
+   * \ingroup UGGrid
   Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
   a neighbor is an entity of codimension 0 which has a common entity of codimension
   These neighbors are accessed via a IntersectionIterator. This allows the implement
@@ -106,9 +107,6 @@ private:
     //! Returns true if the iterator represents an actual intersection
     bool isValid() const;
 
-  //! the actual level
-  //int level_;
-  
     UGGridEntity<0,dim,dimworld> virtualEntity_;
  
   //! vector storing the outer normal 
@@ -134,11 +132,8 @@ private:
 
 };
 
-};  // namespace Dune
-
-
 #include "ugintersectionit.cc"
 
-
+}  // namespace Dune
 
 #endif
