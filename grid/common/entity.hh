@@ -45,7 +45,12 @@ public:
 
   typedef typename RemoveConst<GridImp>::Type mutableGridImp;
 
-  friend EntityImp<codim,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<codim>::Entity& e );
+  // for icc
+  // friend EntityImp<codim,dim,GridImp>& mutableGridImp::template getRealEntity<>(typename GridImp::Traits::template codim<codim>::Entity& e );
+
+  // for g++
+  template <int cd>
+  friend EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<cd>::Entity& e );
 };
 
 template<int dim, class GridImp, template<int,int,class> class EntityImp>
@@ -56,7 +61,12 @@ class Entity <0,dim,GridImp,EntityImp>
 
   typedef typename RemoveConst<GridImp>::Type mutableGridImp;
 
-  friend EntityImp<0,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<0>::Entity& e );
+  // for icc
+  // friend EntityImp<0,dim,GridImp>& mutableGridImp::template getRealEntity<>(typename GridImp::Traits::template codim<0>::Entity& e );
+
+  // for g++
+  template <int cd>
+  friend EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<cd>::Entity& e );
 
 protected:
   EntityImp<0,dim,GridImp> realEntity;
@@ -192,7 +202,12 @@ class Entity <dim,dim,GridImp,EntityImp>
 
   typedef typename RemoveConst<GridImp>::Type mutableGridImp;
 
-  friend EntityImp<dim,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<dim>::Entity& e );
+  // for icc
+  // friend EntityImp<dim,dim,GridImp>& mutableGridImp::template getRealEntity<>(typename GridImp::Traits::template codim<dim>::Entity& e );
+
+  // for g++
+  template <int cd>
+  friend EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<cd>::Entity& e );
 
 protected:
   EntityImp<dim,dim,GridImp> realEntity;
