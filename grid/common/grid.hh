@@ -4,32 +4,32 @@
 namespace Dune {
 
 /** @defgroup GridCommon Dune Grid Module
-	The Dune Grid module defines a general interface to a hierarchical finite element mesh.
-	The interface is independent of dimension and element type. Various implementations
-	of this interface exits:
+  The Dune Grid module defines a general interface to a hierarchical finite element mesh.
+  The interface is independent of dimension and element type. Various implementations
+  of this interface exits:
 
-	- Structured Grid (SGrid) : A structured mesh in d dimensions consisting of "cubes". The number
-	of elements per dimension is variable.
+  - Structured Grid (SGrid) : A structured mesh in d dimensions consisting of "cubes". The number
+  of elements per dimension is variable.
 
-	- Albert Grid (AlbertGrid) : Provides the simplicial meshes of the finite element tool box ALBERT
-	written by Kunibert Siebert and Alfred Schmidt.
+  - Albert Grid (AlbertGrid) : Provides the simplicial meshes of the finite element tool box ALBERT
+  written by Kunibert Siebert and Alfred Schmidt.
 
-	- Quoc Mesh Grid  : Provides the meshes of the QuocMesh.
+  - Quoc Mesh Grid  : Provides the meshes of the QuocMesh.
 
-	- UG Grid (UGGrid) : Provides the meshes of the finite element toolbox UG.
+  - UG Grid (UGGrid) : Provides the meshes of the finite element toolbox UG.
 
-	- Structured Parallel Grid (SPGrid) : Provides a distributed structured mesh.
+  - Structured Parallel Grid (SPGrid) : Provides a distributed structured mesh.
 
-	This Module contains only the description of compounds that are common to all implementations
-	of the grid interface.
+  This Module contains only the description of compounds that are common to all implementations
+  of the grid interface.
 
-	For a detailed description of the interface itself please see the documentation
-	of the "Structured Grid Module". Since Dune uses the Engine concept there is no abstract definition
-	of the interface. As with STL containers, all implementations must implement the
-	same classes with exactly the same members to be used in generic algorithms.
+  For a detailed description of the interface itself please see the documentation
+  of the "Structured Grid Module". Since Dune uses the Engine concept there is no abstract definition
+  of the interface. As with STL containers, all implementations must implement the
+  same classes with exactly the same members to be used in generic algorithms.
 
 
-	@{
+  @{
  */
 
 //************************************************************************
@@ -41,6 +41,10 @@ namespace Dune {
 
 enum ElementType {unknown,vertex,line, triangle, quadrilateral, tetrahedron, pyramid, prism, hexahedron,
                   iso_triangle, iso_quadrilateral};
+
+enum GridIdentifier { SGrid_Id, AlbertGrid_Id };
+
+enum FileFormatType { ascii , xdr };
 
 //************************************************************************
 // E L E M E N T
@@ -88,71 +92,106 @@ public:
     typedef ElementImp<dim,dimworld>  Element;
   };
 
-	//! know dimension
-	enum { dimension=dim };
+  //! know dimension
+  enum { dimension=dim };
 
-	//! know dimension of world
-	enum { dimensionworld=dimworld };
+  //! know dimension of world
+  enum { dimensionworld=dimworld };
 
-	//! define type used for coordinates in grid module
-	typedef ct ctype;
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
 
-	//! return the element type identifier
-	ElementType type ();             
+  //! return the element type identifier
+  ElementType type ();             
 
-	//! return the number of corners of this element. Corners are numbered 0...n-1
-	int corners ();                  
+  //! return the number of corners of this element. Corners are numbered 0...n-1
+  int corners ();                  
 
-	//! access to coordinates of corners. Index is the number of the corner 
-	Vec<dimworld,ct>& operator[] (int i);
+  //! access to coordinates of corners. Index is the number of the corner 
+  Vec<dimworld,ct>& operator[] (int i);
 
-	/*! return reference element corresponding to this element. If this is
-	  a reference element then self is returned. A reference to a reference
-	  element is returned. Usually, the implementation will store the finite
-	  set of reference elements as global variables.
-	*/
-	ElementImp<dim,dim>& refelem ();      
+  /*! return reference element corresponding to this element. If this is
+    a reference element then self is returned. A reference to a reference
+    element is returned. Usually, the implementation will store the finite
+    set of reference elements as global variables.
+  */
+  ElementImp<dim,dim>& refelem ();      
 
-	//! maps a local coordinate within reference element to global coordinate in element 
-	Vec<dimworld,ct> global (const Vec<dim,ct>& local);
+  //! maps a local coordinate within reference element to global coordinate in element 
+  Vec<dimworld,ct> global (const Vec<dim,ct>& local);
 
-	//! maps a global coordinate within the element to a local coordinate in its reference element
-	Vec<dim,ct> local (const Vec<dimworld,ct>& global);
+  //! maps a global coordinate within the element to a local coordinate in its reference element
+  Vec<dim,ct> local (const Vec<dimworld,ct>& global);
 
-	/*! Integration over a general element is done by integrating over the reference element
-	  and using the transformation from the reference element to the global element as follows:
-	  \f[\int\limits_{\Omega_e} f(x) dx = \int\limits_{\Omega_{ref}} f(g(l)) A(l) dl \f] where
-	  \f$g\f$ is the local to global mapping and \f$A(l)\f$ is the integration element. 
+  //! return true if the point global lies inside the element
+  bool checkInside (const Vec<dimworld,ct>& global);
 
-	  For a general map \f$g(l)\f$ involves partial derivatives of the map (surface element of
-	  the first kind if \f$d=2,w=3\f$, determinant of the Jacobian of the transformation for
-	  \f$d=w\f$, \f$\|dg/dl\|\f$ for \f$d=1\f$).
+  /*! Integration over a general element is done by integrating over the reference element
+    and using the transformation from the reference element to the global element as follows:
+    \f[\int\limits_{\Omega_e} f(x) dx = \int\limits_{\Omega_{ref}} f(g(l)) A(l) dl \f] where
+    \f$g\f$ is the local to global mapping and \f$A(l)\f$ is the integration element. 
 
-	  For linear elements, the derivatives of the map with respect to local coordinates
-	  do not depend on the local coordinates and are the same over the whole element.
+    For a general map \f$g(l)\f$ involves partial derivatives of the map (surface element of
+    the first kind if \f$d=2,w=3\f$, determinant of the Jacobian of the transformation for
+    \f$d=w\f$, \f$\|dg/dl\|\f$ for \f$d=1\f$).
 
-	  For a structured mesh where all edges are parallel to the coordinate axes, the 
-	  computation is the length, area or volume of the element is very simple to compute.
+    For linear elements, the derivatives of the map with respect to local coordinates
+    do not depend on the local coordinates and are the same over the whole element.
+
+    For a structured mesh where all edges are parallel to the coordinate axes, the 
+    computation is the length, area or volume of the element is very simple to compute.
  
-	  Each grid module implements the integration element with optimal efficieny. This
-	  will directly translate in substantial savings in the computation of finite element
-	  stiffness matrices.
-	 */
-	ct integration_element (const Vec<dim,ct>& local);
+    Each grid module implements the integration element with optimal efficieny. This
+    will directly translate in substantial savings in the computation of finite element
+    stiffness matrices.
+   */
+  ct integration_element (const Vec<dim,ct>& local);
 
-	//! can only be called for dim=dimworld!
-	Mat<dim,dim>& Jacobian_inverse (const Vec<dim,ct>& local);
+  //! can only be called for dim=dimworld!
+  Mat<dim,dim>& Jacobian_inverse (const Vec<dim,ct>& local);
 
-	/*! Checking presence and format of all interface functions. With
-	  this method all derived classes can check their correct definition.
-	*/
-	void checkIF ();
+  /*! Checking presence and format of all interface functions. With
+    this method all derived classes can check their correct definition.
+  */
+  void checkIF ();
 
 private:
-	//! Barton-Nackman trick 
-	ElementImp<dim,dimworld>& asImp () {return static_cast<ElementImp<dim,dimworld>&>(*this);}
+  //! Barton-Nackman trick 
+  ElementImp<dim,dimworld>& asImp () {return static_cast<ElementImp<dim,dimworld>&>(*this);}
 };
 
+//*****************************************************************************
+//
+//
+//
+//
+//*****************************************************************************
+template<int dim, int dimworld, class ct,template<int,int> class ElementImp>  
+class ElementDefault : public Element <dim,dimworld,ct,ElementImp>
+{
+public:
+  //! remeber the template types
+  struct Traits
+  {
+    typedef ct                        CoordType;  
+    typedef ElementImp<dim,dimworld>  Element;
+  };
+
+  //! know dimension
+  enum { dimension=dim };
+
+  //! know dimension of world
+  enum { dimensionworld=dimworld };
+
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
+
+
+private:
+  //! Barton-Nackman trick 
+  ElementImp<dim,dimworld>& asImp () {return static_cast<ElementImp<dim,dimworld>&>(*this);}
+}; // end ElementDefault 
+//************************************************************
 
 //! Specialization of Element for dim=0 (vertices)
 template<int dimworld, class ct,template<int,int> class ElementImp>  
@@ -165,33 +204,68 @@ public:
     typedef ElementImp<0,dimworld>  Element;
   };
 
-	//! know dimension
-	enum { dimension=0 };
+  //! know dimension
+  enum { dimension=0 };
 
-	//! know dimension of world
-	enum { dimensionworld=dimworld };
+  //! know dimension of world
+  enum { dimensionworld=dimworld };
 
-	//! define type used for coordinates in grid module
-	typedef ct ctype;
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
 
-	//! return the element type identifier
-	ElementType type ();             
+  //! return the element type identifier
+  ElementType type ();             
 
-	//! return the number of corners of this element. Corners are numbered 0...n-1
-	int corners ();                  
+  //! return the number of corners of this element. Corners are numbered 0...n-1
+  int corners ();                  
 
-	//! access to coordinates of corners. Index is the number of the corner 
-	Vec<dimworld,ct>& operator[] (int i);
+  //! access to coordinates of corners. Index is the number of the corner 
+  Vec<dimworld,ct>& operator[] (int i);
 
-	/*! Checking presence and format of all interface functions. With
-	  this method all derived classes can check their correct definition.
-	*/
-	void checkIF ();
+  /*! Checking presence and format of all interface functions. With
+    this method all derived classes can check their correct definition.
+  */
+  void checkIF ();
 
 private:
-	//! Barton-Nackman trick 
-	ElementImp<0,dimworld>& asImp () {return static_cast<ElementImp<0,dimworld>&>(*this);}
+  //! Barton-Nackman trick 
+  ElementImp<0,dimworld>& asImp () {return static_cast<ElementImp<0,dimworld>&>(*this);}
 };
+
+
+//*************************************************************************
+//
+// --ElementDefault 
+// 
+//! Default implementation for class Element with dim = 0 (vertices)
+//! 
+//
+//*************************************************************************
+template<int dimworld, class ct,template<int,int> class ElementImp>  
+class ElementDefault <0,dimworld,ct,ElementImp> 
+: public Element<0,dimworld,ct,ElementImp>
+{
+public:
+  //! remeber the template types
+  struct Traits
+  {
+    typedef ct                      CoordType;  
+    typedef ElementImp<0,dimworld>  Element;
+  };
+
+  //! know dimension
+  enum { dimension=0 };
+
+  //! know dimension of world
+  enum { dimensionworld=dimworld };
+
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
+private:
+  //! Barton-Nackman trick 
+  ElementImp<0,dimworld>& asImp () {return static_cast<ElementImp<0,dimworld>&>(*this);}
+}; // end ElementDefault, dim = 0
+//****************************************************************************
 
 
 //************************************************************************
@@ -205,9 +279,9 @@ private:
   of an element!
  */
 template<int dim, int dimworld, class ct, 
-	template<int,int> class NeighborIteratorImp,
-	template<int,int,int> class EntityImp, 
-	template<int,int> class ElementImp
+  template<int,int> class NeighborIteratorImp,
+  template<int,int,int> class EntityImp, 
+  template<int,int> class ElementImp
 >  
 class NeighborIterator
 {
@@ -222,78 +296,102 @@ public:
     typedef NeighborIteratorImp<dim,dimworld> NeighborIterator;
   };
 
-	//! know your own dimension
-	enum { dimension=dim };
+  //! know your own dimension
+  enum { dimension=dim };
 
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
+  //! know your own dimension of world
+  enum { dimensionworld=dimworld };
 
-	//! define type used for coordinates in grid module
-	typedef ct ctype;
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
 
-	//! prefix increment
-	NeighborIteratorImp<dim,dimworld>& operator++();
+  //! prefix increment
+  NeighborIteratorImp<dim,dimworld>& operator++();
 
-	//! equality
-	bool operator== (const NeighborIteratorImp<dim,dimworld>& i) const;
+  //! equality
+  bool operator== (const NeighborIteratorImp<dim,dimworld>& i) const;
 
-	//! inequality
-	bool operator!= (const NeighborIteratorImp<dim,dimworld>& i) const;
+  //! inequality
+  bool operator!= (const NeighborIteratorImp<dim,dimworld>& i) const;
 
-	//! access neighbor, dereferencing 
-	EntityImp<0,dim,dimworld>& operator*();
+  //! access neighbor, dereferencing 
+  EntityImp<0,dim,dimworld>& operator*();
 
-	//! access neighbor, arrow
-	EntityImp<0,dim,dimworld>* operator->();
+  //! access neighbor, arrow
+  EntityImp<0,dim,dimworld>* operator->();
 
-	//! return true if intersection is with boundary. \todo connection with boundary information, processor/outer boundary
-	bool boundary ();
+  //! return true if intersection is with boundary. \todo connection with boundary information, processor/outer boundary
+  bool boundary ();
 
-	//! return unit outer normal, this should be dependent on local coordinates for higher order boundary 
-	Vec<dimworld,ct>& unit_outer_normal (Vec<dim-1,ct>& local);
+  //! return unit outer normal, this should be dependent on local coordinates for higher order boundary 
+  Vec<dimworld,ct>& unit_outer_normal (Vec<dim-1,ct>& local);
 
-	//! return unit outer normal, if you know it is constant use this function instead
-	Vec<dimworld,ct>& unit_outer_normal ();
+  //! return unit outer normal, if you know it is constant use this function instead
+  Vec<dimworld,ct>& unit_outer_normal ();
 
-	/*! intersection of codimension 1 of this neighbor with element where iteration started. 
-	  Here returned element is in LOCAL coordinates of the element where iteration started.
-	*/
-	ElementImp<dim-1,dim>& intersection_self_local ();
+  /*! intersection of codimension 1 of this neighbor with element where iteration started. 
+    Here returned element is in LOCAL coordinates of the element where iteration started.
+  */
+  ElementImp<dim-1,dim>& intersection_self_local ();
 
-	/*! intersection of codimension 1 of this neighbor with element where iteration started. 
-	  Here returned element is in GLOBAL coordinates of the element where iteration started.
-	*/
-	ElementImp<dim-1,dimworld>& intersection_self_global ();
+  /*! intersection of codimension 1 of this neighbor with element where iteration started. 
+    Here returned element is in GLOBAL coordinates of the element where iteration started.
+  */
+  ElementImp<dim-1,dimworld>& intersection_self_global ();
 
-	//! local number of codim 1 entity in self where intersection is contained in 
-	int number_in_self ();
+  //! local number of codim 1 entity in self where intersection is contained in 
+  int number_in_self ();
 
-	/*! intersection of codimension 1 of this neighbor with element where iteration started. 
-	  Here returned element is in LOCAL coordinates of neighbor
-	*/
-	ElementImp<dim-1,dim>& intersection_neighbor_local ();
+  /*! intersection of codimension 1 of this neighbor with element where iteration started. 
+    Here returned element is in LOCAL coordinates of neighbor
+  */
+  ElementImp<dim-1,dim>& intersection_neighbor_local ();
 
-	/*! intersection of codimension 1 of this neighbor with element where iteration started. 
-	  Here returned element is in LOCAL coordinates of neighbor
-	*/
-	ElementImp<dim-1,dimworld>& intersection_neighbor_global ();
+  /*! intersection of codimension 1 of this neighbor with element where iteration started. 
+    Here returned element is in LOCAL coordinates of neighbor
+  */
+  ElementImp<dim-1,dimworld>& intersection_neighbor_global ();
 
-	//! local number of codim 1 entity in neighbor where intersection is contained in 
-	int number_in_neighbor ();
+  //! local number of codim 1 entity in neighbor where intersection is contained in 
+  int number_in_neighbor ();
 
-	/*! Checking presence and format of all interface functions. With
-	  this method all derived classes can check their correct definition.
-	*/
-	void checkIF ();
+  /*! Checking presence and format of all interface functions. With
+    this method all derived classes can check their correct definition.
+  */
+  void checkIF ();
 
 private:
-	//! Barton-Nackman trick 
-	NeighborIteratorImp<dim,dimworld>& asImp () 
-		{return static_cast<NeighborIteratorImp<dim,dimworld>&>(*this);}
-	const NeighborIteratorImp<dim,dimworld>& asImp () const 
-		{return static_cast<const NeighborIteratorImp<dim,dimworld>&>(*this);}
+  //! Barton-Nackman trick 
+  NeighborIteratorImp<dim,dimworld>& asImp () 
+    {return static_cast<NeighborIteratorImp<dim,dimworld>&>(*this);}
+  const NeighborIteratorImp<dim,dimworld>& asImp () const 
+    {return static_cast<const NeighborIteratorImp<dim,dimworld>&>(*this);}
 };
 
+//**************************************************************************
+//
+// --NeighborIteratorDefault
+//
+//! Default implementation for NeighborIterator. 
+//
+//**************************************************************************
+template<int dim, int dimworld, class ct, 
+  template<int,int> class NeighborIteratorImp,
+  template<int,int,int> class EntityImp, 
+  template<int,int> class ElementImp
+>  
+class NeighborIteratorDefault 
+: public NeighborIterator <dim,dimworld,ct,NeighborIteratorImp,EntityImp,ElementImp>
+{
+public:
+  // no default functionality at this moment 
+private:
+  //! Barton-Nackman trick 
+  NeighborIteratorImp<dim,dimworld>& asImp () 
+    {return static_cast<NeighborIteratorImp<dim,dimworld>&>(*this);}
+  const NeighborIteratorImp<dim,dimworld>& asImp () const 
+    {return static_cast<const NeighborIteratorImp<dim,dimworld>&>(*this);}
+}; // end NeighborIteratorDefault 
 
 //************************************************************************
 // H I E R A R C H I C I T E R A T O R
@@ -307,8 +405,8 @@ private:
   hierarchically refined meshes.
  */
 template<int dim, int dimworld, class ct, 
-	template<int,int> class HierarchicIteratorImp,
-	template<int,int,int> class EntityImp
+  template<int,int> class HierarchicIteratorImp,
+  template<int,int,int> class EntityImp
 >  
 class HierarchicIterator
 {
@@ -321,41 +419,84 @@ public:
     typedef EntityImp<0,dim,dimworld>           Entity;
     typedef HierarchicIteratorImp<dim,dimworld> HierarchicIterator;
   };
-	//! know your own dimension
-	enum { dimension=dim };
+  //! know your own dimension
+  enum { dimension=dim };
 
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
+  //! know your own dimension of world
+  enum { dimensionworld=dimworld };
 
-	//! define type used for coordinates in grid module
-	typedef ct ctype;
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
 
-	//! prefix increment
-	HierarchicIteratorImp<dim,dimworld>& operator++();
+  //! prefix increment
+  HierarchicIteratorImp<dim,dimworld>& operator++();
 
-	//! equality
-	bool operator== (const HierarchicIteratorImp<dim,dimworld>& i) const;
+  //! equality
+  bool operator== (const HierarchicIteratorImp<dim,dimworld>& i) const;
 
-	//! inequality
-	bool operator!= (const HierarchicIteratorImp<dim,dimworld>& i) const;
+  //! inequality
+  bool operator!= (const HierarchicIteratorImp<dim,dimworld>& i) const;
 
-	//! dereferencing
-	EntityImp<0,dim,dimworld>& operator*();
+  //! dereferencing
+  EntityImp<0,dim,dimworld>& operator*();
 
-	//! arrow
-	EntityImp<0,dim,dimworld>* operator->();
+  //! arrow
+  EntityImp<0,dim,dimworld>* operator->();
 
-	/*! Checking presence and format of all interface functions. With
-	  this method all derived classes can check their correct definition.
-	*/
-	void checkIF ();
+  /*! Checking presence and format of all interface functions. With
+    this method all derived classes can check their correct definition.
+  */
+  void checkIF ();
 
 private:
-	//! Barton-Nackman trick 
-	HierarchicIteratorImp<dim,dimworld>& asImp () 
-		{return static_cast<HierarchicIteratorImp<dim,dimworld>&>(*this);}
-	const HierarchicIteratorImp<dim,dimworld>& asImp () const 
-		{return static_cast<const HierarchicIteratorImp<dim,dimworld>&>(*this);}
+  //! Barton-Nackman trick 
+  HierarchicIteratorImp<dim,dimworld>& asImp () 
+    {return static_cast<HierarchicIteratorImp<dim,dimworld>&>(*this);}
+  const HierarchicIteratorImp<dim,dimworld>& asImp () const 
+    {return static_cast<const HierarchicIteratorImp<dim,dimworld>&>(*this);}
+};
+
+//***************************************************************************
+//
+// --HierarchicIteratorDefault 
+// 
+//! Default implementation of the HierarchicIterator. 
+//! This class provides functionality which uses the interface of
+//! HierarchicIterator. For performance implementation the method of this
+//! class should be overloaded if a fast implementation can be done. 
+//
+//***************************************************************************
+template<int dim, int dimworld, class ct, 
+  template<int,int> class HierarchicIteratorImp,
+  template<int,int,int> class EntityImp
+>  
+class HierarchicIteratorDefault 
+: public HierarchicIterator <dim,dimworld,ct,HierarchicIteratorImp,EntityImp> 
+{
+public:
+
+  //! remember the template types 
+  struct Traits
+  {
+    typedef ct                                  CoordType;  
+    typedef EntityImp<0,dim,dimworld>           Entity;
+    typedef HierarchicIteratorImp<dim,dimworld> HierarchicIterator;
+  };
+  //! know your own dimension
+  enum { dimension=dim };
+
+  //! know your own dimension of world
+  enum { dimensionworld=dimworld };
+
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
+
+private:
+  //! Barton-Nackman trick 
+  HierarchicIteratorImp<dim,dimworld>& asImp () 
+    {return static_cast<HierarchicIteratorImp<dim,dimworld>&>(*this);}
+  const HierarchicIteratorImp<dim,dimworld>& asImp () const 
+    {return static_cast<const HierarchicIteratorImp<dim,dimworld>&>(*this);}
 };
 
 //************************************************************************
@@ -369,11 +510,11 @@ private:
   Here: the general template
  */
 template<int codim, int dim, int dimworld, class ct, 
-	template<int,int,int> class EntityImp, 
-	template<int,int> class ElementImp, 
-	template<int,int,int> class LevelIteratorImp,
-	template<int,int> class NeighborIteratorImp,
-	template<int,int> class HierarchicIteratorImp
+  template<int,int,int> class EntityImp, 
+  template<int,int> class ElementImp, 
+  template<int,int,int> class LevelIteratorImp,
+  template<int,int> class NeighborIteratorImp,
+  template<int,int> class HierarchicIteratorImp
 >  
 class Entity {
 public:
@@ -388,36 +529,64 @@ public:
     typedef HierarchicIteratorImp<dim,dimworld>  HierarchicIterator;
   };
   
-	//! know your own codimension
-	enum { codimension=codim };
+  //! know your own codimension
+  enum { codimension=codim };
 
-	//! know your own dimension
-	enum { dimension=dim };
+  //! know your own dimension
+  enum { dimension=dim };
 
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
+  //! know your own dimension of world
+  enum { dimensionworld=dimworld };
 
-	//! define type used for coordinates in grid module
-	typedef ct ctype;
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
 
-	//! level of this element
-	int level ();
+  //! level of this element
+  int level ();
 
-	//! index is unique and consecutive per level and codim used for access to degrees of freedom
-	int index (); 
+  //! index is unique and consecutive per level and codim used for access to degrees of freedom
+  int index (); 
 
-	//! geometry of this entity
-	ElementImp<dim-codim,dimworld>& geometry ();
+  //! geometry of this entity
+  ElementImp<dim-codim,dimworld>& geometry ();
 
-	/*! Checking presence and format of all interface functions. With
-	  this method all derived classes can check their correct definition.
-	*/
-	void checkIF ();
+  /*! Checking presence and format of all interface functions. With
+    this method all derived classes can check their correct definition.
+  */
+  void checkIF ();
 
 private:
-	//! Barton-Nackman trick 
-	EntityImp<codim,dim,dimworld>& asImp () {return static_cast<EntityImp<codim,dim,dimworld>&>(*this);}
+  //! Barton-Nackman trick 
+  EntityImp<codim,dim,dimworld>& asImp () {return static_cast<EntityImp<codim,dim,dimworld>&>(*this);}
 };
+
+
+//********************************************************************
+//
+// --EntityDefault
+//
+//! EntityDefault provides default implementations for Entity which uses
+//! the implemented interface which has to be done by the user. 
+//
+//********************************************************************
+template<int codim, int dim, int dimworld, class ct, 
+  template<int,int,int> class EntityImp, 
+  template<int,int> class ElementImp, 
+  template<int,int,int> class LevelIteratorImp,
+  template<int,int> class NeighborIteratorImp,
+  template<int,int> class HierarchicIteratorImp
+>  
+class EntityDefault 
+: public Entity <codim,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,NeighborIteratorImp,HierarchicIteratorImp> 
+{
+public:
+  // at this moment no default implementation 
+private:
+  //! Barton-Nackman trick 
+  EntityImp<codim,dim,dimworld>& asImp () {return static_cast<EntityImp<codim,dim,dimworld>&>(*this);}
+
+}; // end EntityDefault
+
 
 /*! 
   A Grid is a container of grid entities. An entity is parametrized by the codimension.
@@ -433,11 +602,11 @@ private:
   of an element!
  */
 template<int dim, int dimworld, class ct, 
-	template<int,int,int> class EntityImp, 
-	template<int,int> class ElementImp, 
-	template<int,int,int> class LevelIteratorImp,
-	template<int,int> class NeighborIteratorImp,
-	template<int,int> class HierarchicIteratorImp
+  template<int,int,int> class EntityImp, 
+  template<int,int> class ElementImp, 
+  template<int,int,int> class LevelIteratorImp,
+  template<int,int> class NeighborIteratorImp,
+  template<int,int> class HierarchicIteratorImp
 >  
 class Entity<0,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,NeighborIteratorImp,HierarchicIteratorImp> {
 public:
@@ -455,79 +624,138 @@ public:
   };
 
 
-	//! know your own codimension
-	enum { codimension=0 };
+  //! know your own codimension
+  enum { codimension=0 };
 
-	//! know your own dimension
-	enum { dimension=dim };
+  //! know your own dimension
+  enum { dimension=dim };
 
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
+  //! know your own dimension of world
+  enum { dimensionworld=dimworld };
 
-	//! define type used for coordinates in grid module
-	typedef ct ctype;
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
 
-	//! level of this element
-	int level ();
+  //! level of this element
+  int level ();
 
-	//! index is unique and consecutive per level and codim used for access to degrees of freedom
-	int index (); 
+  //! index is unique and consecutive per level and codim used for access to degrees of freedom
+  int index (); 
 
-	//! geometry of this entity
-	ElementImp<dim,dimworld>& geometry ();
+  //! geometry of this entity
+  ElementImp<dim,dimworld>& geometry ();
 
-	/*! Intra-element access to entities of codimension cc > codim. Return number of entities
-	  with codimension cc.
-	 */
-	template<int cc> int count (); 
+  /*! Intra-element access to entities of codimension cc > codim. Return number of entities
+    with codimension cc.
+   */
+  template<int cc> int count (); 
 
-	/*! Provide access to mesh entity i of given codimension. Entities
-	  are numbered 0 ... count<cc>()-1
-	 */ 
-	template<int cc> LevelIteratorImp<cc,dim,dimworld> entity (int i); // 0 <= i < count()
+  /*! Provide access to mesh entity i of given codimension. Entities
+    are numbered 0 ... count<cc>()-1
+   */ 
+  template<int cc> LevelIteratorImp<cc,dim,dimworld> entity (int i); // 0 <= i < count()
 
-	/*! Intra-level access to neighboring elements. A neighbor is an entity of codimension 0
-	  which has an entity of codimension 1 in commen with this entity. Access to neighbors
-	  is provided using iterators. This allows meshes to be nonmatching. Returns iterator
-	  referencing the first neighbor.
-	 */
-	NeighborIteratorImp<dim,dimworld> nbegin ();
+  /*! Intra-level access to neighboring elements. A neighbor is an entity of codimension 0
+    which has an entity of codimension 1 in commen with this entity. Access to neighbors
+    is provided using iterators. This allows meshes to be nonmatching. Returns iterator
+    referencing the first neighbor.
+   */
+  NeighborIteratorImp<dim,dimworld> nbegin ();
 
-	//! Reference to one past the last neighbor
-	NeighborIteratorImp<dim,dimworld> nend ();
+  //! Reference to one past the last neighbor
+  NeighborIteratorImp<dim,dimworld> nend ();
 
-	//! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
-	LevelIteratorImp<0,dim,dimworld> father ();
+  //! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
+  LevelIteratorImp<0,dim,dimworld> father ();
 
-	/*! Location of this element relative to the reference element element of the father.
-	  This is sufficient to interpolate all dofs in conforming case.
-	  Nonconforming may require access to neighbors of father and
-	  computations with local coordinates.
-	  On the fly case is somewhat inefficient since dofs  are visited several times.
-	  If we store interpolation matrices, this is tolerable. We assume that on-the-fly
-	  implementation of numerical algorithms is only done for simple discretizations.
-	  Assumes that meshes are nested.
-	*/
-	ElementImp<dim,dim>& father_relative_local ();
+  /*! Location of this element relative to the reference element element of the father.
+    This is sufficient to interpolate all dofs in conforming case.
+    Nonconforming may require access to neighbors of father and
+    computations with local coordinates.
+    On the fly case is somewhat inefficient since dofs  are visited several times.
+    If we store interpolation matrices, this is tolerable. We assume that on-the-fly
+    implementation of numerical algorithms is only done for simple discretizations.
+    Assumes that meshes are nested.
+  */
+  ElementImp<dim,dim>& father_relative_local ();
 
-	/*! Inter-level access to son elements on higher levels<=maxlevel.
-	  This is provided for sparsely stored nested unstructured meshes.
-	  Returns iterator to first son.
-	*/
-	HierarchicIteratorImp<dim,dimworld> hbegin (int maxlevel);
+  /*! Inter-level access to son elements on higher levels<=maxlevel.
+    This is provided for sparsely stored nested unstructured meshes.
+    Returns iterator to first son.
+  */
+  HierarchicIteratorImp<dim,dimworld> hbegin (int maxlevel);
 
-	//! Returns iterator to one past the last son
-	HierarchicIteratorImp<dim,dimworld> hend (int maxlevel);
+  //! Returns iterator to one past the last son
+  HierarchicIteratorImp<dim,dimworld> hend (int maxlevel);
 
-	/*! Checking presence and format of all interface functions. With
-	  this method all derived classes can check their correct definition.
-	*/
-	void checkIF ();
+  /*! Checking presence and format of all interface functions. With
+    this method all derived classes can check their correct definition.
+  */
+  void checkIF ();
 
 private:
-	//! Barton-Nackman trick 
-	EntityImp<0,dim,dimworld>& asImp () {return static_cast<EntityImp<0,dim,dimworld>&>(*this);}
+  //! Barton-Nackman trick 
+  EntityImp<0,dim,dimworld>& asImp () {return static_cast<EntityImp<0,dim,dimworld>&>(*this);}
 };
+
+
+//********************************************************************
+//
+// --EntityDefault
+//
+//! EntityDefault provides default implementations for Entity which uses
+//! the implemented interface which has to be done by the user. 
+//
+//********************************************************************
+template<int dim, int dimworld, class ct, 
+  template<int,int,int> class EntityImp, 
+  template<int,int> class ElementImp, 
+  template<int,int,int> class LevelIteratorImp,
+  template<int,int> class NeighborIteratorImp,
+  template<int,int> class HierarchicIteratorImp
+>  
+class EntityDefault
+<0,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,NeighborIteratorImp,HierarchicIteratorImp>
+: public Entity <0,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,
+  NeighborIteratorImp,HierarchicIteratorImp> 
+{
+public:
+  //! remeber the template types
+  struct Traits
+  {
+    typedef ct                                   CoordType;
+    typedef ElementImp<dim,dimworld>             Element;
+    typedef EntityImp<0,dim,dimworld>            Entity;
+    typedef LevelIteratorImp<0,dim,dimworld>     LevelIterator;
+    typedef NeighborIteratorImp<dim,dimworld>    NeighborIterator;
+    typedef HierarchicIteratorImp<dim,dimworld>  HierarchicIterator;
+  };
+
+  //! know your own codimension
+  enum { codimension=0 };
+
+  //! know your own dimension
+  enum { dimension=dim };
+
+  //! know your own dimension of world
+  enum { dimensionworld=dimworld };
+
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
+
+  // default implementation for access to subIndex via interface method entity
+  // default is to return the index of the sub entity, is very slow, but works
+  template <int cc> int subIndex ( int i );
+//  {
+//    return (asImp().entity<cc>(i))->index();
+//  };
+
+private:
+  //! Barton-Nackman trick 
+  EntityImp<0,dim,dimworld>& asImp () {return static_cast<EntityImp<0,dim,dimworld>&>(*this);}
+};
+// end EntityDefault
+//******************************************************************************
 
 /*! 
   A Grid is a container of grid entities. An entity is parametrized by the codimension.
@@ -537,11 +765,11 @@ private:
   that this specialization has an extended interface compared to the general case
  */
 template<int dim, int dimworld, class ct, 
-	template<int,int,int> class EntityImp, 
-	template<int,int> class ElementImp, 
-	template<int,int,int> class LevelIteratorImp,
-	template<int,int> class NeighborIteratorImp,
-	template<int,int> class HierarchicIteratorImp
+  template<int,int,int> class EntityImp, 
+  template<int,int> class ElementImp, 
+  template<int,int,int> class LevelIteratorImp,
+  template<int,int> class NeighborIteratorImp,
+  template<int,int> class HierarchicIteratorImp
 >  
 class Entity<dim,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,NeighborIteratorImp,HierarchicIteratorImp> {
 public:
@@ -556,45 +784,63 @@ public:
     typedef HierarchicIteratorImp<dim,dimworld>  HierarchicIterator;
   };
 
-	//! know your own codimension
-	enum { codimension=dim };
+  //! know your own codimension
+  enum { codimension=dim };
 
-	//! know your own dimension
-	enum { dimension=dim };
+  //! know your own dimension
+  enum { dimension=dim };
 
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
+  //! know your own dimension of world
+  enum { dimensionworld=dimworld };
 
-	//! define type used for coordinates in grid module
-	typedef ct ctype;
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
 
-	//! level of this element
-	int level ();
+  //! level of this element
+  int level ();
 
-	//! index is unique and consecutive per level and codim used for access to degrees of freedom
-	int index (); 
+  //! index is unique and consecutive per level and codim used for access to degrees of freedom
+  int index (); 
 
-	//! geometry of this entity
-	ElementImp<0,dimworld>& geometry ();
+  //! geometry of this entity
+  ElementImp<0,dimworld>& geometry ();
 
-	/*! Location of this vertex within a mesh entity of codimension 0 on the coarse grid.
-	  This can speed up on-the-fly interpolation for linear conforming elements
-	  Possibly this is sufficient for all applications we want on-the-fly.
-	*/
-	LevelIteratorImp<0,dim,dimworld> father ();
+  /*! Location of this vertex within a mesh entity of codimension 0 on the coarse grid.
+    This can speed up on-the-fly interpolation for linear conforming elements
+    Possibly this is sufficient for all applications we want on-the-fly.
+  */
+  LevelIteratorImp<0,dim,dimworld> father ();
 
-	//! local coordinates within father
-	Vec<dim,ct>& local ();
+  //! local coordinates within father
+  Vec<dim,ct>& local ();
 
-	/*! Checking presence and format of all interface functions. With
-	  this method all derived classes can check their correct definition.
-	*/
-	void checkIF ();
+  /*! Checking presence and format of all interface functions. With
+    this method all derived classes can check their correct definition.
+  */
+  void checkIF ();
 
 private:
-	//! Barton-Nackman trick 
-	EntityImp<dim,dim,dimworld>& asImp () {return static_cast<EntityImp<dim,dim,dimworld>&>(*this);}
+  //! Barton-Nackman trick 
+  EntityImp<dim,dim,dimworld>& asImp () {return static_cast<EntityImp<dim,dim,dimworld>&>(*this);}
 };
+
+template<int dim, int dimworld, class ct, 
+  template<int,int,int> class EntityImp, 
+  template<int,int> class ElementImp, 
+  template<int,int,int> class LevelIteratorImp,
+  template<int,int> class NeighborIteratorImp,
+  template<int,int> class HierarchicIteratorImp
+>  
+class EntityDefault <dim,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,NeighborIteratorImp,HierarchicIteratorImp> 
+: public Entity <dim,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,NeighborIteratorImp,HierarchicIteratorImp> 
+{
+public:
+  // no default implementation at the moment
+private:
+  //! Barton-Nackman trick 
+  EntityImp<dim,dim,dimworld>& asImp () {return static_cast<EntityImp<dim,dim,dimworld>&>(*this);}
+};
+
 
 
 //************************************************************************
@@ -604,8 +850,8 @@ private:
 /*! Enables iteration over all entities of a given codimension and level of a grid.
  */
 template<int codim, int dim, int dimworld, class ct, 
-	template<int,int,int> class LevelIteratorImp,
-	template<int,int,int> class EntityImp
+  template<int,int,int> class LevelIteratorImp,
+  template<int,int,int> class EntityImp
 >  
 class LevelIterator
 {
@@ -618,48 +864,91 @@ public:
     typedef LevelIteratorImp<codim,dim,dimworld> LevelIterator;
   };
 
-	//! know your own codimension
-	enum { codimension=dim };
+  //! know your own codimension
+  enum { codimension=dim };
 
-	//! know your own dimension
-	enum { dimension=dim };
+  //! know your own dimension
+  enum { dimension=dim };
 
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
+  //! know your own dimension of world
+  enum { dimensionworld=dimworld };
 
-	//! define type used for coordinates in grid module
-	typedef ct ctype;
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
 
-	//! prefix increment
-	LevelIteratorImp<codim,dim,dimworld>& operator++();
+  //! prefix increment
+  LevelIteratorImp<codim,dim,dimworld>& operator++();
 
-	//! equality
-	bool operator== (const LevelIteratorImp<codim,dim,dimworld>& i) const;
+  //! equality
+  bool operator== (const LevelIteratorImp<codim,dim,dimworld>& i) const;
 
-	//! inequality
-	bool operator!= (const LevelIteratorImp<codim,dim,dimworld>& i) const;
+  //! inequality
+  bool operator!= (const LevelIteratorImp<codim,dim,dimworld>& i) const;
 
-	//! dereferencing
-	EntityImp<codim,dim,dimworld>& operator*() ;
+  //! dereferencing
+  EntityImp<codim,dim,dimworld>& operator*() ;
 
-	//! arrow
-	EntityImp<codim,dim,dimworld>* operator->() ;
+  //! arrow
+  EntityImp<codim,dim,dimworld>* operator->() ;
 
-	//! ask for level of entity
-	int level ();
+  //! ask for level of entity
+  int level ();
 
-	/*! Checking presence and format of all interface functions. With
-	  this method all derived classes can check their correct definition.
-	*/
-	void checkIF ();
+  /*! Checking presence and format of all interface functions. With
+    this method all derived classes can check their correct definition.
+  */
+  void checkIF ();
 
 private:
-	//! Barton-Nackman trick 
-	LevelIteratorImp<codim,dim,dimworld>& asImp () 
-		{return static_cast<LevelIteratorImp<codim,dim,dimworld>&>(*this);}
-	const LevelIteratorImp<codim,dim,dimworld>& asImp () const 
-		{return static_cast<const LevelIteratorImp<codim,dim,dimworld>&>(*this);}
+  //! Barton-Nackman trick 
+  LevelIteratorImp<codim,dim,dimworld>& asImp () 
+    {return static_cast<LevelIteratorImp<codim,dim,dimworld>&>(*this);}
+  const LevelIteratorImp<codim,dim,dimworld>& asImp () const 
+    {return static_cast<const LevelIteratorImp<codim,dim,dimworld>&>(*this);}
 };
+
+//**********************************************************************
+//
+//  --LevelIteratorDefault
+//
+//! Default implementation of LevelIterator. 
+//
+//**********************************************************************
+template<int codim, int dim, int dimworld, class ct, 
+  template<int,int,int> class LevelIteratorImp,
+  template<int,int,int> class EntityImp
+>  
+class LevelIteratorDefault 
+: public LevelIterator <codim,dim,dimworld,ct,LevelIteratorImp,EntityImp> 
+{
+public:
+  //! remeber the template types
+  struct Traits
+  {
+    typedef ct                                   CoordType;
+    typedef EntityImp<codim,dim,dimworld>        Entity;
+    typedef LevelIteratorImp<codim,dim,dimworld> LevelIterator;
+  };
+
+  //! know your own codimension
+  enum { codimension=dim };
+
+  //! know your own dimension
+  enum { dimension=dim };
+
+  //! know your own dimension of world
+  enum { dimensionworld=dimworld };
+
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
+private:
+  //! Barton-Nackman trick 
+  LevelIteratorImp<codim,dim,dimworld>& asImp () 
+    {return static_cast<LevelIteratorImp<codim,dim,dimworld>&>(*this);}
+  const LevelIteratorImp<codim,dim,dimworld>& asImp () const 
+    {return static_cast<const LevelIteratorImp<codim,dim,dimworld>&>(*this);}
+}; // end LevelIteratorDefault 
+//**************************************************************************
 
 
 //************************************************************************
@@ -681,7 +970,7 @@ private:
   Template class Grid defines a "base class" for all grids. 
  */
 template< int dim, int dimworld, class ct, template<int,int> class GridImp, 
-	template<int,int,int> class LevelIteratorImp, template<int,int,int> class EntityImp>  
+  template<int,int,int> class LevelIteratorImp, template<int,int,int> class EntityImp>  
 class Grid {
 public:
 
@@ -695,40 +984,176 @@ public:
     typedef EntityImp<codim,dim,dimworld>         Entity;
   };
   
-	//! A grid exports its dimension
-	enum { dimension=dim };
+  //! A grid exports its dimension
+  enum { dimension=dim };
 
-	//! A grid knowns the dimension of the world
-	enum { dimensionworld=dimworld };
+  //! A grid knowns the dimension of the world
+  enum { dimensionworld=dimworld };
 
-	//! Define type used for coordinates in grid module
-	typedef ct ctype;
+  //! Define type used for coordinates in grid module
+  typedef ct ctype;
 
-	/*! Return maximum level defined in this grid. Levels are numbered
-	  0 ... maxlevel with 0 the coarsest level.
+  /*! Return maximum level defined in this grid. Levels are numbered
+    0 ... maxlevel with 0 the coarsest level.
      */
-	int maxlevel() const;
+  int maxlevel() const;
 
-	//! Return number of grid entities of a given codim on a given level
-	int size (int level, int codim) const;
+  //! Return number of grid entities of a given codim on a given level
+  int size (int level, int codim) const;
 
-	//! Iterator to first entity of given codim on level
-	template<int codim>
-	LevelIteratorImp<codim,dim,dimworld> lbegin (int level);
+  //! Iterator to first entity of given codim on level
+  template<int codim>
+  LevelIteratorImp<codim,dim,dimworld> lbegin (int level);
 
-	//! one past the end on this level
-	template<int codim>
-	LevelIteratorImp<codim,dim,dimworld> lend (int level);
+  //! one past the end on this level
+  template<int codim>
+  LevelIteratorImp<codim,dim,dimworld> lend (int level);
 
-	/*! Checking presence and format of all interface functions. With
-	  this method all derived classes can check their correct definition.
-	*/
-	void checkIF ();
+  //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ... 
+  GridIdentifier type(); 
+
+  //! write Grid to file filename 
+  bool writeGrid ( const char * filename );
+
+  //! read Grid from file filename 
+  bool readGrid ( const char * filename );
+
+  /*! Checking presence and format of all interface functions. With
+    this method all derived classes can check their correct definition.
+  */
+  void checkIF ();
 
 private:
-	//! Barton-Nackman trick 
-	GridImp<dim,dimworld>& asImp () {return static_cast<GridImp<dim,dimworld>&>(*this);}
+  //! Barton-Nackman trick 
+  GridImp<dim,dimworld>& asImp () {return static_cast<GridImp<dim,dimworld>&>(*this);}
 };
+
+
+//************************************************************************
+//
+//  Default Methods of Grid 
+//
+//************************************************************************
+//
+template< int dim, int dimworld, class ct, template<int,int> class GridImp, 
+  template<int,int,int> class LevelIteratorImp, template<int,int,int> class EntityImp>  
+class GridDefault : public Grid <dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp> 
+{
+public:
+
+  //! remember the types of template parameters
+  template <int codim> 
+  struct Traits 
+  {
+    typedef ct                                    CoordType;
+    typedef GridImp<dim,dimworld>                 ImpGrid;
+    typedef LevelIteratorImp<codim,dim,dimworld>  LevelIterator;
+    typedef EntityImp<codim,dim,dimworld>         Entity;
+  };
+
+  class LeafIterator;
+  
+  //! A grid exports its dimension
+  enum { dimension=dim };
+
+  //! A grid knowns the dimension of the world
+  enum { dimensionworld=dimworld };
+
+  //! Define type used for coordinates in grid module
+  typedef ct ctype;
+
+  //! return LeafIterator which points to the first entity in maxLevel
+  LeafIterator leafbegin (int maxLevel);
+
+  //! return LeafIterator which points behind the last entity in maxLevel
+  LeafIterator leafend( int maxLevel);
+
+  //! write Grid with GridType file filename and time 
+  //! this method use the Grid Interface Method writeGrid 
+  //! is not the same 
+  template <FileFormatType ftype>
+  bool grid2File ( const char * filename , int processor =0, ct time=0.0, 
+                   bool adaptive=false , int timestep = 0);
+
+  //! get Grid from file with time and timestep , return true if ok 
+  template <FileFormatType ftype> 
+  bool file2Grid ( const char * filename , ct & time , int processor=0, 
+                   bool adaptive= false, int timestep=0 );
+  
+private:
+  //! Barton-Nackman trick 
+  GridImp<dim,dimworld>& asImp () {return static_cast<GridImp<dim,dimworld>&>(*this);}
+};
+
+
+// GridDefault::LeafIterator 
+template< int dim, int dimworld, class ct, template<int,int> class GridImp, 
+  template<int,int,int> class LevelIteratorImp, template<int,int,int> class EntityImp>  
+class GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::LeafIterator
+//: public LevelIterator <0,dim,dimworld,ct,LevelIteratorImp,EntityImp> 
+{
+    // some typedefs  
+    typedef GridImp<dim,dimworld> GridType;
+    typedef typename Traits<0>::LevelIterator LevelIterator; 
+    typedef typename Traits<0>::Entity EntityType;
+    typedef typename EntityType::Traits::HierarchicIterator HierIterator;
+
+public:
+    //! Constructor making new LeafIterator
+    LeafIterator (GridType &grid, int maxlevel, bool end);
+      
+    //! prefix increment
+    LeafIterator& operator ++();
+
+    //! prefix increment i times 
+    LeafIterator& operator ++(int i);
+
+    //! equality
+    bool operator == (const LeafIterator& i) const;
+
+    //! inequality
+    bool operator != (const LeafIterator& i) const;
+
+    // didn't work with implementation in .cc file, so what 
+    //! dereferencing
+    EntityImp<0,dim,dimworld>& operator*() { return (*en_); };
+
+    //! arrow
+    EntityImp<0,dim,dimworld>* operator->() { return (en_); };
+
+    //! ask for level of entity
+    int level ();
+
+    private:
+    EntityImp<0,dim,dimworld> * goNextEntity();
+
+    // private member varibles 
+    // pointer to actual Entity 
+    EntityType        *en_;
+
+    // macro grid iterator 
+    LevelIterator *it_;
+    // end of macro grid iterator 
+    LevelIterator *endit_;
+
+    // hierarchical iterator 
+    HierIterator *hierit_;
+
+    // end of hierarchical iterator 
+    HierIterator *endhierit_;
+
+    // true if we must go to next macro element 
+    bool goNextMacroEntity_;
+    bool built_;
+    bool useHierarchic_;
+    bool end_; 
+
+    // go down until max level
+    int maxLev_;
+    
+    public:
+  };
+
 
 
 /** @} */
