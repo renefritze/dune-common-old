@@ -57,7 +57,7 @@ template <int m, int p>
 struct power_M_P
 {
   //! power stores m^p
-  enum { power = ( p < 1 ) ? 1 : (m * power_M_P<m,p-1>::power ) };
+  enum { power = (m * power_M_P<m,p-1>::power ) };
 };
 
 //! end of recursion via specialization
@@ -96,7 +96,7 @@ public:
 
 private:
   //! Vectors storing the quadrature points and weights
-	Mat<dim,n,ct> local;
+	Vec<dim,ct> local[n];
 	RangeField weight[n];
 };
 

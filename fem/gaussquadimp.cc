@@ -172,7 +172,7 @@ inline GaussQuadrature<Domain,RangeField,dim,order>::GaussQuadrature ()
 	for (int i=0; i<n; ++i)
 	{
 		// compute integer coordinates of Gauss point from number
-		Vec<dim,short> x ((short) 0);
+		Vec<dim,int> x (0);
 		int z = i;
 		for (int k=0; k<dim; ++k)
 		{
@@ -182,7 +182,7 @@ inline GaussQuadrature<Domain,RangeField,dim,order>::GaussQuadrature ()
 
 		weight[i] = 1.0;
 		for (int k=0; k<dim; k++) {
-			local(i,k) = G[x(k)];
+			local[i](k) = G[x(k)];
 			weight[i] *= W[x(k)];
 		}
 	}
@@ -197,7 +197,7 @@ inline int GaussQuadrature<Domain,RangeField,dim,order>::nip ()
 template<class Domain, class RangeField, int dim, int order>
 inline Domain& GaussQuadrature<Domain,RangeField,dim,order>::ip (int i)
 {
-	return local(i);
+	return local[i];
 }
 
 template<class Domain, class RangeField, int dim, int order>
