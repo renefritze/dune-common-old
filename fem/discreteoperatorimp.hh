@@ -6,9 +6,14 @@
 
 namespace Dune{
 
+/** @defgroup DiscreteOperators
+    
+    The DiscreteFunction is resposible for the dof storage. This can be
+    done in various ways an is left to the user. The user has to derive his
+    own implemenation from the DiscreteFunctionDefault class. If some of
+    the implementations in the default class are for his dof storage
+    unefficient, then one can overload this functions.
 
-/*!  One Implementation of a discrete Operator 
-  
   A discrete operator of this type consists of a local operator and a grid
   walkthrough. On each Entity then the local operator is called. 
   Before strating the walkthrough the prepareGlobal method of the local
@@ -21,7 +26,10 @@ namespace Dune{
   another discrete operator or by multiplying with a scalar. 
   The result of a sum has to be a mapping ( :-( ). 
    
-*/ 
+  
+  @{
+ */
+
 template <class DiscreteFunctionType, class LocalOperatorImp >
 class DiscreteOperator 
 : public DiscreteOperatorDefault <DiscreteFunctionType, DiscreteFunctionType >
@@ -205,6 +213,8 @@ private:
     return (*this);
   }
 };
+
+/** @} end documentation group */
 
 }
 
