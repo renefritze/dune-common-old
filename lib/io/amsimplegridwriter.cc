@@ -1,6 +1,9 @@
 // ///////////////////////////////////////////////
-// Specialization for SimpleGrid<3,3>
+// Specialization of the AmiraMesh writer for SimpleGrid<3,3>
 // ///////////////////////////////////////////////
+
+#include"../../grid/simplegrid.hh"
+
 namespace Dune {
     
     template<>
