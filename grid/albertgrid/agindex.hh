@@ -75,7 +75,20 @@ public:
         state_[i] = UNUSED;
       }
     }
+    std::cout << maxIndex() << " max Index of Set \n";
   }
+
+  int maxIndex () const
+  {
+    int max = 0;
+    for(int i =0; i<globalIndex_.size(); i++)
+    {
+      if(globalIndex_[i] > max ) max = globalIndex_[i];
+    }
+    return max;
+  }
+
+  
 
   int searchNext ()
   {
