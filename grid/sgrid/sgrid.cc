@@ -229,7 +229,7 @@ static inline FixedArray<int,n>& coarsen (FixedArray<int,n>& in)
 }
 
 template<int codim, int dim, int dimworld>
-inline SEntityBase<codim,dim,dimworld>::SEntityBase (SGrid<dim,dimworld>& _grid, int _l, int _id) : geo(true)
+inline SEntityBase<codim,dim,dimworld>::SEntityBase (SGrid<dim,dimworld>& _grid, int _l, int _id) : geo(false)
 {
   grid = &_grid;
         l = _l;
@@ -239,7 +239,7 @@ inline SEntityBase<codim,dim,dimworld>::SEntityBase (SGrid<dim,dimworld>& _grid,
 }
 
 template<int codim, int dim, int dimworld>
-inline SEntityBase<codim,dim,dimworld>::SEntityBase () : geo(true)
+inline SEntityBase<codim,dim,dimworld>::SEntityBase () : geo(false)
 {
         builtgeometry = false;
 }
