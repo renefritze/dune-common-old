@@ -1,21 +1,21 @@
-#ifndef _DUNE_ALBERTGRID_COMMUNICATOR_HH_
-#define _DUNE_ALBERTGRID_COMMUNICATOR_HH_
+#ifndef DUNE_ALBERTGRID_COMMUNICATOR_HH
+#define DUNE_ALBERTGRID_COMMUNICATOR_HH
+
+// use this define to control if Albert should use the found MPI
+// #define ALBERT_USES_MPI 1
 
 #ifdef HAVE_CONFIG_H
 #include <config.h> 
-#if !HAVE_MPI 
-#undef ALBERT_USES_MPI
-#else 
+#if defined(HAVE_MPI) && defined(ALBERT_USES_MPI)
 #include <mpi.h>
 #endif
 #endif
-
 
 #include <dune/common/dlist.hh>
 
 namespace Dune {
 
-#define COMMUNICATOR_COMM_TAG 457
+  static const int COMMUNICATOR_COMM_TAG = 457;
 
 /*!
   ProcListElement describes the link between two processors. 
@@ -23,7 +23,7 @@ namespace Dune {
   these two procs.
 */
 
-#ifdef ALBERT_USES_MPI
+#if defined(HAVE_MPI) && defined(ALBERT_USES_MPI)
 template <class BufferType>
 class ProcListElement 
 {
@@ -195,7 +195,7 @@ public:
   
 };
 
-#ifdef ALBERT_USES_MPI 
+#if defined(HAVE_MPI) && defined(ALBERT_USES_MPI)
 template <class GridType, class IndexSetType>
 class AlbertGridCommunicator 
 {
