@@ -23,16 +23,15 @@ namespace Dune {
   hierarchically refined meshes.
  */
 
-template<int dim, int dimworld>
+template<class GridImp>
 class UGGridHierarchicIterator :
-public HierarchicIteratorDefault <dim,dimworld, UGCtype,
-                          UGGridHierarchicIterator,UGGridEntity>
+        public HierarchicIteratorDefault <GridImp,UGGridHierarchicIterator>
 {
 
-    friend class UGGridEntity<0,dim,dimworld>;
+    friend class UGGridEntity<0,GridImp::dimension,GridImp>;
 
     // Either UG3d::ELEMENT or UG2d:ELEMENT
-    typedef typename TargetType<0,dim>::T UGElementType;
+    typedef typename TargetType<0,GridImp::dimension>::T UGElementType;
 
     // Stack entry
     struct StackEntry {
@@ -55,15 +54,15 @@ public:
   bool operator!= (const UGGridHierarchicIterator& i) const;
 
   //! dereferencing
-  UGGridEntity<0,dim,dimworld>& operator*();
+    UGGridEntity<0,GridImp::dimension,GridImp>& operator*();
 
   //! arrow
-  UGGridEntity<0,dim,dimworld>* operator->();
+    UGGridEntity<0,GridImp::dimension,GridImp>* operator->();
 
 private:
 
   //! implement with virtual element
-  UGGridEntity<0,dim,dimworld> virtualEntity_;
+    UGGridEntity<0,GridImp::dimension,GridImp> virtualEntity_;
 
   //! max level to go down 
   int maxlevel_;
