@@ -4,6 +4,8 @@
 #include<iostream>
 #include<math.h>
 
+
+
 //! Check condition at compilation time 
 template <bool flag> class CompileTimeChecker;
 
@@ -15,29 +17,16 @@ template <> class CompileTimeChecker<true> { };
 namespace Dune {
 /** @addtogroup Common
 
-	@{
+        @{
  */
 
 template<class T>
 T ABS (T t)
 {
-	if (t<0) return -t;
-	return t;
+        if (t<0) return -t;
+        return t;
 }
 
-template<class T>
-T MAX (T t1, T t2)
-{
-	if (t1<t2) return t2;
-	return t1;
-}
-
-template<class T>
-T MIN (T t1, T t2)
-{
-	if (t1<t2) return t1;
-	return t2;
-}
 
 template <class T>
 T* realloc(T* & pointer, int size) {
