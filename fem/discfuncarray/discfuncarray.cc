@@ -1,5 +1,5 @@
-#ifndef __DUNE_DISCFUNCARRAY_CC__
-#define __DUNE_DISCFUNCARRAY_CC__
+#ifndef DUNE_DISCFUNCARRAY_CC
+#define DUNE_DISCFUNCARRAY_CC
 
 namespace Dune 
 {
@@ -7,7 +7,7 @@ namespace Dune
 // Constructor making discrete function  
 template<class DiscreteFunctionSpaceType >
 inline DiscFuncArray< DiscreteFunctionSpaceType >::
-DiscFuncArray(DiscreteFunctionSpaceType & f) 
+DiscFuncArray(const DiscreteFunctionSpaceType & f) 
 : DiscreteFunctionDefaultType ( f )  
   , name_ ( "no name" )
   , freeLocalFunc_ (0) 
@@ -19,7 +19,7 @@ DiscFuncArray(DiscreteFunctionSpaceType & f)
 // Constructor making discrete function  
 template<class DiscreteFunctionSpaceType >
 inline DiscFuncArray< DiscreteFunctionSpaceType >::
-DiscFuncArray(const char * name, DiscreteFunctionSpaceType & f ) 
+DiscFuncArray(const char * name, const DiscreteFunctionSpaceType & f ) 
 : DiscreteFunctionDefaultType ( f )  
   , name_ ( name )
   , freeLocalFunc_ (0) 
@@ -79,7 +79,7 @@ inline void DiscFuncArray< DiscreteFunctionSpaceType >::print(std::ostream &s ) 
   ConstDofIteratorType enddof = this->dend ();
   for(ConstDofIteratorType itdof = this->dbegin (); itdof != enddof; ++itdof) 
   {
-    s << (*itdof) << " \n";
+      s << (*itdof) << " \n";
   } 
 }
 //*************************************************************************
