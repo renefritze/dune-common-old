@@ -7,6 +7,7 @@
 #include "operator/spmatrix.hh"
 #include "operator/CG.hh"
 
+
 namespace Dune 
 {
 
@@ -40,7 +41,7 @@ public:
   
 }; //end DiscreteOperator
 
-
+#if 0
 //***************************************************************************
 //
 //  --FV1stOrd Finite Volume scheme first order 
@@ -73,6 +74,7 @@ private:
   void solve(DiscFunc &f);
   
 }; //end FV1stOrd
+#endif
 
 
 //***************************************************************************
@@ -98,7 +100,7 @@ public:
   
   // preStep 
   template <class DiscFunc>
-  void assemble (DiscFunc &func, double dt);
+  void assemble (DiscFunc &func, double dt, double time);
 
   // solve 
   template <class DiscFunc>

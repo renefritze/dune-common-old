@@ -11,6 +11,8 @@ template <> struct CompileTimeChecker<true> {};
 //  implements a special DiscretOperator
 //
 //***************************************************************************
+//
+#if 0
 inline FV1stOrd::FV1stOrd()
 {  
   helpVec_ = NULL;
@@ -79,7 +81,7 @@ inline void FV1stOrd::finalize(DiscFunc &f)
   helpVec_->Free();
   built = false;
 }
-
+#endif
 
 //***************************************************************************
 //
@@ -201,7 +203,7 @@ inline void LinFEM::assembleMatrix(DiscFunc &func, int level)
 
 // resize od built the helpVec for the updates 
 template <class DiscFunc>
-inline void LinFEM::assemble(DiscFunc &func, double dt)
+inline void LinFEM::assemble(DiscFunc &func, double dt, double time)
 {
   // check that base type of function space is LagrangeOne at compile time
   //CompileTimeChecker<DiscFunc::mySpace::type == LagrangeOne> check;
@@ -305,7 +307,7 @@ inline void TimeEulerFV<SpaceDiscr>::
 assemble(DiscFunc &f, double startTime, double endTime)
 {
   // calc timestep size
-  double dt = 0.1; // hier fkt aufruf einbauen 
+  double dt = fv_->Getdt(); // hier fkt aufruf einbauen 
   
   int steps = static_cast<int> ((endTime - startTime)/dt+1);
 
@@ -331,7 +333,7 @@ inline DiscFunc& TimeEulerFV<SpaceDiscr>::operator() (DiscFunc &f)
   { 
     std::cout << "TimeStep " << it->index() << "\n";
     double timestep = (it->geometry().integration_element(tmp));
-    fv_->assemble(f,timestep); 
+    fv_->assemble(f,timestep,it->geometry()[0](0)); 
     fake(f);
     fv_->finalize(f);
     char na[20];

@@ -61,7 +61,8 @@ setFunction (Func &initFunc, int polOrd)
 
   int level = -1;
   LevelIterator endit = grid_->lend<0>(level);
-    
+  ssbm_->vset(vec_,0.0);  
+ 
   for(LevelIterator it = grid_->lbegin<0>(level); it != endit; ++it)
   {
     Vec<dimdef> vec(1.0);
@@ -75,13 +76,17 @@ setFunction (Func &initFunc, int polOrd)
     }
 
     vec *= (1.0/3.0);
-    val = vol*initFunc.eval(vec)(0)/3.0;
+    if(numDof > 1)
+      val = vol*initFunc.eval(vec)(0)/(double) numDof;
+    else 
+      val = initFunc.eval(vec)(0);
 
-    for(int i=0; i<it->geometry().corners(); i++)
+    for(int i=0; i<FuncSpace::numDof; i++)
     {
       int k = feSpace_->mapIndex((*it),i);
       vec_->Add(k,&val);
     }
+
   }
 }
 
