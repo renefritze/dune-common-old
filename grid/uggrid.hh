@@ -306,6 +306,11 @@ private:
         return entity.realEntity;
     }
 
+    template <int cd>
+    const UGGridEntity<cd,dim,const UGGrid>& getRealEntity(const typename Traits::template codim<cd>::Entity& entity) const {
+        return entity.realEntity;
+    }
+
     void init(unsigned int heapSize, unsigned int envHeapSize);
 
     // Each UGGrid object has a unique name to identify it in the
