@@ -1,6 +1,8 @@
 #ifndef __ALBERTGRID_ELMEM_CC__
 #define __ALBERTGRID_ELMEM_CC__
 
+namespace AlbertHelp {
+
 typedef struct elnum_str ELNUM_STR;
 struct elnum_str
 {
@@ -47,6 +49,7 @@ static const int newMemSize = 1000;
 
 static ELNUM_STR * getNewElNumMem() 
 {
+  //printf("Calling getNewElNumMem \n");
   ELNUM_STR * newMem = (ELNUM_STR *) malloc( sizeof(ELNUM_STR) );
   assert(newMem != NULL);
   newMem->elNumVec = (int *) malloc(newMemSize * sizeof(int));
@@ -58,7 +61,7 @@ static ELNUM_STR * getNewElNumMem()
 }
 
 /* return the new element index for el->index */
-int get_elIndex()
+static int get_elIndex()
 {
   /* the case of reading the mesh from file */
   if(!Albert_global_im) return -1;
@@ -75,7 +78,8 @@ int get_elIndex()
       return ind;
     }
   }
-  
+ 
+  //printf("get Num from Stack \n");
   actNum->count--;
   assert((actNum->count >=0) && (actNum->count < newMemSize));
 
@@ -83,7 +87,7 @@ int get_elIndex()
 }
 
 /* when element is deleted remember the index */
-void free_elIndex(int ind)
+static void free_elIndex(int ind)
 {
   assert(Albert_global_im != NULL);
   
@@ -101,6 +105,8 @@ void free_elIndex(int ind)
   actNum->count++;
   return;
 }
+
+} // end namespace AlbertHelp
 
 #endif
 
