@@ -1,5 +1,5 @@
 #ifndef DUNE_MG_TRANSFER_HH
-#define DUNE_MG_TRANSFER_HH_
+#define DUNE_MG_TRANSFER_HH
 
 #include <dune/fem/feop/spmatrix.hh>
 
