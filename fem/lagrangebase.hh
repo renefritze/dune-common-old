@@ -677,6 +677,11 @@ public:
        delete baseFuncSet_(i);
   }
 
+  DFSpaceIdentifier type () const 
+  {
+    return LagrangeSpace_id;
+  }
+
   //! provide the access to the base function set 
   template <class EntityType>
   const FastBaseFunctionSetType& getBaseFunctionSet ( EntityType &en ) const
@@ -854,6 +859,11 @@ public:
   ~DGDiscreteFunctionSpace ()
   {
     if(mapper_) delete mapper_;
+  }
+  
+  DFSpaceIdentifier type () const 
+  {
+    return DGSpace_id;
   }
   
   //! return true if we have continuous discrete functions 
@@ -1269,6 +1279,11 @@ public:
   ~RaviartThomasSpace ()
   {
     if(mapper_) delete mapper_;
+  }
+  
+  DFSpaceIdentifier type () const 
+  {
+    return RaviartThomasSpace_id;
   }
   
   //! provide the access to the base function set 
