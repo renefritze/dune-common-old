@@ -275,14 +275,14 @@ public:
   //! return weight for point i
   const RangeFieldType& getQuadratureWeight ( int i) const
   {
-    return (weights_.get(i)); 
+    return (weights_(i)); 
   };
 
   //! return point i
   const DomainType& getQuadraturePoint (int i) const 
   {
     //(points_.read(i)).print(std::cout , 1); std::cout << "QuadRead \n";
-    return (points_.get(i));
+    return (points_(i));
   };
 
 private:
@@ -344,14 +344,14 @@ public:
   //! return weight for point i
   const RangeFieldType& getQuadratureWeight ( int i) const
   {
-    return (weights_.get(i)); 
+    return (weights_(i)); 
   };
 
   //! return point i
   const DomainType& getQuadraturePoint (int i) const 
   {
     //(points_.read(i)).print(std::cout , 1); std::cout << "QuadRead \n";
-    return (points_.get(i));
+    return (points_(i));
   };
 
 private:
