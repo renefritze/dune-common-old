@@ -181,7 +181,7 @@ void SparseRowMatrix<T>::set(int row, int col, const T& val)
   if(whichCol < 0)
   {
     std::cerr << "Error in SparseRowMatrix::set: Entry (" << row << ", " << col << ") "
-	      << "could neither be found nor newly allocated!\n";
+              << "could neither be found nor newly allocated!\n";
   }
   else
   {
@@ -200,7 +200,7 @@ void SparseRowMatrix<T>::add(int row, int col, const T& val)
   if(whichCol < 0)
   {
     std::cerr << "Error in SparseRowMatrix::add: Entry (" << row << ", " << col << ") "
-	      << "could neither be found nor newly allocated!\n";
+              << "could neither be found nor newly allocated!\n";
   }
   else
   {
@@ -216,7 +216,7 @@ void SparseRowMatrix<T>::multScalar(int row, int col, const T& val)
   if(whichCol < 0)
   {
     std::cerr << "Error in SparseRowMatrix::multScalar: Entry Entry (" << row << ", " << col << ") "
-	      << "could neither be found nor newly allocated!\n";
+              << "could neither be found nor newly allocated!\n";
   }
   else
   {
@@ -338,9 +338,16 @@ void SparseRowMatrix<T>::apply(const DiscFuncType &f, DiscFuncType &ret) const
 template <class T> template <class DiscFType , class DiscFuncType>
 void SparseRowMatrix<T>::apply(const DiscFType &f, DiscFuncType &ret) const 
 {
+    int level = f.getFunctionSpace().getGrid().maxlevel();
+    apply(f, ret, level);
+}
+
+template <class T> template <class DiscFType , class DiscFuncType>
+void SparseRowMatrix<T>::apply(const DiscFType &f, DiscFuncType &ret, int level) const 
+{
   typedef typename DiscFType::DofIteratorType DofFItType;  
   typedef typename DiscFuncType::DofIteratorType DofIteratorType;  
-  int level = f.getFunctionSpace().getGrid().maxlevel();
+  //int level = f.getFunctionSpace().getGrid().maxlevel();
 
   //! we assume that the dimension of the functionspace of f is the same as
   //! the size of the matrix 

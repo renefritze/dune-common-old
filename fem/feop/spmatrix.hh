@@ -171,7 +171,7 @@ public:
     //! Multiply with a SimpleVector
     SimpleVector<T> operator*(const SimpleVector<T>& v) const;
 
-    /** \brief Multiply with a vector
+    /** \brief Multiply with a vector on the topmost level of the grid
      *
      * This method works on discrete functions and expects
      * the template parameter types to have DofIterators.
@@ -179,6 +179,14 @@ public:
     template <class DiscFType, class DiscFuncType>
     void apply(const DiscFType &f, DiscFuncType &ret) const;
     
+    /** \brief Multiply with a vector on a given grid level
+     *
+     * This method works on discrete functions and expects
+     * the template parameter types to have DofIterators.
+     */
+    template <class DiscFType, class DiscFuncType>
+    void apply(const DiscFType &f, DiscFuncType &ret, int level) const;
+
     //! Multiply the transpose with a vector
     template <class DiscFuncType>
     void apply_t(const DiscFuncType &f, DiscFuncType &ret) const;
