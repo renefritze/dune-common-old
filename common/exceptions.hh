@@ -157,6 +157,14 @@ class MathError : public Exception {};
  */
 class RangeError : public Exception {};
   
+/*! default exception class for OS errors
+
+  This class is thrown when a system-call is used and returns an
+  error.
+  
+ */
+class SystemError : public Exception {};
+
 } // end namespace
 
 #endif
