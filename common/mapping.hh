@@ -15,8 +15,10 @@ namespace Dune{
   @{
  */
 
-/** \brief A mapping
-    \todo Please doc me!
+/** \brief A mapping from one vector space into another
+    This class describes a general mapping from the domain vector space into 
+    the range vector space.
+    It can also be used to construct linear combinations of mappings.
 
     Note: Range has to have Vector structure as well.
 */
@@ -24,11 +26,15 @@ template<typename DFieldType,typename RFieldType, class DType, class RType>
 class Mapping : public Vector < RFieldType > 
 {
 public:
-  //! remember template parameters for derived classes  
+  //! domain vector space (for usage in derived classes)
   typedef DType DomainType;
+  //! range vector space
   typedef RType  RangeType;
+  //! integral type used in the construction of the domain vector space
   typedef DFieldType DomainFieldType;
+  //! integral type used in the construction of the range vector space
   typedef RFieldType RangeFieldType;
+  //! \todo why that one?
   typedef RangeFieldType Field;
 
   //! remember what type this class has 
