@@ -1,29 +1,21 @@
-#ifndef __GAUSSQUADRATURE_HH__
-#define __GAUSSQUADRATURE_HH__
+#ifndef DUNE_GAUSSQUADRATURE_HH
+#define DUNE_GAUSSQUADRATURE_HH
 
 namespace Dune {
 
-/** @addtogroup Quadrature
-
-        Integration over polyhedral regions is a fundamental operation in
-    the numerical solution of partial differential equations.
-        This module provides a number of classes for numerical 
-        integration on the reference element.
-
-        @{
- */
-
-/*! This class provides Gauss Quadrature in d space dimensions
-    of various orders from 2 to about 20. All rules are tensor
-    products of one-dimensional rules.
-
-        Note that Gauss quadrature is restricted to cube elements (i.e.
-        line segments, quadrilaterals, hexahedra)
-
-        The dimension is a template parameter (yes, this class template can
-        to 5-dimensional integration) as well as the type used for the components
-        of the local coordinates used for the Gauss points. 
- */
+/** \brief Gauss quadrature rules
+ * \ingroup Quadrature
+ This class provides Gauss quadrature in d space dimensions
+ of various orders from 2 to about 20. All rules are tensor
+ products of one-dimensional rules.
+ 
+ Note that Gauss quadrature is restricted to cube elements (i.e.
+ line segments, quadrilaterals, hexahedra)
+ 
+ The dimension is a template parameter (yes, this class template can
+ to 5-dimensional integration) as well as the type used for the components
+ of the local coordinates used for the Gauss points. 
+*/
 template<int dim, class ct>
 class GaussQuadrature {
 public:
@@ -55,8 +47,6 @@ private:
 
         int power (int y, int d);
 };
-
-/** @} end documentation group */
 
 } // end namespace
 
