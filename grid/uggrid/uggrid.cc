@@ -6,7 +6,6 @@
 //
 //************************************************************************
 
-  //#include <stdlib.h>
 #include <dune/common/tuples.hh>
 #include <dune/common/sllist.hh>
 
@@ -127,14 +126,22 @@ template<> int Dune::UGGrid < 2, 2 >::numOfUGGrids = 0;
 template<> int Dune::UGGrid < 3, 3 >::numOfUGGrids = 0;
 
 template < int dim, int dimworld >
-inline Dune::UGGrid < dim, dimworld >::UGGrid() : multigrid_(NULL), refinementType_(COPY), omitGreenClosure_(false)
+inline Dune::UGGrid < dim, dimworld >::UGGrid() : multigrid_(NULL), 
+                                                  refinementType_(COPY), 
+                                                  omitGreenClosure_(false),
+                                                  hierarchicIndexSet_(*this),
+                                                  levelIndexSet_(NULL)
 {
     init(500, 10);
 }
 
 template < int dim, int dimworld >
 inline Dune::UGGrid < dim, dimworld >::UGGrid(unsigned int heapSize, unsigned envHeapSize)
-    : multigrid_(NULL), refinementType_(COPY), omitGreenClosure_(false)
+    : multigrid_(NULL), 
+      refinementType_(COPY), 
+      omitGreenClosure_(false), 
+      hierarchicIndexSet_(*this) ,
+      levelIndexSet_(NULL)
 {
     init(heapSize, envHeapSize);
 }
@@ -221,6 +228,9 @@ inline Dune::UGGrid < dim, dimworld >::~UGGrid()
 {
     if (extra_boundary_data_)
         free(extra_boundary_data_);
+
+    if (levelIndexSet_)
+        delete(levelIndexSet_);
 
     if (multigrid_) {
         // Set UG's currBVP variable to the BVP corresponding to this
@@ -487,7 +497,7 @@ bool Dune::UGGrid < dim, dimworld >::adapt()
     // Collapse the complete grid hierarchy into a single level if requested
     if (refinementType_==COLLAPSE)
         if (Collapse(multigrid_))
-            DUNE_THROW(GridError, "UG?d::Collapse returned error code!");
+            DUNE_THROW(GridError, "UG" << dim << "d::Collapse returned error code!");
 
     // Renumber everything
     setLocalIndices();
@@ -532,7 +542,7 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
                                                 int maxl, 
                                                 Array<FixedArray<unsigned int, 3> >& children) const
 {
-#if 0
+
     typedef typename TargetType<0,dim>::T ElementType;
     typedef Tuple<ElementType*,int, int> ListEntryType;
 
@@ -542,6 +552,34 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
     int level = e->level();
 
     const int MAX_SONS = 30;  // copied from UG
+
+    // //////////////////////////////////////////////////////////////////////
+    //   Change the input face number from Dune numbering to UG numbering
+    // //////////////////////////////////////////////////////////////////////
+    
+    switch (e->geometry().type()) {
+    case hexahedron: {
+        // Dune numbers the faces of a hexahedron differently than UG.
+        // The following two lines do the transformation
+        const int renumbering[6] = {4, 2, 1, 3, 0, 5};
+        elementSide = renumbering[elementSide];
+        break; 
+    }
+    case tetrahedron: {
+        // Dune numbers the faces of a tetrahedron differently than UG.
+        // The following two lines do the transformation
+        const int renumbering[4] = {1, 2, 3, 0};
+        elementSide = renumbering[elementSide];
+        break; 
+    }
+    case triangle: {
+        // Dune numbers the faces of a triangle differently from UG.
+        // The following two lines do the transformation
+        const int renumbering[3] = {1, 2, 0};
+        elementSide = renumbering[elementSide];
+        break;
+    }
+    }
 
     // ///////////////
     //   init list
@@ -563,7 +601,7 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
                                       &Sons_of_Side,
                                       SonList,      // the output elements
                                       SonSides,     // Output element side numbers
-                                      false,        // Element sons are not precomputed
+                                      true,        // Element sons are not precomputed
                                       true);        // ioflag: I have no idea what this is supposed to do         
 
         for (int i=0; i<Sons_of_Side; i++)
@@ -578,9 +616,9 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
     typename SLList<ListEntryType>::iterator f = list.begin();
     for (; f!=list.end(); ++f) {
 
-        ElementType* theElement = (*f)[0];
-        int side                 = (*f)[1];
-        level                    = (*f)[2];
+        ElementType* theElement = Element<0>::get(*f);
+        int side                 = Element<1>::get(*f);
+        level                    = Element<2>::get(*f);
 
         int Sons_of_Side = 0;
         ElementType* SonList[MAX_SONS];
@@ -598,7 +636,7 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
                                           &Sons_of_Side, // Number of topological sons of the element side
                                           SonList,      // Output elements
                                           SonSides,     // Output element side numbers
-                                          false,
+                                          true,
                                           true);
 
             for (int i=0; i<Sons_of_Side; i++)
@@ -614,11 +652,34 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
     children.resize(list.size());
     int i=0;
     for (f = list.begin(); f!=list.end(); ++f, ++i) {
-        children[i][0] = (*f)[0];
-        children[i][1] = (*f)[1];
-        children[i][2] = (*f)[2];
+
+        int side = Element<1>::get(*f);
+
+        // Dune numbers the faces of several elements differently than UG.
+        // The following switch does the transformation
+        switch (e->geometry().type()) {
+        case hexahedron: {
+            const int renumbering[6] = {4, 2, 1, 3, 0, 5};
+            side = renumbering[side];
+            break;
+        }
+        case tetrahedron: {
+            const int renumbering[4] = {3, 0, 1, 2};
+            side = renumbering[side];
+            break;
+        }
+        case triangle: {
+            const int renumbering[3] = {2, 0, 1};
+            side = renumbering[side];
+            break;
+        }
+        }
+
+        children[i][0] = UG_NS<dim>::index(Element<0>::get(*f));
+        children[i][1] = side;
+        children[i][2] = Element<2>::get(*f);
     }
-#endif
+
 }
 
 template < int dim, int dimworld >
@@ -754,11 +815,9 @@ void Dune::UGGrid < dim, dimworld >::createend()
     for (theElement=multigrid_->grids[0]->elements[0]; theElement!=NULL; theElement=theElement->ge.succ)
         UG_NS<dim>::SetSubdomain(theElement, 1);
 
-#ifdef _3    
-    UG3d::SetEdgeAndNodeSubdomainFromElements(multigrid_->grids[0]);
-#else
-    UG2d::SetEdgeAndNodeSubdomainFromElements(multigrid_->grids[0]);
-#endif
+    // Complete the subdomain structure
+    // From namespace UG?d
+    SetEdgeAndNodeSubdomainFromElements(multigrid_->grids[0]);
     
     // Complete the UG-internal grid data structure
 #ifdef _3
@@ -769,9 +828,10 @@ void Dune::UGGrid < dim, dimworld >::createend()
         DUNE_THROW(IOError, "Call of 'UG::CreateAlgebra' failed!");
   
     /* here all temp memory since CreateMultiGrid is released */
-#define ReleaseTmpMem(p,k) Release(p, UG::FROM_TOP,k)
-    ReleaseTmpMem(multigrid_->theHeap, multigrid_->MarkKey);
-#undef ReleaseTmpMem
+// #define ReleaseTmpMem(p,k) Release(p, UG::FROM_TOP,k)
+//     ReleaseTmpMem(multigrid_->theHeap, multigrid_->MarkKey);
+// #undef ReleaseTmpMem
+    Release(multigrid_->theHeap, UG::FROM_TOP, multigrid_->MarkKey);
     multigrid_->MarkKey = 0;
 
     // Set the local indices
@@ -783,6 +843,7 @@ void Dune::UGGrid < dim, dimworld >::createend()
 template < int dim, int dimworld >
 void Dune::UGGrid < dim, dimworld >::setLocalIndices()
 {
+#ifndef UGGRID_WITH_INDEX_SETS
     // Renumber everything
     for (int i=0; i<=maxlevel(); i++) {
         
@@ -801,5 +862,5 @@ void Dune::UGGrid < dim, dimworld >::setLocalIndices()
             UG_NS<dim>::index(getRealEntity<dim>(*vIt).target_) = id++;
 
     }
-
+#endif
 }
