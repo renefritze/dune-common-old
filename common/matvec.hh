@@ -61,7 +61,7 @@ public:
   }
   
   //! matrix/vector multiplication with transpose of matrix 
-  Vec<m,T> mult_t (const Vec<n,T>& x)
+  Vec<m,T> mult_t (const Vec<n,T>& x) const
   {
     Vec<m,T> z(0.0);
     const Mat<n,m,T> &matrix = (*this);
