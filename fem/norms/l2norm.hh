@@ -13,7 +13,7 @@ namespace Dune {
         typedef typename DiscreteFunctionType::FunctionSpaceType FunctionSpaceType;
         
     public:  
-        double compute (const DiscreteFunctionType &discFunc)
+        double compute (const DiscreteFunctionType &discFunc, int level)
         {
 
             /** \todo Automatically choose the correct quadrature order */
@@ -28,8 +28,6 @@ namespace Dune {
             
             
             GridType & grid = functionSpace_.getGrid();
-
-            const int level = grid.maxlevel();
             
             typename FunctionSpaceType::Range phi (0.0);
             
