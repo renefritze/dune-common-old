@@ -1093,19 +1093,20 @@ inline void BSGridElement<2,3> :: buildJacobianInverse()
   {
     if(!builtA_) calcElMatrix();
 
-    tmpVec_(0) = -0.5 * ( ( coord_(1)(1) - (coord_(1)(0)) ) *
-                          ( coord_(2)(2) - (coord_(2)(1)) ) - 
-                          ( coord_(1)(2) - (coord_(1)(1)) ) *
-                          ( coord_(2)(1) - (coord_(2)(0)) )  );
-    tmpVec_(1) = -0.5 * ( ( coord_(2)(1) - (coord_(2)(0)) ) *
-                          ( coord_(0)(2) - (coord_(0)(1)) ) -
-                          ( coord_(2)(2) - (coord_(2)(1)) ) * 
-                          ( coord_(0)(1) - (coord_(0)(0)) )  );
-    tmpVec_(2) = -0.5 * ( ( coord_(0)(1) - (coord_(0)(0)) ) * 
-                          ( coord_(1)(2) - (coord_(1)(1)) ) -
-                          ( coord_(0)(2) - (coord_(0)(1)) ) * 
-                          ( coord_(1)(1) - (coord_(1)(0)) )  );
-    detDF_ = tmpVec_.norm2();
+    tmpVec_[0] = -0.5 * ( ( coord_(1)[1] - (coord_(1)[0]) ) *
+                          ( coord_(2)[2] - (coord_(2)[1]) ) - 
+                          ( coord_(1)[2] - (coord_(1)[1]) ) *
+                          ( coord_(2)[1] - (coord_(2)[0]) )  );
+    tmpVec_[1] = -0.5 * ( ( coord_(2)[1] - (coord_(2)[0]) ) *
+                          ( coord_(0)[2] - (coord_(0)[1]) ) -
+                          ( coord_(2)[2] - (coord_(2)[1]) ) * 
+                          ( coord_(0)[1] - (coord_(0)[0]) )  );
+    
+    tmpVec_[2] = -0.5 * ( ( coord_(0)[1] - (coord_(0)[0]) ) * 
+                          ( coord_(1)[2] - (coord_(1)[1]) ) -
+                          ( coord_(0)[2] - (coord_(0)[1]) ) * 
+                          ( coord_(1)[1] - (coord_(1)[0]) ) ) ;
+    detDF_ = tmpVec_.two_norm();
     builtinverse_ = builtDetDF_ = true;
   }
 }
@@ -1209,10 +1210,10 @@ inline bool BSGridElement<dim,dimworld> :: checkInside(const FieldVector<bs_ctyp
   
   for(int i=0; i<dim; i++)
   {
-    sum += local(i);
-    if(local(i) < 0.0)
+    sum += local[i];
+    if(local[i] < 0.0)
     {
-      if(ABS(local(i)) > 1e-15) 
+      if(ABS(local[i]) > 1e-15) 
       {
         return false; 
       }
