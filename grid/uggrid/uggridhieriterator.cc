@@ -15,13 +15,11 @@ UGGridHierarchicIterator<GridImp>::UGGridHierarchicIterator(int actLevel,int max
     virtualEntity_.setToTarget(NULL);
 }
 
-
 template<class GridImp>
-inline UGGridHierarchicIterator<GridImp>& 
-UGGridHierarchicIterator<GridImp>::operator ++()
+void UGGridHierarchicIterator<GridImp>::increment()
 {
     if (elemStack.empty())
-        return (*this);
+        return;
 
     StackEntry old_target = elemStack.pop();
 
@@ -56,10 +54,18 @@ UGGridHierarchicIterator<GridImp>::operator ++()
     else
         virtualEntity_.setToTarget(elemStack.top().element, elemStack.top().level);
     
-  return (*this);
 }
 
+template<class GridImp>
+inline bool UGGridHierarchicIterator<GridImp>::
+equals(const UGGridHierarchicIterator& I) const 
+{
+    return ( (elemStack.size()==0 && I.elemStack.size()==0) ||
+             ((elemStack.size() == I.elemStack.size()) &&
+              (elemStack.top().element == I.elemStack.top().element)));
+}
 
+#if 0
 template<class GridImp>
 inline bool UGGridHierarchicIterator<GridImp>::
 operator ==(const UGGridHierarchicIterator& I) const 
@@ -75,7 +81,17 @@ operator !=(const UGGridHierarchicIterator& I) const
 {
   return !((*this) == I);
 }
+#endif
 
+template<class GridImp>
+inline typename UGGridHierarchicIterator<GridImp>::Entity& 
+UGGridHierarchicIterator<GridImp>::
+dereference() const
+{
+    return virtualEntity_;
+}
+
+#if 0
 template<class GridImp>
 inline UGGridEntity < 0, GridImp::dimension,GridImp>& 
 UGGridHierarchicIterator<GridImp>::
@@ -91,4 +107,4 @@ operator ->()
 {
   return &virtualEntity_;
 }
-
+#endif

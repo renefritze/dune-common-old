@@ -1,5 +1,5 @@
-#ifndef __DUNE_UGHIERITERATOR_HH__
-#define __DUNE_UGHIERITERATOR_HH__
+#ifndef DUNE_UGHIERITERATOR_HH
+#define DUNE_UGHIERITERATOR_HH
 
 /** \file
  * \brief The UGGridHierarchicIterator class
@@ -40,10 +40,19 @@ class UGGridHierarchicIterator :
     };
 
 public:
- 
+    typedef typename GridImp::template codim<0>::Entity Entity;
+
   //! the default Constructor
   UGGridHierarchicIterator(int actLevel,int maxLevel);
 
+    void increment();
+
+    bool equals (const UGGridHierarchicIterator& i) const;
+
+    //UGGridEntity<0,GridImp::dimension,GridImp>& dereference() const;
+    Entity& dereference() const;
+
+#if 0
   //! prefix increment
   UGGridHierarchicIterator& operator ++();
 
@@ -58,11 +67,13 @@ public:
 
   //! arrow
     UGGridEntity<0,GridImp::dimension,GridImp>* operator->();
+#endif
 
 private:
 
   //! implement with virtual element
     UGGridEntity<0,GridImp::dimension,GridImp> virtualEntity_;
+    //Entity virtualEntity_;
 
   //! max level to go down 
   int maxlevel_;

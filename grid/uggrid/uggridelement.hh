@@ -169,7 +169,7 @@ public:
     FieldVector<UGCtype, 2> local (const FieldVector<UGCtype, 3>& global) const;
   
   //! Returns true if the point is in the current element
-    bool checkInside(const FieldVector<UGCtype, 3> &global);
+    bool checkInside(const FieldVector<UGCtype, 3> &global) const;
 
   // A(l) 
     UGCtype integrationElement (const FieldVector<UGCtype, 2>& local) const;
@@ -252,7 +252,7 @@ public:
     FieldVector<UGCtype, 1> local (const FieldVector<UGCtype, 2>& global) const;
   
   //! Returns true if the point is in the current element
-    bool checkInside(const FieldVector<UGCtype, 2> &global);
+    bool checkInside(const FieldVector<UGCtype, 1> &global) const;
 
   // A(l) 
     UGCtype integrationElement (const FieldVector<UGCtype, 1>& local) const;
@@ -261,11 +261,12 @@ public:
     const Mat<1,1>& jacobianInverse (const FieldVector<UGCtype, 1>& local) const;
 
 private:
-    //void setToTarget(typename TargetType<dimworld-dim,dimworld>::T* target) {target_ = target;}
+#if 1
+    // This method needs to be here to compile, but it should never be called
   void setToTarget(TargetType<1,2>::T* target) {
       DUNE_THROW(GridError, "UGGridElement<1,2>::setToTarget called!");
   }
-
+#endif
     // Do nothing: faces in a 2d grid always have 2 corners
     void setNumberOfCorners(int n) {}
 

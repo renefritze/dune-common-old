@@ -1,5 +1,5 @@
-#ifndef __DUNE_UGTYPES_HH__
-#define __DUNE_UGTYPES_HH__
+#ifndef DUNE_UGTYPES_HH
+#define DUNE_UGTYPES_HH
 
 /** \file
  * \brief Encapsulates a few types from UG

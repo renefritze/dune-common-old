@@ -108,6 +108,13 @@ public:
 #endif
         return CORNERS_OF_ELEM(theElement);
     }
+
+  //! \todo Please doc me!
+    // Dummy implementation for vertices
+    static int Corners_Of_Elem(const typename TargetType<dim,dim>::T* theElement) {
+        return 1;
+    }
+
   //! \todo Please doc me!
     static int Corners_Of_Side(const typename TargetType<0,dim>::T* theElement, int side) {
 #ifdef _2
@@ -132,6 +139,12 @@ public:
         return TAG(theElement);
     }
     
+    //! Doesn't ever get called, but needs to be there to calm the compiler
+    static unsigned int Tag(const typename TargetType<dim,dim>::T* theNode) {
+        DUNE_THROW(GridError, "Called method Tag() for a vertex.  This should never happen!");
+        return 0;
+    }
+
   //! \todo Please doc me!
     static void Local_To_Global(int n, DOUBLE** y, 
                                 const FieldVector<double, dim>& local,
