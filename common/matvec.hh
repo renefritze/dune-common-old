@@ -63,19 +63,27 @@ public:
 	T read (int i) const {return x[i];}
 
 	//! operator+ adds two vectors
+	Vec<n,T>& operator+= (const Vec<n,T>& b)
+	{
+		for (int i=0; i<n; i++) x[i] += b.x[i]; 
+		return *this;
+	}
 	Vec<n,T> operator+ (const Vec<n,T>& b) const
 	{
-		Vec<n,T> z; 
-		for (int i=0; i<n; i++) z.x[i] = x[i]+b.x[i]; 
-		return z;
+		Vec<n,T> z = *this; 
+		return (z+=b);
 	}
 
 	//! operator- binary minus
+	Vec<n,T>& operator-= (const Vec<n,T>& b)
+	{
+		for (int i=0; i<n; i++) x[i] -= b.x[i]; 
+		return *this;
+	}
 	Vec<n,T> operator- (const Vec<n,T>& b) const
 	{
-		Vec<n,T> z; 
-		for (int i=0; i<n; i++) z.x[i] = x[i]-b.x[i]; 
-		return z;
+		Vec<n,T> z = *this; 
+		return (z-=b);
 	}
 
 	//! scalar product of two vectors with operator* 
@@ -88,6 +96,13 @@ public:
 	T operator* (T k) const
 	{
 		Vec<n,T> z; for (int i=0; i<n; i++) z.x[i] =  k*x[i]; return z;
+	}
+
+	//! multiplication assignment with scalar
+	Vec<n,T>& operator*= (T k)
+	{
+		for (int i=0; i<n; i++) x[i] *= k; 
+		return *this;
 	}
 
 	//! 1 norm
