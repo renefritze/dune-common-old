@@ -1045,7 +1045,7 @@ inline GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::
 LeafIterator::LeafIterator (GridType &grid, int maxlevel, bool end) :
               maxLev_ ( maxlevel ) , end_ ( end ),
   it_ (NULL) , endit_ (NULL) , hierit_(NULL) , endhierit_(NULL) ,
-  built_(false) , goNextMacroEntity_(false) , deleteMe_ (false)
+  built_(false) , goNextMacroEntity_(false) 
 {
   if(!end_)
   {
