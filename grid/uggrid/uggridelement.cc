@@ -105,7 +105,6 @@ operator [](int i) const
 #endif
 
 #ifdef _2
-
 #if 0
 template <class GridImp>
 inline const FieldVector<UGCtype, 2>& UGGridGeometry<0,2, GridImp>:: 
@@ -209,14 +208,6 @@ local (const FieldVector<UGCtype, coorddim>& global) const
         result[i] = localCoords[i];
 
     return result;
-}
-
-template<int mydim, int coorddim, class GridImp>
-inline bool UGGridGeometry<mydim,coorddim, GridImp>::
-checkInside(const FieldVector<UGCtype, coorddim> &global) const
-{
-    DUNE_THROW(GridError, "UGGridGeometry::checkInside() not implemented yet!");
-    return true;
 }
 
   

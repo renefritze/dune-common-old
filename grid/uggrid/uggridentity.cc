@@ -148,6 +148,7 @@ inline int UGGridEntity<codim, dim, GridImp>::subIndex(int i) const
 }
 
 
+#if 0  // only for codim 0 ?!?
 template <int codim, int dim, class GridImp> 
 template <int cc>
 inline UGGridLevelIterator<cc,All_Partition,GridImp> 
@@ -158,6 +159,7 @@ UGGridEntity<codim,dim,GridImp>::entity ( int i )
     UGGridLevelIterator<cc,All_Partition,GridImp> tmp (level_);
   return tmp;
 }
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -234,7 +236,7 @@ inline int UGGridEntity<0, dim, GridImp>::subIndex(int i) const
 
 template <int dim, class GridImp> 
 template <int cc>
-inline UGGridLevelIterator<cc,All_Partition,GridImp> 
+inline typename GridImp::template codim<cc>::EntityPointer
 UGGridEntity<0,dim,GridImp>::entity ( int i ) const
 {
     assert(i>=0 && i<count<cc>());
