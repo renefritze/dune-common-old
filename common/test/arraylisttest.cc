@@ -69,9 +69,8 @@ int testIteratorRemove(){
 
     iter+=8;
 
-    iter.removeUpToHere();
+    iter.eraseToHere();
 
-    ++iter;
 
     if((*iter)!=10){
 	std::cerr<<"Removing from iterator failed! "<<__FILE__<<":"<<__LINE__<<std::endl;
@@ -86,7 +85,7 @@ int testIteratorRemove(){
     }
 
     iter +=3;
-    iter.removeUpToHere();
+    iter.eraseToHere();
     iter +=4;
 
     if((*iter)!=14){
