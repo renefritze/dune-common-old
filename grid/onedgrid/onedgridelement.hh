@@ -156,7 +156,7 @@ public:
 
     //! The Jacobian matrix of the mapping from the reference element to this element
     const Mat<dim,dim>& Jacobian_inverse (const FieldVector<OneDCType, dim>& local) const {
-        jacInverse_[0][0] = vertex[1]->geometry().pos_ - vertex[0]->geometry().pos_;
+        jacInverse_[0][0] = 1 / (vertex[1]->geometry().pos_[0] - vertex[0]->geometry().pos_[0]);
         return jacInverse_;
     }
 
