@@ -108,7 +108,7 @@ public:
     }
 
   //! copy constructor from GeometryImp
-  Geometry(const GeometryImp<mydim,cdim,GridImp> & e) : realGeometry(e) {};
+  explicit Geometry(const GeometryImp<mydim,cdim,GridImp> & e) : realGeometry(e) {};
 };
 
 //! Specialization of Geometry for mydim=0 (vertices)
