@@ -12,7 +12,7 @@ class DynamicType {
 public:
 
   //! Definition for undefined value
-  static const IdentifierType undefined = 0;
+  static const IdentifierType undefined = -1;
  
   //! set identifier of this class 
   DynamicType (int ident) : identifier_ (ident) {};
