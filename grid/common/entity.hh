@@ -359,7 +359,7 @@ public:
     }
 
   //! return true if the entity is leaf 
-  bool isLeaf ()
+  bool isLeaf () const
     {
       return asImp().isLeaf();
     }
