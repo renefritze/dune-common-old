@@ -28,7 +28,8 @@ struct ObjPointer
   }
 };
 
-//! ???
+//! stores the new created objects when DiscreteOperatorDefault 
+//! operator + or operator * is called 
 class ObjPointerStorage
 {
   typedef ObjPointerStorage MyType;
@@ -49,6 +50,15 @@ public:
     ObjPointerType *next = new ObjPointerType ( discrOp );
     next->next = item_;
     item_ = next;
+  }
+
+  //! Store new generated DiscreteOperator Pointer and the LocalOperator
+  //! pointer
+  template <class DiscrOpType, class LocalOpType >
+  void saveObjPointer ( DiscrOpType * discrOp , LocalOpType * lop )
+  {
+    saveObjPointer( discrOp );
+    saveObjPointer( lop     );  
   }
 
 private:
