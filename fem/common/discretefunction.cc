@@ -24,9 +24,9 @@ scalarProductDofs( const DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
 
   RangeFieldType skp = 0.;
 
-  const DofIteratorImp endit = this->dend ();
-  const DofIteratorImp git =  g.dbegin ();
-  const DofIteratorImp it = this->dbegin();
+  DofIteratorImp endit = this->dend ();
+  DofIteratorImp git =  g.dbegin ();
+  DofIteratorImp it = this->dbegin();
 
   // multiply
   for(; it != endit; ++it,++git)
@@ -54,7 +54,7 @@ assign( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g )
 
     DofIteratorImp it = this->dbegin();
     DofIteratorImp endit = this->dend ();
-    const DofIteratorImp git = gc.dbegin ();
+    DofIteratorImp git = gc.dbegin ();
 
     for(; it != endit; ++it, ++git) 
         *it = *git; 
@@ -78,7 +78,7 @@ operator = ( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g 
     static_cast<const DiscreteFunctionDefaultType &> ( g );
 
   DofIteratorImp endit = this->dend ();
-  const DofIteratorImp git = gc.dbegin ();
+  DofIteratorImp git = gc.dbegin ();
   
   for(DofIteratorImp it = this->dbegin(); it != endit; ++it,++git ) 
   {
@@ -105,7 +105,7 @@ operator += ( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g
     static_cast<const DiscreteFunctionDefaultType &> ( g );
 
   DofIteratorImp endit = this->dend ();
-  const DofIteratorImp git = gc.dbegin ();
+  DofIteratorImp git = gc.dbegin ();
   for(DofIteratorImp it = this->dbegin(); it != endit; ++it, ++git) 
   {
     *it += *git;
@@ -125,11 +125,12 @@ operator -= ( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
       DofIteratorImp , LocalFunctionIteratorImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
 
+  // cast to class discrete functions     
   const DiscreteFunctionDefaultType &gc = 
     static_cast<const DiscreteFunctionDefaultType &> ( g );
 
   DofIteratorImp endit = this->dend ();
-  const DofIteratorImp git = gc.dbegin ();
+  DofIteratorImp git = gc.dbegin ();
   for(DofIteratorImp it = this->dbegin(); it != endit; ++it, ++git) 
   {
     *it -= *git;

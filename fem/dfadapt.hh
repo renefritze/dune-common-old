@@ -289,9 +289,6 @@ public:
   //! go next dof
   MyType & operator++ ();
   
-  //! go next dof
-  const MyType & operator++ () const;
-
   //! random access 
   DofType& operator[] (int i);
 
@@ -308,7 +305,7 @@ public:
   int index () const; 
 
   //! set dof iterator back to begin , for const and not const Iterators
-  void reset () const;
+  void reset () ;
 
   DofType * vector() { return dofArray_.vector(); }
   const DofType * vector() const { return dofArray_.vector(); }

@@ -307,9 +307,6 @@ public:
   //! go next dof
   DofIteratorArray<DofType> & operator++ ();
   
-  //! go next dof
-  const DofIteratorArray<DofType> & operator++ () const;
-
   //! random access 
   DofType& operator[] (int i);
 
@@ -326,7 +323,7 @@ public:
   int index () const; 
 
   //! set dof iterator back to begin , for const and not const Iterators
-  void reset () const;
+  void reset () ;
   
 private: 
   //! the array holding the dofs 
