@@ -7,7 +7,6 @@
 //************************************************************************
 
 #include <algorithm>
-#include <dune/io/file/grapedataio.hh>
 
 namespace Dune
 {
@@ -997,7 +996,7 @@ AlbertaGridEntity < codim, dim ,dimworld >::father() const
 //************************************
 template< int dim, int dimworld>
 inline bool AlbertaGridEntity < 0, dim ,dimworld >::
-mark( int refCount )
+mark( int refCount ) const
 {
   if(! hasChildren() )
   {
@@ -1107,7 +1106,7 @@ setTraverseStack(ALBERTA TRAVERSE_STACK * travStack)
 
 template< int dim, int dimworld>
 inline AlbertaGridEntity < 0, dim ,dimworld >::
-AlbertaGridEntity(AlbertaGrid<dim,dimworld> &grid, int level) 
+AlbertaGridEntity(const AlbertaGrid<dim,dimworld> &grid, int level) 
   : grid_(grid) 
   , level_ (level)
   , vxEntity_ ( grid_ , -1, 0, 0, 0, 0, 0) 
@@ -1411,16 +1410,18 @@ makeIterator()
 
 template< int dim, int dimworld>
 inline AlbertaGridHierarchicIterator<dim,dimworld>::
-AlbertaGridHierarchicIterator(AlbertaGrid<dim,dimworld> &grid,int actLevel,
-    int maxLevel) : grid_(grid), level_ (actLevel) 
-, maxlevel_ (maxLevel) , virtualEntity_(grid,level_)
+AlbertaGridHierarchicIterator(const AlbertaGrid<dim,dimworld> &grid,
+                              int actLevel,
+                              int maxLevel) 
+  : grid_(grid), level_ (actLevel) 
+    , maxlevel_ (maxLevel) , virtualEntity_(grid,level_)
 {
   makeIterator();
 }
 
 template< int dim, int dimworld>
 inline AlbertaGridHierarchicIterator<dim,dimworld>::
-AlbertaGridHierarchicIterator(AlbertaGrid<dim,dimworld> &grid, 
+AlbertaGridHierarchicIterator(const AlbertaGrid<dim,dimworld> &grid, 
   ALBERTA TRAVERSE_STACK *travStack,int actLevel, int maxLevel) : 
   grid_(grid), level_ (actLevel), 
   maxlevel_ ( maxLevel), virtualEntity_(grid,level_)
@@ -1630,7 +1631,7 @@ setElInfo (ALBERTA EL_INFO * elInfo, int nb)
 // for a LevelIterator we only need one virtualNeighbour Entity, which is
 // given to the Neighbour Iterator, we need a list of Neighbor Entitys
 template< int dim, int dimworld>
-inline void AlbertaGridIntersectionIterator<dim,dimworld>::freeObjects ()
+inline void AlbertaGridIntersectionIterator<dim,dimworld>::freeObjects () const
 {
   if(manageObj_) 
     manageObj_ = grid_->entityProvider_.freeObjectEntity(manageObj_);
@@ -1659,7 +1660,8 @@ inline AlbertaGridIntersectionIterator<dim,dimworld>::~AlbertaGridIntersectionIt
 
 template< int dim, int dimworld>
 inline AlbertaGridIntersectionIterator<dim,dimworld>::
-AlbertaGridIntersectionIterator(AlbertaGrid<dim,dimworld> &grid, int level) : 
+AlbertaGridIntersectionIterator(const AlbertaGrid<dim,dimworld> &grid,
+                                int level) : 
 grid_( &grid ), level_ (level) , neighborCount_ (dim+1), virtualEntity_ (0) 
   , elInfo_ (0)
   , manageObj_ (0) 
@@ -1673,7 +1675,7 @@ grid_( &grid ), level_ (level) , neighborCount_ (dim+1), virtualEntity_ (0)
 
 template< int dim, int dimworld>
 inline AlbertaGridIntersectionIterator<dim,dimworld>::AlbertaGridIntersectionIterator
-(AlbertaGrid<dim,dimworld> & grid, int level, ALBERTA EL_INFO *elInfo ) : 
+(const AlbertaGrid<dim,dimworld> & grid, int level, ALBERTA EL_INFO *elInfo ) :
   grid_( &grid ) , level_ (level), neighborCount_ (0) 
   , builtNeigh_ (false) 
   , virtualEntity_ (0) 
@@ -1704,7 +1706,9 @@ AlbertaGridIntersectionIterator ( ) :
 
 template< int dim, int dimworld>
 inline void AlbertaGridIntersectionIterator<dim,dimworld>::makeBegin
-(AlbertaGrid<dim,dimworld> &grid, int level, ALBERTA EL_INFO *elInfo ) 
+(const AlbertaGrid<dim,dimworld> &grid, 
+ int level, 
+ ALBERTA EL_INFO *elInfo ) const
 {
   grid_ = &grid;
   level_ = level;
@@ -1721,7 +1725,7 @@ inline void AlbertaGridIntersectionIterator<dim,dimworld>::makeBegin
 
 template< int dim, int dimworld>
 inline void AlbertaGridIntersectionIterator<dim,dimworld>::makeEnd
-(AlbertaGrid<dim,dimworld> &grid, int level ) 
+(const AlbertaGrid<dim,dimworld> &grid, int level ) const
 {
   grid_ = &grid;
   level_ = level;
@@ -2009,7 +2013,7 @@ number_in_neighbor () const
 
 // setup neighbor element with the information of elInfo_
 template< int dim, int dimworld>
-inline void AlbertaGridIntersectionIterator<dim,dimworld>::setupVirtEn()
+inline void AlbertaGridIntersectionIterator<dim,dimworld>::setupVirtEn() const
 {
   // set the neighbor element as element
   neighElInfo_->el = elInfo_->neigh[neighborCount_];
@@ -2122,11 +2126,11 @@ makeIterator()
 // Make LevelIterator with point to element from previous iterations
 template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
 inline AlbertaGridLevelIterator<codim,dim,dimworld,pitype>::
-AlbertaGridLevelIterator(AlbertaGrid<dim,dimworld> &grid, int travLevel, 
+AlbertaGridLevelIterator(const AlbertaGrid<dim,dimworld> &grid, int travLevel, 
     int proc, bool leafIt ) :
-  grid_(grid), level_ (travLevel) ,
-  virtualEntity_(grid,travLevel) 
-  ,leafIt_(leafIt) , proc_(proc)
+  grid_(grid), level_ (travLevel),
+  virtualEntity_(grid,travLevel),
+  leafIt_(leafIt) , proc_(proc)
 {
   makeIterator();
 }
@@ -2134,7 +2138,7 @@ AlbertaGridLevelIterator(AlbertaGrid<dim,dimworld> &grid, int travLevel,
 // Make LevelIterator with point to element from previous iterations
 template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
 inline AlbertaGridLevelIterator<codim,dim,dimworld,pitype>::
-AlbertaGridLevelIterator(AlbertaGrid<dim,dimworld> &grid, int level,  
+AlbertaGridLevelIterator(const AlbertaGrid<dim,dimworld> &grid, int level,  
 ALBERTA EL_INFO *elInfo,int elNum,int face,int edge,int vertex) : 
   grid_(grid), level_ (level) 
   , virtualEntity_(grid,level) , elNum_ ( elNum ) , face_ ( face ) ,
@@ -2154,7 +2158,7 @@ ALBERTA EL_INFO *elInfo,int elNum,int face,int edge,int vertex) :
 
 template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
 inline AlbertaGridLevelIterator<codim,dim,dimworld,pitype>::
-AlbertaGridLevelIterator(AlbertaGrid<dim,dimworld> &grid, 
+AlbertaGridLevelIterator(const AlbertaGrid<dim,dimworld> &grid, 
   AlbertaMarkerVector * vertexMark, 
   int travLevel, int proc, bool leafIt) 
   : grid_(grid) , level_ (travLevel), virtualEntity_(grid,travLevel) 
@@ -3048,8 +3052,7 @@ inline AlbertaGrid < dim, dimworld >::AlbertaGrid(const char *MacroTriangFilenam
   }
   else 
   {
-    GrapeDataIO < AlbertaGrid <dim,dimworld> > dataIO;
-    dataIO.readGrid ( *this, MacroTriangFilename,time_,0);
+    //    this->readGrid<xdr>(MacroTriangFilename,time_,0);
   }
 }
 
@@ -3188,7 +3191,7 @@ inline AlbertaGrid < dim, dimworld >::~AlbertaGrid()
 
 template < int dim, int dimworld > template<int codim, PartitionIteratorType pitype>
 inline AlbertaGridLevelIterator<codim,dim,dimworld,pitype> 
-AlbertaGrid < dim, dimworld >::lbegin (int level, int proc)
+AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 {
   AlbertaGridLevelIterator<codim,dim,dimworld,pitype> it(*this,vertexMarker_,level,proc);
   return it;
@@ -3196,15 +3199,14 @@ AlbertaGrid < dim, dimworld >::lbegin (int level, int proc)
 
 template < int dim, int dimworld > template<int codim, PartitionIteratorType pitype>
 inline AlbertaGridLevelIterator<codim,dim,dimworld,pitype> 
-AlbertaGrid < dim, dimworld >::lend (int level, int proc )
+AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
 {
   AlbertaGridLevelIterator<codim,dim,dimworld,pitype> it((*this),level,proc);
   return it;
 }
-
 template < int dim, int dimworld > template<int codim>
 inline AlbertaGridLevelIterator<codim,dim,dimworld,All_Partition> 
-AlbertaGrid < dim, dimworld >::lbegin (int level, int proc)
+AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 {
   AlbertaGridLevelIterator<codim,dim,dimworld,All_Partition> it(*this,vertexMarker_,level,proc);
   return it;
@@ -3212,15 +3214,34 @@ AlbertaGrid < dim, dimworld >::lbegin (int level, int proc)
 
 template < int dim, int dimworld > template<int codim>
 inline AlbertaGridLevelIterator<codim,dim,dimworld,All_Partition> 
-AlbertaGrid < dim, dimworld >::lend (int level, int proc )
+AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
 {
   AlbertaGridLevelIterator<codim,dim,dimworld,All_Partition> it((*this),level,proc);
   return it;
 }
 
+/* May be deleted
+template < int dim, int dimworld > template<int codim>
+inline AlbertaGridLevelIterator<codim,dim,dimworld,All_Partition> 
+AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
+{
+  AlbertaGridLevelIterator<codim,dim,dimworld,All_Partition> it(*this,vertexMarker_,level,proc);
+  return it;
+}
+
+template < int dim, int dimworld > template<int codim>
+inline AlbertaGridLevelIterator<codim,dim,dimworld,All_Partition> 
+AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
+{
+  AlbertaGridLevelIterator<codim,dim,dimworld,All_Partition> it((*this),level,proc);
+  return it;
+}
+*/
+
 //**********************************************
 // the const versions of LevelIterator
 //**********************************************
+/* May be deleted
 template < int dim, int dimworld > template<int codim, PartitionIteratorType pitype>
 inline typename AlbertaGrid < dim, dimworld > :: template ConstAlbertaGridLevelIterator<codim,pitype> :: IteratorType 
 AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
@@ -3264,11 +3285,11 @@ AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
   typename ConstAlbertaGridLevelIterator<codim,All_Partition> :: IteratorType cit ( it );
   return cit;
 }
-
+*/
 //*****************************************************************
 template < int dim, int dimworld >
 inline AlbertaGridLevelIterator<0,dim,dimworld,All_Partition> 
-AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc )
+AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const
 {
   bool leaf = true;
   AlbertaGridLevelIterator<0,dim,dimworld,All_Partition> 
@@ -3278,7 +3299,7 @@ AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc )
 
 template < int dim, int dimworld >
 inline AlbertaGridLevelIterator<0,dim,dimworld,All_Partition> 
-AlbertaGrid < dim, dimworld >::leafend (int level, int proc )
+AlbertaGrid < dim, dimworld >::leafend (int level, int proc ) const
 {
   bool leaf = true;
   AlbertaGridLevelIterator<0,dim,dimworld,All_Partition> it((*this),level,proc,leaf);
@@ -3330,7 +3351,7 @@ inline bool AlbertaGrid < dim, dimworld >::postAdapt()
 }
 
 template < int dim, int dimworld >
-inline void AlbertaGrid < dim, dimworld >::setMark (bool isMarked)
+inline void AlbertaGrid < dim, dimworld >::setMark (bool isMarked) const
 {
   isMarked_ = isMarked;
 }
