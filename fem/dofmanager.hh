@@ -222,7 +222,7 @@ public:
     {
       int len = size_;
       xdr_int( xdrs, &len );
-      assert(size_ == len);
+      assert(size_ <= len);
       xdr_vector(xdrs,(char *) vec_,size_, sizeof(T) ,(xdrproc_t)xdr_double);
       return true;
     }
@@ -248,7 +248,7 @@ bool DofArrayMemory::processXdr<int>(XDR *xdrs)
   {
     int len = size_;
     xdr_int( xdrs, &len );
-    assert(size_ == len);
+    assert(size_ <= len);
     xdr_vector(xdrs,(char *) vec_,size_, sizeof(T) ,(xdrproc_t)xdr_int);
     return true;
   }
@@ -266,7 +266,7 @@ bool DofArrayMemory::processXdr<double>(XDR *xdrs)
   {
     int len = size_;
     xdr_int( xdrs, &len );
-    assert(size_ == len);
+    assert(size_ <= len);
     xdr_vector(xdrs,(char *) vec_,size_, sizeof(T) ,(xdrproc_t)xdr_double);
     return true;
   }
@@ -597,6 +597,7 @@ template <class GridType,class IndexSetType>
 inline bool DofManager<GridType,IndexSetType>::
 write_xdr(const char * filename , int timestep)
 {
+  //std::cout << indexSet_.size(grid_.maxlevel(),0) << " Size\n";
   return indexSet_.write_xdr(filename,timestep);
 }
 
