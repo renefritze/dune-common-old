@@ -48,6 +48,7 @@ template<int dim, int dimworld>               class YaspGrid;
 template<int mydim, int cdim, class GridImp>  class YaspGeometry;
 template<int codim, int dim, class GridImp>   class YaspEntity;
 template<int codim, PartitionIteratorType pitype, class GridImp> class YaspLevelIterator;
+template<class GridImp>            class YaspLeafIterator;
 template<class GridImp>            class YaspIntersectionIterator;
 template<class GridImp>            class YaspHierarchicIterator;
 template<class GridImp>            class YaspBoundaryEntity;
@@ -284,7 +285,7 @@ public:
                   s << " " << extension[i];
                 s << " missing is " << missing;
   }
-
+private:
   const YaspGeometry<mydim,cdim,GridImp>&
   operator = (const YaspGeometry<mydim,cdim,GridImp>& g)
     {
@@ -304,8 +305,8 @@ private:
 
   // IMPORTANT midpoint and extension can't be references,
   // because they must stay the same when the iterator changes
-  FieldVector<ctype, cdim> midpoint;    // the midpoint
-  FieldVector<ctype, cdim> extension;   // the extension
+  const FieldVector<ctype, cdim> & midpoint;    // the midpoint
+  const FieldVector<ctype, cdim> & extension;   // the extension
   int& missing;                         // the missing, i.e. constant direction
 
   // In addition we need memory in order to return references.
@@ -427,7 +428,7 @@ public:
         for (int i=0; i<mydim; i++)
                   s << " " << extension[i];
   }
-
+private:
   const YaspGeometry<mydim,mydim,GridImp>&
   operator = (const YaspGeometry<mydim,mydim,GridImp>& g)
     {
@@ -446,8 +447,8 @@ private:
 
   // IMPORTANT midpoint and extension can't be references,
   // because they must stay the same when the iterator changes
-  FieldVector<ctype, mydim> midpoint;   // the midpoint
-  FieldVector<ctype, mydim> extension;  // the extension
+  const FieldVector<ctype, mydim> & midpoint;   // the midpoint
+  const FieldVector<ctype, mydim> & extension;  // the extension
 
   // In addition we need memory in order to return references.
   // Possibly we should change this in the interface ...
@@ -493,7 +494,7 @@ public:
         s << "YaspGeometry<"<<0<<","<<cdim<< "> ";
         s << "position " << position;
   }
-
+private:
   const YaspGeometry<0,cdim,GridImp>&
   operator = (const YaspGeometry<0,cdim,GridImp>& g)
     {
@@ -504,7 +505,7 @@ public:
 private:
   // IMPORTANT position can't be references,
   // because they must stay the same when the iterator changes
-  FieldVector<ctype, cdim> position; //!< where the vertex is
+  const FieldVector<ctype, cdim> & position; //!< where the vertex is
 };
 
 // operator<< for all YaspGeometrys
@@ -544,11 +545,11 @@ public:
     {};
   const TSI& transformingsubiterator () const
   {
-        return this->realEntity._it;
+        return this->realEntity.transformingsubiterator();
   }
   const YGLI& gridlevel () const
   {
-        return this->realEntity._g;
+        return this->realEntity.gridlevel();
   }
 };
 
@@ -628,7 +629,7 @@ public:
   int level () const {return _g.level();}
 
   //! index is unique and consecutive per level
-  int index () const {return _it.superindex();} // superindex works also for iteration over subgrids
+  int index () const { return _it.superindex();} // superindex works also for iteration over subgrids
 
   //! return partition type attribute
   PartitionType partitionType () const
@@ -671,6 +672,10 @@ public:
                   if (i&(1<<k)) (coord[k])++;
 
                 return YaspLevelIterator<cc,All_Partition,GridImp>(_g,_g.vertex_overlapfront().tsubbegin(coord));
+          }
+        if (cc==0)
+          {
+                return *this;
           }
         DUNE_THROW(GridError, "codim not (yet) implemented");
   }
@@ -727,6 +732,14 @@ public:
         return _g;
   }
 
+  bool isLeaf() const
+  {
+    std::cout << _g.level() << " ... " << _g.mg()->maxlevel() << std::endl;
+    if (_g.level() == _g.mg()->maxlevel())
+      std::cout << "is Leaf\n";
+    return (_g.level() == _g.mg()->maxlevel());
+  }
+  
   //! returns intersection iterator for first intersection
   IntersectionIterator ibegin () const
   {
@@ -905,6 +918,7 @@ class YaspIntersectionIterator : public IntersectionIteratorDefault<GridImp,Yasp
   enum { dim=GridImp::dimension };
   enum { dimworld=GridImp::dimensionworld };  
   typedef typename GridImp::ctype ctype;
+  YaspIntersectionIterator();
 public:
   // types used from grids
   typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
@@ -1008,18 +1022,19 @@ public:
         return _nb;
   }
 
+  //! return unit outer normal, this should be dependent on local coordinates for higher order boundary
+  FieldVector<ctype, dimworld> outerNormal (const FieldVector<ctype, dim-1>& local) const
+  {
+        return _normal;
+  }
+
 
   //! return unit outer normal, this should be dependent on local coordinates for higher order boundary
-  FieldVector<ctype, dimworld>& unitOuterNormal (FieldVector<ctype, dim-1>& local) const
+  FieldVector<ctype, dimworld> unitOuterNormal (const FieldVector<ctype, dim-1>& local) const
   {
         return _normal;
   }
 
-  //! return unit outer normal, if you know it is constant use this function instead
-  FieldVector<ctype, dimworld>& unitOuterNormal () const
-  {
-        return _normal;
-  }
 
   /*! intersection of codimension 1 of this neighbor with element where iteration started.
         Here returned element is in LOCAL coordinates of the element where iteration started.
@@ -1068,7 +1083,7 @@ public:
           _ext_local(1.0),
           _is_self_local(_pos_self_local,_ext_local,_dir),
           _is_nb_local(_pos_nb_local,_ext_local,_dir),
-          _is_global(_pos_world,myself.transformingsubiterator().meshsize(),_dir),
+          _is_global(_pos_world,_myself.transformingsubiterator().meshsize(),_dir),
           _normal(0.0)
   {
         // making an end iterator?
@@ -1078,7 +1093,6 @@ public:
                 _count = 2*dim;
                 return;
           }
-
         // initialize to first neighbor
         _count = 0;
         _dir = 0;
@@ -1096,6 +1110,26 @@ public:
         _normal[0] = -1.0;
   }
 
+  //! copy constructor
+  YaspIntersectionIterator (const YaspIntersectionIterator<GridImp>& it)
+    // important! _itnb and _nb must recreated not copied
+        : _count(it._count),
+          _dir(it._dir),
+          _face(it._face),
+          _itnb(it._itnb),
+          _myself(it._myself),
+          _nb(_myself.gridlevel(),_itnb),
+          _pos_self_local(it._pos_self_local),
+          _pos_nb_local(it._pos_nb_local),
+          _pos_world(it._pos_world),
+          _ext_local(it._ext_local),
+    // important! _is_* must recreated not copied
+          _is_self_local(_pos_self_local,_ext_local,_dir),
+          _is_nb_local(_pos_nb_local,_ext_local,_dir),
+          _is_global(_pos_world,_myself.transformingsubiterator().meshsize(),_dir),
+          _normal(it._normal)
+  {}
+
 private:
   int _count;                             //!< valid neighbor count in 0 .. 2*dim-1
   int _dir;                               //!< count/2
@@ -1106,7 +1140,7 @@ private:
   mutable SpecialEntity   _nb;            //!< virtual neighbor entity, built on the fly
   FieldVector<ctype, dim> _pos_self_local;//!< center of face in own local coordinates
   FieldVector<ctype, dim> _pos_nb_local;  //!< center of face in neighbors local coordinates
-  FieldVector<ctype, dim> _pos_world;     //!< center of face in world coordinates
+  FieldVector<ctype, dimworld>_pos_world;     //!< center of face in world coordinates
   FieldVector<ctype, dim> _ext_local;     //!< extension of face in local coordinates
   SpecialLocalGeometry    _is_self_local; //!< intersection in own local coordinates
   SpecialLocalGeometry    _is_nb_local;   //!< intersection in neighbors local coordinates
@@ -1158,6 +1192,12 @@ public:
         if (!stack.empty())
           pop_tos();
   }
+
+  //! constructor
+  YaspHierarchicIterator (const YaspHierarchicIterator& it) :
+    _g(it._g), _it(it._it), _entity(_g,_it),
+    _maxlevel(it._maxlevel), stack(it.stack)
+  {}
 
   //! increment
   void increment ()
@@ -1331,6 +1371,20 @@ private:
   mutable SpecialEntity _entity; //!< virtual entity
 };
 
+template <class GridImp>
+class YaspLeafIterator : public YaspLevelIterator<0,All_Partition,GridImp>
+{
+  typedef typename GridImp::ctype ctype;
+public:
+  typedef typename MultiYGrid<0,ctype>::YGridLevelIterator YGLI;
+  typedef typename SubYGrid<0,ctype>::TransformingSubIterator TSI;
+  YaspLeafIterator(const YGLI & g, const TSI & it) :
+    YaspLevelIterator<0,All_Partition,GridImp>(g,it)
+    {}
+  YaspLeafIterator(const YaspLevelIterator<0,All_Partition,GridImp>& i) :
+    YaspLevelIterator<0,All_Partition,GridImp>(i)
+    {}
+};
 
 
 //************************************************************************
