@@ -2718,8 +2718,6 @@ inline void AlbertaGrid < dim, dimworld >::initGrid(int proc, bool swapEls )
   ALBERTA AlbertHelp::getDofVecs(&dofvecs_);
   ALBERTA AlbertHelp::setDofVec ( dofvecs_.owner, -1 );
 
-  hIndexSet_.initializePointers(dofvecs_);
-
   // dont delete dofs on higher levels 
   mesh_->preserve_coarse_dofs = 1;
     
@@ -2934,6 +2932,7 @@ globalRefine(int refCount)
   typedef LeafIterator LeafIt;
   LeafIt endit = this->leafend(this->maxlevel());
 
+  assert(refCount >= 0);
   for(int i=0; i<refCount; i++)
   {
     // mark all interior elements 
@@ -3027,7 +3026,7 @@ inline bool AlbertaGrid < dim, dimworld >::adapt()
   wasChanged_ = false;
  
   // set global pointer to index manager in elmem.cc
-  ALBERTA AlbertHelp::initIndexManager_elmem_cc(indexStack_);
+  ALBERTA AlbertHelp::initIndexManager_elmem_cc( indexStack_ );
   ALBERTA AlbertHelp::clearDofVec ( dofvecs_.elNewCheck );
 
   flag = ALBERTA AlbertRefine ( mesh_ );
@@ -3136,7 +3135,7 @@ inline int AlbertaGrid < dim, dimworld >::size (int level, int codim) const
 template < int dim, int dimworld > 
 inline void AlbertaGrid < dim, dimworld >::arrangeDofVec()
 {
-  //hIndexSet_.updateVecPointers(dofvecs_);
+  hIndexSet_.updatePointers(dofvecs_);
 
   elNewVec_ = (dofvecs_.elNewCheck)->vec;  assert(elNewVec_);
   ownerVec_ = (dofvecs_.owner)->vec;       assert(ownerVec_);
