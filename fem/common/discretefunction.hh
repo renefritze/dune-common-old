@@ -5,6 +5,7 @@
 #include <dune/common/function.hh>
 #include <dune/common/functionspace.hh>
 #include "discretefunctionspace.hh"
+#include "dofiterator.hh"
 
 namespace Dune{
 
@@ -130,13 +131,13 @@ public:
   };
 
   //! const version of dbegin 
-  const DofIteratorType dbegin () const  
+  ConstDofIteratorDefault<DofIteratorType> dbegin () const  
   {
     return asImp().dbegin ();
   };
 
   //! const version of dend 
-  const DofIteratorType dend () const
+  ConstDofIteratorDefault<DofIteratorType> dend () const  
   {
     return asImp().dend ();
   };

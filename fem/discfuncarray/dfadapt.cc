@@ -110,19 +110,21 @@ DFAdapt< DiscreteFunctionSpaceType >::dend ()
 }
 
 template<class DiscreteFunctionSpaceType > 
-inline const typename DFAdapt<DiscreteFunctionSpaceType>::DofIteratorType 
+inline typename DFAdapt<DiscreteFunctionSpaceType>::ConstDofIteratorType 
 DFAdapt< DiscreteFunctionSpaceType >::dbegin ( ) const
 {
   DofIteratorType tmp ( dofVec_ , 0 );     
-  return tmp;
+  ConstDofIteratorType tmp2(tmp);
+  return tmp2;
 }
 
 template<class DiscreteFunctionSpaceType > 
-inline const typename DFAdapt<DiscreteFunctionSpaceType>::DofIteratorType 
+inline typename DFAdapt<DiscreteFunctionSpaceType>::ConstDofIteratorType 
 DFAdapt< DiscreteFunctionSpaceType >::dend () const 
 {
   DofIteratorType tmp ( dofVec_ , dofVec_.size() );
-  return tmp;
+  ConstDofIteratorType tmp2(tmp);
+  return tmp2;
 }
 //**************************************************************************
 //  Read and Write Methods 

@@ -319,11 +319,12 @@ void SparseRowMatrix<T>::apply(const DiscFType &f, DiscFuncType &ret) const
 {
   typedef typename DiscFType::DofIteratorType DofFItType;  
   typedef typename DiscFuncType::DofIteratorType DofIteratorType;  
+  typedef typename DiscFuncType::ConstDofIteratorType ConstDofIteratorType;  
 
   //! we assume that the dimension of the functionspace of f is the same as
   //! the size of the matrix 
-  DofIteratorType ret_it = ret.dbegin(); 
-  const DofFItType f_it = f.dbegin(); 
+  DofIteratorType    ret_it = ret.dbegin(); 
+  ConstDofIteratorType f_it = f.dbegin(); 
 
   for(int row=0; row<dim_[0]; row++)
   {

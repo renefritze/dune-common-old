@@ -52,7 +52,9 @@ private:
 public:
   typedef DofIteratorAdapt<typename DiscreteFunctionSpaceType::RangeField,
           DofArrayType > DofIteratorType;
-
+  typedef ConstDofIteratorDefault<DofIteratorType> ConstDofIteratorType;
+          
+          
   typedef typename DiscreteFunctionSpaceType::MemObjectType MemObjectType;
   
   typedef DFAdapt <DiscreteFunctionSpaceType> DiscreteFunctionType;          
@@ -90,10 +92,10 @@ public:
   DofIteratorType dend   ( );
 
   //! const version of dof iterator  
-  const DofIteratorType dbegin ( ) const;
+  ConstDofIteratorType dbegin ( ) const;
   
   //! const version of dof iterator  
-  const DofIteratorType dend   ( ) const;
+  ConstDofIteratorType dend   ( ) const;
 
   //! set all dofs to zero  
   void clear( );
@@ -264,13 +266,13 @@ protected:
 //  --DofIteratorAdapt
 //
 //***********************************************************************
-template < class DofType, class DofArrayType >
+template < class DofImp, class DofArrayType >
 class DofIteratorAdapt : public
-DofIteratorDefault < DofType , DofIteratorAdapt < DofType, DofArrayType > >
+DofIteratorDefault < DofImp , DofIteratorAdapt < DofImp, DofArrayType > >
 {
-  typedef DofIteratorAdapt<DofType,DofArrayType> MyType;
+  typedef DofIteratorAdapt<DofImp,DofArrayType> MyType;
 public:
-  typedef DofType T;
+  typedef DofImp DofType;
   
   DofIteratorAdapt ( DofArrayType & dofArray , int count )
     :  dofArray_ ( dofArray ) , constArray_ (dofArray) , count_ ( count ) {};
