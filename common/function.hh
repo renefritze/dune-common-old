@@ -5,6 +5,18 @@
 
 
 namespace Dune{
+/** @defgroup FunctionCommon Functions
+    @ingroup AlgebraCommon
+    Functions are Mappings from \f$K^n\f$ into \f$L^m\f$ where 
+    \f$K\f$ and \f$L\f$ are fields.
+ */
+
+/** @defgroup Function Function
+   \ingroup FunctionCommon
+
+  @{
+ */
+
 
 typedef int deriType;
   
@@ -38,6 +50,7 @@ protected:
 
 };
 
+/** @} end documentation group */
 
 }
 

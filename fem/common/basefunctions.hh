@@ -8,7 +8,8 @@
 
 namespace Dune{
 
-/** @defgroup BaseFunctionSets Base Function Sets for various Elements
+/** @defgroup BaseFunction BaseFunction
+  @ingroup DiscreteFunction
     
   The base functions are essential to describe a numerical solutions.
   Here the interface of base functions and the corresponding base 
@@ -75,6 +76,19 @@ private:
 
 };
 
+/** @} end documentation group */
+
+
+/** @defgroup BaseFunctionSet BaseFunctionSet
+  @ingroup DiscreteFunction
+    
+  The base functions are essential to describe a numerical solutions.
+  Here the interface of base functions and the corresponding base 
+  function set is presented. The user always works with the base function
+  set, where all diffrent base functions for on element type are known.
+
+  @{
+ */
 
 //****************************************************************************
 //

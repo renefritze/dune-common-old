@@ -7,8 +7,8 @@
 namespace Dune{
 
 
-/** @defgroup DiscreteFunctionSpace The DiscreteFunctionSpace Interface
-  
+/** @defgroup DiscreteFunctionSpace DiscreteFunctionSpace
+  @ingroup DiscreteFunction
   This provides the interfaces for discrete function spaces. 
   
   @{

@@ -5,6 +5,16 @@
 
 namespace Dune
 {
+/** @defgroup OperatorCommon Operators
+  @ingroup AlgebraCommon
+  Operators are mappings from function spaces into function spaces.
+ */
+
+/** @defgroup Operator Operator
+    @ingroup OperatorCommon
+
+  @{
+ */
 
 template <typename DFieldType, typename RFieldType,
           typename DType , typename RType>
@@ -27,6 +37,8 @@ public:
 private:
 
 }; // end class Operator 
+
+/** @} end documentation group */
 
 } // end namespace Dune 
 
