@@ -287,6 +287,27 @@ public:
  * a number in an array. 
  */
 //*********************************************************************
+
+template <class DefaultLevelIndexSetType, int codim>
+struct CalcLevelForCodim 
+{
+  static void recursive(DefaultLevelIndexSetType & d)
+  {
+    d.template calcLevelIndexForCodim<codim> (); 
+    CalcLevelForCodim<DefaultLevelIndexSetType,codim-1>::recursive(d);
+  }
+};
+
+template <class DefaultLevelIndexSetType>
+struct CalcLevelForCodim<DefaultLevelIndexSetType,0>
+{
+  static void recursive(DefaultLevelIndexSetType & d)
+  {
+    d.template calcLevelIndexForCodim<0> (); 
+  }
+};
+
+
 template <class GridType>
 class DefaultLevelIndexSet
 {
@@ -295,6 +316,7 @@ class DefaultLevelIndexSet
   typedef typename GridType :: HierarchicIndexSetType HierarchicIndexSetType;
   typedef typename GridType :: Traits :: template codim<0> :: Entity  EntityCodim0Type;
 
+  typedef DefaultLevelIndexSet<GridType> MyType;
 public:
   DefaultLevelIndexSet(const GridType & grid ) :
     grid_(grid) , hIndexSet_ ( grid.hierarchicIndexSet() ) 
@@ -334,6 +356,7 @@ private:
     return levelIndex_[cd][level][hIndex];
   };
 
+public:
   template <int cd>
   void calcLevelIndexForCodim ()
   {
@@ -359,19 +382,6 @@ private:
     }
   }
 
-  void recursiveCall (int d)
-  {
-    switch (d) 
-    {
-      //case 3:  calcLevelIndexForCodim<3> (); recursiveCall(2);
-      case 2:  calcLevelIndexForCodim<2> (); recursiveCall(1);
-      case 1:  calcLevelIndexForCodim<1> (); recursiveCall(0);
-      case 0:  calcLevelIndexForCodim<0> ();
-      default: return;
-    }
-  }
-
-public:
   void calcNewIndex ()
   {
     int numLevel = grid_.maxlevel() + 1;
@@ -379,9 +389,10 @@ public:
     if( (numLevel) * (numCodim) > size_.size() )
       makeNewSize(size_, 2*((numLevel) * numCodim) );
 
-    recursiveCall(dim) ;
+    CalcLevelForCodim<MyType,dim>::recursive(*this);
   }
 
+private:
   void makeNewSize(Array<int> &a, int newNumberOfEntries)
   {
     if(newNumberOfEntries > a.size())
