@@ -35,11 +35,11 @@ namespace Dune {
 	- SEntity is a class template realizing the grid entities. Grid entities are the constituents
 	of a grid. Grid entities of codimension 0 and codimension dim are defines through specialization.
 	Entities can be used as template parameters to generic algorithms. Each entity must therefore
-	provide the nested classes Element, LevelIterator, HierarchicIterator and NeighborIterator.
+	provide the nested classes Element, LevelIterator, HierarchicIterator and IntersectionIterator.
 	Element and LevelIterator are derived from the classes SELement and SLevelIterator.
 	Note that entities of codimension 0 and dim have an extended interface.
 
-	- SEntity::NeighborIterator provides access to all entities of codimension 0 sharing an object of codimension 1
+	- SEntity::IntersectionIterator provides access to all entities of codimension 0 sharing an object of codimension 1
 	with the given entity of codimension 0. This interface covers nonmatching grids.
 
 	- SEntity::HierarchicIterator provides access to the sons of an entity of codimension 0.
@@ -65,7 +65,7 @@ template<int dim, int dimworld> class SElement;
 template<int codim, int dim, int dimworld> class SEntity;
 template<int codim, int dim, int dimworld> class SLevelIterator;
 template<int dim, int dimworld> class SGrid;
-template<int dim, int dimworld> class SNeighborIterator;
+template<int dim, int dimworld> class SIntersectionIterator;
 template<int dim, int dimworld> class SHierarchicIterator;
 
 //************************************************************************
@@ -103,12 +103,6 @@ template<int dim, int dimworld>
 class SElement : public ElementDefault<dim,dimworld,sgrid_ctype,SElement>
 {
 public:
-	//! know dimension
-	enum { dimension=dim };
-
-	//! know dimension of world
-	enum { dimensionworld=dimworld };
-
 	//! define type used for coordinates in grid module
 	typedef sgrid_ctype ctype;
 
@@ -186,12 +180,6 @@ template<int dimworld>
 class SElement<0,dimworld> : public ElementDefault <0,dimworld,sgrid_ctype,SElement>
 {
 public:
-	//! know dimension
-	enum { dimension=0 };
-
-	//! know dimension of world
-	enum { dimensionworld=dimworld };
-
 	//! define type used for coordinates in grid module
 	typedef sgrid_ctype ctype;
 
@@ -247,31 +235,25 @@ private:
 //************************************************************************
 /*! Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
   a neighbor is an entity of codimension 0 which has a common entity of codimension 1 with the entity.
-  These neighbors are accessed via a NeighborIterator. This allows the implementation of
+  These neighbors are accessed via a IntersectionIterator. This allows the implementation of
   non-matching meshes. The number of neigbors may be different from the number of faces/edges
   of an element!
  */
 template<int dim, int dimworld>
-class SNeighborIterator : public NeighborIteratorDefault <dim,dimworld,sgrid_ctype,SNeighborIterator,SEntity,SElement,SBoundaryEntity>
+class SIntersectionIterator : public IntersectionIteratorDefault <dim,dimworld,sgrid_ctype,SIntersectionIterator,SEntity,SElement,SBoundaryEntity>
 {
 public:
-	//! know your own dimension
-	enum { dimension=dim };
-
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
-
 	//! define type used for coordinates in grid module
 	typedef sgrid_ctype ctype;
 
 	//! prefix increment
-	SNeighborIterator<dim,dimworld>& operator++();
+	SIntersectionIterator<dim,dimworld>& operator++();
 
 	//! equality
-	bool operator== (const SNeighborIterator<dim,dimworld>& i) const;
+	bool operator== (const SIntersectionIterator<dim,dimworld>& i) const;
 
 	//! inequality
-	bool operator!= (const SNeighborIterator<dim,dimworld>& i) const;
+	bool operator!= (const SIntersectionIterator<dim,dimworld>& i) const;
 
 	//! return true if intersection is with boundary. \todo connection with boundary information, processor/outer boundary
 	bool boundary ();
@@ -320,8 +302,8 @@ public:
 	int number_in_neighbor ();
 
 	//! constructor
-	SNeighborIterator (SGrid<dim,dimworld>& _grid, SEntity<0,dim,dimworld>& _self, int _count);
-    SNeighborIterator ();
+	SIntersectionIterator (SGrid<dim,dimworld>& _grid, SEntity<0,dim,dimworld>& _self, int _count);
+    SIntersectionIterator ();
 
   void make (SGrid<dim,dimworld>& _grid, SEntity<0,dim,dimworld>& _self, int _count);
 
@@ -356,12 +338,6 @@ template<int dim, int dimworld>
 class SHierarchicIterator : public HierarchicIteratorDefault <dim,dimworld,sgrid_ctype,SHierarchicIterator,SEntity>
 {
 public:
-	//! know your own dimension
-	enum { dimension=dim };
-
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
-
 	//! define type used for coordinates in grid module
 	typedef sgrid_ctype ctype;
 
@@ -452,18 +428,9 @@ protected:
 template<int codim, int dim, int dimworld> 
 class SEntity : public SEntityBase<codim,dim,dimworld>, 
 				public EntityDefault <codim,dim,dimworld,sgrid_ctype,SEntity,SElement,
-	                   SLevelIterator,SNeighborIterator,SHierarchicIterator>
+	                   SLevelIterator,SIntersectionIterator,SHierarchicIterator>
 {
 public:
-	//! know your own codimension
-	enum { codimension=codim };
-
-	//! know your own dimension
-	enum { dimension=dim };
-
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
-
 	//! define type used for coordinates in grid module
 	typedef sgrid_ctype ctype;
 
@@ -504,26 +471,17 @@ static Tupel <int,2> zentityGlob;
 template<int dim, int dimworld>
 class SEntity<0,dim,dimworld> : public SEntityBase<0,dim,dimworld>, 
 								public EntityDefault <0,dim,dimworld,sgrid_ctype,SEntity,SElement,
-	                                   SLevelIterator,SNeighborIterator,SHierarchicIterator>
+	                                   SLevelIterator,SIntersectionIterator,SHierarchicIterator>
 {
 public:
 	//! make HierarchicIterator a friend
-	friend class SNeighborIterator<dim,dimworld>;
+	friend class SIntersectionIterator<dim,dimworld>;
 
-	//! make NeighborIterator a friend
+	//! make IntersectionIterator a friend
 	friend class SHierarchicIterator<dim,dimworld>;
 
 	//! define type used for coordinates in grid module
 	typedef sgrid_ctype ctype;
-
-	//! know your own codimension
-	enum { codimension=0 };
-
-	//! know your own dimension
-	enum { dimension=dim };
-
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
 
 	// disambiguate member functions with the same name in both bases
 	//! level of this element
@@ -553,12 +511,12 @@ public:
 	  is provided using iterators. This allows meshes to be nonmatching. Returns iterator
 	  referencing the first neighbor.
 	 */
-	SNeighborIterator<dim,dimworld> nbegin ();
-	void nbegin (SNeighborIterator<dim,dimworld>&);
+	SIntersectionIterator<dim,dimworld> ibegin ();
+	void ibegin (SIntersectionIterator<dim,dimworld>&);
 
 	//! Reference to one past the last neighbor
-	SNeighborIterator<dim,dimworld> nend ();
-	void nend (SNeighborIterator<dim,dimworld>&);
+	SIntersectionIterator<dim,dimworld> iend ();
+	void iend (SIntersectionIterator<dim,dimworld>&);
 
 	//! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
 	SLevelIterator<0,dim,dimworld> father ();
@@ -631,18 +589,9 @@ private:
 template<int dim, int dimworld>
 class SEntity<dim,dim,dimworld> : public SEntityBase<dim,dim,dimworld>, 
 								  public EntityDefault <dim,dim,dimworld,sgrid_ctype,SEntity,SElement,
-                                         SLevelIterator,SNeighborIterator,SHierarchicIterator>
+                                         SLevelIterator,SIntersectionIterator,SHierarchicIterator>
 {
 public:
-	//! know your own codimension
-	enum { codimension=dim };
-
-	//! know your own dimension
-	enum { dimension=dim };
-
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
-
 	// disambiguate member functions with the same name in both bases
 	//! level of this element
 	int level () {return SEntityBase<dim,dim,dimworld>::level();}
@@ -691,15 +640,6 @@ template<int codim, int dim, int dimworld>
 class SLevelIterator : public LevelIteratorDefault <codim,dim,dimworld,sgrid_ctype,SLevelIterator,SEntity>
 {
 public:
-	//! know your own codimension
-	enum { codimension=dim };
-
-	//! know your own dimension
-	enum { dimension=dim };
-
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
-
 	//! prefix increment
 	SLevelIterator<codim,dim,dimworld>& operator++();
 
@@ -747,12 +687,6 @@ class SGrid : public GridDefault <dim,dimworld,sgrid_ctype,SGrid,SLevelIterator,
 public:
 	//! maximum number of levels allowed
 	enum { MAXL=32 };
-
-	//! know your own dimension
-	enum { dimension=dim };
-
-	//! know your own dimension of world
-	enum { dimensionworld=dimworld };
 
 	//! define type used for coordinates in grid module
 	typedef sgrid_ctype ctype;

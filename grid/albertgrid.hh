@@ -31,6 +31,10 @@ extern "C"
 {
 #endif
 
+#if EL_INDEX != 1
+#error "EL_INDEX must be set to 1 !!! \n"
+#endif
+  
 // the original ALBERT Lib 
 #include <albert.h>
 
@@ -89,7 +93,7 @@ template<int codim, int dim, int dimworld> class AlbertGridLevelIterator;
 template<int dim, int dimworld>            class AlbertGridElement;
 template<int dim, int dimworld>            class AlbertGridBoundaryEntity;
 template<int dim, int dimworld>            class AlbertGridHierarchicIterator;
-template<int dim, int dimworld>            class AlbertGridNeighborIterator;
+template<int dim, int dimworld>            class AlbertGridIntersectionIterator;
 template<int dim, int dimworld>            class AlbertGrid;
 
 template <class Object> class AlbertGridMemory;
@@ -117,10 +121,10 @@ class AlbertGridElement :
 public ElementDefault <dim,dimworld,albertCtype,AlbertGridElement>
 { 
   friend class AlbertGridBoundaryEntity<dim,dimworld>;
-public:
 
-  //! know dimension of world
+  //! know dimension of barycentric coordinates
   enum { dimbary=dim+1};
+public:
 
   //! for makeRefElement == true a Element with the coordinates of the 
   //! reference element is made 
@@ -182,16 +186,20 @@ public:
   Mat<dim,dim>& Jacobian_inverse (const Vec<dim,albertCtype>& local);
 
   //***********************************************************************
-  //  Methods that not belong to the Interface, but have to be public
+  //!  Methods that not belong to the Interface, but have to be public
   //***********************************************************************
   //! generate the geometry for the ALBERT EL_INFO 
+  //! no interface method
   bool builtGeom(ALBERT EL_INFO *elInfo, unsigned char face, 
                  unsigned char edge, unsigned char vertex);
   // init geometry with zeros 
+  //! no interface method
   void initGeom();
 
   //! print internal data
+  //! no interface method
   void print (std::ostream& ss, int indent);
+
 private:
   // calc the local barycentric coordinates 
   template <int dimbary>
@@ -268,21 +276,13 @@ template<int codim, int dim, int dimworld>
 class AlbertGridEntity : 
 public EntityDefault <codim,dim,dimworld,albertCtype,
               AlbertGridEntity,AlbertGridElement,AlbertGridLevelIterator,
-              AlbertGridNeighborIterator,AlbertGridHierarchicIterator>
+              AlbertGridIntersectionIterator,AlbertGridHierarchicIterator>
 {
   friend class AlbertGrid < dim , dimworld >;
   friend class AlbertGridEntity < 0, dim, dimworld>;
   friend class AlbertGridLevelIterator < codim, dim, dimworld>;
   //friend class AlbertGridLevelIterator < dim, dim, dimworld>;
 public:
-  //! know your own codimension
-  //enum { codimension=codim };
-
-  //! know your own dimension
-    //enum { dimension=dim };
-
-  //! know your own dimension of world
-    //enum { dimensionworld=dimworld };
 
   //! level of this element
   int level ();
@@ -371,27 +371,18 @@ private:
 template<int dim, int dimworld>
 class AlbertGridEntity<0,dim,dimworld> : 
 public EntityDefault<0,dim,dimworld,albertCtype,AlbertGridEntity,AlbertGridElement,
-              AlbertGridLevelIterator,AlbertGridNeighborIterator,
+              AlbertGridLevelIterator,AlbertGridIntersectionIterator,
               AlbertGridHierarchicIterator>
 {
   friend class AlbertGrid < dim , dimworld >;
   friend class AlbertMarkerVector;
-  friend class AlbertGridNeighborIterator < dim, dimworld>;
+  friend class AlbertGridIntersectionIterator < dim, dimworld>;
   friend class AlbertGridHierarchicIterator < dim, dimworld>;
   friend class AlbertGridLevelIterator <0,dim,dimworld>;
 public:
-  typedef AlbertGridNeighborIterator<dim,dimworld> NeighborIterator; 
+  typedef AlbertGridIntersectionIterator<dim,dimworld> IntersectionIterator; 
   typedef AlbertGridHierarchicIterator<dim,dimworld> HierarchicIterator; 
   
-  //! know your own codimension
-    //enum { codimension=0 };
-
-  //! know your own dimension
-    //enum { dimension=dim };
-
-  //! know your own dimension of world
-    //enum { dimensionworld=dimworld };
-
   //! Destructor, needed perhaps needed for deleteing faceEntity_ and
   //! edgeEntity_ , see below
   //! there are only implementations for dim==dimworld 2,3
@@ -423,14 +414,15 @@ public:
   //!  are numbered 0 ... count<cc>()-1
   template<int cc> AlbertGridLevelIterator<cc,dim,dimworld> entity (int i);
 
-  /*! Intra-level access to neighboring elements. A neighbor is an entity of codimension 0
+  /*! Intra-level access to intersection with neighboring elements. 
+    A neighbor is an entity of codimension 0
     which has an entity of codimension 1 in commen with this entity. Access to neighbors
     is provided using iterators. This allows meshes to be nonmatching. Returns iterator
     referencing the first neighbor. */
-  AlbertGridNeighborIterator<dim,dimworld> nbegin ();
+  AlbertGridIntersectionIterator<dim,dimworld> ibegin ();
 
-  //! Reference to one past the last neighbor
-  AlbertGridNeighborIterator<dim,dimworld> nend ();
+  //! Reference to one past the last intersection with neighbor
+  AlbertGridIntersectionIterator<dim,dimworld> iend ();
 
   //! returns true if Entity has children 
   bool hasChildren (); 
@@ -536,13 +528,6 @@ public HierarchicIteratorDefault <dim,dimworld,albertCtype,
                           AlbertGridHierarchicIterator,AlbertGridEntity>
 {
 public:
-  //! know your own dimension
-    //enum { dimension=dim };
-
-  //! know your own dimension of world
-    //enum { dimensionworld=dimworld };
- 
-#if 1
   //! the normal Constructor
   AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid,
     ALBERT TRAVERSE_STACK *travStack, int actLevel, int maxLevel);
@@ -550,14 +535,6 @@ public:
   //! the default Constructor
   AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid,
         int actLevel,int maxLevel);
-#else 
-  //! the normal Constructor
-  AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid,
-    ALBERT TRAVERSE_STACK *travStack, int travLevel);
-
-  //! the default Constructor
-  AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid);
-#endif
   
   //! prefix increment
   AlbertGridHierarchicIterator& operator ++();
@@ -610,7 +587,7 @@ class AlbertGridBoundaryEntity
 : public BoundaryEntityDefault <dim,dimworld,albertCtype,
           AlbertGridElement,AlbertGridBoundaryEntity>
 { 
-  friend class AlbertGridNeighborIterator<dim,dimworld>;
+  friend class AlbertGridIntersectionIterator<dim,dimworld>;
 public:
   AlbertGridBoundaryEntity () : _geom (false) , _elInfo ( NULL ), 
   _neigh (-1) {};
@@ -672,49 +649,43 @@ private:
 };
 //**********************************************************************
 //
-// --AlbertGridNeighborIterator
-// --NeighborIterator
+// --AlbertGridIntersectionIterator
+// --IntersectionIterator
 /*!
   Mesh entities of codimension 0 ("elements") allow to visit all neighbors, wh
   a neighbor is an entity of codimension 0 which has a common entity of codimens
-  These neighbors are accessed via a NeighborIterator. This allows the implement
+  These neighbors are accessed via a IntersectionIterator. This allows the implement
   non-matching meshes. The number of neigbors may be different from the number o
   of an element!
  */
 template<int dim, int dimworld>
-class AlbertGridNeighborIterator : 
-public  NeighborIteratorDefault <dim,dimworld,albertCtype,
-                         AlbertGridNeighborIterator,AlbertGridEntity,
+class AlbertGridIntersectionIterator : 
+public  IntersectionIteratorDefault <dim,dimworld,albertCtype,
+                         AlbertGridIntersectionIterator,AlbertGridEntity,
                          AlbertGridElement, AlbertGridBoundaryEntity>
 {
 public:
-  //! know your own dimension
-  //enum { dimension=dim };
-  
-  //! know your own dimension of world
-  //enum { dimensionworld=dimworld };
-  
   //! prefix increment
-  AlbertGridNeighborIterator& operator ++();
+  AlbertGridIntersectionIterator& operator ++();
 
   //! postfix increment
-  AlbertGridNeighborIterator& operator ++(int i);
+  AlbertGridIntersectionIterator& operator ++(int i);
 
   //! The default Constructor 
-  AlbertGridNeighborIterator(AlbertGrid<dim,dimworld> &grid,int level);
+  AlbertGridIntersectionIterator(AlbertGrid<dim,dimworld> &grid,int level);
 
   //! The Constructor 
-  AlbertGridNeighborIterator(AlbertGrid<dim,dimworld> &grid,int level,
+  AlbertGridIntersectionIterator(AlbertGrid<dim,dimworld> &grid,int level,
           ALBERT EL_INFO *elInfo);
   
   //! The Destructor 
-  ~AlbertGridNeighborIterator();
+  ~AlbertGridIntersectionIterator();
 
   //! equality
-  bool operator== (const AlbertGridNeighborIterator& i) const;
+  bool operator== (const AlbertGridIntersectionIterator& i) const;
 
   //! inequality
-  bool operator!= (const AlbertGridNeighborIterator& i) const;
+  bool operator!= (const AlbertGridIntersectionIterator& i) const;
 
   //! access neighbor, dereferencing 
   AlbertGridEntity<0,dim,dimworld>& operator*();
@@ -844,8 +815,6 @@ public LevelIteratorDefault <codim,dim,dimworld,albertCtype,
   friend class AlbertGrid < dim , dimworld >;
 public:
 
-  //friend class AlbertGrid<dim,dimworld>;
-
   //! Constructor
   AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, int travLevel);
   
@@ -957,7 +926,7 @@ class AlbertGrid : public GridDefault  < dim, dimworld,
   friend class AlbertGridLevelIterator<3,dim,dimworld>;
   friend class AlbertGridHierarchicIterator<dim,dimworld>;
 
-  friend class AlbertGridNeighborIterator<dim,dimworld>;
+  friend class AlbertGridIntersectionIterator<dim,dimworld>;
 
   //! AlbertGrid is only implemented for 2 and 3 dimension
   //! for 1d use SGrid or SimpleGrid 
@@ -1020,8 +989,6 @@ public:
   //! uses the interface, mark on entity and refineLocal 
   bool globalRefine(int refCount);
 
-  // write Grid to file
-  //void writeGrid(int level=-1);
 
   /** \brief write Grid to file in specified FileFormatType 
    */
@@ -1033,6 +1000,8 @@ public:
   template <FileFormatType ftype>
   bool readGrid( const char * filename, albertCtype & time );
 
+  //! return current time of grid 
+  //! not an interface method yet 
   albertCtype getTime () const { return time_; };
   
 private:
