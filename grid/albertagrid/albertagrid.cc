@@ -687,10 +687,11 @@ inline albertCtype AlbertaGridGeometry<2,3,const AlbertaGrid<3,3> >::elDetermina
   // calculate scaled outer normal 
   for(int i=0; i<dim; i++) 
   {
-    tmpZ_[i] = 0.5 * (  tmpU_[(i+1)%dim] * tmpV_[(i+2)%dim] 
-                      - tmpU_[(i+2)%dim] * tmpV_[(i+1)%dim] );
+    tmpZ_[i] = (  tmpU_[(i+1)%dim] * tmpV_[(i+2)%dim] 
+                - tmpU_[(i+2)%dim] * tmpV_[(i+1)%dim] );
   }
 
+  // tmpZ is the same as 2.0 * the outer normal 
   return std::abs( tmpZ_.two_norm() );
 }
 
