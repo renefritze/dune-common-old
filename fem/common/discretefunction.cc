@@ -1,23 +1,25 @@
 #ifndef __DUNE_DISCRETE_FUNCTION_CC__
 #define __DUNE_DISCRETE_FUNCTION_CC__
 
+#include <fstream>
+
 namespace Dune 
 {
 
-
+  
 //************************************************************
 //  Default Implementations 
 //************************************************************
 // scalarProductDofs
 template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
          template <class,class> class LocalFunctionIteratorImp, class DiscreteFunctionImp >
-inline DiscreteFunctionSpaceType::RangeField 
+inline typename DiscreteFunctionSpaceType::RangeField 
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
 scalarProductDofs( const DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
                 DofIteratorImp ,LocalFunctionIteratorImp, DiscreteFunctionImp > &g ) 
 {
-  typedef DiscreteFunctionSpaceType::RangeField RangeFieldType; 
+  typedef typename DiscreteFunctionSpaceType::RangeField RangeFieldType; 
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
     DofIteratorImp , LocalFunctionIteratorImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
 
@@ -42,10 +44,10 @@ scalarProductDofs( const DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
 // assign
 template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
          template <class,class> class LocalFunctionIteratorImp, class DiscreteFunctionImp >
-inline Vector< DiscreteFunctionSpaceType::RangeField > &
+inline Vector< typename DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp, DiscreteFunctionImp >::
-assign( const Vector< DiscreteFunctionSpaceType::RangeField > & g ) 
+assign( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g ) 
 {
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
     DofIteratorImp , LocalFunctionIteratorImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
@@ -70,10 +72,10 @@ assign( const Vector< DiscreteFunctionSpaceType::RangeField > & g )
 // operator =
 template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
          template <class,class> class LocalFunctionIteratorImp, class DiscreteFunctionImp >
-inline Vector< DiscreteFunctionSpaceType::RangeField > &
+inline Vector< typename DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
-operator = ( const Vector< DiscreteFunctionSpaceType::RangeField > & g ) 
+operator = ( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g ) 
 {
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
     DofIteratorImp , LocalFunctionIteratorImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
@@ -98,10 +100,10 @@ operator = ( const Vector< DiscreteFunctionSpaceType::RangeField > & g )
 // operator +=
 template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
          template <class,class> class LocalFunctionIteratorImp, class DiscreteFunctionImp >
-inline Vector< DiscreteFunctionSpaceType::RangeField > &
+inline Vector< typename DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
-operator += ( const Vector< DiscreteFunctionSpaceType::RangeField > & g ) 
+operator += ( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g ) 
 {
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
     DofIteratorImp , LocalFunctionIteratorImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
@@ -127,8 +129,8 @@ template<class DiscreteFunctionSpaceType, class DofIteratorImp,
          template <class,class> class LocalFunctionIteratorImp, class DiscreteFunctionImp >
 inline void DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
-addScaled( const Vector< DiscreteFunctionSpaceType::RangeField > & g ,
-           const  DiscreteFunctionSpaceType::RangeField &scalar) 
+addScaled( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g ,
+           const  typename DiscreteFunctionSpaceType::RangeField &scalar) 
 {
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
     DofIteratorImp , LocalFunctionIteratorImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
@@ -151,10 +153,10 @@ addScaled( const Vector< DiscreteFunctionSpaceType::RangeField > & g ,
 // operator -=
 template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
          template <class,class> class LocalFunctionIteratorImp, class DiscreteFunctionImp >
-inline Vector< DiscreteFunctionSpaceType::RangeField > &
+inline Vector< typename DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
-operator -= ( const Vector< DiscreteFunctionSpaceType::RangeField > & g ) 
+operator -= ( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g ) 
 {
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
     DofIteratorImp , LocalFunctionIteratorImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
@@ -178,10 +180,10 @@ operator -= ( const Vector< DiscreteFunctionSpaceType::RangeField > & g )
 // operator *=
 template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
          template <class,class> class LocalFunctionIteratorImp, class DiscreteFunctionImp >
-inline Vector< DiscreteFunctionSpaceType::RangeField > &
+inline Vector< typename DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
-operator *= ( const DiscreteFunctionSpaceType::RangeField & scalar ) 
+operator *= ( const typename DiscreteFunctionSpaceType::RangeField & scalar ) 
 {
   int level = getFunctionSpace().getGrid().maxlevel();
 
@@ -195,10 +197,10 @@ operator *= ( const DiscreteFunctionSpaceType::RangeField & scalar )
 // operator /=
 template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
          template <class,class> class LocalFunctionIteratorImp, class DiscreteFunctionImp >
-inline Vector< DiscreteFunctionSpaceType::RangeField > &
+inline Vector< typename DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
-operator /= ( const DiscreteFunctionSpaceType::RangeField & scalar ) 
+operator /= ( const typename DiscreteFunctionSpaceType::RangeField & scalar ) 
 {
   (*this) *= (1./scalar);
   return *this;
@@ -208,11 +210,11 @@ operator /= ( const DiscreteFunctionSpaceType::RangeField & scalar )
 // add
 template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
          template <class,class> class LocalFunctionIteratorImp, class DiscreteFunctionImp >
-inline Vector< DiscreteFunctionSpaceType::RangeField > &
+inline Vector< typename DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
   DofIteratorImp , LocalFunctionIteratorImp,DiscreteFunctionImp >::
-add ( const Vector< DiscreteFunctionSpaceType::RangeField > & g ,
-    DiscreteFunctionSpaceType::RangeField  scalar ) 
+add ( const Vector< typename DiscreteFunctionSpaceType::RangeField > & g ,
+    typename DiscreteFunctionSpaceType::RangeField  scalar ) 
 {
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
     DofIteratorImp , LocalFunctionIteratorImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
@@ -272,6 +274,8 @@ write(const FileFormatType ftype, const char *filename, int timestep)
     return asImp().write_ascii(filename,timestep);
   if(ftype == pgm)
     return asImp().write_pgm(filename,timestep);
+  
+  return false;
 }
 
 template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
@@ -282,7 +286,7 @@ read(const char *filename, int timestep)
 {
     enum { tn = DiscreteFunctionSpaceType::DimDomain };
     enum { tm = DiscreteFunctionSpaceType::DimRange };
-    std::fstream file( filename , std::ios::in );
+    std::fstream file ( filename , std::ios::in );
     int n,m;
     std::basic_string <char> r,d;
     std::basic_string <char> tr (typeIdentifier<RangeFieldType>());
@@ -314,6 +318,7 @@ read(const char *filename, int timestep)
 
   std::cerr << ftype << " FileFormatType not supported at the moment! \n";
   abort();
+  
   return false;
 };
 

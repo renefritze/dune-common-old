@@ -7,9 +7,7 @@ namespace Dune {
   
 template <class DiscFunctionType, class MatrixType, class FEOpImp>
 class FiniteElementOperatorInterface 
-: public Operator<DiscFunctionType::RangeFieldType,DiscFunctionType,DiscFunctionType> 
-//: public DiscreteOperator<DiscFunctionType , FiniteElementOperatorInterface
-//<DiscFunctionType , MatrixType ,FEOpImp > >
+: public Operator<typename DiscFunctionType::RangeFieldType,DiscFunctionType,DiscFunctionType> 
 {
 public:
   typedef typename DiscFunctionType::FunctionSpace FunctionSpaceType;
@@ -47,7 +45,7 @@ class FiniteElementOperator : public FiniteElementOperatorInterface<DiscFunction
   
 protected:
   mutable MatrixType *matrix_;
-  const DiscFunctionType::FunctionSpaceType & functionSpace_;
+  const typename DiscFunctionType::FunctionSpaceType & functionSpace_;
   mutable bool matrix_assembled_;
 
   void assemble ( ) const 
@@ -61,8 +59,8 @@ protected:
     GridType &grid = const_cast<GridType &> (functionSpace_.getGrid());
 
   {  
-    LevelIterator it = grid.lbegin<0>( grid.maxlevel() );
-    LevelIterator endit = grid.lend<0> ( grid.maxlevel() );
+    LevelIterator it = grid.template lbegin<0>( grid.maxlevel() );
+    LevelIterator endit = grid.template lend<0> ( grid.maxlevel() );
     for( it ; it != endit; ++it ) 
     {
       prepare( *it );
@@ -92,8 +90,8 @@ protected:
     typedef typename EntityType::Traits::NeighborIterator NeighIt;
     typedef typename NeighIt::Traits::BoundaryEntity BoundaryEntityType;
         
-    LevelIterator it = grid.lbegin<0>( grid.maxlevel() );
-    LevelIterator endit = grid.lend<0> ( grid.maxlevel() );
+    LevelIterator it = grid.template lbegin<0>( grid.maxlevel() );
+    LevelIterator endit = grid.template lend<0> ( grid.maxlevel() );
     for( it ; it != endit; ++it ) 
     {
       NeighIt nit = it->nbegin();
@@ -153,8 +151,8 @@ protected:
 
     dest.clear();
 
-    LevelIterator it = grid.lbegin<0>( grid.maxlevel() );
-    LevelIterator endit = grid.lend<0> ( grid.maxlevel() );
+    LevelIterator it = grid.template lbegin<0>( grid.maxlevel() );
+    LevelIterator endit = grid.template lend<0> ( grid.maxlevel() );
     for( ; it != endit; ++it ) 
     {
       prepare( *it );
@@ -180,7 +178,7 @@ protected:
 public:
   enum OpMode { ON_THE_FLY, ASSEMBLED };
 
-  FiniteElementOperator( const DiscFunctionType::FunctionSpaceType &fuspace, 
+  FiniteElementOperator( const typename DiscFunctionType::FunctionSpaceType &fuspace, 
        OpMode opMode = ON_THE_FLY ) :
     functionSpace_( fuspace ), 
     matrix_ (NULL),

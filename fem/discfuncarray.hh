@@ -39,14 +39,14 @@ class DiscFuncArray
 				    DiscFuncArray <DiscreteFunctionSpaceType > >
   DiscreteFunctionDefaultType;
 
-  typedef DiscFuncArray <DiscreteFunctionSpaceType> DiscreteFunctionType;          
-  typedef LocalFunctionArray < DiscreteFunctionSpaceType > LocalFunctionType;
 
   enum { myId_ = 0};
 public:
+  typedef DiscFuncArray <DiscreteFunctionSpaceType> DiscreteFunctionType;          
+  typedef LocalFunctionArray < DiscreteFunctionSpaceType > LocalFunctionType;
 
   template <class GridIteratorType>
-  struct Type 
+  struct Traits 
   {
     typedef LocalFunctionArrayIterator < DiscreteFunctionType,
     GridIteratorType> LocalFunctionIteratorType;
@@ -259,13 +259,13 @@ protected:
   Array < RangeFieldType * > values_;
 
   //! dofVec from all levels of the discrete function 
-  std::vector < Array < RangeFieldType > > & dofVec_;
+  typename std::vector < Array < RangeFieldType > > & dofVec_;
 
   //! do we have the same base function set for all elements
   bool uniform_;
   
   //! the corresponding base function set 
-  BaseFunctionSetType *baseFuncSet_;
+  const BaseFunctionSetType *baseFuncSet_;
 }; // end LocalFunctionArray 
 
 

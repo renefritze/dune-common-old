@@ -239,8 +239,6 @@ read_xdr( const char *filename , int timestep )
   // read max level on which function lives 
   xdr_int (&xdrs, &level_);
   
-  std::cout << allLevels_ << " allLevels!\n";
-  
   if(allLevels_)
   {
     levOcu_ = level_+1;
@@ -249,7 +247,6 @@ read_xdr( const char *filename , int timestep )
     for(int lev=0; lev<=level_; lev++)
     {
       int length = functionSpace_.size( lev );
-      std::cerr << length << " Length!\n";
       dofVec_[lev].processXdr(&xdrs);
       if(length != dofVec_[lev].size())
       {
