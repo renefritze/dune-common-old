@@ -318,10 +318,6 @@ class AlbertaGridMakeableEntity :
    friend class AlbertaGridEntity<codim, dim, GridImp>;
 public:
 
-  //AlbertaGridMakeableEntity(const GridImp & grid, int level, 
-  //                 ALBERTA TRAVERSE_STACK * travStack) :
-  //  EntityType (AlbertaGridEntity<codim, dim, GridImp>(grid,level,travStack)) {}
-
   AlbertaGridMakeableEntity(const GridImp & grid, int level) :
     GridImp::template codim<codim>::Entity (AlbertaGridEntity<codim, dim, GridImp>(grid,level)) {}
 
@@ -355,7 +351,6 @@ public:
   {
     return 0; 
   }
-
 };
 
 //**********************************************************************
@@ -380,7 +375,6 @@ public EntityDefault <codim,dim,GridImp,AlbertaGridEntity>
   //friend class AlbertaGridLevelIterator < dim, dim, dimworld>;
   friend class AlbertaGridMakeableEntity<codim,dim,GridImp>;
 public:
-
   typedef typename GridImp::template codim<codim>::Entity Entity;
   typedef typename GridImp::template codim<codim>::Geometry Geometry;
   typedef AlbertaGridMakeableGeometry<codim,dimworld,GridImp> GeometryImp;
@@ -420,6 +414,7 @@ private:
   // private Methods
   void makeDescription();
 
+  // the grid this entity belong to 
   const GridImp &grid_;
 
   // private Members
@@ -484,6 +479,7 @@ public:
   {
     typedef typename GridImp::template codim<cd>::EntityPointer EntityPointer;
   };
+  typedef AlbertaGridMakeableEntity<0,GridImp::dimension,GridImp> EntityImp;
 
   typedef typename GridImp::template codim<0>::Entity Entity;
   typedef typename GridImp::template codim<0>::Geometry Geometry;
@@ -1064,12 +1060,11 @@ template <int dim, int dimworld>
 class AlbertaGrid  
 : public GridDefault <dim,dimworld,albertCtype, AlbertaGrid<dim,dimworld> >
 {
-  friend class AlbertaGridEntity <0,dim,AlbertaGrid<dim,dimworld> >;
+  friend class AlbertaGridEntity <0,dim,const AlbertaGrid<dim,dimworld> >;
   //friend class AlbertaGridEntity <1,dim,dimworld>;
   //friend class AlbertaGridEntity <1 << dim-1 ,dim,dimworld>;
-  friend class AlbertaGridEntity <dim,dim,AlbertaGrid<dim,dimworld> >;
+  friend class AlbertaGridEntity <dim,dim,const AlbertaGrid<dim,dimworld> >;
 
-  friend class AlbertaMarkerVector;
 
   // friends because of fillElInfo
   friend class AlbertaGridLevelIterator<0,All_Partition,AlbertaGrid<dim,dimworld> >;
@@ -1085,6 +1080,8 @@ class AlbertaGrid
   //CompileTimeChecker<dimworld != 1>   Do_not_use_AlbertaGrid_for_1d_Grids;   
  
   typedef AlbertaGrid<dim,dimworld> MyType; 
+  friend class AlbertaMarkerVector;
+
 //**********************************************************
 // The Interface Methods
 //**********************************************************
@@ -1097,7 +1094,7 @@ public:
 
   typedef AlbertaGridReferenceGeometry<dim,AlbertaGrid<dim,dimworld> > ReferenceGeometry;
   typedef AlbertaGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSetType;
-  typedef DefaultLevelIndexSet< AlbertaGrid<dim,dimworld> > LevelIndexSetType;
+  typedef DefaultLevelIndexSet<AlbertaGrid<dim,dimworld> > LevelIndexSetType;
 
 
   typedef ObjectStream ObjectStreamType;
@@ -1227,38 +1224,22 @@ public:
     return *levelIndexSet_; 
   }
 
-//private:
   //! access to mesh pointer, needed by some methods
   ALBERTA MESH* getMesh () const { return mesh_; }; 
 
-  template<int cd>
-  AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >&
-        getRealEntity(typename Traits::template codim<cd>::Entity& e )
+  template <int cd>
+  AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& getRealEntity(typename Traits::template codim<cd>::Entity& entity) 
   {
-    return e.realEntity;
+      return entity.realEntity;
   }
-  
-  template<int cd>
-  const AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >&
-        getRealEntity(const typename Traits::template codim<cd>::Entity& e )
+
+  template <int cd>
+  const AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& getRealEntity(const typename Traits::template codim<cd>::Entity& entity) const 
   {
-    return e.realEntity;
+      return entity.realEntity;
   }
-  
-  template<int codim>
-  AlbertaGridEntity<codim,dim,const AlbertaGrid<dim,dimworld> >&
-        getRealEntity(AlbertaGridEntity<codim,dim,const AlbertaGrid<dim,dimworld> > & e )
-  {
-    return e;
-  }
-  
-  template<int codim>
-  const AlbertaGridEntity<codim,dim,const AlbertaGrid<dim,dimworld> >&
-        getRealEntity(const AlbertaGridEntity<codim,dim,const AlbertaGrid<dim,dimworld> > & e ) const 
-  {
-    return e;
-  }
-  
+
+private:
   //! number of grid entities per level and codim, size is cached 
   template <int codim> int calcLevelSize (int level);
   int calcLevelCodimSize (int level, int codim);
@@ -1307,6 +1288,7 @@ public:
   // help vector for setNewCoords 
   mutable Array<int> macroVertices_;
 
+public:  
   // this method is new fill_elinfo from ALBERTA but here the neighbor
   // relations are calced diffrent, on ervery level there are neighbor
   // realtions ( in ALBERTA only on leaf level ), so we needed a new
@@ -1329,18 +1311,14 @@ public:
   // needed for VertexIterator, mark on which element a vertex is treated 
   AlbertaMarkerVector * vertexMarker_; 
 
+private:  
   //*********************************************************
   // Methods for mapping the global Index to local on Level
   // contains the index on level for each unique el->index of Albert
   enum { AG_MAXLEVELS = 100 };
-  Array<int> levelIndex_[dim+1][AG_MAXLEVELS];
   
   void makeNewSize(Array<int> &a, int newNumberOfEntries);
   void markNew();
-
-  //! map the global index from the Albert Mesh to the local index on Level
-  template <int codim>
-  int indexOnLevel(int globalIndex, int level ) const ;
 
   // pointer to the real number of elements or vertices
   // i.e. points to mesh->n_hier_elements or mesh->n_vertices
@@ -1358,15 +1336,17 @@ public:
   //**********************************************************************
   typedef AlbertaGridMakeableEntity<0,dim,const MyType>            EntityImp;
   typedef AlbertaGridMakeableGeometry<dim-1,dimworld,const MyType> GeometryImp;
-
+  
+public:
   typedef MemoryProvider< EntityImp > EntityProvider;
   typedef MemoryProvider< GeometryImp > IntersectionSelfProvider; 
   typedef MemoryProvider< GeometryImp > IntersectionNeighProvider;
-
+  
   mutable EntityProvider            entityProvider_;
   mutable IntersectionSelfProvider  interSelfProvider_;
   mutable IntersectionNeighProvider interNeighProvider_;
 
+private:
   //*********************************************************************
   // organisation of the global index 
   //*********************************************************************
@@ -1386,7 +1366,8 @@ public:
  
   // make some shortcuts 
   void arrangeDofVec(); 
-  
+
+public:  
   // return true if el is new 
   bool checkElNew ( ALBERTA EL * el ) const;
   
@@ -1397,10 +1378,6 @@ public:
   //  organisation of the parallelisation 
   //********************************************************************
   
-  // pointer to vec  with processor number for each element, 
-  // access via setOwner and getOwner 
-  int * ownerVec_;
-
   // set owner of element, for partioning  
   bool setOwner ( ALBERTA EL * el , int proc );
   
@@ -1409,6 +1386,11 @@ public:
 
   // PartitionType (InteriorEntity , BorderEntity, GhostEntity )
   PartitionType partitionType ( ALBERTA EL_INFO * elinfo) const;
+
+private:
+  // pointer to vec  with processor number for each element, 
+  // access via setOwner and getOwner 
+  int * ownerVec_;
 
   // rank of my thread, i.e. number of my processor 
   const int myProc_;
@@ -1439,54 +1421,19 @@ class AlbertaGridHierarchicIndexSet
 
   friend class AlbertaGrid<dim,dimworld>;
 public:
-  AlbertaGridHierarchicIndexSet( const GridType & grid , const int (& s)[numCodim])
+  AlbertaGridHierarchicIndexSet(const GridType & grid , const int (& s)[numCodim])
     : grid_( grid ), size_(s) {}
-
-  //template <class EntityType>
-  template <int cd>
-  int index (const typename Dune::Entity<cd,dim,const GridType,AlbertaGridEntity> & ep) const
-  {
-    typedef typename codim<cd>::EntityType EntityType;
-    enum { cd = EntityType :: codimension };
-    typedef typename codim<cd> :: RealEntityType REnType;
-    const REnType & en = grid_.template getRealEntity<cd>(ep);
-    return getIndex(
-              en.getElInfo()->el,
-              en.vx(),
-              Int2Type<dim-cd>());
-  }
-
-  template <int cd>
-  int index (typename Dune::Entity<cd,dim,const GridType,AlbertaGridEntity> & ep) const
-  {
-    typedef typename codim<cd>::EntityType EntityType;
-    enum { cd = EntityType :: codimension };
-    typedef typename codim<cd> :: RealEntityType REnType;
-    const REnType & en = grid_.template getRealEntity<cd>(ep);
-    return getIndex(
-              en.getElInfo()->el,
-              en.vx(),
-              Int2Type<dim-cd>());
-  }
-
-  /*
+  
   template <class EntityType>
   int index (const EntityType & ep) const
   {
     enum { cd = EntityType :: codimension };
-    typedef typename codim<cd> :: RealEntityType REnType;
-        REnType & en = grid_.template getRealEntity<cd>(ep);
-        
-    return getIndex( 
-              en.getElInfo()->el, 
-              en.vx(),
-              Int2Type<dim-cd>()
-              );
+    return getIndex((grid_.template getRealEntity<cd>(ep)).getElInfo()->el
+                    ,0,Int2Type<dim-cd>());
   }
-  */
 
   template <int codim>
-  int subIndex (const EntityCodim0Type & en, int i)
+  int subIndex (const EntityCodim0Type & en, int i) const
   {
     return 0;
   }
@@ -1525,17 +1472,14 @@ private:
     // see Albert Doc. , should stay the same 
     nv_ [cd] = elAdmin_->n0_dof    [ALBERTA AlbertHelp::AlbertaDofType<cd>::type];
     dof_[cd] = elAdmin_->mesh->node[ALBERTA AlbertHelp::AlbertaDofType<cd>::type];
-
-    std::cout << "nv = " << nv_[cd] << "  dof = " << dof_[cd] << "\n";
   }
 
   // codim = 0 means we get from dim-cd = dim 
   int getIndex ( const ALBERTA EL * el, int i , Int2Type<dim> fake ) const
   {
-    enum { codim = 0 }; 
+    enum { cd = 0 }; 
     assert(el);
-    int idx = elNumVec_[0][ el->dof[dof_[codim]][nv_[codim]] ];
-    std::cout << "Returning " << idx << "\n";
+    int idx = elNumVec_[cd][ el->dof[dof_[cd]][nv_[cd]] ];
     return idx;
   }
   
