@@ -291,6 +291,11 @@ private:
     OneDGridEntity<cd,dim,const OneDGrid>& getRealEntity(typename Traits::template codim<cd>::Entity& entity) {
         return entity.realEntity;
     }
+    
+    template <int cd>
+    const OneDGridEntity<cd,dim,const OneDGrid>& getRealEntity(const typename Traits::template codim<cd>::Entity& entity) const {
+        return entity.realEntity;
+    }
 
    //! The type of grid refinement currently in use
     RefinementType refinementType_;
