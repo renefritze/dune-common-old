@@ -7,10 +7,21 @@ namespace Dune {
 static BSGridElement<3,3> refelem_3d(true);
 
 template <int dim, int dimworld>
-inline BSGrid<dim,dimworld>::BSGrid(const char* macroTriangFilename) 
-  : mygrid_ (0) , maxlevel_(0)
+inline BSGrid<dim,dimworld>::BSGrid(const char* macroTriangFilename
+#ifdef _BSGRID_PARALLEL_
+    , MPI_Comm mpiComm
+#endif
+    ) 
+  : mygrid_ (0) , maxlevel_(0) 
+#ifdef _BSGRID_PARALLEL_
+  , mpAccess_(mpiComm)
+#endif
 {
-  mygrid_ = new BSSPACE GitterBasisImpl (macroTriangFilename);
+  mygrid_ = new BSSPACE BSGitterImplType (macroTriangFilename
+#ifdef _BSGRID_PARALLEL_
+      , mpAccess_ 
+#endif
+      );
   assert(mygrid_ != 0);
   mygrid_->printsize();
 
@@ -109,11 +120,10 @@ inline void BSGrid<dim,dimworld>::calcExtras()
 
   for(int i=0; i<dim+1; i++) globalSize_[i] = -1;
   
-  //BSGridLevelIterator<0,dim,dimworld,All_Partition> it    = this->template lbegin<0> (0);
-  //BSGridLevelIterator<0,dim,dimworld,All_Partition> endit = this->template lend  <0> (0);
   BSGridLeafIterator it    = leafbegin (0);
   BSGridLeafIterator endit = leafend   (0);
-  
+
+  // hier den macIndex vom IndexSet erfragen 
   for(; it != endit; ++it)
   {
     if((*it).global_index() > globalSize_[0]) 
@@ -130,10 +140,12 @@ inline void BSGrid<dim,dimworld>::calcExtras()
   }
   globalSize_[0]++;
 }
+
 template <int dim, int dimworld>
 inline int BSGrid<dim,dimworld>::global_size(int codim)  
 {
   assert(codim == 0);
+  assert(globalSize_[codim] >= 0);
   return globalSize_[codim];
 }
 
@@ -143,7 +155,7 @@ inline int BSGrid<dim,dimworld>::maxlevel() const
   return maxlevel_;
 }
 template <int dim, int dimworld>
-inline BSSPACE GitterBasisImpl *BSGrid<dim,dimworld>::mygrid() {
+inline BSSPACE BSGitterType *BSGrid<dim,dimworld>::mygrid() {
   return mygrid_;
 }
 
@@ -162,37 +174,33 @@ inline BSGridLevelIterator<codim,dim,dimworld,All_Partition> BSGrid<dim,dimworld
 
 // leaf methods 
 template <int dim, int dimworld>
-inline typename BSGrid<dim,dimworld>::LeafIterator BSGrid<dim,dimworld>::leafbegin(int level) 
+inline typename BSGrid<dim,dimworld>::LeafIterator BSGrid<dim,dimworld>::leafbegin(int level, PartitionIteratorType pitype) 
 {
-  return BSGridLeafIterator(*this,level);
+  return BSGridLeafIterator(*this,level,false,pitype);
 }
 template <int dim, int dimworld>
-inline typename BSGrid<dim,dimworld>::LeafIterator BSGrid<dim,dimworld>::leafend(int level) 
+inline typename BSGrid<dim,dimworld>::LeafIterator BSGrid<dim,dimworld>::leafend(int level, PartitionIteratorType pitype) 
 {
-  return BSGridLeafIterator(*this,level,true);
+  return BSGridLeafIterator(*this,level,true,pitype);
 }
 
 // global refine 
 template <int dim, int dimworld>
 inline bool BSGrid<dim,dimworld>::globalRefine(int anzahl) 
 {
+  bool ref = false;
   for (;anzahl>0;anzahl--) 
   {
+    BSGridLeafIterator endit = leafend   ( maxlevel() );
+    for(BSGridLeafIterator it = leafbegin ( maxlevel() ); it != endit; ++it)
     {
-      typename BSSPACE BSLeafIteratorMaxLevel w (*mygrid_) ;
-      for (w->first () ; ! w->done () ; w->next ())
-      {
-        w->item ().tagForGlobalRefinement ();
-      }
+      (*it).mark(1); 
     }
-
-    mygrid_->adapt ();
-    maxlevel_++;
-    postAdapt();
-  }  
-
-  calcExtras();
-  return true;
+    ref = adapt();
+    if(ref) postAdapt();
+  }
+  if(ref) loadBalance();
+  return ref;
 }
 
 // adapt grid  
@@ -213,9 +221,17 @@ inline bool BSGrid<dim,dimworld>::preAdapt()
 template <int dim, int dimworld>
 inline bool BSGrid<dim,dimworld>::adapt() 
 {
-  bool ref = mygrid_->adapt (); // adapt grid 
-  calcMaxlevel();               // calculate new maxlevel 
-  calcExtras();                 // reset size and things  
+#ifdef _BSGRID_PARALLEL_
+  bool ref = mygrid_->duneAdapt(); // adapt grid 
+#else 
+  bool ref = mygrid_->adapt(); // adapt grid 
+#endif
+  if(ref)
+  {
+    calcMaxlevel();               // calculate new maxlevel 
+    calcExtras();                 // reset size and things  
+  }
+  //std::cout << maxlevel_ << " Maxlevel \n";
   return ref;
 }
 
@@ -231,6 +247,62 @@ inline void BSGrid<dim,dimworld>::postAdapt()
     }
   }
   coarsenMark_ = false;
+}
+
+template <int dim, int dimworld>
+inline bool BSGrid<dim,dimworld>::loadBalance() 
+{
+#ifdef _BSGRID_PARALLEL_
+  bool changed = mygrid_->duneLoadBalance();
+  if(changed)
+  {
+    calcMaxlevel();               // calculate new maxlevel 
+    calcExtras();                 // reset size and things  
+  }
+#else 
+  return false;
+#endif
+}
+  
+// adapt grid  
+template <int dim, int dimworld> template <class DataCollectorType> 
+inline bool BSGrid<dim,dimworld>::loadBalance(DataCollectorType & dc) 
+{
+#ifdef _BSGRID_PARALLEL_
+  std::cout << "Start load balance on proc " << myRank() << "\n";
+  std::cout.flush();
+  
+  typedef BSGridEntity<0,dim,dimworld> EntityType;
+  EntityType en (*this);    
+  
+  BSSPACE GatherScatterImpl< EntityType , DataCollectorType > gs(en,dc);
+  
+  bool changed = mygrid_->duneLoadBalance(gs);
+
+  if(changed)
+  {
+    calcMaxlevel();               // calculate new maxlevel 
+    calcExtras();                 // reset size and things  
+  }
+#else 
+  return false;
+#endif
+}
+
+// adapt grid  
+template <int dim, int dimworld> template <class DataCollectorType> 
+inline bool BSGrid<dim,dimworld>::communicate(DataCollectorType & dc) 
+{
+#ifdef _BSGRID_PARALLEL_
+  typedef BSGridEntity<0,dim,dimworld> EntityType;
+  EntityType en (*this);    
+  BSSPACE GatherScatterImpl< EntityType , DataCollectorType > gs(en,dc);
+  
+  mygrid_->duneExchangeDynamicState();
+  return true;
+#else 
+  return false;
+#endif
 }
 
 // writeGrid and readGrid 
@@ -282,7 +354,7 @@ readGrid( const char * filename, bs_ctype & time )
     }
     sprintf(macroName,"%s.macro",filename);
       
-    mygrid_ = new BSSPACE GitterBasisImpl (macroName);
+    mygrid_ = new BSSPACE BSGitterImplType (macroName);
 
     delete [] macroName;
   }
@@ -349,10 +421,13 @@ inline BSGridLevelIterator<codim,dim,dimworld,pitype> ::
   if(!end) 
   {
     iter_.first();
-    index_=0;
-    BSGridEntity<0,dim,dimworld> * obj = 
-      new BSGridEntity<codim,dim,dimworld> (grid_,iter_.item(),index_,level_);
-    objEntity_.store ( obj );
+    if(iter_.size() > 0)
+    {
+      index_=0;
+      BSGridEntity<0,dim,dimworld> * obj = 
+        new BSGridEntity<codim,dim,dimworld> (grid_,iter_.item(),index_,level_);
+      objEntity_.store ( obj );
+    }
   }
 }
 
@@ -407,6 +482,7 @@ template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
 inline BSGridEntity<codim,dim,dimworld>& 
 BSGridLevelIterator<codim,dim,dimworld,pitype>::operator*() 
 {
+  assert(iter_.size() > 0);
   return (*objEntity_);
 }
 
@@ -414,6 +490,7 @@ template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
 inline BSGridEntity<codim,dim,dimworld>* 
 BSGridLevelIterator<codim,dim,dimworld,pitype>::operator->() 
 {
+  assert(iter_.size() > 0);
   return objEntity_.operator -> ();
 }
 
@@ -431,18 +508,23 @@ inline int BSGridLevelIterator<codim,dim,dimworld,pitype>::level ()
 //*******************************************************************
 template<int dim, int dimworld>
 inline BSGrid<dim,dimworld>::BSGridLeafIterator :: 
-  BSGridLeafIterator(BSGrid<dim,dimworld> &grid, int level,bool end) 
+  BSGridLeafIterator(BSGrid<dim,dimworld> &grid, int level,bool
+      end, PartitionIteratorType pitype) 
   : index_(-1) 
   , level_(level)
   , iter_(grid.mygrid()->container(), level )
+  , pitype_ (pitype)
 {
   if(!end) 
   {
     iter_.first();
-    index_=0;
-    BSGridEntity<0,dim,dimworld> * obj = 
-      new BSGridEntity<codim,dim,dimworld> (grid,iter_.item(),index_,level_);
-    objEntity_.store ( obj );
+    if(iter_.size() > 0)
+    {
+      index_=0;
+      BSGridEntity<0,dim,dimworld> * obj = 
+        new BSGridEntity<codim,dim,dimworld> (grid,iter_.item(),index_,level_);
+      objEntity_.store ( obj );
+    }
   }
 }
 
@@ -462,6 +544,7 @@ BSGrid<dim,dimworld>::BSGridLeafIterator :: operator ++()
   }
    
   objEntity_->setelement(iter_.item(),index_);
+
   return *this;
 }
 
@@ -514,19 +597,24 @@ template<int dim, int dimworld>
 inline BSGridHierarchicIterator<dim,dimworld> :: 
   BSGridHierarchicIterator(BSGrid<dim,dimworld> &grid , 
    BSSPACE HElementType & elem, int maxlevel ,bool end)
-  : grid_(grid), elem_(elem) , maxlevel_(maxlevel), item_(0)
+  : grid_(grid), elem_(elem) , maxlevel_(maxlevel), item_(0) 
 {
   if (!end) 
   {
     item_ = elem_.down();
     if(item_) 
     {
+      // we have children and they lie in the disired level range 
       if(item_->level() <= maxlevel_)
       {
         BSGridEntity<0,dim,dimworld> * obj = 
           new BSGridEntity<0,dim,dimworld>(grid_,*item_ ,0,maxlevel_);
         // objEntity deletes entity pointer when no refCount is left 
         objEntity_.store ( obj );
+      }
+      else 
+      { // otherwise do nothing 
+        item_ = 0;
       }
     }
   }
@@ -631,6 +719,7 @@ BSGridIntersectionIterator(BSGrid<dim,dimworld> &grid,
   , interSelfGlobal_ (false) 
   , theSituation_ (false) , daOtherSituation_ (false)
   , isBoundary_ (true) // isBoundary_ == true means no neighbour 
+  , ghost_(false)
 {
   if( !end )
   {
@@ -654,6 +743,20 @@ first (BSSPACE HElementType & elem, int wLevel)
 
   // if needed more than once we spare the virtual funtion call
   isBoundary_ = item_->myneighbour(index_).first->isboundary();
+  ghost_ = false;
+#ifdef _BSGRID_PARALLEL_
+  if(isBoundary_)
+  {
+    typename BSSPACE ImplBndFaceType * bnd = item_->myneighbour(index_).first;
+    if(bnd->bndtype() == BSSPACE ProcessorBoundary_t)
+    {
+      std::cout << bnd->bndtype() << "first :  BoundaType \n";
+      std::cout.flush();
+      isBoundary_ = false;
+      ghost_ = true;
+    }
+  }
+#endif 
   theSituation_ = ( (elem.level() < wLevel ) && elem.leaf() );
   daOtherSituation_ = false;
   
@@ -700,6 +803,18 @@ BSGridIntersectionIterator<dim,dimworld> :: operator ++()
   
   // if needed more than once we spare the virtual funtion call
   isBoundary_ = item_->myneighbour(index_).first->isboundary();
+#ifdef _BSGRID_PARALLEL_
+  if(isBoundary_)
+  {
+    typename BSSPACE ImplBndFaceType * bnd = item_->myneighbour(index_).first;
+    if(bnd->bndtype() == BSSPACE ProcessorBoundary_t)
+    {
+      std::cout << bnd->bndtype() << " operator ++ BoundaType \n";
+      isBoundary_ = false;
+      ghost_ = true;
+    }
+  }
+#endif 
 
   needSetup_  = true;
   needNormal_ = true;
@@ -726,12 +841,31 @@ inline void BSGridIntersectionIterator<dim,dimworld> ::
 setNeighbor () 
 {
   assert(this->neighbor());
+#ifdef _BSGRID_PARALLEL_
+  if(ghost_)
+  {
+    BSSPACE PLLFaceType * bnd = item_->myneighbour(index_).first;
+    std::cout << "Access to proc boundary \n"; 
+    /*dd
+    BSSPACE PLLFaceType * bndface = static_cast < BSSPACE PLLFaceType * > (bnd);
+    entity_.setelement(*bndface, index_);
+    needSetup_ = false;
+    return;
+    */
+    //typedef BSSPACE GitterType::Objects::tetra_IMPL RealElType;
+    //BSSPACE GEOElementType * fakeneigh 
+    //  = new RealElType ( static_cast<RealElType &> (*item_) );
+    entity_.setGhost( *(static_cast<BSSPACE GEOElementType &> (*item_).myhface3 (index_)) 
+            , *bnd , index_);
+    needSetup_ = false;
+    return;
+  }
+#endif
 
   if(! neighpair_.first ) 
   {
     // get the face(index_)  of this element 
     neighpair_ = (*item_).myintersection(index_);
-
     assert(neighpair_.first);
 
     // the "situation" describes the case we are on a leaf element but the
@@ -764,7 +898,6 @@ setNeighbor ()
 
   assert(neigh_ != item_);
   assert(neigh_ != 0);
-
 
   entity_.setelement(*neigh_, index_);
   needSetup_ = false;
@@ -894,7 +1027,9 @@ inline BSGridEntity<0,dim,dimworld> :: BSGridEntity(BSGrid<dim,dimworld> &grid,
              BSSPACE HElementType & element,int index, int wLevel) : 
   grid_(grid), item_(static_cast<BSSPACE GEOElementType *> (&element))
   , builtgeometry_(false), geo_(false)
-  , index_(index) , walkLevel_ (wLevel) 
+  , index_(index) , walkLevel_ (wLevel) , glIndex_ (element.getIndex())
+  , level_ (element.level())
+  , ghost_(0)
 {
 }
 
@@ -902,16 +1037,30 @@ template<int dim, int dimworld>
 inline void 
 BSGridEntity<0,dim,dimworld> :: setelement(BSSPACE HElementType & element,int index) 
 {
-  item_=&element;
+  item_= static_cast<BSSPACE GEOElementType *> (&element);
   builtgeometry_=false;
   index_=index;
+  level_ = item_->level();
+  glIndex_ = item_->getIndex();
+}
+
+template<int dim, int dimworld>
+inline void 
+BSGridEntity<0,dim,dimworld> :: setGhost(BSSPACE HFaceType & face, BSSPACE PLLFaceType & ghost,int index) 
+{
+  item_ = 0;
+  ghost_ = &ghost;
+  index_=index;
+  glIndex_ = ghost.getIndex();
+  level_ = face.level();
+  builtgeometry_ = geo_.builtGhost(face,ghost);
 }
 
 template<int dim, int dimworld>
 inline int
 BSGridEntity<0,dim,dimworld> :: level() 
 {
-  return item_->level();
+  return level_;
 }
 
 template<int dim, int dimworld>
@@ -932,8 +1081,8 @@ inline int BSGridEntity<0,dim,dimworld> :: index()
 template<int dim, int dimworld>
 inline int BSGridEntity<0,dim,dimworld> :: global_index() 
 {
-  assert(item_ != 0);
-  return item_->getIndex();
+  //assert(item_ != 0);
+  return glIndex_;
 }
 
 template<int dim, int dimworld>
@@ -956,42 +1105,49 @@ partitionType () const
 template<int dim, int dimworld>
 inline bool BSGridEntity<0,dim,dimworld> :: hasChildren() 
 {
+  assert(item_ != 0);
   return (item_->down() != 0);
 }
 
 template<int dim, int dimworld>
 inline BSGridHierarchicIterator<dim,dimworld> BSGridEntity<0,dim,dimworld> :: hbegin (int maxlevel) 
 {
+  assert(item_ != 0);
   return BSGridHierarchicIterator<dim,dimworld>(grid_,*item_,maxlevel);
 }
 
 template<int dim, int dimworld>
 inline BSGridHierarchicIterator<dim,dimworld> BSGridEntity<0,dim,dimworld> :: hend (int maxlevel) 
 {
+  assert(item_ != 0);
   return BSGridHierarchicIterator<dim,dimworld> (grid_,*item_,maxlevel,true);
 }
 
 template<int dim, int dimworld>
 inline BSGridIntersectionIterator<dim,dimworld> BSGridEntity<0,dim,dimworld> :: ibegin () 
 {
+  assert(item_ != 0);
   return BSGridIntersectionIterator<dim,dimworld> (grid_,item_,walkLevel_);
 }
 
 template<int dim, int dimworld>
 inline BSGridIntersectionIterator<dim,dimworld> BSGridEntity<0,dim,dimworld> :: iend () 
 {
+  assert(item_ != 0);
   return BSGridIntersectionIterator<dim,dimworld> (grid_, 0 ,walkLevel_,true);
 }
 
 template<int dim, int dimworld>
 inline void BSGridEntity<0,dim,dimworld> :: ibegin ( BSGridIntersectionIterator<dim,dimworld> &it)
 {
+  assert(item_ != 0);
   it.first(*item_,walkLevel_);
 }
 
 template<int dim, int dimworld>
 inline void BSGridEntity<0,dim,dimworld> :: iend ( BSGridIntersectionIterator<dim,dimworld> &it)
 {
+  assert(item_ != 0);
   it.done();
 }
 
@@ -1014,6 +1170,7 @@ template<int dim, int dimworld>
 inline BSGridEntity<0,dim,dimworld>
 BSGridEntity<0,dim,dimworld> :: newEntity ()
 {
+  assert(item_ != 0);
   BSGridEntity<0,dim,dimworld> tmp ( *this );
   return tmp;
 }
@@ -1022,6 +1179,7 @@ template<int dim, int dimworld>
 inline void 
 BSGridEntity<0,dim,dimworld> :: father( BSGridEntity<0,dim,dimworld> & vati )
 {
+  assert(item_ != 0);
   vati.setelement( *(item_->up()) , 0 );
 }
 
@@ -1029,6 +1187,7 @@ BSGridEntity<0,dim,dimworld> :: father( BSGridEntity<0,dim,dimworld> & vati )
 template<int dim, int dimworld>
 inline bool BSGridEntity<0,dim,dimworld> :: mark (int ref) 
 {
+  assert(item_ != 0);
   // refine_element_t and coarse_element_t are defined in bsinclude.hh
   if(ref < 0) 
   {
@@ -1055,6 +1214,7 @@ inline bool BSGridEntity<0,dim,dimworld> :: mark (int ref)
 template<int dim, int dimworld>
 inline AdaptationState BSGridEntity<0,dim,dimworld> :: state () const 
 {
+  assert(item_ != 0);
   if((*item_).requestrule() == BSSPACE coarse_element_t) 
   {
     return COARSEN;
@@ -1093,6 +1253,7 @@ inline int BSGridEntity<codim,dim,dimworld> :: global_index ()
  #       #       #       #    #  #       #   ##     #
  ######  ######  ######  #    #  ######  #    #     #
 ***********************************************************************/
+// --Element
 template<int dim, int dimworld>  
 inline BSGridElement<dim,dimworld> :: BSGridElement(bool makeRefElement) 
   : builtinverse_ (false) , builtA_ (false) , builtDetDF_ (false)
@@ -1188,7 +1349,7 @@ inline void BSGridElement<1,3> :: buildJacobianInverse()
 #endif
 
 template <> 
-inline bool BSGridElement<3,3> :: builtGeom(const BSSPACE HElementType & item) 
+inline bool BSGridElement<3,3> :: builtGeom(const BSSPACE GEOElementType & item) 
 {
   enum { dim = 3 };
   enum { dimworld = 3};
@@ -1199,9 +1360,36 @@ inline bool BSGridElement<3,3> :: builtGeom(const BSSPACE HElementType & item)
   {
     for (int j=0;j<dimworld;j++) 
     {
-      coord_(j,i) = static_cast<const BSSPACE GEOElementType &> (item).myvertex(i)->Point()[j];
+      coord_(j,i) = (item).myvertex(i)->Point()[j];
     }
   } 
+  return true;
+}
+
+template <> 
+inline bool BSGridElement<3,3> :: builtGhost(const BSSPACE HFaceType & face, const BSSPACE PLLFaceType & ghost) 
+{
+  enum { dim = 3 };
+  enum { dimworld = 3};
+
+  std::cout << "builtGhost \n";
+  builtinverse_ = builtA_ = builtDetDF_ = false;
+  
+  for (int i=0;i<dim;i++) 
+  {
+    for (int j=0;j<dimworld;j++) 
+    {
+      coord_(j,i) = static_cast<const BSSPACE GEOFaceType &> (face).myvertex(i)->Point()[j];
+    }
+  } 
+  
+  std::cout << "get opp vx\n";
+  for (int j=0;j<dimworld;j++) 
+  {
+    coord_(j,3) = ghost.oppositeVertex()[j];
+  }
+  std::cout << coord_ << "\n";
+  
   return true;
 }
 
