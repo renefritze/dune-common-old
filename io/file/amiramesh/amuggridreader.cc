@@ -80,14 +80,6 @@ static int SegmentDescriptionByAmira(void *data, double *param, double *result)
   barCoords[0] += b[0];
   barCoords[1] += b[1];
 
-#ifndef NDEBUG 
-  const float eps = 1e-6;
-  if (barCoords[0]<-eps || barCoords[1]<-eps || (1-barCoords[0]-barCoords[1])<-eps) {
-      printf("Illegal barycentric coordinate\n");
-      assert(false);
-  }
-#endif
-
   AmiraCallPositionParametrizationForDomain(domainNum, triNum, barCoords, result);
 
   return 0;
@@ -509,10 +501,8 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(Dune::UGGrid<3,3>& grid,
         DUNE_THROW(IOError, "Could not open AmiraMesh file" << filename);
 
     if (am->findData("Hexahedra", HxINT32, 8, "Nodes")) {
-        //readHexaGrid(grid, am);
-        std::cout << "This is the AmiraMesh HexaGrid reader for UGGrid<3,3>!" << std::endl;
 
-        //loaddomain $file @PARA_FILE $name @DOMAIN
+        // Load a domain from an AmiraMesh hexagrid file
         createHexaDomain(grid, am);
 
     } else {
@@ -546,10 +536,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(Dune::UGGrid<3,3>& grid,
 
     if (am->findData("Hexahedra", HxINT32, 8, "Nodes")) {
 
-        //readHexaGrid(grid, am);
-        std::cout << "This is the AmiraMesh HexaGrid reader for UGGrid<3,3>!" << std::endl;
-
-        //loaddomain $file @PARA_FILE $name @DOMAIN
+        // Create a domain from an AmiraMesh hexagrid file
         createHexaDomain(grid, am);
 
     } else {
@@ -573,6 +560,16 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid, Ami
 
     // call configureCommand and newCommand
     grid.makeNewUGMultigrid();
+
+    // If we are in a parallel setting and we are _not_ the master
+    // process we can exit here.
+#ifdef ModelP
+    if (me!=0) {
+        delete(am);
+        grid.createend();
+        return;
+    }
+#endif
 
     // ////////////////////////////////////////////
     // loadmesh $file @GRID_FILE $name @DOMAIN;
@@ -614,21 +611,11 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid, Ami
 
   int maxBndNodeID = -1;
   for (theNode=UG_NS<3>::FirstNode(grid.multigrid_->grids[0]); theNode!=NULL; theNode=theNode->succ)
-  {
-      // The following two lines ought to be in here, but the
-      // OBJT macros is somewhat complicated, so I leave it out
-      // for the time being.
-//       if(OBJT(theNode->myvertex) == UG3d::IVOBJ)
-//           UserWriteF("Warning: Node %d is inner node\n", ID(theNode));
       maxBndNodeID = std::max(theNode->id, maxBndNodeID);
-  }
 
   std::cout << "Already " << maxBndNodeID+1 << " nodes existing\n";
 
-
   int noOfBndNodes = maxBndNodeID;
-
-
   int noOfNodes = am->nElements("Nodes");
   
   std::cout << "AmiraMesh has " << noOfNodes << " total nodes." << std::endl;
@@ -646,8 +633,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid, Ami
           nodePos[2] = am_node_coordinates_double[3*i+2];
       }
  
-      /// \todo Warum ist nicht UG3d::InsertInnerNode Pflicht???
-     if (InsertInnerNode(grid.multigrid_->grids[0], nodePos) == NULL)
+      if (UG3d::InsertInnerNode(grid.multigrid_->grids[0], nodePos) == NULL)
          DUNE_THROW(IOError, "inserting an inner node failed");
 
   }
@@ -672,9 +658,9 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid, Ami
           for (int j=0; j<numberOfCorners; j++)
               cornerIDs[j] = elemData[numberOfCorners*i+j]-1;
           
-          /// \todo Warum ist nicht UG3d::InsertElementFromIDs Pflicht???
-              if (InsertElementFromIDs(grid.multigrid_->grids[0], numberOfCorners, cornerIDs, NULL) == NULL)
-                  DUNE_THROW(IOError, "Inserting element failed");
+          if (UG3d::InsertElementFromIDs(grid.multigrid_->grids[0], numberOfCorners, cornerIDs, NULL) == NULL)
+              DUNE_THROW(IOError, "Inserting element failed");
+
       } else {
 
           // Prism
@@ -683,18 +669,16 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid, Ami
               int cornerIDs[6] = {thisElem[0]-1, thisElem[1]-1, thisElem[3]-1, 
                                   thisElem[4]-1, thisElem[5]-1, thisElem[7]-1};
 
-              /// \todo Warum ist nicht UG3d::InsertElementFromIDs Pflicht???
-                  if (InsertElementFromIDs(grid.multigrid_->grids[0], 6, cornerIDs, NULL) == NULL)
-                      DUNE_THROW(IOError, "Inserting element failed");
+              if (UG3d::InsertElementFromIDs(grid.multigrid_->grids[0], 6, cornerIDs, NULL) == NULL)
+                  DUNE_THROW(IOError, "Inserting element failed");
 
           } else if (thisElem[2]==thisElem[3] && thisElem[6]==thisElem[7]) {
               
               int cornerIDs[6] = {thisElem[0]-1, thisElem[1]-1, thisElem[2]-1, 
                                   thisElem[4]-1, thisElem[5]-1, thisElem[6]-1};
 
-              /// \todo Warum ist nicht UG3d::InsertElementFromIDs Pflicht???
-                  if (InsertElementFromIDs(grid.multigrid_->grids[0], 6, cornerIDs, NULL) == NULL)
-                      DUNE_THROW(IOError, "Inserting element failed");
+              if (UG3d::InsertElementFromIDs(grid.multigrid_->grids[0], 6, cornerIDs, NULL) == NULL)
+                  DUNE_THROW(IOError, "Inserting element failed");
 
           } else {
 
@@ -704,8 +688,8 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid, Ami
               for (int j=0; j<numberOfCorners; j++)
                   cornerIDs[j] = elemData[numberOfCorners*i+j]-1;
               
-                  if (InsertElementFromIDs(grid.multigrid_->grids[0], numberOfCorners, cornerIDs, NULL) == NULL)
-                      DUNE_THROW(IOError, "Inserting element failed");
+              if (UG3d::InsertElementFromIDs(grid.multigrid_->grids[0], numberOfCorners, cornerIDs, NULL) == NULL)
+                  DUNE_THROW(IOError, "Inserting element failed");
 
           }
 
@@ -1329,6 +1313,16 @@ void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
 
     // call configureCommand and newCommand
     grid.makeNewUGMultigrid();
+
+    // If we are in a parallel setting and we are _not_ the master
+    // process we can exit here.
+#ifdef ModelP
+    if (me!=0) {
+        delete(am);
+        grid.createend();
+        return;
+    }
+#endif
     
     // Determine whether grid contains only triangles
     bool containsOnlyTriangles = am->findData("Triangles", HxINT32, 3, "Nodes");
@@ -1366,14 +1360,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
 
   maxBndNodeID = -1;
   for (theNode=UG_NS<2>::FirstNode(theMG->grids[0]); theNode!=NULL; theNode=theNode->succ)
-  {
-      // The following two lines ought to be in here, but the
-      // OBJT macros is somewhat complicated, so I leave it out
-      // for the time being.
-//       if(OBJT(theNode->myvertex) == UG3d::IVOBJ)
-//           UserWriteF("Warning: Node %d is inner node\n", ID(theNode));
       maxBndNodeID = std::max(theNode->id, maxBndNodeID);
-  }
 
   std::cout << "Already " << maxBndNodeID+1 << " nodes existing" << std::endl;
 
@@ -1397,8 +1384,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
       double nodePos[2];
       nodePos[0] = am_node_coordinates[2*i];
       nodePos[1] = am_node_coordinates[2*i+1];
-      
-      /** \todo Why is InsertInnerNode outside of the UG namespaces?? */
+
       if (InsertInnerNode(theMG->grids[0], nodePos) == NULL)
           DUNE_THROW(IOError, "2d AmiraMesh reader: Inserting an inner node failed");
       
@@ -1418,11 +1404,9 @@ void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
           cornerIDs[0] = isBoundaryNode[elemData[3*i]-1];
           cornerIDs[1] = isBoundaryNode[elemData[3*i+1]-1];
           cornerIDs[2] = isBoundaryNode[elemData[3*i+2]-1];
-          //printf("elem id : %d, node ids : %d %d %d\n", i, cornerIDs[0], cornerIDs[1], cornerIDs[2]); 
           
-          /** \todo Why is InsertElementFromIDs outside of the UG namespaces?? */
-          if (InsertElementFromIDs(theMG->grids[0], 3,cornerIDs, NULL) == NULL)
-              DUNE_THROW(IOError, "2d AmiraMesh reader: Inserting an element failed");
+              if (InsertElementFromIDs(theMG->grids[0], 3,cornerIDs, NULL) == NULL)
+                  DUNE_THROW(IOError, "2d AmiraMesh reader: Inserting an element failed");
       
       } else {
       
@@ -1434,7 +1418,6 @@ void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
           cornerIDs[2] = isBoundaryNode[elemData[4*i+2]-1];
           cornerIDs[3] = isBoundaryNode[elemData[4*i+3]-1];
           
-          /** \todo Why is InsertElementFromIDs outside of the UG namespaces?? */
           if (InsertElementFromIDs(theMG->grids[0], 4,cornerIDs, NULL) == NULL)
               DUNE_THROW(IOError, "2d AmiraMesh reader: Inserting an element failed");
       
