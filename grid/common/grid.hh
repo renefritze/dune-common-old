@@ -1094,8 +1094,17 @@ private:
 //
 //************************************************************************
 //
-template< int dim, int dimworld, class ct, template<int,int> class GridImp, 
-  template<int,int,int> class LevelIteratorImp, template<int,int,int> class EntityImp>  
+
+/** \brief The Default Methods of Grid
+ *
+ * \todo Please doc me!
+ */
+template<int dim, 
+         int dimworld, 
+         class ct, 
+         template<int,int> class GridImp, 
+         template<int,int,int> class LevelIteratorImp, 
+         template<int,int,int> class EntityImp>  
 class GridDefault : public Grid <dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp> 
 {
 public:
@@ -1103,22 +1112,32 @@ public:
   template <int codim> 
   struct Traits 
   {
-    typedef ct                                    CoordType;
-    typedef GridImp<dim,dimworld>                 ImpGrid;
-    typedef LevelIteratorImp<codim,dim,dimworld>  LevelIterator;
-    typedef EntityImp<codim,dim,dimworld>         Entity;
+  
+      //! Please doc me!
+      typedef ct                                    CoordType;
+
+      //! Please doc me!
+      typedef GridImp<dim,dimworld>                 ImpGrid;
+
+      //! Please doc me!
+      typedef LevelIteratorImp<codim,dim,dimworld>  LevelIterator;
+
+      //! Please doc me!
+      typedef EntityImp<codim,dim,dimworld>         Entity;
+
   };
 
-  class LeafIterator;
-  
-  //! A grid exports its dimension
-  enum { dimension=dim };
-
-  //! A grid knowns the dimension of the world
-  enum { dimensionworld=dimworld };
-
-  //! Define type used for coordinates in grid module
-  typedef ct ctype;
+    //! Please doc me!
+    class LeafIterator;
+    
+    //! A grid exports its dimension
+    enum { dimension=dim };
+    
+    //! A grid knowns the dimension of the world
+    enum { dimensionworld=dimworld };
+    
+    //! Define type used for coordinates in grid module
+    typedef ct ctype;
 
   //! return LeafIterator which points to the first entity in maxLevel
   LeafIterator leafbegin(int maxLevel);
@@ -1126,20 +1145,22 @@ public:
   //! return LeafIterator which points behind the last entity in maxLevel
   LeafIterator leafend(int maxLevel);
 
-  //! write Grid with GridType file filename and time 
-  //! this method use the Grid Interface Method writeGrid 
-  //! is not the same 
-  bool write (const FileFormatType ftype, const char * filename , ct time=0.0, int timestep=0, 
-                   bool adaptive=false , int processor = 0);
-
-  //! get Grid from file with time and timestep , return true if ok 
-  bool read ( const char * filename , ct & time , int timestep, 
-                   bool adaptive= false, int processor=0 );
-  
+    /** Write Grid with GridType file filename and time 
+     *
+     * This method use the Grid Interface Method writeGrid 
+     * is not the same 
+     */
+    bool write (const FileFormatType ftype, const char * filename , ct time=0.0, int timestep=0, 
+                bool adaptive=false , int processor = 0);
+    
+    //! get Grid from file with time and timestep , return true if ok 
+    bool read ( const char * filename , ct & time , int timestep, 
+                bool adaptive= false, int processor=0 );
+    
 protected:
-  //! Barton-Nackman trick 
-  GridImp<dim,dimworld>& asImp () {return static_cast<GridImp<dim,dimworld>&>(*this);}
-};
+    //! Barton-Nackman trick 
+    GridImp<dim,dimworld>& asImp () {return static_cast<GridImp<dim,dimworld>&>(*this);}
+         };
 
 
 /** \brief Iterates over the leaves of a hierarchical grid. */
@@ -1159,10 +1180,18 @@ public:
     //! HierarchicIterator 
     struct Traits 
     {
-      typedef ct                                CoordType;
-      typedef GridImp<dim,dimworld>             ImpGrid;
-      typedef LevelIteratorImp<0,dim,dimworld>  LevelIterator;
-      typedef EntityImp<0,dim,dimworld>         Entity;
+        //! Please doc me!
+        typedef ct                                CoordType;
+
+        //! Please doc me!
+        typedef GridImp<dim,dimworld>             ImpGrid;
+
+        //! Please doc me!
+        typedef LevelIteratorImp<0,dim,dimworld>  LevelIterator;
+
+        //! Please doc me!
+        typedef EntityImp<0,dim,dimworld>         Entity;
+
     };
 
     //! Constructor making new LeafIterator
@@ -1192,7 +1221,7 @@ public:
 
     private:
     EntityImp<0,dim,dimworld> * goNextEntity();
-
+    
     // private member varibles 
     // pointer to actual Entity 
     EntityType        *en_;
@@ -1213,7 +1242,7 @@ public:
     bool built_;
     bool useHierarchic_;
     bool end_; 
-
+    
     // go down until max level
     int maxLev_;
     
