@@ -1,6 +1,7 @@
 #ifndef __DLIST_CC__
 #define __DLIST_CC__
 
+#include<iostream>
 #include<new.h> // fuer std::nothrow
 
 namespace Dune {
@@ -83,11 +84,11 @@ template<class T>
 inline DoubleLinkedList<T>::Iterator DoubleLinkedList<T>::insert_after (Iterator i, T t)
 {
 	// Teste Eingabe
-	if (i.p==0 && head.p!=0) {cerr << "wo einfuegen?" << endl; return end();} 
+	if (i.p==0 && head.p!=0) {std::cerr << "wo einfuegen?" << std::endl; return end();} 
 
 	// neues Listenelement erzeugen, 
 	Element* e = new(std::nothrow) Element(t);
-	if (e==0) {cerr << "Kein Platz mehr" << endl; return end();}
+	if (e==0) {std::cerr << "Kein Platz mehr" << std::endl; return end();}
 
 	// einfuegen
 	if (head.p==0) 
@@ -117,11 +118,11 @@ template<class T>
 inline DoubleLinkedList<T>::Iterator DoubleLinkedList<T>::insert_before (Iterator i, T t)
 {
 	// Teste Eingabe
-	if (i.p==0 && head.p!=0) {cerr << "wo einfuegen?" << endl; return end();} 
+	if (i.p==0 && head.p!=0) {std::cerr << "wo einfuegen?" << std::endl; return end();} 
 
 	// neues Listenelement erzeugen, 
 	Element* e = new(std::nothrow) Element(t);
-	if (e==0) {cerr << "Kein Platz mehr" << endl; return end();}
+	if (e==0) {std::cerr << "Kein Platz mehr" << std::endl; return end();}
 
 	// einfuegen
 	if (head.p==0) 
@@ -174,13 +175,13 @@ template <class T>
 inline ostream& operator<< (ostream& s, DoubleLinkedList<T>& a)
 {
 	T t;
-	s << "dlist " << a.size() << " elements = (" << endl;
+	s << "dlist " << a.size() << " elements = (" << std::endl;
 	for (DoubleLinkedList<T>::Iterator i=a.begin(); i!=a.end(); i++)
 	{
 		t = *i;
-		s << "    " << t << endl;
+		s << "    " << t << std::endl;
 	}
-	s << ")" << endl;
+	s << ")" << std::endl;
 	return s;
 }
 
