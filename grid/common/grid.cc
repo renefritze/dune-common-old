@@ -106,17 +106,7 @@ inline void Element<0,dimworld,ct,ElementImp>::checkIF ()
 //  E L E M E N T  Default
 //***********************************************************************
 
-template<int dim, int dimworld, class ct,template<int,int> class ElementImp>  
-inline Vec<dimworld,ct>& ElementDefault<dim,dimworld,ct,ElementImp>::
-barycenter ()
-{
-  baryCenter_ = 0.0;
-  for(int i=0; i<asImp().corners(); i++)
-    baryCenter_ += asImp().operator [] (i);
-  
-  baryCenter_ *= fraction (asImp().corners());
-  return baryCenter_;
-}
+
 //************************************************************************
 // N E I G H B O R I T E R A T O R
 //************************************************************************
