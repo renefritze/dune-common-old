@@ -20,11 +20,18 @@ public:
   typedef typename FunctionSpaceType::Range RangeVecType;
   typedef typename FunctionSpaceType::JacobianRange JacobianRange;
   typedef typename FunctionSpaceType::Domain DomainVecType;  
-  typedef typename GridType::template Traits<0>::Entity EntityType;
-  
+
+
+  template<class  EntityType>
   double getLocalMatrixEntry( EntityType &entity, const int i, const int j ) const {
     return asImp().getLocalMatrixEntry( entity, i, j );
   }
+
+  template <class  EntityType, class MatrixType>
+  void getLocalMatrix( EntityType &entity, const int matSize, MatrixType& mat) const {
+    return asImp().getLocalMatrix( entity, matSize, mat);
+  }
+  
 
   MatrixType *newEmptyMatrix( ) const {
     return asImp().newEmptyMatrix( );
@@ -46,7 +53,7 @@ DiscFunctionType::RangeFieldType , FEOpImp  >
   typedef FiniteElementOperator <DiscFunctionType,MatrixType,FEOpImp> MyType;
 
 protected:
-  // the corresponding function space 
+  // the corresponding function_space 
   const typename DiscFunctionType::FunctionSpaceType & functionSpace_;
   
   // the representing matrix 
@@ -59,6 +66,7 @@ protected:
   const DiscFunctionType * arg_;
   DiscFunctionType * dest_;
   
+
   void assemble ( ) const 
   {
     typedef typename DiscFunctionType::FunctionSpace FunctionSpaceType;
@@ -71,22 +79,25 @@ protected:
   {  
     LevelIterator it = grid.template lbegin<0>( grid.maxlevel() );
     LevelIterator endit = grid.template lend<0> ( grid.maxlevel() );
+    enum {maxnumOfBaseFct = 10};
+
+    Mat<maxnumOfBaseFct,maxnumOfBaseFct , double> mat;
     
     for( ; it != endit; ++it ) 
     {
       const BaseFunctionSetType & baseSet = functionSpace_.getBaseFunctionSet( *it );
-      int numOfBaseFct = baseSet.getNumberOfBaseFunctions();  
+      const int numOfBaseFct = baseSet.getNumberOfBaseFunctions();  
       
       // setup matrix 
+      getLocalMatrix( *it, numOfBaseFct, mat);
+
       for(int i=0; i<numOfBaseFct; i++) 
       { 
         int row = functionSpace_.mapToGlobal( *it , i );
         for (int j=0; j<numOfBaseFct; j++ ) 
         {
           int col = functionSpace_.mapToGlobal( *it , j );    
-          double val = getLocalMatrixEntry( *it, i, j );
-    
-          matrix_->add( row , col , val);
+          matrix_->add( row , col , mat(i,j));
         }
       }
     }
@@ -286,7 +297,12 @@ public:
       
     const BaseFunctionSetType & baseSet = functionSpace_.getBaseFunctionSet( en );
     int numOfBaseFct = baseSet.getNumberOfBaseFunctions();  
-   
+    enum {maxnumOfBaseFct = 10};
+
+    Mat<maxnumOfBaseFct,maxnumOfBaseFct , double> mat;
+    
+    getLocalMatrix( en, numOfBaseFct, mat);
+
     if(this->scalar_ == 1.)
     {
       for(int i=0; i<numOfBaseFct; i++) 
@@ -298,9 +314,7 @@ public:
 
           // scalar comes from LocalOperatorDefault, if operator is scaled,
           // i.e. with timestepsize
-          double val = getLocalMatrixEntry( en, i, j );
-
-          dest_it[ row ] += arg_it[ col ] * val;
+          dest_it[ row ] += arg_it[ col ] * mat(i,j);
         }
       }
     }
@@ -315,7 +329,7 @@ public:
 
           // scalar comes from LocalOperatorDefault, if operator is scaled,
           // i.e. with timestepsize
-          double val = (this->scalar_) * getLocalMatrixEntry( en, i, j );
+          double val = (this->scalar_) * mat(i, j );
 
           dest_it[ row ] += arg_it[ col ] * val;
         }
