@@ -67,8 +67,8 @@ enum ElementType {unknown,vertex,line, triangle, quadrilateral, tetrahedron, pyr
                         Dirichlet //!< Dirichlet type boundary 
                       };
     
-    enum AdaptationState { NONE ,   //!< notin' to do 
-                           COARSEND,//!< entity could be coarsend 
+    enum AdaptationState { NONE ,   //!< nothin' to do 
+                           COARSENED,//!< entity could be coarsened 
                            REFINED  //!< enity was refined 
                          };
 
@@ -832,7 +832,7 @@ class EntityDefault
   IntersectionIteratorImp,HierarchicIteratorImp> 
 {
 public:
-  //! remeber the template types
+  //! remember the template types
   struct Traits
   {
     typedef ct                                   CoordType;
