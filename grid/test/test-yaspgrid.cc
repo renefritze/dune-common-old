@@ -8,6 +8,8 @@
 
 #include "gridcheck.cc"
 
+int rank;
+
 template <int dim>
 void check_yasp() {
   typedef Dune::FieldVector<int,dim> iTupel;
@@ -23,7 +25,7 @@ void check_yasp() {
   int overlap = 1;
 
   Dune::YaspGrid<dim,dim> grid(MPI_COMM_WORLD,Len,s,p,overlap);
-
+  
   grid.globalRefine(1);
   
   gridcheck(grid);
@@ -35,8 +37,7 @@ int main (int argc , char **argv) {
     MPI_Init(&argc,&argv);
 
     // get own rank
-    /* int rank;
-       MPI_Comm_rank(MPI_COMM_WORLD,&rank); */
+    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
     
     check_yasp<2>();
     check_yasp<3>();
