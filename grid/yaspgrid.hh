@@ -1404,12 +1404,12 @@ public:
  */
 template<int dim, int dimworld>
 class YaspGrid :
-  public GridDefault<dim,dimworld,yaspgrid_ctype,YaspGrid>,
+  public GridDefault<dim,dimworld,yaspgrid_ctype,YaspGrid<dim,dimworld> >,
   public MultiYGrid<dim,yaspgrid_ctype>
 {
   typedef const YaspGrid<dim,dimworld> GridImp;
 public:
-  typedef GridTraits<dim,dimworld,Dune::YaspGrid,YaspGeometry,YaspEntity,
+  typedef GridTraits<dim,dimworld,Dune::YaspGrid<dim,dimworld>,YaspGeometry,YaspEntity,
                      YaspBoundaryEntity,YaspLevelIterator,
                      YaspIntersectionIterator,YaspHierarchicIterator> Traits;
 
