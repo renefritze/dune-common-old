@@ -243,6 +243,7 @@
 */
 
 #include "../../../common/fvector.hh"
+#include "../../../common/helpertemplates.hh"
 #include "base.cc"
 
 namespace Dune {
@@ -425,6 +426,9 @@ Has to be checked
       {
       public:
 	enum { dimension = dimension_ };
+	// to make Dune::Geometry work:
+	typedef CoordType ctype;
+	enum { dimensionworld = dimension };
 	
 	template<int codimension>
 	struct codim;
@@ -585,12 +589,16 @@ Has to be checked
 
       // elements
 
+      template<int mydimension, class GridImp>
+      class MakeableGeometry;
+
       template<int dimension, class CoordType>
       class RefinementIteratorSpecial<dimension, CoordType, 0>
       {
       public:
 	typedef RefinementImp<dimension, CoordType> RefinementImp;
 	typedef typename RefinementImp::IndexVector IndexVector;
+	typedef typename RefinementImp::template codim<0>::Geometry Geometry;
 	typedef RefinementIteratorSpecial<dimension, CoordType, 0> This;
 
 	RefinementIteratorSpecial(int level, bool end = false);
@@ -600,6 +608,7 @@ Has to be checked
 	
 	IndexVector vertexIndices() const;
 	int index() const;
+	const Geometry &geometry() const;
       protected:
 	typedef FieldVector<int, dimension> Vertex;
 	enum { nKuhnSimplices = Factorial<dimension>::value };
@@ -608,12 +617,16 @@ Has to be checked
 	int kuhnIndex;
 	int size;
 	int index_;
+      private:
+	mutable bool builtGeometry;
+	mutable MakeableGeometry<dimension, RefinementImp> geometry_;
       };
     
       template<int dimension, class CoordType>
       RefinementIteratorSpecial<dimension, CoordType, 0>::
       RefinementIteratorSpecial(int level, bool end)
-	: kuhnIndex(0), size(1<<level), index_(0)
+	: kuhnIndex(0), size(1<<level), index_(0),
+	  builtGeometry(false), geometry_(level)
       {
 	for(int i = 0; i < dimension; ++i)
 	  origin[i] = 0;
@@ -631,6 +644,7 @@ Has to be checked
 	assert(origin[0] < size);
 
 	++index_;
+	builtGeometry = false;
 
 	while(1) {
 	  ++kuhnIndex;
@@ -698,6 +712,19 @@ Has to be checked
       index() const
       { return index_; }
       
+      template<int dimension, class CoordType>
+      const typename RefinementIteratorSpecial<dimension, CoordType, 0>::Geometry &
+      RefinementIteratorSpecial<dimension, CoordType, 0>::
+      geometry() const
+      {
+	if(!builtGeometry) {
+	  geometry_.make(origin, kuhnIndex);
+	  builtGeometry = true;
+	}
+
+	return geometry_;
+      }
+
       // common
       
       template<int dimension, class CoordType>
@@ -724,10 +751,14 @@ Has to be checked
       //  The Geometry
       //
 
+      template<int mydimension, class GridImp>
+      class ReferenceGeometryInstance;
+
       template<int mydimension, int coorddimension, class GridImp>
       class Geometry : public GeometryDefault<mydimension, coorddimension, GridImp, Geometry>
       {
 	typedef typename GridImp::ctype ct;
+	typedef Dune::Geometry<mydimension, mydimension, GridImp, Dune::RefinementImp::Simplex::Geometry> ReferenceGeometry;
       public:
 	GeometryType type() const
 	{
@@ -747,7 +778,7 @@ Has to be checked
 	{
 	  if(!builtCoords) {
 	    FieldVector<ct, coorddimension> v = 0;
-	    FieldVector<int, mydimension> perm = getPermutation<mydimension>(permIndex);
+	    FieldVector<int, mydimension> perm = getPermutation<mydimension>(kuhnIndex);
 	    for(int i = 0; i < mydimension; ++i) {
 	      coords[i] = global(v);
 	      v[perm[i]] += 1;
@@ -758,9 +789,12 @@ Has to be checked
 	  return coords[i];
 	}
 
+	static const ReferenceGeometry& refelem()
+	{ return ReferenceGeometryInstance<mydimension, GridImp>::instance(); }
+
 	FieldVector<ct, coorddimension> global(const FieldVector<ct, mydimension>& local) const
 	{
-	  FieldVector<ct, mydimension> v = referenceToKuhn(local, getPermutation<mydimension>(permIndex));
+	  FieldVector<ct, mydimension> v = referenceToKuhn(local, getPermutation<mydimension>(kuhnIndex));
 	  v += origin;
 	  v /= (1<<level);
 	  return kuhnToReference(v, getPermutation<mydimension>(0));
@@ -771,7 +805,7 @@ Has to be checked
 	  FieldVector<ct, mydimension> v = referenceToKuhn(global, getPermutation<mydimension>(0));
 	  v *= (1<<level);
 	  v -= origin;
-	  return kuhnToReference(v, getPermutation<mydimension>(permIndex));
+	  return kuhnToReference(v, getPermutation<mydimension>(kuhnIndex));
 	}
 
 	bool checkInside (const FieldVector<ct, mydimension>& local) const
@@ -798,7 +832,7 @@ Has to be checked
 	    for(int i = 0; i < mydimension; ++i)
 	      M[i][i] = 1;
 	    for(int i = 0; i < mydimension; ++i)
-	      M[i] = kuhnToReference(referenceToKuhn(Jinv[i], getPermutation<mydimension>(permIndex)), getPermutation<mydimension>(0));
+	      M[i] = kuhnToReference(referenceToKuhn(Jinv[i], getPermutation<mydimension>(kuhnIndex)), getPermutation<mydimension>(0));
 	    
 	    for(int i = 0; i < mydimension; ++i)
 	      for(int j = 0; j < mydimension; ++j)
@@ -809,12 +843,19 @@ Has to be checked
 	  return Jinv;
 	}
 
-	void make(const FieldVector<int, coorddimension> &origin_, int permIndex_, int level_)
+	Geometry(int level_)
+	  : coords(), builtCoords(false), Jinv(), builtJinv(false),
+	    level(level_), kuhnIndex(0), origin()
+	{
+	  IsTrue<mydimension == coorddimension>::yes();
+	}
+
+	void make(const FieldVector<int, coorddimension> &origin_, int kuhnIndex_)
 	{
 	  origin = origin_;
-	  permIndex = permIndex_;
-	  level = level_;
-	  builtCoords = builtJinv = false;
+	  kuhnIndex = kuhnIndex_;
+	  builtCoords = false;
+	  builtJinv = false;
 	}
       private:
 	mutable FieldVector<FieldVector<ct, coorddimension>, mydimension+1> coords;
@@ -822,9 +863,40 @@ Has to be checked
 	mutable FieldMatrix<ct, mydimension, mydimension> Jinv;
 	mutable bool builtJinv;
 	int level;
-	int permIndex;
+	int kuhnIndex;
 	FieldVector<int, coorddimension> origin;
       };
+
+      template<int mydimension, class GridImp>
+      class MakeableGeometry : public Dune::Geometry<mydimension, mydimension, GridImp, Geometry>
+      {
+      public:
+	MakeableGeometry(int level)
+	  : Dune::Geometry<mydimension, mydimension, GridImp, Geometry>(Geometry<mydimension, mydimension, GridImp>(level))
+	{}
+
+	void make(const FieldVector<int, mydimension> &origin, int kuhnIndex)
+	{ realGeometry.make(origin, kuhnIndex); }
+      private:
+	using Dune::Geometry<mydimension, mydimension, GridImp, Geometry>::realGeometry;
+      };
+
+      template<int mydimension, class GridImp>
+      class ReferenceGeometryInstance
+      {
+	typedef Dune::Geometry<mydimension, mydimension, GridImp, Geometry> ReferenceGeometry;
+      public:
+	static ReferenceGeometry &instance()
+	{
+	  if(instance_ == 0)
+	    instance = new ReferenceGeometry(Geometry<mydimension, mydimension, GridImp>(0));
+	  return *instance;
+	}
+      private:
+	static ReferenceGeometry *instance_;
+      };
+      template<int mydimension, class GridImp>
+      Dune::Geometry<mydimension, mydimension, GridImp, Geometry> *ReferenceGeometryInstance<mydimension, GridImp>::instance_ = 0;
 
     } // namespace Simplex
 
