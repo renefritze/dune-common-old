@@ -89,6 +89,7 @@ template<int dim, int dimworld>            class AlbertGridHierarchicIterator;
 template<int dim, int dimworld>            class AlbertGridNeighborIterator;
 template<int dim, int dimworld>            class AlbertGrid;
 
+template <class Object> class AlbertGridMemory;
 
 // singleton holding reference elements
 template<int dim> struct AlbertGridReferenceElement;
@@ -617,7 +618,6 @@ private:
   ALBERT TRAVERSE_STACK * travStack_;
 
   AlbertGridElement <dim,dim> fatherReLocal_;
-  
 }; // end of AlbertGridEntity codim = 0
 
 //**********************************************************************
@@ -863,8 +863,7 @@ public:
 
   //! local number of codim 1 entity in neighbor where intersection is contained
   int number_in_neighbor ();
-
-private:
+  
   //! return outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
   Vec<dimworld,albertCtype>& outer_normal (Vec<dim-1,albertCtype>& local);
@@ -872,10 +871,11 @@ private:
   //! return unit outer normal, if you know it is constant use this function instead
   Vec<dimworld,albertCtype>& outer_normal ();
 
-  //! setup the virtual entity
-  ALBERT EL_INFO * setupVirtualEntity(int neighbor);
-  
-  void makeIterator();
+private:
+  //**********************************************************
+  //  private methods 
+  //**********************************************************
+
   // makes empty neighElInfo
   void initElInfo(ALBERT EL_INFO * elInfo); 
   // calc the Neighbor neigh out of elInfo information
@@ -890,10 +890,16 @@ private:
   //! implement with virtual element
   //! Most of the information can be generated from the ALBERT EL_INFO 
   //! therefore this element is only created on demand. 
+  bool builtNeigh_;
   AlbertGridEntity<0,dim,dimworld> *virtualEntity_;
+ 
+  // for memory management 
+  AlbertGrid<dim,dimworld>::EntityProvider::ObjectEntity *manageObj_;
+  AlbertGrid<dim,dimworld>::IntersectionSelfProvider::ObjectEntity  *manageInterEl_;
+  AlbertGrid<dim,dimworld>::IntersectionNeighProvider::ObjectEntity *manageNeighEl_;
 
   //! vector storing the outer normal 
-  Vec<dimworld,albertCtype> outerNormal_;
+  //Vec<dimworld,albertCtype> outerNormal_;
 
   //! pointer to element holding the self_local and self_global information.
   //! This element is created on demand.
@@ -908,8 +914,6 @@ private:
   
   //! pointer to the EL_INFO struct storing the real element information
   ALBERT EL_INFO * elInfo_;
-
- 
 
   //! EL_INFO th store the information of the neighbor if needed
   ALBERT EL_INFO neighElInfo_;
@@ -1077,6 +1081,8 @@ class AlbertGrid : public GridDefault  < dim, dimworld,
   friend class AlbertGridLevelIterator<3,dim,dimworld>;
   friend class AlbertGridHierarchicIterator<dim,dimworld>;
 
+  friend class AlbertGridNeighborIterator<dim,dimworld>;
+
   //! AlbertGrid is only implemented for 2 and 3 dimension
   //! for 1d use SGrid or SimpleGrid 
   CompileTimeChecker<dimworld != 1>   Do_not_use_AlbertGrid_for_1d_Grids;   
@@ -1216,6 +1222,53 @@ private:
   //! actual time of Grid
   albertCtype time_;
 
+//***********************************************************************
+//  MemoryManagement for Entitys and Elements 
+//**********************************************************************
+
+  // organize the memory management for entitys used by the NeighborIterator
+  template <class Object> 
+  class MemoryProvider 
+  {
+  public:
+    typedef Object ObjectType;
+    
+    struct ObjectEntity
+    {
+      ObjectEntity *next;
+      Object       *item;
+    };
+
+    // freeEntity_ = NULL
+    MemoryProvider() : freeEntity_ (NULL) {} 
+
+    // call deleteEntity 
+    ~MemoryProvider ();
+
+    // delete recursive all free ObjectEntitys 
+    void deleteEntity(ObjectEntity *obj);
+
+    // i.e. return pointer to Entity
+    ObjectEntity *getNewObjectEntity(AlbertGrid<dim,dimworld> &grid, int level);
+
+    // i.e. get pointer to element 
+    ObjectEntity *getNewObjectElement();
+
+    // free, move element to stack 
+    void freeObjectEntity (ObjectEntity *obj);
+
+    private:    
+    ObjectEntity  *freeEntity_;
+  };
+
+  typedef MemoryProvider< AlbertGridEntity<0,dim,dimworld > > EntityProvider;
+  typedef MemoryProvider< AlbertGridElement<dim-1,dimworld> > IntersectionSelfProvider; 
+  typedef MemoryProvider< AlbertGridElement<dim-1,dim> >      IntersectionNeighProvider;
+
+  EntityProvider            entityProvider_;
+  IntersectionSelfProvider  interSelfProvider_;
+  IntersectionNeighProvider interNeighProvider_;
+
 }; // end Class AlbertGridGrid
 
 
@@ -1248,6 +1301,7 @@ private:
 
 }; // namespace Dune
 
+#include "albertgrid/agmemory.hh"
 #include "albertgrid/albertgrid.cc"
 
 #endif
