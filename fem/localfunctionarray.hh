@@ -216,6 +216,10 @@ public:
     return (*this);
   };
 
+  DofType& operator[] (int i) {
+    return dofArray_[i];
+  }
+
   bool operator == (const DofIteratorType & I )
   {
     return count_  == I.count_;

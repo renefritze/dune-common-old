@@ -24,8 +24,8 @@ class DiscreteFunctionInterface
 {
   // just for readability 
   typedef Function < DiscreteFunctionSpaceType,  
-        DiscreteFunctionInterface <DiscreteFunctionSpaceType,  
-              LocalFunctionIteratorImp , DofIteratorImp , DiscreteFunctionImp > > FunctionType;
+		     DiscreteFunctionInterface <DiscreteFunctionSpaceType,  
+						LocalFunctionIteratorImp , DofIteratorImp , DiscreteFunctionImp > > FunctionType;
 public:
   template <int cc>
   struct Traits 
@@ -140,10 +140,13 @@ public:
     // search element  
   };
 
-
-  Traits<0>::RangeField scalarProductDofs( const DiscreteFunctionDefault &g ) {
+  
+  //! compute the linear algebra version of the scalarproduct of the dofs
+  Traits<0>::RangeField scalarProductDofs( const DiscreteFunctionImp &g ) {
     Traits<0>::RangeField skp = 0.;
-    
+
+    std::cerr << "warning: calling default version of scalarProductDofs.\n";
+
     typedef typename GlobalDofIteratorImp DofIteratorType;
     int level = getFunctionSpace().getGrid().maxlevel();
 
@@ -157,6 +160,7 @@ public:
     return skp;
   }
 
+  //! copy the dofs from another DiscreteFunction
   Vector<Traits<0>::RangeField> &assign(const Vector<Traits<0>::RangeField> &g) {
 
     DiscreteFunctionDefault &gc = const_cast<DiscreteFunctionDefault &>( dynamic_cast<const DiscreteFunctionDefault &> ( g ));
@@ -191,6 +195,7 @@ public:
     return *this;
   }
 
+  //! add another discrete function to this function
   Vector<Traits<0>::RangeField> &operator+=(const Vector<Traits<0>::RangeField> &g) {
 
     DiscreteFunctionDefault &gc = const_cast<DiscreteFunctionDefault &>( dynamic_cast<const DiscreteFunctionDefault &> ( g ));
@@ -207,9 +212,9 @@ public:
     }
     return *this;
   }
-
- Vector<Traits<0>::RangeField> &operator-=(const Vector<Traits<0>::RangeField> &g) {
-
+  
+  Vector<Traits<0>::RangeField> &operator-=(const Vector<Traits<0>::RangeField> &g) {
+    
     DiscreteFunctionDefault &gc = const_cast<DiscreteFunctionDefault &>( dynamic_cast<const DiscreteFunctionDefault &> ( g ));
     // we would need const_iterators.....
 
@@ -379,15 +384,85 @@ public:
   };
 
   void clear( ) {
-     GlobalDofIteratorType enddof = dend ( level_ );
-     for(GlobalDofIteratorType itdof = dbegin ( level_ ); itdof != enddof; ++itdof)
-     {
-       *itdof = 0.;
-     } 
+    setAll( 0. );
   }
 
   void setAll( DofType x ) {
     set( x, level_ );
+  }
+
+  //! compute the linear algebra version of the scalarproduct of the dofs
+  DofType scalarProductDofs( const DiscFuncTest &g ) {
+    DofType skp = 0.;
+
+    int level = getFunctionSpace().getGrid().maxlevel();
+    
+    Array<DofType>::Iterator it = dofVec_[ level ].begin();
+    Array<DofType>::Iterator g_it = g.dofVec_[ level ].begin();
+    
+    for ( ; it != dofVec_[ level ].end(); ++it, ++g_it ) {
+      skp += *it * *g_it;
+    }
+
+    return skp;
+  }
+
+  //! copy the dofs from another DiscreteFunction
+  Vector<DofType> &assign(const Vector<DofType> &g) {
+
+    DiscFuncTest &gc = const_cast<DiscFuncTest &>( dynamic_cast<const DiscFuncTest &> ( g ));
+    // we would need const_iterators.....
+
+    int level = getFunctionSpace().getGrid().maxlevel();
+
+    dofVec_[ level ] = gc.dofVec_[ level ];
+
+    return *this;
+  }
+
+  Vector<DofType> &operator+=(const Vector<DofType> &g) {
+    int level = getFunctionSpace().getGrid().maxlevel();
+
+    DiscFuncTest &gc = const_cast<DiscFuncTest &>( dynamic_cast<const DiscFuncTest &> ( g ));
+    // we would need const_iterators.....
+
+    Array<DofType>::Iterator it = dofVec_[ level ].begin();
+    Array<DofType>::Iterator g_it = gc.dofVec_[ level ].begin();
+
+    // Arrays don't have += ( they want to store non-vector type elements? )
+    for ( ; it != dofVec_[ level ].end(); ++it, ++g_it ) {
+      *it += *g_it;
+    }
+
+    return *this;
+  }
+
+  Vector<DofType> &operator-=(const Vector<DofType> &g) {
+    int level = getFunctionSpace().getGrid().maxlevel();
+
+    DiscFuncTest &gc = const_cast<DiscFuncTest &>( dynamic_cast<const DiscFuncTest &> ( g ));
+    // we would need const_iterators.....
+
+    Array<DofType>::Iterator it = dofVec_[ level ].begin();
+    Array<DofType>::Iterator g_it = gc.dofVec_[ level ].begin();
+
+    // Arrays don't have += ( they want to store non-vector type elements? )
+    for ( ; it != dofVec_[ level ].end(); ++it, ++g_it ) {
+      *it -= *g_it;
+    }
+    return *this;
+  }
+
+  Vector<DofType> &operator*=(const DofType &scalar) {
+    int level = getFunctionSpace().getGrid().maxlevel();
+
+    Array<DofType>::Iterator it = dofVec_[ level ].begin();
+
+    // Arrays don't have += ( they want to store non-vector type elements? )
+    for ( ; it != dofVec_[ level ].end(); ++it ) {
+      *it *= scalar;
+    }
+    return *this;
   }
 
   //! print all dofs 
@@ -424,7 +499,7 @@ public:
     } 
     fclose( in );
   }
-
+  
 private:  
   bool allLevels_;
   

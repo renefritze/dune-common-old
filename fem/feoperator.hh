@@ -43,7 +43,7 @@ class FiniteElementOperator : public FiniteElementOperatorInterface<DiscFunction
 protected:
   mutable MatrixType *matrix_;
   const DiscFunctionType::FunctionSpaceType & functionSpace_;
-  mutable bool matrix_assembled;
+  mutable bool matrix_assembled_;
 
   void assemble ( ) const {
     typedef typename DiscFunctionType::FunctionSpace FunctionSpaceType;
@@ -78,7 +78,7 @@ protected:
 	}
       }
     }
-    matrix_assembled = true;
+    matrix_assembled_ = true;
   }
 
   void multiplyOnTheFly( const DiscFunctionType &arg, DiscFunctionType &dest ) const {
@@ -117,11 +117,12 @@ protected:
 
 	  double val = getLocalMatrixEntry( *it, i, j );
 	  
-	  arg_it.reset();
-	  arg_it.operator++( col );
-	  dest_it.reset();
-	  dest_it.operator++( row );
-	  (*dest_it) += (*arg_it) * val;
+	  //arg_it.reset();
+	  //arg_it.operator++( col );
+	  //dest_it.reset();
+	  //dest_it.operator++( row );
+	  //(*dest_it) += (*arg_it) * val;
+	  dest_it[col] += arg_it[ row ] * val;
 	}
       }
     }
@@ -134,7 +135,7 @@ public:
 			 OpMode opMode = ASSEMBLED ) :
     functionSpace_( fuspace ), 
     matrix_ (NULL),
-    matrix_assembled( false ),
+    matrix_assembled_( false ),
     opMode_(opMode) {
   }
 
@@ -144,7 +145,7 @@ public:
 
   void apply( const DiscFunctionType &arg, DiscFunctionType &dest) const {
     if ( opMode_ == ASSEMBLED ) {
-      if ( !matrix_assembled ) {
+      if ( !matrix_assembled_ ) {
 	matrix_ = newEmptyMatrix( );
 	assemble();
       }
