@@ -10,6 +10,10 @@
  * @author Markus Blatt
  */
 namespace Dune{
+/** @addtogroup Common
+     *
+     * @{
+     */
 
     /**
      * @brief A reference counting smart pointer.
@@ -103,5 +107,7 @@ namespace Dune{
     inline int SmartPointer<T>::count(){
 	return rep_->count_;
     }
+
+    /** @} */
 }
 #endif
