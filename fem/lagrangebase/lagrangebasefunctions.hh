@@ -36,7 +36,7 @@ public:
                           const Domain & x, Range & phi) const 
   {
     phi = 0.0;
-    phi(baseNum_) = 1.0;
+    phi[baseNum_] = 1.0;
   }
 
     virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
