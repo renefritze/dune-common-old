@@ -13,6 +13,7 @@ class DiscreteFunctionSpaceInterface
 {
   
 public:
+  //! the interface defines the type of the BaseFunctionSet 
   typedef BaseFunctionSetInter BaseFunctionSetType;
   typedef GridTemp GridType;
 
@@ -34,9 +35,26 @@ public:
 
   //! return number of degrees of freedom for spezified grid and level 
   //! depends also on the base function set
-  int size ( int level ) const { asImp().size(level); };
+  int size ( int level ) const { return asImp().size(level); };
+ 
+  //! for given entity map local dof number to global dof number 
+  template <class EntityType>
+  int mapToGlobal ( EntityType &en, int localNum ) const
+  {
+    return asImp().mapToGlobal ( en , localNum );
+  };
   
 protected:
+  //! Barton-Nackman trick 
+  DiscreteFunctionSpaceImp &asImp() 
+  { 
+    return static_cast<DiscreteFunctionSpaceImp&>(*this); 
+  }
+  const DiscreteFunctionSpaceImp &asImp() const  
+  { 
+    return static_cast<const DiscreteFunctionSpaceImp&>(*this); 
+  }
+  
   //! the corresponding Grid
   const GridType & grid_ ;
 };
