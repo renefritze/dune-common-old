@@ -1164,22 +1164,22 @@ public:
         /*! Return maximum level defined in this grid. Levels are numbered
           0 ... maxlevel with 0 the coarsest level.
      */
-  int maxlevel() const {return L-1;}
-
-        //! Iterator to first entity of given codim on level
-        template<int cd>
-        SimpleLevelIterator<cd,dim,dimworld> lbegin (int level)
+    int maxlevel() const {return L-1;}
+    
+    //! Iterator to first entity of given codim on level
+    template<int cd>
+    SimpleLevelIterator<cd,dim,dimworld> lbegin (int level)
     {
-          assert(cd==0 || cd==dim)
-          return SimpleLevelIterator<cd,dim,dimworld>(li[level],-1);
+        assert(cd==0 || cd==dim)
+            return SimpleLevelIterator<cd,dim,dimworld>(li[level],-1);
     }
-        template<>
-        SimpleLevelIterator<0,dim,dimworld> lbegin (int level)
+    template<>
+    SimpleLevelIterator<0,dim,dimworld> lbegin (int level)
     {
-          return SimpleLevelIterator<0,dim,dimworld>(li[level],0);
+        return SimpleLevelIterator<0,dim,dimworld>(li[level],0);
     }
-        template<>
-        SimpleLevelIterator<dim,dim,dimworld> lbegin (int level)
+    template<>
+    SimpleLevelIterator<dim,dim,dimworld> lbegin (int level)
     {
           return SimpleLevelIterator<dim,dim,dimworld>(li+level,0);
     }
@@ -1347,6 +1347,12 @@ public:
      * \todo Make sure the level exists!
      */
   levelinfo<dim>* get_levelinfo (int l) {return &li[l];}
+
+    /** \brief Returns information about a given grid level 
+     * 
+     * \todo Make sure the level exists!
+     */
+    const levelinfo<dim>* get_levelinfo (int l) const {return &li[l];}
 
   //! write Grid to file filename and store time  
   template <FileFormatType ftype>
