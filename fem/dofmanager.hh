@@ -177,7 +177,7 @@ private:
   int size_;
   
   // sizeof one array entry 
-  const size_t objSize_;
+  size_t objSize_;
   
   // name of this array
   const char * name_;
@@ -186,7 +186,7 @@ private:
   friend class MemObject;
 
   // Constructor can only be called from MemObject
-  DofArrayMemory(const char * name, const size_t objSize) : vec_ (0), size_(0) 
+  DofArrayMemory(const char * name, size_t objSize) : vec_ (0), size_(0) 
       , objSize_(objSize) , name_(name) {}
   
 public:  
@@ -194,7 +194,7 @@ public:
   int size () const { return size_; } 
   
   //! size of one entry 
-  const size_t objSize() const { return objSize_; }
+  size_t objSize() const { return objSize_; }
 
   //! copy array 
   void assign ( const DofArrayMemory &copy )
@@ -371,7 +371,7 @@ private:
   DefaultGHMM & ghmm_;
   
   // sizeof datatype
-  const size_t sizeOfObj_;
+  size_t sizeOfObj_;
 
   // pointer to memory
   MemPointerType * myMem_;
@@ -385,7 +385,7 @@ public:
   // Constructor of MemObject, only to call from DofManager 
   template <class GridType, class MapperType>
   MemObject ( GridType & grid, MapperType & mapper, 
-      const char * name , DefaultGHMM & ghmm , const size_t objSize ) 
+      const char * name , DefaultGHMM & ghmm , size_t objSize ) 
     : size_(0), name_ (name) , ghmm_( ghmm ) , sizeOfObj_ (objSize) 
     , myMem_(0) , dofmap_ (0) 
     , array_( name_, sizeOfObj_ )
@@ -409,7 +409,7 @@ public:
   int size () const { return size_; }
 
   //! return size on one entity  
-  const size_t objSize () const { return sizeOfObj_; }
+  size_t objSize () const { return sizeOfObj_; }
 
   //! return pointer to memory 
   MemPointerType * myMem() const { return myMem_; }

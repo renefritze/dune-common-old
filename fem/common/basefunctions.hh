@@ -182,14 +182,13 @@ template<class FunctionSpaceType, class BaseFunctionSetImp>
 class BaseFunctionSetDefault  
 : public BaseFunctionSetInterface < FunctionSpaceType , BaseFunctionSetImp> 
 {
+public:
   typedef typename FunctionSpaceType::JacobianRange JacobianRange;
   enum { dimRow = JacobianRange::dimRow };
   enum { dimCol = JacobianRange::dimCol };
   
-public:
   typedef typename FunctionSpaceType::Domain Domain ;
   typedef typename FunctionSpaceType::Range Range ;
-  typedef typename FunctionSpaceType::JacobianRange JacobianRange;
   typedef typename FunctionSpaceType::HessianRange  HessianRange;
   //! set the default diffVar Types 
   BaseFunctionSetDefault ( FunctionSpaceType & f ) : 
