@@ -371,15 +371,16 @@ void SparseRowMatrix<T>::apply_t(const SimpleVector<T> &f, SimpleVector<T> &ret)
     assert(f.size() == rows());
 
     ret.resize(cols());
+    ret.set(0);
 
-    for (int i=0; i<cols(); i++) {
+    for (int row=0; row<rows(); row++) {
+ 
+        for (int col=0; col<nz_; col++) {
 
-        ret[i] = 0;
+            if (col_[row*nz_+col] >= 0)
+                ret[col_[row*nz_+col]] += f[row]*val(row*nz_+col);
 
-        for (int j=0; j<rows(); j++)
-
-            ret[i] += f[j] * (*this)(j,i);
-
+        }
     }
 
 }
