@@ -1,6 +1,10 @@
 #ifndef __DUNE_SPMATRIX_HH
 #define __DUNE_SPMATRIX_HH
 
+#ifdef HAVE_SUPERLU
+#include <dsp_defs.h>
+#endif
+
 #include <dune/common/simplevector.hh>
 
 namespace Dune
@@ -213,6 +217,15 @@ public:
 
     //! Makes a given column a unit column
     void unitCol(int col);
+
+#ifdef HAVE_SUPERLU
+private:
+  Array<int> nzval_;
+public:
+  void createSuperMatrix(SuperMatrix & A);
+  void destroySuperMatrix(SuperMatrix & A);
+#endif
+	
 private:
 
     //! Always contains zero.  It's only here so the index operator

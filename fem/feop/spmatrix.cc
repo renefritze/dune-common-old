@@ -11,6 +11,7 @@ T SparseRowMatrix<T>::staticZero = T(0);
 /*****************************/
 /*  Constructor(s)           */
 /*****************************/
+
 template <class T>
 SparseRowMatrix<T>::SparseRowMatrix()
 {
@@ -25,10 +26,6 @@ template <class T>
 SparseRowMatrix<T>::~SparseRowMatrix()
 {
 }
-
-/***********************************/
-/*  Construct from storage vectors */
-/***********************************/
 
 template <class T> 
 SparseRowMatrix<T>::SparseRowMatrix(int rows, int cols, int nz)
@@ -57,7 +54,7 @@ SparseRowMatrix<T>::SparseRowMatrix(const SparseRowMatrix<T>& other)
 /* Iterator creation          */
 /******************************/
 
-// Return iterator refering to first nonzero element in row
+//! Return iterator refering to first nonzero element in row
 template <class T>
 typename SparseRowMatrix<T>::ColumnIterator SparseRowMatrix<T>::rbegin (int row)
 {
@@ -73,7 +70,7 @@ typename SparseRowMatrix<T>::ColumnIterator SparseRowMatrix<T>::rbegin (int row)
     return it;
 }
     
-// Return iterator refering to one past the last nonzero element of row
+//! Return iterator refering to one past the last nonzero element of row
 template <class T>
 typename SparseRowMatrix<T>::ColumnIterator SparseRowMatrix<T>::rend (int row)
 {
@@ -85,9 +82,7 @@ typename SparseRowMatrix<T>::ColumnIterator SparseRowMatrix<T>::rend (int row)
     return it;
 }
 
-/***************************/
-/* Assignment operator...  (deep copy) */
-/***************************/
+//! Assignment operator...  (deep copy)
 
 template <class T>
 SparseRowMatrix<T>& SparseRowMatrix<T>::operator=(const SparseRowMatrix<T>& other)
@@ -105,9 +100,7 @@ SparseRowMatrix<T>& SparseRowMatrix<T>::operator=(const SparseRowMatrix<T>& othe
 }
 
 
-/***************************/
-/* resize()                */
-/***************************/
+//! resize the Matrix and reset the content
 
 template <class T> 
 void SparseRowMatrix<T>::resize(int M, int N, int nz)
@@ -120,7 +113,12 @@ void SparseRowMatrix<T>::resize(int M, int N, int nz)
     // resize data fields
     values_.resize(dim_[0]*nz_);
     col_.resize(dim_[0]*nz_);
+
+    values_.set(0.0);
+    col_.set(-1);
 }
+
+//! resize the Matrix and reset the content
 
 template <class T> 
 void SparseRowMatrix<T>::resize(int M, int N)
@@ -132,6 +130,9 @@ void SparseRowMatrix<T>::resize(int M, int N)
     // resize data fields
     values_.resize(dim_[0]*nz_);
     col_.resize(dim_[0]*nz_);
+
+    values_.set(0.0);
+    col_.set(-1);
 }
 
 template <class T>
@@ -239,6 +240,7 @@ const SparseRowMatrix<T>& SparseRowMatrix<T>::operator*=(const T& val)
 /***************************************/
 /*  Matrix-MV_Vector multiplication    */
 /***************************************/
+
 template <class T> template <class VECtype>
 void SparseRowMatrix<T>::mult(VECtype &ret, const VECtype &x) const
 {
@@ -484,6 +486,43 @@ void SparseRowMatrix<T>::unitCol(int col)
     else 
         set(col,col,1.0); 
 } 
+
+template <class T>
+void SparseRowMatrix<T>::createSuperMatrix(SuperMatrix & A)
+{
+  // non zero values before this line
+  nzval_.resize(dim_[0]+1);
+  for (int i=0; i<nzval_.size(); i++)
+    nzval_[i] = 3*i;
+  // fill missing entries
+  for (int row = 0; row < dim_[0]; row++)
+  {
+    int whichCol;
+    while((whichCol = colIndex(row,-2)) != -1)
+    {
+      int col;
+      for (col = 0; col < dim_[1]; col++)
+      {
+        bool newcol = true;
+        for (int i=0; i<nz_; i++)
+          if (col_[row*nz_ +i] == col)
+            newcol = false;
+        if (newcol) break;
+      }
+      col_[row*nz_ + whichCol] = col;
+    }
+  }
+  // create matrix
+  dCreate_CompCol_Matrix(&A, dim_[0], dim_[1], values_.size(),
+                         values_.raw(), col_.raw(), nzval_.raw(),
+                         SLU_NR, SLU_D, SLU_GE);  
+}
+
+template <class T>
+void SparseRowMatrix<T>::destroySuperMatrix(SuperMatrix & A)
+{
+  nzval_.resize(0);
+}
 
 } // end namespace Dune
 
