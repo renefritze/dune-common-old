@@ -131,7 +131,6 @@ public:
   int codimsize (int codim ) const
   {
     // return number of vertices 
-    //std::cout << level_ << " " << codim << " size l|c \n";
     return dimrange * indexSet_.size(level_,codim);
   }
 

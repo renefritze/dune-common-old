@@ -35,6 +35,9 @@ DiscreteFunctionSpaceType (g,id) , dm_ ( dm ) , level_ (level)
     if(baseFuncSet_[i])
       maxNumBase_ = std::max(baseFuncSet_[i]->getNumberOfBaseFunctions(),maxNumBase_);
   }
+  
+  // for empty functions space which can happen for BSGrid 
+  if(!mapper_) makeBaseSet<line,0> ();
 }
   
 template< class FunctionSpaceType, class GridType,int polOrd, class DofManagerType >
@@ -155,6 +158,7 @@ LagrangeDiscreteFunctionSpace<FunctionSpaceType,GridType,polOrd,DofManagerType>:
 signIn (DiscFuncType & df)
 {
   // only for gcc to pass type DofType
+  assert(mapper_ != 0);
   DofType *fake=0;
   return dm_.addDofSet( fake, this->grid_ , *mapper_, df.name() );
 }
