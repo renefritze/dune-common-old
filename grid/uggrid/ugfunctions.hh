@@ -253,7 +253,7 @@ public:
     //! Calm the compiler
     static int& index(const void* theWhatever) {
         DUNE_THROW(NotImplemented, "No index available for this kind of object");
-        return 0;
+        //return 0;
     }
 
     //! \todo Please doc me!

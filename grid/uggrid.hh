@@ -22,7 +22,8 @@
 // undef stuff defined by UG
 #include "uggrid/ug_undefs.hh"
 
-#include "../common/array.hh"
+#include <dune/common/array.hh>
+#include <dune/grid/common/defaultindexsets.hh>
 
 namespace Dune 
 {
@@ -106,6 +107,7 @@ template<class GridImp>            class UGGridIntersectionIterator;
 #include "uggrid/ugintersectionit.hh"
 #include "uggrid/uggridleveliterator.hh"
 #include "uggrid/uggridhieriterator.hh"
+#include "uggrid/ughierarchicindexset.hh"
 
 namespace Dune {
 
@@ -131,14 +133,16 @@ namespace Dune {
 template <int dim, int dimworld>
 class UGGrid : public GridDefault  <dim, dimworld,UGCtype, UGGrid<dim,dimworld> >
 {
-
+    
     friend class UGGridEntity <0,dim,UGGrid<dim,dimworld> >;
-  friend class UGGridEntity <dim,dim,UGGrid<dim,dimworld> >;
-  friend class UGGridHierarchicIterator<UGGrid<dim,dimworld> >;
-  friend class UGGridIntersectionIterator<UGGrid<dim,dimworld> >;
+    friend class UGGridEntity <dim,dim,UGGrid<dim,dimworld> >;
+    friend class UGGridHierarchicIterator<UGGrid<dim,dimworld> >;
+    friend class UGGridIntersectionIterator<UGGrid<dim,dimworld> >;
 
     template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
     friend class Entity;
+
+    friend class UGGridHierarchicIndexSet<UGGrid<dim,dimworld> >;
 
     /** \brief UGGrid is only implemented for 2 and 3 dimension
      * for 1d use SGrid or OneDGrid  */
@@ -166,6 +170,9 @@ public:
                          UGGridIntersectionIterator,
                          UGGridHierarchicIterator> Traits;
     
+    typedef UGGridHierarchicIndexSet<Dune::UGGrid<dim,dimworld> > HierarchicIndexSetType;
+    typedef DefaultLevelIndexSet<Dune::UGGrid<dim,dimworld> >      LevelIndexSetType;
+
     /** \brief Constructor with control over UG's memory requirements 
      *
      * \param heapSize The size of UG's internal memory in megabytes.  UG allocates 
@@ -262,6 +269,16 @@ public:
     // End of Interface Methods
     // **********************************************************
 
+    const HierarchicIndexSetType& hierarchicIndexSet() const {
+        return hierarchicIndexSet_;
+    }
+
+    const LevelIndexSetType& levelIndexSet() const {
+        if (!levelIndexSet_)
+            levelIndexSet_ = new LevelIndexSetType(*this);
+        return *levelIndexSet_;
+    }
+
     void createbegin();
 
     void createend();
@@ -330,8 +347,15 @@ private:
   // number of maxlevel of the mesh
   int maxlevel_;
 
+    // Our hierarchic index set
+    HierarchicIndexSetType hierarchicIndexSet_;
+
+    // Our set of level indices
+    mutable LevelIndexSetType* levelIndexSet_;
+    
+
   // true if grid was refined
-  bool wasChanged_; 
+  //bool wasChanged_; 
   
   // number of entitys of each level an codim 
   Array<int> size_;
