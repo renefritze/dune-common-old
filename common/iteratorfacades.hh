@@ -1,6 +1,6 @@
 // $Id$
 #ifndef __DUNE_ITERATORFACADES_HH__
-#define __DUNE_ITERATORFACADEs_HH__
+#define __DUNE_ITERATORFACADES_HH__
 #include<iterator>
 #include<dune/common/typetraits.hh>
 namespace Dune
