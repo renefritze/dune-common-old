@@ -1,6 +1,8 @@
 #ifndef __ALBERTGRID_ELMEM_CC__
 #define __ALBERTGRID_ELMEM_CC__
 
+#include <assert.h>
+
 namespace AlbertHelp {
 
 // IndexManagerType defined in albertgrid.hh  
