@@ -20,7 +20,7 @@ class CombinedOperatorInterface
 {
 public:
   typedef typename A::Domain Domain;
-  typedef typename A::Range Range;
+  typedef typename A::Range  Range;
 
   typedef double RangeFieldType;
 
@@ -84,9 +84,12 @@ public:
 
   //! prepare apply and get temporary variable 
   //! set fA_ = fak1 and fB_ = fak2  ( i.e. delta t)
-  void prepareGlobal (const Domain & arg , Range & dest, 
-    Range * t, RangeFieldType fak1, RangeFieldType fak2 )
+  void prepareGlobal (int level, const Domain & arg , Range & dest, 
+    Range * t, RangeFieldType & fak1, RangeFieldType & fak2 ) 
   {
+    _b.prepareGlobal(level,arg,dest,t,fak1,fak2);
+    _a.prepareGlobal(level,arg,dest,t,fak1,fak2);
+    
     _fA = fak1;
     _fB = fak2;
     _tmp = t;
@@ -96,18 +99,24 @@ public:
   template <class GridIteratorType>
   void prepareLocal ( GridIteratorType &it , const Domain & arg , Range & dest )   
   {
+    _b.prepareLocal(it,arg,dest);
+    _a.prepareLocal(it,arg,dest);
   } 
  
   //! do some local stuff, overload for functionality
   template <class GridIteratorType>
   void finalizeLocal ( GridIteratorType &it , const Domain & arg , Range & dest )   
   {
+    _b.finalizeLocal(it,arg,dest);
+    _a.finalizeLocal(it,arg,dest);
   } 
   
   //! finalize the operator 
-  void finalizeGlobal (const Domain & arg , Range & dest )   
+  void finalizeGlobal (int level, const Domain & arg , Range & dest, 
+    Range * t, RangeFieldType & fak1, RangeFieldType & fak2 ) 
   {
-    _b.finalizeGlobal(arg,dest);
+    _b.finalizeGlobal(level,arg,dest,t,fak1,fak2);
+    _a.finalizeGlobal(level,arg,dest,t,fak1,fak2);
     _tmp = NULL;
   }
 protected: 
@@ -187,15 +196,18 @@ public:
     InterfaceType (a,b) {};
   
   template <class GridIteratorType>
-  void applyLocal ( GridIteratorType &it , const Domain & arg , Range & dest )   
+  void applyLocal ( GridIteratorType &it , const Domain & arg , Range & dest )  const  
   {
-    _tmp->setLocal(it,0.0); 
-    _b.applyLocal ( it , arg , (*_tmp) );
-    dest.addLocal(it,(*_tmp));
+    _b.applyLocal ( it , arg , dest );
+    _a.applyLocal ( it , arg , dest );
     
-    _tmp->setLocal(it,0.0); 
-    _a.applyLocal ( it , arg , (*_tmp) );
-    dest.addLocal(it,(*_tmp));
+    //_tmp->setLocal(it,0.0); 
+    //_b.applyLocal ( it , arg , (*_tmp) );
+    //dest.addLocal(it,(*_tmp));
+    
+    //_tmp->setLocal(it,0.0); 
+    //_a.applyLocal ( it , arg , (*_tmp) );
+    //dest.addLocal(it,(*_tmp));
   }
 };
 
@@ -327,7 +339,7 @@ public:
 };
 
 //! return OP = A + B 
-template <class A , class B , typename RangeFieldType>
+template <class A , class B >
 CombinedOperator < ADD, A,B> add ( A & a, B & b )
 {
   CombinedOperator <ADD, A,B> tmp (a,b);

@@ -30,9 +30,9 @@ public:
   }
   
   //! finalize the operation 
-  void finalize (  Domain &Arg, Range &Dest )
+  double finalize (  Domain &Arg, Range &Dest )
   {
-    asImp().finalize( Arg, Dest );
+    return asImp().finalize( Arg, Dest );
   }
  
   //! apply the operator 
