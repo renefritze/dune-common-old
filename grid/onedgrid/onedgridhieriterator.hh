@@ -31,11 +31,9 @@ public HierarchicIteratorDefault <dim,dimworld, OneDCType,
 
     friend class OneDGridEntity<0,dim,dimworld>;
 
-    typedef typename DoubleLinkedList<OneDGridEntity<0,dim,dimworld> >::Iterator ElementIterator;
-
     // Stack entry
     struct StackEntry {
-        ElementIterator element;
+        OneDGridEntity<0,1,1>* element;
         /** \todo Do we need the level ? */
         int level;
     };
@@ -45,7 +43,7 @@ public:
   //! the default Constructor
     OneDGridHierarchicIterator(int maxlevel) : elemStack() {
         maxlevel_ = maxlevel;
-        target_   = ElementIterator();
+        target_   = NULL;
     }
 
   //! prefix increment
@@ -60,26 +58,21 @@ public:
       if (old_target.level < maxlevel_) {
           
           // Load sons of old target onto the iterator stack
-          if (old_target.element.hasChildren()) {
+          if (old_target.element->hasChildren()) {
               StackEntry se0;
-              se0.element = old_target.element.sons_[0];
+              se0.element = old_target.element->sons_[0];
               se0.level   = old_target.level + 1;
               elemStack.push(se0);
 
               StackEntry se1;
-              se1.element = old_target.element.sons_[1];
+              se1.element = old_target.element->sons_[1];
               se1.level   = old_target.level + 1;
               elemStack.push(se1);
           }
 
       }
-      
-      if (elemStack.empty())
-          //virtualEntity_.setToTarget(0);
-          target_ = ElementIterator();
-      else
-          //virtualEntity_.setToTarget(elemStack.top().element, elemStack.top().level);
-          target_ = elemStack.top().element;
+
+      target_ = (elemStack.empty()) ? NULL : elemStack.top().element;
       
       return (*this);
   }
@@ -113,7 +106,7 @@ private:
 
     Stack<StackEntry> elemStack;
 
-    ElementIterator target_;
+    OneDGridEntity<0,1,1>* target_;
 
 };
 

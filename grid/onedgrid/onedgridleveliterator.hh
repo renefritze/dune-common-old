@@ -32,7 +32,7 @@ class OneDGridLevelIterator :
 protected:
 
     /** \brief Constructor from a given iterator */
-    OneDGridLevelIterator<codim,dim,dimworld,pitype>(const typename DoubleLinkedList<OneDGridEntity<codim,dim,dimworld> >::Iterator& it) {
+    OneDGridLevelIterator<codim,dim,dimworld,pitype>(OneDGridEntity<codim,dim,dimworld>* it) {
         target_ = it;
     }
 
@@ -40,7 +40,7 @@ public:
 
   //! prefix increment
     OneDGridLevelIterator<codim,dim,dimworld,pitype>& operator ++() {
-        ++target_;
+        target_ = target_->succ_;
         return (*this);
     }
     
@@ -58,14 +58,14 @@ public:
     OneDGridEntity<codim,dim,dimworld>& operator*() {return *target_;}
 
   //! arrow
-    OneDGridEntity<codim,dim,dimworld>* operator->() {return target_.operator->();}
+    OneDGridEntity<codim,dim,dimworld>* operator->() {return target_;}
   
   //! ask for level of entity
     int level () const {return target_->level();}
 
 private:
 
-    typename DoubleLinkedList<OneDGridEntity<codim,dim,dimworld> >::Iterator target_;
+    OneDGridEntity<codim,dim,dimworld>* target_;
 
 };
 
