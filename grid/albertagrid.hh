@@ -246,17 +246,15 @@ private:
   //! built the jacobian inverse and store the volume 
   void buildJacobianInverse () const; 
 
-  mutable FieldVector<albertCtype, mydim+1> tmpVec_;
-  //! maps a global coordinate within the elements local barycentric
-  //! koordinates 
-  //Vec<dim+1,albertCtype> localBary (const Vec<dimworld,albertCtype>& global);
-
   // template method for map the vertices of EL_INFO to the actual 
   // coords with face_,edge_ and vertex_ , needes for operator []
   int mapVertices (int i) const; 
 
   // calculates the volume of the element 
   albertCtype elDeterminant () const;
+
+  // temporary need vector 
+  mutable FieldVector<albertCtype, mydim+1> tmpVec_;
 
   //! the vertex coordinates 
   mutable FieldMatrix<albertCtype,mydim+1,cdim> coord_;
@@ -385,11 +383,7 @@ public:
   const Geometry & geometry () const;
 
   //! local coordinates within father
-    FieldVector<albertCtype, dim>& local () const ;
-  
-  //! no interface method 
-  //! returns the global vertex number as default 
-  int el_index() const; 
+  FieldVector<albertCtype, dim>& local () const ;
   
 private: 
   // methods for setting the infos from the albert mesh
@@ -576,9 +570,6 @@ public:
   //! return processor number where entity is master 
   int owner () const; 
   
-  //! return the global unique index in grid 
-  int el_index() const; 
-
   //! return the global unique index in grid , same as el_index
   int globalIndex() const ; 
 
@@ -1049,7 +1040,6 @@ public:
       AlbertaGridHierarchicIterator>  Traits;
 
   typedef typename Traits::template codim<0>::template partition<All_Partition>::LevelIterator LeafIterator;
-
 
   typedef AlbertaGridReferenceGeometry<dim,AlbertaGrid<dim,dimworld> > ReferenceGeometry;
 
