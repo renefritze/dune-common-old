@@ -37,11 +37,11 @@ static UGGridReferenceElement<1> refline;
 //****************************************************************
 //
 // default, do nothing 
-template< int dim, int dimworld>  
-inline int UGGridElement<dim,dimworld>::mapVertices (int i) const  
-{ 
-  return i; 
-}
+// template< int dim, int dimworld>  
+// inline int UGGridElement<dim,dimworld>::mapVertices (int i) const  
+// { 
+//   return i; 
+// }
 
 template< int dim, int dimworld>
 inline UGGridElement<dim,dimworld>:: 
@@ -242,7 +242,7 @@ refelem()
         return refquadrangle.refelem;
 }
 
-template<>
+//template<>
 inline UGGridElement<1,1>& UGGridElement<1,2>:: 
 refelem()
 {
@@ -304,7 +304,8 @@ template< int dim, int dimworld>
 inline UGCtype UGGridElement<dim,dimworld>:: 
 integration_element (const Vec<dim,UGCtype>& local)
 {
-    return ABS(Jacobian_inverse(local).determinant());
+    //std::cout << "integration element: " << ABS(Jacobian_inverse(local).determinant()) << std::endl;
+    return ABS(1/Jacobian_inverse(local).determinant());
 }
 
 template< int dim, int dimworld>
@@ -318,6 +319,6 @@ Jacobian_inverse (const Vec<dim,UGCtype>& local)
 
     // compute the transformation onto the reference element (or vice versa?)
     UG_NS<dimworld>::Transformation(corners(), cornerCoords, local, jac_inverse_); 
-
+    //std::cout << jac_inverse_ << std::endl;
     return jac_inverse_;
 }
