@@ -84,8 +84,25 @@ class DofIteratorDefault
 : public DofIteratorInterface < DofImp , DofIteratorImp >
 {
 public:
-  
-  //! no extra functionality at this moment 
+  //! random access operator, for efficient implementation overload in the 
+  //! implementation class DofIteratorImp
+  DofImp& operator [] (int i)
+  {
+    asImp().reset();
+    asImp().operator ++ (i);
+    return asImp().operator *();
+  };
+
+private:  
+  //! Barton-Nackman trick 
+  DofIteratorType &asImp() 
+  { 
+    return static_cast<DofIteratorType&>(*this); 
+  };
+  const DofIteratorType &asImp() const
+  { 
+    return static_cast<const DofIteratorType&>(*this); 
+  };
 }; // end class DofIteratorDefault
 
 
