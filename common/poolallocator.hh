@@ -3,6 +3,7 @@
 #define DUNE_COMMON_POOLALLOCATOR_HH
 
 #include"alignment.hh"
+#include<typeinfo>
 
 namespace Dune
 {
@@ -47,8 +48,8 @@ namespace Dune
 	/**
 	 * @brief The aligned size of the type.
 	 *
-	 * This size is bigger than sizeof of the type and multiple of
-	 * the algnment requirement.
+	 * This size is bigger than sizeof of the type and a multiple of
+	 * the alignment requirement.
 	 */
 	alignedSize = (sizeof(MemberType) % AlignmentOf<MemberType>::value == 0) ?
 	sizeof(MemberType) : 
@@ -70,6 +71,7 @@ namespace Dune
 	 */
 	elements = (chunkSize / alignedSize)
       };
+
   private:
     struct Reference
     {
@@ -96,6 +98,7 @@ namespace Dune
       Chunk()
       {
 	unsigned long lmemory = reinterpret_cast<unsigned long>(chunk_);
+
 	if(lmemory % AlignmentOf<MemberType>::value != 0)
 	  lmemory = (lmemory / AlignmentOf<MemberType>::value + 1)
 	    * AlignmentOf<MemberType>::value;
@@ -121,6 +124,9 @@ namespace Dune
      * @param o The pointer to memory block of the object.
      */
     inline void free(void* o);
+
+    
+    inline void print();
 
   private:
   
@@ -234,7 +240,7 @@ namespace Dune
      * @brief Not correctly implemented, yet!
      */
     inline int max_size(){ return 1;}
-
+    
     /**
      * @brief Rebind the allocator to another type.
      */
@@ -253,17 +259,16 @@ namespace Dune
 
   template<class T, int S>
   inline Pool<T,S>::Pool()
-  {
-    head_ = 0;
-    chunks_ = 0;
-  }
+    :head_(0), chunks_(0)
+  {}
   
   template<class T, int S>
   inline Pool<T,S>::~Pool()
   {
     // delete the allocated chunks.
     Chunk *current=chunks_;
-    while(current)
+    
+    while(current!=0)
       {
 	Chunk *tmp = current;
 	current = current->next_;
@@ -272,6 +277,17 @@ namespace Dune
   }
 
   template<class T, int S>
+  inline void Pool<T,S>::print()
+  {
+    Chunk* current=chunks_;
+    while(current){
+      std::cout<<current<<" ";
+      current=current->next_;
+    }
+    std::cout<<current<<" ";
+  }
+  
+  template<class T, int S>
   inline void Pool<T,S>::grow()
   {
     Chunk *newChunk = new Chunk;
@@ -279,7 +295,7 @@ namespace Dune
     chunks_ = newChunk;
     
     char* start = reinterpret_cast<char *>(chunks_->memory_);
-    char* last  = &start[elements*alignedSize];
+    char* last  = &start[(elements-1)*alignedSize];
 
     for(char* element=start; element<last; element+=alignedSize)
       reinterpret_cast<Reference*>(element)->next_
