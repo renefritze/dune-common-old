@@ -6,6 +6,8 @@
 //
 //************************************************************************
 
+#include <algorithm>
+
 namespace Dune
 {
 
@@ -566,7 +568,7 @@ buildJacobianInverse()
   
   // Jinv = A^-1
   assert( builtElMat_ == true );
-  elDet_ = ABS( elMat_.invert(Jinv_) );
+  elDet_ = std::abs( elMat_.invert(Jinv_) );
 
   assert(elDet_ > 1.0E-25);
   builtinverse_ = true;
@@ -611,7 +613,7 @@ template <>
 inline albertCtype AlbertGridElement<2,2>::elDeterminant () 
 {
   calcElMatrix();
-  return ABS ( elMat_.determinant () );
+  return std::abs ( elMat_.determinant () );
 }
 
 // volume of one Element, here therahedron  
@@ -619,7 +621,7 @@ template <>
 inline albertCtype AlbertGridElement<3,3>::elDeterminant ()  
 {
   calcElMatrix();
-  return ABS ( elMat_.determinant () );
+  return std::abs ( elMat_.determinant () );
 }
   
 template< int dim, int dimworld>
@@ -679,7 +681,7 @@ inline bool AlbertGridElement<2,2>::checkInverseMapping (int loc)
   tmp2 = Jinv_ * tmp2;
 
   for(int j=0; j<dim; j++)
-    if(ABS(tmp2[j] - refcoord[j]) > 1e-15)
+    if(std::abs(tmp2[j] - refcoord[j]) > 1e-15)
     {
       std::cout << "AlbertGridElement<2,2>::checkInverseMapping: Mapping of coord " << loc << " incorrect! \n";
       return false;
@@ -701,7 +703,7 @@ inline bool AlbertGridElement<3,3>::checkInverseMapping (int loc)
   tmp2 = Jinv_ * tmp2;
 
   for(int j=0; j<dim; j++)
-    if(ABS(tmp2[j] - refcoord[j]) > 1e-15)
+    if(std::abs(tmp2[j] - refcoord[j]) > 1e-15)
     {
       std::cout << "AlbertGridElement<3,3>::checkInverseMapping: Mapping of coord " << loc << " incorrect! \n";
       return false;
@@ -761,7 +763,7 @@ inline bool AlbertGridElement<3,3>::checkMapping (int loc)
 
   for(int j=0; j<dim; j++)
   {
-    if(ABS(tmp2[j] - coord[j]) > 1e-15)
+    if(std::abs(tmp2[j] - coord[j]) > 1e-15)
     {
       std::cout << "Checking of " << loc << " not ok!\n";
       std::cout << coord; std::cout << refcoord;
@@ -785,7 +787,7 @@ checkInside(const FieldVector<albertCtype, dim> &local)
     sum += local[i];
     if(local[i] < 0.0) 
     {
-      if(ABS(local[i]) > 1e-15) 
+      if(std::abs(local[i]) > 1e-15) 
       {
         return false; 
       }

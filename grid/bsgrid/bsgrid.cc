@@ -1,5 +1,7 @@
-#ifndef __DUNE_BSGRID_CC__
-#define __DUNE_BSGRID_CC__
+#ifndef DUNE_BSGRID_CC
+#define DUNE_BSGRID_CC
+
+#include <algorithm>
 
 namespace Dune {
 
@@ -1300,7 +1302,7 @@ inline void BSGridElement<dim,dimworld> :: buildJacobianInverse()
     if(!builtA_) calcElMatrix(); 
 
     // DetDf = integration_element
-    detDF_ = ABS( A_.invert(Jinv_) );
+    detDF_ = std::abs( A_.invert(Jinv_) );
     builtinverse_ = builtDetDF_ = true;
   }
 }
@@ -1459,7 +1461,7 @@ inline bool BSGridElement<dim,dimworld> :: checkInside(const FieldVector<bs_ctyp
     sum += local[i];
     if(local[i] < 0.0)
     {
-      if(ABS(local[i]) > 1e-15) 
+      if(std::abs(local[i]) > 1e-15) 
       {
         return false; 
       }

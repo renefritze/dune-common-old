@@ -1,5 +1,7 @@
-#ifndef __DUNE_DFADAPT_CC__
-#define __DUNE_DFADAPT_CC__
+#ifndef DUNE_DFADAPT_CC
+#define DUNE_DFADAPT_CC
+
+#include <algorithm>
 
 namespace Dune 
 {
@@ -96,7 +98,7 @@ inline void DFAdapt< DiscreteFunctionSpaceType >::print(std::ostream &s, int lev
   for(DofIteratorType itdof = dbegin ( level ); itdof != enddof; ++itdof) 
   {
     s << (*itdof) << " DofValue \n";
-    sum += ABS(*itdof);
+    sum += std::abs(*itdof);
   } 
   s << "sum = " << sum << "\n";
 }

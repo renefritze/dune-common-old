@@ -1,5 +1,6 @@
 #include <amiramesh/AmiraMesh.h>
 
+#include <algorithm>
 
 #if _3
 /** \todo Make sure that the grid is three-dimensional */
@@ -82,7 +83,7 @@ void Dune::AmiraMeshWriter<GridType, DiscFuncType>::writeGrid(const GridType& gr
 
    ncomp = 0;
    for(i=0; i<NVECTYPES; i++)
-     ncomp = MAX(ncomp,VD_NCMPS_IN_TYPE(sol, i));
+     ncomp = std::max(ncomp,VD_NCMPS_IN_TYPE(sol, i));
 #endif
 
    /* write element section to file */
@@ -244,7 +245,7 @@ void Dune::AmiraMeshWriter<GridType, DiscFuncType>::writeGrid(const GridType& gr
 
    ncomp = 0;
    for(i=0; i<NVECTYPES; i++)
-     ncomp = MAX(ncomp,VD_NCMPS_IN_TYPE(sol, i));
+     ncomp = std::max(ncomp,VD_NCMPS_IN_TYPE(sol, i));
 #endif
 
    /* write element section to geo - file */

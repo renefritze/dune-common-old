@@ -1,7 +1,7 @@
-#ifndef __DUNE_GRID_CC__
-#define __DUNE_GRID_CC__
+#ifndef DUNE_GRID_CC
+#define DUNE_GRID_CC
 
-#include "../../common/misc.hh"
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 
@@ -189,7 +189,7 @@ inline void Element<dim,dimworld,ct,ElementImp>::checkIF ()
     g = global ( l );
     for(int j=0; j<dimworld; j++)
     {
-      if( ABS(g[j] - coord[j]) > 1e-15 )
+      if( std::abs(g[j] - coord[j]) > 1e-15 )
       {
         std::cerr << "\nglobal--local of coord " << i << " failed! \n";
         std::cerr << "started with "; std::cerr << coord; 

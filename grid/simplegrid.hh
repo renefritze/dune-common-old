@@ -3,6 +3,7 @@
 
 #include"../common/matvec.hh"
 #include"common/grid.hh"
+#include<algorithm>
 #include<iostream>
 #include<assert.h>
 
@@ -1288,7 +1289,7 @@ public:
   {
     double w = 0.0;
     for (int i=0; i<dim; i++)
-      w = MAX(w,li[L-1].h[i]);
+      w = std::max(w,li[L-1].h[i]);
      
     //std::cout << w << " widht \n";       
     return w;      
