@@ -53,9 +53,13 @@ public:
         return NBELEM(theElement, nb);
     }
 
-    //! Encapsulates the TAG macro
-    static unsigned int Tag(const typename TargetType<0,dim>::T* theElement) {
-        return TAG(theElement);
+    static int Edges_Of_Elem(const typename TargetType<0,dim>::T* theElement) {
+#ifdef _2
+        using UG2d::element_descriptors;
+#else
+        using UG3d::element_descriptors;
+#endif
+        return EDGES_OF_ELEM(theElement);
     }
 
     static int Corners_Of_Elem(const typename TargetType<0,dim>::T* theElement) {
@@ -65,6 +69,11 @@ public:
         using UG3d::element_descriptors;
 #endif
         return CORNERS_OF_ELEM(theElement);
+    }
+
+    //! Encapsulates the TAG macro
+    static unsigned int Tag(const typename TargetType<0,dim>::T* theElement) {
+        return TAG(theElement);
     }
 
     static void Local_To_Global(int n, DOUBLE** y, 
