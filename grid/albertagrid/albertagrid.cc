@@ -20,16 +20,9 @@ static ALBERTA EL_INFO statElInfo[DIM+1];
 template<int dim, class GridImp>
 struct AlbertaGridReferenceGeometry
 {
-  AlbertaGridMakeableGeometry<dim,GridImp::dimensionworld,GridImp> refelem;
+  AlbertaGridMakeableGeometry<dim,dim,GridImp> refelem;
   AlbertaGridReferenceGeometry () : refelem (true) {};
 };
-
-// initialize static variable with bool constructor 
-// (which makes reference element)
-// this sucks but for gcc we do a lot 
-static AlbertaGridReferenceGeometry<3, const AlbertaGrid<3,3> > refelem_3;
-static AlbertaGridReferenceGeometry<2, const AlbertaGrid<2,2> > refelem_2;
-static AlbertaGridReferenceGeometry<1, const AlbertaGrid<1,1> > refelem_1;
 
 //****************************************************************
 //
@@ -53,12 +46,14 @@ struct MapVertices
 };
 
 // faces in 2d 
+// which vertices belong to which face
+static const int localTriangleFaceNumber [3][2] = { {1,2} , {2,0} , {0,1} };
 template <>
 struct MapVertices<1,2>
 {
   static int mapVertices (int i, int face, int edge, int vertex)
   {
-    return ((face + 1 + i) % (N_VERTICES));
+    return localTriangleFaceNumber[face][i];
   }
 };
 
@@ -73,32 +68,28 @@ struct MapVertices<2,3>
 };
 
 // edges in 3d 
+// local numbers of vertices belonging to one edge 
+static const int localEdgeNumber [6][2] = 
+{ 
+  {1,2} , {2,0} , {0,1} , // first three vertices like in 2d for faces(edges)
+  {0,3} , {1,3} , {2,3}  // then all with the last vertex 
+};
 template <>
 struct MapVertices<1,3>
 {
   static int mapVertices (int i, int face, int edge, int vertex)
   {
-    return ((face+1)+ (edge+1) +i)% (N_VERTICES);
+    return localEdgeNumber[edge][i];
   }
 };
 
-// vertices in 2d 
-template <>
-struct MapVertices<0,2>
+// vertices in 2d and 3d 
+template <int cd>
+struct MapVertices<0,cd>
 {
   static int mapVertices (int i, int face, int edge, int vertex)
   {
-    return ((face+1)+ (vertex+1) +i)% (N_VERTICES);
-  }
-};
-
-// vertices in 3d 
-template <>
-struct MapVertices<0,3>
-{
-  static int mapVertices (int i, int face, int edge, int vertex)
-  {
-    return ((face+1)+ (edge+1) +(vertex+1) +i)% (N_VERTICES);
+    return vertex;
   }
 };
 
@@ -106,6 +97,7 @@ struct MapVertices<0,3>
 template <int mydim, int cdim, class GridImp>
 inline int AlbertaGridGeometry<mydim,cdim,GridImp>::mapVertices (int i) const  
 { 
+  // there is a specialisation for each combination of mydim and coorddim 
   return MapVertices<mydim,cdim>::mapVertices(i,face_,edge_,vertex_); 
 }
 
@@ -217,7 +209,6 @@ makeRefElemCoords()
 
   // vertex 3 
   coord_[3][2] = 1.0;
-  std::cout << "Made Reference Element in 3d \n";
 }
 template <> 
 inline void AlbertaGridGeometry<1,1,const AlbertaGrid<1,1> >:: 
@@ -397,13 +388,26 @@ getCoordVec (int i)
 
 template <class GridImp, int dim> struct AlbertaGridRefElem;
 template <class GridImp> struct AlbertaGridRefElem<GridImp,1> {
-  static const Dune::Geometry<1,1,GridImp,Dune::AlbertaGridGeometry> & refelem () { return refelem_1.refelem; }
+  static const Dune::Geometry<1,1,GridImp,Dune::AlbertaGridGeometry> & refelem () 
+  { 
+    static AlbertaGridReferenceGeometry<1,GridImp> ref;
+    return ref.refelem; 
+  }
 };
+
 template <class GridImp> struct AlbertaGridRefElem<GridImp,2> {
-  static const Dune::Geometry<2,2,GridImp,Dune::AlbertaGridGeometry> & refelem () { return refelem_2.refelem; }
+  static const Dune::Geometry<2,2,GridImp,Dune::AlbertaGridGeometry> & refelem () 
+  { 
+    static AlbertaGridReferenceGeometry<2,GridImp> ref;
+    return ref.refelem; 
+  }
 };
 template <class GridImp> struct AlbertaGridRefElem<GridImp,3> {
-  static const Dune::Geometry<3,3,GridImp,Dune::AlbertaGridGeometry> & refelem () { return refelem_3.refelem; }
+  static const Dune::Geometry<3,3,GridImp,Dune::AlbertaGridGeometry> & refelem () 
+  { 
+    static AlbertaGridReferenceGeometry<3,GridImp> ref;
+    return ref.refelem; 
+  }
 };
 
 template <int mydim, int cdim, class GridImp>
@@ -517,7 +521,7 @@ global(const FieldVector<albertCtype, 2>& local) const
   
   globalCoord_ = coord_[0];
   elMat_.umv(local,globalCoord_);
-  //globalCoord_ += coord_[0];
+  
   return globalCoord_; 
 }
 
@@ -526,9 +530,6 @@ inline FieldVector<albertCtype, 3> AlbertaGridGeometry<3,3,const AlbertaGrid<3,3
 global(const FieldVector<albertCtype, 3>& local) const
 {
   calcElMatrix();
-  
-  //globalCoord_  = elMat_ * local;
-  //globalCoord_ += coord_[0];
   
   globalCoord_ = coord_[0];
   elMat_.umv(local,globalCoord_);
@@ -556,9 +557,12 @@ local(const FieldVector<albertCtype, 2>& global) const
   if(!builtinverse_)
     buildJacobianInverse();
   
-  localCoord_ = 0.0;
-  Jinv_.umv(( global - coord_[0]),localCoord_);
-  //localCoord_ = Jinv_ * ( global - coord_[0]);
+  enum { dim = 2 };
+  
+  for(int i=0; i<dim; i++) 
+    globalCoord_[i] = global[i] - coord_[0][i];
+
+  FMatrixHelp::multAssign(Jinv_,globalCoord_,localCoord_);
   
   return localCoord_; 
 }
@@ -569,10 +573,12 @@ local(const FieldVector<albertCtype, 3>& global) const
 {
   if(!builtinverse_)
     buildJacobianInverse();
+  enum { dim = 3 };
   
-  localCoord_ = 0.0;
-  Jinv_.umv((global - coord_[0]),localCoord_);
-  //localCoord_ = Jinv_ * ( global - coord_[0]);
+  for(int i=0; i<dim; i++) 
+    globalCoord_[i] = global[i] - coord_[0][i];
+
+  FMatrixHelp::multAssign(Jinv_,globalCoord_,localCoord_);
   
   return localCoord_; 
 }
@@ -890,10 +896,9 @@ getElInfo() const
 
 template<int codim, int dim, class GridImp>
 inline void AlbertaGridEntity<codim,dim,GridImp>::
-setElInfo(ALBERTA EL_INFO * elInfo, int elNum, int face,
+setElInfo(ALBERTA EL_INFO * elInfo, int face,
           int edge, int vertex )
 {
-  elNum_ = elNum;
   face_ = face;
   edge_ = edge;
   vertex_ = vertex;
@@ -1014,19 +1019,33 @@ globalIndex() const
   return grid_.hierarchicIndexSet().index(en);
 }
 
-template<int codim, int dim, class GridImp>
-inline const typename AlbertaGridEntity<codim,dim,GridImp>::Geometry & 
-AlbertaGridEntity<codim,dim,GridImp>::geometry() const
+template<int cd, int dim, class GridImp>
+inline const typename AlbertaGridEntity<cd,dim,GridImp>::Geometry & 
+AlbertaGridEntity<cd,dim,GridImp>::geometry() const
 {
+  assert(builtgeometry_ == true);
   return geo_;
 }
 
 template<int codim, int dim, class GridImp>
+inline typename AlbertaGridEntity<codim,dim,GridImp>::EntityPointer 
+AlbertaGridEntity<codim,dim,GridImp>::ownersFather () const
+{
+  ALBERTA EL_INFO * fatherInfo = ALBERTA AlbertHelp::getFatherInfo(travStack_,elInfo_,level_);
+  int fatherLevel = (level_ > 0) ? (level_-1) : 0;
+
+  AlbertaGridLevelIterator<0,All_Partition,GridImp>
+    vati(grid_,travStack_,fatherLevel,fatherInfo,0,0,0);
+  return vati;  
+}
+
+template<int codim, int dim, class GridImp>
 inline FieldVector<albertCtype, dim>& 
-AlbertaGridEntity<codim,dim,GridImp>::local() const
+AlbertaGridEntity<codim,dim,GridImp>::positionInOwnersFather() const
 {
   return localFatherCoords_;
 }
+
 
 //************************************
 //
@@ -1145,17 +1164,72 @@ inline int AlbertaGridEntity <0,dim,GridImp>::subIndex ( int i ) const
 {
   const Entity en (*this);
   return grid_.hierarchicIndexSet().template subIndex<cc> (en,i);
+  //return grid_.levelIndexSet().template subIndex<cc> (en,i);
 }
 
+template <class GridImp, int dim, int cd> struct SubEntity;
+
+// specialisation for elements  
+template <class GridImp, int dim>
+struct SubEntity<GridImp,dim,0>
+{
+  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<0>::EntityPointer EntityPointer;
+  static EntityPointer entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
+      int level, ALBERTA EL_INFO * elInfo, int i )
+  {
+    return AlbertaGridLevelIterator<0,All_Partition,GridImp> 
+       (grid, stack , level ,elInfo, 0,0,0);
+  }
+};
+
+// specialisation for faces 
+template <class GridImp, int dim>
+struct SubEntity<GridImp,dim,1>
+{
+  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<1>::EntityPointer EntityPointer;
+  static EntityPointer entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
+      int level, ALBERTA EL_INFO * elInfo, int i )
+  {
+    return AlbertaGridLevelIterator<1,All_Partition,GridImp> 
+       (grid, stack , level ,elInfo, i,0,0);
+  }
+};
+
+// specialisation for edges , only when dim == 3 
+template <class GridImp>
+struct SubEntity<GridImp,3,2>
+{
+  enum { dim = 3 };
+  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<2>::EntityPointer EntityPointer;
+  static EntityPointer entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
+      int level, ALBERTA EL_INFO * elInfo, int i )
+  {
+    return AlbertaGridLevelIterator<2,All_Partition,GridImp> 
+       (grid, stack , level ,elInfo, 0,i,0);
+  }
+};
+
+// specialisation for vertices 
+template <class GridImp, int dim>
+struct SubEntity<GridImp,dim,dim>
+{
+  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<dim>::EntityPointer EntityPointer;
+  static EntityPointer entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
+      int level, ALBERTA EL_INFO * elInfo, int i )
+  {
+    return AlbertaGridLevelIterator<dim,All_Partition,GridImp> 
+       (grid, stack , level ,elInfo, 0,0,i);
+  }
+};
+
+
 // default is faces 
-template<int dim, class GridImp>
+template <int dim, class GridImp>
 template <int cc>
 inline typename AlbertaGridEntity <0,dim,GridImp>::template codim<cc>::EntityPointer
 AlbertaGridEntity <0,dim,GridImp>::entity ( int i ) const
 {
-  AlbertaGridLevelIterator<cc,All_Partition,GridImp> 
-    tmp (grid_, level() ,elInfo_, -1,i,0,0);
-  return tmp;
+  return SubEntity<GridImp,dim,cc> :: entity(grid_,travStack_,level(),elInfo_,i);
 }
 
 #if 0
@@ -1269,8 +1343,7 @@ setLevel(int actLevel)
 
 template<int dim, class GridImp>
 inline void AlbertaGridEntity <0,dim,GridImp>::
-setElInfo(ALBERTA EL_INFO * elInfo, int elNum,  int face,
-          int edge, int vertex )
+setElInfo(ALBERTA EL_INFO * elInfo, int face, int edge, int vertex )
 {
   // in this case the face, edge and vertex information is not used,
   // because we are in the element case
@@ -1291,23 +1364,11 @@ template<int dim, class GridImp>
 inline typename AlbertaGridEntity <0,dim,GridImp>::EntityPointer 
 AlbertaGridEntity <0,dim,GridImp>::father() const
 {
-  ALBERTA EL_INFO * fatherInfo = 0;
-  int fatherLevel = level_-1;
-  // if this level > 0 return father = elInfoStack -1, 
-  // else return father = this 
-  assert(travStack_ != 0);
-
-  if(level_ > 0)
-    fatherInfo = & (travStack_->elinfo_stack)[travStack_->stack_used-1];
-  else
-  {
-    std::cout << "No father on macro level! \n";
-    fatherInfo = elInfo_;
-    fatherLevel = 0;
-  }
+  ALBERTA EL_INFO * fatherInfo = ALBERTA AlbertHelp::getFatherInfo(travStack_,elInfo_,level_);
+  int fatherLevel = (level_ > 0) ? (level_-1) : 0;
 
   AlbertaGridLevelIterator<0,All_Partition,GridImp>
-    vati(grid_,fatherLevel,fatherInfo,-1,0,0,0);
+    vati(grid_,travStack_,fatherLevel,fatherInfo,0,0,0);
   return vati;  
 }
 
@@ -1339,7 +1400,7 @@ inline void AlbertaGridHierarchicIterator<GridImp>::
 makeIterator()
 {
   virtualEntity_.setTraverseStack(0);
-  virtualEntity_.setElInfo(0,0,0,0,0);
+  virtualEntity_.setElInfo(0,0,0,0);
 }
 
 template< class GridImp >
@@ -1915,10 +1976,9 @@ makeIterator()
   face_ = 0;
   edge_ = 0;
   vertexMarker_ = 0;
-  elNum_ = -1;
 
   virtualEntity_.setTraverseStack(0);
-  virtualEntity_.setElInfo(0,0,0,0,0);
+  virtualEntity_.setElInfo(0,0,0,0);
 }
 
 // Make LevelIterator with point to element from previous iterations
@@ -1936,22 +1996,23 @@ AlbertaGridLevelIterator(const GridImp & grid, int travLevel,int proc, bool leaf
 // Make LevelIterator with point to element from previous iterations
 template<int codim, PartitionIteratorType pitype, class GridImp>   
 inline AlbertaGridLevelIterator<codim,pitype,GridImp>::
-AlbertaGridLevelIterator(const GridImp & grid, int level,  
-ALBERTA EL_INFO *elInfo,int elNum,int face,int edge,int vertex) : 
+AlbertaGridLevelIterator(const GridImp & grid, TRAVERSE_STACK * stack, 
+    int level,  ALBERTA EL_INFO *elInfo,int face,int edge,int vertex) : 
   grid_(grid), level_ (level) 
-  , virtualEntity_(grid,level) , 
-  elNum_ ( elNum ) , face_ ( face ) ,
-  edge_ ( edge ), vertex_ ( vertex ) , leafIt_(false) ,
-  proc_(-1)
+  , virtualEntity_(grid,level) 
+  , face_ ( face ) ,  edge_ ( edge ), vertex_ ( vertex ) 
+  , leafIt_(false) ,  proc_(-1)
 {
   vertexMarker_ = 0;
-  virtualEntity_.setTraverseStack(0);
+
+  assert(stack);
+  virtualEntity_.setTraverseStack(stack);
 
   if(elInfo)
   {
     // diese Methode muss neu geschrieben werden, da man 
     // die ParentElement explizit speichern moechte. 
-    virtualEntity_.setElInfo(elInfo,elNum_,face_,edge_,vertex_);
+    virtualEntity_.setElInfo(elInfo,face_,edge_,vertex_);
   }
 }
 
@@ -1968,7 +2029,6 @@ AlbertaGridLevelIterator(const GridImp & grid,
 
   if( mesh && ((travLevel >= 0) && (travLevel <= grid_.maxlevel())) )
   {
-    elNum_  = 0;
     vertex_ = 0;
     face_   = 0;
     edge_   = 0;
@@ -1990,7 +2050,7 @@ AlbertaGridLevelIterator(const GridImp & grid,
     ALBERTA EL_INFO* elInfo = 
       goFirstElement(manageStack_.getStack(), mesh, travLevel,travFlags);
 
-    virtualEntity_.setElInfo(elInfo,elNum_,face_,edge_,vertex_);
+    virtualEntity_.setElInfo(elInfo,face_,edge_,vertex_);
   }
   else
   {
@@ -2010,10 +2070,9 @@ equals(const AlbertaGridLevelIterator<codim,pitype,GridImp> &I) const
 template<int codim, PartitionIteratorType pitype, class GridImp>   
 inline void AlbertaGridLevelIterator<codim,pitype,GridImp>::increment()
 {
-  elNum_++;
   virtualEntity_.setElInfo(
     goNextEntity(manageStack_.getStack(),virtualEntity_.getElInfo()),
-           elNum_,face_,edge_,vertex_); 
+           face_,edge_,vertex_); 
   return ;
 }
 
@@ -2692,16 +2751,17 @@ inline void AlbertaMarkerVector::markNewVertices(GridType &grid)
   enum { dimworld = GridType::dimensionworld };
   
   int nvx = grid.hierarchicIndexSet().size(grid.maxlevel(),dim);
+#if DIM == 3
   int edg = grid.hierarchicIndexSet().size(grid.maxlevel(),dim-1);
+#endif
   
   for(int level=0; level <= grid.maxlevel(); level++)
   {
     Array<int> & vec     = vec_[level];
-    Array<int> & edgevec = edgevec_[level];
-    
     if(vec.size()     < nvx) vec.resize( nvx + vxBufferSize_ );
 
 #if DIM == 3
+    Array<int> & edgevec = edgevec_[level];
     if(edgevec.size() < edg) edgevec.resize( edg + vxBufferSize_ );
 #endif
   
@@ -2855,7 +2915,7 @@ template < int dim, int dimworld >
 inline void AlbertaGrid < dim, dimworld >::removeMesh()
 {
   if(levelIndexSet_) delete levelIndexSet_; 
-  if(vertexMarker_) delete vertexMarker_;
+  if(vertexMarker_)  delete vertexMarker_;
   
   for(int i=0; i<AlbertHelp::numOfElNumVec; i++)
     if(dofvecs_.elNumbers[i])  ALBERTA free_dof_int_vec(dofvecs_.elNumbers[i]);
@@ -2927,9 +2987,7 @@ template<PartitionIteratorType pitype>
 inline typename AlbertaGrid<dim,dimworld>::LeafIterator  
 AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const
 {
-  bool leaf = true;
-  AlbertaGridLevelIterator<0,All_Partition,const MyType> 
-    it(*this,vertexMarker_,level,proc,leaf);
+  AlbertaGridLeafIterator<const MyType> it(*this,vertexMarker_,level,proc);
   return it;
 }
 
@@ -2938,9 +2996,7 @@ template<PartitionIteratorType pitype>
 inline typename AlbertaGrid<dim,dimworld>::LeafIterator 
 AlbertaGrid < dim, dimworld >::leafend (int level, int proc ) const
 {
-  bool leaf = true;
-  AlbertaGridLevelIterator<0,All_Partition,const MyType> 
-    it((*this),level,proc,leaf);
+  AlbertaGridLeafIterator<const MyType> it(*this,level,proc);
   return it;
 }
 
@@ -2948,9 +3004,7 @@ template < int dim, int dimworld >
 inline typename AlbertaGrid<dim,dimworld>::LeafIterator  
 AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const
 {
-  bool leaf = true;
-  AlbertaGridLevelIterator<0,All_Partition,const MyType> 
-    it(*this,vertexMarker_,level,proc,leaf);
+  AlbertaGridLeafIterator<const MyType> it(*this,vertexMarker_,level,proc);
   return it;
 }
 
@@ -2958,9 +3012,7 @@ template < int dim, int dimworld >
 inline typename AlbertaGrid<dim,dimworld>::LeafIterator 
 AlbertaGrid < dim, dimworld >::leafend (int level, int proc ) const
 {
-  bool leaf = true;
-  AlbertaGridLevelIterator<0,All_Partition,const MyType> 
-    it((*this),level,proc,leaf);
+  AlbertaGridLeafIterator<const MyType> it(*this,level,proc);
   return it;
 }
 
