@@ -20,8 +20,13 @@ public:
     GridType::Traits<0>::Entity  EntityType;
 
   //! get LocalOperator 
-  DiscreteOperator (LocalOperatorImp &op ) : _localOp ( op ) {};
-   
+  DiscreteOperator (LocalOperatorImp &op ) : _localOp ( op ) , tmp_ (NULL) {};
+  
+  void prepare ( Range &r )
+  {
+    tmp_ = &r;
+  }
+  
   //! go over all Entitys and call the LocalOperator.applyLocal Method 
   //! Note that the LocalOperator can be an combined Operator 
   //! Domain and Range are defined through class Operator
@@ -34,17 +39,13 @@ public:
     const typename FunctionSpaceType & functionSpace_= Dest.getFunctionSpace();
     GridType &grid = const_cast<GridType &> (functionSpace_.getGrid());
     
-    //std::cout << "DiscreteOperator::operator element wise () \n";
-  
     LevelIterator levit = grid.lbegin<0>( grid.maxlevel() );
     LevelIterator endit = grid.lend<0> ( grid.maxlevel() );
-    Range tmp( Dest );
+    //Range tmp( Dest );
 
     Dest.clear();
 
-    //const_cast<DiscreteFunctionType &> (Arg).print();
-
-    _localOp.prepare(&tmp);
+    _localOp.prepare(tmp_);
     for( levit ; levit != endit; ++levit )
     {
       //std::cout << "Call applyLocal on element " << levit->index() << "\n";
@@ -58,6 +59,8 @@ public:
   }
 
 private:
+  Range * tmp_;
+  
   LocalOperatorImp & _localOp;
 };
 
