@@ -382,4 +382,11 @@ UGGridEntity < 0, dim, dimworld>::father()
     return it;
 }
 
-
+/** \todo Method not implemented yet! */
+template<int dim, int dimworld>
+inline UGGridElement<dim,dim>& 
+UGGridEntity < 0, dim, dimworld>::father_relative_local()
+{
+    DUNE_THROW(GridError, "UGGridEntity < 0, dim, dimworld>::father_relative_local() not implemented yet!");
+    return fatherReLocal_;
+}
