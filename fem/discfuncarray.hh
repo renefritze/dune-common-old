@@ -1,5 +1,5 @@
-#ifndef __DUNE_DISCFUNCARRAY_HH__
-#define __DUNE_DISCFUNCARRAY_HH__
+#ifndef DUNE_DISCFUNCARRAY_HH
+#define DUNE_DISCFUNCARRAY_HH
 
 #include <dune/common/array.hh>
 
@@ -258,13 +258,6 @@ protected:
   //! remember pointer to next LocalFunction 
   MyType * next_;
   
-  //! needed once 
-  mutable RangeType tmp_;
-  mutable DomainType xtmp_;
-
-  //! needed once 
-  JacobianRangeType tmpGrad_;
-
   //! diffVar for evaluate, is empty 
   const DiffVariable<0>::Type diffVar;
 
