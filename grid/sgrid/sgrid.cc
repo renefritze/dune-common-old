@@ -19,100 +19,12 @@ template<int dim>
 SElement<dim,dim> SReferenceElement<dim>::refelem(true);
 
 
-// members for SElementBase
-template<int dim, int dimworld> 
-inline SElementBase<dim,dimworld>::SElementBase ()
-{
-	builtinverse = false;
-}
-
-template<int dim, int dimworld> 
-inline SElement<dim,dim>& SElementBase<dim,dimworld>::refelem ()
-{
-	return SReferenceElement<dim,dim>::refelem;
-}
-
-template<int dim, int dimworld> 
-inline int SElementBase<dim,dimworld>::corners ()
-{
-	return 1<<dim;
-}
-
-template<int dim, int dimworld> 
-inline Vec<dimworld,sgrid_ctype>& SElementBase<dim,dimworld>::operator[] (int i)
-{
-	return c[i];
-}
-
-template<int dim, int dimworld> 
-inline Vec<dimworld,sgrid_ctype> SElementBase<dim,dimworld>::global (const Vec<dim,sgrid_ctype>& local)
-{
-	return s+(A*local);
-}
-
-template<int dim, int dimworld> 
-inline Vec<dim,sgrid_ctype> SElementBase<dim,dimworld>::local (const Vec<dimworld,sgrid_ctype>& global)
-{
-	Vec<dim,sgrid_ctype> l; // result
-	Vec<dimworld,sgrid_ctype> rhs = global-s;
-	for (int k=0; k<dim; k++)
-		l(k) = (rhs*A(k)) / (A(k)*A(k));
-	return l;
-}
-
-template<int dim, int dimworld> 
-inline sgrid_ctype SElementBase<dim,dimworld>::integration_element (const Vec<dim,sgrid_ctype>& local)
-{
-	sgrid_ctype s = 1.0;
-	for (int j=0; j<dim; j++) s *= A(j).norm1();
-	return s;
-}
-
-template<int dim, int dimworld> 
-inline Mat<dim,dim>& SElementBase<dim,dimworld>::Jacobian_inverse (const Vec<dim,sgrid_ctype>& local)
-{
-	assert(dim==dimworld);
-
-	Jinv = A;
-	if (!builtinverse)
-	{
-		for (int i=0; i<dim; i++) Jinv(i,i) = 1.0/Jinv(i,i);
-		builtinverse = true;
-	}
-	return Jinv;
-}
-
-template<int dim, int dimworld> 
-inline void SElementBase<dim,dimworld>::print (std::ostream& ss, int indent)
-{
-	for (int k=0; k<indent; k++) ss << " "; ss << "SElementBase<" << dim << "," << dimworld << ">" << endl;
-	for (int k=0; k<indent; k++) ss << " "; ss << "{" << endl;
-	for (int k=0; k<indent+2; k++) ss << " "; ss << "Position: " << s << endl;
-	for (int j=0; j<dim; j++) 
-	{
-		for (int k=0; k<indent+2; k++) ss << " ";
-		ss << "direction " << j << "  " << A(j) << endl;
-	}
-	for (int j=0; j<1<<dim; j++) 
-	{
-		for (int k=0; k<indent+2; k++) ss << " ";
-		ss << "corner " << j << "  " << c[j] << endl;
-	}
-	if (builtinverse)
-	{
-		for (int k=0; k<indent+2; k++) ss << " "; ss << "Jinv "; 
-		Jinv.print(ss,indent+2);
-	}
-	for (int k=0; k<indent+2; k++) ss << " "; ss << "builtinverse " << builtinverse << endl;
-	for (int k=0; k<indent; k++) ss << " "; ss << "}";
-}
-
-// members for SElement, must use specialization
-
-// reference element constructor, dim>0
+// members for SElement, general case dim!=0
 template<int dim, int dimworld> 
 inline SElement<dim,dimworld>::SElement (bool b)
 {
+	builtinverse = false;
+
 	if (!b) return;
 
 	// copy arguments
@@ -127,13 +39,6 @@ inline SElement<dim,dimworld>::SElement (bool b)
 		for (int k=0; k<dim; k++)
 			if (i&(1<<k)) c[i] = c[i]+A(k);
 	}
-}
-
-template<int dimworld> 
-inline SElement<0,dimworld>::SElement (bool b)
-{
-	if (!b) return;
-	s = 0.0;
 }
 
 template<int dim, int dimworld> 
@@ -160,13 +65,6 @@ inline void SElement<dim,dimworld>::make (Mat<dimworld,dim+1,sgrid_ctype>& As)
 	}
 }
 
-template<int dimworld> 
-inline void SElement<0,dimworld>::make (Mat<dimworld,1,sgrid_ctype>& As)
-{
-	s = As(0);
-}
-
-// type
 template<int dim, int dimworld> 
 inline ElementType SElement<dim,dimworld>::type ()
 {
@@ -177,6 +75,103 @@ inline ElementType SElement<dim,dimworld>::type ()
 	    case 3: return hexahedron;
 		default: return unknown;
 	}
+}
+
+template<int dim, int dimworld> 
+inline SElement<dim,dim>& SElement<dim,dimworld>::refelem ()
+{
+	return SReferenceElement<dim>::refelem;
+}
+
+template<int dim, int dimworld> 
+inline int SElement<dim,dimworld>::corners ()
+{
+	return 1<<dim;
+}
+
+template<int dim, int dimworld> 
+inline Vec<dimworld,sgrid_ctype>& SElement<dim,dimworld>::operator[] (int i)
+{
+	return c[i];
+}
+
+template<int dim, int dimworld> 
+inline Vec<dimworld,sgrid_ctype> SElement<dim,dimworld>::global (const Vec<dim,sgrid_ctype>& local)
+{
+	return s+(A*local);
+}
+
+template<int dim, int dimworld> 
+inline Vec<dim,sgrid_ctype> SElement<dim,dimworld>::local (const Vec<dimworld,sgrid_ctype>& global)
+{
+	Vec<dim,sgrid_ctype> l; // result
+	Vec<dimworld,sgrid_ctype> rhs = global-s;
+	for (int k=0; k<dim; k++)
+		l(k) = (rhs*A(k)) / (A(k)*A(k));
+	return l;
+}
+
+template<int dim, int dimworld> 
+inline sgrid_ctype SElement<dim,dimworld>::integration_element (const Vec<dim,sgrid_ctype>& local)
+{
+	sgrid_ctype s = 1.0;
+	for (int j=0; j<dim; j++) s *= A(j).norm1();
+	return s;
+}
+
+template<int dim, int dimworld> 
+inline Mat<dim,dim>& SElement<dim,dimworld>::Jacobian_inverse (const Vec<dim,sgrid_ctype>& local)
+{
+	assert(dim==dimworld);
+
+	for (int i=0; i<dim; ++i)
+		for (int j=0; j<dim; ++j)
+			Jinv(i,j) = A(i,j);
+	if (!builtinverse)
+	{
+		for (int i=0; i<dim; i++) Jinv(i,i) = 1.0/Jinv(i,i);
+		builtinverse = true;
+	}
+	return Jinv;
+}
+
+template<int dim, int dimworld> 
+inline void SElement<dim,dimworld>::print (std::ostream& ss, int indent)
+{
+	for (int k=0; k<indent; k++) ss << " "; ss << "SElement<" << dim << "," << dimworld << ">" << endl;
+	for (int k=0; k<indent; k++) ss << " "; ss << "{" << endl;
+	for (int k=0; k<indent+2; k++) ss << " "; ss << "Position: " << s << endl;
+	for (int j=0; j<dim; j++) 
+	{
+		for (int k=0; k<indent+2; k++) ss << " ";
+		ss << "direction " << j << "  " << A(j) << endl;
+	}
+	for (int j=0; j<1<<dim; j++) 
+	{
+		for (int k=0; k<indent+2; k++) ss << " ";
+		ss << "corner " << j << "  " << c[j] << endl;
+	}
+	if (builtinverse)
+	{
+		for (int k=0; k<indent+2; k++) ss << " "; ss << "Jinv "; 
+		Jinv.print(ss,indent+2);
+	}
+	for (int k=0; k<indent+2; k++) ss << " "; ss << "builtinverse " << builtinverse << endl;
+	for (int k=0; k<indent; k++) ss << " "; ss << "}";
+}
+
+// special case dim=0
+template<int dimworld> 
+inline SElement<0,dimworld>::SElement (bool b)
+{
+	if (!b) return;
+	s = 0.0;
+}
+
+template<int dimworld> 
+inline void SElement<0,dimworld>::make (Mat<dimworld,1,sgrid_ctype>& As)
+{
+	s = As(0);
 }
 
 template<int dimworld> 
@@ -323,15 +318,15 @@ inline SLevelIterator<cc,dim,dimworld> SEntity<0,dim,dimworld>::entity (int i)
 }
 
 template<int dim, int dimworld>
-inline SEntity<0,dim,dimworld>::NeighborIterator SEntity<0,dim,dimworld>::nbegin ()
+inline SNeighborIterator<dim,dimworld> SEntity<0,dim,dimworld>::nbegin ()
 {
-	return NeighborIterator(grid,*this,0);
+	return SNeighborIterator<dim,dimworld>(grid,*this,0);
 }
 
 template<int dim, int dimworld>
-inline SEntity<0,dim,dimworld>::NeighborIterator SEntity<0,dim,dimworld>::nend ()
+inline SNeighborIterator<dim,dimworld> SEntity<0,dim,dimworld>::nend ()
 {
-	return NeighborIterator(grid,*this,count<1>());
+	return SNeighborIterator<dim,dimworld>(grid,*this,count<1>());
 }
 
 
@@ -403,15 +398,15 @@ inline SElement<dim,dim>& SEntity<0,dim,dimworld>::father_relative_local ()
 }
 
 template<int dim, int dimworld>
-inline SEntity<0,dim,dimworld>::HierarchicIterator SEntity<0,dim,dimworld>::hbegin (int maxlevel)
+inline SHierarchicIterator<dim,dimworld> SEntity<0,dim,dimworld>::hbegin (int maxlevel)
 {
-	return SEntity<0,dim,dimworld>::HierarchicIterator(grid,*this,maxlevel,false);
+	return SHierarchicIterator<dim,dimworld>(grid,*this,maxlevel,false);
 }
 
 template<int dim, int dimworld>
-inline SEntity<0,dim,dimworld>::HierarchicIterator SEntity<0,dim,dimworld>::hend (int maxlevel)
+inline SHierarchicIterator<dim,dimworld> SEntity<0,dim,dimworld>::hend (int maxlevel)
 {
-	return SEntity<0,dim,dimworld>::HierarchicIterator(grid,*this,maxlevel,true);
+	return SHierarchicIterator<dim,dimworld>(grid,*this,maxlevel,true);
 }
 
 
@@ -486,7 +481,7 @@ inline Vec<dim,sgrid_ctype>& SEntity<dim,dim,dimworld>::local ()
 // inline methods for HierarchicIterator
 
 template<int dim, int dimworld>
-inline void SEntity<0,dim,dimworld>::HierarchicIterator::push_sons (int level, int fatherid)
+inline void SHierarchicIterator<dim,dimworld>::push_sons (int level, int fatherid)
 {
 	// check level
 	if (level+1>maxlevel) return; // nothing to do
@@ -514,7 +509,7 @@ inline void SEntity<0,dim,dimworld>::HierarchicIterator::push_sons (int level, i
 } 
 
 template<int dim, int dimworld>
-inline SEntity<0,dim,dimworld>::HierarchicIterator::HierarchicIterator (SGrid<dim,dimworld>& _grid, 
+inline SHierarchicIterator<dim,dimworld>::SHierarchicIterator (SGrid<dim,dimworld>& _grid, 
 									     SEntity<0,dim,dimworld>& _e, int _maxlevel, bool makeend) :
 	grid(_grid),e(_e)
 {
@@ -539,7 +534,7 @@ inline SEntity<0,dim,dimworld>::HierarchicIterator::HierarchicIterator (SGrid<di
 }
 
 template<int dim, int dimworld>
-inline SEntity<0,dim,dimworld>::HierarchicIterator& SEntity<0,dim,dimworld>::HierarchicIterator::operator++ ()
+inline SHierarchicIterator<dim,dimworld>& SHierarchicIterator<dim,dimworld>::operator++ ()
 {
 	// check empty stack
 	if (stack.isempty()) return *this;
@@ -556,25 +551,25 @@ inline SEntity<0,dim,dimworld>::HierarchicIterator& SEntity<0,dim,dimworld>::Hie
 }
 
 template<int dim, int dimworld>
-inline bool SEntity<0,dim,dimworld>::HierarchicIterator::operator== (const SEntity<0,dim,dimworld>::HierarchicIterator& i) const
+inline bool SHierarchicIterator<dim,dimworld>::operator== (const SHierarchicIterator<dim,dimworld>& i) const
 {
 	return !operator!=(i);
 }
 
 template<int dim, int dimworld>
-inline bool SEntity<0,dim,dimworld>::HierarchicIterator::operator!= (const SEntity<0,dim,dimworld>::HierarchicIterator& i) const
+inline bool SHierarchicIterator<dim,dimworld>::operator!= (const SHierarchicIterator<dim,dimworld>& i) const
 {
 	return (stack.size()!=i.stack.size()) || (e.id!=i.e.id) || (e.l!=i.e.l) ;
 }
 
 template<int dim, int dimworld>
-inline SEntity<0,dim,dimworld>& SEntity<0,dim,dimworld>::HierarchicIterator::operator* ()
+inline SEntity<0,dim,dimworld>& SHierarchicIterator<dim,dimworld>::operator* ()
 {
 	return e;
 }
 
 template<int dim, int dimworld>
-inline SEntity<0,dim,dimworld>* SEntity<0,dim,dimworld>::HierarchicIterator::operator-> ()
+inline SEntity<0,dim,dimworld>* SHierarchicIterator<dim,dimworld>::operator-> ()
 {
 	return &e;
 }
@@ -584,7 +579,7 @@ inline SEntity<0,dim,dimworld>* SEntity<0,dim,dimworld>::HierarchicIterator::ope
 // inline methods for NeighborIterator
 
 template<int dim, int dimworld>
-inline void SEntity<0,dim,dimworld>::NeighborIterator::make (int _count)
+inline void SNeighborIterator<dim,dimworld>::make (int _count)
 {
 	// reset cache flags
 	built_intersections = false;
@@ -624,21 +619,21 @@ inline void SEntity<0,dim,dimworld>::NeighborIterator::make (int _count)
 }
 
 template<int dim, int dimworld>
-inline SEntity<0,dim,dimworld>::NeighborIterator::NeighborIterator 
+inline SNeighborIterator<dim,dimworld>::SNeighborIterator 
 (SGrid<dim,dimworld>& _grid, SEntity<0,dim,dimworld>& _self, int _count) 
-	: grid(_grid), self(_self), e(_grid,_self.level(), _self.id), is_self_local(false), is_global(false),
+	: grid(_grid), self(_self), e(_grid,_self.l, _self.id), is_self_local(false), is_global(false),
 	  is_nb_local(false)
 {
 	// compute own compressed coordinates once
-	zred = grid.compress(self.level(),self.z);
-	partition = grid.partition(self.level,self.z); 
+	zred = grid.compress(self.l,self.z);
+	partition = grid.partition(self.l,self.z); 
 
 	// make neighbor
 	make(_count);
 }
 
 template<int dim, int dimworld>
-inline SEntity<0,dim,dimworld>::NeighborIterator& SEntity<0,dim,dimworld>::NeighborIterator::operator++ ()
+inline SNeighborIterator<dim,dimworld>& SNeighborIterator<dim,dimworld>::operator++ ()
 {
 	count++;
 	make(count);
@@ -646,37 +641,37 @@ inline SEntity<0,dim,dimworld>::NeighborIterator& SEntity<0,dim,dimworld>::Neigh
 }
 
 template<int dim, int dimworld>
-inline bool SEntity<0,dim,dimworld>::NeighborIterator::operator== (const SEntity<0,dim,dimworld>::NeighborIterator& i) const
+inline bool SNeighborIterator<dim,dimworld>::operator== (const SNeighborIterator<dim,dimworld>& i) const
 {
 	return (count==i.count)&&(&self==&(i.self));
 }
 
 template<int dim, int dimworld>
-inline bool SEntity<0,dim,dimworld>::NeighborIterator::operator!= (const SEntity<0,dim,dimworld>::NeighborIterator& i) const
+inline bool SNeighborIterator<dim,dimworld>::operator!= (const SNeighborIterator<dim,dimworld>& i) const
 {
 	return (count!=i.count)||(&self!=&(i.self));
 }
 
 template<int dim, int dimworld>
-inline SEntity<0,dim,dimworld>& SEntity<0,dim,dimworld>::NeighborIterator::operator* ()
+inline SEntity<0,dim,dimworld>& SNeighborIterator<dim,dimworld>::operator* ()
 {
 	return e;
 }
 
 template<int dim, int dimworld>
-inline SEntity<0,dim,dimworld>* SEntity<0,dim,dimworld>::NeighborIterator::operator-> ()
+inline SEntity<0,dim,dimworld>* SNeighborIterator<dim,dimworld>::operator-> ()
 {
 	return &e;
 }
 
 template<int dim, int dimworld>
-inline bool SEntity<0,dim,dimworld>::NeighborIterator::boundary ()
+inline bool SNeighborIterator<dim,dimworld>::boundary ()
 {
 	return is_on_boundary;
 }
 
 template<int dim, int dimworld>
-inline void SEntity<0,dim,dimworld>::NeighborIterator::makeintersections ()
+inline void SNeighborIterator<dim,dimworld>::makeintersections ()
 {
 	if (built_intersections) return; // already done
 	if (!valid_count) return; // nothing to do
@@ -753,55 +748,55 @@ inline void SEntity<0,dim,dimworld>::NeighborIterator::makeintersections ()
 }
 
 template<int dim, int dimworld>
-inline SElement<dim-1,dim>& SEntity<0,dim,dimworld>::NeighborIterator::intersection_self_local () 
+inline SElement<dim-1,dim>& SNeighborIterator<dim,dimworld>::intersection_self_local () 
 {
 	makeintersections();
 	return is_self_local;
 }
 
 template<int dim, int dimworld>
-inline SElement<dim-1,dimworld>& SEntity<0,dim,dimworld>::NeighborIterator::intersection_self_global () 
+inline SElement<dim-1,dimworld>& SNeighborIterator<dim,dimworld>::intersection_self_global () 
 {
 	makeintersections();
 	return is_global;
 }
 
 template<int dim, int dimworld>
-inline SElement<dim-1,dim>& SEntity<0,dim,dimworld>::NeighborIterator::intersection_neighbor_local () 
+inline SElement<dim-1,dim>& SNeighborIterator<dim,dimworld>::intersection_neighbor_local () 
 {
 	makeintersections();
 	return is_nb_local;
 }
 
 template<int dim, int dimworld>
-inline SElement<dim-1,dimworld>& SEntity<0,dim,dimworld>::NeighborIterator::intersection_neighbor_global () 
+inline SElement<dim-1,dimworld>& SNeighborIterator<dim,dimworld>::intersection_neighbor_global () 
 {
 	makeintersections();
 	return is_global;
 }
 
 template<int dim, int dimworld>
-inline int SEntity<0,dim,dimworld>::NeighborIterator::number_in_self () 
+inline int SNeighborIterator<dim,dimworld>::number_in_self () 
 {
 	return count;
 }
 
 template<int dim, int dimworld>
-inline int SEntity<0,dim,dimworld>::NeighborIterator::number_in_neighbor () 
+inline int SNeighborIterator<dim,dimworld>::number_in_neighbor () 
 {
 	return (count/2)*2 + (1-count%2);
 }
 
 template<int dim, int dimworld>
 inline Vec<dimworld,sgrid_ctype>&
-    SEntity<0,dim,dimworld>::NeighborIterator::unit_outer_normal (Vec<dim-1,sgrid_ctype>& local)
+    SNeighborIterator<dim,dimworld>::unit_outer_normal (Vec<dim-1,sgrid_ctype>& local)
 {
 	return normal; 
 }
 
 template<int dim, int dimworld>
 inline Vec<dimworld,sgrid_ctype>& 
-    SEntity<0,dim,dimworld>::NeighborIterator::unit_outer_normal ()
+    SNeighborIterator<dim,dimworld>::unit_outer_normal ()
 {
 	return normal; 
 }
