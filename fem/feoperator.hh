@@ -123,7 +123,7 @@ public:
     }
   }
 
-#if 1
+#if 0
   {
     // eliminate the Dirichlet rows and columns 
     typedef typename GridType::template Traits<0>::Entity EntityType;
