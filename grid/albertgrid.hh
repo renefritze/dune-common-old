@@ -1101,6 +1101,9 @@ public:
   //! Constructor which reads an Albert Macro Triang file 
   //! or given GridFile 
   AlbertGrid(const char* macroTriangFilename);
+  
+  //! empty Constructor 
+  AlbertGrid();
  
   //! Desctructor 
   ~AlbertGrid();
@@ -1148,6 +1151,8 @@ public:
   // read Grid from file filename and store time of mesh in time 
   template <FileFormatType ftype>
   bool readGrid( const char * filename, albertCtype & time );
+
+  albertCtype getTime () const { return time_; };
   
 private:
   // make the calculation of indexOnLevel and so on.
@@ -1207,7 +1212,9 @@ private:
   {
     return levelIndex_[dim][level*mesh_->n_vertices + globalIndex]; 
   };
-  
+
+  //! actual time of Grid
+  albertCtype time_;
 
 }; // end Class AlbertGridGrid
 
