@@ -1101,7 +1101,7 @@ template<int dim, class GridImp> template <int cc>
 inline int AlbertaGridEntity <0,dim,GridImp>::subIndex ( int i ) const
 {
   const Entity en (*this);
-  return grid_.hierarchicIndexSet().template subIndex<cc> (en);
+  return grid_.hierarchicIndexSet().template subIndex<cc> (en,i);
 }
 
 // default is faces 
