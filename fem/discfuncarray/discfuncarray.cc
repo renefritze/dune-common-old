@@ -158,6 +158,7 @@ DiscFuncArray< DiscreteFunctionSpaceType >::dbegin ( int level )
   return tmp;
 }
 
+
 template<class DiscreteFunctionSpaceType > 
 inline typename DiscFuncArray<DiscreteFunctionSpaceType>::DofIteratorType 
 DiscFuncArray< DiscreteFunctionSpaceType >::dend ( int level )
@@ -166,7 +167,21 @@ DiscFuncArray< DiscreteFunctionSpaceType >::dend ( int level )
   return tmp;
 }
 
+template<class DiscreteFunctionSpaceType > 
+inline const typename DiscFuncArray<DiscreteFunctionSpaceType>::DofIteratorType 
+DiscFuncArray< DiscreteFunctionSpaceType >::dbegin ( int level ) const
+{
+  DofIteratorType tmp ( dofVec_ [level] , 0 );     
+  return tmp;
+}
 
+template<class DiscreteFunctionSpaceType > 
+inline const typename DiscFuncArray<DiscreteFunctionSpaceType>::DofIteratorType 
+DiscFuncArray< DiscreteFunctionSpaceType >::dend ( int level ) const 
+{
+  DofIteratorType tmp ( dofVec_ [ level ] , dofVec_[ level ].size() );     
+  return tmp;
+}
 //**************************************************************************
 //  Read and Write Methods 
 //**************************************************************************
@@ -670,9 +685,22 @@ inline DofType& DofIteratorArray<DofType>::operator *()
 }
 
 template <class DofType>
+inline const DofType& DofIteratorArray<DofType>::read () const 
+{
+  return constArray_ [ count_ ];
+}
+
+template <class DofType>
 inline DofIteratorArray<DofType>& DofIteratorArray<DofType>::operator ++()
 {
   count_++;
+  return (*this);      
+}
+
+template <class DofType>
+inline const DofIteratorArray<DofType>& DofIteratorArray<DofType>::operator ++() const
+{
+  const_cast<DofIteratorArray<DofType>&> (*this).operator ++ ();
   return (*this);      
 }
 
@@ -684,9 +712,22 @@ inline DofIteratorArray<DofType>& DofIteratorArray<DofType>::operator ++(int i)
 }
 
 template <class DofType>
+inline const DofIteratorArray<DofType>& DofIteratorArray<DofType>::operator ++(int i) const 
+{
+  count_ += i;
+  return (*this);
+}
+
+template <class DofType>
 inline DofType& DofIteratorArray<DofType>::operator [](int i)
 {
   return dofArray_[i];
+}
+
+template <class DofType>
+inline const DofType& DofIteratorArray<DofType>::read(int i) const
+{
+  return constArray_[i];
 }
 
 template <class DofType>
@@ -710,9 +751,9 @@ inline int DofIteratorArray<DofType>::index() const
 }
 
 template <class DofType>
-inline void DofIteratorArray<DofType>::reset() 
+inline void DofIteratorArray<DofType>::reset() const
 {
-  count_ = 0;
+  count_ = 0; 
 }
 //**********************************************************************
 //

@@ -29,14 +29,14 @@ template < class DofType >                  class DofIteratorArray;
 template<class DiscreteFunctionSpaceType >
 class DiscFuncArray 
 : public DiscreteFunctionDefault < DiscreteFunctionSpaceType, 
-				   DofIteratorArray < typename DiscreteFunctionSpaceType::RangeField > , 
+           DofIteratorArray < typename DiscreteFunctionSpaceType::RangeField > , 
            LocalFunctionArrayIterator ,
-				   DiscFuncArray <DiscreteFunctionSpaceType> > 
+           DiscFuncArray <DiscreteFunctionSpaceType> > 
 {
   typedef DiscreteFunctionDefault < DiscreteFunctionSpaceType,
-				    DofIteratorArray < typename DiscreteFunctionSpaceType::RangeField > ,
+            DofIteratorArray < typename DiscreteFunctionSpaceType::RangeField > ,
             LocalFunctionArrayIterator ,
-				    DiscFuncArray <DiscreteFunctionSpaceType > >
+            DiscFuncArray <DiscreteFunctionSpaceType > >
   DiscreteFunctionDefaultType;
 
 
@@ -75,12 +75,17 @@ public:
   localFunction ( GridIteratorType &it );
 
   // we use the default implementation 
-  // Warning!!! returns reference to local object!
   DofIteratorType dbegin ( int level );
   
   //! points behind the last dof of type cc
-  // Warning!!! returns reference to local object!
   DofIteratorType dend   ( int level );
+
+  // the const versions 
+  // we use the default implementation 
+  const DofIteratorType dbegin ( int level ) const;
+  
+  //! points behind the last dof of type cc
+  const DofIteratorType dend   ( int level ) const;
 
   //! return if allLevels are used 
   bool allLevels () { return allLevels_; }
@@ -295,19 +300,36 @@ DofIteratorDefault < DofType , DofIteratorArray < DofType > >
 {
 public:
   DofIteratorArray ( Array < DofType > & dofArray , int count )
-    :  dofArray_ ( dofArray ) , count_ ( count ) {};
+    :  dofArray_ ( dofArray ) , constArray_ (dofArray) , count_ ( count ) {};
+  
+  DofIteratorArray ( const Array < DofType > & dofArray , int count )
+    :  constArray_ ( dofArray ) , 
+       dofArray_ ( const_cast <Array < DofType > &> (dofArray) ) ,
+       count_ ( count ) {};
 
   //! return dof
   DofType & operator *();
 
+  //! return dof read only 
+  const DofType & read () const;
+
   //! go next dof
   DofIteratorArray<DofType> & operator++ ();
+  
+  //! go next dof
+  const DofIteratorArray<DofType> & operator++ () const;
 
   //! go next i steps
   DofIteratorArray<DofType> & operator++ (int i);
 
+  //! go next i steps
+  const DofIteratorArray<DofType> & operator++ (int i) const;
+
   //! random access 
   DofType& operator[] (int i);
+
+  //! random access read only 
+  const DofType& read (int i) const;
 
   //! compare
   bool operator == (const DofIteratorArray<DofType> & I ) const;
@@ -318,15 +340,18 @@ public:
   //! return actual index 
   int index () const; 
 
-  //! set dof iterator back to begin 
-  void reset ();
+  //! set dof iterator back to begin , for const and not const Iterators
+  void reset () const;
   
 private: 
   //! index 
-  int count_;
+  mutable int count_;
   
   //! the array holding the dofs 
   Array < DofType > &dofArray_;  
+  
+  //! the array holding the dofs , only const reference
+  const Array < DofType > &constArray_;  
   
 }; // end DofIteratorArray 
 
@@ -389,7 +414,7 @@ private:
   bool built_;
 
   //! GridIteratorType can be LevelIterator, HierarchicIterator or
-  //! NeighborIterator or LeafIterator 
+  //! ItersectionIterator or LeafIterator 
   GridIteratorType &it_;
  
   //! needed for access of local functions 
