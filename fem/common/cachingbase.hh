@@ -1,7 +1,10 @@
 #ifndef __DUNE_CACHINGBASE_HH__
 #define __DUNE_CACHINGBASE_HH__
 
+#include <map>
+
 #include "basefunctions.hh"
+
 
 namespace Dune {
 
@@ -31,12 +34,12 @@ template<class FunctionSpaceType>
 class CachingBaseFunctionSet 
 : public BaseFunctionSetDefault <FunctionSpaceType, CachingBaseFunctionSet<FunctionSpaceType> >  
 {
+public:
   typedef typename FunctionSpaceType::Domain Domain;
   typedef typename FunctionSpaceType::Range  Range;
   typedef typename FunctionSpaceType::JacobianRange JacobianRange;
   enum { DimDomain = FunctionSpaceType::DimDomain }; 
   enum { DimRange  = FunctionSpaceType::DimRange  };
-public:
   
   //! the BaseFunctionInterface type 
   typedef BaseFunctionInterface<FunctionSpaceType> BaseFunctionInterfaceType;
@@ -46,7 +49,7 @@ public:
 
   //! Constructor
   CachingBaseFunctionSet (FunctionSpaceType& fuspace,
-                          ElementType eltype,
+                          GeometryType eltype,
                           int nBaseFnc);
 
   //! Destructor 
@@ -107,13 +110,13 @@ public:
 
 private:
   //- Local typedefs
-  typedef std::map<IdentifierType, std::vector<std::vector<Range> > > RangeMap;
-  typedef RangeMap::iterator RangeMapIterator;
-  typedef RangeMap::const_iterator ConstRangeMapIterator;
-  typedef std::map<IdentifierType,
-                   std::vector<std::vector<JacobianRange> > > JacobianMap;
-  typedef JacobianMap::iterator JacobianMapIterator;
-  typedef JacobianMap::const_iterator ConstJacobianMapIterator;
+  typedef typename std::map<IdentifierType, std::vector<std::vector<Range> > > RangeMap;
+  typedef typename RangeMap::iterator RangeMapIterator;
+  typedef typename RangeMap::const_iterator ConstRangeMapIterator;
+  typedef typename std::map<IdentifierType,
+                            std::vector<std::vector<JacobianRange> > > JacobianMap;
+  typedef typename JacobianMap::iterator JacobianMapIterator;
+  typedef typename JacobianMap::const_iterator ConstJacobianMapIterator;
 
   //- Helper methods
   //! Extracts a gradient component from the base function
