@@ -2,8 +2,8 @@
 #define DUNE_GRID_HH
 
 #include <string>
-#include <dune/common/matvec.hh>
 #include <dune/common/exceptions.hh>
+#include <dune/common/fvector.hh>
 #include <dune/common/helpertemplates.hh>
 #include <dune/common/typetraits.hh>
 
