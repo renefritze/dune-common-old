@@ -807,10 +807,7 @@ public:
   //! empty constructor making grid of unit square 
   SGrid ();
 
-  /** \brief Refine mesh globally by one level
-   *
-   * \param refCount gets ignored
-   */
+  /** \brief Refine mesh globally by one refCount levels */
   void globalRefine (int refCount);
 
     /** \brief Get number of elements in each coordinate direction */

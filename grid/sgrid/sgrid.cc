@@ -1035,18 +1035,22 @@ inline SGrid<dim,dimworld>::SGrid ()
 template<int dim, int dimworld>
 inline void SGrid<dim,dimworld>::globalRefine (int refCount)
 {
-  // refine the mesh
-  for (int i=0; i<dim; i++) N[L][i] = 2*N[L-1][i];
-  mapper[L].make(N[L]);
+  for(int ref=0; ref<refCount; ref++)
+  {
+  
+    // refine the mesh
+    for (int i=0; i<dim; i++) N[L][i] = 2*N[L-1][i];
+    mapper[L].make(N[L]);
 
-  // compute mesh size
-  for (int i=0; i<dim; i++) 
-      h[L][i] = (H[i]-low[i])/((sgrid_ctype)N[L][i]);
-  L++;
+    // compute mesh size
+    for (int i=0; i<dim; i++) 
+        h[L][i] = (H[i]-low[i])/((sgrid_ctype)N[L][i]);
+    L++;
 
-  std::cout << "level=" << L-1 << " size=(" << N[L-1][0];
-  for (int i=1; i<dim; i++) std::cout << "," <<  N[L-1][i];
-  std::cout << ")" << std::endl;
+    std::cout << "level=" << L-1 << " size=(" << N[L-1][0];
+    for (int i=1; i<dim; i++) std::cout << "," <<  N[L-1][i];
+    std::cout << ")" << std::endl;
+  }
 }
 
 template<int dim, int dimworld>
