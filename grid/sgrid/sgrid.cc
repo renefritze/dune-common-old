@@ -467,9 +467,9 @@ inline SLevelIterator<0,dim,dimworld,All_Partition> SEntity<0,dim,dimworld>::fat
 {
         if (!built_father) make_father();
         if (this->l>0)
-                return SLevelIterator<0,dim,dimworld,All_Partition>(*(this->grid),(this->l)-1,father_id);
+                return SLevelIterator<0,dim,dimworld,All_Partition>((this->grid),(this->l)-1,father_id);
         else
-                return SLevelIterator<0,dim,dimworld,All_Partition>(*(this->grid),this->l,this->id);
+                return SLevelIterator<0,dim,dimworld,All_Partition>((this->grid),this->l,this->id);
 }
 
 template<int dim, int dimworld>
@@ -564,9 +564,9 @@ inline SLevelIterator<0,dim,dimworld,All_Partition> SEntity<dim,dim,dimworld>::f
 {
         if (!built_father) make_father();
         if (this->l>0)
-                return SLevelIterator<0,dim,dimworld,All_Partition>(*(this->grid),(this->l)-1,father_id);
+                return SLevelIterator<0,dim,dimworld,All_Partition>((this->grid),(this->l)-1,father_id);
         else
-                return SLevelIterator<0,dim,dimworld,All_Partition>(*(this->grid),this->l,this->id);
+                return SLevelIterator<0,dim,dimworld,All_Partition>((this->grid),this->l,this->id);
 }
 
 template<int dim, int dimworld>
