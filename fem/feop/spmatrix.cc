@@ -38,6 +38,7 @@ SparseRowMatrix<T>::SparseRowMatrix(int rows, int cols, int nz)
   values_.resize(dim_[0]*nz_);
   col_.resize(dim_[0]*nz_);
 
+  values_.set(0.0);
   col_.set(-1);
 }
 
@@ -179,8 +180,8 @@ void SparseRowMatrix<T>::set(int row, int col, const T& val)
   int whichCol = colIndex(row,col);
   if(whichCol < 0)
   {
-      std::cerr << "Error in SparseRowMatrix::set: Entry could neither be found "
-                << "nor newly allocated!\n";
+    std::cerr << "Error in SparseRowMatrix::set: Entry could neither be found "
+	      << "nor newly allocated!\n";
   }
   else
   {
