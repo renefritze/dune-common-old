@@ -1588,7 +1588,8 @@ private:
 
 }
 
-#include"grid.cc"
+#include "grid.cc"
+#include "constgriditerators.hh"
 
 #endif
 
