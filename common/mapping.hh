@@ -15,7 +15,11 @@ namespace Dune{
   @{
  */
 
-// Note: Range has to have Vector structure as well.
+/** ??? 
+    \todo Please doc me!
+
+    Note: Range has to have Vector structure as well.
+*/
 template<typename DFieldType,typename RFieldType, class DType, class RType>
 class Mapping : public Vector < RFieldType > 
 {
@@ -80,21 +84,21 @@ public:
     for ( typename std::vector<term>::const_iterator it = lincomb_.begin(); it != lincomb_.end(); it++ ) 
     {
       if ( count == 0 ) {
-	it->v_->apply( Arg, Dest );
-	if ( it->scalar_ != 1. ) {
-	  Dest *= it->scalar_;
-	} 
+        it->v_->apply( Arg, Dest );
+        if ( it->scalar_ != 1. ) {
+          Dest *= it->scalar_;
+        } 
       } else {
-	RangeType tmp( Dest );
-	it->v_->apply( Arg, tmp );
-	if ( it->scalar_ == 1. ) {
-	  Dest += tmp;
-	} else if ( it->scalar_ == -1. ) {
-	  Dest -= tmp;
-	} else {
-	  tmp *= it->scalar_;
-	  Dest += tmp;
-	}
+        RangeType tmp( Dest );
+        it->v_->apply( Arg, tmp );
+        if ( it->scalar_ == 1. ) {
+          Dest += tmp;
+        } else if ( it->scalar_ == -1. ) {
+          Dest -= tmp;
+        } else {
+          tmp *= it->scalar_;
+          Dest += tmp;
+        }
       }
       count++;
     }
@@ -106,7 +110,7 @@ private:
 
     term(const MappingType &mapping, Field scalar ) : v_(&mapping), scalar_(scalar), scaleIt_( true ) {
       if ( scalar_ == 1. ) {
-	scaleIt_ = false;
+        scaleIt_ = false;
       }
     }
 
