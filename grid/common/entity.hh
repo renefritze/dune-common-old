@@ -62,11 +62,11 @@ public:
   friend const EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(const typename GridImp::Traits::template codim<cd>::Entity& e ) const;
 #endif
 
-private:
+protected:
   /** hide copy constructor */
-  Entity(const Entity& rhs);
+  Entity(const Entity& rhs) : realEntity(rhs.realEntity) {};
   /** hide assignement operator */
-  Entity & operator = (const Entity& rhs);
+  Entity & operator = (const Entity& rhs) { realEntity = rhs.realEntity; };
 };
 
     /** \brief The wrapper class for entities of codimension zero, i.e. elements 
@@ -242,11 +242,11 @@ public:
   //! Copy constructor from EntityImp
   explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {};  
 
-private:
+protected:
   /** hide copy constructor */
-  Entity(const Entity& rhs);
+  Entity(const Entity& rhs) : realEntity(rhs.realEntity) {};
   /** hide assignement operator */
-  Entity & operator = (const Entity& rhs);
+  Entity & operator = (const Entity& rhs) { realEntity = rhs.realEntity; };
 };
 
     /** \brief The wrapper class for entities representing vertices 
@@ -312,11 +312,11 @@ public:
   //! Copy constructor from EntityImp
   explicit Entity(const EntityImp<dim,dim,GridImp> & e) : realEntity(e) {};  
 
-private:
+protected:
   /** hide copy constructor */
-  Entity(const Entity& rhs);
+  Entity(const Entity& rhs) : realEntity(rhs.realEntity) {};
   /** hide assignement operator */
-  Entity & operator = (const Entity& rhs);
+  Entity & operator = (const Entity& rhs) { realEntity = rhs.realEntity; };
 };
 
 //********************************************************************
