@@ -204,7 +204,7 @@ inline UGGrid < dim, dimworld >::~UGGrid()
 
     if (multigrid_) {
 #ifdef _3
-        UG3d::DisposeMultiGrid(multigrid_);
+        //UG3d::DisposeMultiGrid(multigrid_);
 #else
         UG2d::DisposeMultiGrid(multigrid_);
 #endif
@@ -435,7 +435,9 @@ inline bool UGGrid < dim, dimworld >::adapt()
 
 #ifdef _3
     mode = UG3d::GM_REFINE_TRULY_LOCAL;
-    mode = mode | UG3d::GM_COPY_ALL;
+
+    if (refinementType_==COPY)
+        mode = mode | UG3d::GM_COPY_ALL;
 
     // I don't really know what this means
     int seq = UG3d::GM_REFINE_PARALLEL;
@@ -446,7 +448,9 @@ inline bool UGGrid < dim, dimworld >::adapt()
     rv = UG3d::AdaptMultiGrid(multigrid_,mode,seq,mgtest);
 #else
     mode = UG2d::GM_REFINE_TRULY_LOCAL;
-    mode = mode | UG2d::GM_COPY_ALL;
+
+    if (refinementType_==COPY)
+        mode = mode | UG2d::GM_COPY_ALL;
 
     // I don't really know what this means
     int seq = UG2d::GM_REFINE_PARALLEL;
@@ -454,10 +458,23 @@ inline bool UGGrid < dim, dimworld >::adapt()
     // I don't really know what this means either
     int mgtest = UG2d::GM_REFINE_NOHEAPTEST;
 
+    /** \todo Why don't I have to mention the namespace?? */
     rv = AdaptMultiGrid(multigrid_,mode,seq,mgtest);
 #endif
 
-    std::cout << "adapt():  error code " << rv << "\n";
+    if (rv!=0)
+        DUNE_THROW(GridError, "UG::adapt() returned with error code " << rv);
+
+    // Collapse the complete grid hierarchy into a single level if requested
+#ifdef _3
+    if (refinementType_==COLLAPSE)
+        if (UG3d::Collapse(multigrid_))
+            DUNE_THROW(GridError, "UG3d::Collapse returned error code!");
+#else
+    if (refinementType_==COLLAPSE)
+        if (UG2d::Collapse(multigrid_))
+            DUNE_THROW(GridError, "UG2d::Collapse returned error code!");
+#endif
 
     /** \bug Should return true only if at least one element has actually
         been refined */
