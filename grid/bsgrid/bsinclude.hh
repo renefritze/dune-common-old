@@ -24,13 +24,15 @@
 
 namespace BernhardSchuppGrid {
 
+// definition of AutoPointer class 
+#include "myautoptr.hh"
+
 // definition of indexstack 
 enum { lengthOfFiniteStack = 10000 };
 typedef Dune::IndexStack<int,lengthOfFiniteStack> IndexManagerType; 
 
 // type for outer normal of intersection iterator 
 typedef Dune::FieldVector <double,3> BSGridVecType;
-
 
 typedef enum { hexa , tetra } grid_t;
   
@@ -60,13 +62,7 @@ typedef GatherScatter GatherScatterType;
 // all header files of the BSGrid 
 #include "allheaders.h"
 
-//#include "bsgrid_src/gitter_pll_sti.cc"
-#include "bsgrid_src/gitter_pll_impl.cc"
-//#include "bsgrid_src/gitter_pll_ldb.cc"
-//#include "bsgrid_src/gitter_pll_mgb.cc"
-//#include "bsgrid_src/gitter_pll_idn.cc"
-//#include "bsgrid_src/mpAccess.cc"
-//#include "bsgrid_src/mpAccess_MPI.cc"
+//#include "bsgrid_src/gitter_pll_impl.cc"
 
 typedef GitterDunePll GitterType;
 typedef GitterDunePll BSGitterType; 
@@ -84,9 +80,9 @@ enum { ProcessorBoundary_t = BSGitterType:: hbndseg_STI :: closure };
 #else 
 struct GatherScatter;
 typedef GatherScatter GatherScatterType;
+
 #include "bsgrid_src/serialize.h"
 #include "bsgrid_src/gitter_dune_impl.h"
-//#include "bsgrid_src/gitter_impl.h"
 
 typedef Gitter::helement_STI  HElemType;    // Interface Element
 typedef HElemType HGhostType;
@@ -109,19 +105,6 @@ typedef GitterDuneImpl BSGitterImplType;
 typedef GitterType::hface_STI               PLLFaceType;       // Interface Face
 
 #endif
-//#include "bsgrid_src/gitter_mgb.cc"
-
-/*
-// the serial sources 
-#include "bsgrid_src/gitter_geo.cc"
-#include "bsgrid_src/gitter_mgb.cc"
-//#include "bsgrid_src/gitter_sti_inline.h"
-//#include "bsgrid_src/gitter_sti.cc"
-#include "bsgrid_src/mapp_cube_3d.cc"
-#include "bsgrid_src/mapp_tetra_3d.cc"
-#include "bsgrid_src/myalloc.cc"
-*/
-
 
 // rule for Dune LeafIterator 
 #include "leafwalk.hh"
@@ -129,7 +112,11 @@ typedef GitterType::hface_STI               PLLFaceType;       // Interface Face
 // typedefs of Element types 
 typedef GitterType::helement_STI            HElementType;    // Interface Element
 typedef GitterType::hface_STI               HFaceType;       // Interface Face
+typedef GitterType::hedge_STI               HEdgeType;       // Interface Edge
+typedef GitterType::vertex_STI              VertexType;      // Interface Vertex
 typedef GitterType::Geometric::hface3_GEO   GEOFaceType;     // real Face
+typedef GitterType::Geometric::hedge1_GEO   GEOEdgeType;     // real Face
+typedef GitterType::Geometric::VertexGeo    GEOVertexType;     // real Face
 typedef BSGitterType::Objects::tetra_IMPL   IMPLElementType; // impl Element
 typedef GitterType::Geometric::tetra_GEO    GEOElementType;  // real Element
 typedef GitterType::Geometric::hasFace3     HasFace3Type;    // has Face with 3 polygons
@@ -159,75 +146,236 @@ struct BSMacroIterator
 //******************************************************************
 //  LevelIterators 
 //******************************************************************
-template <int codim>
-struct BSLevelIterator
+template <int codim> struct BSHElementType
 {
-  typedef Insert < AccessIterator < GitterType::helement_STI>::Handle,
-    TreeIterator  <  GitterType::helement_STI, 
-    any_has_level < GitterType::helement_STI  > > > IteratorType;
-};
-template <>
-struct BSLevelIterator<1>
-{
-  typedef Insert <AccessIterator <GitterType::hface_STI>::Handle,
-    TreeIterator <GitterType::hface_STI , 
-    any_has_level <GitterType::hface_STI > > > IteratorType;
+  typedef GitterType :: helement_STI ElementType;
 };
 
-template <>
-struct BSLevelIterator<2>
+template <> struct BSHElementType<0> {
+  typedef GitterType :: helement_STI ElementType;
+}; 
+template <> struct BSHElementType<1> {
+  typedef GitterType :: hface_STI ElementType;
+}; 
+template <> struct BSHElementType<2> {
+  typedef GitterType :: hedge_STI ElementType;
+}; 
+template <> struct BSHElementType<3> {
+  typedef GitterType :: vertex_STI ElementType;
+}; 
+
+template <int codim> struct BSIMPLElementType
 {
-  typedef Insert <AccessIterator <GitterType::hedge_STI>::Handle,
-    TreeIterator <GitterType::hedge_STI , 
-      any_has_level <GitterType::hedge_STI > > > IteratorType;
+  typedef BSGitterType::Objects::tetra_IMPL ElementType; // impl Element
 };
 
-template <>
-struct BSLevelIterator<3>
-{
-  /*
-  typedef Insert <AccessIterator <GitterType::vertex_STI>::Handle,
-    TreeIterator <GitterType::vertex_STI , 
-    any_has_level <GitterType::vertex_STI > > > IteratorType;
-  */
-  typedef LeafIterator < GitterType :: vertex_STI > IteratorType; 
+template <> struct BSIMPLElementType<0> {
+  typedef BSGitterType::Objects::tetra_IMPL ElementType; // impl Element
+}; 
+template <> struct BSIMPLElementType<1> {
+  typedef BSGitterType::Objects::hface3_IMPL ElementType; // impl Element
+}; 
+template <> struct BSIMPLElementType<2> {
+  typedef BSGitterType::Objects::hedge1_IMPL ElementType; // impl Element
 };
 
-template <int codim> 
-struct BSLeafIterator 
-{
-  // A 
-  typedef AccessIterator <GitterType::helement_STI>::Handle A;
-  typedef ListIterator   <GitterType::helement_STI> ListIteratorType; 
-  // B
-  typedef TreeIterator <GitterType::helement_STI,leaf_or_has_level <GitterType::helement_STI> > B;
-
-  typedef Insert < A, B > IteratorType;
-
-  //typedef Insert < AccessIterator <GitterType::helement_STI>::Handle,
-  //    TreeIterator <GitterType::helement_STI, 
-  //    leaf_or_has_level <GitterType::helement_STI> > > IteratorType;
+template <> struct BSIMPLElementType<3> {
+  //typedef GitterType :: vertex_STI ElementType;
+  typedef GitterType::Geometric::VertexGeo ElementType;
 };
 
-/*
+//*********************************************************
+//  LevelIterator Wrapper 
+//*********************************************************
+template <int codim> class BSGridLevelIteratorWrapper;
 template <> 
-struct BSLeafIterator<1> 
+class BSGridLevelIteratorWrapper<0>
 {
-  typedef LeafIterator < GitterType::hface_STI > IteratorType;
+  typedef BSHElementType<0>::ElementType ElType; 
+  typedef Insert < AccessIterator < ElType >::Handle ,
+    TreeIterator  < ElType ,  any_has_level < ElType > > > IteratorType;
+    
+  IteratorType it_;
+  typedef IteratorType :: val_t val_t;
+public:
+  template <class GridImp> 
+  BSGridLevelIteratorWrapper (const GridImp & grid, int level ) 
+    : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
+
+  int size  ()    { return it_.size(); }
+  void next ()    { it_.next(); }
+  void first()    { it_.first(); }
+  int done ()     { return it_.done(); }
+  val_t & item () { return it_.item(); }
+
 };
 
-template <> 
-struct BSLeafIterator<2> 
+template <>
+class BSGridLevelIteratorWrapper<1>
 {
-  typedef LeafIterator < GitterType::hedge_STI > IteratorType;
+  typedef BSHElementType<1>::ElementType ElType; 
+  typedef Insert < AccessIterator < ElType >::Handle ,
+    TreeIterator  < ElType ,  any_has_level < ElType > > > IteratorType;
+    
+  IteratorType it_;
+  typedef IteratorType :: val_t val_t;
+public:
+  template <class GridImp> 
+  BSGridLevelIteratorWrapper (const GridImp & grid, int level ) 
+    : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
+
+  int size  ()    { return it_.size(); }
+  void next ()    { it_.next(); }
+  void first()    { it_.first(); }
+  int done ()     { return it_.done(); }
+  val_t & item () { return it_.item(); }
+
 };
 
-template <> 
-struct BSLeafIterator<3> 
+template <>
+class BSGridLevelIteratorWrapper<2>
+{
+  typedef BSHElementType<2>::ElementType ElType; 
+  typedef Insert < AccessIterator < ElType >::Handle ,
+    TreeIterator  < ElType ,  any_has_level < ElType > > > IteratorType;
+    
+  IteratorType it_;
+  typedef IteratorType :: val_t val_t;
+public:
+  template <class GridImp> 
+  BSGridLevelIteratorWrapper (const GridImp & grid, int level ) 
+    : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
+
+  int size  ()    { return it_.size(); }
+  void next ()    { it_.next(); }
+  void first()    { it_.first(); }
+  int done ()     { return it_.done(); }
+  val_t & item () { return it_.item(); }
+
+};
+
+template <>
+class BSGridLevelIteratorWrapper<3>
 {
   typedef LeafIterator < GitterType::vertex_STI > IteratorType;
+
+  IteratorType it_;
+  typedef IteratorType :: val_t val_t;
+
+  // level to walk 
+  int level_; 
+public:
+  template <class GridImp> 
+  BSGridLevelIteratorWrapper (const GridImp & grid, int level ) 
+    : it_(const_cast<GridImp &> (grid).myGrid()),
+      level_(level)  {}
+      
+  int size  ()  { return it_->size(); }
+
+  //! if level of item is larger then walk level, go next 
+  void next ()    
+  {
+    it_->next();
+    if(it_->done()) return ; 
+    if(it_->item().level() > level_) this->next();
+    return ;
+  }
+  void first()    { it_->first(); }
+  int done () const  { return it_->done(); }
+  val_t & item () { return it_->item(); }
+
 };
-*/
+
+template <int codim> class BSGridLeafIteratorWrapper;
+//**********************************************************
+//  LeafIterator Wrapper 
+//**********************************************************
+template <>
+class BSGridLeafIteratorWrapper<0>
+{
+  typedef BSHElementType<0>::ElementType ElType; 
+  typedef Insert < AccessIterator < ElType >::Handle,
+    TreeIterator < ElType , leaf_or_has_level < ElType > > > IteratorType;
+
+  IteratorType it_;
+  typedef IteratorType :: val_t val_t;
+public:
+  template <class GridImp> 
+  BSGridLeafIteratorWrapper (const GridImp & grid, int level ) 
+    : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
+
+  int size  ()    { return it_.size(); }
+  void next ()    { it_.next(); }
+  void first()    { it_.first(); }
+  int done ()     { return it_.done(); }
+  val_t & item () { return it_.item(); }
+
+};
+
+template <>
+class BSGridLeafIteratorWrapper<1>
+{
+  typedef BSHElementType<1>::ElementType ElType; 
+  typedef Insert < AccessIterator < ElType >::Handle,
+    TreeIterator < ElType , leaf_or_has_level < ElType > > > IteratorType;
+
+  IteratorType it_;
+  typedef IteratorType :: val_t val_t;
+public:
+  template <class GridImp> 
+  BSGridLeafIteratorWrapper (const GridImp & grid, int level ) 
+    : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
+
+  int size  ()    { return it_.size(); }
+  void next ()    { it_.next(); }
+  void first()    { it_.first(); }
+  int done ()     { return it_.done(); }
+  val_t & item () { return it_.item(); }
+
+};
+
+template <>
+class BSGridLeafIteratorWrapper<2>
+{
+  typedef BSHElementType<2>::ElementType ElType; 
+  typedef Insert < AccessIterator < ElType >::Handle,
+    TreeIterator < ElType , leaf_or_has_level < ElType > > > IteratorType;
+
+  IteratorType it_;
+  typedef IteratorType :: val_t val_t;
+public:
+  template <class GridImp> 
+  BSGridLeafIteratorWrapper (const GridImp & grid, int level ) 
+    : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
+
+  int size  ()    { return it_.size(); }
+  void next ()    { it_.next(); }
+  void first()    { it_.first(); }
+  int done ()     { return it_.done(); }
+  val_t & item () { return it_.item(); }
+
+};
+
+template <>
+class BSGridLeafIteratorWrapper<3>
+{
+  typedef LeafIterator < GitterType::vertex_STI > IteratorType;
+  IteratorType it_;
+  typedef IteratorType :: val_t val_t;
+public:
+  template <class GridImp> 
+  BSGridLeafIteratorWrapper (const GridImp & grid, int level ) 
+    : it_(const_cast<GridImp &> (grid).myGrid()) {}
+
+  int size  ()    { return it_->size(); }
+  void next ()    { it_->next(); }
+  void first()    { it_->first(); }
+  int done ()     { return it_->done(); }
+  val_t & item () { return it_->item(); }
+
+};
+
+
 //*************************************************************
 typedef LeafIterator < GitterType::helement_STI > BSLeafIteratorMaxLevel;
 
