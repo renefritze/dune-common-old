@@ -1,3 +1,4 @@
+// $Id$
 #ifndef DUNE_FMATRIX_HH
 #define DUNE_FMATRIX_HH
 
@@ -19,7 +20,7 @@
 namespace Dune {
    
     /** 
-		@addtogroup ISTL 
+		@addtogroup DenseMatVec
                 @ingroup Common
 		@{
      */

@@ -1,3 +1,4 @@
+// $ Id: $
 #ifndef DUNE_FVECTOR_HH
 #define DUNE_FVECTOR_HH
 
@@ -13,8 +14,8 @@ representing a field and a compile-time given size.
 
 namespace Dune {
    
-  /** @defgroup ISTL Iterative Solvers Template Library
-	  @addtogroup ISTL
+  /** @defgroup DenseMatVec Dense Matrix and Vector Template Library
+	  @addtogroup DenseMatVec
 	  @{
   */
 
