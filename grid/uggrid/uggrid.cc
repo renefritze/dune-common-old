@@ -83,15 +83,10 @@ inline UGGrid < dim, dimworld >::UGGrid(unsigned int heap) : heapsize(heap)
     extra_boundary_data_ = 0;
 
     // Create unique name
-    /** \todo Do this safely */
     static unsigned int nameCounter = 0;
-    char buffer[20];
-    sprintf(buffer, "%d", nameCounter);
-//     std::ostrstream numberAsAscii;
-//     numberAsAscii << nameCounter;
-    name_ = "DuneUGGrid_";
-    //    name += numberAsAscii.str();
-    name_ += buffer;
+    std::stringstream numberAsAscii;
+    numberAsAscii << nameCounter;
+    name_ = "DuneUGGrid_" + numberAsAscii.str();
 
     std::cout << "UGGrid<" << dim << "," << dimworld <<"> with name " 
               << name_ << " created!" << std::endl;
@@ -138,7 +133,10 @@ UGGrid < 3, 3 >::lbegin<3> (int level) const
     assert(multigrid_);
     UG3d::grid* theGrid = multigrid_->grids[level];
 
-    UGGridLevelIterator<3,3,3> it((*const_cast<UGGrid< 3, 3 >* >(this)),level);
+    if (!theGrid)
+        DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
+
+    UGGridLevelIterator<3,3,3,All_Partition> it((*const_cast<UGGrid< 3, 3 >* >(this)),level);
 
     UG3d::node* mytarget = theGrid->firstNode[0];
 
@@ -153,7 +151,10 @@ UGGrid < 3, 3 >::lbegin<0> (int level) const
     assert(multigrid_);
     UG3d::grid* theGrid = multigrid_->grids[level];
 
-    UGGridLevelIterator<0,3,3> it((*const_cast<UGGrid< 3, 3 >* >(this)),level);
+    if (!theGrid)
+        DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
+
+    UGGridLevelIterator<0,3,3, All_Partition> it((*const_cast<UGGrid< 3, 3 >* >(this)),level);
     it.setToTarget(theGrid->elements[0], level);
     return it;
 }
@@ -166,6 +167,9 @@ UGGrid < 2, 2 >::lbegin<2> (int level) const
 {
     assert(multigrid_);
     UG2d::grid* theGrid = multigrid_->grids[level];
+
+    if (!theGrid)
+        DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
     UGGridLevelIterator<2,2,2,All_Partition> it((*const_cast<UGGrid< 2, 2 >* >(this)),level);
 
@@ -181,6 +185,9 @@ UGGrid < 2, 2 >::lbegin<0> (int level) const
 {
     assert(multigrid_);
     UG2d::grid* theGrid = multigrid_->grids[level];
+
+    if (!theGrid)
+        DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
     UGGridLevelIterator<0,2,2,All_Partition> it((*const_cast<UGGrid< 2, 2 >* >(this)),level);
     it.setToTarget(theGrid->elements[0], level);
@@ -259,12 +266,11 @@ template < int dim, int dimworld >
 void UGGrid < dim, dimworld >::makeNewUGMultigrid()
 {
     //configure @PROBLEM $d @DOMAIN;
-    //char* configureArgs[2] = {"configure DuneDummyProblem", "d olisDomain"};
-    std::string configureArgs[2] = {"configure DuneDummyProblem", "d " + name() + "_Domain"};
+     std::string configureArgs[2] = {"configure DuneDummyProblem", "d " + name() + "_Domain"};
     const char* configureArgs_c[2]     = {configureArgs[0].c_str(), configureArgs[1].c_str()};
     /** \todo Kann man ConfigureCommand so ‰ndern daﬂ man auch ohne den const_cast auskommt? */
 #ifdef _3
-    UG3d::ConfigureCommand(2, configureArgs_c);
+    UG3d::ConfigureCommand(2, const_cast<char**>(configureArgs_c));
 #else
     UG2d::ConfigureCommand(2, const_cast<char**>(configureArgs_c));
 #endif
@@ -313,7 +319,7 @@ inline bool UGGrid < dim, dimworld >::adapt()
     // I don't really know what this means either
     int mgtest = UG3d::GM_REFINE_NOHEAPTEST;
 
-    rv = AdaptMultiGrid(multigrid_,mode,seq,mgtest);
+    rv = UG3d::AdaptMultiGrid(multigrid_,mode,seq,mgtest);
 #else
     mode = UG2d::GM_REFINE_TRULY_LOCAL;
     mode = mode | UG2d::GM_COPY_ALL;
@@ -332,6 +338,23 @@ inline bool UGGrid < dim, dimworld >::adapt()
     /** \bug Should return true only if at least one element has actually
         been refined */
     return true;
+}
+
+
+template < int dim, int dimworld >
+void UGGrid < dim, dimworld >::globalRefine(int refCount)
+{
+    // mark all entities for grid refinement
+    UGGridLevelIterator<0, dim, dimworld, All_Partition> iIt    = lbegin<0>(maxlevel());
+    UGGridLevelIterator<0, dim, dimworld, All_Partition> iEndIt = lend<0>(maxlevel());
+    
+    for (; iIt!=iEndIt; ++iIt)
+        iIt->mark(1);
+    
+    this->preAdapt();
+    adapt();
+    this->postAdapt();
+
 }
 
 } // namespace Dune
