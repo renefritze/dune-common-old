@@ -148,7 +148,7 @@ protected:
 
 protected:
   //! DofManager manages the memory 
-  mutable DofManagerType & dm_;
+  DofManagerType & dm_;
 
 private:
   //! the corresponding LagrangeMapper 
