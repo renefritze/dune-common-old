@@ -316,8 +316,6 @@ inline static U_CHAR AlbertCoarsen ( MESH * mesh )
   return coarsen ( mesh );
 }
 
-
-
 //*********************************************************************
 //
 //  Help Routines for the ALBERT Mesh 

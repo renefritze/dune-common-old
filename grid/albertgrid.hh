@@ -148,7 +148,7 @@ public:
 
   //! maps a local coordinate within reference element to 
   //! global coordinate in element 
-  Vec<dimworld,albertCtype>& global (const Vec<dim,albertCtype>& local);
+  Vec<dimworld,albertCtype> global (const Vec<dim,albertCtype>& local);
   
   //! maps a global coordinate within the element to a 
   //! local coordinate in its reference element
@@ -198,7 +198,6 @@ public:
   //! print internal data
   void print (std::ostream& ss, int indent);
 private:
-
   // calc the local barycentric coordinates 
   template <int dimbary>
   Vec<dimbary,albertCtype>& localB (const Vec<dimworld,albertCtype>& global)
@@ -213,9 +212,6 @@ private:
   //! built the jacobian inverse and store the volume 
   void builtJacobianInverse (const Vec<dim,albertCtype>& local); 
   
-  //! maps a barycentric coordinate within element to global coordinate in element 
-  Vec<dimworld,albertCtype> globalBary (const Vec<dim+1,albertCtype>& local);
-
   //! maps a global coordinate within the elements local barycentric
   //! koordinates 
   Vec<dim+1,albertCtype> localBary (const Vec<dimworld,albertCtype>& global);
@@ -223,7 +219,10 @@ private:
   // template method for map the vertices of EL_INFO to the actual 
   // coords with face_,edge_ and vertex_ , needes for operator []
   int mapVertices (int i) const; 
- 
+
+  // calculates the volume of the element 
+  albertCtype elVolume () const;
+
   //! the vertex coordinates 
   Mat<dimworld,dim+1,albertCtype> coord_;
 
@@ -255,7 +254,6 @@ private:
   Mat<dim,dim,albertCtype> Jinv_;  //!< storage for inverse of jacobian
   albertCtype volume_; //!< storage of element volume
     
-  //Vec<dimworld,albertCtype> outerNormal_;
 };
 
 
@@ -741,7 +739,7 @@ public:
   //! return unit outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
   Vec<dimworld,albertCtype>& unit_outer_normal (Vec<dim-1,albertCtype>& local);
-
+  
   //! return unit outer normal, if you know it is constant use this function instead
   Vec<dimworld,albertCtype>& unit_outer_normal ();
  
