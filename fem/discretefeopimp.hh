@@ -133,7 +133,7 @@ public:
     typedef typename FunctionSpaceType::GridType GridType;
     // the corresponding grid 
     FunctionSpaceType & functionSpace_= dest.getFunctionSpace();
-    GridType &grid = functionSpace_.getGrid();
+    const GridType &grid = functionSpace_.getGrid();
     
     if(leaf_)
     {

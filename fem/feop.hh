@@ -125,7 +125,7 @@ public:
     
     typedef typename FunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
 
-    GridType &grid = functionSpace_.getGrid();
+    const GridType &grid = functionSpace_.getGrid();
 
     typedef typename FunctionSpaceType::Range RangeVecType;
     typedef typename FunctionSpaceType::JacobianRange JacobianRange;
@@ -190,7 +190,7 @@ public:
     typedef typename EntityType::IntersectionIterator NeighIt;
     typedef typename NeighIt::BoundaryEntity BoundaryEntityType;
  
-    GridType &grid = functionSpace_.getGrid();
+    const GridType &grid = functionSpace_.getGrid();
 
     DiscFunctionType & arg  = const_cast<DiscFunctionType &> (*arg_);
     DiscFunctionType & dest = (*dest_);
@@ -298,7 +298,7 @@ protected:
     typedef typename GridType::LeafIterator LeafIterator; 
    
 
-    GridType &grid = functionSpace_.getGrid();
+    const GridType &grid = functionSpace_.getGrid();
 
 
     std::cout << "Assemble Matrix!" << std::endl ;

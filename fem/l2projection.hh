@@ -36,7 +36,7 @@ public:
     typedef typename DiscreteFunctionType::LocalFunctionType LocalFuncType;
       
 
-    GridType & grid = functionSpace_.getGrid();
+    const GridType & grid = functionSpace_.getGrid();
 
     typename FunctionSpaceType::Range ret (0.0);
     typename FunctionSpaceType::Range phi (0.0);
