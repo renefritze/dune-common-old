@@ -1590,8 +1590,8 @@ public:
 
         // find send/recv lists or throw error
         typedef typename MultiYGrid<dim,ctype>::Intersection IS;
-        std::deque<IS>* sendlist;
-        std::deque<IS>* recvlist;
+        const std::deque<IS>* sendlist;
+        const std::deque<IS>* recvlist;
         if (codim==0) // the elements
           {
                 if (iftype==InteriorBorder_InteriorBorder_Interface)
@@ -1642,7 +1642,7 @@ public:
 
         // allocate & fill the send buffers & store send request
         std::vector<P<T>*> sends; // store pointers to send buffers
-        typedef typename std::deque<IS>::iterator ISIT;
+        typedef typename std::deque<IS>::const_iterator ISIT;
         for (ISIT is=sendlist->begin(); is!=sendlist->end(); ++is)
           {
                 // allocate send buffer
@@ -1701,6 +1701,13 @@ public:
   // implement leaf communication. Problem: supply vector of vectors
 
 private:
+  template<int codim>
+  YaspEntity<codim,dim,const YaspGrid<dim,dimworld> >& 
+  getRealEntity(typename Traits::template codim<codim>::Entity& e );
+
+  template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
+  friend class Entity;
+
   //  YMG _mg;
 };
 
