@@ -8,55 +8,84 @@
 
 #include <stdlib.h>
 
-namespace Dune
+  // *********************************************************************
+  //
+  //  -- UGGridLevelIteratorFactory
+  //
+  // *********************************************************************
+
+template <int codim, int dim, int dimworld, PartitionIteratorType PiType>
+class UGGridLevelIteratorFactory
 {
+public:
+    static inline
+    UGGridLevelIterator<codim,dim,dimworld,PiType> getIterator(typename UGTypes<dim>::GridType* theGrid, int level) {
+        std::cout << "LevelIteratorFactory default implementation" << std::endl;
+    }
+    
+};
 
 
-    // *********************************************************************
-    //
-    //  -- UGGridLevelIteratorFactory
-    //
-    // *********************************************************************
+#ifdef _2
+template <>
+class UGGridLevelIteratorFactory<2,2,2,All_Partition>
+{
+public:
+    static inline
+    UGGridLevelIterator<2,2,2,All_Partition> getIterator(UGTypes<2>::GridType* theGrid, int level) {
+        
+        UGGridLevelIterator<2,2,2,All_Partition> it(level);
+        it.setToTarget(theGrid->firstNode[0], level);
+        return it;
+    }
+    
+};
 
-    template <int codim, int dim, int dimworld, PartitionIteratorType PiType>
-    class UGGridLevelIteratorFactory
+template <>
+class UGGridLevelIteratorFactory<0,2,2,All_Partition>
+{
+public:
+    static inline
+    UGGridLevelIterator<0,2,2,All_Partition> getIterator(UGTypes<2>::GridType* theGrid, int level) {
+        
+        UGGridLevelIterator<0,2,2,All_Partition> it(level);
+        it.setToTarget(theGrid->elements[0], level);
+        return it;
+    }
+    
+};
+#endif
+
+#ifdef _3
+    template <> 
+    class UGGridLevelIteratorFactory<3,3,3,All_Partition> 
     {
     public:
         static inline
-        UGGridLevelIterator<codim,dim,dimworld,PiType> getIterator(UG2d::grid* theGrid, int level) {
-            std::cout << "LevelIteratorFactory default implementation" << std::endl;
-        }
+        UGGridLevelIterator<3,3,3,All_Partition> getIterator(UGTypes<3>::GridType* theGrid, int level) {
 
-    };
+            UGGridLevelIterator<3,3,3,All_Partition> it(level);
 
-    template <>
-    class UGGridLevelIteratorFactory<2,2,2,All_Partition>
-    {
-    public:
-        static inline
-        UGGridLevelIterator<2,2,2,All_Partition> getIterator(UG2d::grid* theGrid, int level) {
-            
-            UGGridLevelIterator<2,2,2,All_Partition> it(level);
-            it.setToTarget(theGrid->firstNode[0], level);
+            UG3d::node* mytarget = theGrid->firstNode[0];
+            it.setToTarget(mytarget, level);
             return it;
         }
-
     };
 
-    template <>
-    class UGGridLevelIteratorFactory<0,2,2,All_Partition>
+    template <> 
+    class UGGridLevelIteratorFactory<0,3,3,All_Partition> 
     {
     public:
         static inline
-        UGGridLevelIterator<0,2,2,All_Partition> getIterator(UG2d::grid* theGrid, int level) {
-            
-            UGGridLevelIterator<0,2,2,All_Partition> it(level);
+        UGGridLevelIterator<0,3,3,All_Partition> getIterator(UGTypes<3>::GridType* theGrid, int level) {
+
+            UGGridLevelIterator<0,3,3,All_Partition> it(level);
+
             it.setToTarget(theGrid->elements[0], level);
             return it;
         }
-
     };
-
+#endif
 
 //***********************************************************************
 // 
@@ -205,7 +234,7 @@ inline int UGGrid < dim, dimworld >::maxlevel() const
     return multigrid_->topLevel;
 }
 
-#ifdef _3
+#if 0
 template <> 
 inline UGGridLevelIterator<3,3,3,All_Partition> 
 UGGrid < 3, 3 >::lbegin<3> (int level) const
@@ -282,11 +311,8 @@ template<int codim>
 inline UGGridLevelIterator<codim, dim, dimworld, All_Partition>
 UGGrid<dim, dimworld>::lbegin (int level) const
 {
-//     printf("UGGrid<%d, %d>::lbegin<%d> not implemented\n", dim, dimworld, codim);
-//     UGGridLevelIterator<codim,dim,dimworld, All_Partition> dummy(level);
-//    return dummy;
     assert(multigrid_);
-    UG2d::grid* theGrid = multigrid_->grids[level];
+    typename UGTypes<dim>::GridType* theGrid = multigrid_->grids[level];
     
     if (!theGrid)
         DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
@@ -299,11 +325,8 @@ template<int codim, PartitionIteratorType PiType>
 inline UGGridLevelIterator<codim, dim, dimworld,PiType>
 UGGrid<dim, dimworld>::lbegin (int level) const
 {
-//     printf("UGGrid<%d, %d>::lbegin<%d, PiType> not implemented\n", dim, dimworld, codim);
-//     UGGridLevelIterator<codim,dim,dimworld,PiType> dummy(level);
-//     return dummy;
     assert(multigrid_);
-    UG2d::grid* theGrid = multigrid_->grids[level];
+    typename UGTypes<dim>::GridType* theGrid = multigrid_->grids[level];
     
     if (!theGrid)
         DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
@@ -452,5 +475,3 @@ void UGGrid < dim, dimworld >::globalRefine(int refCount)
     this->postAdapt();
 
 }
-
-} // namespace Dune
