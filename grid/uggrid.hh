@@ -24,7 +24,7 @@
 
 namespace Dune 
 {
-/** @defgroup UGGrid UGGrid
+/** @defgroup UGGrid UGGridImp
     \ingroup GridCommon
 
   This is the implementation of the grid interface
@@ -34,10 +34,12 @@ namespace Dune
   http://cox.iwr.uni-heidelberg.de/~ug).
  
   For the compilation of UG keep the following in mind! 
-  In your shell you need the following variables set: 
+  In your shell you need set the following variables: 
 
+\verbatim
     export UGROOT=some_path/UG/ug
     export PATH=$PATH:$UGROOT/bin
+\endverbatim
 
   In the dir $UGROOT (the path above) you find a file named 'ug.conf'.
   There you have to choose for dimension 2 or 3 and furthermore set the 
@@ -46,21 +48,24 @@ namespace Dune
   Then in the file $UGROOT/arch/PC/mk.arch add '-xc++' to the ARCH_CFLAGS
   variable. 
 
-  Now your ready to. Go is 
+  Now your ready to compile UG. Type
 
+\verbatim
   cd $UGROOT 
   ugmake links
   make
+\endverbatim
 
   After compiling UG you must tell %Dune where to find UG, which
   dimension to use and which dimension your world should have:
-  <tt> ./autogen.sh [OPTIONS] --with-ug=PATH_TO_UG --with-problem-dim=DIM --with-world-dim=DIMWORLD
-  </tt>
+\verbatim
+  ./autogen.sh [OPTIONS] --with-ug=PATH_TO_UG --with-problem-dim=DIM --with-world-dim=DIMWORLD
+  \endverbatim
 
   Now you must use the UGGrid with DIM and DIMWORLD, otherwise
   unpredictable results may occur. 
 
-  @addtogroup UGGrid
+
   @{
  */
   
@@ -83,6 +88,8 @@ template <class Object> class UGGridMemory;
 // singleton holding reference elements
 template<int dim> struct UGGridReferenceElement;
 
+  /** @} end documentation group */
+
 }  // namespace Dune
 
 #include "uggrid/uggridelement.hh"
@@ -100,7 +107,7 @@ namespace Dune {
 //**********************************************************************
 
 /** \brief The UG %Grid class
- * @addtogroup UGGrid
+ * 
  *
  * \todo Please doc me!
  */
@@ -220,10 +227,10 @@ protected:
 
 }; // end Class UGGrid
 
-/** @} end documentation group */
 
 
-}; // namespace Dune
+
+} // namespace Dune
 
 #include "uggrid/uggrid.cc"
 #endif
