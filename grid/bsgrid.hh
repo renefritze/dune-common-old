@@ -304,6 +304,9 @@ public:
   //! geometry of this entity
   BSGridElement<dim,dimworld>& geometry ();
 
+  //! return partition type of this entity ( see grid.hh )
+  PartitionType partitionType() const;
+  
   /*! Intra-element access to entities of codimension cc > codim. Return number of entities
     with codimension cc.
    */
@@ -379,7 +382,7 @@ public:
   
 private:
   BSGrid<dim,dimworld> &grid_;
-  BSSPACE HElementType *item_;
+  BSSPACE GEOElementType *item_;
 
   //! the cuurent geometry
   BSGridElement<dim,dimworld> geo_;
@@ -453,15 +456,9 @@ class BSGridBoundaryEntity
   friend class BSGridIntersectionIterator<dim,dimworld>;
 public:
   BSGridBoundaryEntity () : _geom (false) ,
-  _neigh (-1) {};
+  _neigh (-1), _id(-1) {};
 
-  //! return type of boundary , i.e. Neumann, Dirichlet ... 
-  BoundaryType type () 
-  {
-    return Dirichlet ; 
-  }
-
-  int id () { return -1; }
+  int id () { return _id; }
 
   //! return true if geometry of ghost cells was filled  
   bool hasGeometry () { return false; }
@@ -473,8 +470,13 @@ public:
   }
 
 private: 
-  int _neigh;
+  void setId ( int id )
+  {
+    _id = id;
+  }
   
+  int _neigh;
+  int _id;   
   // BSGrid<dim,dimworld> & _grid;
   BSGridElement<dim,dimworld> _geom;
 };
@@ -607,6 +609,8 @@ private:
   BSSPACE NeighbourFaceType neighpair_;
 
   BSGridElement<dim-1,dimworld> interSelfGlobal_; //! intersection_self_global
+
+  BSGridBoundaryEntity<dim,dimworld> bndEntity_;
 };
 
 
@@ -695,12 +699,12 @@ class BSGrid : public GridDefault  < dim, dimworld,
   CompileTimeChecker<dimworld == 3>   BSGrid_only_implemented_for_3dw;   
 
   friend class BSGridEntity <0,dim,dimworld>;
+  friend class BSGridIntersectionIterator<dim,dimworld>;
+  
 #if 0
   //friend class BSGridEntity <1,dim,dimworld>;
   //friend class BSGridEntity <1 << dim-1 ,dim,dimworld>;
   friend class BSGridEntity <dim,dim,dimworld>;
-
-  friend class BaumMarkerVector;
 
   // friends because of fillElInfo
   friend class BSGridLevelIterator<0,dim,dimworld>;
@@ -708,14 +712,8 @@ class BSGrid : public GridDefault  < dim, dimworld,
   friend class BSGridLevelIterator<2,dim,dimworld>;
   friend class BSGridLevelIterator<3,dim,dimworld>;
   friend class BSGridHierarchicIterator<dim,dimworld>;
-
-  friend class BSGridIntersectionIterator<dim,dimworld>;
 #endif
 
-  //! BSGrid is only implemented for 2 and 3 dimension
-  //! for 1d use SGrid or SimpleGrid 
-  //CompileTimeChecker<dimworld != 1>   Do_not_use_BSGrid_for_1d_Grids;   
-  
 //**********************************************************
 // The Interface Methods
 //**********************************************************
@@ -812,12 +810,15 @@ public:
   //! return current time of grid 
   //! not an interface method yet 
   bs_ctype getTime () const { return time_; };
-  
+
+  //! calculate max edge length 
+  double calcGridWidth () { return 1; }
+   
   BSSPACE GitterBasisImpl *mygrid();
  
 private:
   void calcExtras();
-  
+
   void calcMaxlevel();
 
   // set _coarsenMark to true

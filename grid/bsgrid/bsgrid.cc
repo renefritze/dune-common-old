@@ -14,6 +14,7 @@ inline BSGrid<dim,dimworld>::BSGrid(const char* macroTriangFilename)
   assert(mygrid_ != 0);
   mygrid_->printsize();
 
+  postAdapt();
   calcExtras();
 }
 
@@ -377,6 +378,7 @@ inline BSGridLevelIterator<codim,dim,dimworld,pitype> &
   assert(index_ >= 0);
 
   iter_.next();
+  index_++;
   if (iter_.done()) 
   {
     index_ = -1; 
@@ -623,7 +625,8 @@ template<int dim, int dimworld>
 inline BSGridIntersectionIterator<dim,dimworld> :: 
 BSGridIntersectionIterator(BSGrid<dim,dimworld> &grid,
   BSSPACE HElementType *el, int wLevel,bool end) :
-  entity_( grid ), item_(0), neigh_(0), index_(0) 
+  entity_( grid )
+  , item_(0), neigh_(0), index_(0) 
   , needSetup_ (true), needNormal_(true) 
   , interSelfGlobal_ (false) 
   , theSituation_ (false) , daOtherSituation_ (false)
@@ -638,6 +641,7 @@ BSGridIntersectionIterator(BSGrid<dim,dimworld> &grid,
     done();
   }
 }
+
 template<int dim, int dimworld>
 inline void BSGridIntersectionIterator<dim,dimworld> :: 
 first (BSSPACE HElementType & elem, int wLevel) 
@@ -650,7 +654,6 @@ first (BSSPACE HElementType & elem, int wLevel)
 
   // if needed more than once we spare the virtual funtion call
   isBoundary_ = item_->myneighbour(index_).first->isboundary();
-  
   theSituation_ = ( (elem.level() < wLevel ) && elem.leaf() );
   daOtherSituation_ = false;
   
@@ -827,6 +830,7 @@ BSGridIntersectionIterator<dim,dimworld>::outer_normal()
   { 
     if( boundary() || ( !daOtherSituation_ ) )
     {
+      // if boundary calc normal normal ;)
       item_->outerNormal(index_,outNormal_);
     }
     else 
@@ -860,10 +864,20 @@ template< int dim, int dimworld>
 inline BSGridElement<dim-1,dimworld>&
 BSGridIntersectionIterator<dim,dimworld>::intersection_self_global ()
 {
-  const BSSPACE Gitter::Geometric::hface3_GEO & face = *(static_cast<BSSPACE GEOElementType &>(*item_).myhface3(index_));
+  const BSSPACE Gitter::Geometric::hface3_GEO & face = *(item_->myhface3(index_));
   bool init = interSelfGlobal_.builtGeom(face);
   
   return interSelfGlobal_;
+}
+
+template< int dim, int dimworld>
+inline BSGridBoundaryEntity<dim,dimworld>&
+BSGridIntersectionIterator<dim,dimworld>::boundaryEntity ()
+{
+  typename BSSPACE BNDFaceType * bnd = item_->myneighbour(index_).first;
+  int id = bnd->bndtype(); // id's are positive
+  bndEntity_.setId( -id );
+  return bndEntity_;
 }
 
 /************************************************************************************
@@ -878,7 +892,7 @@ BSGridIntersectionIterator<dim,dimworld>::intersection_self_global ()
 template<int dim, int dimworld>
 inline BSGridEntity<0,dim,dimworld> :: BSGridEntity(BSGrid<dim,dimworld> &grid,
              BSSPACE HElementType & element,int index, int wLevel) : 
-  grid_(grid), item_(&element)
+  grid_(grid), item_(static_cast<BSSPACE GEOElementType *> (&element))
   , builtgeometry_(false), geo_(false)
   , index_(index) , walkLevel_ (wLevel) 
 {
@@ -928,9 +942,16 @@ inline int BSGridEntity<0,dim,dimworld> :: subIndex (int i)
 {
   assert(cc == dim);
   assert(item_ != 0);
-  return IndexWrapper<cc>::subIndex (
-      ( static_cast<BSSPACE GEOElementType &> (*item_)) ,i);
+  return IndexWrapper<cc>::subIndex ( *item_ ,i);
 }
+
+template<int dim, int dimworld>
+inline PartitionType BSGridEntity<0,dim,dimworld> ::
+partitionType () const
+{
+  return InteriorEntity;
+}
+
 
 template<int dim, int dimworld>
 inline bool BSGridEntity<0,dim,dimworld> :: hasChildren() 
@@ -1012,13 +1033,11 @@ inline bool BSGridEntity<0,dim,dimworld> :: mark (int ref)
   if(ref < 0) 
   {
     if(level() <= 0) return false;
-    if(static_cast<BSSPACE GEOElementType &> 
-        (*item_).requestrule() == BSSPACE refine_element_t) 
+    if((*item_).requestrule() == BSSPACE refine_element_t) 
     {
       return false;
     }
 
-    static_cast<BSSPACE GEOElementType &> 
       (*item_).request( BSSPACE coarse_element_t );
     grid_.setCoarsenMark();
     return true;
@@ -1026,8 +1045,7 @@ inline bool BSGridEntity<0,dim,dimworld> :: mark (int ref)
   
   if(ref > 0)
   {
-    static_cast<BSSPACE GEOElementType &> 
-      (*item_).request( BSSPACE refine_element_t );
+    (*item_).request( BSSPACE refine_element_t );
     return true;  
   }
   return false;
@@ -1037,16 +1055,13 @@ inline bool BSGridEntity<0,dim,dimworld> :: mark (int ref)
 template<int dim, int dimworld>
 inline AdaptationState BSGridEntity<0,dim,dimworld> :: state () const 
 {
-  if(static_cast<BSSPACE GEOElementType &> 
-      (*item_).requestrule() == BSSPACE coarse_element_t) 
+  if((*item_).requestrule() == BSSPACE coarse_element_t) 
   {
-    //std::cout << "return COARSEND \n";
     return COARSEN;
   }
  
   if(item_->hasBeenRefined())
   {
-    //std::cout << "return REFINED\n";
     return REFINED;
   }
   

@@ -49,6 +49,8 @@ typedef GitterBasis::Objects::tetra_IMPL   IMPLElementType;// real Element
 typedef Gitter::Geometric::tetra_GEO   GEOElementType;// real Element
 typedef Gitter::Geometric::hasFace3    HasFace3Type;  // has Face with 3 polygons
 
+typedef Gitter::Geometric::hbndseg3_GEO  BNDFaceType; 
+
 // refinement and coarsening enum for tetrahedons 
 enum { refine_element_t = Gitter::Geometric::TetraRule::iso8 };
 enum { coarse_element_t = Gitter::Geometric::TetraRule::crs  };
