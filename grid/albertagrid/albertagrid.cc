@@ -1390,7 +1390,7 @@ inline void AlbertaGridHierarchicIterator< GridImp >::increment()
         );
   // set new actual level, calculated by recursiveTraverse 
   virtualEntity_.setLevel(level_);
-  return (*this);
+  return ;
 }
 
 template< class GridImp >
