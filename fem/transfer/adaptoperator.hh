@@ -124,7 +124,8 @@ public:
     {
       if(!calcedWeight_) calcWeight();
       
-      dm_.resizeTmp();
+      dm_.resizeForRestrict();
+
       typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
 
       // make run through grid 
@@ -192,8 +193,7 @@ private:
         if((*it).state() == COARSEN)
         {
           // create index for fatty, here set indices equal
-          if(initialize)
-            dm_.createFatherIndex( en );
+          if(initialize) dm_.createFatherIndex( en );
 
           rpOp_.restrictLocal( en , *it, initialize);     
           initialize = false;
