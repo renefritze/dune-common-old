@@ -77,6 +77,46 @@ public:
 template <class GridType>
 class AdaptiveLeafIndexSet : public DefaultGridIndexSetBase <GridType>
 {
+  // busines as usual 
+   
+  template <class EntityType,int enCodim, int codim>
+  struct IndexWrapper
+  {
+    static int index (EntityType & en , const IndexArray<int> & leafIndex, int num )
+    {
+      // this index set works only for codim = 0 at the moment
+      assert(codim == 0);
+
+      // check if we have index for given entity
+      assert(leafIndex[en.global_index()] >= 0);
+
+      return leafIndex[en.global_index()];
+    }
+  };
+
+  //! if codim > codim of entity use subIndex 
+  template <class EntityType>
+  struct IndexWrapper<EntityType,0,2>
+  {
+    static int index (EntityType & en , const IndexArray<int> & leafIndex, int num )
+    {
+      return en.template subIndex<2> (num);
+    }
+  };
+
+  template <class EntityType>
+  struct IndexWrapper<EntityType,0,3>
+  {
+    static int index (EntityType & en , const IndexArray<int> & leafIndex, int num )
+    {
+      return en.template subIndex<3> (num);
+    }
+  };
+  //******************************************************************
+  
+  // my type, to be revised 
+  enum { myType = 2 };
+  
   enum INDEXSTATE { NEW, USED, UNUSED };
   
   // the mapping of the global to leaf index 
@@ -103,6 +143,7 @@ class AdaptiveLeafIndexSet : public DefaultGridIndexSetBase <GridType>
   // size of old index set 
   int oldSize_;
 
+  // true if all entities that we use are marked as USED 
   bool marked_;
 
 public:
@@ -239,6 +280,8 @@ public:
   template <int codim, class EntityType>
   int index (EntityType & en, int num) const
   {
+    return IndexWrapper<EntityType,EntityType::codimension,codim>::index(en,leafIndex_,num);
+    /*
     // this index set works only for codim = 0 at the moment
     assert(codim == 0);
 
@@ -246,6 +289,7 @@ public:
     assert(leafIndex_[en.global_index()] >= 0);
 
     return leafIndex_[en.global_index()];
+    */
   }
   
   //! return size of grid entities per level and codim 
@@ -459,6 +503,14 @@ private:
   // read/write from/to xdr stream 
   bool processXdr(XDR *xdrs)
   {
+    int type = myType;
+    xdr_int ( xdrs, &type );
+    if(type != myType)
+    {
+      std::cerr << "\nERROR: AdaptiveLeafIndexSet: wrong type choosen! \n\n";
+      assert(type == myType);
+    }
+
     xdr_int ( xdrs, &nextFreeIndex_ );
     xdr_int ( xdrs, &actSize_ );
     leafIndex_.processXdr(xdrs);
