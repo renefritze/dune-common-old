@@ -114,6 +114,20 @@ inline Vec<dim,sgrid_ctype> SElement<dim,dimworld>::local (const Vec<dimworld,sg
 }
 
 template<int dim, int dimworld> 
+inline bool SElement<dim,dimworld>::checkInside (const Vec<dimworld,sgrid_ctype>& global)
+{
+  // check if point in in element, therefore calc local coordinates and
+  // check wether they are in the reference element 
+  Vec<dim,sgrid_ctype> tmp = local(global);
+  for(int i=0; i<dim; i++)
+  {
+    if((tmp.read(i) < 0.0) || (tmp.read(i) > 1.0 ))
+      return false;
+  }
+  return true;
+}
+
+template<int dim, int dimworld> 
 inline sgrid_ctype SElement<dim,dimworld>::integration_element (const Vec<dim,sgrid_ctype>& local)
 {
 	sgrid_ctype s = 1.0;
@@ -726,6 +740,12 @@ template<int dim, int dimworld>
 inline bool SNeighborIterator<dim,dimworld>::boundary ()
 {
 	return is_on_boundary;
+}
+
+template<int dim, int dimworld>
+inline bool SNeighborIterator<dim,dimworld>::neighbor ()
+{
+	return (!is_on_boundary);
 }
 
 template<int dim, int dimworld>

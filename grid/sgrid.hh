@@ -134,6 +134,9 @@ public:
 	//! maps a global coordinate within the element to a local coordinate in its reference element
 	Vec<dim,sgrid_ctype> local (const Vec<dimworld,sgrid_ctype>& global);
 
+	//! returns true if the point global is located within this element 
+	bool checkInside (const Vec<dimworld,sgrid_ctype>& global);
+  
 	/*! Integration over a general element is done by integrating over the reference element
 	  and using the transformation from the reference element to the global element as follows:
 	  \f[\int\limits_{\Omega_e} f(x) dx = \int\limits_{\Omega_{ref}} f(g(l)) A(l) dl \f] where
@@ -221,6 +224,26 @@ inline std::ostream& operator<< (std::ostream& s, SElement<dim,dimworld>& e)
 	return s;
 }
 
+
+template <int dim, int dimworld> 
+class SBoundaryEntity 
+: public BoundaryEntityDefault <dim,dimworld,sgrid_ctype,SElement,SBoundaryEntity>
+{
+public: 
+  //! return type of boundary segment 
+  BoundaryType type ();
+
+  //! return true if ghost cell was calced
+  bool hasGeometry ();
+
+  //! return outer ghost cell 
+  SElement<dim,dimworld> & geometry();
+
+  //! return outer barycenter of ghost cell 
+  Vec<dimworld,sgrid_ctype> & outerPoint ();
+private:
+};
+
 //************************************************************************
 /*! Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
   a neighbor is an entity of codimension 0 which has a common entity of codimension 1 with the entity.
@@ -229,7 +252,7 @@ inline std::ostream& operator<< (std::ostream& s, SElement<dim,dimworld>& e)
   of an element!
  */
 template<int dim, int dimworld>
-class SNeighborIterator : public NeighborIteratorDefault <dim,dimworld,sgrid_ctype,SNeighborIterator,SEntity,SElement>
+class SNeighborIterator : public NeighborIteratorDefault <dim,dimworld,sgrid_ctype,SNeighborIterator,SEntity,SElement,SBoundaryEntity>
 {
 public:
 	//! know your own dimension
@@ -252,6 +275,9 @@ public:
 
 	//! return true if intersection is with boundary. \todo connection with boundary information, processor/outer boundary
 	bool boundary ();
+
+  //! return true if neighbor on this level exists
+  bool neighbor ();
 
 	//! access neighbor, dereferencing 
 	SEntity<0,dim,dimworld>& operator*();

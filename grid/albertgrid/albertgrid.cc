@@ -272,9 +272,10 @@ builtGeom(ALBERT EL_INFO *elInfo, unsigned char face,
   if(elInfo_)
   {
     for(int i=0; i<dim+1; i++)
+    {
       (coord_(i)) = static_cast< albertCtype  * > 
                     ( elInfo_->coord[mapVertices<dimworld-dim>(i)] );
-
+    }
     // geometry built 
     return true;
   }
@@ -567,6 +568,12 @@ integration_element (const Vec<dim,albertCtype>& local)
   builtJacobianInverse(local);
   return volume_;
 }
+inline Mat<1,1>& AlbertGridElement<1,2>:: 
+Jacobian_inverse (const Vec<1,albertCtype>& local)
+{
+  std::cout << "Jaconbian_inverse for dim=1,dimworld=2 not implemented yet! \n";
+  return Jinv_;
+}
 
 template< int dim, int dimworld>
 inline Mat<dim,dim>& AlbertGridElement<dim,dimworld>:: 
@@ -597,6 +604,16 @@ builtJacobianInverse(const Vec<dim,albertCtype>& local)
     for(int j=0; j<dimworld; j++)
       Jinv_(i,j) = lambda[i][j];
   }
+  builtinverse_ = true;
+}
+
+inline void AlbertGridElement<1,2>:: 
+builtJacobianInverse(const Vec<1,albertCtype>& local)
+{
+  // volume is length of edge 
+  Vec<2,albertCtype> vec = coord_(0) - coord_(1);
+  volume_ = sqrt( vec*vec ); 
+
   builtinverse_ = true;
 }
 
@@ -1232,7 +1249,7 @@ operator !=(const AlbertGridNeighborIterator& I) const
 }
 
 template< int dim, int dimworld>
-inline void AlbertGridNeighborIterator<dim,dimworld>::
+inline ALBERT EL_INFO * AlbertGridNeighborIterator<dim,dimworld>::
 setupVirtualEntity(int neighbor)
 {
   if((neighbor >= 0) && (neighbor < dim+1))
@@ -1242,20 +1259,22 @@ setupVirtualEntity(int neighbor)
       // if no neighbour exists, then return the 
       // the default neighbour, which means boundary
       initElInfo(&neighElInfo_);
-      virtualEntity_->setElInfo(&neighElInfo_);
-      return;
+      
+      //virtualEntity_->setElInfo(&neighElInfo_);
+      return (&neighElInfo_);
     }
     else
     {
       setNeighInfo(elInfo_,&neighElInfo_,neighbor);
-      virtualEntity_->setElInfo(&neighElInfo_);
-      return;
+      return (&neighElInfo_);
+      //virtualEntity_->setElInfo(&neighElInfo_);
     }
   }
   else 
   {
     std::cout << "No Neighbour for this number! \n";
     abort();
+    return NULL;
   }
 }
 
@@ -1270,7 +1289,7 @@ operator *()
     virtualEntity_->setTraverseStack(NULL);
   }
 
-  setupVirtualEntity(neighborCount_);
+  virtualEntity_->setElInfo(setupVirtualEntity(neighborCount_));
   return (*virtualEntity_);
 }
 
@@ -1285,12 +1304,28 @@ operator ->()
     virtualEntity_->setTraverseStack(NULL);
   }
 
-  setupVirtualEntity(neighborCount_);
+  virtualEntity_->setElInfo(setupVirtualEntity(neighborCount_));
   return virtualEntity_;
 }
 
 template< int dim, int dimworld>
+inline AlbertGridBoundaryEntity<dim,dimworld>& 
+AlbertGridNeighborIterator<dim,dimworld>::boundaryEntity ()
+{
+//  std::cout << "Not correctly implemented yet!\n";
+//  _boundaryEntity.setElInfo(setupVirtualEntity(neighborCount_),neighborCount_);
+  _boundaryEntity.setElInfo(elInfo_,neighborCount_);
+  return _boundaryEntity;
+}
+
+template< int dim, int dimworld>
 inline bool AlbertGridNeighborIterator<dim,dimworld>::boundary()
+{
+  return (elInfo_->boundary[neighborCount_] != NULL);
+}
+
+template< int dim, int dimworld>
+inline bool AlbertGridNeighborIterator<dim,dimworld>::neighbor()
 {
   return (elInfo_->neigh[neighborCount_] == NULL);
 }
@@ -1396,7 +1431,7 @@ inline AlbertGridElement< dim-1, dimworld >&
 AlbertGridNeighborIterator<dim,dimworld>::
 intersection_self_global()
 {
-  std::cout << "intersection_self_global not check until now! \n";
+  //std::cout << "intersection_self_global not check until now! \n";
   if(!neighGlob_)
     neighGlob_ = new AlbertGridElement<dim-1,dimworld> (false);
 
@@ -2341,12 +2376,18 @@ inline void AlbertGrid < dim, dimworld >::calcExtras ()
 template < int dim, int dimworld >  template <FileFormatType ftype> 
 inline bool AlbertGrid < dim, dimworld >::writeGrid (const char * filename, albertCtype time )
 {
-  if(ftype != xdr)
+  switch (ftype)
   {
-    std::cerr << "Only xdr Format support in writeGrid!\n";
-    abort();
+    case xdr:  
+      { return writeGridXdr (filename , time ); }
+    case USPM: {
+                 //std::cout << "Write USPM \n";
+                 return writeGridUSPM ( filename , time , maxlevel_ ); 
+               };
   }
-  return writeGridXdr (filename , time );
+  std::cerr << "Only xdr Format support in writeGrid!\n";
+  abort();
+  return false;
 }
 
 template < int dim, int dimworld >  template <FileFormatType ftype> 
@@ -2380,30 +2421,28 @@ inline bool AlbertGrid < dim, dimworld >::readGridXdr (const char * filename, al
   return true;
 }
 
-#if 0
 template < int dim, int dimworld >
-inline void AlbertGrid < dim, dimworld >::writeGrid (int level)
+inline bool AlbertGrid < dim, dimworld >::
+writeGridUSPM ( const char * filename, double time , int level)
 {
   printf("Not implemented for dim=%d , dimworld=%d \n",dim,dimworld);
   abort();
+  return false;
 }
 
 
-inline void AlbertGrid <2,2>::writeGrid (int level)
+inline bool AlbertGrid <2,2>::
+writeGridUSPM ( const char * filename, double time , int level)
 {
   std::cout << "\nStarting USPM Grid write! \n";
   // USPM 2d 
  
   enum {dim = 2}; enum {dimworld = 2};  
-  typedef AlbertGridLevelIterator<0,dim,dimworld> LEVit;
+  typedef AlbertGrid<dim,dimworld>::LeafIterator  LEVit;
 
-  //if(level == -1) level = maxlevel_;
-  
-  LEVit endit = lend<0>(level);
+  LEVit endit = leafend (level);
 
   int nvx = size(level,dim);
-  //std::cout << nvx << " Nvx \n";
-  
   int noe = size(level,0);
 
   double **coord = new double *[nvx];
@@ -2419,22 +2458,22 @@ inline void AlbertGrid <2,2>::writeGrid (int level)
     vertex[i] = new int[dim + 1];
 
   // setup the USPM Mesh 
-  for (LEVit it = lbegin<0>(level); it != endit; ++it)
+  for (LEVit it = leafbegin (level); it != endit; ++it)
   {
     int elNum = it->index();
-    std::cout << elNum << " ElNum \n";
+  //  std::cout << elNum << " ElNum \n";
 
     typedef AlbertGridNeighborIterator<dim,dimworld> Neighit;
     Neighit nit = it->nbegin();
     
     for (int i = 0; i < dim+1; i++)
     {
-      int k = it->entity<dim>(i)->index();
+      int k = it->subIndex<dim>(i);
 //      std::cout << k << " K " << nvx << " Nop\n";
       vertex[elNum][i] = k;
 
       nb[elNum][i] = nit->index();
-      std::cout << nb[elNum][i] << " Neigh \n";
+      //std::cout << nb[elNum][i] << " Neigh \n";
 
       Vec<dimworld>& vec = (it->geometry())[i];
       for (int j = 0; j < dimworld; j++)
@@ -2442,11 +2481,11 @@ inline void AlbertGrid <2,2>::writeGrid (int level)
 
       ++nit;
     }
-    std::cout << "------------------------------------\n";
+    //std::cout << "------------------------------------\n";
   }
   
   // write the USPM Mesh
-  FILE *file = fopen("grid.uspm", "w");
+  FILE *file = fopen(filename, "w");
   if(!file)
   {
     std::cout << "Couldnt open grid.uspm \n";
@@ -2475,7 +2514,7 @@ inline void AlbertGrid <2,2>::writeGrid (int level)
   }
 
   fclose(file);
-  std::cout << "\nUSPM grid 'grid.uspm' written !\n\n";
+  std::cout << "\nUSPM grid `" << filename << "' written !\n\n";
 
   for (int i = 0; i < nvx; i++)
     delete [] coord[i];
@@ -2489,10 +2528,11 @@ inline void AlbertGrid <2,2>::writeGrid (int level)
     delete [] vertex[i];
   delete [] vertex;
 
-
+  return true;
 }
 
-inline void AlbertGrid<3,3>::writeGrid(int level)
+inline bool AlbertGrid<3,3>::
+writeGridUSPM ( const char * filename, double time , int level)
 {
   std::cout << "\nStarting 3d Grid write\n";
 
@@ -2528,10 +2568,10 @@ inline void AlbertGrid<3,3>::writeGrid(int level)
   }
 
   // / write the Wesenber 3d grid Mesh
-  FILE *file = fopen("grid3d.0", "w");
+  FILE *file = fopen(filename, "w");
   if(!file)
   {
-    std::cout << "Couldnt open grid3d.0 \n";
+    std::cout << "Couldnt open `" << filename <<"' \n";
     abort();
   }
   // die Zeit 
@@ -2564,11 +2604,10 @@ inline void AlbertGrid<3,3>::writeGrid(int level)
     delete [] vertex[i];
   delete [] vertex;
 
-  system("gzip -fq grid3d.0");
+  //system("gzip -fq grid3d.0");
   std::cout << "3d Grid written! \n";
+  return true;
 }
-
-#endif
 
 //! Index Mapping 
 template < int dim, int dimworld > 
@@ -2661,12 +2700,14 @@ inline void AlbertGrid < dim, dimworld >::markNew()
 // so they were switch off normaly 
 
 //#define DEBUG_FILLELINFO
-
+//*********************************************************************
+//  fillElInfo 2D
+//*********************************************************************
 template<int dim, int dimworld>
 inline void AlbertGrid<dim,dimworld >::
 fillElInfo(int ichild, int actLevel , const ALBERT EL_INFO *elinfo_old, ALBERT EL_INFO *elinfo, bool hierarchical) const
 {
-
+   
 #if 0
   ALBERT fill_elinfo(ichild,elinfo_old,elinfo);
 #else
@@ -3120,8 +3161,20 @@ else
 
 #endif
 
-} // end Grid::fillElInfo
+} // end Grid::fillElInfo 2D
 
+
+//***********************************************************************
+// fillElInfo 3D
+//***********************************************************************
+inline void AlbertGrid<3,3>::
+fillElInfo(int ichild, int actLevel , const ALBERT EL_INFO *elinfo_old, ALBERT EL_INFO *elinfo, bool hierarchical) const
+{
+  enum { dim = 3 };
+  enum { dimworld = 3 };
+
+  ALBERT fill_elinfo(ichild,elinfo_old,elinfo);
+} // end Grid::fillElInfo 3D
 
 } // end namespace dune
 
