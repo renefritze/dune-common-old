@@ -49,6 +49,12 @@ class Entity <0,dim,GridImp,EntityImp>
 {
   enum { dimworld = GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
+
+    typedef typename RemoveConst<GridImp>::Type mutableGridImp;
+
+    template <int cd>
+    friend EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<cd>::Entity& e );
+
 protected:
   EntityImp<0,dim,GridImp> realEntity;
 public:
@@ -180,6 +186,12 @@ class Entity <dim,dim,GridImp,EntityImp>
 {
   enum { dimworld = GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
+
+    typedef typename RemoveConst<GridImp>::Type mutableGridImp;
+
+    template <int cd>
+    friend EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<cd>::Entity& e );
+
 protected:
   EntityImp<dim,dim,GridImp> realEntity;
 public:
