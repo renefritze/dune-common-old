@@ -956,8 +956,8 @@ state()
   //printf("El State  %d \n", elInfo_->el->mark);
   if( elInfo_->el->mark < 0 )
   {
-    //std::cout << " Return Coarsend!\n";
-    return COARSEND; 
+    //std::cout << " Return Coarsen!\n";
+    return COARSEN; 
   }
   
   if( grid_.checkElNew( elInfo_->el ) )
@@ -3254,6 +3254,8 @@ inline int AlbertGrid < dim, dimworld >::maxlevel() const
 template < int dim, int dimworld >
 inline int AlbertGrid < dim, dimworld >::global_size (int codim) const
 {
+  // at this moment only for codim=0 and codim=dim
+  assert((codim == dim) || (codim == 0));
   return maxHierIndex_[codim];
 }
 
@@ -3358,6 +3360,9 @@ inline void AlbertGrid < dim, dimworld >::calcExtras ()
   numberOfEntitys_[1]     = 1;                      // faces 
   numberOfEntitys_[dim-1] = 1;                      // edges 
   numberOfEntitys_[dim]   = mesh_->n_vertices;      // vertices 
+
+  maxHierIndex_[1]   = mesh_->n_edges; 
+  maxHierIndex_[dim] = mesh_->n_vertices;
 
   // determine new maxlevel and mark neighbours 
   maxlevel_ = ALBERT AlbertHelp::calcMaxLevelAndMarkNeighbours
@@ -3745,6 +3750,8 @@ inline void AlbertGrid < dim, dimworld >::markNew()
 //  fillElInfo 2D
 //*********************************************************************
 #define CALC_COORD
+#define ALBERT_CHAR U_CHAR
+
 template<int dim, int dimworld>
 inline void AlbertGrid<dim,dimworld >::
 firstNeigh(const int ichild, const ALBERT EL_INFO *elinfo_old, 
@@ -3755,7 +3762,7 @@ firstNeigh(const int ichild, const ALBERT EL_INFO *elinfo_old,
   const ALBERT REAL_D * old_coord      = elinfo_old->coord;
 
   // new stuff 
-  ALBERT U_CHAR * opp_vertex     = elinfo->opp_vertex;
+  ALBERT ALBERT_CHAR * opp_vertex     = elinfo->opp_vertex;
   ALBERT EL ** neigh = NEIGH(el,elinfo);
   ALBERT REAL_D * opp_coord = elinfo->opp_coord;
 
@@ -3814,7 +3821,7 @@ secondNeigh(const int ichild, const ALBERT EL_INFO *elinfo_old,
   const ALBERT REAL_D * old_coord      = elinfo_old->coord;
 
   // new stuff 
-  ALBERT U_CHAR * opp_vertex     = elinfo->opp_vertex;
+  ALBERT ALBERT_CHAR * opp_vertex     = elinfo->opp_vertex;
   ALBERT EL ** neigh = NEIGH(el,elinfo);
   ALBERT REAL_D * opp_coord = elinfo->opp_coord;
 
@@ -3855,12 +3862,12 @@ thirdNeigh(const int ichild, const ALBERT EL_INFO *elinfo_old,
            ALBERT EL_INFO *elinfo, const bool leafLevel) const
 {
   // old stuff 
-  const ALBERT U_CHAR * old_opp_vertex = elinfo_old->opp_vertex;
+  const ALBERT ALBERT_CHAR * old_opp_vertex = elinfo_old->opp_vertex;
   const ALBERT REAL_D * old_opp_coord  = elinfo_old->opp_coord;
   const ALBERT REAL_D * old_coord      = elinfo_old->coord;
 
   // new stuff 
-  ALBERT U_CHAR * opp_vertex     = elinfo->opp_vertex;
+  ALBERT ALBERT_CHAR * opp_vertex     = elinfo->opp_vertex;
   ALBERT EL ** neigh = NEIGH(el,elinfo);
   ALBERT REAL_D * opp_coord = elinfo->opp_coord;
 
