@@ -1,3 +1,4 @@
+// $Id$
 #include<dune/common/arraylist.hh>
 #include<iostream>
 #include<cstdlib>
@@ -58,6 +59,40 @@ void initConsecutive(Dune::ArrayList<double,size>& alist){
 	alist.push_back(i);
 }
 
+int testIteratorRemove(){
+    using namespace Dune;
+    ArrayList<double,10> alist;
+    initConsecutive(alist);
+    ArrayList<double,10>::iterator iter=alist.begin();
+
+    iter+=8;
+
+    iter.removeUpToHere();
+
+    ++iter;
+
+    if((*iter)!=10){
+	std::cerr<<"Removing from iterator failed! "<<__FILE__<<":"<<__LINE__<<std::endl;
+	return 1;
+    }
+
+    iter = alist.begin();
+
+    if((*iter)!=10){
+	std::cerr<<"Removing from iterator failed! "<<__FILE__<<":"<<__LINE__<<std::endl;
+	return 1;
+    }
+
+    iter +=3;
+    iter.removeUpToHere();
+    iter +=4;
+
+    if((*iter)!=14){
+	std::cerr<<"Removing from iterator failed! "<<__FILE__<<":"<<__LINE__<<std::endl;
+	return 1;
+    }
+    return 0;
+}
 int testRandomAccess(){
     using namespace Dune;
     ArrayList<double,10> alist;
@@ -131,23 +166,17 @@ int main(){
 
     int ret=0;
 
-    if(0==testComparison())
-	cout << "Comparison is OK."<<endl;
-    else{
+    if(0!=testComparison()){
 	ret++;
 	cerr<< "Comparison failed!"<<endl;
     }
 
-    if(0==testRandomAccess())
-	cout << "Radom Access is OK."<<endl;
-    else{
+    if(0!=testRandomAccess()){
 	ret++;
 	cerr<< "Ransom Access failed!"<<endl;
     }
 
-    if(0==testSorting())
-	cout << "Sorting is OK."<<endl;
-    else{
+    if(0!=testSorting()){
 	ret++;
 	cerr<< "Sorting failed!"<<endl;
     }
