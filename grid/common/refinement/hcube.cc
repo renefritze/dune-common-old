@@ -113,6 +113,7 @@ namespace Dune {
       struct RefinementImp<dimension, CoordType>::codim
       {
 	class SubEntityIterator;
+	typedef typename Grid::template codim<codimension>::Geometry Geometry;
       };
 
       template<int dimension, class CoordType>
@@ -323,6 +324,7 @@ namespace Dune {
 	void increment();
 
 	int index() const;
+	const Geometry &geometry() const;
       private:
 	friend class RefinementSubEntityIteratorSpecial<dimension, CoordType, codimension>;
 	BackendIterator backend;
@@ -355,6 +357,13 @@ namespace Dune {
       RefinementImp<dimension, CoordType>::codim<codimension>::SubEntityIterator::
       index() const
       { return backend->index(); }
+
+      template<int dimension, class CoordType>
+      template<int codimension>
+      const typename RefinementImp<dimension, CoordType>::template codim<codimension>::Geometry &
+      RefinementImp<dimension, CoordType>::codim<codimension>::SubEntityIterator::
+      geometry() const
+      { return backend->geometry(); }
 
     } // namespace HCube
 
