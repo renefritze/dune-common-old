@@ -1,6 +1,7 @@
 #ifndef __DUNE_BSGRID_MYAUTOPTR_HH__
 #define __DUNE_BSGRID_MYAUTOPTR_HH__
 
+/** \brief An auto pointer class *\
 template <class Pointer> 
 class AutoPointer
 {
@@ -11,7 +12,7 @@ class AutoPointer
   mutable int *refCount_;
 
 public:
-  //! if a copy is made, the refcout is increased
+  //! if a copy is made, the refcount is increased
   inline AutoPointer(const AutoPointer<Pointer> & copy)
   {
     ptr_ = 0;
@@ -27,7 +28,7 @@ public:
   //! initialize the member variables 
   AutoPointer() : ptr_ (0) , refCount_ (0) {}
 
-  // store object pointer and creat refCount 
+  // store object pointer and create refCount 
   void store (Pointer * ptr) 
   {
     assert(ptr_ == 0);
@@ -54,14 +55,14 @@ public:
     }
   }
 
-  // return object reference 
+  //! return object reference 
   Pointer & operator * () const
   {
     assert( ptr_ != 0);
     return *ptr_;
   }
 
-  // return object pointer 
+  //! return object pointer 
   Pointer * operator -> () const
   {
     assert( ptr_ != 0);

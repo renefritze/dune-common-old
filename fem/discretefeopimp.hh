@@ -24,6 +24,9 @@ namespace Dune{
   @{
  */
 
+/** \brief Base class for discrete finite element operators
+ * Base class for local operators in a finite elment discretization
+ */
 template <class DiscreteFunctionType, class LocalOperatorImp >
 class DiscreteFEOp
 : public DiscreteOperatorDefault <DiscreteFunctionType, DiscreteFunctionType >
@@ -116,6 +119,7 @@ public:
     applyNow(Arg,Dest);
   }
 
+  //! \todo Please doc me!
   template <class ArgParamType , class DestParamType>
   void applyNow ( const ArgParamType &arg, DestParamType &dest ) const
   {
@@ -193,6 +197,7 @@ private:
     localOp_.finalizeGlobal();
   }
   
+  //! \todo Please doc me!
   template <class GridIteratorType>
   void applyOnGrid ( GridIteratorType &it, GridIteratorType &endit,
                      const DomainType &Arg, RangeType &Dest ) const 
@@ -209,6 +214,7 @@ private:
     }
   }
   
+  //! \todo Please doc me!
   template <class GridIteratorType>
   void applyOnGrid ( GridIteratorType &it, GridIteratorType &endit ) const 
   {

@@ -64,6 +64,7 @@ int testBidirectionalIterator(Iter begin, Iter end, Opt opt)
   return 0;
 }
 
+/** \todo Please doc me! */
 template<class Iter, class Opt>
 int testRandomAccessIterator(Iter begin, Iter end, Opt opt){
   int ret=testBidirectionalIterator(begin, end, opt);
@@ -153,21 +154,25 @@ int testRandomAccessIterator(Iter begin, Iter end, Opt opt){
   return ret;
 }
 
+/** \todo Please doc me! */
 template<class Iter, class Opt, typename iterator_category>
 int testIterator(Iter& begin, Iter& end, Opt& opt, iterator_category cat);
 
+/** \todo Please doc me! */
 template<class Iter, class Opt>
 int testIterator(Iter& begin, Iter& end, Opt& opt, std::forward_iterator_tag)
 {
   return testForwardIterator(begin, end, opt);
 }
 
+/** \todo Please doc me! */
 template<class Iter, class Opt>
 int testIterator(Iter& begin, Iter& end, Opt& opt, std::bidirectional_iterator_tag)
 {
   return testBidirectionalIterator(begin, end, opt);
 }
 
+/** \todo Please doc me! */
 template<class Iter, class Opt>
 int testIterator(Iter& begin, Iter& end, Opt& opt, std::random_access_iterator_tag)
 {
@@ -177,6 +182,7 @@ int testIterator(Iter& begin, Iter& end, Opt& opt, std::random_access_iterator_t
   return ret;
 }
 
+/** \todo Please doc me! */
 template<class Iter, class Opt>
 int testConstIterator(Iter& begin, Iter& end, Opt& opt)
 {
@@ -186,16 +192,19 @@ int testConstIterator(Iter& begin, Iter& end, Opt& opt)
   return ret;
 }
 
+/** \todo Please doc me! */
 template<class Container, typename IteratorTag>
 void testSorting(Container& C, IteratorTag tag)
 { }
 
+/** \todo Please doc me! */
 template<class Container>
 void testSorting(Container& c, std::random_access_iterator_tag)
 {
     std::sort(c.begin(), c.end());
 }
 
+/** \todo Please doc me! */
 template<class Container, class Opt>
 int testIterator(Container& c, Opt& opt)
 {
@@ -217,6 +226,7 @@ int testIterator(Container& c, Opt& opt)
     testIterator(begin,end,opt);
 }
 
+/** \todo Please doc me! */
 template<class Iter, class Opt>
 void testAssignment(Iter begin, Iter end, Opt& opt)
 {
@@ -226,6 +236,7 @@ void testAssignment(Iter begin, Iter end, Opt& opt)
   //std::cout<<" Done."<< std::endl;
 }
 
+/** \todo Please doc me! */
 template<class Iter, class Opt>
 int testIterator(Iter& begin, Iter& end, Opt& opt)
 {
@@ -234,6 +245,7 @@ int testIterator(Iter& begin, Iter& end, Opt& opt)
 }
 
 
+/** \todo Please doc me! */
 template<class T>
 class Printer{
   typename Dune::RemoveConst<T>::Type res;
@@ -244,7 +256,8 @@ public:
     //    std::cout << t <<" ";
   }
 };
-    
+ 
+/** \todo Please doc me! */   
 template<class Container, class Opt>
 int testIterator(const Container& c, Opt& opt)
 {
@@ -253,6 +266,7 @@ int testIterator(const Container& c, Opt& opt)
 }
 
 
+/** \todo Please doc me! */
 template<class Container>
 int testIterator(Container& c)
 {

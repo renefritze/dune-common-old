@@ -6,209 +6,220 @@
 
 namespace Dune {
 
-template <class DiscreteFunctionType>
-class CGInverseOperator : public Operator<
-  typename DiscreteFunctionType::DomainFieldType,
-  typename DiscreteFunctionType::RangeFieldType,
-            DiscreteFunctionType,DiscreteFunctionType> 
-{
-
-  typedef Mapping<typename DiscreteFunctionType::DomainFieldType ,
-        typename DiscreteFunctionType::RangeFieldType ,
-    DiscreteFunctionType,DiscreteFunctionType> MappingType;
-    
-public:
-
-  CGInverseOperator( const MappingType & op , 
-         double redEps , double absLimit , int maxIter , int verbose ) 
-    : op_(op), _redEps ( redEps ), epsilon_ ( absLimit*absLimit ) , 
-           maxIter_ (maxIter ) , _verbose ( verbose ) {
-  } 
-
-  void apply( const DiscreteFunctionType& arg, DiscreteFunctionType& dest ) const 
+  /** \brief Inversion operator using CG algorithm
+   */
+  template <class DiscreteFunctionType>
+  class CGInverseOperator : public Operator<
+    typename DiscreteFunctionType::DomainFieldType,
+    typename DiscreteFunctionType::RangeFieldType,
+    DiscreteFunctionType,DiscreteFunctionType> 
   {
-    typedef typename DiscreteFunctionType::FunctionSpace FunctionSpaceType;
-    typedef typename FunctionSpaceType::RangeField Field;
 
-    int count = 0;
-    Field spa=0, spn, q, quad;
+    typedef Mapping<typename DiscreteFunctionType::DomainFieldType ,
+                    typename DiscreteFunctionType::RangeFieldType ,
+                    DiscreteFunctionType,DiscreteFunctionType> MappingType;
     
-    DiscreteFunctionType r( arg );
-    DiscreteFunctionType p( arg );
-    DiscreteFunctionType h( arg );
+  public:
+    /** \todo Please doc me! */
+    CGInverseOperator( const MappingType & op, 
+                       double redEps,
+                       double absLimit,
+                       int maxIter,
+                       int verbose ) 
+      : op_(op), _redEps ( redEps ), epsilon_ ( absLimit*absLimit ) , 
+        maxIter_ (maxIter ) , _verbose ( verbose ) {
+    } 
 
-    op_( dest, h );
-
-    r.assign( h );
-    r -= arg;
-
-    p.assign( arg );
-    p -= h;
-
-    spn = r.scalarProductDofs( r );
-   
-    while((spn > epsilon_) && (count++ < maxIter_)) 
+    /** \todo Please doc me! */
+    void apply( const DiscreteFunctionType& arg, DiscreteFunctionType& dest ) const 
     {
-      // fall ab der zweiten iteration *************
-      
-      if(count > 1)
-      { 
-        const Field e = spn / spa;
-        p *= e;
-        p -= r;
-      }
+      typedef typename DiscreteFunctionType::FunctionSpace FunctionSpaceType;
+      typedef typename FunctionSpaceType::RangeField Field;
 
-      // grund - iterations - schritt **************
-      
-      op_( p, h );
-      
-      quad = p.scalarProductDofs( h );
-      q    = spn / quad;
-
-      dest.add( p, q );
-      r.add( h, q );
-
-      spa = spn;
-      
-      // residuum neu berechnen *********************
-      
-      spn = r.scalarProductDofs( r ); 
-      if(_verbose > 0)
-        std::cerr << count << " cg-Iterationen  " << count << " Residuum:" << spn << "        \r";
-    }
-    if(_verbose > 0)
-      std::cerr << "\n";
-  }
-
-private:
-  // reference to operator which should be inverted 
-  const MappingType &op_;
-  
-  // reduce error each step by 
-  double _redEps; 
-
-  // minial error to reach 
-  typename DiscreteFunctionType::RangeFieldType epsilon_;
-
-  // number of maximal iterations
-  int maxIter_;
-
-  // level of output 
-  int _verbose ;
-};
-
-
-template <class DiscreteFunctionType, class OperatorType>
-class CGInverseOp : public Operator<
-      typename DiscreteFunctionType::DomainFieldType,
-      typename DiscreteFunctionType::RangeFieldType,
-            DiscreteFunctionType,DiscreteFunctionType> 
-{
-public:
-
-  CGInverseOp( OperatorType & op , double  redEps , double absLimit , int maxIter , int verbose ) : op_(op),
-                  _redEps ( redEps ), epsilon_ ( absLimit*absLimit ) , 
-                  maxIter_ (maxIter ) , _verbose ( verbose ) , 
-                  r_(0), p_(0), h_(0)
-  {
-                    
-  } 
-                  
-  ~CGInverseOp()
-  {
-    if(p_) delete p_;
-    if(r_) delete r_;
-    if(h_) delete h_;
-  }
-
-  void apply( const DiscreteFunctionType& arg, DiscreteFunctionType& dest ) const 
-  {
-    typedef typename DiscreteFunctionType::FunctionSpace FunctionSpaceType;
-    typedef typename FunctionSpaceType::RangeField Field;
-
-    int count = 0;
-    Field spa=0, spn, q, quad;
-
-    if(!p_) p_ = new DiscreteFunctionType ( arg );
-    if(!r_) r_ = new DiscreteFunctionType ( arg );
-    if(!h_) h_ = new DiscreteFunctionType ( arg );
+      int count = 0;
+      Field spa=0, spn, q, quad;
     
-    DiscreteFunctionType & r = *r_;
-    DiscreteFunctionType & p = *p_;
-    DiscreteFunctionType & h = *h_;
+      DiscreteFunctionType r( arg );
+      DiscreteFunctionType p( arg );
+      DiscreteFunctionType h( arg );
 
-    op_.prepareGlobal(arg,dest);
+      op_( dest, h );
 
-    op_( dest, h );
+      r.assign( h );
+      r -= arg;
 
-    r.assign( h );
-    r -= arg;
+      p.assign( arg );
+      p -= h;
 
-    p.assign( arg );
-    p -= h;
-
-    spn = r.scalarProductDofs( r );
+      spn = r.scalarProductDofs( r );
    
-    while((spn > epsilon_) && (count++ < maxIter_)) 
-    {
-      // fall ab der zweiten iteration *************
+      while((spn > epsilon_) && (count++ < maxIter_)) 
+        {
+          // fall ab der zweiten iteration *************
       
-      if(count > 1)
-      { 
-        const Field e = spn / spa;
-        p *= e;
-        p -= r;
-      }
+          if(count > 1)
+            { 
+              const Field e = spn / spa;
+              p *= e;
+              p -= r;
+            }
 
-      // grund - iterations - schritt **************
+          // grund - iterations - schritt **************
       
-      op_( p, h );
+          op_( p, h );
       
-      quad = p.scalarProductDofs( h );
-      q    = spn / quad;
+          quad = p.scalarProductDofs( h );
+          q    = spn / quad;
 
-      dest.add( p, q );
-      r.add( h, q );
+          dest.add( p, q );
+          r.add( h, q );
 
-      spa = spn;
+          spa = spn;
       
-      // residuum neu berechnen *********************
+          // residuum neu berechnen *********************
       
-      spn = r.scalarProductDofs( r ); 
+          spn = r.scalarProductDofs( r ); 
+          if(_verbose > 0)
+            std::cerr << count << " cg-Iterationen  " << count << " Residuum:" << spn << "        \r";
+        }
       if(_verbose > 0)
-        std::cerr << count << " cg-Iterationen  " << count << " Residuum:" << spn << "        \r";
+        std::cerr << "\n";
     }
-    if(_verbose > 0)
-      std::cerr << "\n";
-    op_.finalizeGlobal();
-  }
+
+  private:
+    // reference to operator which should be inverted 
+    const MappingType &op_;
   
-  void operator () ( const DiscreteFunctionType& arg, DiscreteFunctionType& dest ) const 
+    // reduce error each step by 
+    double _redEps; 
+
+    // minial error to reach 
+    typename DiscreteFunctionType::RangeFieldType epsilon_;
+
+    // number of maximal iterations
+    int maxIter_;
+
+    // level of output 
+    int _verbose ;
+  };
+
+  /** \todo Please doc me! */
+  template <class DiscreteFunctionType, class OperatorType>
+  class CGInverseOp : public Operator<
+    typename DiscreteFunctionType::DomainFieldType,
+    typename DiscreteFunctionType::RangeFieldType,
+    DiscreteFunctionType,DiscreteFunctionType> 
   {
-    this->apply(arg,dest);
-  }
+  public:
+    /** \todo Please doc me! */
+    CGInverseOp( OperatorType & op , double  redEps , double absLimit , int maxIter , int verbose ) : 
+      op_(op),
+      _redEps ( redEps ),
+      epsilon_ ( absLimit*absLimit ) , 
+      maxIter_ (maxIter ) ,
+      _verbose ( verbose ) , 
+      r_(0),
+      p_(0), 
+      h_(0) {} 
 
-private:
-  // no const reference, we make const later 
-  OperatorType &op_;
+    /** \todo Please doc me! */             
+    ~CGInverseOp()
+    {
+      if(p_) delete p_;
+      if(r_) delete r_;
+      if(h_) delete h_;
+    }
+
+    /** \todo Please doc me! */      
+    void apply( const DiscreteFunctionType& arg, DiscreteFunctionType& dest ) const 
+    {
+      typedef typename DiscreteFunctionType::FunctionSpace FunctionSpaceType;
+      typedef typename FunctionSpaceType::RangeField Field;
+
+      int count = 0;
+      Field spa=0, spn, q, quad;
+
+      if(!p_) p_ = new DiscreteFunctionType ( arg );
+      if(!r_) r_ = new DiscreteFunctionType ( arg );
+      if(!h_) h_ = new DiscreteFunctionType ( arg );
+    
+      DiscreteFunctionType & r = *r_;
+      DiscreteFunctionType & p = *p_;
+      DiscreteFunctionType & h = *h_;
+
+      op_.prepareGlobal(arg,dest);
+
+      op_( dest, h );
+
+      r.assign( h );
+      r -= arg;
+
+      p.assign( arg );
+      p -= h;
+
+      spn = r.scalarProductDofs( r );
+   
+      while((spn > epsilon_) && (count++ < maxIter_)) 
+        {
+          // fall ab der zweiten iteration *************
+      
+          if(count > 1)
+            { 
+              const Field e = spn / spa;
+              p *= e;
+              p -= r;
+            }
+
+          // grund - iterations - schritt **************
+      
+          op_( p, h );
+      
+          quad = p.scalarProductDofs( h );
+          q    = spn / quad;
+
+          dest.add( p, q );
+          r.add( h, q );
+
+          spa = spn;
+      
+          // residuum neu berechnen *********************
+      
+          spn = r.scalarProductDofs( r ); 
+          if(_verbose > 0)
+            std::cerr << count << " cg-Iterationen  " << count << " Residuum:" << spn << "        \r";
+        }
+      if(_verbose > 0)
+        std::cerr << "\n";
+      op_.finalizeGlobal();
+    }
   
-  // reduce error each step by 
-  double _redEps; 
+    /** \todo Please doc me! */      
+    void operator () ( const DiscreteFunctionType& arg, DiscreteFunctionType& dest ) const 
+    {
+      this->apply(arg,dest);
+    }
 
-  // minial error to reach 
-  typename DiscreteFunctionType::RangeFieldType epsilon_;
+  private:
+    // no const reference, we make const later 
+    OperatorType &op_;
+  
+    // reduce error each step by 
+    double _redEps; 
 
-  // number of maximal iterations
-  int maxIter_;
+    // minial error to reach 
+    typename DiscreteFunctionType::RangeFieldType epsilon_;
 
-  // level of output 
-  int _verbose ;
+    // number of maximal iterations
+    int maxIter_;
 
-  // tmp variables 
-  mutable DiscreteFunctionType* r_;
-  mutable DiscreteFunctionType* p_;
-  mutable DiscreteFunctionType* h_;
-};
+    // level of output 
+    int _verbose ;
+
+    // tmp variables 
+    mutable DiscreteFunctionType* r_;
+    mutable DiscreteFunctionType* p_;
+    mutable DiscreteFunctionType* h_;
+  };
 
 
 } // end namespace Dune

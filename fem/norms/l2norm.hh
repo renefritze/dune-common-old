@@ -12,7 +12,9 @@ namespace Dune {
     {
         typedef typename DiscreteFunctionType::FunctionSpaceType FunctionSpaceType;
         
-    public:  
+    public:
+
+      //! \todo Please doc me!
         double compute (const DiscreteFunctionType &discFunc)
         {
 

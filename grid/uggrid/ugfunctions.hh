@@ -8,7 +8,7 @@
 #include "ugtypes.hh"
 
 namespace Dune {
-
+//! \todo Please doc me!
 template<int dim>
 class UG_NS {
 public:
@@ -34,7 +34,7 @@ public:
         CORNER_COORDINATES(theElement, n, x);
 #endif
     }
-
+//! \todo Please doc me!
     static int Sides_Of_Elem(typename TargetType<0,dim>::T* theElement) {
 #ifdef _3
         using UG3d::nb_offset;
@@ -56,7 +56,7 @@ public:
 #endif
         return NBELEM(theElement, nb);
     }
-
+//! \todo Please doc me!
     static int Edges_Of_Elem(const typename TargetType<0,dim>::T* theElement) {
 #ifdef _2
         using UG2d::element_descriptors;
@@ -65,7 +65,7 @@ public:
 #endif
         return EDGES_OF_ELEM(theElement);
     }
-
+  //! \todo Please doc me!
     static int Corners_Of_Elem(const typename TargetType<0,dim>::T* theElement) {
 #ifdef _2
         using UG2d::element_descriptors;
@@ -74,7 +74,7 @@ public:
 #endif
         return CORNERS_OF_ELEM(theElement);
     }
-
+  //! \todo Please doc me!
     static int Corners_Of_Side(const typename TargetType<0,dim>::T* theElement, int side) {
 #ifdef _2
         using UG2d::element_descriptors;
@@ -83,7 +83,7 @@ public:
 #endif
         return CORNERS_OF_SIDE(theElement, side);
     }
-
+//! \todo Please doc me!
     static int Corner_Of_Side(const typename TargetType<0,dim>::T* theElement, int side, int corner) {
 #ifdef _2
         using UG2d::element_descriptors;
@@ -98,7 +98,7 @@ public:
         return TAG(theElement);
     }
     
-
+  //! \todo Please doc me!
     static void Local_To_Global(int n, DOUBLE** y, 
                                 const FieldVector<double, dim>& local,
                                 FieldVector<double, dim>& global) {
@@ -132,7 +132,7 @@ public:
 #endif
         return CORNER(theElement, i);
     }
-
+  //! \todo Please doc me!
     static typename TargetType<0,dim>::T* EFather(typename TargetType<0,dim>::T* theElement) {
 #ifdef _3
         using UG3d::ELEMENT;
@@ -144,7 +144,7 @@ public:
         return EFATHER(theElement);
     }
     
-
+  //! \todo Please doc me!
     static void InitUg(int* argcp, char*** argvp) {
 #ifdef _3
         UG3d::InitUg(argcp, argvp);
@@ -154,6 +154,7 @@ public:
     }
 
 #ifdef _3
+  //! \todo Please doc me!
     static void* CreateBoundaryValueProblem(const char* BVPname,
                                           int numOfCoeffFunc, 
                                           UG3d::CoeffProcPtr coeffs[],
@@ -163,6 +164,7 @@ public:
                                                 numOfUserFct, userfct);
     }
 #else
+  //! \todo Please doc me!
     static void* CreateBoundaryValueProblem(const char* BVPname,
                                           int numOfCoeffFunc, 
                                           UG2d::CoeffProcPtr coeffs[],
@@ -172,7 +174,7 @@ public:
                                                 numOfUserFct, userfct);
     }
 #endif
-
+  //! \todo Please doc me!
     static typename UGTypes<dim>::MultiGridType* GetMultigrid(const char* name) {
 #ifdef _3
         return UG3d::GetMultigrid(name);
@@ -180,7 +182,7 @@ public:
         return UG2d::GetMultigrid(name);
 #endif
     }
-
+  //! \todo Please doc me!
     static void SetSubdomain(typename TargetType<0,dim>::T* theElement, int id) {
 #ifdef _2
         using UG2d::control_entries;
@@ -193,7 +195,7 @@ public:
     }
 
 };
-
+  //! \todo Please doc me!
     template <int codim, int dimworld>
     class UGGridSubEntityFactory {
 //     public:

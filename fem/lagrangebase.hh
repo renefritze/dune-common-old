@@ -160,7 +160,7 @@ private:
 
 //*******************************************************************
 //
-// DGSpace using Lagrange basis functions, used for visualisation 
+//! DGSpace using Lagrange basis functions, used for visualisation 
 //
 //*******************************************************************
 template< class FunctionSpaceType, class GridType,int polOrd, class
@@ -219,6 +219,7 @@ public:
     }
   }; 
 
+  //! Destructor
   ~LagrangeDGSpace () { 
     if (mapper_) delete mapper_;
   }
@@ -520,7 +521,7 @@ private:
 
 //*******************************************************************
 //
-//  EdgeBaseFunctionSet 
+//!  EdgeBaseFunctionSet 
 //
 //*******************************************************************
 template<class FunctionSpaceType, ElementType ElType, int polOrd > 
@@ -564,6 +565,7 @@ public:
   //! return number of base function for this base function set 
   int getNumberOfBaseFunctions() const { return numOfBaseFct; };
 
+  //! \todo Please doc me!
   int getNumberOfDiffrentBaseFunctions () const 
   { 
     return (int) (numOfBaseFct);
@@ -573,7 +575,7 @@ private:
     FieldVector<EdgeBaseFunctionType*, numOfBaseFct> baseFuncList_; 
 };
 
-
+//! \todo Please doc me!
 template <class GridType, int polOrd> 
 class RTMapper 
 : public DofMapperDefault < RTMapper <GridType,polOrd> > 
@@ -581,8 +583,11 @@ class RTMapper
   int numberOfDofs_;
   int level_;
 public: 
+
+  //! \todo Please doc me!
   RTMapper ( int numDof , int level ) : numberOfDofs_ (numDof), level_(level) {};
 
+  //! \todo Please doc me!
   int size (const GridType &grid ) const 
   {
     // return number of entities  * number of local faces  
@@ -598,6 +603,7 @@ public:
   
 }; // end class RTMapper
 
+  //! \todo Please doc me!
 template< class FunctionSpaceType, class GridType, int polOrd  >
 class RaviartThomasSpace 
 : public DiscreteFunctionSpaceInterface <  FunctionSpaceType , GridType, 
@@ -779,7 +785,7 @@ private:
 
 //********************************************************************
 //
-//  EdgeSpace 
+//!  EdgeSpace 
 //
 //********************************************************************
 template< class FunctionSpaceType, class GridType, int polOrd  >
@@ -814,6 +820,7 @@ FastBaseFunctionSet < EdgeSpace
  
   int level_;  
 public:
+  //! \todo Please doc me!
   EdgeSpace ( GridType & g , int level ) :
     DiscreteFunctionSpaceType (g,id) , level_ (level)  
   {

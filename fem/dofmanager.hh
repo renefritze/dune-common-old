@@ -36,22 +36,22 @@ typedef char MemPointerType;
 class DofArrayMemory 
 {
 private:
-  // pointer to memory
+  //! pointer to memory
   MemPointerType * vec_;
   
-  // size of array 
+  //! size of array 
   int size_;
   
-  // sizeof one array entry 
+  //! sizeof one array entry 
   size_t objSize_;
   
-  // name of this array
+  //! name of this array
   const char * name_;
  
-  // only this class is allowed to generate instances of this class 
+  //! only this class is allowed to generate instances of this class 
   friend class MemObject;
 
-  // Constructor can only be called from MemObject
+  //! Constructor can only be called from MemObject
   DofArrayMemory(const char * name, size_t objSize) : vec_ (0), size_(0) 
       , objSize_(objSize) , name_(name) {}
   
@@ -82,7 +82,8 @@ public:
   //! return vector for cg scheme 
   template <class T>
   T* vector () { return static_cast<T *> ((void *)vec_); }
-    
+  
+  //! return vector for cg scheme, const version
   template <class T>
   const T* vector () const { return static_cast<T *> ((void *)vec_); }
   
@@ -194,7 +195,10 @@ public:
     return *this;
   }
 
+  //! \todo Please doc me!
   T* vector() { return array_.vector<T> (); }
+
+  //! \todo Please doc me!
   const T* vector() const { return array_.vector<T> (); }
 
   //! read and write xdr 
@@ -204,6 +208,7 @@ public:
   } 
 };
 
+//! \todo Please doc me!
 class DefaultGHMM
 {
 public:
@@ -259,7 +264,7 @@ private:
   DofArrayMemory array_;
   
 public:  
-  // Constructor of MemObject, only to call from DofManager 
+  //! Constructor of MemObject, only to call from DofManager 
   template <class GridType, class MapperType>
   MemObject ( GridType & grid, MapperType & mapper, 
       const char * name , DefaultGHMM & ghmm , size_t objSize ) 
@@ -279,7 +284,7 @@ public:
     if(myMem_) ghmm_.Free(myMem_); 
   }
 
-  // defines the corresponding array type 
+  //! defines the corresponding array type 
   typedef DofArrayMemory DefaultArrayType;
  
   //! returns name of this vector 
@@ -436,7 +441,8 @@ public:
   {
     indexSet_.createFatherIndex(en);
   }
-    
+  
+  //! \todo Please doc me!
   void resizeTmp () 
   {
     ListIteratorType it    = memList_.begin();
@@ -464,6 +470,7 @@ public:
     }
   }
 
+  //! \todo Please doc me!
   void resize()
   {
     indexSet_.resize();
@@ -500,6 +507,7 @@ public:
     }
   }
 
+  //! \todo Please doc me!
   void dofCompress() 
   {
     // keeps the old indices for a while 
@@ -556,6 +564,7 @@ public:
   bool read_xdr( const char * filename, int timestep);
 };
 
+//! \todo Please doc me!
 template <class GridType,class IndexSetType>
 inline bool DofManager<GridType,IndexSetType>::
 write(const FileFormatType ftype, const char *filename, int timestep)
@@ -563,6 +572,7 @@ write(const FileFormatType ftype, const char *filename, int timestep)
   assert(ftype == xdr);     
   return write_xdr(filename,timestep);
 }
+//! \todo Please doc me!
 template <class GridType,class IndexSetType>
 inline bool DofManager<GridType,IndexSetType>::
 read(const char * filename , int timestep)
@@ -570,6 +580,7 @@ read(const char * filename , int timestep)
   return read_xdr(filename,timestep);  
 }
 
+//! \todo Please doc me!
 template <class GridType,class IndexSetType>
 inline bool DofManager<GridType,IndexSetType>::
 write_xdr(const char * filename , int timestep)
@@ -578,6 +589,7 @@ write_xdr(const char * filename , int timestep)
   return indexSet_.write_xdr(filename,timestep);
 }
 
+//! \todo Please doc me!
 template <class GridType,class IndexSetType>
 inline bool DofManager<GridType,IndexSetType>::
 read_xdr(const char * filename , int timestep)

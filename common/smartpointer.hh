@@ -3,6 +3,7 @@
 #ifndef __DUNE_SMARTPOINTER_HH__
 #define __DUNE_SMARTPOINTER_HH__
 #include<iostream>
+
 /**
  * @file 
  * @brief This file implements the class SmartPointer which is a reference counting

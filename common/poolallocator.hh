@@ -73,11 +73,13 @@ namespace Dune
       };
 
   private:
+    /** \todo Please doc me! */
     struct Reference
     {
       Reference *next_;
     };
-    
+
+    /** \todo Please doc me! */
     struct Chunk
     {
       /** @brief The memory we hold. */

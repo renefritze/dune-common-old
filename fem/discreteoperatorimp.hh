@@ -93,6 +93,7 @@ public:
     applyNow(Arg,Dest);
   }
 
+  //! \todo Please doc me!
   template <class ArgParamType , class DestParamType>
   void applyNow ( const ArgParamType &arg, DestParamType &dest ) const
   {
@@ -169,7 +170,8 @@ private:
     prepared_ = false;
     localOp_.finalizeGlobal();
   }
-  
+
+  //! \todo Please doc me!
   template <class GridIteratorType>
   void applyOnGrid ( GridIteratorType &it, GridIteratorType &endit,
                      const DFDomainType &Arg, DFRangeType &Dest ) const 
@@ -185,7 +187,8 @@ private:
       localOp_.finalizeLocal(*it);
     }
   }
-  
+
+  //! \todo Please doc me!
   template <class GridIteratorType>
   void applyOnGrid ( GridIteratorType &it, GridIteratorType &endit ) const 
   {
