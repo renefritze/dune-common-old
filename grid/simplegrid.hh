@@ -1,8 +1,7 @@
-#ifndef __SIMPLEGRID_HH__
-#define __SIMPLEGRID_HH__
+#ifndef SIMPLEGRID_HH
+#define SIMPLEGRID_HH
 
 #include"../common/matvec.hh"
-#include"../common/stack.hh"
 #include"common/grid.hh"
 #include<iostream>
 #include<assert.h>
