@@ -903,7 +903,7 @@ AlbertGridEntity < codim, dim ,dimworld >::father()
   travStack.stack_used--;
 
   AlbertGridLevelIterator <0,dim,dimworld>
-    it(grid_,travStack.elinfo_stack+travStack.stack_used,0,0,0,0);
+    it(grid_,level(),travStack.elinfo_stack+travStack.stack_used,0,0,0,0);
   return it;
 }
 
@@ -1102,8 +1102,8 @@ template <int dim, int dimworld> template <int cc>
 inline AlbertGridLevelIterator<cc,dim,dimworld> 
 AlbertGridEntity<0,dim,dimworld>::entity ( int i )
 {
-  AlbertGridLevelIterator<cc,dim,dimworld> tmp (grid_,elInfo_,
-      grid_. template indexOnLevel<cc>( el_index() ,level_),i,0,0);
+  AlbertGridLevelIterator<cc,dim,dimworld> tmp (grid_, level() ,elInfo_,
+      grid_. template indexOnLevel<cc>( el_index() ,level()),i,0,0);
   return tmp;
 }
 

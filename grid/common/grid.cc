@@ -833,7 +833,7 @@ template< int dim, int dimworld, class ct, template<int,int> class GridImp,
 template<int codim>
 inline LevelIteratorImp<codim,dim,dimworld> Grid<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::lbegin (int level)
 {
-	return asImp().lbegin<codim>(level);
+	return asImp().template lbegin<codim>(level);
 }
 
 template< int dim, int dimworld, class ct, template<int,int> class GridImp, 
@@ -841,7 +841,7 @@ template< int dim, int dimworld, class ct, template<int,int> class GridImp,
 template<int codim>
 inline LevelIteratorImp<codim,dim,dimworld> Grid<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::lend (int level)
 {
-	return asImp().lend<codim>(level);
+	return asImp().template lend<codim>(level);
 }
 
 // tester code
@@ -855,7 +855,7 @@ struct meta_grid_checkIF {
 		// iterate over codimension cc
 		std::cout << "checking LevelIterator with codim=" << cc 
 				  << ", dim=" << dim << ", dimworld=" << dimworld;
-		LevelIteratorImp<cc,dim,dimworld> i = g.lbegin<cc>(0);
+		LevelIteratorImp<cc,dim,dimworld> i = g.template lbegin<cc>(0);
 		i.checkIF();
 		std::cout << " OK."  << std::endl;
 
