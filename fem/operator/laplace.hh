@@ -27,7 +27,7 @@ namespace Dune
         enum { dim = GridType::dimension };
 
         //! The coordinate type
-        typedef typename GridType::template Traits<0>::CoordType CoordType;
+        typedef typename GridType::template codim<0>::CoordType CoordType;
 
         //! ???
         typedef typename FunctionSpaceType::JacobianRange JacobianRange;

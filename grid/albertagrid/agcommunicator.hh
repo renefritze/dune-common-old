@@ -452,7 +452,7 @@ private:
   void initialize () 
   {
 #ifndef YGRID
-    typedef typename GridType::template Traits<0>::LevelIterator LevelIteratorType;
+    typedef typename GridType::template codim<0>::LevelIterator LevelIteratorType;
     LevelIteratorType it    = grid_.template lbegin<0> (0,Ghosts);
     LevelIteratorType endit = grid_.template lend  <0> (0,Ghosts);
 
@@ -558,7 +558,7 @@ void makeParallelGrid (GridType &grid, CritType &crit)
 {
   for(int l=0; l <= grid.maxlevel(); l++)
   {
-    typedef typename GridType::template Traits<0>::LevelIterator LevelIteratorType;
+    typedef typename GridType::template codim<0>::LevelIterator LevelIteratorType;
     
     LevelIteratorType it    = grid.template lbegin<0> (l);
     LevelIteratorType endit = grid.template lend  <0> (l);

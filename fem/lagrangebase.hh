@@ -210,7 +210,7 @@ public:
   LagrangeDGSpace ( GridType & g, DofManagerType & dm , int level ) :
    ChefType (g,dm,level) , mapper_(0)
   {
-    typedef typename GridType::template Traits<0> :: LevelIterator LevIt;
+    typedef typename GridType::template codim<0> :: LevelIterator LevIt;
     LevIt it = g.template lbegin<0>(0);
     if(it != g.template lend<0>(0))
     {
@@ -643,7 +643,7 @@ public:
       baseFuncSet_(i) = 0;
     
     // search the macro grid for diffrent element types 
-    typedef typename GridType::template Traits<0>::LevelIterator LevelIterator;
+    typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
     LevelIterator endit = g.template lend<0>(0);
     for(LevelIterator it = g.template lbegin<0>(0); it != endit; ++it)
     {
@@ -827,7 +827,7 @@ public:
     for(int i=0; i<numOfDiffBase_; i++)
       baseFuncSet_(i) = 0;
 
-    typedef typename GridType::template Traits<0>::LevelIterator LevelIterator;
+    typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
     
     int edgeSize = 3 * g.size ( level , 0);
     edgeMap_.resize( edgeSize );
@@ -845,7 +845,7 @@ public:
         baseFuncSet_ ( type ) = setBaseFuncSetPointer(*it);
 
       typedef typename
-        GridType::template Traits<0>::Entity::Traits::IntersectionIterator EdgeIt;
+        GridType::template codim<0>::IntersectionIterator EdgeIt;
 
       int index = it->index();
       EdgeIt nit    = it->ibegin();

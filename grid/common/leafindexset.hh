@@ -385,7 +385,7 @@ private:
   //! give all entities that lie below the old entities new numbers 
   void markAllBelowOld () 
   {
-    typedef typename GridType::template Traits<0>::LevelIterator LevelIterator; 
+    typedef typename GridType::template codim<0>::LevelIterator LevelIterator; 
 
     LevelIterator macroit  = this->grid_.template lbegin<0> (0);
     LevelIterator macroend = this->grid_.template lend  <0> (0);
@@ -402,8 +402,8 @@ private:
     
     for( ; macroit != macroend; ++macroit )
     {
-      typedef typename GridType::template Traits<0>::
-            Entity::Traits::HierarchicIterator HierarchicIterator; 
+      typedef typename GridType::template codim<0>::
+            Entity::HierarchicIterator HierarchicIterator; 
      
       // if we have index all entities below need new numbers 
       bool areNew = false; 

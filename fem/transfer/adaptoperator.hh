@@ -125,7 +125,7 @@ public:
       if(!calcedWeight_) calcWeight();
       
       dm_.resizeTmp();
-      typedef typename GridType::template Traits<0>::LevelIterator LevelIterator;
+      typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
 
       // make run through grid 
       for(int l=0; l<grid_.maxlevel(); l++)
@@ -145,7 +145,7 @@ public:
     {
       dm_.resize();
       
-      typedef typename GridType::template Traits<0>::LevelIterator LevelIterator;
+      typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
 
       // make run through grid 
       LevelIterator it    = grid_.template lbegin<0> ( 0 );
@@ -175,7 +175,7 @@ private:
   {
     if(en.hasChildren())
     {
-      typedef typename EntityType::Traits::HierarchicIterator HierarchicIterator; 
+      typedef typename EntityType::HierarchicIterator HierarchicIterator; 
       HierarchicIterator it    = en.hbegin( en.level() + 1 );
 
       // if the children have children then we have to go deeper 
@@ -205,7 +205,7 @@ private:
   template <class EntityType>
   void hierarchicProlong ( EntityType &en) const 
   {
-    typedef typename EntityType::Traits::HierarchicIterator HierarchicIterator; 
+    typedef typename EntityType::HierarchicIterator HierarchicIterator; 
     HierarchicIterator it    = en.hbegin( grid_.maxlevel() );
     HierarchicIterator endit = en.hend  ( grid_.maxlevel() );
 
@@ -228,7 +228,7 @@ private:
   template <class EntityType>
   bool hierarchicCalcWeight ( EntityType &en) const 
   {
-    typedef typename EntityType::Traits::HierarchicIterator HierarchicIterator; 
+    typedef typename EntityType::HierarchicIterator HierarchicIterator; 
     HierarchicIterator it    = en.hbegin( en.level() + 1 );
     HierarchicIterator endit = en.hend  ( en.level() + 1 );
 
@@ -244,7 +244,7 @@ private:
   // calc ratio between volume of father and volume of child 
   void calcWeight() const
   {
-    typedef typename GridType::template Traits<0>::LevelIterator LevelIterator;
+    typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
     // make run through grid 
     LevelIterator it    = grid_.template lbegin<0> ( 0 );
     LevelIterator endit = grid_.template lend<0>   ( 0 );

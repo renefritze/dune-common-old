@@ -18,8 +18,8 @@ void Dune::AmiraMeshWriter<GridType>::writeGrid(const GridType& grid,
     // hexagrid format.
     bool containsOnlyTetrahedra = true;
 
-    typename GridType::template Traits<0>::LevelIterator element = grid.template lbegin<0>(level);
-    typename GridType::template Traits<0>::LevelIterator end     = grid.template lend<0>(level);
+    typename GridType::template codim<0>::LevelIterator element = grid.template lbegin<0>(level);
+    typename GridType::template codim<0>::LevelIterator end     = grid.template lend<0>(level);
 
     for (; element!=end; ++element) {
         if (element->geometry().type() != tetrahedron) {
@@ -48,7 +48,7 @@ void Dune::AmiraMeshWriter<GridType>::writeGrid(const GridType& grid,
                                                         McPrimType::mc_float, DIM);
    am.insert(geo_node_data);
 
-   typedef typename GridType::template Traits<3>::LevelIterator VertexIterator;
+   typedef typename GridType::template codim<3>::LevelIterator VertexIterator;
    VertexIterator vertex    = grid.template lbegin<DIM>(level);
    VertexIterator endvertex = grid.template lend<DIM>(level);
    
@@ -103,7 +103,7 @@ void Dune::AmiraMeshWriter<GridType>::writeGrid(const GridType& grid,
 
    int *dPtr = (int*)element_data->dataPtr();
 
-   typedef typename GridType::template Traits<0>::LevelIterator ElementIterator;
+   typedef typename GridType::template codim<0>::LevelIterator ElementIterator;
    ElementIterator element2    = grid.template lbegin<0>(level);
    ElementIterator endelement = grid.template lend<0>(level);
 
@@ -168,8 +168,8 @@ void Dune::AmiraMeshWriter<GridType>::writeGrid(const GridType& grid,
     // written (so far).
     bool containsOnlyTetrahedra = true;
 
-    typename GridType::template Traits<0>::LevelIterator element = grid.template lbegin<0>(level);
-    typename GridType::template Traits<0>::LevelIterator end     = grid.template lend<0>(level);
+    typename GridType::template codim<0>::LevelIterator element = grid.template lbegin<0>(level);
+    typename GridType::template codim<0>::LevelIterator end     = grid.template lend<0>(level);
 
     for (; element!=end; ++element) {
         if (element->geometry().type() != triangle) {
@@ -206,8 +206,8 @@ void Dune::AmiraMeshWriter<GridType>::writeGrid(const GridType& grid,
    am_geometry.insert(geo_node_data);
 
 
-   typename GridType::template Traits<2>::LevelIterator vertex    = grid.template lbegin<DIM>(level);
-   typename GridType::template Traits<2>::LevelIterator endvertex = grid.template lend<DIM>(level);
+   typename GridType::template codim<2>::LevelIterator vertex    = grid.template lbegin<DIM>(level);
+   typename GridType::template codim<2>::LevelIterator endvertex = grid.template lend<DIM>(level);
    
    for (; vertex!=endvertex; ++vertex) 
    {
@@ -259,8 +259,8 @@ void Dune::AmiraMeshWriter<GridType>::writeGrid(const GridType& grid,
 
    int *dPtr = (int*)element_data->dataPtr();
 
-   typename GridType::template Traits<0>::LevelIterator element2   = grid.template lbegin<0>(level);
-   typename GridType::template Traits<0>::LevelIterator endelement = grid.template lend<0>(level);
+   typename GridType::template codim<0>::LevelIterator element2   = grid.template lbegin<0>(level);
+   typename GridType::template codim<0>::LevelIterator endelement = grid.template lend<0>(level);
 
    for (i=0; element2!=endelement; ++element2, i++) {
        switch (element2->geometry().type()) {
@@ -361,8 +361,8 @@ void Dune::AmiraMeshWriter<GridType>::writeBlockVector(const GridType& grid,
     // hexagrid format.
     bool containsOnlyTetrahedra = true;
 
-    typename GridType::template Traits<0>::LevelIterator element = grid.template lbegin<0>(level);
-    typename GridType::template Traits<0>::LevelIterator end     = grid.template lend<0>(level);
+    typename GridType::template codim<0>::LevelIterator element = grid.template lbegin<0>(level);
+    typename GridType::template codim<0>::LevelIterator end     = grid.template lend<0>(level);
 
     for (; element!=end; ++element) {
         if (element->geometry().type() != tetrahedron) {

@@ -20,7 +20,7 @@ LagrangeDiscreteFunctionSpace ( GridType & g, DofManagerType & dm , int level) :
 
   {
     // search the macro grid for diffrent element types 
-    typedef typename GridType::template Traits<0>::LevelIterator LevelIteratorType;
+    typedef typename GridType::template codim<0>::LevelIterator LevelIteratorType;
     LevelIteratorType endit  = g.template lend<0>(level);
     for(LevelIteratorType it = g.template lbegin<0>(level); it != endit; ++it)
     {
