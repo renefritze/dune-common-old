@@ -558,11 +558,16 @@ public:
     :  FastBaseFunctionSet<FunctionSpaceType >
   ( fuSpace, numOfBaseFct ) 
   {
-    for(int i=0; i<numOfBaseFct; i++)
+    int numOfDifferentFuncs = (int) numOfBaseFct / dimrange;
+    for(int i=0; i<numOfDifferentFuncs; i++)
     {
-      baseFuncList_(i) = new LagrangeBaseFunctionType ( fuSpace, i ) ;
-      setBaseFunctionPointer ( i , baseFuncList_ (i) );
+      for(int k=0; k<dimrange; k++)
+      {
+        baseFuncList_(i*dimrange + k) = new LagrangeBaseFunctionType ( fuSpace, i ) ;
+        setBaseFunctionPointer ( i*dimrange + k , baseFuncList_ (i*dimrange + k) );
+      }
     }
+    setNumOfDiffFct ( numOfDifferentFuncs );
   };
 
   //! Destructor deleting the base functions 
@@ -574,6 +579,11 @@ public:
 
   //! return number of base function for this base function set 
   int getNumberOfBaseFunctions() const { return numOfBaseFct; };
+
+  int getNumberOfDiffrentBaseFunctions () const 
+  { 
+    return (int) (numOfBaseFct / dimrange);
+  }
 private:
   //! Vector with all base functions corresponding to the base function set 
   Vec < numOfBaseFct , LagrangeBaseFunctionType *> baseFuncList_; 
@@ -599,7 +609,7 @@ public:
   template <class GridType>      
   int size (const GridType &grid , int level ) const 
   {
-    // return number of vertices 
+    // return number of vertices * dimrange
     return (dimrange*grid.size( level , GridType::dimension ));     
   };
 
@@ -626,7 +636,7 @@ class LagrangeMapper<0,dimrange>
 public: 
   LagrangeMapper ( int numDofs ) {} 
 
-  //! default is Lagrange with polOrd = 1 
+  //! default is Lagrange with polOrd = 0 
   template <class GridType>      
   int size (const GridType &grid , int level ) const 
   {
@@ -635,7 +645,7 @@ public:
   };
 
   //! map Entity an local Dof number to global Dof number 
-  //! for Lagrange with polOrd = 1
+  //! for Lagrange with polOrd = 0
   template <class EntityType>
   int mapToGlobal (EntityType &en, int localNum ) const 
   {
@@ -703,6 +713,7 @@ public:
       if(baseFuncSet_( type ) == NULL ) 
         baseFuncSet_ ( type ) = setBaseFuncSetPointer(*it);
     }
+
   }
   
   ~LagrangeDiscreteFunctionSpace ( ) 
@@ -859,6 +870,12 @@ public:
   ~DGDiscreteFunctionSpace ()
   {
     if(mapper_) delete mapper_;
+  }
+  
+  //! return true if we have continuous discrete functions 
+  bool continuous ( ) const
+  {
+    return false;
   }
   
   //! length of the dof vector  
