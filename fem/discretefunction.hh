@@ -5,13 +5,8 @@
 #include "../common/function.hh"
 #include "../common/functionspace.hh"
 #include "discretefunctionspace.hh"
-#include "localfunctionarray.hh"
-#include "dofiterator.hh"
-
-//#include <fstream>
 
 namespace Dune{
-
 
 /** @defgroup DiscreteFunction The Interface for DiscreteFunctions
     
@@ -205,6 +200,10 @@ public:
   // add
   Vector<DiscreteFunctionSpaceType::RangeField> & 
   operator += (const Vector<DiscreteFunctionSpaceType::RangeField> &g);
+  
+  // add
+  void addScaled (const Vector<DiscreteFunctionSpaceType::RangeField> &g, 
+             const  DiscreteFunctionSpaceType::RangeField &scalar);
 
   // substract
   Vector<DiscreteFunctionSpaceType::RangeField> & 
