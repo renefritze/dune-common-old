@@ -555,13 +555,6 @@ inline DofIteratorArray<DofType>& DofIteratorArray<DofType>::operator ++()
 }
 
 template <class DofType>
-inline const DofIteratorArray<DofType>& DofIteratorArray<DofType>::operator ++() const
-{
-  count_++;
-  return (*this);      
-}
-
-template <class DofType>
 inline DofType& DofIteratorArray<DofType>::operator [](int i)
 {
   assert((i >=0) && (i < dofArray_.size()));
@@ -596,7 +589,7 @@ inline int DofIteratorArray<DofType>::index() const
 }
 
 template <class DofType>
-inline void DofIteratorArray<DofType>::reset() const
+inline void DofIteratorArray<DofType>::reset() 
 {
   count_ = 0; 
 }
