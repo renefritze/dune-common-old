@@ -89,7 +89,7 @@ inline void DiscFuncArray< DiscreteFunctionSpaceType >::set ( RangeFieldType x )
 template<class DiscreteFunctionSpaceType >
 inline void DiscFuncArray< DiscreteFunctionSpaceType >::clearLevel (int level )
 {
-  set(0.0,level);
+  setLevel(0.0,level);
 }
 
 template<class DiscreteFunctionSpaceType >
@@ -102,11 +102,10 @@ template<class DiscreteFunctionSpaceType >
 inline void DiscFuncArray< DiscreteFunctionSpaceType >::print(std::ostream &s, int level )
 {
   RangeFieldType sum = 0.;
-  int numLevel = const_cast<GridType &> (functionSpace_.getGrid()).maxlevel();
-  DofIteratorType enddof = dend ( numLevel );
-  for(DofIteratorType itdof = dbegin ( numLevel ); itdof != enddof; ++itdof) 
+  DofIteratorType enddof = dend ( level );
+  for(DofIteratorType itdof = dbegin ( level ); itdof != enddof; ++itdof) 
   {
-//    s << (*itdof) << " DofValue \n";
+    //s << (*itdof) << " DofValue \n";
     sum += ABS(*itdof);
   } 
   s << "sum = " << sum << "\n";
@@ -114,13 +113,20 @@ inline void DiscFuncArray< DiscreteFunctionSpaceType >::print(std::ostream &s, i
 //*************************************************************************
 //  Interface Methods 
 //*************************************************************************
-template<class DiscreteFunctionSpaceType > template<class GridIteratorType> 
-inline LocalFunctionArrayIterator<DiscFuncArray<DiscreteFunctionSpaceType>,GridIteratorType> 
+template<class DiscreteFunctionSpaceType > template <class EntityType>
+inline void
 DiscFuncArray< DiscreteFunctionSpaceType >::
-localFunction ( GridIteratorType &it )
+localFunction ( EntityType &en , LocalFunctionArray < DiscreteFunctionSpaceType > &lf )
 {
-  LocalFunctionArrayIterator<DiscreteFunctionType,GridIteratorType>
-      tmp ( *this , it );
+  lf.init (en );
+}
+
+template<class DiscreteFunctionSpaceType > 
+inline LocalFunctionArray<DiscreteFunctionSpaceType>  
+DiscFuncArray< DiscreteFunctionSpaceType >::
+newLocalFunction ( )
+{
+  LocalFunctionArray<DiscreteFunctionSpaceType> tmp ( functionSpace_ , dofVec_ );
   return tmp;
 }
 
@@ -465,10 +471,10 @@ write_USPM( const char *filename , int timestep )
 
 template<class DiscreteFunctionSpaceType >
 inline void DiscFuncArray< DiscreteFunctionSpaceType >::
-addScaled( const DiscFuncArray<DiscreteFunctionSpaceType> &g, 
+addScaled( int level, 
+           const DiscFuncArray<DiscreteFunctionSpaceType> &g, 
            const RangeFieldType &scalar )
 {
-  int level = functionSpace_.getGrid().maxlevel();
   int length = dofVec_[level].size();
 
   Array<RangeFieldType> &v = dofVec_[level];
@@ -585,7 +591,7 @@ numberOfDofs () const
 // hier noch evaluate mit Quadrature Regel einbauen 
 template<class DiscreteFunctionSpaceType > template <class EntityType> 
 inline void LocalFunctionArray < DiscreteFunctionSpaceType >::
-evaluate (EntityType &en, const DomainType & x, RangeType & ret) 
+evaluate (EntityType &en, const DomainType & x, RangeType & ret) const 
 {
   ret = 0.0;
   if(numOfDifferentDofs_ > 1) // i.e. polynom order > 0 
@@ -613,7 +619,7 @@ evaluate (EntityType &en, const DomainType & x, RangeType & ret)
 template<class DiscreteFunctionSpaceType > 
 template <class EntityType, class QuadratureType> 
 inline void LocalFunctionArray < DiscreteFunctionSpaceType >::
-evaluate (EntityType &en, QuadratureType &quad, int quadPoint, RangeType & ret) 
+evaluate (EntityType &en, QuadratureType &quad, int quadPoint, RangeType & ret) const 
 {
   ret = 0.0;
   if(numOfDifferentDofs_ > 1) // i.e. polynom order > 0 
@@ -809,7 +815,7 @@ template <class DiscFuncType , class GridIteratorType >
 inline LocalFunctionArrayIterator<DiscFuncType, GridIteratorType> &
 LocalFunctionArrayIterator<DiscFuncType,GridIteratorType>::operator ++(int i)
 {
-  ++it_.operator ++(i);
+  it_.operator ++(i);
   built_ = false;
   return (*this);
 }
@@ -833,6 +839,14 @@ inline int LocalFunctionArrayIterator<DiscFuncType,GridIteratorType>::
 index() const
 {
   return it_->index();
+}
+
+template <class DiscFuncType , class GridIteratorType >
+inline void LocalFunctionArrayIterator<DiscFuncType,GridIteratorType>::
+update( GridIteratorType & it ) 
+{
+  built_ = true;
+  lf_->init( *it );
 }
 
 } // end namespace 
