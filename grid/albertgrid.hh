@@ -197,14 +197,14 @@ public:
 
   //! maps a local coordinate within reference element to 
   //! global coordinate in element 
-    FieldVector<albertCtype, dimworld> global (const FieldVector<albertCtype, dim>& local);
+  FieldVector<albertCtype, dimworld> global (const FieldVector<albertCtype, dim>& local);
   
   //! maps a global coordinate within the element to a 
   //! local coordinate in its reference element
-    FieldVector<albertCtype, dim> local (const FieldVector<albertCtype, dimworld>& global);
+  FieldVector<albertCtype, dim> local (const FieldVector<albertCtype, dimworld>& global);
   
   //! returns true if the point in local coordinates is inside reference element
-    bool checkInside(const FieldVector<albertCtype, dim>& local);
+  bool checkInside(const FieldVector<albertCtype, dim>& local);
 
   /*! 
     Copy from sgrid.hh:
@@ -230,13 +230,13 @@ public:
    */
 
   // A(l) 
-    albertCtype integration_element (const FieldVector<albertCtype, dim>& local);
+  albertCtype integration_element (const FieldVector<albertCtype, dim>& local);
 
   //! can only be called for dim=dimworld!
   //! Note that if both methods are called on the same element, then 
   //! call Jacobian_inverse first because integration element is calculated
   //! during calculation of the Jacobian_inverse
-    Mat<dim,dim>& Jacobian_inverse (const FieldVector<albertCtype, dim>& local);
+  Mat<dim,dim>& Jacobian_inverse (const FieldVector<albertCtype, dim>& local);
 
   //***********************************************************************
   //!  Methods that not belong to the Interface, but have to be public
@@ -269,7 +269,7 @@ private:
   //! built the jacobian inverse and store the volume 
   void buildJacobianInverse (); 
 
-    FieldVector<albertCtype, dim+1> tmpVec_;
+  FieldVector<albertCtype, dim+1> tmpVec_;
   //! maps a global coordinate within the elements local barycentric
   //! koordinates 
   //Vec<dim+1,albertCtype> localBary (const Vec<dimworld,albertCtype>& global);
@@ -285,10 +285,10 @@ private:
   Mat<dimworld,dim+1,albertCtype> coord_;
 
   //! storage for global coords 
-    FieldVector<albertCtype, dimworld> globalCoord_;
+  FieldVector<albertCtype, dimworld> globalCoord_;
 
   //! storage for local coords
-    FieldVector<albertCtype, dim> localCoord_;
+  FieldVector<albertCtype, dim> localCoord_;
 
   // make empty EL_INFO 
   ALBERT EL_INFO * makeEmptyElInfo();
@@ -397,7 +397,7 @@ private:
   AlbertGridElement<dim-codim,dimworld> geo_;
   bool builtgeometry_;         //!< true if geometry has been constructed
 
-    FieldVector<albertCtype, dim> localFatherCoords_; 
+  FieldVector<albertCtype, dim> localFatherCoords_; 
 
   //! element number 
   int elNum_;
@@ -796,7 +796,7 @@ public:
       
   //! return unit outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
-    FieldVector<albertCtype, dimworld>& unit_outer_normal (FieldVector<albertCtype, dim-1>& local);
+  FieldVector<albertCtype, dimworld>& unit_outer_normal (FieldVector<albertCtype, dim-1>& local);
   
   //! return unit outer normal, if you know it is constant use this function instead
     FieldVector<albertCtype, dimworld>& unit_outer_normal ();
@@ -827,10 +827,10 @@ public:
   
   //! return outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
-    FieldVector<albertCtype, dimworld>& outer_normal (FieldVector<albertCtype, dim-1>& local);
+  FieldVector<albertCtype, dimworld>& outer_normal (FieldVector<albertCtype, dim-1>& local);
 
   //! return unit outer normal, if you know it is constant use this function instead
-    FieldVector<albertCtype, dimworld>& outer_normal ();
+  FieldVector<albertCtype, dimworld>& outer_normal ();
 
 private:
   //**********************************************************
