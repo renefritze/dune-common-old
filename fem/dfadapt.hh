@@ -231,6 +231,10 @@ public:
   template <class EntityType, class QuadratureType> 
   void evaluate (EntityType &en, QuadratureType &quad, int quadPoint , RangeType & ret) const;
   
+  //! sum over all local base functions evaluated on given quadrature point
+  template <class EntityType, class QuadratureType> 
+  void jacobian (EntityType &en, QuadratureType &quad, int quadPoint , JacobianRangeType & ret) const;
+  
 protected:
   //! update local function for given Entity  
   template <class EntityType > bool init ( EntityType &en ) const;
@@ -240,7 +244,7 @@ protected:
   mutable DomainType xtmp_;
 
   //! needed once 
-  JacobianRangeType tmpGrad_;
+  mutable JacobianRangeType tmpGrad_;
 
   //! diffVar for evaluate, is empty 
   const DiffVariable<0>::Type diffVar;

@@ -141,10 +141,11 @@ protected:
   //! length is different element types 
   Vec< numOfDiffBase_ , FastBaseFunctionSetType * > baseFuncSet_;
 
-private:
+protected:
   //! DofManager manages the memory 
   mutable DofManagerType & dm_;
 
+private:
   //! the corresponding LagrangeMapper 
   LagrangeMapperType *mapper_; 
 }; // end class LagrangeDiscreteFunctionSpace
