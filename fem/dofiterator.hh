@@ -45,12 +45,6 @@ public:
     return asImp().operator ++ ();
   };
 
-  //! go to next i steps 
-  DofIteratorType& operator++ (int i)
-  {
-    return asImp().operator ++ (i);
-  };
-
   //! compare with other GlobalDofIterators 
   bool operator == (const DofIteratorType& I)
   {
@@ -103,6 +97,14 @@ public:
     asImp().reset();
     asImp().operator ++ (i);
     return asImp().operator *();
+  };
+
+  //! go to next i steps 
+  DofIteratorType& operator++ (int steps)
+  {
+    for(int i=0; i<steps; i++)
+      asImp().operator ++ (i);
+    return asImp();
   };
 
 private:  
