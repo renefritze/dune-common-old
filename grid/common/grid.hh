@@ -67,9 +67,9 @@ enum ElementType {unknown,vertex,line, triangle, quadrilateral, tetrahedron, pyr
                         Dirichlet //!< Dirichlet type boundary 
                       };
     
-    enum AdaptationState { NONE ,   //!< nothin' to do 
-                           COARSENED,//!< entity could be coarsened 
-                           REFINED  //!< enity was refined 
+    enum AdaptationState { NONE ,   //!< notin' to do and notin' was done 
+                           COARSEN, //!< entity could be coarsen in adaptation step  
+                           REFINED  //!< enity was refined in adaptation step
                          };
 
    
@@ -92,7 +92,13 @@ enum ElementType {unknown,vertex,line, triangle, quadrilateral, tetrahedron, pyr
                          GhostEntity     //!< ghost entities 
                        };
 
-    
+    /*! GridIndexType specifies which Index of the Entities of the grid
+        should be used, i.e. global_index() or index() 
+     */
+    enum GridIndexType { GlobalIndex , //!< use global_index() of entity 
+                         LevelIndex    //!< use index() of entity 
+                       };
+        
 //************************************************************************
 // E L E M E N T
 //************************************************************************
@@ -832,7 +838,7 @@ class EntityDefault
   IntersectionIteratorImp,HierarchicIteratorImp> 
 {
 public:
-  //! remember the template types
+  //! remeber the template types
   struct Traits
   {
     typedef ct                                   CoordType;
@@ -859,6 +865,28 @@ public:
   // default is to return the index of the sub entity, is very slow, but works
   template <int cc> int subIndex ( int i );
 
+  //***************************************************************
+  //  Interface for Adaptation
+  //***************************************************************
+  //! marks an element for refCount refines. if refCount is negative the
+  //! element is coarsend -refCount times
+  //! mark returns true if element was marked, otherwise false
+  //! **Note**: default implemenntation is: return false; for grids with no
+  //! adaptation 
+  bool mark( int refCount ) { return false; } 
+  
+  //! return whether entity could be cosrsend (COARSEN) or was refined
+  //! (REFIEND) or nothing happend (NONE) 
+  //! **Note**: default implementation is: return NONE for grid with no
+  //! adaptation
+  AdaptationState state () { return NONE; }
+
+  EntityImp<0,dim,dimworld> newEntity () 
+  { 
+    EntityImp<0,dim,dimworld> tmp (asImp());  
+    return tmp;
+  }
+   
 private:
   //! \internal Barton-Nackman trick 
   EntityImp<0,dim,dimworld>& asImp () {return static_cast<EntityImp<0,dim,dimworld>&>(*this);}
@@ -1190,6 +1218,20 @@ public:
 
   //! return LeafIterator which points behind the last entity in maxLevel
   LeafIterator leafend(int maxLevel);
+
+  //! refine all positive marked leaf entities 
+  //! coarsen all negative marked entities if possible 
+  //! return true if a least one element was refined 
+  //! **Note**: this default implemenation returns always false 
+  //! so grid with no adaptation doesnt need to implement these methods 
+  bool adapt ()    { return false; }
+  
+  //! returns true, if a least one element is marked for coarsening
+  bool preAdapt () { return false; }
+
+  //! clean up some markers 
+  bool postAdapt() { return false; }
+
 
     /** Write Grid with GridType file filename and time 
      *
