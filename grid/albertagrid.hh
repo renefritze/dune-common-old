@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <assert.h>
+#include <algorithm>
 
 #include <config.h>
 
@@ -1071,7 +1072,7 @@ class AlbertaGrid
   friend class AlbertaGridLevelIterator<2,All_Partition,AlbertaGrid<dim,dimworld> >;
   friend class AlbertaGridLevelIterator<3,All_Partition,AlbertaGrid<dim,dimworld> >;
   friend class AlbertaGridHierarchicIterator<AlbertaGrid<dim,dimworld> >;
-
+  
   friend class AlbertaGridIntersectionIterator<AlbertaGrid<dim,dimworld> >;
 
   //! AlbertaGrid is only implemented for 2 and 3 dimension
@@ -1079,15 +1080,18 @@ class AlbertaGrid
   //CompileTimeChecker<dimworld != 1>   Do_not_use_AlbertaGrid_for_1d_Grids;   
  
   typedef AlbertaGrid<dim,dimworld> MyType; 
+
   friend class AlbertaMarkerVector;
+  friend class AlbertaGridHierarchicIndexSet<dim,dimworld>;
 
 //**********************************************************
 // The Interface Methods
 //**********************************************************
 public: 
-  typedef GridTraits<dim,dimworld,Dune::AlbertaGrid<dim,dimworld> ,AlbertaGridGeometry,AlbertaGridEntity,
-                   AlbertaGridBoundaryEntity,AlbertaGridLevelIterator,AlbertaGridIntersectionIterator,
-      AlbertaGridHierarchicIterator>  Traits;
+  typedef GridTraits<dim,dimworld,Dune::AlbertaGrid<dim,dimworld> ,
+              AlbertaGridGeometry,AlbertaGridEntity,
+              AlbertaGridBoundaryEntity,AlbertaGridLevelIterator,
+              AlbertaGridIntersectionIterator,AlbertaGridHierarchicIterator>  Traits;
 
   typedef typename Traits::template codim<0>::template partition<All_Partition>::LevelIterator LeafIterator;
 
@@ -1101,7 +1105,7 @@ public:
   //  Traits::template codim<0>::Entity  * > DataCollectorParamType;
 
 
-  //! we always have dim+1 codimensions since we use only simplices 
+  //! we always have dim+1 codimensions 
   enum { numCodim = dim+1 };
 
   //! Constructor which reads an Albert Macro Triang file 
@@ -1110,7 +1114,7 @@ public:
   //! if levInd == true the the element number of first macro element is
   //! set to 1 so hasLevelIndex_ can be identified we grid is read from
   //! file 
-  AlbertaGrid(const char* macroTriangFilename, bool levInd = true);
+  AlbertaGrid(const char* macroTriangFilename);
   
   //! Constructor which reads an Albert Macro Triang file 
   //! or given GridFile , proc is the number of domain , 
@@ -1118,7 +1122,7 @@ public:
   //! if levInd == true the the element number of first macro element is
   //! set to 1 so hasLevelIndex_ can be identified we grid is read from
   //! file 
-  AlbertaGrid(AlbertaGrid<dim,dimworld> & oldGrid, int proc,bool levInd = true);
+  AlbertaGrid(AlbertaGrid<dim,dimworld> & oldGrid, int proc);
   
   //! empty Constructor 
   AlbertaGrid();
@@ -1150,6 +1154,20 @@ public:
   template partition<All_Partition>::LevelIterator 
   lend (int level, int proc=-1) const;
 
+  //! return LeafIterator which points to first leaf entity 
+  template <PartitionIteratorType pitype>
+  LeafIterator leafbegin ( int maxlevel, int proc = -1 ) const;
+  
+  //! return LeafIterator which points behind last leaf entity 
+  template <PartitionIteratorType pitype>
+  LeafIterator leafend   ( int maxlevel, int proc = -1 ) const;
+
+  //! return LeafIterator which points to first leaf entity 
+  LeafIterator leafbegin ( int maxlevel, int proc = -1 ) const;
+  
+  //! return LeafIterator which points behind last leaf entity 
+  LeafIterator leafend   ( int maxlevel, int proc = -1 ) const;
+
   /** \brief Number of grid entities per level and codim
    * because lbegin and lend are none const, and we need this methods 
    * counting the entities on each level, you know.
@@ -1165,6 +1183,9 @@ public:
   bool mark( int refCount , typename Traits::template codim<0>::EntityPointer & en ); 
   bool mark( int refCount , typename Traits::template codim<0>::Entity & en ); 
 
+  //! uses the interface, mark on entity and refineLocal 
+  bool globalRefine(int refCount);
+  
   /*! \brief refine all positive marked leaf entities, 
    *  coarsen all negative marked entities if possible, 
    *  return true if a least one element was refined */
@@ -1182,10 +1203,6 @@ public:
 //**********************************************************
 // End of Interface Methods
 //**********************************************************
-
-  //! uses the interface, mark on entity and refineLocal 
-  bool globalRefine(int refCount);
-
   /** \brief write Grid to file in specified FileFormatType */
   template <FileFormatType ftype>
   bool writeGrid( const char * filename, albertCtype time ) const;
@@ -1194,16 +1211,6 @@ public:
   template <FileFormatType ftype>
   bool readGrid( const char * filename, albertCtype & time );
 
-  //! return current time of grid 
-  //! not an interface method yet 
-  albertCtype getTime () const { return time_; };
-
-  //! return LeafIterator which points to first leaf entity 
-  LeafIterator leafbegin ( int maxlevel, int proc = -1 ) const;
-  
-  //! return LeafIterator which points behind last leaf entity 
-  LeafIterator leafend   ( int maxlevel, int proc = -1 ) const;
-
   //! returns size of mesh include all levels 
   //! max Index of grid entities with given codim 
   //! for outside the min index is 0, the shift has to done inside 
@@ -1211,7 +1218,7 @@ public:
   int global_size (int codim) const;
 
   //! return number of my processor 
-  int myProcessor () const { return myProc_; }; 
+  int myRank () const { return myRank_; }; 
 
   //! transform grid N = scalar * x + trans
   void setNewCoords(const FieldVector<albertCtype, dimworld> & trans, const albertCtype scalar);
@@ -1227,20 +1234,22 @@ public:
   ALBERTA MESH* getMesh () const { return mesh_; }; 
 
   template <int cd>
-  AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& getRealEntity(typename Traits::template codim<cd>::Entity& entity) 
-  {
-      return entity.realEntity;
-  }
-
-  template <int cd>
-  const AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& getRealEntity(const typename Traits::template codim<cd>::Entity& entity) const 
+  AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& 
+  getRealEntity(typename Traits::template codim<cd>::Entity& entity) 
   {
       return entity.realEntity;
   }
 
 private:
+  template <int cd>
+  const AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& 
+  getRealEntity(const typename Traits::template codim<cd>::Entity& entity) const 
+  {
+      return entity.realEntity;
+  }
+
   // initialize of some members 
-  void initGrid(int proc, bool swapEls = true );
+  void initGrid(int proc);
   
   // max global index in Grid 
   int maxHierIndex_[dim+1];
@@ -1304,17 +1313,6 @@ public:
   AlbertaMarkerVector * vertexMarker_; 
 
 private:  
-  //*********************************************************
-  // Methods for mapping the global Index to local on Level
-  // contains the index on level for each unique el->index of Albert
-  enum { AG_MAXLEVELS = 100 };
-  
-  void makeNewSize(Array<int> &a, int newNumberOfEntries);
-  void markNew();
-
-  //! actual time of Grid
-  albertCtype time_;
-
   //***********************************************************************
   //  MemoryManagement for Entitys and Geometrys 
   //**********************************************************************
@@ -1345,6 +1343,7 @@ private:
   // pointer to vec of elNumbers_
   const int * elNewVec_;
 
+  // for access in the elNewVec and ownerVec 
   const int nv_;
   const int dof_; 
  
@@ -1355,13 +1354,13 @@ public:
   // return true if el is new 
   bool checkElNew ( ALBERTA EL * el ) const;
   
-  // read global element number form elNumbers_  
+  // read global element number from elNumbers_  
   int getElementNumber ( ALBERTA EL * el ) const; 
 
-  // read global element number form elNumbers_  
+  // read global element number from elNumbers_  
   int getEdgeNumber ( ALBERTA EL * el, int edge ) const; 
 
-  // read global element number form elNumbers_  
+  // read global element number from elNumbers_  
   int getVertexNumber ( ALBERTA EL * el, int vx ) const; 
 
   //********************************************************************
@@ -1378,12 +1377,13 @@ public:
   PartitionType partitionType ( ALBERTA EL_INFO * elinfo) const;
 
 private:
+
   // pointer to vec  with processor number for each element, 
   // access via setOwner and getOwner 
   int * ownerVec_;
 
   // rank of my thread, i.e. number of my processor 
-  const int myProc_;
+  const int myRank_;
 
   // the hierarchical numbering of AlbertaGrid, unique per codim and processor 
   AlbertaGridHierarchicIndexSet<dim,dimworld> hIndexSet_;
@@ -1575,6 +1575,7 @@ namespace Capabilities
 
 #include "albertagrid/agmemory.hh"
 #include <dune/io/file/asciiparser.hh>
+#include <dune/io/file/grapedataio.hh>
 #include "albertagrid/albertagrid.cc"
 
 #endif
