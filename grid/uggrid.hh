@@ -258,6 +258,10 @@ public:
     // End of Interface Methods
     // **********************************************************
 
+    void createbegin();
+
+    void createend();
+
     void adaptWithoutClosure();
     
     /** \brief The different forms of grid refinement that UG supports */
