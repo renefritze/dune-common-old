@@ -323,6 +323,7 @@ struct GridInterface
       // check for exported types
       typedef typename Grid::ctype ctype;
       typedef typename Grid::template codim<0>::LevelIterator LevelIterator;
+      typedef typename Grid::template codim<0>::EntityPointer EntityPointer;
       typedef typename Grid::LeafIterator LeafIterator;
       
       // check for member functions
@@ -332,8 +333,8 @@ struct GridInterface
       g.ghostSize(0,0);
 
       // adaption
-      LevelIterator lit = g.template lbegin<0>(0);
-      g.mark(100, *lit);
+      EntityPointer ept = g.template lbegin<0>(0);
+      g.mark(100, ept);
       g.adapt();
       g.preAdapt();
       g.postAdapt();
