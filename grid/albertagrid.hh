@@ -1315,8 +1315,8 @@ private:
 
   // pointer to the real number of elements or vertices
   // i.e. points to mesh->n_hier_elements or mesh->n_vertices
-  int numberOfEntitys_[dim+1];
-  int oldNumberOfEntities_[dim+1];
+  //int numberOfEntitys_[dim+1];
+  //int oldNumberOfEntities_[dim+1];
 
   //! actual time of Grid
   albertCtype time_;
@@ -1476,7 +1476,7 @@ private:
   {
     enum { cd = 0 }; 
     assert(el);
-    return elNumVec_[cd][ el->dof[dof_[cd]][nv_[cd]] ];
+    return elNumVec_[cd][ el->dof[ dof_[cd] ][nv_[cd]] ];
   }
   
   enum { cd1 = (dim > 1) ? 1 : 5 };
@@ -1485,13 +1485,17 @@ private:
   {
     enum { cd = 1 }; 
     assert(el);
-    //int idx = elNumVec_[cd][ el->dof[dof_[cd]][nv_[cd]] ];
+    // dof_[cd] marks the insertion point form which this dofs start
+    // then i is the i-th dof
+    return elNumVec_[cd][ el->dof[ dof_[cd] + i ][ nv_[cd] ] ];
+
+    //int idx = elNumVec_[cd][ el->dof[ dof_[cd]+i ][nv_[cd]] ];
     //return idx;
-    return 0;
   }
   
   enum { cd2 = (dim > 2) ? 2 : 6 };
   // codim = 0 means we get from dim-cd = dim 
+  // this method we have only in 3d
   int getIndex ( const ALBERTA EL * el, int i , Int2Type<cd2> fake ) const
   {
     return 0;
