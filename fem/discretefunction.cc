@@ -238,9 +238,9 @@ write(const char *filename, int timestep)
     file << d << " " << r << " ";
     file << n << " " << m << "\n";
     file << myId_ << " " << ftype << "\n";
+    file.close();
   }
 
-  file.close();
   if(ftype == xdr)
     return asImp().write_xdr(filename,timestep);
   if(ftype == ascii)
