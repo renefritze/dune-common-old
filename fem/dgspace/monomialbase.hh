@@ -1,5 +1,5 @@
-#ifndef __DUNE__MONOMIALBASE_HH__
-#define __DUNE__MONOMIALBASE_HH__
+#ifndef DUNE__MONOMIALBASE_HH
+#define DUNE__MONOMIALBASE_HH
 
 #include <dune/common/matvec.hh>
 #include <dune/common/simplevector.hh>
@@ -127,4 +127,4 @@ operator<< (std::ostream& s, MonomialBaseFunctionSet<T> & m)
 
 } // end namespace Dune
 
-#endif
+#endif // DUNE__MONOMIALBASE_HH

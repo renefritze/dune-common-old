@@ -5,6 +5,7 @@
 
 #include <dune/fem/common/discretefunctionspace.hh>
 #include <dune/fem/dgspace/monomialbase.hh>
+#include <dune/fem/dgspace/orthonormalbase.hh>
 #include <dune/fem/dgspace/dgmapper.hh>
 #include <dune/fem/dofmanager.hh>
 
@@ -15,14 +16,16 @@ namespace Dune {
 //!  DiscreteFunctionSpace for discontinous functions 
 //  
 //**********************************************************************
-template< class FunctionSpaceType, class GridType, int polOrd , class
-DofManagerType = DofManager<GridType,DefaultGridIndexSet<GridType,LevelIndex> > >
+template< class FunctionSpaceType, class GridType, int polOrd ,
+          template<class> class BaseFunctionSet,
+          class DofManagerType =
+            DofManager<GridType,DefaultGridIndexSet<GridType,LevelIndex> > >
 class DGDiscreteFunctionSpace
 : public DiscreteFunctionSpaceInterface
   <  FunctionSpaceType , GridType, 
      DGDiscreteFunctionSpace < FunctionSpaceType , GridType,
-                               polOrd, DofManagerType >, 
-     MonomialBaseFunctionSet < FunctionSpaceType > >
+                               polOrd, BaseFunctionSet, DofManagerType >, 
+     BaseFunctionSet < FunctionSpaceType > >
 {
   enum { DGFSpaceId = 123456789 };
   
@@ -41,15 +44,15 @@ public:
   typedef typename DofManagerType::MemObjectType MemObjectType;
 
   // BaseFunctionSet we are using 
-  typedef MonomialBaseFunctionSet<FunctionSpaceType> BaseFunctionSetType;
+  typedef BaseFunctionSet<FunctionSpaceType> BaseFunctionSetType;
 
   typedef DGDiscreteFunctionSpace 
-  < FunctionSpaceType , GridType , polOrd , DofManagerType >
+  < FunctionSpaceType , GridType , polOrd , BaseFunctionSet, DofManagerType >
   DGDiscreteFunctionSpaceType;
   
   typedef DiscreteFunctionSpaceInterface
   <FunctionSpaceType , GridType, DGDiscreteFunctionSpaceType,
-   MonomialBaseFunctionSet <FunctionSpaceType> >
+   BaseFunctionSet <FunctionSpaceType> >
   DiscreteFunctionSpaceType;
 
   /** \todo Please doc me! */
@@ -88,6 +91,7 @@ public:
   const BaseFunctionSetType & 
   getBaseFunctionSet ( EntityType &en ) const 
   {
+    setType(base_,en.geometry().type());
     return base_;
   }
   
@@ -125,7 +129,14 @@ public:
   };
  
 private: 
-  BaseFunctionSetType base_;
+  void setType(MonomialBaseFunctionSet<FunctionSpaceType> & b,
+               ElementType t) const {};
+  void setType(OrthonormalBaseFunctionSet<FunctionSpaceType> & b,
+               ElementType t) const
+    {
+      b.changeType(t);
+    };
+  mutable BaseFunctionSetType base_;
   // mapper for function space 
   DGMapperType mapper_;
 };
