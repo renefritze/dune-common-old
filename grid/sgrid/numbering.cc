@@ -92,7 +92,24 @@ inline int JoinOrder<dim>::subset (int n)
 //************************************************************************
 
 template<int dim>
-CubeMapper<dim>::CubeMapper (Tupel<int,dim>& _N) 
+CubeMapper<dim>::CubeMapper (Tupel<int,dim> _N) 
+{
+	make(_N);
+}
+
+template<int dim>
+CubeMapper<dim>::CubeMapper () 
+{
+	Tupel<int,dim> M;
+
+	// make mesh of single cube
+	for (int i=0; i<dim; i++) M[i]=1;
+
+	make(M);
+}
+
+template<int dim>
+void CubeMapper<dim>::make (Tupel<int,dim>& _N) 
 {
 	// store argument
 	N=_N;
@@ -140,14 +157,22 @@ CubeMapper<dim>::CubeMapper (Tupel<int,dim>& _N)
 			}
 		join[c].init(t); // set join mapper
 	}
+}
 
-	cout << "CubeMapper [" ;
+template<int dim>
+inline void  CubeMapper<dim>::print (std::ostream& ss, int indent)
+{
+	for (int k=0; k<indent; k++) ss << " ";
+	ss << "CubeMapper [" ;
 	for (int i=0; i<dim; i++)
 		cout << N[i] << " ";
-	cout << "]" << endl;
+	ss << "]" << endl;
 	for (int i=0; i<=dim; i++) 
-		cout << "  " << ne[i] << " elements of codim " << i 
+	{
+		for (int k=0; k<indent; k++) ss << " ";
+		ss << "  " << ne[i] << " elements of codim " << i 
 			 << " in dimension " << dim << endl;
+	}
 }
 
 template<int dim>
@@ -169,7 +194,7 @@ template<int dim>
 inline int CubeMapper<dim>::n (Tupel<int,dim>& z)
 {
 	int p = partition(z);        // get partition
-	Tupel<int,dim> r=reduce(z); // get reduced coordinate
+	Tupel<int,dim> r=compress(z); // get compressd coordinate
 	
 	// treat easy cases first
 	if (p==0 || p==power2(dim)-1)
@@ -233,7 +258,7 @@ inline int CubeMapper<dim>::partition (Tupel<int,dim>& z)
 }
 
 template<int dim>
-inline Tupel<int,dim> CubeMapper<dim>::reduce (Tupel<int,dim>& z)
+inline Tupel<int,dim> CubeMapper<dim>::compress (Tupel<int,dim>& z)
 {
 	Tupel<int,dim> r;
 	for (int i=0; i<dim; i++)
@@ -248,13 +273,12 @@ template<int dim>
 inline Tupel<int,dim> CubeMapper<dim>::expand (Tupel<int,dim>& r, int b)
 {
 	Tupel<int,dim> z;
-	int mask = 1;
 	for (int i=0; i<dim; i++)
-		if (b&mask)
+		if (b&(1<<i))
 			z[i] = r[i]*2;     // even component
 	    else
-			z[i] = 2*r[i]+1);  // odd component
-	return r;
+			z[i] = 2*r[i]+1;   // odd component
+	return z;
 }
 
 }
