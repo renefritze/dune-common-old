@@ -22,17 +22,16 @@ namespace Dune {
   This is redundant but important for memory efficient implementations of unstru
   hierarchically refined meshes.
  */
-template<int dim, int dimworld>
+template<class GridImp>
 class OneDGridHierarchicIterator :
-public HierarchicIteratorDefault <dim,dimworld, OneDCType,
-                          OneDGridHierarchicIterator,OneDGridEntity>
+        public HierarchicIteratorDefault <GridImp, OneDGridHierarchicIterator>
 {
-
-    friend class OneDGridEntity<0,dim,dimworld>;
+    enum { dim = GridImp::dimension };
+    friend class OneDGridEntity<0,dim,GridImp>;
 
     // Stack entry
     struct StackEntry {
-        OneDGridEntity<0,1,1>* element;
+        OneDGridEntity<0,1,GridImp>* element;
         /** \todo Do we need the level ? */
         int level;
     };
@@ -93,12 +92,12 @@ public:
     }
 
   //! dereferencing
-    OneDGridEntity<0,dim,dimworld>& operator*() {
+    OneDGridEntity<0,dim,GridImp>& operator*() {
         return *target_;
     }
 
   //! arrow
-    OneDGridEntity<0,dim,dimworld>* operator->() {
+    OneDGridEntity<0,dim,GridImp>* operator->() {
         return target_;
     }
 
@@ -109,7 +108,7 @@ private:
 
     Stack<StackEntry> elemStack;
 
-    OneDGridEntity<0,1,1>* target_;
+    OneDGridEntity<0,1,GridImp>* target_;
 
 };
 
