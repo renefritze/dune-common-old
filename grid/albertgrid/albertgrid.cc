@@ -458,8 +458,6 @@ inline void AlbertGridElement<2,2>::calcElMatrix ()
 template <>
 inline void AlbertGridElement<3,3>::calcElMatrix ()
 {
-  //printf("orientation %d \n",elInfo_->orientation);
-  
   enum { dimworld = 3 };
   if( !builtElMat_)
   {
@@ -471,7 +469,6 @@ inline void AlbertGridElement<3,3>::calcElMatrix ()
       elMat_(i,2) = coord_(i,3) - coord0(i);
     }
     builtElMat_ = true;
-    elMat_.print(std::cout,1);
   }
   
 }
