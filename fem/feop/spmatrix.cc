@@ -1,3 +1,5 @@
+#include <cmath>
+
 namespace Dune 
 {
 
@@ -174,7 +176,7 @@ int SparseRowMatrix<T>::colIndex(int row, int col)
 template <class T> 
 void SparseRowMatrix<T>::set(int row, int col, const T& val)
 {
-  if(ABS(val) < EPS)
+  if(std::abs(val) < EPS)
     return;
 
   int whichCol = colIndex(row,col);
@@ -193,7 +195,7 @@ void SparseRowMatrix<T>::set(int row, int col, const T& val)
 template <class T> 
 void SparseRowMatrix<T>::add(int row, int col, const T& val)
 {  
-  if(ABS(val) < EPS)
+  if(std::abs(val) < EPS)
     return;
 
   int whichCol = colIndex(row,col);
