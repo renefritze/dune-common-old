@@ -880,9 +880,10 @@ private:
   //**********************************************************
 
   // makes empty neighElInfo
-  void initElInfo(ALBERT EL_INFO * elInfo); 
+  //void initElInfo(ALBERT EL_INFO * elInfo); 
   // calc the Neighbor neigh out of elInfo information
-  void setNeighInfo(ALBERT EL_INFO * elInfo, ALBERT EL_INFO * neighInfo, int neigh);
+  //void setNeighInfo(ALBERT EL_INFO * elInfo, ALBERT EL_INFO * neighInfo, int neigh);
+  void setupVirtEn ();
 
   //! know the grid were im comming from
   AlbertGrid<dim,dimworld> &grid_;
@@ -900,6 +901,9 @@ private:
   AlbertGrid<dim,dimworld>::EntityProvider::ObjectEntity *manageObj_;
   AlbertGrid<dim,dimworld>::IntersectionSelfProvider::ObjectEntity  *manageInterEl_;
   AlbertGrid<dim,dimworld>::IntersectionNeighProvider::ObjectEntity *manageNeighEl_;
+ 
+  //! defined in agmemory.hh 
+  ElInfoProvider::ObjectEntity *manageNeighInfo_;
 
   //! vector storing the outer normal 
   //Vec<dimworld,albertCtype> outerNormal_;
@@ -913,14 +917,13 @@ private:
   AlbertGridElement<dim-1,dimworld> *neighGlob_;
 
   //! BoundaryEntity
-  AlbertGridBoundaryEntity<dim,dimworld> _boundaryEntity;
+  AlbertGridBoundaryEntity<dim,dimworld> *boundaryEntity_;
   
   //! pointer to the EL_INFO struct storing the real element information
   ALBERT EL_INFO * elInfo_;
 
   //! EL_INFO th store the information of the neighbor if needed
-  ALBERT EL_INFO neighElInfo_;
-  ALBERT EL boundEl_;
+  ALBERT EL_INFO * neighElInfo_;
  
   //! count on which neighbor we are lookin' at
   int neighborCount_;
