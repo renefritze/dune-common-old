@@ -162,7 +162,11 @@ namespace Dune
         else 
           return false;
       }
-
+    
+      T * raw()
+      {
+        return p;
+      }
   protected:
       int n;  // Anzahl Elemente; n=0 heisst, dass kein array allokiert ist!
       T *p;   // Zeiger auf built-in array
@@ -372,13 +376,13 @@ namespace Dune
   }
 
   template<class T>
-  inline T& Array<T>::Iterator::operator* () const
+  inline const T& Array<T>::Iterator::operator* () const
   {
         return *p;
   }
                 
   template<class T>
-  inline T* Array<T>::Iterator::operator-> () const
+  inline const T* Array<T>::Iterator::operator-> () const
   {
         return p;
   }
