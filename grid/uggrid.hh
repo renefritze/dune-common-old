@@ -209,6 +209,8 @@ public:
     /** \brief Number of grid entities per level and codim
      */
     int size (int level, int codim) const;
+    
+    int global_size (int codim) const { return size(maxlevel(),codim); }
 
         /** \brief Mark entity for refinement
      *
