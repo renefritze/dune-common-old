@@ -316,17 +316,17 @@ private:
 
 /*! Mesh entities of codimension 0 ("elements") allow to visit all neighbors, where
   a neighbor is an entity of codimension 0 which has a common entity of codimension 1 with the entity.
-  These neighbors are accessed via a NeighborIterator. This allows the implementation of
+  These neighbors are accessed via a IntersectionIterator. This allows the implementation of
   non-matching meshes. The number of neigbors may be different from the number of faces/edges
   of an element!
  */
 template<int dim, int dimworld, class ct, 
-  template<int,int> class NeighborIteratorImp,
+  template<int,int> class IntersectionIteratorImp,
   template<int,int,int> class EntityImp, 
   template<int,int> class ElementImp , 
   template<int,int> class BoundaryEntityImp
   >  
-class NeighborIterator
+class IntersectionIterator
 {
 public:
   
@@ -336,7 +336,7 @@ public:
     typedef ct                                CoordType;  
     typedef EntityImp<0,dim,dimworld>         Entity;
     typedef ElementImp<dim,dimworld>          Element;
-    typedef NeighborIteratorImp<dim,dimworld> NeighborIterator;
+    typedef IntersectionIteratorImp<dim,dimworld> IntersectionIterator;
     typedef BoundaryEntityImp<dim,dimworld>   BoundaryEntity;
   };
 
@@ -350,13 +350,13 @@ public:
   typedef ct ctype;
 
   //! prefix increment
-  NeighborIteratorImp<dim,dimworld>& operator++();
+  IntersectionIteratorImp<dim,dimworld>& operator++();
 
   //! equality
-  bool operator== (const NeighborIteratorImp<dim,dimworld>& i) const;
+  bool operator== (const IntersectionIteratorImp<dim,dimworld>& i) const;
 
   //! inequality
-  bool operator!= (const NeighborIteratorImp<dim,dimworld>& i) const;
+  bool operator!= (const IntersectionIteratorImp<dim,dimworld>& i) const;
 
   //! access neighbor, dereferencing 
   EntityImp<0,dim,dimworld>& operator*();
@@ -411,27 +411,27 @@ public:
 
 private:
   //! Barton-Nackman trick 
-  NeighborIteratorImp<dim,dimworld>& asImp () 
-    {return static_cast<NeighborIteratorImp<dim,dimworld>&>(*this);}
-  const NeighborIteratorImp<dim,dimworld>& asImp () const 
-    {return static_cast<const NeighborIteratorImp<dim,dimworld>&>(*this);}
+  IntersectionIteratorImp<dim,dimworld>& asImp () 
+    {return static_cast<IntersectionIteratorImp<dim,dimworld>&>(*this);}
+  const IntersectionIteratorImp<dim,dimworld>& asImp () const 
+    {return static_cast<const IntersectionIteratorImp<dim,dimworld>&>(*this);}
 };
 
 //**************************************************************************
 //
-// --NeighborIteratorDefault
+// --IntersectionIteratorDefault
 //
-//! Default implementation for NeighborIterator. 
+//! Default implementation for IntersectionIterator. 
 //
 //**************************************************************************
 template<int dim, int dimworld, class ct, 
-  template<int,int> class NeighborIteratorImp,
+  template<int,int> class IntersectionIteratorImp,
   template<int,int,int> class EntityImp, 
   template<int,int> class ElementImp ,
   template<int,int> class BoundaryEntityImp
 >  
-class NeighborIteratorDefault 
-: public NeighborIterator <dim,dimworld,ct,NeighborIteratorImp,EntityImp,ElementImp,BoundaryEntityImp>
+class IntersectionIteratorDefault 
+: public IntersectionIterator <dim,dimworld,ct,IntersectionIteratorImp,EntityImp,ElementImp,BoundaryEntityImp>
 {
 public:
   //! return outer normal, which is the unit_outer_normal() scaled with the 
@@ -452,11 +452,11 @@ protected:
 
 private:
   //! Barton-Nackman trick 
-  NeighborIteratorImp<dim,dimworld>& asImp () 
-    {return static_cast<NeighborIteratorImp<dim,dimworld>&>(*this);}
-  const NeighborIteratorImp<dim,dimworld>& asImp () const 
-    {return static_cast<const NeighborIteratorImp<dim,dimworld>&>(*this);}
-}; // end NeighborIteratorDefault 
+  IntersectionIteratorImp<dim,dimworld>& asImp () 
+    {return static_cast<IntersectionIteratorImp<dim,dimworld>&>(*this);}
+  const IntersectionIteratorImp<dim,dimworld>& asImp () const 
+    {return static_cast<const IntersectionIteratorImp<dim,dimworld>&>(*this);}
+}; // end IntersectionIteratorDefault 
 
 //************************************************************************
 // H I E R A R C H I C I T E R A T O R
@@ -578,7 +578,7 @@ template<int codim, int dim, int dimworld, class ct,
   template<int,int,int> class EntityImp, 
   template<int,int> class ElementImp, 
   template<int,int,int> class LevelIteratorImp,
-  template<int,int> class NeighborIteratorImp,
+  template<int,int> class IntersectionIteratorImp,
   template<int,int> class HierarchicIteratorImp
 >  
 class Entity {
@@ -590,7 +590,7 @@ public:
     typedef ct                                   CoordType;
     typedef ElementImp<dim,dimworld>             Element;
     typedef LevelIteratorImp<codim,dim,dimworld> LevelIterator;
-    typedef NeighborIteratorImp<dim,dimworld>    NeighborIterator;
+    typedef IntersectionIteratorImp<dim,dimworld>    IntersectionIterator;
     typedef HierarchicIteratorImp<dim,dimworld>  HierarchicIterator;
   };
   
@@ -638,11 +638,11 @@ template<int codim, int dim, int dimworld, class ct,
   template<int,int,int> class EntityImp, 
   template<int,int> class ElementImp, 
   template<int,int,int> class LevelIteratorImp,
-  template<int,int> class NeighborIteratorImp,
+  template<int,int> class IntersectionIteratorImp,
   template<int,int> class HierarchicIteratorImp
 >  
 class EntityDefault 
-: public Entity <codim,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,NeighborIteratorImp,HierarchicIteratorImp> 
+: public Entity <codim,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,IntersectionIteratorImp,HierarchicIteratorImp> 
 {
 public:
   // at this moment no default implementation 
@@ -670,10 +670,10 @@ template<int dim, int dimworld, class ct,
   template<int,int,int> class EntityImp, 
   template<int,int> class ElementImp, 
   template<int,int,int> class LevelIteratorImp,
-  template<int,int> class NeighborIteratorImp,
+  template<int,int> class IntersectionIteratorImp,
   template<int,int> class HierarchicIteratorImp
 >  
-class Entity<0,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,NeighborIteratorImp,HierarchicIteratorImp> {
+class Entity<0,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,IntersectionIteratorImp,HierarchicIteratorImp> {
 public:
 
 
@@ -684,7 +684,7 @@ public:
     typedef ElementImp<dim,dimworld>             Element;
     typedef EntityImp<0,dim,dimworld>            Entity;
     typedef LevelIteratorImp<0,dim,dimworld>     LevelIterator;
-    typedef NeighborIteratorImp<dim,dimworld>    NeighborIterator;
+    typedef IntersectionIteratorImp<dim,dimworld>    IntersectionIterator;
     typedef HierarchicIteratorImp<dim,dimworld>  HierarchicIterator;
   };
 
@@ -720,15 +720,16 @@ public:
    */ 
   template<int cc> LevelIteratorImp<cc,dim,dimworld> entity (int i); // 0 <= i < count()
 
-  /*! Intra-level access to neighboring elements. A neighbor is an entity of codimension 0
+  /*! Intra-level access to intersections with neighboring elements. 
+    A neighbor is an entity of codimension 0
     which has an entity of codimension 1 in commen with this entity. Access to neighbors
     is provided using iterators. This allows meshes to be nonmatching. Returns iterator
     referencing the first neighbor.
    */
-  NeighborIteratorImp<dim,dimworld> nbegin ();
+  IntersectionIteratorImp<dim,dimworld> ibegin ();
 
-  //! Reference to one past the last neighbor
-  NeighborIteratorImp<dim,dimworld> nend ();
+  //! Reference to one past the last intersection
+  IntersectionIteratorImp<dim,dimworld> iend ();
 
   //! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
   LevelIteratorImp<0,dim,dimworld> father ();
@@ -776,13 +777,13 @@ template<int dim, int dimworld, class ct,
   template<int,int,int> class EntityImp, 
   template<int,int> class ElementImp, 
   template<int,int,int> class LevelIteratorImp,
-  template<int,int> class NeighborIteratorImp,
+  template<int,int> class IntersectionIteratorImp,
   template<int,int> class HierarchicIteratorImp
 >  
 class EntityDefault
-<0,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,NeighborIteratorImp,HierarchicIteratorImp>
+<0,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,IntersectionIteratorImp,HierarchicIteratorImp>
 : public Entity <0,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,
-  NeighborIteratorImp,HierarchicIteratorImp> 
+  IntersectionIteratorImp,HierarchicIteratorImp> 
 {
 public:
   //! remeber the template types
@@ -792,7 +793,7 @@ public:
     typedef ElementImp<dim,dimworld>             Element;
     typedef EntityImp<0,dim,dimworld>            Entity;
     typedef LevelIteratorImp<0,dim,dimworld>     LevelIterator;
-    typedef NeighborIteratorImp<dim,dimworld>    NeighborIterator;
+    typedef IntersectionIteratorImp<dim,dimworld>    IntersectionIterator;
     typedef HierarchicIteratorImp<dim,dimworld>  HierarchicIterator;
   };
 
@@ -830,20 +831,20 @@ template<int dim, int dimworld, class ct,
   template<int,int,int> class EntityImp, 
   template<int,int> class ElementImp, 
   template<int,int,int> class LevelIteratorImp,
-  template<int,int> class NeighborIteratorImp,
+  template<int,int> class IntersectionIteratorImp,
   template<int,int> class HierarchicIteratorImp
 >  
-class Entity<dim,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,NeighborIteratorImp,HierarchicIteratorImp> {
+class Entity<dim,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,IntersectionIteratorImp,HierarchicIteratorImp> {
 public:
   //! remeber the template types
   struct Traits
   {
-    typedef ct                                   CoordType;
-    typedef ElementImp<dim,dimworld>             Element;
-    typedef EntityImp<dim,dim,dimworld>          Entity;
-    typedef LevelIteratorImp<dim,dim,dimworld>   LevelIterator;
-    typedef NeighborIteratorImp<dim,dimworld>    NeighborIterator;
-    typedef HierarchicIteratorImp<dim,dimworld>  HierarchicIterator;
+    typedef ct                                     CoordType;
+    typedef ElementImp<dim,dimworld>               Element;
+    typedef EntityImp<dim,dim,dimworld>            Entity;
+    typedef LevelIteratorImp<dim,dim,dimworld>     LevelIterator;
+    typedef IntersectionIteratorImp<dim,dimworld>  IntersectionIterator;
+    typedef HierarchicIteratorImp<dim,dimworld>    HierarchicIterator;
   };
 
   //! know your own codimension
@@ -890,11 +891,11 @@ template<int dim, int dimworld, class ct,
   template<int,int,int> class EntityImp, 
   template<int,int> class ElementImp, 
   template<int,int,int> class LevelIteratorImp,
-  template<int,int> class NeighborIteratorImp,
+  template<int,int> class IntersectionIteratorImp,
   template<int,int> class HierarchicIteratorImp
 >  
-class EntityDefault <dim,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,NeighborIteratorImp,HierarchicIteratorImp> 
-: public Entity <dim,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,NeighborIteratorImp,HierarchicIteratorImp> 
+class EntityDefault <dim,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,IntersectionIteratorImp,HierarchicIteratorImp> 
+: public Entity <dim,dim,dimworld,ct,EntityImp,ElementImp,LevelIteratorImp,IntersectionIteratorImp,HierarchicIteratorImp> 
 {
 public:
   // no default implementation at the moment
