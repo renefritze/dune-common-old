@@ -136,19 +136,24 @@ class UGGrid : public GridDefault  < dim, dimworld,
   //! UGGrid is only implemented for 2 and 3 dimension
   //! for 1d use SGrid or SimpleGrid 
     CompileTimeChecker< (dimworld==dim) && ((dim==2) || (dim==3)) >   Use_UGGrid_only_for_2d_and_3d;   
-// #ifdef _2
-//   CompileTimeChecker< (dimworld==dim) && (dim==2) >   Use_UGGrid_only_for_2d_when_built_for_2d;   
-// #endif
-// #ifdef _3
-//   CompileTimeChecker< (dimworld==dim) && (dim==3) >   Use_UGGrid_only_for_3d_when_built_for_3d;   
-// #endif
-
-//**********************************************************
-// The Interface Methods
-//**********************************************************
+    // #ifdef _2
+    //   CompileTimeChecker< (dimworld==dim) && (dim==2) >   Use_UGGrid_only_for_2d_when_built_for_2d;   
+    // #endif
+    // #ifdef _3
+    //   CompileTimeChecker< (dimworld==dim) && (dim==3) >   Use_UGGrid_only_for_3d_when_built_for_3d;   
+    // #endif
+    
+    //**********************************************************
+      // The Interface Methods
+      //**********************************************************
 public:  
+      
 
-  typedef UGGridReferenceElement<dim> ReferenceElement;
+      typedef UGGridReferenceElement<dim> ReferenceElement;
+    
+    /** \brief The leaf iterator type  (currently only a level iterator)
+     * \todo Replace this by a true leaf iterator */
+    typedef UGGridLevelIterator<0,dim,dimworld, All_Partition> LeafIterator;
 
     /** \todo Please doc me! */
   enum { numCodim = dim+1 };
@@ -184,6 +189,13 @@ public:
   template<int codim>
   UGGridLevelIterator<codim,dim,dimworld, All_Partition> lend (int level) const;
 
+    /** \brief Create leaf iterator  (currently only a level iterator)
+     * \todo Replace this by a true leaf iterator */
+    LeafIterator leafbegin (int level) const {return lbegin<0>(level);}
+
+    /** \brief Create one past last on leaf level  (currently only a level iterator)
+     * \todo Replace this by a true leaf iterator */
+    LeafIterator leafend (int level) const {return lend<0>(level);}
 
     /** \brief Number of grid entities per level and codim
      */
