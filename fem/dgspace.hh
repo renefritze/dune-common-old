@@ -10,7 +10,8 @@
 
 namespace Dune {
 
-
+  enum { DGFSpaceId = 123456789 };
+  
 //**********************************************************************
 //
 //  DiscreteFunctionSpace for discontinous functions 
@@ -53,7 +54,7 @@ public:
 
   /** \todo Please doc me! */
   DGDiscreteFunctionSpace ( GridType & g , int level ) : 
-    DiscreteFunctionSpaceType (g, 123456789),
+    DiscreteFunctionSpaceType (g, DGFSpaceId, level),
     dm_ ( g ), base_(*this, polOrd),
     mapper_(dm_.indexSet(), base_.getNumberOfBaseFunctions(), level)
   {}
