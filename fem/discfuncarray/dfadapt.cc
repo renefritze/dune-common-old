@@ -444,7 +444,7 @@ LocalFunctionAdapt < DiscreteFunctionSpaceType >::operator [] (int num)
 
 template<class DiscreteFunctionSpaceType >
 inline const typename LocalFunctionAdapt < DiscreteFunctionSpaceType >::RangeFieldType & 
-LocalFunctionAdapt < DiscreteFunctionSpaceType >::read (int num) const
+LocalFunctionAdapt < DiscreteFunctionSpaceType >::operator [] (int num) const
 {
   return (* (values_[num]));
 }

@@ -266,7 +266,7 @@ public:
   RangeFieldType & operator [] (int num);
   
   //! access to dof number num, all dofs of the dof entity
-  const RangeFieldType & read (int num) const;
+  const RangeFieldType & operator [] (int num) const;
 
   //! return number of degrees of freedom 
   int numberOfDofs () const;
