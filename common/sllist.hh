@@ -77,9 +77,6 @@ namespace Dune
      */
     inline void pop_front();
      
-    /**
-     * @brief Remove the first item in the list.
-     * @return The last item in the list or 0 if the list is empty.
      /** @brief Remove all elements from the list. */
     inline void clear();
 
@@ -115,7 +112,14 @@ namespace Dune
      * @return An iterator pointing to the end.
      */
     inline const_iterator end() const;
-        
+
+    /**
+     * @brief Check whether the list is empty.
+     *
+     * @return True if the list is empty;
+     */
+    inline bool empty() const;
+    
   private:
     struct Element
     {
@@ -323,7 +327,13 @@ namespace Dune
     }
     tail_ = head_;
   }
-        
+
+  template<typename T, class A>
+  inline bool SLList<T,A>::empty() const
+  {
+    return head_==0;
+  }
+  
   template<typename T, class A>
   inline SLListIterator<T,A> SLList<T,A>::begin()
   {
