@@ -1,7 +1,6 @@
 #include <dune/fem/dofmanager.hh>
 #include <dune/fem/lagrangebase.hh>
 #include <dune/common/functionspace.hh>
-//#include <dune/fem/discfuncarray.hh>
 #include <dune/fem/fastquad.hh>
 
 
@@ -14,7 +13,6 @@ void Dune::MGTransfer<DiscFuncType>::setup(const FunctionSpaceType& fS, int cL, 
     assert(fL == cL+1);
     //assert(level<grid_->maxlevel());
 
-    //typedef typename DiscFuncType::FunctionSpaceType FunctionSpaceType;
     typedef typename FunctionSpaceType::GridType GridType;
 
     int rows = fS.size(coarseLevel);
@@ -74,7 +72,7 @@ void Dune::MGTransfer<DiscFuncType>::setup(const FunctionSpaceType& fS, int cL, 
 
               // Evaluate coarse grid base function
               
-              Vec<GridType::dimension, double> value;
+              typename FunctionSpaceType::Range value;
               Vec<0, int> diffVariable;
               coarseBaseSet.evaluate(i, diffVariable, local, value);
 
