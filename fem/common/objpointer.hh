@@ -1,6 +1,8 @@
 #ifndef __DUNE_OBJPOINTER_HH__
 #define __DUNE_OBJPOINTER_HH__
 
+namespace Dune {
+
 //! storage class for newly generated operators during operator + on
 //! DiscreteOperator
 template <class ObjType>
@@ -54,6 +56,8 @@ private:
   ObjPointerType * item_;
 
 };
+
+} // end namespace Dune
 
 #endif
 
