@@ -1,7 +1,7 @@
-#ifndef __DUNE_FUNCTIONSPACE_HH__
-#define __DUNE_FUNCTIONSPACE_HH__
+#ifndef DUNE_FUNCTIONSPACE_HH
+#define DUNE_FUNCTIONSPACE_HH
 
-#include "matvec.hh"
+#include <dune/common/fmatrix.hh>
 #include "dynamictype.hh"
 
 namespace Dune{
@@ -26,9 +26,9 @@ public:
   typedef RangeFieldType  RangeField;
   
 /** \todo Please doc me! */
-  typedef Mat < n, m, RangeField> JacobianRange;
+    typedef FieldMatrix <RangeField, m, n> JacobianRange;
 /** \todo Please doc me! */
-    typedef FieldVector<Mat< n, n, RangeField>, m> HessianRange ;
+    typedef FieldVector<FieldMatrix< RangeField, n, n>, m> HessianRange ;
 
 /** Type of domain vector (using type of domain field) */
     typedef FieldVector<DomainField, n> Domain;
