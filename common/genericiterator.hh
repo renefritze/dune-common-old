@@ -2,11 +2,10 @@
 #ifndef DUNE_GENERICITERATOR_HH
 #define DUNE_GENERICITERATOR_HH
 
-#include<dune/common/iteratorfacades.hh>
+#include <dune/common/iteratorfacades.hh>
 #include <cassert>
 
-namespace Dune
-{
+namespace Dune {
 
   /*! \defgroup GenericIterator GenericIterator
     \ingroup IteratorFacades
@@ -85,7 +84,8 @@ namespace Dune
    *
    */
 template<class C, class T>
-class GenericIterator : public Dune::RandomAccessIteratorFacade<GenericIterator<C,T>,T, T&, int>
+class GenericIterator : 
+public Dune::RandomAccessIteratorFacade<GenericIterator<C,T>,T, T&, int>
 {
   friend class GenericIterator<typename Dune::RemoveConst<C>::Type, typename Dune::RemoveConst<T>::Type >;
   friend class GenericIterator<const typename Dune::RemoveConst<C>::Type, const typename Dune::RemoveConst<T>::Type >;
@@ -159,6 +159,6 @@ private:
 
   /** @} */
   
-}
+} // end namespace Dune
 
 #endif
