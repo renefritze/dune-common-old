@@ -61,7 +61,7 @@ public: //! at the moment nothin'
 //*************************************************************************
 template<class FunctionSpaceType> 
 class FastBaseFunctionSet 
-: public BaseFunctionSetInterface<FunctionSpaceType, FastBaseFunctionSet<FunctionSpaceType> >  
+: public BaseFunctionSetDefault <FunctionSpaceType, FastBaseFunctionSet<FunctionSpaceType> >  
 {
  
 public:
