@@ -628,6 +628,7 @@ private:
 };
 
 //************************************************************************
+
 /*! Enables iteration over all entities of a given codimension and level of a grid.
  */
 template<int codim, int dim, int dimworld>
