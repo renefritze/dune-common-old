@@ -54,11 +54,11 @@ public:
   //! global coordinate in element 
   Vec<dimworld,UGCtype> global (const Vec<dim, UGCtype>& local);
   
-  //! maps a global coordinate within the element to a 
+  //! Maps a global coordinate within the element to a 
   //! local coordinate in its reference element
-  Vec<dim, UGCtype>& local (const Vec<dimworld, UGCtype>& global);
+  Vec<dim, UGCtype> local (const Vec<dimworld, UGCtype>& global);
   
-  //! returns true if the point is in the current element
+  //! Returns true if the point is in the current element
   bool checkInside(const Vec<dimworld, UGCtype> &global);
 
   /*! 
