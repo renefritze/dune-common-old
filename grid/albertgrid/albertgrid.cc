@@ -484,14 +484,14 @@ refelem()
 
 template< int dim, int dimworld>
 inline Vec<dimworld,albertCtype>& AlbertGridElement<dim,dimworld>:: 
-global(Vec<dim> local)
+global(const Vec<dim>& local)
 {
   // Umrechnen von localen Koordinaten zu baryzentrischen Koordinaten
   Vec<dim+1> tmp (1.0); // Wichtig, da tmp(0) = 1 - tmp(1)- ... -tmp(dim+1)
   for(int i=0; i<dim; i++)
-    tmp(0) -= local(i);
+    tmp(0) -= local.read(i);
   for(int i=1; i<dim+1; i++)
-    tmp(i) = local(i-1);
+    tmp(i) = local.read(i-1);
  
   // globale Koordinaten ausrechnen
   globalCoord_ = globalBary(tmp);
@@ -501,21 +501,21 @@ global(Vec<dim> local)
 
 template< int dim, int dimworld>
 inline Vec<dimworld> AlbertGridElement<dim,dimworld>:: 
-globalBary(Vec<dim+1> local)
+globalBary(const Vec<dim+1>& local)
 {
   ALBERT REAL *v = NULL;
   ALBERT REAL c;
   Vec<dimworld> ret(0.0);
     
   v = static_cast<ALBERT REAL *> (elInfo_->coord[0]);
-  c = local(0);
+  c = local.read(0);
   for (int j = 0; j < dimworld; j++)
     ret(j) = c * v[j];
       
   for (int i = 1; i < dim+1; i++)
   { 
     v = static_cast<ALBERT REAL *> (elInfo_->coord[i]); 
-    c = local(i);
+    c = local.read(i);
     for (int j = 0; j < dimworld; j++)
       ret(j) += c * v[j];
   } 
@@ -525,7 +525,7 @@ globalBary(Vec<dim+1> local)
 
 template< int dim, int dimworld>
 inline Vec<dim>& AlbertGridElement<dim,dimworld>:: 
-local(Vec<dimworld> global)
+local(const Vec<dimworld>& global)
 {
   Vec<dim+1,albertCtype> tmp = localBary(global);
   
@@ -539,7 +539,7 @@ local(Vec<dimworld> global)
 
 template <int dim, int dimworld> 
 inline Vec<dim+1> AlbertGridElement<dim,dimworld>:: 
-localBary(Vec<dimworld> global)
+localBary(const Vec<dimworld>& global)
 {
   std::cout << "localBary for dim != dimworld not implemented yet!";
   Vec<dim+1> tmp (0.0);  
@@ -547,7 +547,7 @@ localBary(Vec<dimworld> global)
 }
 
 inline Vec<3> AlbertGridElement<2,2>:: 
-localBary(Vec<2> global)
+localBary(const Vec<2>& global)
 {
   enum { dim = 2};
   enum { dimworld = 2};
@@ -575,7 +575,7 @@ localBary(Vec<2> global)
   for (int j = 0; j < dimworld; j++)
   {
     x0 = elInfo_->coord[dim][j];
-    x[j] = global(j) - x0;
+    x[j] = global.read(j) - x0;
     for (int i = 0; i < dim; i++)
       edge[i][j] = elInfo_->coord[i][j] - x0;
   }
@@ -601,7 +601,7 @@ localBary(Vec<2> global)
 
 //template< int dim, int dimworld>
 inline Vec<4> AlbertGridElement<3,3>:: 
-localBary(Vec<3> global)
+localBary(const Vec<3>& global)
 {
   enum { dim = 3};
   enum { dimworld = 3};
@@ -620,7 +620,7 @@ localBary(Vec<3> global)
   for (int j = 0; j < dimworld; j++)
   {
     x0 = elInfo_->coord[dim][j];
-    x[j] = global(j) - x0;
+    x[j] = global.read(j) - x0;
     for (int i = 0; i < dim; i++)
       edge[i][j] = elInfo_->coord[i][j] - x0;
   }
@@ -981,6 +981,7 @@ AlbertGridEntity(AlbertGrid<dim,dimworld> &grid) : grid_(grid)
 template <>
 inline int AlbertGridEntity<0,3,3>::count<2> ()
 {
+  // number of edges of a tetrahedron
   return 6;
 }
 
