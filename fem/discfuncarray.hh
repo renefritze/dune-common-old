@@ -287,7 +287,7 @@ public:
   
   //! Default constructor
   DofIteratorArray() :
-    dofArray(0),
+    dofArray_ (0) ,
     count_() {}
 
   //! Constructor (const)

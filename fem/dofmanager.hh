@@ -272,7 +272,7 @@ public:
     , myMem_(0) , dofmap_ (0) 
     , array_( name_, sizeOfObj_ )
   {
-    vecSize_ = mapper.size( grid.maxlevel() );
+    vecSize_ = mapper.size();
     memSize_ = vecSize_;
     dofmap_ = &mapper;
     

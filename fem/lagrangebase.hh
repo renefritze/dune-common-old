@@ -66,7 +66,7 @@ public:
   typedef typename FunctionSpaceT::RangeField DofType;
   typedef typename FunctionSpaceT::RangeField RangeField;
   typedef typename FunctionSpaceT::DomainField DomainField;
-  typedef typename FunctionSpaceT FunctionSpaceType;
+  typedef FunctionSpaceT FunctionSpaceType;
 
   //! dimension of value 
   enum { dimVal = 1 };
@@ -179,7 +179,7 @@ public:
       FunctionSpaceType , GridType, LagrangeDiscreteFunctionSpaceType,
     FastBaseFunctionSet < LagrangeDiscreteFunctionSpaceType > >  DiscreteFunctionSpaceType;
 
-  typedef FastBaseFunctionSet <ChefType> BaseFunctionSetType;
+  typedef FastBaseFunctionSet <LagrangeDiscreteFunctionSpaceType> BaseFunctionSetType;
   typedef BaseFunctionSetType FastBaseFunctionSetType;
 
   //! id is neighbor of the beast
@@ -208,7 +208,7 @@ public:
   //! Constructor generating for each different element type of the grid a 
   //! LagrangeBaseSet with polOrd 
   LagrangeDGSpace ( GridType & g, DofManagerType & dm , int level ) :
-   ChefType (g,dm,level) , mapper_(0)
+   LagrangeDiscreteFunctionSpaceType (g,dm,level) , mapper_(0)
   {
     typedef typename GridType::template codim<0> :: LevelIterator LevIt;
     LevIt it = g.template lbegin<0>(0);
