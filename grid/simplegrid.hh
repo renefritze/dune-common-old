@@ -38,6 +38,7 @@ typedef simplegrid_ctype sgrid_ctype;
 
 template<int dim, int dimworld>            class SimpleElement;
 template<int codim, int dim, int dimworld> class SimpleEntity;
+template<int dim, int dimworld>            class SimpleBoundaryEntity;
 template<int dim, int dimworld>            class SimpleGrid;
 template<int codim, int dim, int dimworld> class SimpleLevelIterator;
 template<int dim, int dimworld>            class SimpleIntersectionIterator;
@@ -596,7 +597,7 @@ private:
 
 template<int dim, int dimworld>
 class SimpleIntersectionIterator : public IntersectionIteratorDefault<dim,dimworld,simplegrid_ctype,
-                                                                                                           SimpleIntersectionIterator,SimpleEntity,SimpleElement,SimpleBoundaryEntity>
+                                   SimpleIntersectionIterator,SimpleEntity,SimpleElement,SimpleBoundaryEntity>
 {
 public:
   //! define type used for coordinates in grid module
