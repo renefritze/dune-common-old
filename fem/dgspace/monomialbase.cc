@@ -47,7 +47,7 @@ void MonomialBaseFunctionSet<FunctionSpaceType >::
 real_evaluate( int baseFunct, const FieldVector<deriType, 1> &diffVariable,
                const Domain & x,  Range & phi ) const 
 {
-  if (diffVariable(0) == 0) {
+  if (diffVariable[0] == 0) {
     phi = Phi_[baseFunct][0] * power(x[0], Phi_[baseFunct][0]-1)
       * power(x[1], Phi_[baseFunct][1]);;
   }
@@ -62,8 +62,8 @@ void MonomialBaseFunctionSet<FunctionSpaceType >::
 real_evaluate( int baseFunct, const FieldVector<deriType, 2> &diffVariable,
                const Domain & x,  Range & phi ) const 
 {
-  if (diffVariable(0) == 0) {
-    if (diffVariable(1) == 0) {
+  if (diffVariable[0] == 0) {
+    if (diffVariable[1] == 0) {
       // d/(dx^2)
       phi = Phi_[baseFunct][0] * ( Phi_[baseFunct][0] - 1 )
         * power(x[0], Phi_[baseFunct][0]-2)
@@ -76,7 +76,7 @@ real_evaluate( int baseFunct, const FieldVector<deriType, 2> &diffVariable,
     }
   }
   else {
-    if (diffVariable(1) == 0) {
+    if (diffVariable[1] == 0) {
       // d/(dydx)
       phi = Phi_[baseFunct][0] * power(x[0], Phi_[baseFunct][0]-1)
         * Phi_[baseFunct][1] * power(x[1], Phi_[baseFunct][1]-1);

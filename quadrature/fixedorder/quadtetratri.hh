@@ -51,7 +51,9 @@ RangeField QuadraturePoints<Domain,RangeField,triangle,polOrd>::
 getWeight(int i)
 {
   QUADRATURE * quad = UG_Quadratures::GetQuadrature(dim,numberOfCorners,polOrd);
-  return (referenceVol_triangle * static_cast<RangeField> (quad->weight[i]));
+  RangeField
+    w(referenceVol_triangle * static_cast<RangeField> (quad->weight[i]));
+  return w;
 }
 
 //! the weight is the volume of the reference element
@@ -164,7 +166,9 @@ RangeField QuadraturePoints<Domain,RangeField,tetrahedron,polOrd>::
 getWeight(int i)
 {
   QUADRATURE * quad = UG_Quadratures::GetQuadrature(dim,numberOfCorners,polOrd);
-  return (referenceVol_tetrahedron * static_cast<RangeField> (quad->weight[i]));
+  RangeField
+    w(referenceVol_tetrahedron * static_cast<RangeField> (quad->weight[i]));
+  return w;
 }
 
 //! the weight is the volume of the reference element
