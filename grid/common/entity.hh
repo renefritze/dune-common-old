@@ -295,7 +295,6 @@ public:
   typedef typename GridImp::template codim<0>::Geometry Geometry;
   typedef typename GridImp::template codim<0>::EntityPointer EntityPointer;
   typedef typename GridImp::template codim<0>::IntersectionIterator IntersectionIterator;
-  typedef typename GridImp::template codim<0>::IntersectionIterator IntersectionIterator;
   typedef typename GridImp::template codim<0>::HierarchicIterator HierarchicIterator;
 
   //! know your own codimension
