@@ -563,12 +563,14 @@ init (EntityType &en ) const
 template <class DofType,class DofArrayType>
 inline DofType& DofIteratorAdapt<DofType,DofArrayType>::operator *()
 {
+  assert((count_ >=0) && (count_ < dofArray_.size()));
   return dofArray_ [ count_ ];
 }
 
 template <class DofType,class DofArrayType>
-inline const DofType& DofIteratorAdapt<DofType,DofArrayType>::read () const 
+inline const DofType& DofIteratorAdapt<DofType,DofArrayType>::operator* () const 
 {
+  assert((count_ >=0) && (count_ < constArray_.size()));
   return constArray_ [ count_ ];
 }
 
@@ -582,33 +584,21 @@ inline DofIteratorAdapt<DofType,DofArrayType>& DofIteratorAdapt<DofType,DofArray
 template <class DofType,class DofArrayType>
 inline const DofIteratorAdapt<DofType,DofArrayType>& DofIteratorAdapt<DofType,DofArrayType>::operator ++() const
 {
-  const_cast<DofIteratorAdapt<DofType,DofArrayType>&> (*this).operator ++ ();
+  count_++;
   return (*this);      
-}
-
-template <class DofType,class DofArrayType>
-inline DofIteratorAdapt<DofType,DofArrayType>& DofIteratorAdapt<DofType,DofArrayType>::operator ++(int i)
-{
-  count_ += i;
-  return (*this);
-}
-
-template <class DofType,class DofArrayType>
-inline const DofIteratorAdapt<DofType,DofArrayType>& DofIteratorAdapt<DofType,DofArrayType>::operator ++(int i) const 
-{
-  count_ += i;
-  return (*this);
 }
 
 template <class DofType,class DofArrayType>
 inline DofType& DofIteratorAdapt<DofType,DofArrayType>::operator [](int i)
 {
+  assert((i >=0) && (i < dofArray_.size()));
   return dofArray_[i];
 }
 
 template <class DofType,class DofArrayType>
-inline const DofType& DofIteratorAdapt<DofType,DofArrayType>::read(int i) const
+inline const DofType& DofIteratorAdapt<DofType,DofArrayType>::operator [](int i) const
 {
+  assert((i >=0) && (i < constArray_.size()));
   return constArray_[i];
 }
 
