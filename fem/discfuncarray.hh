@@ -144,7 +144,7 @@ public:
   void setLocal (GridIteratorType &it, const RangeFieldType &scalar);
   
   //! print all dofs 
-  void print(std::ostream& s, int level); 
+  void print(std::ostream& s, int level) const;
 
   //! write leaf data to file in USPM format for Grape 
   bool write_USPM(const char *filename , int timestep);
@@ -194,7 +194,7 @@ private:
   }
 
   //! the name of the function
-  const char * name_;
+    std::string name_;
 
   //! true if memory was allocated
   bool built_;
