@@ -174,7 +174,8 @@ class QuadratureInterface : public DynamicType
 public:
   //! Contructor passing ident to DynamicType for comparison with other
   //! Quadratures 
-  QuadratureInterface ( int ident ) : DynamicType (ident) {};
+  //QuadratureInterface ( int ident ) : DynamicType (ident) {};
+  //QuadratureInterface () {};
   
   //! return number of quadrature points 
   int nop() const { return asImp().nop(); }
@@ -210,15 +211,21 @@ class QuadratureDefault
 : public QuadratureInterface  < RangeFieldType , DomainType , QuadratureImp >
 {
 public:
-  QuadratureDefault ( int ident ) : 
-    QuadratureInterface < RangeFieldType , DomainType, QuadratureImp > (ident) {};   
+  //QuadratureDefault ( int ident ) : 
+  //  QuadratureInterface < RangeFieldType , DomainType, QuadratureImp > (ident) {};   
 
-  void printQuad () const 
+  void print (std::ostream& s, int indent) const 
   {
+    double sum = 0.0;
+    s << "quad (id = " << asImp().getIdentifier() <<") { \n" ;
+    s << " nop = " << asImp().nop() << " | order = " << asImp().order() << "\n";
     for(int i=0; i<asImp().nop(); i++)
     {
-      std::cout << asImp().weight(i) << asImp().point(i) << "\n";
+      sum += asImp().weight(i);
+      s << " w = " << asImp().weight(i) << " | p = " << asImp().point(i) << "\n";
     }
+    s << " Sum of w = " << sum << " \n";
+    s << "}" ;
   }
 private:
   //! Barton - Nackman trick 
@@ -227,6 +234,16 @@ private:
   { return static_cast<const QuadratureImp&>(*this); }
 
 }; // end class QuadraturDefault 
+
+// overloading the out stream for printing of quadratures 
+template< class RangeFieldType , class DomainType , class QuadratureImp>
+inline std::ostream& operator<< (std::ostream& s, 
+    QuadratureDefault<RangeFieldType,DomainType,QuadratureImp>& quad)
+{
+  quad.print(s,0);
+  return s;
+}
+
 
 /** @} end documentation group */
 
