@@ -1125,6 +1125,11 @@ public:
   template <class DofManagerType>
   bool communicate (DofManagerType & dm);
   
+  template <class T> T globalMin (T val) const ;
+  template <class T> T globalMax (T val) const ;
+  template <class T> T globalSum (T val) const ;
+  template <class T> void globalSum (T *, int , T *) const ;
+
   //! returns if a least one entity was marked for coarsening 
   bool preAdapt ( );
 
@@ -1159,10 +1164,6 @@ public:
 
   //! return my rank (only parallel)
   int myRank () const { return myRank_; }
-
-  double communicateValue (double val) const ;
-  double communicateSum  (double val) const ;
-  int communicateInt (int val) const ;
 
   //! no interface method, but has to be public 
   void updateStatus ();
@@ -1209,7 +1210,7 @@ private:
 
   // the real grid 
   ALU3DSPACE GitterImplType * mygrid_;
-#ifdef _BSGRID_PARALLEL_
+#ifdef _ALU3DGRID_PARALLEL_
   ALU3DSPACE MpAccessMPI mpAccess_;
 #endif
   // save global_size of grid 

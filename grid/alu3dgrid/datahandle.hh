@@ -8,7 +8,11 @@ template <class GridType, class EntityType, class DataCollectorType >
 class GatherScatterImpl : public GatherScatter
 {
   GridType & grid_;
-  EntityType & en_;
+  typedef typename GridType::template codim<0>::Entity Entity;
+  Entity & en_;
+  EntityType & realEntity_;
+
+  
   DataCollectorType & dc_;
 
   typedef ObjectStream ObjectStreamType;
@@ -16,7 +20,7 @@ class GatherScatterImpl : public GatherScatter
 public:
   //! Constructor
   GatherScatterImpl(GridType & grid, EntityType & en, DataCollectorType & dc) 
-    : grid_(grid), en_(en), dc_(dc) {}
+    : grid_(grid), en_(en), realEntity_(en) , dc_(dc) {}
 
   //! this method is called from the dunePackAll method of the corresponding 
   //! Macro element class of the BSGrid, see gitter_dune_pll*.*
@@ -24,7 +28,7 @@ public:
   virtual void inlineData ( ObjectStreamType & str , HElemType & elem )
   {
     // set element and then start 
-    en_.setElement(elem);
+    realEntity_.setElement(elem);
     dc_.inlineData(str,en_);
   }
 
@@ -35,14 +39,14 @@ public:
   {
     // set element and then start 
     grid_.updateStatus();
-    en_.setElement(elem);
+    realEntity_.setElement(elem);
     dc_.xtractData(str,en_);
   }
 
   //! write Data of one lement to stream 
   virtual void sendData ( ObjectStreamType & str , const HElementType & elem )
   {
-    en_.setElement( const_cast<HElementType &> (elem) );
+    realEntity_.setElement( const_cast<HElementType &> (elem) );
     dc_.scatter(str, en_);
   }
  
@@ -53,7 +57,7 @@ public:
     //en_.setGhost( static_cast <PLLBndFaceType &> (ghost) );
 
     PLLBndFaceType & gh = static_cast <PLLBndFaceType &> (ghost);
-    en_.setGhost( *(gh.getGhost()) );
+    realEntity_.setGhost( *(gh.getGhost()) );
             
     dc_.gather(str, en_);
   }

@@ -291,7 +291,8 @@ inline void ALU3dGrid<dim,dimworld>::postAdapt()
   for(int l=0; l<= maxlevel(); l++)
   {
     {
-      ALU3DSPACE BSLevelIterator<0>::IteratorType w ( myGrid().container() , l ) ;
+      typename ALU3DSPACE 
+        ALU3dGridLevelIteratorWrapper<0> w ( *this, l ) ;
       for (w.first () ; ! w.done () ; w.next ())
       {
         w.item ().resetRefinedTag();
@@ -310,44 +311,48 @@ inline void ALU3dGrid<dim,dimworld>::postAdapt()
   coarsenMark_ = false;
 }
 
-template <int dim, int dimworld> 
-inline double ALU3dGrid<dim,dimworld>::communicateValue(double val) const
+template <int dim, int dimworld> template <class T>
+inline T ALU3dGrid<dim,dimworld>::globalMin(T val) const
 {
 #ifdef _ALU3DGRID_PARALLEL_
-  //std::cout << "communicateValue " << val << " on proc " << mpAccess_.myrank() << " \n";
-  double ret = mpAccess_.gmin(val);
-  //std::cout << "got " << ret << " on proc " << mpAccess_.myrank() << " \n";
+  T ret = mpAccess_.gmin(val);
   return ret;
-#else 
+#else
   return val;
+#endif
+}
+template <int dim, int dimworld> template <class T>
+inline T ALU3dGrid<dim,dimworld>::globalMax(T val) const
+{
+#ifdef _ALU3DGRID_PARALLEL_
+  T ret = mpAccess_.gmax(val);
+  return ret;
+#else
+  return val;
+#endif
+}
+template <int dim, int dimworld> template <class T>
+inline T ALU3dGrid<dim,dimworld>::globalSum(T val) const
+{
+#ifdef _ALU3DGRID_PARALLEL_
+  T sum = mpAccess_.gsum(val);
+  return sum;
+#else
+  return val;
+#endif
+}
+template <int dim, int dimworld> template <class T>
+inline void ALU3dGrid<dim,dimworld>::globalSum(T * send, int s , T * recv) const
+{
+#ifdef _ALU3DGRID_PARALLEL_
+  mpAccess_.gsum(send,s,recv);
+  return ;
+#else
+  std::memcpy(recv,send,s*sizeof(T));
+  return ;
 #endif
 }
 
-template <int dim, int dimworld> 
-inline double ALU3dGrid<dim,dimworld>::communicateSum(double val) const
-{
-#ifdef _ALU3DGRID_PARALLEL_
-  //std::cout << "communicateValue " << val << " on proc " << mpAccess_.myrank() << " \n";
-  double ret = mpAccess_.gsum(val);
-  //std::cout << "got " << ret << " on proc " << mpAccess_.myrank() << " \n";
-  return ret;
-#else 
-  return val;
-#endif
-}
-
-template <int dim, int dimworld>
-inline int ALU3dGrid<dim,dimworld>::communicateInt(int val) const
-{
-#ifdef _ALU3DGRID_PARALLEL_
-  //std::cout << "communicateInt " << val << " on proc " << mpAccess_.myrank() << " \n";
-  int ret = mpAccess_.gmin(val);
-  //std::cout << "got " << ret << " on proc " << mpAccess_.myrank() << " \n";
-  return ret;
-#else 
-  return val;
-#endif
-}
 
 template <int dim, int dimworld>
 inline bool ALU3dGrid<dim,dimworld>::loadBalance() 
@@ -370,9 +375,10 @@ template <int dim, int dimworld> template <class DataCollectorType>
 inline bool ALU3dGrid<dim,dimworld>::loadBalance(DataCollectorType & dc) 
 {
 #ifdef _ALU3DGRID_PARALLEL_
-  typedef ALU3dGridEntity<0,dim,GridImp> EntityType;
-  EntityType en (*this);    
-  
+  //typedef typename Traits::template codim<0>::Entity EntityType;
+  typedef EntityImp EntityType;
+  EntityType en ( *this, this->maxlevel() );    
+
   ALU3DSPACE GatherScatterImpl< ALU3dGrid<dim,dimworld> , EntityType , 
         DataCollectorType > gs(*this,en,dc);
   
@@ -394,8 +400,9 @@ template <int dim, int dimworld> template <class DataCollectorType>
 inline bool ALU3dGrid<dim,dimworld>::communicate(DataCollectorType & dc) 
 {
 #ifdef _ALU3DGRID_PARALLEL_
-  typedef ALU3dGridEntity<0,dim,GridImp> EntityType;
-  EntityType en (*this);    
+  typedef EntityImp EntityType;
+  EntityType en ( *this, this->maxlevel() );    
+
   ALU3DSPACE GatherScatterImpl< ALU3dGrid<dim,dimworld> , EntityType , 
     DataCollectorType > gs(*this,en,dc);
 
@@ -450,6 +457,13 @@ readGrid( const char * filename, alu3d_ctype & time )
     assert(macroName); 
     
     sprintf(macroName,"%s.macro",filename);
+    
+    { //check if file exists 
+      std::ifstream check ( macroName );
+      if( !check ) 
+        DUNE_THROW(ALU3dGridError,"cannot read file " << macroName << "\n");
+    }
+    
     mygrid_ = new ALU3DSPACE GitterImplType (macroName
 #ifdef _ALU3DGRID_PARALLEL_
         , mpAccess_ 
@@ -731,7 +745,7 @@ inline ALU3dGridHierarchicIterator<GridImp> ::
   ALU3dGridHierarchicIterator(const GridImp & grid , 
    const ALU3DSPACE HElementType & elem, int maxlevel ,bool end)
   : grid_(grid), elem_(elem) , item_(0) , maxlevel_(maxlevel) 
-  , entity_ ( grid_.entityProvider_.getNewObjectEntity( grid_, maxlevel) )
+  , entity_ ( (!end) ? grid_.entityProvider_.getNewObjectEntity( grid_, maxlevel) : 0 )
 {
   if (!end) 
   {
@@ -758,14 +772,15 @@ template <class GridImp>
 inline ALU3dGridHierarchicIterator<GridImp> :: 
 ~ALU3dGridHierarchicIterator() 
 {
-  grid_.entityProvider_.freeObjectEntity ( entity_ );
+  if(entity_) grid_.entityProvider_.freeObjectEntity ( entity_ );
+  entity_ = 0;
 }
 
 template <class GridImp>
 inline ALU3dGridHierarchicIterator<GridImp> :: 
 ALU3dGridHierarchicIterator(const ALU3dGridHierarchicIterator<GridImp> & org)
   : grid_(org.grid_), elem_(org.elem_) , item_(org.item_) , maxlevel_(org.maxlevel_) 
-  , entity_ ( grid_.entityProvider_.getNewObjectEntity( grid_, maxlevel_ ) )
+  , entity_ ( (org.entity_) ? grid_.entityProvider_.getNewObjectEntity( grid_, maxlevel_ ) : 0)
 {
   if(item_) (*entity_).setElement(*item_);
 }
@@ -883,7 +898,7 @@ ALU3dGridIntersectionIterator(const GridImp & grid,
   ALU3DSPACE HElementType *el, int wLevel,bool end) 
   : grid_ ( grid ) 
   , walkLevel_ (wLevel)
-  , entity_( grid_.entityProvider_.getNewObjectEntity( grid_ , wLevel ) )
+  , entity_( (!end) ? grid_.entityProvider_.getNewObjectEntity( grid_ , wLevel ) : 0)
   , item_(0), neigh_(0), ghost_(0)
   , index_(0) , numberInNeigh_ (-1)
   , theSituation_ (false) , daOtherSituation_ (false)
@@ -908,7 +923,7 @@ inline ALU3dGridIntersectionIterator<GridImp> ::
 ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org) 
   : grid_ ( org.grid_ ) 
   , walkLevel_ ( org.walkLevel_ )
-  , entity_( grid_.entityProvider_.getNewObjectEntity( grid_ , walkLevel_ ) )
+  , entity_( (org.entity_) ? grid_.entityProvider_.getNewObjectEntity( grid_ , walkLevel_ ) : 0)
   , item_(org.item_), neigh_(org.neigh_), ghost_(org.ghost_)
   , index_(org.index_) , numberInNeigh_ (org.numberInNeigh_)
   , theSituation_ (org.theSituation_) 
@@ -924,7 +939,8 @@ ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org
 template<class GridImp>
 inline ALU3dGridIntersectionIterator<GridImp> :: ~ALU3dGridIntersectionIterator() 
 {
-  grid_.entityProvider_.freeObjectEntity( entity_ );
+  if(entity_) grid_.entityProvider_.freeObjectEntity( entity_ );
+  entity_ = 0;
 }
 
 template<class GridImp>
@@ -943,7 +959,7 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: checkGhost () const
   ghost_   = 0;
   if(isBoundary_)
   {
-    typename ALU3DSPACE PLLBndFaceType * bnd = 
+    ALU3DSPACE PLLBndFaceType * bnd = 
         dynamic_cast<ALU3DSPACE PLLBndFaceType *> (item_->myneighbour(index_).first);
     if(bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
     {
@@ -1085,7 +1101,7 @@ setNeighbor () const
         daOtherSituation_ = false;
       }
       
-      ghost_ = ghost_->up();
+      ghost_ = static_cast<ALU3DSPACE PLLBndFaceType *> ( ghost_->up() );
       assert(ghost_->level() == ghost_->ghostLevel());
     }
     
@@ -1298,7 +1314,7 @@ template<int dim, class GridImp>
 inline void 
 ALU3dGridEntity<0,dim,GridImp> :: setGhost(ALU3DSPACE HElementType & element) 
 {
-  item_= static_cast<ALU3DSPACE GEOElementType *> (&element);
+  item_= static_cast<ALU3DSPACE IMPLElementType *> (&element);
   isGhost_ = true;
   ghost_ = 0;
   builtgeometry_=false;
