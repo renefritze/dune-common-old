@@ -40,6 +40,8 @@ template<int codim, int dim, int dimworld>
 inline int UGGridEntity < codim, dim ,dimworld >::
 index()
 {
+    cerr << "UGGridEntity <" << codim << ", " << dim << ", " << dimworld 
+         << ">::index() not implemented!\n";
     return -1;
 }
 
@@ -53,6 +55,22 @@ index()
 
 template<>
 inline int UGGridEntity < 0, 3 ,3 >::
+index()
+{
+    return target_->ge.id;
+}
+#endif
+
+#ifdef _2
+template<>
+inline int UGGridEntity < 2, 2 ,2 >::
+index()
+{
+    return target_->myvertex->iv.id;
+}
+
+template<>
+inline int UGGridEntity < 0, 2 ,2 >::
 index()
 {
     return target_->ge.id;
@@ -106,9 +124,9 @@ mark( int refCount )
                                    UG3d::RED, 
                                    0);  // no user data
 #else
-        if (!UG2d::EstimateHere(target_))
+    if (!UG2d::EstimateHere(target_))
         return false;
-
+    
     return UG2d::MarkForRefinement(target_, 
                                    UG2d::RED, // red refinement rule
                                    0);  // no user data
@@ -257,7 +275,11 @@ inline int UGGridEntity<0, dim, dimworld>::subIndex(int i)
 
 #else
 
-    typename TargetType<dim,dim>::T* node = CORNER(target_,i);
+#ifdef _3
+    UG3d::node* node = (UG3d::node*)UG<dimworld>::Corner(target_,i);
+#else
+    UG2d::node* node = (UG2d::node*)UG<dimworld>::Corner(target_,i);
+#endif
     return node->myvertex->iv.id;
 
 #endif

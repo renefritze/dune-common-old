@@ -12,16 +12,7 @@ public:
     typedef void DomainType;
 };
 
-#ifdef _3
-template <>
-class UGTypes<3>
-{
-public:
-    typedef UG3d::multigrid MultiGridType;
-
-    typedef UG3d::domain DomainType;
-};
-#else
+#ifdef _2
 template <>
 class UGTypes<2>
 {
@@ -31,6 +22,19 @@ public:
     typedef UG2d::domain DomainType;
 };
 #endif
+
+#ifdef _3
+template <>
+class UGTypes<3>
+{
+public:
+    typedef UG3d::multigrid MultiGridType;
+
+    typedef UG3d::domain DomainType;
+};
+#endif
+
+
 
     /*****************************************************************/
     /*****************************************************************/
