@@ -147,8 +147,13 @@ public:
     /** \todo Please doc me! */
   enum { numCodim = dim+1 };
   
-  //! empty Constructor 
-  UGGrid();
+    /** \brief Constructor with control over UG's memory requirements 
+     *
+     * \param heap The size of UG's internal memory in megabytes.  UG allocates 
+     * memory only once.  I don't know what happens if you create UGGrids with 
+     * differing heap sizes.
+     */
+  UGGrid(unsigned int heap=500);
  
   //! Desctructor 
   ~UGGrid();
@@ -179,10 +184,6 @@ public:
 //**********************************************************
 // End of Interface Methods
 //**********************************************************
-
-#if 0
-  UGCtype getTime () const { return time_; };
-#endif
 
     void makeNewUGMultigrid();
   
@@ -225,6 +226,14 @@ protected:
      * compiled with gcc.
      */
     char* newformatArgs[4];
+
+    /** \brief The size of UG's internal heap in megabytes
+     *
+     * It is handed over to UG for each new multigrid.  I don't know
+     * what happens if you hand over differing values.
+     */
+    unsigned int heapsize;
+
 
 }; // end Class UGGrid
 
