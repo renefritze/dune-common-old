@@ -293,7 +293,7 @@ AlbertGridElement()
 }
 
 
-
+#if 0
 template< int dim, int dimworld>
 inline AlbertGridElement<dim,dimworld>:: 
 AlbertGridElement(ALBERT EL_INFO *elInfo, 
@@ -312,6 +312,8 @@ AlbertGridElement(ALBERT EL_INFO *elInfo,
         coord_(i)(j) = elInfo_->coord[i][j];
   }
 }
+#endif
+
 template< int dim, int dimworld>
 inline void AlbertGridElement<dim,dimworld>:: 
 initGeom()
@@ -336,7 +338,7 @@ builtGeom(ALBERT EL_INFO *elInfo, unsigned char face,
   {
     for(int i=0; i<dim+1; i++)
       for(int j=0; j<dimworld; j++)
-        coord_(i)(j) = elInfo_->coord[i][j];
+        coord_(i)(j) = elInfo_->coord[mapVertices<dimworld-dim>(i)][j];
   }
 }
 
@@ -373,48 +375,8 @@ template< int dim, int dimworld>
 inline Vec<dimworld,albertCtype>& AlbertGridElement<dim,dimworld>:: 
 operator [](int i)
 {
-  return coord_(mapVertices<dimworld-dim>(i) % corners()); 
+  return coord_(i);
 }
-
-inline Vec<3,albertCtype>& AlbertGridElement<3,3>:: 
-operator [](int i)
-{
-  return coord_(i); 
-}
-
-inline Vec<2,albertCtype>& AlbertGridElement<2,2>:: 
-operator [](int i)
-{
-  return coord_(i); 
-}
-
-inline Vec<1,albertCtype>& AlbertGridElement<1,1>:: 
-operator [](int i)
-{
-  return coord_(i); 
-}
-
-/// specialization for codim = dim
-inline Vec<3,albertCtype>& AlbertGridElement<0,3>:: 
-operator [](int i)
-{
-  return coord_(vertex_); 
-}
-
-/// specialization for codim = dim
-inline Vec<2,albertCtype>& AlbertGridElement<0,2>:: 
-operator [](int i)
-{
-  return coord_(vertex_); 
-}
-
-/// specialization for codim = dim
-inline Vec<1,albertCtype>& AlbertGridElement<0,1>:: 
-operator [](int i)
-{
-  return coord_(vertex_); 
-}
-
 
 template< int dim, int dimworld>
 inline AlbertGridElement<dim,dim>& AlbertGridElement<dim,dimworld>:: 
@@ -427,11 +389,14 @@ template< int dim, int dimworld>
 inline Vec<dimworld,albertCtype>& AlbertGridElement<dim,dimworld>:: 
 global(Vec<dim> local)
 {
-  std::cout << "global not correctly implemented yet! \n";
-  Vec<dim+1> tmp (0.0);
+  // Umrechnen von localen Koordinaten zu baryzentrischen Koordinaten
+  Vec<dim+1> tmp (1.0); // Wichtig, da tmp(0) = 1 - tmp(1)- ... -tmp(dim+1)
+  for(int i=0; i<dim; i++)
+    tmp(0) -= local(i);
   for(int i=1; i<dim+1; i++)
     tmp(i) = local(i-1);
  
+  // globale Koordinaten ausrechnen
   globalCoord_ = globalBary(tmp);
   
   return globalCoord_; 
@@ -466,9 +431,10 @@ template< int dim, int dimworld>
 inline Vec<dim>& AlbertGridElement<dim,dimworld>:: 
 local(Vec<dimworld> global)
 {
-  std::cout << "local not correctly implemented yet! \n";
   Vec<dim+1,albertCtype> tmp = localBary(global);
   
+  // Umrechnen von baryzentrischen localen Koordinaten nach 
+  // localen Koordinaten, 
   for(int i=0; i<dim; i++)
     localCoord_(i) = tmp(i+1);
   
@@ -554,7 +520,6 @@ localBary(Vec<2> global)
   return lam;
 }
 
-#if 1
 //template< int dim, int dimworld>
 inline Vec<4> AlbertGridElement<3,3>:: 
 localBary(Vec<3> global)
@@ -639,13 +604,13 @@ localBary(Vec<3> global)
   
   return lam;
 }
-#endif
+
 
 template< int dim, int dimworld>
 inline albertCtype AlbertGridElement<dim,dimworld>:: 
 integration_element (const Vec<dim,albertCtype>& local)
 {
-  std::cout << "integration_element not implemented yet! \n";
+  //std::cout << "integration_element not implemented yet! \n";
   return ALBERT el_volume(elInfo_);
 }
 
@@ -711,6 +676,63 @@ pointIsInside(const Vec<dimworld> &point)
   
   return ret;
 }
+
+template< int dim, int dimworld>
+inline Vec<dimworld,albertCtype>& AlbertGridElement<dim,dimworld>:: 
+unit_outer_normal()
+{
+  Vec<dimworld,albertCtype> tmp = outer_normal();
+  
+  double norm = tmp.norm2();
+  if(!(norm > 0.0)) norm = 1.0;
+  
+  for(int i=0; i<dimworld; i++)
+    outerNormal_(i) = tmp(i)/norm;
+  
+  return outerNormal_; 
+}
+
+template< int dim, int dimworld>
+inline Vec<dimworld,albertCtype>& AlbertGridElement<dim,dimworld>:: 
+outer_normal()
+{
+  std::cout << "outer_normal not correctly available for this elementtype! \n";
+  for(int i=0; i<dimworld; i++)
+    outerNormal_(i) = 0.0;
+  
+  return outerNormal_; 
+}
+
+inline Vec<2,albertCtype>& AlbertGridElement<1,2>:: 
+outer_normal()
+{
+  // Faces in 2d
+  Vec<2,albertCtype>& v = coord_(1);
+  Vec<2,albertCtype>& u = coord_(0);
+    
+  outerNormal_(0) =   v(0) - u(0); 
+  outerNormal_(1) = -(v(1) - u(1));
+  
+  return outerNormal_; 
+}
+
+inline Vec<3,albertCtype>& AlbertGridElement<2,3>:: 
+outer_normal()
+{
+  enum { dimworld = 3};
+  
+  Vec<dimworld,albertCtype> v = coord_(0) - coord_(2);
+  Vec<dimworld,albertCtype> u = coord_(1) - coord_(2);
+
+  // rechne Kreuzprodukt der Vectoren aus   
+  for(int i=0; i<dimworld; i++) 
+    outerNormal_(i) = u((i+1)%dimworld)*v((i+2)%dimworld) 
+                    - u((i+2)%dimworld)*v((i+1)%dimworld);
+  
+  return outerNormal_; 
+}
+
+
 //*************************************************************************
 //
 //  --AlbertGridEntity 
@@ -819,7 +841,6 @@ AlbertGridEntity < codim, dim ,dimworld >::father()
 }
 
 
-
 //************************************
 //
 //  --AlbertGridEntity codim = 0 
@@ -921,31 +942,16 @@ template< int dim, int dimworld>
 inline AlbertGridElement<dim,dim>& 
 AlbertGridEntity < 0, dim ,dimworld >::father_relative_local()
 {
-  std::cout << "father_realtive_local not implemented yet! \n";
+  std::cout << "\nfather_realtive_local not implemented yet! \n";
   return fatherReLocal_;
 }
 
-template< int dim, int dimworld> template<int cc>
-inline int AlbertGridEntity < 0, dim ,dimworld >::count()
-{
-  std::cout << "count not implemented yet! \n";
-  return -1;
-}
-
-template<int dim, int dimworld> template<int cc>
-inline AlbertGridLevelIterator<cc,dim,dimworld> 
-AlbertGridEntity<0,dim,dimworld>::entity (int i)
-{
-  std::cout << "entity not implemented yet! \n";
-  AlbertGridLevelIterator<cc,dim,dimworld> tmp;
-  return tmp;
-}
-
-// Ende AlbertGridEntity
+// end AlbertGridEntity
 
 //***************************************************************
 //
 //  --AlbertGridHierarchicIterator
+//  --HierarchicIterator
 //
 //***************************************************************
 template< int dim, int dimworld>
@@ -1115,6 +1121,7 @@ recursiveTraverse(ALBERT TRAVERSE_STACK * stack)
 //***************************************************************
 //
 //  --AlbertGridNeighborIterator
+//  --NeighborIterator
 //
 //***************************************************************
 template< int dim, int dimworld>
@@ -1385,7 +1392,14 @@ template< int dim, int dimworld>
 inline Vec<dimworld,albertCtype>& AlbertGridNeighborIterator<dim,dimworld>:: 
 unit_outer_normal(Vec<dim-1,albertCtype>& local)
 {
-  std::cout << "unit_outer_normal(local) not implemented yet! \n";
+  Vec<dimworld,albertCtype> tmp = outer_normal(local);
+
+  double norm = tmp.norm2();
+  if(!(norm > 0.0)) norm = 1.0;
+  
+  for(int i=0; i<dimworld; i++)
+    outerNormal_(i) = tmp(i)/norm;
+  
   return outerNormal_; 
 }
 
@@ -1405,9 +1419,23 @@ unit_outer_normal()
 
 template< int dim, int dimworld>
 inline Vec<dimworld,albertCtype>& AlbertGridNeighborIterator<dim,dimworld>:: 
+outer_normal(Vec<dim-1,albertCtype>& local)
+{
+  std::cout << "outer_normal() not correctly implemented yet! \n";
+  for(int i=0; i<dimworld; i++)
+    outerNormal_(i) = 0.0;
+
+  return outerNormal_; 
+}
+
+template< int dim, int dimworld>
+inline Vec<dimworld,albertCtype>& AlbertGridNeighborIterator<dim,dimworld>:: 
 outer_normal()
 {
-  std::cout << "outer_normal() not implemented yet! \n";
+  std::cout << "outer_normal() not correctly implemented yet! \n";
+  for(int i=0; i<dimworld; i++)
+    outerNormal_(i) = 0.0;
+
   return outerNormal_; 
 }
 
@@ -1457,8 +1485,8 @@ inline AlbertGridElement< dim-1, dimworld >&
 AlbertGridNeighborIterator<dim,dimworld>::
 intersection_self_global()
 {
-  std::cout << "intersection_self_global not implemented yet! \n";
-  return fakeNeigh_;
+  neighGlob_.builtGeom(elInfo_,neighborCount_,0,0);  
+  return neighGlob_;
 }
 
 template< int dim, int dimworld>
@@ -1475,7 +1503,7 @@ inline AlbertGridElement< dim-1, dimworld >&
 AlbertGridNeighborIterator<dim,dimworld>::
 intersection_neighbor_global()
 {
-  std::cout << "intersection_neighbor_global not implemented yet! \n";
+  neighGlob_.builtGeom(elInfo_,neighborCount_,0,0);  
   return neighGlob_;
 }
 
@@ -1491,8 +1519,7 @@ template< int dim, int dimworld>
 inline int AlbertGridNeighborIterator<dim,dimworld>::
 number_in_neighbor () 
 {
-  std::cout << "number_in_self not implemented yet! \n";
-  return -1;
+  return elInfo_->opp_vertex[neighborCount_];
 }
 
 // end NeighborIterator
@@ -1501,6 +1528,7 @@ number_in_neighbor ()
 //*******************************************************
 // 
 // --AlbertGridLevelIterator
+// --LevelIterator
 // 
 //*******************************************************
 template<int codim, int dim, int dimworld>
@@ -1528,13 +1556,13 @@ AlbertGridLevelIterator()
 // Make LevelIterator with point to element from previous iterations
 template<int codim, int dim, int dimworld>
 inline AlbertGridLevelIterator<codim,dim,dimworld >::
-AlbertGridLevelIterator(ALBERT EL_INFO *elInfo)
+AlbertGridLevelIterator(ALBERT EL_INFO *elInfo,int face,int edge,int vertex)
 {
   if(elInfo)
   {
-    vertex_ = 0;
-    face_ = 0;
-    edge_ = 0;
+    face_ = face;
+    edge_ = edge;
+    vertex_ = vertex;
 
     vertexMarker_ = NULL;
 
