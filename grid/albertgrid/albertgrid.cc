@@ -229,6 +229,7 @@ initGeom()
   edge_ = 0;
   vertex_ = 0;
   builtinverse_ = false;
+  builtElMat_   = false;
 }
 
 // built Geometry 
@@ -245,6 +246,7 @@ builtGeom(ALBERT EL_INFO *elInfo, unsigned char face,
   vertex_ = vertex;
   elDet_ = 0.0;
   builtinverse_ = false;
+  builtElMat_   = false;
 
   if(elInfo_)
   {
@@ -274,6 +276,8 @@ builtGeom(ALBERT EL_INFO *elInfo, unsigned char face,
   elInfo_ = elInfo;
   elDet_ = 0.0;
   builtinverse_ = false;
+  builtElMat_   = false;
+
   if(elInfo_)
   {
     for(int i=0; i<dim+1; i++)
@@ -298,6 +302,8 @@ builtGeom(ALBERT EL_INFO *elInfo, unsigned char face,
   elInfo_ = elInfo;
   elDet_ = 0.0;
   builtinverse_ = false;
+  builtElMat_   = false;
+
   if(elInfo_)
   {
     for(int i=0; i<dim+1; i++)
@@ -561,11 +567,15 @@ localBary(const Vec<3>& global)
 template <> 
 inline void AlbertGridElement<2,2>::calcElMatrix ()
 {
-  Vec<2,albertCtype> & coord0 = coord_(2);
-  for (int i=0; i<2; i++) 
+  if( !builtElMat_)
   {
-    elMat_(i,0) = coord_(i,0) - coord0(i);
-    elMat_(i,1) = coord_(i,1) - coord0(i);
+    Vec<2,albertCtype> & coord0 = coord_(2);
+    for (int i=0; i<2; i++) 
+    {
+      elMat_(i,0) = coord_(i,0) - coord0(i);
+      elMat_(i,1) = coord_(i,1) - coord0(i);
+    }
+    builtElMat_ = true;
   }
 }
 
@@ -574,17 +584,22 @@ template <>
 inline void AlbertGridElement<3,3>::calcElMatrix ()
 {
   enum { dimworld = 3 };
-  for(int i=0 ;i<dimworld; i++)
+  if( !builtElMat_)
   {
-    elMat_(i,0) = coord_(i,3) - coord_(i,0);
-    elMat_(i,1) = coord_(i,2) - coord_(i,3);
-    elMat_(i,2) = coord_(i,1) - coord_(i,2);
+    for(int i=0 ;i<dimworld; i++)
+    {
+      elMat_(i,0) = coord_(i,3) - coord_(i,0);
+      elMat_(i,1) = coord_(i,2) - coord_(i,3);
+      elMat_(i,2) = coord_(i,1) - coord_(i,2);
+    }
+    builtElMat_ = true;
   }
 }
 
 template <int dim, int dimworld> 
 inline void AlbertGridElement<dim,dimworld>::calcElMatrix ()
 {
+  builtElMat_ = false;
   std::cout << "AlbertGridElement::calcElMatrix: No default implementation \n";
   abort();
 }
@@ -612,6 +627,7 @@ buildJacobianInverse(const Vec<dim,albertCtype>& local)
   calcElMatrix();
   
   // Jinv = A^-1
+  assert( builtElMat_ == true );
   elDet_ = ABS( elMat_.invert(Jinv_) );
 
   assert(elDet_ > 1.0E-25);
