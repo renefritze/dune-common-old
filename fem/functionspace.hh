@@ -1,6 +1,6 @@
 
-#ifndef DUNE_LOCALBASE_HH
-#define DUNE_LOCALBASE_HH
+#ifndef DUNE_FUNCTIONSPACE_HH
+#define DUNE_FUNCTIONSPACE_HH
 
 #include "localbase.hh"
 #include "localbase/defaultmmgr.hh"
@@ -108,6 +108,8 @@ private:
 };
 
 } // end namespace Dune
+
+#include "localbase/functionspace.cc"
 
 #endif
 

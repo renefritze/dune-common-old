@@ -105,7 +105,11 @@ inline void FunctionSpace<Grid,basetype>::makeBase()
         dimOfFunctionSpace_ = grid_->size(-1,0); 
         
         for(int i=0; i<numDof; i++)
-          localBase_(i) = new BASEFUNC (baseType_->getBaseFunc(i));
+          localBase_(i) = new BASEFUNC (
+                        baseType_->getBaseFunc(i),
+                        baseType_->getDrv1st(i),
+                        baseType_->getDrv2nd(i)
+                        );
         makeMapVec();
         break;
       }
@@ -115,7 +119,11 @@ inline void FunctionSpace<Grid,basetype>::makeBase()
         baseType_ = new LOCALBASE ();
         dimOfFunctionSpace_ = grid_->numberVertices();
         for(int i=0; i<numDof; i++)
-          localBase_(i) = new BASEFUNC (baseType_->getBaseFunc(i));
+          localBase_(i) = new BASEFUNC (
+                        baseType_->getBaseFunc(i),
+                        baseType_->getDrv1st(i),
+                        baseType_->getDrv2nd(i)
+                        );
         makeMapVecLag();
         break;
       }
@@ -125,7 +133,11 @@ inline void FunctionSpace<Grid,basetype>::makeBase()
         baseType_ = new LOCALBASE ();
         dimOfFunctionSpace_ = numDof*grid_->size(-1,0);
         for(int i=0; i<numDof; i++)
-          localBase_(i) = new BASEFUNC (baseType_->getBaseFunc(i));
+          localBase_(i) = new BASEFUNC (
+                        baseType_->getBaseFunc(i),
+                        baseType_->getDrv1st(i),
+                        baseType_->getDrv2nd(i)
+                        );
         makeMapVec();
         break;
   

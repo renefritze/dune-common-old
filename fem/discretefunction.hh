@@ -1,6 +1,6 @@
 
-#ifndef DUNE_LOCALBASE_HH
-#define DUNE_LOCALBASE_HH
+#ifndef DUNE_DISCRETEFUNCTION_HH
+#define DUNE_DISCRETEFUNCTION_HH
 
 #include "functionspace.hh"
 
@@ -102,6 +102,8 @@ public:
 
 
 } // end namespace Dune
+
+#include "localbase/discretefunction.cc"
 
 #endif
 
