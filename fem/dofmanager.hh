@@ -4,6 +4,8 @@
 #include <assert.h>
 
 #include <dune/common/dlist.hh>
+#include <dune/common/stdstreams.hh>
+
 #include <dune/fem/common/dofmapperinterface.hh>
 
 // here are the default grid index set defined 
@@ -202,24 +204,19 @@ public:
   } 
 };
 
-
 class DefaultGHMM
 {
 public:
-  MemPointerType *Malloc (unsigned long n)
+  MemPointerType *Malloc (size_t n)
   { 
     MemPointerType *p;
-    p = (MemPointerType *) std::malloc((size_t) n);
-    if (p==0) std::cerr << "Malloc: could not allocate " << n << " bytes\n";
-    assert(p != 0);
+    p = new MemPointerType[n];
     return p;
   }  
 
   void  Free (MemPointerType *p)
   { 
-    assert(p != 0);
-    std::free(p);
-    return;
+    delete[] p;
   } 
 };
 
@@ -356,16 +353,19 @@ private:
   // the dofmanager belong to one grid only 
   GridType & grid_;
   
-  // verbose, true if output of messages 
-  bool verbose_;
-  
   // index set for mapping 
   mutable IndexSetType indexSet_; 
 
-public:  
+public:
   //! Constructor, creates and index set 
-  DofManager (GridType & grid, bool verbose = false) 
-    : grid_(grid), verbose_ (verbose) , indexSet_ ( grid )
+  DofManager (GridType & grid) 
+    : grid_(grid),  indexSet_ ( grid )
+  {
+  }
+  
+  //! Constructor, creates and index set 
+  DofManager (GridType & grid, bool verbose) 
+    : grid_(grid), indexSet_ ( grid )
   {
   }
 
@@ -384,10 +384,7 @@ public:
       //MemPointerType * mem = (*it)->myMem();
       //ghmm_.Free(mem);
       MemObjectType * mobj = (*it);
-      if(verbose_)
-      {
-        std::cout << "Removing " << count << " '" << mobj->name() << "' from DofManager!\n";
-      }
+      dverb << "Removing " << count << " '" << mobj->name() << "' from DofManager!\n";	
       memList_.erase( it );  
       if(mobj) delete mobj;
     }
@@ -400,8 +397,7 @@ public:
   MemObjectType & addDofSet(T * t, GridType &grid, MapperType & mapper, const char * name )
   {
     assert(&grid_ == &grid);
-    if(verbose_) 
-      std::cout << "Adding '" << name << "' to DofManager! \n";
+    dverb << "Adding '" << name << "' to DofManager! \n";
     MemObjectType * obj = 
       new MemObjectType( grid , mapper, name, ghmm_ , sizeof(T) ); 
     
@@ -425,8 +421,7 @@ public:
         //ghmm_.Free(mem);
         MemObjectType * mobj = (*it);
         memList_.erase( it );  
-        if(verbose_)
-          std::cout << "Removing '" << obj.name() << "' from DofManager!\n";
+	dverb << "Removing '" << obj.name() << "' from DofManager!\n";
         if(mobj) delete mobj;
         removed = true;
         break;
