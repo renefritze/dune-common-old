@@ -50,7 +50,7 @@ inline BSGrid<dim,dimworld>::BSGrid(int myrank) : mygrid_ (0) , maxlevel_(0) , m
   for(int l=0; l<MAXL; l++)
     for(int i=0; i<dim+1; i++) size_[l][i] = -1;
 
-  for(int i=0; i<dim+1; i++) globalSize_[i] = -1;
+  for(int i=0; i<dim+1; i++) globalSize_[i] = 0;
 }
 #endif
 
