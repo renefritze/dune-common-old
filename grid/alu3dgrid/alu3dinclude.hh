@@ -41,7 +41,8 @@ typedef Hbnd3PllInternal < GitterType :: Objects :: Hbnd3Default,
   BndsegPllBaseXClosure < GitterType :: hbndseg3_GEO > , 
   BndsegPllBaseXMacroClosure < GitterType :: hbndseg3_GEO > > :: micro_t  MicroType;
 
-enum { ProcessorBoundary_t = GitterImplType:: hbndseg_STI :: closure };
+// value for boundary to other processes 
+static const int ProcessorBoundary_t = GitterImplType:: hbndseg_STI :: closure;
 
 #else 
 typedef GatherScatter GatherScatterType;
@@ -127,7 +128,6 @@ template <> struct BSIMPLElementType<2> {
 };
 
 template <> struct BSIMPLElementType<3> {
-  //typedef GitterType :: vertex_STI ElementType;
   typedef GitterType::Geometric::VertexGeo ElementType;
 };
 
