@@ -19,10 +19,6 @@ public:
     UGMakeableEntity(int level) :
         GridImp::template codim<codim>::Entity (UGGridEntity<codim, dim, GridImp>(level))
     {}
-//   SMakeableEntity(const SEntity<codim, dim, GridImp>& e) :
-//     GridImp::template codim<codim>::Entity (e)
-//     {};
-//   void make (int _l, int _id) { this->realEntity.make(_l, _id); }
 
     void setToTarget(typename TargetType<codim,dim>::T* target) {
         this->realEntity.setToTarget(target);
@@ -30,6 +26,10 @@ public:
 
     void setToTarget(typename TargetType<codim,dim>::T* target, int level) {
         this->realEntity.setToTarget(target, level);
+    }
+
+    typename TargetType<codim,dim>::T* getTarget() {
+        return this->realEntity.target_;
     }
 
 };
@@ -256,18 +256,6 @@ public:
   //  Interface for Adaptation
   //***************************************************************
   
-    /** \brief Mark entity for refinement
-     *
-     * This only works for entities of codim 0.
-     * The parameter is currently ignored
-     *
-     * \return <ul>
-     * <li> true, if element was marked </li>
-     * <li> false, if nothing changed </li>
-     * </ul>
-     */
-    bool mark(int refCount);
-
     /** \todo Please doc me! */
     AdaptationState state() const;
   
