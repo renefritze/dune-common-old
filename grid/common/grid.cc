@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
-#include <dune/io/file/asciiparser.hh>
 
 namespace Dune {
 
