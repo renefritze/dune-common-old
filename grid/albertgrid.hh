@@ -1,11 +1,11 @@
 #ifndef DUNE_ALBERTGRID_HH
 #define DUNE_ALBERTGRID_HH
 
+#include <iostream>
+#include <fstream>
 
 #include <vector>
 #include <assert.h>
-
-//#include "albertgrid/indexset.hh"
 
 #ifdef __ALBERTNAME__
 #define ALBERT Albert:: 
@@ -57,7 +57,7 @@ extern "C"
 #include "albertgrid/albertextra.hh"
 
 #ifdef __ALBERTNAME__
-}//end namespace Albert
+} //end namespace Albert
 #endif
 
 #include "../common/misc.hh"
