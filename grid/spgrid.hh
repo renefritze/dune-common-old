@@ -20,6 +20,8 @@
 
 typedef int ID_t;
 
+#define QUICKHACKNOELEMENTS
+
 namespace Dune {
 
   // consts for flag-index
