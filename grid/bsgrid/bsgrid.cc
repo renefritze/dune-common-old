@@ -187,7 +187,9 @@ inline bool BSGrid<dim,dimworld>::globalRefine(int anzahl)
 
     mygrid_->adapt ();
     maxlevel_++;
+    postAdapt();
   }  
+
   calcExtras();
   return true;
 }
@@ -220,6 +222,13 @@ inline bool BSGrid<dim,dimworld>::adapt()
 template <int dim, int dimworld>
 inline void BSGrid<dim,dimworld>::postAdapt() 
 {
+  {
+    typename BSSPACE BSLeafIteratorMaxLevel w (*mygrid_) ;
+    for (w->first () ; ! w->done () ; w->next ())
+    {
+      w->item ().resetRefinedTag();
+    }
+  }
   coarsenMark_ = false;
 }
 
@@ -614,32 +623,39 @@ template<int dim, int dimworld>
 inline BSGridIntersectionIterator<dim,dimworld> :: 
 BSGridIntersectionIterator(BSGrid<dim,dimworld> &grid,
   BSSPACE HElementType *el, int wLevel,bool end) :
-  entity_( grid ), item_(el), index_(0) 
+  entity_( grid ), item_(0), neigh_(0), index_(0) 
   , needSetup_ (true), needNormal_(true) 
   , interSelfGlobal_ (false) 
   , theSituation_ (false) , daOtherSituation_ (false)
+  , isBoundary_ (true) // isBoundary_ == true means no neighbour 
 {
-  neighpair_.first  = 0; 
-  neighpair_.second = 0;
-  
   if( !end )
-    theSituation_ = ( (item_->level() < wLevel ) && item_->leaf() );
+  {
+    first(*el,wLevel);
+  }
   else 
-    index_ = 4;
+  {
+    done();
+  }
 }
 template<int dim, int dimworld>
 inline void BSGridIntersectionIterator<dim,dimworld> :: 
 first (BSSPACE HElementType & elem, int wLevel) 
 {
-  item_  = &elem;
+  item_  = static_cast<BSSPACE GEOElementType *> (&elem);
   index_ = 0;
+  neigh_ = 0;
   neighpair_.first  = 0; 
   neighpair_.second = 0;
+
+  // if needed more than once we spare the virtual funtion call
+  isBoundary_ = item_->myneighbour(index_).first->isboundary();
+  
+  theSituation_ = ( (elem.level() < wLevel ) && elem.leaf() );
+  daOtherSituation_ = false;
   
   needSetup_ = true;
   needNormal_= true;
-  theSituation_ = ( (elem.level() < wLevel ) && elem.leaf() );
-  daOtherSituation_ = false;
 }
 
 template<int dim, int dimworld>
@@ -657,7 +673,6 @@ inline BSGridIntersectionIterator<dim,dimworld> &
 BSGridIntersectionIterator<dim,dimworld> :: operator ++() 
 {
   assert(item_ != 0);
-  //std::cout << item_->level() << " " << item_->leaf() << " " <<  theSituation_ << " \n";
 
   if( neighpair_.first && theSituation_ && daOtherSituation_ ) 
   {
@@ -680,6 +695,9 @@ BSGridIntersectionIterator<dim,dimworld> :: operator ++()
     return *this;
   }
   
+  // if needed more than once we spare the virtual funtion call
+  isBoundary_ = item_->myneighbour(index_).first->isboundary();
+
   needSetup_  = true;
   needNormal_ = true;
   return *this;
@@ -709,7 +727,7 @@ setNeighbor ()
   if(! neighpair_.first ) 
   {
     // get the face(index_)  of this element 
-    neighpair_ = (static_cast<BSSPACE GEOElementType &> (*item_)).myintersection(index_);
+    neighpair_ = (*item_).myintersection(index_);
 
     assert(neighpair_.first);
 
@@ -735,13 +753,17 @@ setNeighbor ()
 
   // same as in method myneighbour of Tetra and Hexa in gitter_sti.hh
   // neighpair_.second is the twist of the face 
-  typename BSSPACE GEOElementType * neigh = (neighpair_.second < 0) ? 
-    ((neighpair_.first->nb.front()).first) : ((neighpair_.first->nb.rear()).first);
+  BSSPACE NeighbourPairType np = (neighpair_.second < 0) ? 
+      (neighpair_.first->nb.front()) : (neighpair_.first->nb.rear());
 
-  assert(neigh != item_);
-  assert(neigh != 0);
+  neigh_ = np.first; 
+  numberInNeigh_ = np.second;
 
-  entity_.setelement(*neigh, index_);
+  assert(neigh_ != item_);
+  assert(neigh_ != 0);
+
+
+  entity_.setelement(*neigh_, index_);
   needSetup_ = false;
 }
 
@@ -764,10 +786,7 @@ BSGridIntersectionIterator<dim,dimworld> :: operator->()
 template<int dim, int dimworld>
 inline bool BSGridIntersectionIterator<dim,dimworld> :: boundary () 
 {
-  assert(0<=index_ && index_<4);
-  assert(item_);
-  return (static_cast<BSSPACE GEOElementType *>
-      (item_)->myneighbour(index_)).first->isboundary();
+  return isBoundary_;
 }
 
 template<int dim, int dimworld>
@@ -786,7 +805,9 @@ template<int dim, int dimworld>
 inline int BSGridIntersectionIterator<dim,dimworld>::number_in_neighbor () 
 {
   assert(item_ != 0);
-  return (static_cast<BSSPACE GEOElementType *> (item_)->myneighbour(index_).second);
+  
+  if(needSetup_) setNeighbor();
+  return numberInNeigh_;
 }
 
 template< int dim, int dimworld>
@@ -804,31 +825,19 @@ BSGridIntersectionIterator<dim,dimworld>::outer_normal()
   assert(item_ != 0);
   if(needNormal_) 
   { 
-    if(needSetup_) setNeighbor(); 
-    // seems to work, but has t obe checked 
-    calcNormal(neighpair_.first,neighpair_.second);
+    if( boundary() || ( !daOtherSituation_ ) )
+    {
+      item_->outerNormal(index_,outNormal_);
+    }
+    else 
+    {
+      if(needSetup_) setNeighbor(); 
+      neigh_->neighOuterNormal(numberInNeigh_,outNormal_);
+    }
+    needNormal_ = false;
   }
-  return outerNormal_;
+  return outNormal_;
 }
-
-template< int dim, int dimworld>
-inline void 
-BSGridIntersectionIterator<dim,dimworld>::
-calcNormal (BSSPACE GEOFaceType *face, int twist)
-{
-  int i0 = (twist < 0) ? 2 : 0;
-  int i2 = (twist < 0) ? 0 : 2;
-  
-  BSSPACE BSGridLinearSurfaceMapping 
-    LSM(face->myvertex(i0)->Point(),
-        face->myvertex( 1)->Point(),
-        face->myvertex(i2)->Point()
-       );
-  LSM.normal(outerNormal_);
-  needNormal_ = false;
-}
-
-
 
 template< int dim, int dimworld>
 inline FieldVector<bs_ctype, dimworld>& 
@@ -843,7 +852,7 @@ inline FieldVector<bs_ctype, dimworld>&
 BSGridIntersectionIterator<dim,dimworld>::unit_outer_normal()
 {
   unitOuterNormal_  = this->outer_normal();
-  unitOuterNormal_ /= unitOuterNormal_.norm2(); 
+  unitOuterNormal_ /= unitOuterNormal_.two_norm(); 
   return unitOuterNormal_;
 }
 
@@ -911,6 +920,16 @@ inline int BSGridEntity<0,dim,dimworld> :: global_index()
 {
   assert(item_ != 0);
   return item_->getIndex();
+}
+
+template<int dim, int dimworld>
+template<int cc> 
+inline int BSGridEntity<0,dim,dimworld> :: subIndex (int i) 
+{
+  assert(cc == dim);
+  assert(item_ != 0);
+  return IndexWrapper<cc>::subIndex (
+      ( static_cast<BSSPACE GEOElementType &> (*item_)) ,i);
 }
 
 template<int dim, int dimworld>
@@ -1019,12 +1038,36 @@ template<int dim, int dimworld>
 inline AdaptationState BSGridEntity<0,dim,dimworld> :: state () const 
 {
   if(static_cast<BSSPACE GEOElementType &> 
-      (*item_).requestrule() == BSSPACE coarse_element_t) return COARSEN;
+      (*item_).requestrule() == BSSPACE coarse_element_t) 
+  {
+    //std::cout << "return COARSEND \n";
+    return COARSEN;
+  }
  
   if(item_->hasBeenRefined())
+  {
+    //std::cout << "return REFINED\n";
     return REFINED;
+  }
   
   return NONE;
+}
+
+
+/************************************************************************************
+ ######  #    #   #####     #     #####   #   #
+ #       ##   #     #       #       #      # #   
+ #####   # #  #     #       #       #       #
+ #       #  # #     #       #       #       #
+ #       #   ##     #       #       #       #
+ ######  #    #     #       #       #       #
+************************************************************************************/
+// --Entity
+
+template<int codim, int dim, int dimworld>
+inline int BSGridEntity<codim,dim,dimworld> :: global_index () 
+{
+  return item_->getIndex();
 }
 
 /***********************************************************************
