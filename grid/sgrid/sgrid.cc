@@ -345,10 +345,10 @@ inline SLevelIterator<cc,dim,dimworld> SEntity<0,dim,dimworld>::entity (int i)
 
 	// compute expanded coordinates of entity in global coordinates
 	Tupel<int,dim> zentity;
-	for (int i=0; i<dim; i++) zentity[i] = z[i] + zref[i] - 1;
+	for (int i=0; i<dim; i++) zentity[i] = this->z[i] + zref[i] - 1;
 
 	// make Iterator
-	return SLevelIterator<cc,dim,dimworld>(*grid,l,grid->n(l,zentity));
+	return SLevelIterator<cc,dim,dimworld>(*(this->grid),this->l,(this->grid)->n(this->l,zentity));
 }
 
 // default implementation uses entity method 
@@ -360,12 +360,12 @@ inline int SEntity<0,dim,dimworld>::subIndex (int i)
     // find expanded coordinates of entity in reference cube
     // has components in {0,1,2}
     // the grid hold the memory because its faster 
-    Tupel<int,dim> &zref = grid->zrefStatic;
-    Tupel<int,dim> &zentity = grid->zentityStatic;
+    Tupel<int,dim> &zref = this->grid->zrefStatic;
+    Tupel<int,dim> &zentity = this->grid->zentityStatic;
 
     zref = SUnitCubeMapper<dim>::mapper.z(i,dim);
-    for (int i=0; i<dim; i++) zentity[i] = z[i] + zref[i] - 1;
-    return grid->n(l,zentity);
+    for (int i=0; i<dim; i++) zentity[i] = this->z[i] + zref[i] - 1;
+    return this->grid->n(this->l,zentity);
   }
   else 
   {
@@ -376,25 +376,25 @@ inline int SEntity<0,dim,dimworld>::subIndex (int i)
 template<int dim, int dimworld>
 inline SIntersectionIterator<dim,dimworld> SEntity<0,dim,dimworld>::ibegin ()
 {
-	return SIntersectionIterator<dim,dimworld>(*grid,*this,0);
+	return SIntersectionIterator<dim,dimworld>(*(this->grid),*this,0);
 }
 
 template<int dim, int dimworld>
 inline void SEntity<0,dim,dimworld>::ibegin (SIntersectionIterator<dim,dimworld>& i)
 {
-	return i.make(*grid,*this,0);
+	return i.make(*(this->grid),*this,0);
 }
 
 template<int dim, int dimworld>
 inline SIntersectionIterator<dim,dimworld> SEntity<0,dim,dimworld>::iend ()
 {
-	return SIntersectionIterator<dim,dimworld>(*grid,*this,count<1>());
+	return SIntersectionIterator<dim,dimworld>(*(this->grid),*this,count<1>());
 }
 
 template<int dim, int dimworld>
 inline void SEntity<0,dim,dimworld>::iend (SIntersectionIterator<dim,dimworld>& i)
 {
-	return i.make(*grid,*this,count<1>());
+	return i.make(*(this->grid),*this,count<1>());
 }
 
 
@@ -402,7 +402,7 @@ template<int dim, int dimworld>
 inline void SEntity<0,dim,dimworld>::make_father ()
 {
 	// check level
-	if (l<=0)
+	if (this->l<=0)
 	{
 		father_id = 0;
 		built_father = true;
@@ -410,7 +410,7 @@ inline void SEntity<0,dim,dimworld>::make_father ()
 	}
 
 	// reduced coordinates from expanded coordinates
-	Tupel<int,dim> zz = grid->compress(l,z); 
+	Tupel<int,dim> zz = this->grid->compress(this->l,this->z); 
 
 	// look for odd coordinates
 	Vec<dim,sgrid_ctype> delta;
@@ -430,8 +430,8 @@ inline void SEntity<0,dim,dimworld>::make_father ()
 		}
 
 	// zz is now the reduced coordinate of the father, compute id
-	int partition = grid->partition(l,z); 
-	father_id = grid->n(l-1,grid->expand(l-1,zz,partition));
+	int partition = this->grid->partition(this->l,this->z); 
+	father_id = this->grid->n((this->l)-1,this->grid->expand((this->l)-1,zz,partition));
 
 	// now make a subcube of size 1/2 in each direction
 	Mat<dim,dim+1,sgrid_ctype> As;
@@ -452,16 +452,16 @@ template<int dim, int dimworld>
 inline SLevelIterator<0,dim,dimworld> SEntity<0,dim,dimworld>::father ()
 {
 	if (!built_father) make_father();
-	if (l>0)
-		return SLevelIterator<0,dim,dimworld>(*grid,l-1,father_id);
+	if (this->l>0)
+		return SLevelIterator<0,dim,dimworld>(*(this->grid),(this->l)-1,father_id);
 	else
-		return SLevelIterator<0,dim,dimworld>(*grid,l,id);
+		return SLevelIterator<0,dim,dimworld>(*(this->grid),this->l,this->id);
 }
 
 template<int dim, int dimworld>
 inline bool SEntity<0,dim,dimworld>::hasChildren ()
 {
-  return ( grid->maxlevel() > level() );
+  return ( this->grid->maxlevel() > level() );
 }
 
 template<int dim, int dimworld>
@@ -474,13 +474,13 @@ inline SElement<dim,dim>& SEntity<0,dim,dimworld>::father_relative_local ()
 template<int dim, int dimworld>
 inline SHierarchicIterator<dim,dimworld> SEntity<0,dim,dimworld>::hbegin (int maxlevel)
 {
-	return SHierarchicIterator<dim,dimworld>(*grid,*this,maxlevel,false);
+	return SHierarchicIterator<dim,dimworld>(*(this->grid),*this,maxlevel,false);
 }
 
 template<int dim, int dimworld>
 inline SHierarchicIterator<dim,dimworld> SEntity<0,dim,dimworld>::hend (int maxlevel)
 {
-	return SHierarchicIterator<dim,dimworld>(*grid,*this,maxlevel,true);
+	return SHierarchicIterator<dim,dimworld>(*(this->grid),*this,maxlevel,true);
 }
 
 
@@ -489,7 +489,7 @@ template<int dim, int dimworld>
 inline void SEntity<dim,dim,dimworld>::make_father ()
 {
 	// check level
-	if (l<=0)
+	if (this->l<=0)
 	{
 		father_id = 0;
 		built_father = true;
@@ -499,7 +499,7 @@ inline void SEntity<dim,dim,dimworld>::make_father ()
 	// reduced coordinates from expanded coordinates
 	// reduced coordinates of a fine grid vertex can be interpreted as 
 	// expanded coordinates on the next coarser level !
-	Tupel<int,dim> zz = grid->compress(l,z); 
+	Tupel<int,dim> zz = this->grid->compress(this->l,this->z); 
 
 	// to find father, make all coordinates odd
 	Vec<dim,sgrid_ctype> delta;
@@ -525,7 +525,7 @@ inline void SEntity<dim,dim,dimworld>::make_father ()
 		}
 
 	// zz is now an expanded coordinate on the coarse grid
-	father_id = grid->n(l-1,zz);
+	father_id = this->grid->n((this->l)-1,zz);
 
 	// compute the local coordinates in father
 	in_father_local = 0.5;
@@ -538,10 +538,10 @@ template<int dim, int dimworld>
 inline SLevelIterator<0,dim,dimworld> SEntity<dim,dim,dimworld>::father ()
 {
 	if (!built_father) make_father();
-	if (l>0)
-		return SLevelIterator<0,dim,dimworld>(*grid,l-1,father_id);
+	if (this->l>0)
+		return SLevelIterator<0,dim,dimworld>(*(this->grid),(this->l)-1,father_id);
 	else
-		return SLevelIterator<0,dim,dimworld>(*grid,l,id);
+		return SLevelIterator<0,dim,dimworld>(*(this->grid),this->l,this->id);
 }
 
 template<int dim, int dimworld>
