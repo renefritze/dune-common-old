@@ -42,7 +42,7 @@ typedef double OneDCType;
 }  // namespace Dune
 
 #include "onedgrid/onedgridentity.hh"
-#include "onedgrid/onedgridelement.hh"
+#include "onedgrid/onedgridgeometry.hh"
 #include "onedgrid/onedgridboundent.hh"
 #include "onedgrid/onedintersectionit.hh"
 #include "onedgrid/onedgridleveliterator.hh"
