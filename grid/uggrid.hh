@@ -4,6 +4,7 @@
 
 #include "../common/matvec.hh"
 #include "../common/capabilities.hh"
+#include "common/grid.hh"
 
 // All UG includes have to be includes via the file ugincludes.hh
 // for easier parsing by undefAllMacros.pl
@@ -21,7 +22,6 @@
 #include "uggrid/ug_undefs.hh"
 
 #include "../common/array.hh"
-#include "common/grid.hh"
 
 namespace Dune 
 {
@@ -304,6 +304,8 @@ protected:
 
 }; // end Class UGGrid
 
+#include "uggrid/uggrid.cc"
+
 namespace Capabilities
 {
 
@@ -329,5 +331,4 @@ namespace Capabilities
 
 } // namespace Dune
 
-#include "uggrid/uggrid.cc"
 #endif
