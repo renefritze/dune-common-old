@@ -498,10 +498,10 @@ public:
     This is provided for sparsely stored nested unstructured meshes.
     Returns iterator to first son.
   */
-  AlbertGridHierarchicIterator < dim,dimworld > hbegin (int maxlevel);
+  AlbertGridHierarchicIterator<dim,dimworld> hbegin (int maxlevel);
   
   //! Returns iterator to one past the last son
-  AlbertGridHierarchicIterator < dim,dimworld > hend (int maxlevel);
+  AlbertGridHierarchicIterator<dim,dimworld> hend (int maxlevel);
 
 //************************************************************
 //  Methoden zum Anbinden von Albert
@@ -521,7 +521,7 @@ private:
 
   //! the cuurent geometry
   AlbertGridElement<dim,dimworld> geo_;
-  bool builtgeometry_;               //!< true if geometry has been constructed
+  bool builtgeometry_;  //!< true if geometry has been constructed
 
   //! pointer to the real Albert element data
   ALBERT EL_INFO *elInfo_;
@@ -562,16 +562,10 @@ public:
   enum { dimensionworld=dimworld };
   
   // the normal Constructor
-  AlbertGridHierarchicIterator(ALBERT TRAVERSE_STACK travStack, int travLevel);
+  AlbertGridHierarchicIterator(ALBERT TRAVERSE_STACK *travStack, int travLevel);
 
   // the default Constructor
   AlbertGridHierarchicIterator();
-
-  // the default Constructor
-  ~AlbertGridHierarchicIterator();
-
-  // the Copy Constructor
-  AlbertGridHierarchicIterator(const AlbertGridHierarchicIterator& I);
 
   //! prefix increment
   AlbertGridHierarchicIterator& operator ++();
@@ -596,14 +590,18 @@ private:
   //! implement with virtual element
   AlbertGridEntity<0,dim,dimworld> virtualEntity_;
 
+  //! we need this for Albert traversal, and we need ManageTravStack, which
+  //! does count References when copied
+  ALBERT ManageTravStack manageStack_;
+
+  //! remember on which level we started
+  int startLevel_;
 
   //! The nessesary things for Albert
   ALBERT EL_INFO * recursiveTraverse(ALBERT TRAVERSE_STACK * stack);
+
+  //! make empty HierarchicIterator
   void makeIterator();
-
-  //! we need this for Albert traversal, and we need Copy of TRAVERSE_STACK
-  ALBERT TRAVERSE_STACK travStack_;
-
 };
 
 
@@ -731,6 +729,7 @@ private:
 //**********************************************************************
 //
 // --AlbertGridLevelIterator
+// --LevelIterator
 /*!
  Enables iteration over all entities of a given codimension and level of a grid.
  */
