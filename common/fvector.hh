@@ -1,4 +1,4 @@
-// $ Id: $
+// $Id$
 #ifndef DUNE_FVECTOR_HH
 #define DUNE_FVECTOR_HH
 
