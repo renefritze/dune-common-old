@@ -2188,7 +2188,6 @@ AlbertaGridLevelIterator(AlbertaGrid<dim,dimworld> &grid,
     // create empty iterator 
     makeIterator();
   }
-
 };
 
 template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
@@ -2265,8 +2264,7 @@ goNextVertex(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elInfo)
     vertex_ = 0;
   }
   
-  if(!elInfo)
-    return elInfo;  // if no more Vertices, return
+  if(!elInfo) return 0;  // if no more Vertices, return
 
   // go next, if Vertex is not treated on this Element 
   if(vertexMarker_->notOnThisElement(elInfo->el,
@@ -2863,7 +2861,7 @@ iend(AlbertaGridIntersectionIterator<dim,dimworld> &it) const
 inline bool AlbertaMarkerVector::
 notOnThisElement(ALBERTA EL * el, int elIndex, int level, int localNum) 
 {
-  return (vec_[ numVertex_ * level + el->dof[localNum][0]] != elIndex);
+  return (vec_[level][ el->dof[localNum][0] ] != elIndex);
 }
 
 template <class GridType>
@@ -2880,22 +2878,22 @@ inline void AlbertaMarkerVector::markNewVertices(GridType &grid)
 
   int maxlevel = grid.maxlevel();
   
-  int number = (maxlevel+1) * nvx;
-  if(vec_.size() < number) vec_.resize( 2 * number );
-  
-  for(int i=0; i<vec_.size(); i++) vec_[i] = -1;
-
   for(int level=0; level <= maxlevel; level++)
   {
+    Array<int> & vec = vec_[level];
+    
+    if(vec.size() < nvx) vec.resize( nvx + vxBufferSize_ );
+  
+    for(int i=0; i<vec.size(); i++) vec[i] = -1;
+
     typedef typename GridType::template Traits<0>::LevelIterator LevelIteratorType;
     LevelIteratorType endit = grid.template lend<0> (level);
     for(LevelIteratorType it = grid.template lbegin<0> (level); it != endit; ++it)
     {
       for(int local=0; local<dim+1; local++)
       { 
-        int num = it->getElInfo()->el->dof[local][0];
-        if( vec_[level * nvx + num] == -1 )
-          vec_[level * nvx + num] = it->el_index();
+        int num = it->getElInfo()->el->dof[local][0]; // vertex num
+        if( vec[num] == -1 ) vec[num] = it->global_index();
       }
     }
     // remember the number of entity on level and codim = 0
@@ -2904,9 +2902,16 @@ inline void AlbertaMarkerVector::markNewVertices(GridType &grid)
 
 inline void AlbertaMarkerVector::print()
 {
-  printf("\nEntries %d \n",vec_.size());
-  for(int i=0; i<vec_.size(); i++)
-    printf("Konten %d visited on Element %d \n",i,vec_[i]);
+  for(int l=0; l<MAXL; l++)
+  {
+    if(vec_[l].size() > 0)
+    {
+      Array<int> & vec = vec_[l];
+      printf("\nEntries %d \n",vec.size());
+      for(int i=0; i<vec.size(); i++)
+        printf("Vx %d visited on Element %d \n",i,vec[i]);
+    }
+  }
 }
 
 //***********************************************************************
@@ -2984,9 +2989,9 @@ inline void AlbertaGrid < dim, dimworld >::initGrid(int proc, bool swapEls )
   }
   else 
   {
-    hasLevelIndex_ = true;
-    calcExtras();
+    hasLevelIndex_ = false;
   }
+  calcExtras();
 }
 
 template < int dim, int dimworld >
@@ -3446,7 +3451,9 @@ inline int AlbertaGrid < dim, dimworld >::getElementNumber ( ALBERTA EL * el ) c
   if(el)
     return elNumVec_[el->dof[dof_][nv_]];
   else 
+  {
     return -1;
+  }
 };
 
 template < int dim, int dimworld > 
@@ -3458,7 +3465,6 @@ inline void AlbertaGrid < dim, dimworld >::calcExtras ()
   for(int i=0; i<dim+1; i++) 
     oldNumberOfEntities_[i] = numberOfEntitys_[i];
 
-  
   // calc new number of entities 
   numberOfEntitys_[0]     = mesh_->n_hier_elements; // elements 
   numberOfEntitys_[1]     = 1;                      // faces 
@@ -3676,7 +3682,7 @@ inline void AlbertaGrid < dim, dimworld >::markNew()
     LevelIterator endit = lend<dim> (level);
     for(LevelIterator it = lbegin<dim> (level); it != endit; ++it)
     {
-      int no = it->el_index();
+      int no = it->global_index();
       levelIndex_[dim][level][no] = num;
       num++;
     }
