@@ -2,17 +2,6 @@
 #include<dune/common/test/iteratortest.hh>
 #include<iostream>
 #include<algorithm>
-
-template<class T>
-class Printer{
-  typename Dune::RemoveConst<T>::Type res;
-public:
-  Printer():res(0){}
-  void operator()(const T& t){
-    res+=t;
-    //    std::cout << t <<" ";
-  }
-};
   
 void randomize(TestContainer<double>& cont){
   srand((unsigned)time(0));
@@ -33,7 +22,7 @@ int main(){
   TestContainer<double> container;
   randomize(container);
   //  print(container);
-  //std::sort(container.begin(), container.end());
+  std::sort(container.begin(), container.end());
   //print(container);
   
   const TestContainer<double> ccontainer(container);
