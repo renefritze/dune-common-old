@@ -10,7 +10,7 @@ namespace Dune {
      * \brief Provides file reading facilities in the AmiraMesh format.
      *
      */
-    template<class GRID, class T>
+    template<class GRID>
     class AmiraMeshReader {
 
     public:
@@ -31,8 +31,8 @@ namespace Dune {
 }
 
 // Default implementation
-template<class GRID, class T>
-void Dune::AmiraMeshReader<GRID, T>::read(GRID& grid, 
+template<class GRID>
+void Dune::AmiraMeshReader<GRID>::read(GRID& grid, 
                                   const std::string& filename) 
 {
     printf("No AmiraMesh reading has been implemented for this grid type!\n");

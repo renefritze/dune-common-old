@@ -1,7 +1,7 @@
 #include <amiramesh/AmiraMesh.h>
 
 
-
+#if _3
 template<class GRID, class T>
 void Dune::AmiraMeshWriter<GRID, T>::write(GRID& grid, 
                                   const Array<T>& sol,
@@ -200,5 +200,7 @@ void Dune::AmiraMeshWriter<GRID, T>::write(GRID& grid,
    printf("Grid written successfully to:\n %s \n", geoFilename.c_str());
 }
 
+
+#endif  // #if _3
 
 
