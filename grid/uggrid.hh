@@ -84,27 +84,21 @@ namespace Dune
   Please send any questions, suggestions, or bug reports to
   sander@math.fu-berlin.de
 
-  @{
  */
   
 /** \brief The type used by UG to store coordinates */
 typedef double UGCtype;
 
 
-  /** @} end documentation group */
 
 // forward declarations 
 template<int dim, int dimworld>            class UGGrid;
 template<int codim, int dim, class GridImp> class UGGridEntity;
-    template<int codim, PartitionIteratorType pitype, class GridImp> class UGGridLevelIterator;
+template<int codim, PartitionIteratorType pitype, class GridImp> class UGGridLevelIterator;
 template<int mydim, int coorddim, class GridImp>            class UGGridGeometry;
 template<class GridImp>            class UGGridBoundaryEntity;
 template<class GridImp>            class UGGridHierarchicIterator;
 template<class GridImp>            class UGGridIntersectionIterator;
-
-// singleton holding reference elements
-//template<int dim> struct UGGridReferenceElement;
-
 
 }  // namespace Dune
 
@@ -126,7 +120,15 @@ namespace Dune {
 /** \brief The UG %Grid class
  * \ingroup UGGrid
  *
- * \todo Please doc me!
+  This is the implementation of the grid interface
+  using the UG grid management system.  UG provides conforming grids
+  in two and three space dimensions.  The grids can be mixed, i.e.
+  2d grids can contain triangles and quadrilaterals and 3d grid can
+  contain tetrahedra and hexahedra and also pyramids and prisms.
+  The grid refinement rules are very flexible.  Local adaptive red/green
+  refinement is the default, but a special method in the UGGrid class
+  allows you to directly access a number of anisotropic refinements rules.
+  Last but not least, the UG grid manager is completely parallelized.
  */
 template <int dim, int dimworld>
 class UGGrid : public GridDefault  <dim, dimworld,UGCtype, UGGrid<dim,dimworld> >
@@ -184,10 +186,10 @@ public:
   //! Desctructor 
   ~UGGrid();
    
-  //! Return maximum level defined in this grid. Levels are numbered
-  //! 0 ... maxlevel with 0 the coarsest level.  
-  int maxlevel() const;
-
+     //! Return maximum level defined in this grid. Levels are numbered
+     //! 0 ... maxlevel with 0 the coarsest level.  
+     int maxlevel() const;
+     
     //! Iterator to first entity of given codim on level
     template<int codim>
     typename Traits::template codim<codim>::LevelIterator lbegin (int level) const;
@@ -198,11 +200,11 @@ public:
 
     //! Iterator to first entity of given codim on level
     template<int codim, PartitionIteratorType PiType>
-    UGGridLevelIterator<codim,PiType,UGGrid<dim,dimworld> > lbegin (int level) const;
+    typename Traits::template codim<codim>::template partition<PiType>::LevelIterator lbegin (int level) const;
 
     //! one past the end on this level
     template<int codim, PartitionIteratorType PiType>
-    UGGridLevelIterator<codim,PiType,UGGrid<dim,dimworld> > lend (int level) const;
+    typename Traits::template codim<codim>::template partition<PiType>::LevelIterator lend (int level) const;
 
     /** \brief Number of grid entities per level and codim
      */
@@ -284,9 +286,11 @@ public:
 
     void makeNewUGMultigrid();
 
-    /** \brief Does one uniform refinement step
+    /** \brief Does uniform refinement
+     *
+     * \param n Number of uniform refinement steps
      */
-    void globalRefine();
+    void globalRefine(int n);
   
   // UG multigrid, which contains the data
     typename UGTypes<dimworld>::MultiGridType* multigrid_;
