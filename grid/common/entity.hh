@@ -32,6 +32,8 @@ public:
   int level () const { return realEntity.level(); }
   //! index is unique and consecutive per level and codim used for access to degrees of freedom
   int index () const { return realEntity.index(); } 
+  //! return the global unique index in grid
+  int globalIndex () const { return realEntity.globalIndex(); }
   //! return partition type attribute
   PartitionType partitionType () const { return realEntity.partitionType(); }
   //! id of the boundary which is associated with 
@@ -100,6 +102,8 @@ public:
   int level () const { return realEntity.level(); }
   //! index is unique and consecutive per level and codim used for access to degrees of freedom
   int index () const { return realEntity.index(); } 
+  //! return the global unique index in grid
+  int globalIndex () const { return realEntity.globalIndex(); }
   //! return partition type attribute
   PartitionType partitionType () const { return realEntity.partitionType(); }
   //! geometry of this entity
@@ -236,6 +240,8 @@ public:
   int level () const { return realEntity.level(); }
   //! index is unique and consecutive per level and codim used for access to degrees of freedom
   int index () const { return realEntity.index(); }
+  //! return the global unique index in grid
+  int globalIndex () const { return realEntity.globalIndex(); }
   //! return partition type attribute
   PartitionType partitionType () const { return realEntity.partitionType(); }
   //! geometry of this entity
