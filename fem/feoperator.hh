@@ -1,8 +1,9 @@
-#ifndef __DUNE_FEOPERATOR_HH__
-#define __DUNE_FEOPERATOR_HH__
+#ifndef DUNE_FEOPERATOR_HH
+#define DUNE_FEOPERATOR_HH
 
 #include <dune/fem/common/discreteoperator.hh>
 #include <dune/fem/common/localoperator.hh>
+#include <dune/common/fmatrix.hh>
 
 namespace Dune {
 
@@ -100,7 +101,7 @@ namespace Dune {
         LevelIterator endit = grid.template lend<0> ( grid.maxlevel() );
         enum {maxnumOfBaseFct = 10};
 
-        Mat<maxnumOfBaseFct,maxnumOfBaseFct , double> mat;
+        FieldMatrix<double,maxnumOfBaseFct,maxnumOfBaseFct> mat;
     
         for( ; it != endit; ++it ) 
           {
@@ -350,7 +351,7 @@ namespace Dune {
       int numOfBaseFct = baseSet.getNumberOfBaseFunctions();  
       enum {maxnumOfBaseFct = 10};
 
-      Mat<maxnumOfBaseFct,maxnumOfBaseFct , double> mat;
+      FieldMatrix<double,maxnumOfBaseFct,maxnumOfBaseFct> mat;
     
       getLocalMatrix( en, numOfBaseFct, mat);
 
