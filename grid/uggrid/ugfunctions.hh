@@ -198,6 +198,11 @@ public:
         return CORNER_OF_SIDE(theElement, side, corner);
     }
 
+    //! Encapsulates the GRID_ATTR macro
+    static int Grid_Attr(const typename UGTypes<dim>::GridType* grid) {
+        return GRID_ATTR(grid);
+    }
+
     //! Encapsulates the TAG macro
     static unsigned int Tag(const typename TargetType<0,dim>::T* theElement) {
         return TAG(theElement);
