@@ -89,7 +89,7 @@ inline void DiscFuncArray< DiscreteFunctionSpaceType >::print(std::ostream &s ) 
 template<class DiscreteFunctionSpaceType > template <class EntityType>
 inline void
 DiscFuncArray< DiscreteFunctionSpaceType >::
-localFunction ( EntityType &en , LocalFunctionArray < DiscreteFunctionSpaceType > &lf )
+localFunction ( const EntityType &en , LocalFunctionArray < DiscreteFunctionSpaceType > &lf )
 {
   lf.init ( en );
 }
@@ -516,7 +516,7 @@ setNext (LocalFunctionArray < DiscreteFunctionSpaceType > *n)
 
 template<class DiscreteFunctionSpaceType > template <class EntityType> 
 inline bool LocalFunctionArray < DiscreteFunctionSpaceType >::
-init (EntityType &en ) const
+init (const EntityType &en ) const
 {
   if(!uniform_ || !init_)
   {
