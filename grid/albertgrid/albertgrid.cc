@@ -2462,11 +2462,7 @@ goNextElInfo(ALBERT TRAVERSE_STACK *stack, ALBERT EL_INFO *elinfo_old)
 
     // default iterator type no supported
     default: 
-    {
-      std::cerr << "AlbertGridLevelIterator::goNextEntity: Unsupported IteratorType! \n";
-      assert(elinfo != NULL);  
-      return NULL;
-    }
+      DUNE_THROW(AlbertError, "AlbertGridLevelIterator::goNextEntity: Unsupported IteratorType!");
   } // end switch
 }
 
@@ -3318,8 +3314,7 @@ partitionType (ALBERT EL_INFO *elinfo) const
   // if processor number != myProcossor ==> GhostEntity
   if((owner >= 0) && (owner != myProcessor())) return GhostEntity;
 
-  std::cerr << "Unsupported PartitionType\n";
-  assert(false);
+  DUNE_THROW(AlbertError, "Unsupported PartitionType");
   
   return OverlapEntity;
 }
@@ -3594,7 +3589,8 @@ inline bool AlbertGrid < dim, dimworld >::readGridXdr (const char * filename, al
   // use read_mesh_xdr, but works not correctly 
   mesh_ = (ALBERT read_mesh (filename, &time , ALBERT AlbertHelp::initLeafData , 
                                 ALBERT AlbertHelp::initBoundary) );
-  assert(mesh_ != 0);
+  if (mesh_ == 0)
+    DUNE_THROW(AlbertIOError, "could not open grid file " << filename);
   
   // read element numbering from file 
   char elnumfile[2048];
