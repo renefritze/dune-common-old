@@ -90,7 +90,7 @@ public:
   int corners () const;
 
   //! access to coordinates of corners. Index is the number of the corner 
-  FieldVector<bs_ctype, dimworld>& operator[] (int i) const;
+  const FieldVector<bs_ctype, dimworld>& operator[] (int i) const;
 
   /*! return reference element corresponding to this element. If this is
     a reference element then self is returned.
@@ -142,7 +142,7 @@ public:
   //***********************************************************************
   //! generate the geometry for the ALBERT EL_INFO 
   //! no interface method
-  bool builtGeom(const BSSPACE GEOElementType & item);
+  bool builtGeom(const BSSPACE IMPLElementType & item);
   bool builtGeom(const BSSPACE HFaceType & item);
   
   bool builtGhost(const BSSPACE PLLBndFaceType & ghost);
@@ -416,7 +416,7 @@ private:
   BSGrid<dim,dimworld> &grid_;
 
   // the current element of grid 
-  BSSPACE GEOElementType *item_;
+  BSSPACE IMPLElementType *item_;
   
   // the current ghost, if element is ghost
   BSSPACE PLLBndFaceType * ghost_;
@@ -848,7 +848,7 @@ public:
   /** \brief write Grid to file in specified FileFormatType 
    */
   template <FileFormatType ftype>
-  bool writeGrid( const char * filename, bs_ctype time );
+  bool writeGrid( const char * filename, bs_ctype time ) const ;
   
   /** \brief read Grid from file filename and store time of mesh in time 
    */
@@ -860,7 +860,10 @@ public:
   bs_ctype getTime () const { return time_; };
 
   //! return pointer to org BSGrid 
-  BSSPACE BSGitterType *mygrid();
+  //! private method, but otherwise we have to friend class all possible
+  //! types of LevelIterator ==> later
+  BSSPACE BSGitterType & myGrid();
+  const BSSPACE BSGitterType & myGrid() const ;
 
   //! return my rank (only parallel)
   int myRank () const { return myRank_; }
