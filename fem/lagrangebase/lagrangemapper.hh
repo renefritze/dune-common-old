@@ -124,7 +124,7 @@ public:
   int size (int level , int codim ) const
   {
     // return number of vertices 
-    return indexSet_.size(level,codim);
+    return dimrange * indexSet_.size(level,codim);
   }
 
   //! map Entity an local Dof number to global Dof number 
@@ -141,7 +141,7 @@ public:
   // is called once and calcs the insertion points too
   virtual int newSize(int level) const 
   {
-    return indexSet_.size(20,0);
+    return dimrange * indexSet_.size(20,0);
   }
 
   //! calc the new insertion points 
@@ -155,7 +155,7 @@ private:
   template <class EntityType> 
   void getIndex (EntityType &en, int num) const 
   {
-    index_[0] = indexSet_.template index<0> (en,num);
+    index_[0] = dimrange * indexSet_.template index<0> (en,num);
     //index_[1] = dm_.template index<1> (en,num);
     //index_[2] = dm_.template index<2> (en,num);
   }
