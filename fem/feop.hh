@@ -209,7 +209,7 @@ public:
 	{
 	  BoundaryEntityType & bEl = nit.boundaryEntity();
 
-	  if( bEl.type() == Dirichlet )
+	  if( functionSpace_.boundaryType( bEl.id() ) == Dirichlet )
 	    {
 	      int neigh = nit.number_in_self();
 		  
@@ -383,7 +383,7 @@ protected:
       {
         BoundaryEntityType & bEl = nit.boundaryEntity();
 
-        if( bEl.type() == Dirichlet )
+        if( functionSpace_.boundaryType (bEl.id()) == Dirichlet )
         {
           int neigh = nit.number_in_self();
 
