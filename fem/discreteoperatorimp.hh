@@ -106,7 +106,7 @@ public:
     typedef typename DFDomainType::FunctionSpace FunctionSpaceType;
     typedef typename FunctionSpaceType::GridType GridType;
     // the corresponding grid 
-    FunctionSpaceType & functionSpace_= dest.getFunctionSpace();
+    const FunctionSpaceType & functionSpace_= dest.getFunctionSpace();
     GridType &grid = functionSpace_.getGrid();
     
     if(leaf_)
