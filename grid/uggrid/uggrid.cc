@@ -96,7 +96,7 @@ public:
 
             UGGridLevelIterator<3,All_Partition,GridImp> it(level);
 
-            it.setToTarget(UG_NS<3>::PFirstNode(theGrid), level);
+            it.setToTarget(UG_NS<3>::FirstNode(theGrid), level);
             return it;
         }
     };
@@ -110,7 +110,7 @@ public:
 
             UGGridLevelIterator<0,All_Partition,GridImp> it(level);
 
-            it.setToTarget(UG_NS<3>::PFirstElement(theGrid), level);
+            it.setToTarget(UG_NS<3>::FirstElement(theGrid), level);
             return it;
         }
     };
@@ -291,7 +291,6 @@ inline int UGGrid < dim, dimworld >::maxlevel() const
 
 template<int dim, int dimworld> 
 template<int codim>
-//inline UGGridLevelIterator<codim, All_Partition, const UGGrid<dim,dimworld> >
 typename UGGrid<dim,dimworld>::Traits::template codim<codim>::LevelIterator
 UGGrid<dim, dimworld>::lbegin (int level) const
 {
@@ -320,7 +319,7 @@ UGGrid<dim, dimworld>::lbegin (int level) const
 
 template < int dim, int dimworld > 
 template<int codim>
-inline UGGridLevelIterator<codim,All_Partition, const UGGrid<dim,dimworld> >
+typename UGGrid<dim,dimworld>::Traits::template codim<codim>::LevelIterator
 UGGrid < dim, dimworld >::lend (int level) const
 {
     UGGridLevelIterator<codim,All_Partition, const UGGrid<dim,dimworld> > it(level);
@@ -343,8 +342,6 @@ inline int UGGrid < dim, dimworld >::size (int level, int codim) const
     
     if(codim == 0)
         {
-            //UGGridLevelIterator<0,All_Partition, const UGGrid<dim,dimworld> > it = lbegin<0>(level);
-            //UGGridLevelIterator<0,All_Partition,const UGGrid<dim,dimworld> > endit = lend<0>(level);
             typename Traits::template codim<0>::LevelIterator it = lbegin<0>(level);
             typename Traits::template codim<0>::LevelIterator endit = lend<0>(level);
             for (; it != endit; ++it)
@@ -560,9 +557,82 @@ void UGGrid < dim, dimworld >::loadBalance(int strategy, int minlevel, int depth
         DUNE_THROW(GridError, "UG?d::LBCommand returned error code " << errCode);
 }
 
+#ifdef ModelP
+template <class T, template <class> class P> 
+class Foo {
+public:
+    
+    static int gather(DDD_OBJ obj, void* data)
+        {
+            int codim=0;
+            enum {dim = 2};
+
+            P<T>* p = (P<T>*)data;
+            
+            int index = 0;
+            switch (codim) {
+            case 0:
+                index = ((UG2d::element*)obj)->ge.id;
+                break;
+            case dim:
+                index = ((UG2d::node*)obj)->myvertex->iv.id;
+                break;
+            default:
+                DUNE_THROW(GridError, "UGGrid::communicate only implemented for this codim");
+            }
+
+            p->gather(*dataArray, index);
+
+            return 0;
+        }
+
+        static int scatter(DDD_OBJ obj, void* data)
+        {
+            int codim=0;
+            enum {dim = 2};
+
+            P<T>* p = (P<T>*)data;
+            
+            int index = 0;
+            switch (codim) {
+            case 0:
+                index = ((UG2d::element*)obj)->ge.id;
+                break;
+            case dim:
+                index = ((UG2d::node*)obj)->myvertex->iv.id;
+                break;
+            default:
+                DUNE_THROW(GridError, "UGGrid::communicate only implemented for codim 0 and dim");
+            }
+
+            p->scatter(*dataArray, index);
+
+            return 0;
+        }
+
+        static T* dataArray;
+
+    };
+
+template <class T, template<class> class P>
+T* Foo<T,P>::dataArray = 0;
+#endif
+
 template < int dim, int dimworld >
 template<class T, template<class> class P, int codim>
 void UGGrid < dim, dimworld >::communicate (T& t, InterfaceType iftype, CommunicationDirection dir, int level)
 {
     std::cout << "UGGrid communicator not implemented yet!\n";
+#ifdef ModelP
+    Foo<T,P> foo;
+
+    Foo<T,P>::dataArray = &t;
+
+    /** \todo Should be in a namespace */
+    DDD_IFAExchange(0,
+                    level, //GRID_ATTR(g),
+                    sizeof(P<T>),
+                    &Foo<T,P>::gather,
+                    &Foo<T,P>::scatter);
+#endif
 }
