@@ -518,7 +518,7 @@ struct GridTraits
       Used for grid I/O
 */
 enum GridIdentifier { SGrid_Id, AlbertaGrid_Id , SimpleGrid_Id, UGGrid_Id, 
-                      YaspGrid_Id , BSGrid_Id, OneDGrid_Id};
+                      YaspGrid_Id , ALU3dGrid_Id, OneDGrid_Id};
 
 //! provide names for the different grid types
 inline std::string transformToGridName(GridIdentifier type)
@@ -528,14 +528,14 @@ inline std::string transformToGridName(GridIdentifier type)
     return "SGrid";
   case AlbertaGrid_Id:
     return "AlbertaGrid";
+  case ALU3dGrid_Id:
+    return "BSGrid";
   case SimpleGrid_Id:
     return "SimpleGrid";
   case UGGrid_Id:
     return "UGGrid";
   case YaspGrid_Id:
     return "YaspGrid";
-  case BSGrid_Id:
-    return "BSGrid";
   case OneDGrid_Id:
     return "OneDGrid";
   default: 
