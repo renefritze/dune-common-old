@@ -744,7 +744,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid, Ami
   /** \todo Check whether this release is necessary */
   /* here all temp memory since CreateMultiGrid is released */
   //UG3d::ReleaseTmpMem(MGHEAP(theMG),MG_MARK_KEY(theMG));
-#define ReleaseTmpMem(p,k) Release(p, UG3d::FROM_TOP,k)
+#define ReleaseTmpMem(p,k) Release(p, UG::FROM_TOP,k)
   ReleaseTmpMem(grid.multigrid_->theHeap, grid.multigrid_->MarkKey);
 #undef ReleaseTmpMem
   grid.multigrid_->MarkKey = 0;
@@ -1114,7 +1114,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::readHexaGrid(Dune::UGGrid<3,3>& 
   /** \todo Check whether this release is necessary */
   /* here all temp memory since CreateMultiGrid is released */
   //UG3d::ReleaseTmpMem(MGHEAP(theMG),MG_MARK_KEY(theMG));
-#define ReleaseTmpMem(p,k) Release(p, UG3d::FROM_TOP,k)
+#define ReleaseTmpMem(p,k) Release(p, UG::FROM_TOP,k)
   ReleaseTmpMem(theMG->theHeap, theMG->MarkKey);
 #undef ReleaseTmpMem
   theMG->MarkKey = 0;
@@ -1528,8 +1528,8 @@ void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
 
       if (InsertElementFromIDs(theMG->grids[0], 3,cornerIDs, NULL) == NULL)
         {
-            std::cerr << "2d AmiraMesh reader: Inserting an element failed\n";
-            return;
+	  std::cerr << "2d AmiraMesh reader: Inserting an element failed\n";
+	  return;
         }
       noOfCreatedElem++;
 
@@ -1575,7 +1575,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
       return;
   
   /* here all temp memory since CreateMultiGrid is released */
-#define ReleaseTmpMem(p,k) Release(p, UG2d::FROM_TOP,k)
+#define ReleaseTmpMem(p,k) Release(p, UG::FROM_TOP,k)
   ReleaseTmpMem(theMG->theHeap, theMG->MarkKey);
 #undef ReleaseTmpMem
   theMG->MarkKey = 0;
