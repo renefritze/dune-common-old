@@ -11,51 +11,47 @@ inline DFAdapt< DiscreteFunctionSpaceType >::
 DFAdapt(DiscreteFunctionSpaceType& f) :
   DiscreteFunctionDefaultType ( f ) 
   , name_ ("no name") 
-  , memObj_ (f.signIn(*this))
-  , dofVec_ ( memObj_.getArray() )
-  , localFunc_ ( f , dofVec_ ) 
+  , dofVec_ ( f.size() )
+  , memObj_ ( f.signIn( const_cast <DFAdapt< DiscreteFunctionSpaceType > &> (*this) ) )
+  , localFunc_ ( f , dofVec_ )
 {
 }
 
 // Constructor makeing discrete function  
 template<class DiscreteFunctionSpaceType >
 inline DFAdapt< DiscreteFunctionSpaceType >::
-DFAdapt(const char * name, DiscreteFunctionSpaceType & f)  
-: DiscreteFunctionDefaultType ( f ) 
-  , name_ (name) 
-  , memObj_ (f.signIn(*this))
-  , dofVec_ ( memObj_.getArray() )
-  , localFunc_ ( f , dofVec_ ) 
+DFAdapt(const char * name, DiscreteFunctionSpaceType & f)
+: DiscreteFunctionDefaultType ( f )
+  , name_ (name)
+  , dofVec_ ( f.size() )
+  , memObj_ ( f.signIn( const_cast <DFAdapt< DiscreteFunctionSpaceType > &> (*this) ) )
+  , localFunc_ ( f , dofVec_ )
 {
 }
 
 template<class DiscreteFunctionSpaceType >
 inline DFAdapt< DiscreteFunctionSpaceType >::
-DFAdapt(const DFAdapt <DiscreteFunctionSpaceType>& df ) :
-  DiscreteFunctionDefaultType ( df.functionSpace_ ),
-  name_ ("copy"),
-  memObj_ ( df.functionSpace_.signIn(*this) ),
-  dofVec_ ( memObj_.getArray() ),
-  localFunc_ ( df.localFunc_ )
+DFAdapt(const DFAdapt <DiscreteFunctionSpaceType> & df ) :
+ DiscreteFunctionDefaultType ( df.functionSpace_ ) , name_ ("copy")
+, dofVec_ ( df.functionSpace_.size() )
+, memObj_ ( df.functionSpace_.signIn( const_cast <DFAdapt< DiscreteFunctionSpaceType > &> (*this) ))
+, localFunc_ ( df.localFunc_ )
 {
   // copy values of array 
   dofVec_ = df.dofVec_;
-} 
+}
 
-    
+
 // Desctructor 
 template<class DiscreteFunctionSpaceType >
 inline DFAdapt< DiscreteFunctionSpaceType >::
-~DFAdapt() 
+~DFAdapt()
 {
-  //std::cout << "Deleting DF " << this->name() << "\n";
-  // * Temporary hack (burriad)
-  const FunctionSpaceType& spc = this->functionSpace_;
-  bool removed = spc.signOut(*this);
+  bool removed = this->functionSpace_.signOut(const_cast<DFAdapt< DiscreteFunctionSpaceType > &> (*this)  );
   if(!removed)
   {
-    std::cerr << "ERROR: removal of DF '" << name_ << "' failed!\n";
-    assert(removed);
+    std::cerr << "ERROR: removal of DF '" << name_ << "' failed! in " << __FILE__ << " " << __LINE__ << "\n";
+    abort(); 
   }
 }
 
@@ -93,7 +89,7 @@ inline void DFAdapt< DiscreteFunctionSpaceType >::print(std::ostream &s )
 template<class DiscreteFunctionSpaceType > template <class EntityType>
 inline void
 DFAdapt< DiscreteFunctionSpaceType >::
-localFunction ( EntityType &en , LocalFunctionAdapt < DiscreteFunctionSpaceType > &lf )
+localFunction ( const EntityType &en , LocalFunctionAdapt < DiscreteFunctionSpaceType > &lf )
 {
   lf.init ( en );
 }
@@ -496,7 +492,7 @@ jacobian (EntityType &en, QuadratureType &quad, int quadPoint, JacobianRangeType
 
 template<class DiscreteFunctionSpaceType > template <class EntityType> 
 inline bool LocalFunctionAdapt < DiscreteFunctionSpaceType >::
-init (EntityType &en ) const
+init (const EntityType &en ) const
 {
   if(!uniform_ || !init_)
   {
