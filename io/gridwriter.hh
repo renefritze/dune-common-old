@@ -1,26 +1,11 @@
-#ifndef __GRIDWRITER_HH__
-#define __GRIDWRITER_HH__
+#ifndef __DUNE_GRIDWRITER_HH__
+#define __DUNE_GRIDWRITER_HH__
 
-#include <string>
+/** @defgroup IO Dune I/O-Module
+ */
 
-namespace Dune {
+#include "../lib/io/amirameshwriter.hh"
+#include "../lib/io/rawdatawriter.hh"
 
-    class GridWriter {
-
-    public:
-        virtual void write(void* grid, 
-                           const std::string& filename) const = 0;
-
-        static GridWriter* getWriter(const std::string& format);
-
-    protected:
-
-        GridWriter() {}
-
-        static GridWriter* writer;
-
-    };
-
-}
 
 #endif
