@@ -15,7 +15,7 @@ public:
   typedef typename FunctionSpaceType::GridType GridType; 
   typedef typename DiscFunctionType::LocalFunctionType LocalFunctionType;
   typedef typename FunctionSpaceType::Range Range;
-  typedef typename FunctionSpaceType::GradientRange GradientRange;
+  typedef typename FunctionSpaceType::JacobianRange JacobianRange;
   typedef typename FunctionSpaceType::Domain Domain;  
   typedef typename GridType::Traits<0>::Entity EntityType;
 
@@ -55,7 +55,7 @@ protected:
 
     typedef typename DiscFunctionType::LocalFunctionType LocalFunctionType;
     typedef typename FunctionSpaceType::Range Range;
-    typedef typename FunctionSpaceType::GradientRange GradientRange;
+    typedef typename FunctionSpaceType::JacobianRange JacobianRange;
     typedef typename FunctionSpaceType::Domain Domain;
     
     LevelIterator it = grid.lbegin<0>( grid.maxlevel() );
@@ -91,7 +91,7 @@ protected:
 
     typedef typename DiscFunctionType::LocalFunctionType LocalFunctionType;
     typedef typename FunctionSpaceType::Range Range;
-    typedef typename FunctionSpaceType::GradientRange GradientRange;
+    typedef typename FunctionSpaceType::JacobianRange JacobianRange;
     typedef typename FunctionSpaceType::Domain Domain;
 
     typedef typename DiscFunctionType::GlobalDofIteratorType DofIteratorType;
