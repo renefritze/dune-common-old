@@ -1,5 +1,5 @@
-#ifndef __DUNE_AMIRAMESHREADER_HH__
-#define __DUNE_AMIRAMESHREADER_HH__
+#ifndef DUNE_AMIRAMESH_READER_HH
+#define DUNE_AMIRAMESH_READER_HH
 
 #include <string>
 #include "../../common/array.hh"
@@ -23,6 +23,8 @@ namespace Dune {
         static void read(GridType& grid, 
                           const std::string& filename);
 
+        template<class DiscFuncType>
+        static void readFunction(DiscFuncType& f, const std::string& filename);
 
         AmiraMeshReader() {}
 
@@ -39,6 +41,7 @@ void Dune::AmiraMeshReader<GridType>::read(GridType& grid,
     DUNE_THROW(IOError, "No AmiraMesh reading has been implemented for this grid type!");
 }
 
+#include "amiramesh/amirameshreader.cc"
 
 // the amiramesh reader for UGGrid
 #ifdef HAVE_UG
