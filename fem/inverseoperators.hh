@@ -3,6 +3,7 @@
 
 #include <dune/fem/common/discretefunction.hh>
 #include <dune/common/operator.hh>
+#include <dune/solver/oemsolver.hh>
 
 namespace Dune {
 
@@ -10,7 +11,7 @@ template <class DiscreteFunctionType>
 class CGInverseOperator : public Operator<
   typename DiscreteFunctionType::DomainFieldType,
   typename DiscreteFunctionType::RangeFieldType,
-					  DiscreteFunctionType,DiscreteFunctionType> 
+            DiscreteFunctionType,DiscreteFunctionType> 
 {
 
   typedef Mapping<typename DiscreteFunctionType::DomainFieldType ,
@@ -25,8 +26,8 @@ public:
            maxIter_ (maxIter ) , _verbose ( verbose ) {
   } 
 
-  void apply( const DiscreteFunctionType& arg, DiscreteFunctionType& dest ) const {
-
+  void apply( const DiscreteFunctionType& arg, DiscreteFunctionType& dest ) const 
+  {
     typedef typename DiscreteFunctionType::FunctionSpace FunctionSpaceType;
     typedef typename FunctionSpaceType::RangeField Field;
 
@@ -36,7 +37,7 @@ public:
     DiscreteFunctionType r( arg );
     DiscreteFunctionType p( arg );
     DiscreteFunctionType h( arg );
-    
+
     op_( dest, h );
 
     r.assign( h );
@@ -53,9 +54,9 @@ public:
       
       if(count > 1)
       { 
-	      const Field e = spn / spa;
-	      p *= e;
-	      p -= r;
+        const Field e = spn / spa;
+        p *= e;
+        p -= r;
       }
 
       // grund - iterations - schritt **************
@@ -102,46 +103,43 @@ template <class DiscreteFunctionType, class OperatorType>
 class CGInverseOp : public Operator<
       typename DiscreteFunctionType::DomainFieldType,
       typename DiscreteFunctionType::RangeFieldType,
-					  DiscreteFunctionType,DiscreteFunctionType> {
-
-private:
-  // no const reference, we make const later 
-  OperatorType &op_;
-  double _redEps; 
-  typename DiscreteFunctionType::RangeFieldType epsilon_;
-  int maxIter_;
-  int _verbose ;
-    
+            DiscreteFunctionType,DiscreteFunctionType> 
+{
 public:
 
   CGInverseOp( OperatorType & op , double  redEps , double absLimit , int maxIter , int verbose ) : op_(op),
-									_redEps ( redEps ), epsilon_ ( absLimit ) , 
-                  maxIter_ (maxIter ) , _verbose ( verbose ) {
+                  _redEps ( redEps ), epsilon_ ( absLimit*absLimit ) , 
+                  maxIter_ (maxIter ) , _verbose ( verbose ) , 
+                  r_(0), p_(0), h_(0)
+  {
+                    
   } 
-
-  void prepare (int level, const DiscreteFunctionType& Arg, DiscreteFunctionType& Dest)
+                  
+  ~CGInverseOp()
   {
-    op_.prepare(level, Arg,Dest);
+    if(p_) delete p_;
+    if(r_) delete r_;
+    if(h_) delete h_;
   }
 
-  void finalize (int level, const DiscreteFunctionType& Arg, DiscreteFunctionType& Dest)
-  {
-    op_.finalize(level, Arg,Dest);
-  }
-  
   void apply( const DiscreteFunctionType& arg, DiscreteFunctionType& dest ) const 
   {
-
     typedef typename DiscreteFunctionType::FunctionSpace FunctionSpaceType;
     typedef typename FunctionSpaceType::RangeField Field;
 
     int count = 0;
     Field spa=0, spn, q, quad;
+
+    if(!p_) p_ = new DiscreteFunctionType ( arg );
+    if(!r_) r_ = new DiscreteFunctionType ( arg );
+    if(!h_) h_ = new DiscreteFunctionType ( arg );
     
-    DiscreteFunctionType r( arg );
-    DiscreteFunctionType p( arg );
-    DiscreteFunctionType h( arg );
-    
+    DiscreteFunctionType & r = *r_;
+    DiscreteFunctionType & p = *p_;
+    DiscreteFunctionType & h = *h_;
+
+    op_.prepareGlobal(arg,dest);
+
     op_( dest, h );
 
     r.assign( h );
@@ -154,14 +152,13 @@ public:
    
     while((spn > epsilon_) && (count++ < maxIter_)) 
     {
-      
       // fall ab der zweiten iteration *************
       
       if(count > 1)
       { 
-	      const Field e = spn / spa;
-	      p *= e;
-	      p -= r;
+        const Field e = spn / spa;
+        p *= e;
+        p -= r;
       }
 
       // grund - iterations - schritt **************
@@ -184,14 +181,36 @@ public:
     }
     if(_verbose > 0)
       std::cerr << "\n";
+    op_.finalizeGlobal();
   }
-
-  void operator ()( DiscreteFunctionType& arg, DiscreteFunctionType& dest ) 
+  
+  void operator () ( const DiscreteFunctionType& arg, DiscreteFunctionType& dest ) const 
   {
-    apply(arg,dest);
+    this->apply(arg,dest);
   }
 
+private:
+  // no const reference, we make const later 
+  OperatorType &op_;
+  
+  // reduce error each step by 
+  double _redEps; 
+
+  // minial error to reach 
+  typename DiscreteFunctionType::RangeFieldType epsilon_;
+
+  // number of maximal iterations
+  int maxIter_;
+
+  // level of output 
+  int _verbose ;
+
+  // tmp variables 
+  mutable DiscreteFunctionType* r_;
+  mutable DiscreteFunctionType* p_;
+  mutable DiscreteFunctionType* h_;
 };
+
 
 } // end namespace Dune
 
