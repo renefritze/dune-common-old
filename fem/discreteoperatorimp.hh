@@ -23,7 +23,7 @@ public:
  
   //! remember time step size 
   void prepare ( int level , const Domain &Arg, Range &Dest, 
-                 Range *tmp , RangeFieldType & a, RangeFieldType & b)
+                 Range *tmp , RangeFieldType & a, RangeFieldType & b) 
   {
     level_ = level;
     localOp_.prepareGlobal(level,Arg,Dest,tmp,a,b);
@@ -33,7 +33,7 @@ public:
   //! go over all Entitys and call the LocalOperator.applyLocal Method 
   //! Note that the LocalOperator can be an combined Operator 
   //! Domain and Range are defined through class Operator
-  void apply ( Domain &Arg, Range &Dest )    
+  void apply ( const Domain &Arg, Range &Dest ) const 
   {
     if(!prepared_)
     {
@@ -79,7 +79,7 @@ public:
   }
  
   //! apply the operator 
-  void operator()( Domain &Arg, Range &Dest )   
+  void operator()( const Domain &Arg, Range &Dest ) const   
   {
     apply(Arg,Dest);
   }
@@ -87,7 +87,7 @@ public:
 private:
   template <class GridIteratorType>
   void applyOnGrid ( GridIteratorType &it, GridIteratorType &endit,
-                     Domain &Arg, Range &Dest )
+                     const Domain &Arg, Range &Dest ) const 
   {
       // erase destination function
       Dest.clear();
@@ -101,13 +101,13 @@ private:
       }
   }
 
-  bool prepared_;
+  mutable bool prepared_;
 
   //! if true use LeafIterator else LevelIterator
-  bool leaf_;
+  mutable bool leaf_;
   
   //! Level on which we operate 
-  int level_;
+  mutable int level_;
  
   //! Operator which is called on each entity
   LocalOperatorImp & localOp_;
