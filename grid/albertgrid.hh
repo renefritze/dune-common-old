@@ -3,7 +3,7 @@
 
 #include "../common/matvec.hh"
 #include "../common/misc.hh"
-//#include "../common/Stack.hh"
+#include "../common/array.hh"
 #include "common/grid.hh"
 
 
@@ -32,19 +32,17 @@ extern "C"
 } // end extern "C"
 #endif
 
+const FE_SPACE *feSpace;
+
 typedef struct albert_leaf_data
 {
   /// Achtung, Fehler in Albert memory.c,
   /// kleinste Groesse der Leaf Daten 4 Byte,
   /// also ist hier ok, 
-  S_CHAR reachedFace[4]; 
-
+  //S_CHAR reachedFace[4];
 } AlbertLeafData;
 
-const FE_SPACE *feSpace;
 
-void initialReached(const EL_INFO *elInfo);
-void setReached(const EL_INFO *elInfo);
 void AlbertLeafRefine(EL *parent, EL *child[2]);
 void AlbertLeafCoarsen(EL *parent, EL *child[2]);
 void initLeafData(LEAF_DATA_INFO *linfo);
@@ -62,33 +60,16 @@ namespace Dune
 
 typedef ALBERT REAL albertCtype;
 
-// Class to mark the Vertices on the leaf level
-// to visit every vertex only once
-class AlbertMarkerVector 
-{
-  int *vec_;
-  int numberOfEntries_;
-public:
-  AlbertMarkerVector ();
-  ~AlbertMarkerVector ();
+class AlbertMarkerVector;
+class AlbertGridIndices;
 
-  void makeNewSize(int newNumberOfEntries);
-  void makeSmaller(int newNumberOfEntries);
-  bool notOnThisElement(ALBERT EL_INFO * elInfo, int vertex);
-  void markNewVertices(ALBERT MESH * mesh);
-  void print();
-private: 
-  void checkMark(ALBERT EL_INFO * elInfo, int vertex);
-  
-};
-
-
-template<int dim, int dimworld> class AlbertGridElement;
 template<int codim, int dim, int dimworld> class AlbertGridEntity;
 template<int codim, int dim, int dimworld> class AlbertGridLevelIterator;
-template<int dim, int dimworld> class AlbertGridHierarchicIterator;
-template<int dim, int dimworld> class AlbertGridNeighborIterator;
-template<int dim, int dimworld> class AlbertGrid;
+
+template<int dim, int dimworld>            class AlbertGridElement;
+template<int dim, int dimworld>            class AlbertGridHierarchicIterator;
+template<int dim, int dimworld>            class AlbertGridNeighborIterator;
+template<int dim, int dimworld>            class AlbertGrid;
 
 
 // singleton holding reference elements
@@ -323,9 +304,10 @@ public:
   //! index is unique and consecutive per level and codim used for access to degrees of freedo
   int index ();
 
-  AlbertGridEntity(ALBERT TRAVERSE_STACK * travStack);
+  AlbertGridEntity(AlbertGrid<dim,dimworld> &grid, 
+                   ALBERT TRAVERSE_STACK * travStack);
   
-  AlbertGridEntity();
+  AlbertGridEntity(AlbertGrid<dim,dimworld> &grid);
 
   //! geometry of this entity
   AlbertGridElement<dim-codim,dimworld>& geometry ();
@@ -344,20 +326,17 @@ public:
   //  Methods that not belong to the Interface, but have to be public
   //***********************************************************************
   void setTraverseStack (ALBERT TRAVERSE_STACK *travStack);
-  void setElInfo (ALBERT EL_INFO *elInfo, unsigned char face,
+  void setElInfo (ALBERT EL_INFO *elInfo, int elNum, unsigned char face,
                   unsigned char edge, unsigned char vertex );
   ALBERT EL_INFO *getElInfo () const;
 
+  // returns the global vertex number 
+  int globalIndex() { return elInfo_->el->dof[vertex_][0]; };
 private: 
   // private Methods
   void makeDescription();
 
-  template <int cc> 
-  int indexMap () { return elInfo_->el->index; };  
-  template <> 
-  int indexMap<1> () { return (face_*elInfo_->mesh->n_elements)+elInfo_->el->index; };  
-  template <> 
-  int indexMap<dim> () { return elInfo_->el->dof[vertex_][0]; };  
+  AlbertGrid<dim,dimworld> &grid_;
 
   // private Members
   ALBERT EL_INFO *elInfo_;
@@ -367,8 +346,10 @@ private:
   AlbertGridElement<dim-codim,dimworld> geo_;
   bool builtgeometry_;         //!< true if geometry has been constructed
 
-
   Vec<dim,albertCtype> localFatherCoords_; 
+
+  //! element number 
+  int elNum_;
 
   //! Which Face of the Element 
   unsigned char face_;
@@ -396,6 +377,7 @@ private:
 //***********************
 //  
 //  --AlbertGridEntity
+//  --Entity
 //
 //***********************
 template<int dim, int dimworld>
@@ -418,7 +400,7 @@ public:
   enum { dimensionworld=dimworld };
 
   //! Default Constructor, needed, but empty 
-  AlbertGridEntity();
+  AlbertGridEntity(AlbertGrid<dim,dimworld> &grid);
 
   AlbertGridEntity(ALBERT TRAVERSE_STACK * travStack);
 
@@ -446,27 +428,29 @@ public:
    */
   template<int cc> AlbertGridLevelIterator<cc,dim,dimworld> entity (int i) // 0 <= i < count()
   { // Default == Codim 1 Faces
-    AlbertGridLevelIterator<cc,dim,dimworld> tmp(elInfo_,i,0,0);
+    AlbertGridLevelIterator<cc,dim,dimworld> tmp(elInfo_,index(),i,0,0);
     return tmp;
   };
 
   template <> AlbertGridLevelIterator<2 << dim,dim,dimworld> entity<2 << dim> (int i)
   {
+    printf("Entity::entity<codim = %d>: Warning elNum may be not correct! \n",codim);
     if(i < 3)
     { // 0,1,2 
-      AlbertGridLevelIterator<2,3,3> tmp(elInfo_,0,i,0);
+      AlbertGridLevelIterator<2,3,3> tmp(elInfo_,elNum_,0,i,0);
       return tmp;
     }  
     else
     { // 3,4,5
-      AlbertGridLevelIterator<2,3,3> tmp(elInfo_,i-2,1,0);
+      AlbertGridLevelIterator<2,3,3> tmp(elInfo_,elNum_,i-2,1,0);
       return tmp;
     }
   };
   // spezialization for codim = dim in albertgrid.cc 
   template<> AlbertGridLevelIterator<dim,dim,dimworld> entity<dim> (int i)
   {
-    AlbertGridLevelIterator<dim,dim,dimworld> tmp(elInfo_,0,0,i);
+    AlbertGridLevelIterator<dim,dim,dimworld>
+      tmp(grid_,elInfo_,elInfo_->el->dof[i][0],0,0,i);
     return tmp;
   };
 
@@ -511,14 +495,18 @@ public:
 // case jutst to supply the same interface
   void setTraverseStack (ALBERT TRAVERSE_STACK *travStack);
   void setElInfo (ALBERT EL_INFO *elInfo,
+                  int elNum = 0, 
                   unsigned char face = 0,
                   unsigned char edge = 0,
                   unsigned char vertex = 0 );
   ALBERT EL_INFO *getElInfo () const;
-
+  // return the global unique index in mesh 
+  int globalIndex() { return elInfo_->el->index; };
 private: 
   //! make a new AlbertGridEntity 
   void makeDescription();
+
+  AlbertGrid<dim,dimworld> &grid_;
 
   //! the cuurent geometry
   AlbertGridElement<dim,dimworld> geo_;
@@ -563,10 +551,11 @@ public:
   enum { dimensionworld=dimworld };
   
   // the normal Constructor
-  AlbertGridHierarchicIterator(ALBERT TRAVERSE_STACK *travStack, int travLevel);
+  AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid,
+    ALBERT TRAVERSE_STACK *travStack, int travLevel);
 
   // the default Constructor
-  AlbertGridHierarchicIterator();
+  AlbertGridHierarchicIterator(AlbertGrid<dim,dimworld> &grid);
 
   //! prefix increment
   AlbertGridHierarchicIterator& operator ++();
@@ -582,7 +571,6 @@ public:
 
   //! dereferencing
   AlbertGridEntity<0,dim,dimworld>& operator*();
-//  AlbertGrid<dim,dimworld>::Entity<0> & operator*();
 
   //! arrow
   AlbertGridEntity<0,dim,dimworld>* operator->();
@@ -590,6 +578,9 @@ public:
 private:
   //! implement with virtual element
   AlbertGridEntity<0,dim,dimworld> virtualEntity_;
+
+  //! know the grid were im comming from
+  AlbertGrid<dim,dimworld> &grid_;
 
   //! we need this for Albert traversal, and we need ManageTravStack, which
   //! does count References when copied
@@ -635,14 +626,14 @@ public:
   AlbertGridNeighborIterator& operator ++(int i);
 
   //! The default Constructor 
-  AlbertGridNeighborIterator();
+  AlbertGridNeighborIterator(AlbertGrid<dim,dimworld> &grid);
 
   //! The Constructor 
-  AlbertGridNeighborIterator(ALBERT TRAVERSE_STACK * travStack, 
-                             ALBERT EL_INFO *elInfo);
+  AlbertGridNeighborIterator(AlbertGrid<dim,dimworld> &grid,
+          ALBERT EL_INFO *elInfo);
   
   //! Copy Constructor
-  AlbertGridNeighborIterator(const AlbertGridNeighborIterator& I);
+  //AlbertGridNeighborIterator(const AlbertGridNeighborIterator& I);
 
 
   //! equality
@@ -701,8 +692,13 @@ public:
 
 private:
   void makeIterator();
+  // makes empty neighElInfo
   void initElInfo(ALBERT EL_INFO * elInfo); 
-  void setNeighInfo(ALBERT EL_INFO * elInfo, int neigh);
+  // calc the Neighbor neigh out of elInfo information
+  void setNeighInfo(ALBERT EL_INFO * elInfo, ALBERT EL_INFO * neighInfo, int neigh);
+
+  //! know the grid were im comming from
+  AlbertGrid<dim,dimworld> &grid_;
   
   //! implement with virtual element
   AlbertGridEntity<0,dim,dimworld> virtualEntity_;
@@ -719,8 +715,6 @@ private:
 
   ALBERT EL_INFO neighElInfo_;
   ALBERT EL boundEl_;
-  
-  ALBERT TRAVERSE_STACK * travStack_;
   
   int neighborCount_;
 };
@@ -739,7 +733,10 @@ class AlbertGridLevelIterator :
 public LevelIterator<codim,dim,dimworld,albertCtype,
           AlbertGridLevelIterator,AlbertGridEntity>
 {
+  friend class AlbertGrid<dim,dimworld>;
 public:
+
+  //friend class AlbertGrid<dim,dimworld>;
   //! know your own codimension
   enum { codimension=dim };
 
@@ -750,15 +747,16 @@ public:
   enum { dimensionworld=dimworld };
 
   //! Constructor
-  AlbertGridLevelIterator(ALBERT EL_INFO *elInfo,int face=0, int edge=0,int vertex=0);
+  AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid);
   
   //! Constructor
-  AlbertGridLevelIterator(ALBERT MESH * mesh, AlbertMarkerVector * vec,
-                          int travLevel);
+  AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid,
+        ALBERT EL_INFO *elInfo,int elNum = 0 , int face=0, int edge=0,int vertex=0);
   
   //! Constructor
-  AlbertGridLevelIterator();
-
+  AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, 
+          AlbertMarkerVector * vec ,int travLevel);
+  
   //! prefix increment
   AlbertGridLevelIterator<codim,dim,dimworld>& operator ++();
 
@@ -783,6 +781,7 @@ public:
 private:
   // private Methods
   void makeIterator();
+
 
   ALBERT EL_INFO * goFirstElement(ALBERT TRAVERSE_STACK *stack,
                             ALBERT MESH *mesh,
@@ -829,15 +828,24 @@ private:
                               ALBERT EL_INFO *elInfo);
 
 
+  //! the grid were it all comes from
+  AlbertGrid<dim,dimworld> &grid_; 
+
   // private Members
   AlbertGridEntity<codim,dim,dimworld> virtualEntity_;
 
+  // contains ALBERT traversal stack 
   ALBERT ManageTravStack manageStack_;
 
+  //! element number 
+  int elNum_; 
+    
+  //! which face, edge and vertex are we watching of an elInfo
   unsigned char face_;
   unsigned char edge_;
   unsigned char vertex_;
-  
+
+  // knows on which element a point is viewed
   AlbertMarkerVector * vertexMarker_;
   
 };
@@ -854,18 +862,11 @@ class AlbertGrid : public Grid < dim, dimworld,
                           albertCtype,AlbertGrid,
                           AlbertGridLevelIterator,AlbertGridEntity>
 {
+
 //**********************************************************
 // The Interface Methods
 //**********************************************************
 public: 
-  template <int codim> 
-  struct Traits
-  {
-    typedef AlbertGridLevelIterator<codim,dim,dimworld> LevelIterator;
-  };
-
-  typedef Traits<0> LevelIterator;
-
   typedef AlbertGridReferenceElement<dim> ReferenceElement;
   
   //! know your own dimension
@@ -874,8 +875,12 @@ public:
   //! know your own dimension of world
   enum { dimensionworld=dimworld }; 
 
+  enum { numCodim = dim+1 };
+
+  //! Constructor which reads an Albert Macro Triang file 
   AlbertGrid(char* macroTriangFilename);
-  
+ 
+  //! Desctructor 
   ~AlbertGrid();
    
   //! Return maximum level defined in this grid. Levels are numbered
@@ -890,32 +895,79 @@ public:
   template<int codim>
   AlbertGridLevelIterator<codim,dim,dimworld> lend (int level);
 
-  //! Number of Vertices of the Mesh
-  int numberVertices ();
-
   //! number of grid entities per level and codim
   int size (int level, int codim);
-  
-  //! number of grid entities per level and codim
-  int hiersize (int level, int codim);
 
 //**********************************************************
 // End of Interface Methods
 //**********************************************************
   void globalRefine(int refCount);
   void coarsenLocal();
-  void refineLocal();
-  void writeGrid();
+  void refineLocal(int refCount);
+  void writeGrid(int level=-1);
+
+  //! map the global index from the Albert Mesh to the local index on Level
+  template <int codim>
+  int indexOnLevel(int globalIndex, int level );
+  //! map the global index from the Albert Mesh to the local index on Level
+  template <>
+  int indexOnLevel<dim>(int globalIndex, int level)
+  {
+    return levelIndex_[dim][level*mesh_->n_vertices + globalIndex];
+  };
+
+  //! access to mesh pointer, needed by some methods
+  ALBERT MESH* getMesh () const { return mesh_; }; 
 
 private:
-  //! pointer to an Albert Mesh, which contains the data
+  // pointer to an Albert Mesh, which contains the data
   ALBERT MESH *mesh_;
+
+  // number of maxlevel of the mesh
   int maxlevel_;
 
+  // number of entitys of each level an codim 
+  Array<int> size_;
+
+  // needed for VertexIterator
   AlbertMarkerVector *vertexMarker_; 
+
+  //*********************************************************
+  // Methods for mapping the global Index to local on Level
+  // contains the index on level for each unique el->index of Albert
+  Array<int> levelIndex_[dim+1];
+  void makeNewSize(Array<int> &a, int newNumberOfEntries);
+  void markNew();
+  //**********************************************************
+  
+  void print();
     
 }; // end Class AlbertGridGrid
 
+
+
+// Class to mark the Vertices on the leaf level
+// to visit every vertex only once
+// for the LevelIterator codim == dim
+class AlbertMarkerVector 
+{
+  Array<int> vec_;
+  int numVertex_;
+public:
+  friend class AlbertGrid<2,2>;
+  
+  AlbertMarkerVector ();
+
+  void makeNewSize(int newNumberOfEntries);
+  void makeSmaller(int newNumberOfEntries);
+  bool notOnThisElement(ALBERT EL_INFO * elInfo, int vertex);
+  template <class Grid>
+  void markNewVertices(Grid &grid);
+  void print();
+private: 
+  void checkMark(ALBERT EL_INFO * elInfo, int vertex);
+  
+};
 
 }; // namespace Dune
 
