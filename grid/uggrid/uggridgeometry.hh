@@ -17,13 +17,32 @@ public:
     UGMakeableGeometry() :
     Geometry<mydim, coorddim, GridImp, UGGridGeometry>(UGGridGeometry<mydim, coorddim, GridImp>())
     {};
-    //void make (Mat<cdim,mydim+1,sgrid_ctype>& __As) { this->realGeometry.make(__As); }
 
     void setToTarget(typename TargetType<coorddim-mydim,coorddim>::T* target) {
         this->realGeometry.setToTarget(target);
     }
 
 };
+
+template<class GridImp>
+class UGMakeableGeometry<2,3,GridImp> : public Geometry<2, 3, GridImp, UGGridGeometry>
+{
+public:
+    UGMakeableGeometry() :
+    Geometry<2, 3, GridImp, UGGridGeometry>(UGGridGeometry<2,3,GridImp>())
+    {};
+    //void make (Mat<cdim,mydim+1,sgrid_ctype>& __As) { this->realGeometry.make(__As); }
+
+    void setCoords(int n, const FieldVector<UGCtype, 3>& pos) {
+        this->realGeometry.coord_[n] = pos;
+    }
+
+    void setNumberOfCorners(int n) {
+        this->realGeometry.setNumberOfCorners(n);
+    }
+};
+
+
 
 //**********************************************************************
 //
@@ -159,6 +178,8 @@ private:
     template <class GridImp_>
     friend class UGGridIntersectionIterator;
 
+    friend class UGMakeableGeometry<2,3,GridImp>;
+
 public:
 
     /** \brief Default constructor */
@@ -172,7 +193,7 @@ public:
     int corners () const {return (elementType_==triangle) ? 3 : 4;}
 
   //! access to coordinates of corners. Index is the number of the corner 
-    const FieldVector<UGCtype, 3>& operator[] (int i) {
+    const FieldVector<UGCtype, 3>& operator[] (int i) const {
         return coord_[i];
     }
 

@@ -176,8 +176,8 @@ public:
 
   //! Iterator to first entity of given codim on level
   template<int codim>
-  UGGridLevelIterator<codim,All_Partition, const UGGrid<dim,dimworld> > lbegin (int level) const;
-  //typename Traits::template codim<cd>::template partition<pitype>::LevelIterator lbegin (int level) const;
+  //UGGridLevelIterator<codim,All_Partition, const UGGrid<dim,dimworld> > lbegin (int level) const;
+    typename Traits::template codim<codim>::LevelIterator lbegin (int level) const;
 
   //! one past the end on this level
   template<int codim>
