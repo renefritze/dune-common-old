@@ -1623,7 +1623,7 @@ namespace Dune {
           : _torus(comm,tag,s) // torus gets s to compute procs/direction
         {
           // store parameters
-          _L = L;
+          _LL = L;
           _s = s;
           _periodic = periodic;
           _overlap = overlap;
@@ -1673,7 +1673,7 @@ namespace Dune {
           
           // add level
           _maxlevel++;
-          _levels[_maxlevel] = makelevel(_L,s,_periodic,o_interior,s_interior,overlap);
+          _levels[_maxlevel] = makelevel(_LL,s,_periodic,o_interior,s_interior,overlap);
         }
 
         //! return reference to torus 
@@ -2209,7 +2209,7 @@ namespace Dune {
         }
 
         // private data of multigrid
-        fTupel _L;
+        fTupel _LL;
         iTupel _s;
         bTupel _periodic;
         int _maxlevel;

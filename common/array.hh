@@ -4,7 +4,7 @@
 #include<iostream>
 #include<iomanip>
 #include<string>
-#include<rpc/xdr.h>
+#include<rpc/rpc.h>
 
 namespace Dune 
 {
