@@ -24,11 +24,10 @@ public EntityDefault <codim,dim,dimworld, UGCtype,
               UGGridEntity,UGGridElement,UGGridLevelIterator,
               UGGridIntersectionIterator,UGGridHierarchicIterator>
 {
-    //friend class UGGrid < dim , dimworld >;
-    //friend class UGGridEntity < 0, dim, dimworld>;
-    //friend class UGGridLevelIterator < codim, dim, dimworld>;
-    friend class UGGridLevelIterator < dim, dim, dimworld, All_Partition>;
-    //friend class UGGridIntersectionIterator < dim, dimworld>;
+
+    template <int codim_, int dim_, int dimworld_, PartitionIteratorType PiType_>
+    friend class UGGridLevelIterator;
+
 public:
 
   //! level of this element

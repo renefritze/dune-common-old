@@ -20,9 +20,8 @@ class UGGridLevelIterator :
         public LevelIteratorDefault <codim,dim,dimworld, pitype, UGCtype,
                                      UGGridLevelIterator,UGGridEntity>
 {
-//   friend class UGGridEntity<2,dim,dimworld>;
-//   friend class UGGridEntity<1,dim,dimworld>;
-//   friend class UGGridEntity<0,dim,dimworld>;
+    friend class UGGridEntity<codim,dim,dimworld>;
+    friend class UGGridEntity<0,dim,dimworld>;
 
     friend class UGGridLevelIteratorFactory<2,2,2,All_Partition>;
     friend class UGGridLevelIteratorFactory<0,2,2,All_Partition>;
@@ -53,8 +52,8 @@ public:
   int level ();
 
 private:
-  // private Methods
-  void makeIterator();
+
+    void makeIterator();
 
     void setToTarget(typename TargetType<codim,dim>::T* target) {
         target_ = target;
