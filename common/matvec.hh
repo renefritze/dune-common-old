@@ -37,7 +37,7 @@ public:
   Mat(T t)
   {
     for(int j=0; j<m; j++)
-      for (int i=0; i<n; i++) a[j](i) = t;
+      for (int i=0; i<n; i++) a[j][i] = t;
   }
 
   //! operator () for read/write access to element in matrix
@@ -67,7 +67,7 @@ public:
   {
     Mat<n,1,T> z(0.0);
     for (int j=0; j<m; j++)
-      for (int i=0; i<n; i++) z(i,0) += a[j](i) * x(j,0);
+      for (int i=0; i<n; i++) z(i,0) += a[j][i] * x(j,0);
     return z;
   }
   
