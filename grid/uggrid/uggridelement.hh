@@ -133,7 +133,7 @@ private:
   // coords with face_,edge_ and vertex_ , needes for operator []
   int mapVertices (int i) const; 
 
-  // calculates the volume of the element 
+  //! Calculates the volume of the element 
   UGCtype elVolume () const;
 
   //! the vertex coordinates 
