@@ -207,7 +207,7 @@ public:
     SparseRowMatrix<T> applyFromLeftAndRightTo(const SparseRowMatrix<T>& A) const;
     
     //! Prints the complete matrix including the nonzero entries
-    void print (std::ostream& s) const;
+    void print (std::ostream& s, int width=3) const;
 
     //! Just prints the nonzero entries
     void printReal (std::ostream& s) const;
