@@ -1905,7 +1905,7 @@ inline typename AlbertaGridIntersectionIterator<GridImp>::LocalGeometry &
 AlbertaGridIntersectionIterator<GridImp>::
 intersectionSelfLocal () const
 {
-  std::cout << "\nintersection_self_local not checked until now! \n";
+  //std::cout << "\nintersection_self_local not checked until now! \n";
   if(!manageInterEl_)
   {
     manageInterEl_ = grid_->interSelfProvider_.getNewObjectEntity();
