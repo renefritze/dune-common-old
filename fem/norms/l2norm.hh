@@ -1,5 +1,5 @@
-#ifndef __DUNE_L2NORM_HH__
-#define __DUNE_L2NORM_HH__
+#ifndef DUNE_L2NORM_HH
+#define DUNE_L2NORM_HH
 
 #include <dune/fem/norms/norm.hh>
 #include <dune/quadrature/fixedorder.hh>
@@ -13,7 +13,7 @@ namespace Dune {
         typedef typename DiscreteFunctionType::FunctionSpaceType FunctionSpaceType;
         
     public:  
-        double compute (const DiscreteFunctionType &discFunc, int level)
+        double compute (const DiscreteFunctionType &discFunc)
         {
 
             /** \todo Automatically choose the correct quadrature order */
@@ -33,6 +33,7 @@ namespace Dune {
             
             double sum = 0.0;
             LocalFuncType lf = (const_cast<DiscreteFunctionType*>(&discFunc))->newLocalFunction(); 
+            int level = functionSpace_.level();
             LevelIterator endit = grid.template lend<0> ( level );
             LevelIterator it = grid.template lbegin<0> ( level );
             

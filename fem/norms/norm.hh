@@ -1,5 +1,5 @@
-#ifndef __DUNE_NORM_HH__
-#define __DUNE_NORM_HH__
+#ifndef DUNE_NORM_HH
+#define DUNE_NORM_HH
 
 namespace Dune {
 
@@ -10,7 +10,7 @@ namespace Dune {
     public:
 
         //! Compute the norm
-        virtual double compute(const DiscFuncType& f, int level) = 0;
+        virtual double compute(const DiscFuncType& f) = 0;
 
     };
 
