@@ -643,7 +643,7 @@ Jacobian_inverse (const FieldVector<albertCtype, dim>& global)
     return Jinv_;
 
   // builds the jacobian inverse and calculates the volume 
-  buildJacobianInverse(global);
+  buildJacobianInverse();
   return Jinv_;
 }
 
