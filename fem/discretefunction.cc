@@ -1,4 +1,3 @@
-
 template<typename Field, class DiscreteFunctionSpaceType>
 inline void DiscreteFunction< Field, DiscreteFunctionSpaceType >::evaluate 
 ( const Domain & , Range &) const 
