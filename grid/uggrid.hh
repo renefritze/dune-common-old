@@ -24,7 +24,7 @@
 
 namespace Dune 
 {
-/** @defgroup UGGrid UGGridImp
+/** @defgroup UGGrid UGGrid
     \ingroup GridCommon
 
   This is the implementation of the grid interface
@@ -155,12 +155,20 @@ public:
   
     /** \brief Constructor with control over UG's memory requirements 
      *
-     * \param heap The size of UG's internal memory in megabytes.  UG allocates 
+     * \param heapSize The size of UG's internal memory in megabytes.  UG allocates 
      * memory only once.  I don't know what happens if you create UGGrids with 
      * differing heap sizes.
+     * \param envHeapSize The size of UG's environment heap.  
      */
-  UGGrid(unsigned int heap=500);
+    UGGrid(unsigned int heapSize, unsigned int envHeapSize);
  
+    /** \brief Constructor with default memory settings
+     *
+     * The default values are 500MB for the general heap and 10MB for
+     * the environment heap.
+     */
+    UGGrid();
+
   //! Desctructor 
   ~UGGrid();
    
@@ -213,6 +221,9 @@ public:
     void* extra_boundary_data_;
 
 private:
+
+    void init(unsigned int heapSize, unsigned int envHeapSize);
+
     // Each UGGrid object has a unique name to identify it in the
     // UG environment structure
     std::string name_;
@@ -225,6 +236,11 @@ private:
   
   // number of entitys of each level an codim 
   Array<int> size_;
+
+    //! Marks whether the UG environment heap size is taken from
+    //! an existing defaults file or whether the values from
+    //! the UGGrid constructor are taken
+    bool useExistingDefaultsFile;
 
 protected:
     /** \brief Number of UGGrids currently in use.
