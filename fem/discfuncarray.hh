@@ -51,10 +51,8 @@ public:
     typedef LocalFunctionArrayIterator < DiscreteFunctionType,
     GridIteratorType> LocalFunctionIteratorType;
   };
-  
+
   typedef DiscreteFunctionSpaceType FunctionSpaceType;
-  typedef DiscFuncArray <typename FunctionSpaceType::Next> Next;
-  //typedef LocalFunctionArray < DiscreteFunctionSpaceType > LocalFunctionType; 
   
   //! Constructor make empty DiscFuncArray 
   DiscFuncArray ( DiscreteFunctionSpaceType & f );
@@ -140,6 +138,7 @@ public:
   bool read_pgm(const char *filename, int timestep); 
 
   //***** methods that not belong to the interface ************
+  //***** but have to be public *******************************
 
   //! get local function pointer, if not exists new object is created
   LocalFunctionType * getLocalFunction ();
@@ -152,13 +151,13 @@ private:
   void getMemory()
   {
     // for all grid levels we have at least a vector with length 0
-    int numLevel = const_cast<GridType &> (functionSpace_.getGrid()).maxlevel() +1;
+    int numLevel = functionSpace_.getGrid().maxlevel() +1;
     dofVec_.resize(numLevel);
     for(int i=0; i<numLevel; i++)
       dofVec_[i] = NULL;
     
     // this is done only if levOcu_ > 1
-    for(int i=0; i< levOcu_-1; i++)
+    for(int i=0; i<levOcu_-1; i++)
     {
       int length = functionSpace_.size( i );
       (dofVec_[i]).resize( length );
