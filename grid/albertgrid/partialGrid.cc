@@ -616,6 +616,7 @@ print_msg("%d%s", GET_BOUND(mel[i].boundary[N_FACES+j]),
 /*    fscanf(), else false                                                  */
 /****************************************************************************/
 
+#if 0
 static int read_indices(FILE *file, int id[])
 {
   int      i;
@@ -625,9 +626,11 @@ static int read_indices(FILE *file, int id[])
       return(false);
   return(true);
 }
+#endif
 
 #define N_KEYS      9
 #define N_MIN_KEYS  6              
+#if 0
 static const char *keys[N_KEYS] = {"DIM",                 /*  0  */
 				   "DIM_OF_WORLD",        /*  1  */
 				   "number of vertices",  /*  2  */ 
@@ -637,7 +640,9 @@ static const char *keys[N_KEYS] = {"DIM",                 /*  0  */
 				   "element boundaries",  /*  6  */
 				   "element neighbours",  /*  7  */
 				   "element type"};       /*  8  */
+#endif
 
+#if 0
 static int get_key_no(const char *key)
 {
   int     i;
@@ -660,6 +665,7 @@ static const char *read_key(const char *line)
   return((const char *) key);
 }
 
+#endif
 
 /****************************************************************************/
 /*  read_macro_data():                                                      */
@@ -987,6 +993,7 @@ static void read_macro_data_bin(MACRO_DATA *macro_data, const char *name)
 /****************************************************************************/
 #endif
 
+#if 0
 static bool_t xdr_REAL(XDR *xdr, REAL *rp)
 { 
   return (xdr_double(xdr,rp));
@@ -1031,6 +1038,7 @@ static int write_xdr_file(void *xdr_file, void *buffer, u_int size)
 {
   return (fwrite(buffer, (size_t)size, 1, (FILE *)xdr_file) == 1 ? (int)size : 0);
 }
+#endif
 
 #if 0
 static XDR *xdr_open_file(const char *filename, enum xdr_op mode)

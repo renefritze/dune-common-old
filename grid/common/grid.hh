@@ -1265,13 +1265,9 @@ public:
     //! ask for level of entity
     int level ();
 
-    private:
+private:
     EntityImp<0,dim,dimworld> * goNextEntity();
     
-    // private member varibles 
-    // pointer to actual Entity 
-    EntityType        *en_;
-
     // macro grid iterator 
     LevelIterator *it_;
     // end of macro grid iterator 
@@ -1283,6 +1279,9 @@ public:
     // end of hierarchical iterator 
     HierIterator *endhierit_;
 
+    // pointer to actual Entity 
+    EntityType        *en_;
+
     // true if we must go to next macro element 
     bool goNextMacroEntity_;
     bool built_;
@@ -1291,8 +1290,6 @@ public:
     
     // go down until max level
     int maxLev_;
-    
-    public:
   };
 
 

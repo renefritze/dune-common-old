@@ -253,7 +253,7 @@ private:
     Dest.clearLevel ( this->level_ );
 
     // run through grid and apply the local operator
-    for( it ; it != endit; ++it )
+    for( ; it != endit; ++it )
     {
       localOp_.prepareLocal (*it);
       localOp_.applyLocal   (*it);
@@ -265,25 +265,25 @@ private:
   void applyOnGrid ( GridIteratorType &it, GridIteratorType &endit ) const 
   {
     // run through grid and apply the local operator
-    for( it ; it != endit; ++it )
+    for( ; it != endit; ++it )
     {
       localOp_.prepareLocal (*it);
       localOp_.applyLocal   (*it);
       localOp_.finalizeLocal(*it);
     }
   }
-
-  //! true if operator was prepared for apply 
-  mutable bool prepared_;
-
-  //! if true use LeafIterator else LevelIterator
-  mutable bool leaf_;
-
-  bool printMsg_;
   
   //! Operator which is called on each entity
   LocalOperatorImp & localOp_;
 
+  //! if true use LeafIterator else LevelIterator
+  mutable bool leaf_;
+
+  //! true if operator was prepared for apply 
+  mutable bool prepared_;
+
+  bool printMsg_;
+  
   //*******************************************************
   // derived from mappiung, don't need this here 
   //*******************************************************

@@ -135,7 +135,7 @@ private:
   }
 };
 
-static TRAVERSE_STACK *freeStack = NULL;
+//static TRAVERSE_STACK *freeStack = NULL;
 static int stackCount=0;
 
 static inline void initTraverseStack(TRAVERSE_STACK *stack);
@@ -598,7 +598,6 @@ inline static void refineElNewCheck ( DOF_INT_VEC * drv , RC_LIST_EL *list, int 
   const DOF_ADMIN * admin = drv->fe_space->admin;
   const int nv = admin->n0_dof[CENTER];
   const int k  = admin->mesh->node[CENTER];   
-  int dof;
   int *vec = NULL; 
 
   GET_DOF_VEC(vec,drv);
@@ -622,7 +621,6 @@ inline static void refineElOwner ( DOF_INT_VEC * drv , RC_LIST_EL *list, int ref
   const DOF_ADMIN * admin = drv->fe_space->admin;
   const int nv = admin->n0_dof[CENTER];
   const int k  = admin->mesh->node[CENTER];   
-  int dof;
   int *vec = NULL; 
   int val = -1;
 
@@ -949,7 +947,6 @@ inline void removeMacroEls ( MESH * mesh , int proc , int * ownvec )
   {
     if(mel->el->mark == 1)
     {
-      int count = 0;
       for(int i=0; i<N_NEIGH; i++)
       {
         MACRO_EL * neigh = mel->neigh[i];

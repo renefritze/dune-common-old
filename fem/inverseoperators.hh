@@ -104,10 +104,13 @@ class CGInverseOp : public Operator<
       typename DiscreteFunctionType::RangeFieldType,
 					  DiscreteFunctionType,DiscreteFunctionType> {
 
+private:
+  // no const reference, we make const later 
+  OperatorType &op_;
+  double _redEps; 
   typename DiscreteFunctionType::RangeFieldType epsilon_;
   int maxIter_;
-
-  double _redEps; 
+  int _verbose ;
     
 public:
 
@@ -188,10 +191,6 @@ public:
     apply(arg,dest);
   }
 
-private:
-  // no const reference, we make const later 
-  OperatorType &op_;
-  int _verbose ;
 };
 
 } // end namespace Dune

@@ -1045,9 +1045,9 @@ template< int dim, int dimworld, class ct, template<int,int> class GridImp,
 	template<int,int,int> class LevelIteratorImp, template<int,int,int> class EntityImp>  
 inline GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::
 LeafIterator::LeafIterator (GridType &grid, int maxlevel, bool end) :
-              maxLev_ ( maxlevel ) , end_ ( end ),
-  it_ (NULL) , endit_ (NULL) , hierit_(NULL) , endhierit_(NULL) ,
-  built_(false) , goNextMacroEntity_(false) 
+    it_ (NULL) , endit_ (NULL) , hierit_(NULL) , endhierit_(NULL) 
+  , en_ (NULL) , goNextMacroEntity_(false) , built_(false)
+  , useHierarchic_ (false) , end_ ( end ) , maxLev_ ( maxlevel ) 
 {
   if(!end_)
   {
