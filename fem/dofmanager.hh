@@ -110,6 +110,7 @@ private:
 
 //! specialisation for int 
 template <>
+inline
 bool DofArrayMemory::processXdr<int>(XDR *xdrs)
 {
   typedef int T;
@@ -127,6 +128,7 @@ bool DofArrayMemory::processXdr<int>(XDR *xdrs)
 
 //! specialisation for double 
 template <>
+inline
 bool DofArrayMemory::processXdr<double>(XDR *xdrs)
 {
   typedef double T;
