@@ -1,4 +1,4 @@
-#include <dune/config.h>
+#include "config.h"
 
 #include "../onedgrid.hh"
 
