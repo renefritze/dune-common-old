@@ -1,7 +1,6 @@
 #ifndef DUNE__ORTHONORMALBASE_HH
 #define DUNE__ORTHONORMALBASE_HH
 
-#include <dune/common/matvec.hh>
 #include <dune/common/simplevector.hh>
 #include <dune/fem/common/basefunctions.hh>
 
