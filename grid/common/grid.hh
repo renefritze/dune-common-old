@@ -1460,15 +1460,15 @@ class GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::LeafItera
 {
     // some typedefs  
     typedef GridImp<dim,dimworld> GridType;
-    typedef typename Traits<0>::LevelIterator LevelIterator; 
-    typedef typename Traits<0>::Entity EntityType;
+    typedef typename GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::template Traits<0>::LevelIterator LevelIterator; 
+    typedef typename GridDefault<dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp>::template Traits<0>::Entity EntityType;
     typedef typename EntityType::Traits::HierarchicIterator HierIterator;
 
 public:
     //! remember the types of template parameters
     //! LeafIterator only on Entitys of codim=0 , because we use the
     //! HierarchicIterator 
-    struct Traits 
+  struct Traits 
     {
         //! Please doc me!
         typedef ct                                CoordType;
@@ -1498,7 +1498,7 @@ public:
         typedef EntityImp<0,dim,dimworld>         Entity;
 
     };
-
+    
     //! Constructor making new LeafIterator
     LeafIterator (GridType &grid, int maxlevel, bool end);
       
