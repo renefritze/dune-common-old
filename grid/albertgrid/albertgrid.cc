@@ -864,6 +864,51 @@ index()
 
 template<int codim, int dim, int dimworld>
 inline int AlbertGridEntity < codim, dim ,dimworld >::
+boundaryId()
+{
+    return (0);
+  
+}
+
+
+template <> 
+inline int AlbertGridEntity<2,2,2>::boundaryId()
+{
+    return elInfo_->bound[vertex_];
+
+}
+
+template <> 
+inline int AlbertGridEntity<3,3,3>::boundaryId()
+{
+    return elInfo_->bound[vertex_];
+
+}
+
+template <> 
+inline int AlbertGridEntity<1,2,2>::boundaryId()
+{
+  return elInfo_->boundary[face_]->bound;
+}
+
+
+template <> 
+inline int AlbertGridEntity<1,3,3>::boundaryId()
+{
+  return elInfo_->boundary[face_]->bound;
+}
+
+
+template<int dim, int dimworld>
+inline int AlbertGridEntity < 0, dim ,dimworld >::
+boundaryId()
+{
+  return (0);
+  
+}
+
+template<int codim, int dim, int dimworld>
+inline int AlbertGridEntity < codim, dim ,dimworld >::
 el_index()
 {
   assert(codim == dim);
@@ -1076,7 +1121,8 @@ template <>
 #endif
 inline int AlbertGridEntity<0,2,2>::subIndex<2> ( int i )
 {
-  return grid_.indexOnLevel<2>(elInfo_->el->dof[i][0],level_);
+  //return grid_.indexOnLevel<2>(elInfo_->el->dof[i][0],level_);
+  return (elInfo_->el->dof[i][0]);
 }
 
 // subIndex 
@@ -1138,7 +1184,7 @@ template <>
 inline AlbertGridLevelIterator<2,2,2> 
 AlbertGridEntity<0,2,2>::entity<2> ( int i )
 {
-  std::cout << "entity<2> ,2,2 !\n";
+  //std::cout << "entity<2> ,2,2 !\n";
   // we are looking at vertices 
   //enum { cc = dimension };
   enum { cc = 2 };
@@ -1314,7 +1360,7 @@ AlbertGridEntity < 0, dim ,dimworld >::father_relative_local()
   for(int i=0; i<fatherReLocal_.corners(); i++)
     fatherReLocal_[i] = daddy.local(geometry()[i]);
   
-  std::cout << "\nfather_realtive_local not tested yet! \n";
+  //std::cout << "\nfather_realtive_local not tested yet! \n";
   return fatherReLocal_;
 }
 
