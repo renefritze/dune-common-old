@@ -86,6 +86,8 @@ public:
 
     void setToTarget(typename TargetType<codim,dim>::T* target);
 
+    void setToTarget(typename TargetType<codim,dim>::T* target, int level);
+
   // private Methods
   void makeDescription();
 
@@ -133,6 +135,9 @@ public EntityDefault<0,dim,dimworld, UGCtype,UGGridEntity,UGGridElement,
   friend class UGGridIntersectionIterator < dim, dimworld>;
   friend class UGGridHierarchicIterator < dim, dimworld>;
     //friend class UGGridLevelIterator <0,dim,dimworld>;
+
+    // Either UG3d::ELEMENT or UG2d:ELEMENT
+    typedef typename TargetType<0,dim>::T UGElementType;
 public:
   typedef UGGridIntersectionIterator<dim,dimworld> IntersectionIterator; 
   typedef UGGridHierarchicIterator<dim,dimworld> HierarchicIterator; 
@@ -141,9 +146,6 @@ public:
   ~UGGridEntity() {};
 
   UGGridEntity(int level);
-
-  //! Constructor, real information is set via setElInfo method
-    //UGGridEntity(UGGrid<dim,dimworld> &grid, int level);
 
   //! level of this element
   int level ();
@@ -227,10 +229,6 @@ public:
     AdaptationState state() const;
   
 private: 
-  // called from HierarchicIterator, because only this 
-  // class changes the level of the entity, otherwise level is set by
-  // Constructor 
-  void setLevel ( int actLevel );  
 
 #if 0
   // return the global unique index in mesh 
@@ -238,8 +236,11 @@ private:
 #endif
 
   //! make a new UGGridEntity 
-  void makeDescription();
+  //void makeDescription();
 public:
+    void setToTarget(typename TargetType<0,dim>::T* target, int level);
+
+    //! Leaves the level untouched
     void setToTarget(typename TargetType<0,dim>::T* target);
 
   //! the cuurent geometry
