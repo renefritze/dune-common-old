@@ -222,9 +222,6 @@ class SBoundaryEntity
 public: 
   SBoundaryEntity() : elem_(true) {} 
   
-  //! return type of boundary segment 
-  BoundaryType type () { return Dirichlet;  };
-
   //! return true if ghost cell was calced
   bool hasGeometry () { return false; };
 
