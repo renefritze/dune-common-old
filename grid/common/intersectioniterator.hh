@@ -193,7 +193,7 @@ public:
   */
   FieldVector<ct, dimworld> outerNormal (const FieldVector<ct, dim-1>& local) const
     {
-      asImp().fill_outer_normal(local);
+      asImp().outerNormal(local);
     }
 
   /*! intersection of codimension 1 of this neighbor with element where iteration started.
