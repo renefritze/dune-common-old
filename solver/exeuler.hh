@@ -45,7 +45,7 @@ int main(int argc, char ** argv) {
 namespace Dune {
   /**
      exEuler calculates the next step 
-     $x_{i,j,k}^{n+1} = \delta t \cdot RHS_{i,j,k}^n - $x_{i,j,k}^n$
+     \f$ x_{i,j,k}^{n+1} = \delta t \cdot RHS_{i,j,k}^n - x_{i,j,k}^n \f$
   */
   template <class GRID, class RHS>
   class exEuler : public gridOperator< GRID, exEuler<GRID,RHS> > {
@@ -60,8 +60,8 @@ namespace Dune {
     Vector<GRID> &x_new;
   public:
     exEuler(const GRID &G, level LVL,
-	    RHS & Rhs,
-	    Vector<GRID> &X, Vector<GRID> &X_NEW) :
+            RHS & Rhs,
+            Vector<GRID> &X, Vector<GRID> &X_NEW) :
       gridOperator< GRID, exEuler<GRID,RHS> >(G),
       lvl(LVL), rhs(Rhs), x(X), x_new(X_NEW) {};
     void preProcess() { x_new = rhs - x; };
@@ -74,8 +74,8 @@ namespace Dune {
   template <class GRID, class RHS>
   exEuler<GRID,RHS> &
   exeuler(const GRID &g, typename GRID::level lvl,
-	  RHS & rhs,
-	  Vector<GRID> &x, Vector<GRID> &x_new) {
+          RHS & rhs,
+          Vector<GRID> &x, Vector<GRID> &x_new) {
     static exEuler<GRID,RHS> *e=0;
     if (e) delete e;
     e = new exEuler<GRID,RHS>(g,lvl,rhs,x,x_new);
