@@ -48,7 +48,7 @@ enum ElementType {unknown,vertex,line, triangle, quadrilateral, tetrahedron, pyr
     /*! \internal
       Used for grid I/O
      */
-    enum GridIdentifier { SGrid_Id, AlbertGrid_Id , SimpleGrid_Id, Ug_Grid_Id };
+    enum GridIdentifier { SGrid_Id, AlbertGrid_Id , SimpleGrid_Id, UGGrid_Id };
 
     /*! 
       Specify the format to store grid and vector data
@@ -65,7 +65,7 @@ enum ElementType {unknown,vertex,line, triangle, quadrilateral, tetrahedron, pyr
      */
     enum BoundaryType { Neumann ,  //!< Neumann type boundary  
                         Dirichlet, //!< Dirichlet type boundary 
-			Periodic,  //!< Periodic boundary
+                        Periodic,  //!< Periodic boundary
                       };
     
     enum AdaptationState { NONE ,   //!< notin' to do and notin' was done 
