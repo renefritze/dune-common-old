@@ -66,7 +66,7 @@ public:
     Vec<m,T> z(0.0);
     const Mat<n,m,T> &matrix = (*this);
     for (int j=0; j<n; j++)
-      for (int i=0; i<m; i++) z(i) += matrix(j,i) * x.read(j);
+      for (int i=0; i<m; i++) z(i) += matrix(j,i) * x[j];
     return z;
   }
   
