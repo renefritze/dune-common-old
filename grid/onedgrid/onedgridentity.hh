@@ -18,10 +18,10 @@ class OneDEntityImp<0>
 {
 public:
 
-    OneDEntityImp(int level, double pos) : level_(level), pos_(pos), pred_(NULL), succ_(NULL)
+    OneDEntityImp(int level, double pos) : pos_(pos), level_(level), pred_(NULL), succ_(NULL)
     {}
 
-    OneDEntityImp(int level, const FieldVector<double, 1>& pos) : level_(level), pos_(pos), pred_(NULL), succ_(NULL)
+    OneDEntityImp(int level, const FieldVector<double, 1>& pos) : pos_(pos), level_(level), pred_(NULL), succ_(NULL)
     {}
     //private: 
 
@@ -270,8 +270,6 @@ public:
     int subIndex (int i) const {
         assert(i==0 || i==1);
         assert(cc==0 || cc==1);
-//         DUNE_THROW(NotImplemented, "subIndex");
-//         return 0;
         return entity<cc>(i)->index();
     }
     
