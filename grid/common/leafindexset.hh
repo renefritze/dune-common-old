@@ -471,6 +471,7 @@ bool write_xdr(const char * filename, int timestep)
 
   xdr_destroy(&xdrs);
   fclose(file);
+  return true;
 }
 
 //! read index set from given xdr file 
