@@ -2546,8 +2546,9 @@ template < int dim, int dimworld >
 inline int AlbertGrid < dim, dimworld >::size (int level, int codim)
 {
   enum { numCodim = dim+1 };
-
-  if(size_[level * (maxlevel_ +1) + codim] == -1)
+  int ind = (level * numCodim) + codim;
+  
+  if(size_[ind] == -1)
   { 
     int numberOfElements = 0;
     
@@ -2572,7 +2573,7 @@ inline int AlbertGrid < dim, dimworld >::size (int level, int codim)
           it != endit; ++it)
         numberOfElements++;
     }
-#if DIM > 2
+    
     if(codim == 3)
     {
       AlbertGridLevelIterator<3,dim,dimworld> endit = lend<3>(level);
@@ -2580,14 +2581,13 @@ inline int AlbertGrid < dim, dimworld >::size (int level, int codim)
           it != endit; ++it)
         numberOfElements++;
     }
-#endif    
     
-    size_[level * numCodim + codim] = numberOfElements; 
+    size_[ind] = numberOfElements; 
     return numberOfElements;
   }
   else
   { 
-    return size_[level * numCodim + codim]; 
+    return size_[ind]; 
   }
 }
 
