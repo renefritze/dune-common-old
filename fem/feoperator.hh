@@ -8,31 +8,44 @@ namespace Dune {
 
 static const int edge[4][2] = { {0,2}, {1,3} , {0,1} , {2,3}}; 
   
+    /** \brief ???
+     * \todo Please doc me!
+     */
 template <class DiscFunctionType, class MatrixType, class FEOpImp>
 class FiniteElementOperatorInterface 
 : public Operator<typename DiscFunctionType::DomainFieldType, 
     typename DiscFunctionType::RangeFieldType,DiscFunctionType,DiscFunctionType> 
 {
 public:
+
+    //! ??? 
   typedef typename DiscFunctionType::FunctionSpace FunctionSpaceType;
+    //! ??? 
   typedef typename FunctionSpaceType::GridType GridType; 
+    //! ??? 
   typedef typename DiscFunctionType::LocalFunctionType LocalFunctionType;
+    //! ??? 
   typedef typename FunctionSpaceType::Range RangeVecType;
+    //! ??? 
   typedef typename FunctionSpaceType::JacobianRange JacobianRange;
+    //! ??? 
   typedef typename FunctionSpaceType::Domain DomainVecType;  
 
 
+    //! ??? 
   template<class  EntityType>
   double getLocalMatrixEntry( EntityType &entity, const int i, const int j ) const {
     return asImp().getLocalMatrixEntry( entity, i, j );
   }
 
+    //! ??? 
   template <class  EntityType,class MatrixImp>
   void getLocalMatrix( EntityType &entity, const int matSize, MatrixImp& mat) const {
     return asImp().getLocalMatrix( entity, matSize, mat);
   }
   
 
+    //! ??? 
   MatrixType *newEmptyMatrix( ) const {
     return asImp().newEmptyMatrix( );
   }
@@ -44,6 +57,9 @@ protected:
   const FEOpImp &asImp( ) const { return static_cast<const FEOpImp&>( *this ); }
 };
 
+    /** \brief ???
+     * \todo Please doc me!
+     */
 template <class DiscFunctionType, class MatrixType, class FEOpImp>
 class FiniteElementOperator : public FiniteElementOperatorInterface<DiscFunctionType,MatrixType,FEOpImp> ,
 public LocalOperatorDefault <DiscFunctionType,DiscFunctionType, typename
@@ -53,20 +69,22 @@ DiscFunctionType::RangeFieldType , FEOpImp  >
   typedef FiniteElementOperator <DiscFunctionType,MatrixType,FEOpImp> MyType;
 
 protected:
-  // the corresponding function_space 
+  //! The corresponding function_space 
   const typename DiscFunctionType::FunctionSpaceType & functionSpace_;
   
-  // the representing matrix 
+  //! The representing matrix 
   mutable MatrixType *matrix_ ;
  
-  // is matrix assembled 
+  //! Is matrix assembled 
   mutable bool matrix_assembled_;
  
-  // storage of argument and destination
+  //! Storage of argument
   const DiscFunctionType * arg_;
+
+    //! Stores the destination
   DiscFunctionType * dest_;
   
-
+    //! ???
   void assemble ( ) const 
   {
     typedef typename DiscFunctionType::FunctionSpace FunctionSpaceType;
@@ -176,6 +194,7 @@ protected:
     matrix_assembled_ = true;
   }
 
+    //!
   void multiplyOnTheFly( const DiscFunctionType &arg, DiscFunctionType &dest ) const 
   {
     typedef typename DiscFunctionType::FunctionSpace FunctionSpaceType;
@@ -225,8 +244,10 @@ protected:
   }
   
 public:
-  enum OpMode { ON_THE_FLY, ASSEMBLED };
+    //! Operator mode
+    enum OpMode { ON_THE_FLY, ASSEMBLED };
 
+    //! ???
   FiniteElementOperator( const typename DiscFunctionType::FunctionSpaceType &fuspace, 
        OpMode opMode = ON_THE_FLY ) :
     functionSpace_( fuspace ), 
@@ -236,10 +257,12 @@ public:
     opMode_(opMode) {
   }
 
+    //! ???
   ~FiniteElementOperator( ) {
     if ( matrix_ ) delete matrix_;
   }
 
+    //! ???
   void initialize(){
     std::cout << "Matrix reinitialized!" << std::endl ;
     
@@ -249,6 +272,7 @@ public:
     matrix_ = 0;
   }
 
+    //! ???
   void apply( const DiscFunctionType &arg, DiscFunctionType &dest) const 
   {
     if ( opMode_ == ASSEMBLED ) 
@@ -256,7 +280,7 @@ public:
       if ( !matrix_assembled_ ) 
       {
         matrix_ = this->newEmptyMatrix( );
-        assemble();	
+        assemble();     
       }
       matrix_->apply( arg, dest );
     } 
@@ -267,20 +291,20 @@ public:
   }
 
 public:
-  // store argument and destination 
+  //! Store argument and destination 
   void prepareGlobal(const DiscFunctionType &Arg, DiscFunctionType & Dest )  
   { 
     arg_  = &Arg.argument();
     dest_ = &Dest.destination();
     assert(arg_ != NULL); assert(dest_ != NULL);
   }
-  // set argument and dest to NULL 
+  //! Set argument and dest to NULL 
   void finalizeGlobal()  
   { 
     arg_  = NULL; dest_ = NULL;
   }
 
-  // makes local multiply on the fly
+  //! Makes local multiply on the fly
   template <class EntityType>
   void applyLocal ( EntityType &en ) const 
   {
@@ -350,7 +374,7 @@ public:
   } // end applyLocal
 
 
-  // 
+  //! ???
   template <class EntityType>
   void finalizeLocal ( EntityType &en ) const 
   {
@@ -378,59 +402,59 @@ public:
     for( ; nit != endnit ; ++nit){
 
       if(nit.boundary())
-	{
-	  BoundaryEntityType & bEl = nit.boundaryEntity();
+        {
+          BoundaryEntityType & bEl = nit.boundaryEntity();
 
-	  if( bEl.type() == Dirichlet )
-	    {
-	      int neigh = nit.number_in_self();
-		  
-	      if(en.geometry().type() == triangle)
-		{
-		  int numDof = 3;
-		  //std::cout << "Dreieck erkannt "<< en.index() << std::endl;
+          if( bEl.type() == Dirichlet )
+            {
+              int neigh = nit.number_in_self();
+                  
+              if(en.geometry().type() == triangle)
+                {
+                  int numDof = 3;
+                  //std::cout << "Dreieck erkannt "<< en.index() << std::endl;
  
-		  for(int i=1; i<numDof; i++)
-		    {
-		      // funktioniert nur fuer Dreiecke 
-		      // hier muss noch gearbeitet werden. Wie kommt man von den
-		      // Intersections zu den localen Dof Nummern?
-		      int col = functionSpace_.mapToGlobal(en,(neigh+i)%numDof);
-		      // unitRow unitCol for boundary
-		      //matrix_->kroneckerKill(col,col);
-		      dest_it[col] = arg_it[col];
-		    }
-		}
-	      if(en.geometry().type() == tetrahedron)
-		{
-		  int numDof = 4;
-		  for(int i=1; i<numDof; i++)
-		    {
-		      // funktioniert nur fuer Dreiecke 
-		      // hier muss noch gearbeitet werden. Wie kommt man von den
-		      // Intersections zu den localen Dof Nummern?
-		      int col = functionSpace_.mapToGlobal(en,(neigh+i)%numDof);
-		      // unitRow unitCol for boundary
-		      //matrix_->kroneckerKill(col,col);  
-		      dest_it[col] = arg_it[col];
-		      
-		    }
-		}
-	      if(en.geometry().type() == quadrilateral)
-		{
-		  for(int i=0; i<2; i++)
-		    {
-		      // funktioniert nur fuer Dreiecke 
-		      // hier muss noch gearbeitet werden. Wie kommt man von den
-		      // Intersections zu den localen Dof Nummern?
-		      int col = functionSpace_.mapToGlobal(en,edge[neigh][i]);
-		      // unitRow unitCol for boundary
-		      //matrix_->kroneckerKill(col,col); 
-		      dest_it[col] = arg_it[col];
-		    }
-		}
-	    }
-	}
+                  for(int i=1; i<numDof; i++)
+                    {
+                      // funktioniert nur fuer Dreiecke 
+                      // hier muss noch gearbeitet werden. Wie kommt man von den
+                      // Intersections zu den localen Dof Nummern?
+                      int col = functionSpace_.mapToGlobal(en,(neigh+i)%numDof);
+                      // unitRow unitCol for boundary
+                      //matrix_->kroneckerKill(col,col);
+                      dest_it[col] = arg_it[col];
+                    }
+                }
+              if(en.geometry().type() == tetrahedron)
+                {
+                  int numDof = 4;
+                  for(int i=1; i<numDof; i++)
+                    {
+                      // funktioniert nur fuer Dreiecke 
+                      // hier muss noch gearbeitet werden. Wie kommt man von den
+                      // Intersections zu den localen Dof Nummern?
+                      int col = functionSpace_.mapToGlobal(en,(neigh+i)%numDof);
+                      // unitRow unitCol for boundary
+                      //matrix_->kroneckerKill(col,col);  
+                      dest_it[col] = arg_it[col];
+                      
+                    }
+                }
+              if(en.geometry().type() == quadrilateral)
+                {
+                  for(int i=0; i<2; i++)
+                    {
+                      // funktioniert nur fuer Dreiecke 
+                      // hier muss noch gearbeitet werden. Wie kommt man von den
+                      // Intersections zu den localen Dof Nummern?
+                      int col = functionSpace_.mapToGlobal(en,edge[neigh][i]);
+                      // unitRow unitCol for boundary
+                      //matrix_->kroneckerKill(col,col); 
+                      dest_it[col] = arg_it[col];
+                    }
+                }
+            }
+        }
       
     }
 
