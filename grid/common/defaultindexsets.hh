@@ -296,8 +296,8 @@ class DefaultLevelIndexSet
   typedef typename GridType :: Traits :: template codim<0> :: Entity  EntityCodim0Type;
 
 public:
-  DefaultLevelIndexSet( const GridType & grid ) :
-    grid_( const_cast<GridType & > (grid) ) , hIndexSet_ ( grid.hierarchicIndexSet() ) 
+  DefaultLevelIndexSet(const GridType & grid ) :
+    grid_(grid) , hIndexSet_ ( grid.hierarchicIndexSet() ) 
   {
     std::cout << "Created new DefaultLevelIndex! \n";
     calcNewIndex ();
@@ -307,12 +307,12 @@ public:
   template <class EntityType>
   int index (const EntityType & en) const
   {
-    enum { codim = EntityType :: codimension };
-    return indexOnLevel< codim > (hIndexSet_.index(en),en.level());
+    enum { cd = EntityType :: codimension };
+    return indexOnLevel< cd > (hIndexSet_.index(en),en.level());
   }
 
-  template <int codim>
-  int subIndex (const EntityCodim0Type & en, int i) const 
+  template <int cd>
+  int subIndex (const typename GridType::Traits::template codim<0>::Entity & en, int i) const
   {
     return 0;
   }
@@ -323,7 +323,7 @@ public:
   }
 
 private:
-  GridType & grid_;
+  const GridType & grid_;
   const HierarchicIndexSetType & hIndexSet_;
 
   //! map the global index from the Albert Mesh to the local index on Level
@@ -371,6 +371,7 @@ private:
     }
   }
 
+public:
   void calcNewIndex ()
   {
     int numLevel = grid_.maxlevel() + 1;
