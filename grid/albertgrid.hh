@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <assert.h>
 
 // if defined, then used Albert Index 
 //#define REALINDEX 
@@ -55,7 +56,6 @@ extern "C"
 #ifdef __ALBERTNAME__
 }//end namespace Albert
 #endif
-
 
 #include "../common/misc.hh"
 #include "../common/matvec.hh"
@@ -222,7 +222,7 @@ private:
 
   // template method for map the vertices of EL_INFO to the actual 
   // coords with face_,edge_ and vertex_ , needes for operator []
-  template <int cc> int mapVertices (int i) const; 
+  int mapVertices (int i) const; 
  
   //! the vertex coordinates 
   Mat<dimworld,dim+1,albertCtype> coord_;
@@ -899,8 +899,8 @@ private:
   ALBERT EL_INFO * traverseLeafElLevel(ALBERT TRAVERSE_STACK * stack);
  
   // the default is, go to next elInfo
-  template <int cc>  ALBERT EL_INFO * 
-  goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old);
+  //template <int cc>  
+  ALBERT EL_INFO * goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old);
   
   // the real go next methods
   ALBERT EL_INFO * goNextElInfo(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old);
