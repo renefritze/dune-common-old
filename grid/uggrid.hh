@@ -179,11 +179,15 @@ public:
     bool adapt();
 
     /** \brief Please doc me! */
-  GridIdentifier type () { return UGGrid_Id; };
-  
-//**********************************************************
-// End of Interface Methods
-//**********************************************************
+    GridIdentifier type () { return UGGrid_Id; };
+    
+    // **********************************************************
+    // End of Interface Methods
+    // **********************************************************
+    
+    /** \brief Read access to the UG-internal grid name */
+    const std::string& name() const {return name_;}
+
 
     void makeNewUGMultigrid();
   
@@ -198,7 +202,7 @@ public:
 private:
     // Each UGGrid object has a unique name to identify it in the
     // UG environment structure
-    std::string name;
+    std::string name_;
 
   // number of maxlevel of the mesh
   int maxlevel_;
