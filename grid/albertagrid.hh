@@ -15,6 +15,7 @@
 #include <dune/common/fmatrix.hh>
 #include <dune/common/array.hh>
 #include <dune/common/capabilities.hh>
+#include <dune/common/stdstreams.hh>
 #include "common/grid.hh"
 
 #include "dune/common/exceptions.hh"
@@ -80,20 +81,6 @@ namespace Dune
 
   @{
  */
-
-class ObjectStream 
-{
-  public:
-    template <class T>
-    void readObject (T &) {}
-    void readObject (int) {}
-    void readObject (double) {}
-    template <class T> 
-    void writeObject (T &) {};
-    void writeObject (int) {} ;
-    void writeObject (double) {};
-};
-  
 
 // i.e. double or float 
 typedef ALBERTA REAL albertCtype;
@@ -520,6 +507,9 @@ public:
   //! index is unique and consecutive per level and codim used for access to degrees of freedo
   int index () const;
 
+  //! return the global unique index in grid , same as el_index
+  int globalIndex() const ; 
+
   //! index of the boundary which is associated with the entity, 0 for inner entities
   int boundaryId () const;
 
@@ -553,9 +543,6 @@ public:
 
   //! Reference to one past the last intersection with neighbor
   AlbertaGridIntersectionIterator<GridImp> iend () const;
-
-  //! returns true if Entity has children 
-  bool hasChildren () const ; 
 
   //! returns true if entity is leaf entity, i.e. has no children  
   bool isLeaf () const ; 
@@ -591,22 +578,13 @@ public:
   //***************************************************************
   //  Interface for parallelisation 
   //***************************************************************
-    
-  //! AlbertaGrid internal method for partitioning 
-  //! set processor number of this entity  
-  bool partition( int proc ); 
+  void setLeafData( int proc );
 
   //! return partition type of this entity ( see grid.hh )
   PartitionType partitionType() const; 
 
   //! return true if this entity belong to master set of this grid   
   bool master() const; 
-
-  //! return processor number where entity is master 
-  int owner () const; 
-  
-  //! return the global unique index in grid , same as el_index
-  int globalIndex() const ; 
 
   // return 0 for elements 
   int getFEVnum () const { return 0; } 
@@ -1155,11 +1133,8 @@ public:
   typedef AlbertaGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSetType;
   typedef DefaultLevelIndexSet<AlbertaGrid<dim,dimworld> > LevelIndexSetType;
 
-
   typedef ObjectStream ObjectStreamType;
-  //typedef std::pair < ObjectStreamType * , 
-  //  Traits::template codim<0>::Entity  * > DataCollectorParamType;
-
+  //typedef AlbertaObjectStream ObjectStreamType;
 
   //! we always have dim+1 codimensions 
   enum { numCodim = dim+1 };
@@ -1241,7 +1216,10 @@ public:
   //***************************************************************
   /*! \brief marks an element for refCount refines. if refCount is negative the
    *  element is coarsend -refCount times
-   * mark returns true if element was marked, otherwise false */
+   *  NOTE: if element was already marked for refinement then nothing
+   *  happens if element is again marked for coarsen, refinement alsway
+   *  counts more then coarsening 
+   *  mark returns true if element was marked, otherwise false */
   bool mark( int refCount , typename Traits::template codim<0>::EntityPointer & en ); 
   bool mark( int refCount , typename Traits::template codim<0>::Entity & en ); 
 
@@ -1310,6 +1288,43 @@ private:
       return entity.realEntity;
   }
 
+public:
+  //! create ghost cells 
+  void createGhosts ();
+  
+  //! get adaptation mark 
+  template <class EntityType> 
+  int getMark(const EntityType & ) const;
+  
+  //! return processor number where entity is master 
+  template <class EntityType> 
+  int owner (const EntityType & ) const; 
+  
+  //! AlbertaGrid internal method for partitioning 
+  //! set processor number of this entity  
+  template <class EntityType> 
+  bool partition( int proc , EntityType & ); 
+
+  //! unpack recieved ObjectStream 
+  void unpackAll ( ObjectStreamType & os );
+  
+  //! pack this entity and all chilcren to ObjectStream 
+  template <class EntityType> 
+  void packAll ( ObjectStreamType & os, EntityType & en );
+
+  //! pack this entity and all chilcren to ObjectStream 
+  template <class EntityType> 
+  void packBorder ( ObjectStreamType & os, EntityType & en );
+
+  // return true if macro element is ghost 
+  bool isGhost( const ALBERTA MACRO_EL * mel) const;
+  
+  // return true if element is neihter interior nor ghost 
+  bool isNoElement( const ALBERTA MACRO_EL * mel) const;
+  
+private:
+  Array<int> ghostFlag_; // store ghost information 
+  
   // initialize of some members 
   void initGrid(int proc);
   
