@@ -181,13 +181,15 @@ LagrangeDiscreteFunctionSpace<FunctionSpaceType,GridType,polOrd,DofManagerType>:
 setBaseFuncSetPointer ( EntityType &en )
 {
   switch (en.geometry().type())
-  {
-    case line         : return makeBaseSet<line,polOrd> ();
-    case triangle     : return makeBaseSet<triangle,polOrd> ();
-    case quadrilateral: return makeBaseSet<quadrilateral,polOrd> ();
-    case tetrahedron  : return makeBaseSet<tetrahedron,polOrd> ();
-    case hexahedron   : return makeBaseSet<hexahedron,polOrd> ();
-    default: {
+      {
+      case line         : return makeBaseSet<line,polOrd> ();
+      case triangle     : return makeBaseSet<triangle,polOrd> ();
+      case quadrilateral: return makeBaseSet<quadrilateral,polOrd> ();
+      case tetrahedron  : return makeBaseSet<tetrahedron,polOrd> ();
+      case pyramid      : return makeBaseSet<pyramid,polOrd> ();
+      case prism        : return makeBaseSet<prism,polOrd> ();
+      case hexahedron   : return makeBaseSet<hexahedron,polOrd> ();
+      default: {
                std::cerr << en.geometry().type() << " This element type is not provided yet! \n";
                abort();
                return 0;
