@@ -1,6 +1,7 @@
 #ifndef __DUNE_ARRAY_HH
 #define __DUNE_ARRAY_HH
 
+
 //***********************************************************************
 //
 //  implementation of peter array
@@ -24,6 +25,8 @@ public:
 		T* operator-> () const; // Stroustrup p. 289
 		friend class Array<T>;
 	} ;
+
+
 	Iterator begin () const; 
 	Iterator end () const;
 
@@ -32,6 +35,7 @@ public:
 	Array (const Array<T>&);
 	~Array();
 	Array<T>& operator= (const Array<T>&);
+	Array<T>& operator= (const T t);
 	void realloc (int m);
 	int size () const;
 	T& operator[](int i);
@@ -44,7 +48,7 @@ private:
 
 // Iterator interface
 template<class T>
-inline Array<T>::Iterator Array<T>::begin () const
+inline typename Array<T>::Iterator Array<T>::begin () const
 {
 	Iterator tmp;  // hat Zeiger 0
 	tmp.p = p;     // Zeiger auf Feldelement 0
@@ -52,7 +56,7 @@ inline Array<T>::Iterator Array<T>::begin () const
 }
 
 template<class T>
-inline Array<T>::Iterator Array<T>::end () const
+inline typename Array<T>::Iterator Array<T>::end () const
 {
 	Iterator tmp;
 	tmp.p = &(p[n]); // Zeiger auf Feldelement NACH letztem !
@@ -149,6 +153,18 @@ inline Array<T>& Array<T>::operator= (const Array<T>& a)
 	return *this; // Gebe Referenz zurueck damit a=b=c; klappt
 }
 
+inline Array<double >& Array<double >::operator= (const double t)
+{
+	for (int i=0; i<n; i++) p[i] = t;
+}
+
+template <class T>
+inline Array<T>& Array<T>::operator= (const T t)
+{
+  //std::cout << "Array<T>::operator Warning, not implemented! \n";
+	for (int i=0; i<n; i++) p[i] = t;
+}
+
 // Indizierung
 template <class T>
 inline T& Array<T>::operator[] (int i)
@@ -165,7 +181,7 @@ inline int Array<T>::size () const
 
 // Ausgabe
 template <class T>
-ostream& operator<< (ostream& s, Array<T>& a)
+std::ostream & operator<< (std::ostream& s, Array<T>& a)
 {
 	s << "array " << a.size() << " elements = [" << std::endl;
 	for (int i=0; i<a.size(); i++)
@@ -195,14 +211,14 @@ inline bool Array<T>::Iterator::operator==
 }
 		
 template<class T>
-inline Array<T>::Iterator Array<T>::Iterator::operator++ () // prefix
+inline typename Array<T>::Iterator Array<T>::Iterator::operator++ () // prefix
 {
 	p++;  // C Zeigerarithmetik: p zeigt auf naechstes Feldelement
 	return *this;
 }
 
 template<class T>
-inline Array<T>::Iterator Array<T>::Iterator::operator++ (int) // postfix
+inline typename Array<T>::Iterator Array<T>::Iterator::operator++ (int) // postfix
 {
 	Iterator tmp = *this;
 	++*this;
