@@ -346,11 +346,6 @@ public:
   {
     this->realEntity.setLevel(level);
   }
-
-  int vx () const 
-  {
-    return 0; 
-  }
 };
 
 //**********************************************************************
@@ -406,6 +401,10 @@ public:
   
   // needed for the LevelIterator 
   ALBERTA EL_INFO *getElInfo () const;
+
+  //! return the current face/edge or vertex number 
+  int getFEVnum () const;
+
 private: 
   // methods for setting the infos from the albert mesh
   void setTraverseStack (ALBERTA TRAVERSE_STACK *travStack);
@@ -594,10 +593,8 @@ public:
   //! return the global unique index in grid , same as el_index
   int globalIndex() const ; 
 
-  int vx () const 
-  {
-    return 0;
-  } 
+  // return 0 for elements 
+  int getFEVnum () const { return 0; } 
 
   // needed for LevelIterator to compare 
   ALBERTA EL_INFO *getElInfo () const;
@@ -1428,8 +1425,8 @@ public:
   int index (const EntityType & ep) const
   {
     enum { cd = EntityType :: codimension };
-    return getIndex((grid_.template getRealEntity<cd>(ep)).getElInfo()->el
-                    ,0,Int2Type<dim-cd>());
+    const AlbertaGridEntity<cd,dim,const GridType> & en = (grid_.template getRealEntity<cd>(ep));
+    return getIndex(en.getElInfo()->el, en.getFEVnum(),Int2Type<dim-cd>());
   }
 
   template <int cd>
@@ -1481,14 +1478,17 @@ private:
   {
     enum { cd = 0 }; 
     assert(el);
-    int idx = elNumVec_[cd][ el->dof[dof_[cd]][nv_[cd]] ];
-    return idx;
+    return elNumVec_[cd][ el->dof[dof_[cd]][nv_[cd]] ];
   }
   
   enum { cd1 = (dim > 1) ? 1 : 5 };
   // codim = 0 means we get from dim-cd = dim 
   int getIndex ( const ALBERTA EL * el, int i , Int2Type<cd1> fake ) const
   {
+    enum { cd = 1 }; 
+    assert(el);
+    int idx = elNumVec_[cd][ el->dof[dof_[cd]][nv_[cd]] ];
+    //return idx;
     return 0;
   }
   
