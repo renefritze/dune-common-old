@@ -11,6 +11,12 @@ template <typename DFieldType, typename RFieldType,
 class Operator : public Mapping <DFieldType,RFieldType,DType,RType>
 {
 public:
+  //! remember template parameters for derived classes  
+  typedef DType DomainType;
+  typedef RType  RangeType;
+  typedef DFieldType DomainFieldType;
+  typedef RFieldType RangeFieldType;
+  
   //! apply operator, used by mapping 
   void apply ( const DomainType & arg, RangeType & dest ) const
   {
