@@ -17,6 +17,18 @@
 
 
 namespace SG {
+
+  /** @defgroup yaspgrid Yet Another Structured Parallel Grid
+
+  This is the basis of a parallel implementation of the dune grid interface
+  supporting codim 0 and dim.
+
+  You can also use the structured interface and write fast code.
+
+  @{
+  */
+
+
   // forward declarations
   template<int d, typename ct> class Grid;
   template<int d, typename ct> class SubGrid;
@@ -1946,6 +1958,8 @@ namespace SG {
 	s << std::endl;
 	return s;
   }
+
+/** @} end documentation group */
 
 }
 
