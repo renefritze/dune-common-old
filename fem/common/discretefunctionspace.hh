@@ -71,8 +71,8 @@ public:
   typedef GridTemp GridType;
 
   //! Constructor 
-  DiscreteFunctionSpaceInterface ( GridType & g, int ident ) : 
-   FunctionSpaceType (ident),  grid_ (g) {};
+    DiscreteFunctionSpaceInterface ( GridType & g, int ident, int level ) : 
+        FunctionSpaceType (ident),  grid_ (g), level_(level) {};
 
   //! Get base function set for given entity. 
   //! For a type of element the base function set is unique.
@@ -110,6 +110,9 @@ public:
   //! this depends also on the base function set
   int size () const { return asImp().size(); };
 
+    /** \brief Return the grid level */
+    int level () const { return level_; }
+
   //! return boundary type for given boundary id 
   BoundaryType boundaryType ( int id ) const
   {
@@ -137,6 +140,10 @@ protected:
   
   //! the corresponding Grid
   GridType & grid_ ;
+
+    //! The grid level
+    int level_;
+
 };
 
 //**************************************************************************
@@ -156,6 +163,11 @@ class DiscreteFunctionSpaceDefault
   
 public:
   // at the moment nothing
+    DiscreteFunctionSpaceDefault(GridTemp& g, int id, int level)
+        : DiscreteFunctionSpaceInterface < FunctionSpaceType , GridTemp,
+                                           DiscreteFunctionSpaceImp, BaseFunctionSetInter>(g, id, level)
+    {}
+
 private:
   //! Barton-Nackman trick 
   DiscreteFunctionSpaceImp &asImp() 
