@@ -8,6 +8,8 @@
 
 namespace Dune {
 
+
+#define DUNE_DEPRECATED 
 /** @defgroup GridCommon Grid Interface
 
   The Dune Grid module defines a general interface to a hierarchical finite element mesh.
@@ -50,30 +52,21 @@ namespace Dune {
   /*! \internal
         Used for grid I/O
   */
-    enum GridIdentifier { SGrid_Id, AlbertGrid_Id , SimpleGrid_Id, UGGrid_Id, 
-                          YaspGrid_Id , BSGrid_Id, OneDGrid_Id};
+  enum GridIdentifier { SGrid_Id, AlbertGrid_Id , SimpleGrid_Id, UGGrid_Id, 
+                        YaspGrid_Id , BSGrid_Id, OneDGrid_Id};
 
-    /*! 
-      Specify the format to store grid and vector data
-     */
-    enum FileFormatType { ascii , //!< store data in a human readable form
-                          xdr ,   //!< store data in SUN's library routines
-                                  //!< for external data representation (xdr)
-                          pgm };  //!< store data in portable graymap file format (pgm)
+  /*! 
+    Specify the format to store grid and vector data
+  */
+  enum FileFormatType { ascii , //!< store data in a human readable form
+                        xdr ,   //!< store data in SUN's library routines
+                                //!< for external data representation (xdr)
+                        pgm };  //!< store data in portable graymap file format (pgm)
 
-    /*! 
-      To specify the boundary type of an face at the boundary. 
-      This specifier should be located in a geometry class. 
-     */
-    enum BoundaryType { Neumann ,  //!< Neumann type boundary  
-                        Dirichlet, //!< Dirichlet type boundary 
-                        Periodic   //!< Periodic boundary
-                      };
-    
   enum AdaptationState { 
              NONE ,   //!< notin' to do and notin' was done 
-                                                 COARSEN, //!< entity could be coarsend in adaptation step  
-                                                 REFINED  //!< enity was refined in adaptation step
+             COARSEN, //!< entity could be coarsend in adaptation step  
+             REFINED  //!< enity was refined in adaptation step
   };
 
    
@@ -130,8 +123,10 @@ namespace Dune {
       return "front";
     case GhostEntity:
       return "ghost";
+    default: 
+      return "unknown";
     }
-  };
+  }
 
   /*! GridIndexType specifies which Index of the Entities of the grid
         should be used, i.e. global_index() or index() 
@@ -435,12 +430,15 @@ private:
 }; // end ElementDefault, dim = 0
 //****************************************************************************
 
+
 //********************************************************************
-//  BoundaryEntity
+//  --BoundaryEntity
 //
-//! First Version of a BoundaryEntity which holds some information about
-//! the boundary on an intersection with the boundary  
-//
+/*!
+   First Version of a BoundaryEntity which holds some information about
+   the boundary on an intersection with the boundary or and ghost boundary
+   cell.
+*/
 //********************************************************************  
 template<int dim , int dimworld, class ct, 
   template<int,int> class ElementImp ,
@@ -448,31 +446,14 @@ template<int dim , int dimworld, class ct,
 class BoundaryEntity 
 {
 public:
-  //! return boundary identifier 
-  BoundaryType type () 
-  { 
-    std::cerr << "WARNING: BoundaryEntity::type(): default implementation called!\n";
-    return Dirichlet; 
-  }
+  //! return id of booundary segment, any integer but != 0
+  int id () const;
 
-  int id () 
-  { 
-    std::cerr << "WARNING: BoundaryEntity::id(): default implementation called!\n";
-    return -1 ; 
-  }
-
-  //! return true if ghost cell was filled 
-  bool hasGeometry () 
-  {
-    std::cerr << "WARNING: BoundaryEntity::hasGeometry(): default implementation called!\n";
-    return false; 
-  }
+  //! return true if ghost boundary cell was generated 
+  bool hasGeometry () const;
     
-  //! return geometry of ghostcell
+  //! return geometry of ghost boundary cell
   ElementImp<dim,dimworld> & geometry ();  
-
-  //! return barycenter of ghostcell 
-  FieldVector<ct, dimworld>& outerPoint ();
 
 private:
   //!  Barton-Nackman trick 
@@ -482,10 +463,9 @@ private:
 
 //********************************************************************
 //
-// BoundaryEntityDefault 
+// --BoundaryEntityDefault 
 //
-//! Default implementations for the BoundaryEntity
-//! 
+//! Default implementations for the BoundaryEntity class.
 //******************************************************************** 
 template<int dim , int dimworld, class ct, 
   template<int,int> class ElementImp  ,
@@ -494,7 +474,7 @@ class BoundaryEntityDefault
 : public BoundaryEntity<dim,dimworld,ct,ElementImp,BoundaryEntityImp>
 {
 public:
-
+  
 private:
   //!  Barton-Nackman trick 
   BoundaryEntityImp<dim,dimworld> & asImp () 
@@ -807,8 +787,9 @@ public:
   //! return partition type attribute
   PartitionType partition_type ();
 
-  //! index of the boundary which is associated with the entity, 0 for inner entities
-  int boundaryId ();
+  //! id of the boundary which is associated with 
+  //! the entity, returns 0 for inner entities, arbitrary int otherwise 
+  int boundaryId () const ;
 
   //! geometry of this entity
   ElementImp<dim-codim,dimworld>& geometry ();
@@ -1013,20 +994,29 @@ public:
   //! define type used for coordinates in grid module
   typedef ct ctype;
 
-    /** \brief Default implementation for access to subIndex
-     *
-     * Default implementation for access to subIndex via interface method entity
-     * default is to return the index of the sub entity, is very slow, but works
-     */
-    template <int cc> int subIndex ( int i );
+  /** \brief Default implementation for access to subIndex
+   *
+   * Default implementation for access to subIndex via interface method entity
+   * default is to return the index of the sub entity, is very slow, but works
+   */
+  template <int cc> int subIndex ( int i ) const ;
+
+  /** \brief Default implementation for access to boundaryId of sub entities 
+   *
+   * Default implementation for access to boundaryId via interface method
+   * entity<codim>.boundaryId(), default is very slow, but works, can be
+   * overloaded be the actual grid implementation, works the same way as 
+   * subIndex 
+   */
+  template <int cc> int subBoundaryId  ( int i ) const ;
 
   //***************************************************************
   //  Interface for Adaptation
   //***************************************************************
-    /** \brief Marks an element for refCount refines. 
-     * If refCount is negative the element is coarsened -refCount times.
-     * \return  True if element was marked, otherwise false
-     */
+  /** \brief Marks an element for refCount refines. 
+   * If refCount is negative the element is coarsened -refCount times.
+   * \return  True if element was marked, otherwise false
+   */
   bool mark( int refCount ) { return false; } 
   
   //! return whether entity could be coarsened (COARSEN) or was refined
@@ -1035,13 +1025,6 @@ public:
   //! adaptation
   AdaptationState state () { return NONE; }
 
-    //! ???
-  EntityImp<0,dim,dimworld> newEntity () 
-  { 
-    EntityImp<0,dim,dimworld> tmp (asImp());  
-    return tmp;
-  }
-   
 private:
   //!  Barton-Nackman trick 
   EntityImp<0,dim,dimworld>& asImp () {return static_cast<EntityImp<0,dim,dimworld>&>(*this);}
@@ -1354,14 +1337,6 @@ public:
   //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ... 
   GridIdentifier type(); 
 
-  //! write Grid to file filename , only ascii supported
-  template <FileFormatType ftype>
-  bool writeGrid ( const char * filename , ctype time );
-
-  //! read Grid from file filename , only ascii supported
-  template <FileFormatType ftype>
-  bool readGrid ( const char * filename , ctype &time );
-
   /*! \internal Checking presence and format of all interface functions. With
     this method all derived classes can check their correct definition.
   */
@@ -1453,21 +1428,27 @@ public:
   bool preAdapt () { return false; }
 
   //! clean up some markers 
-  bool postAdapt() { return false; }
+  void postAdapt() {}
 
+  /** Write Grid with GridType file filename and time 
+   *
+   * This method uses the Grid Interface Method writeGrid 
+   * to actually write the grid, within this method the real file name is
+   * generated out of filename and timestep 
+   */
+  bool write (const FileFormatType ftype, const char * fnprefix , ct time=0.0, int timestep=0);
+   
+  //! get Grid from file with time and timestep , return true if ok 
+  bool read ( const char * fnprefix , ct & time , int timestep);
+    
+  //! write Grid to file filename and store time 
+  template <FileFormatType ftype>
+  bool writeGrid ( const char * filename , ctype time );
 
-    /** Write Grid with GridType file filename and time 
-     *
-     * This method use the Grid Interface Method writeGrid 
-     * is not the same 
-     */
-    bool write (const FileFormatType ftype, const char * filename , ct time=0.0, int timestep=0, 
-                bool adaptive=false , int processor = 0);
-    
-    //! get Grid from file with time and timestep , return true if ok 
-    bool read ( const char * filename , ct & time , int timestep, 
-                bool adaptive= false, int processor=0 );
-    
+  //! read Grid from file filename and also read time of grid
+  template <FileFormatType ftype>
+  bool readGrid ( const char * filename , ctype &time );
+
 protected:
     //! Barton-Nackman trick 
     GridImp<dim,dimworld>& asImp () {return static_cast<GridImp<dim,dimworld>&>(*this);}
@@ -1573,9 +1554,30 @@ private:
     
     // go down until max level
     int maxLev_;
-  };
+};
 
-
+  //! provide names for the partition types
+  inline std::string GridName(GridIdentifier type)
+  {
+    switch(type) {
+    case SGrid_Id:
+      return "SGrid";
+    case AlbertGrid_Id:
+      return "AlbertGrid";
+    case SimpleGrid_Id:
+      return "SimpleGrid";
+    case UGGrid_Id:
+      return "UGGrid";
+    case YaspGrid_Id:
+      return "YaspGrid";
+    case BSGrid_Id:
+      return "BSGrid";
+    case OneDGrid_Id:
+      return "OneDGrid";
+    default: 
+      return "unknown";
+    }
+  }
 
 /** @} */
 
