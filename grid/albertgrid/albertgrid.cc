@@ -10,7 +10,7 @@ namespace Dune
 {
 
 //#ifdef _GNUGCC
-//#define TEMPPARAM2
+#define TEMPPARAM2
 //#endif
 
 static ALBERT EL_INFO statElInfo[DIM+1];  
