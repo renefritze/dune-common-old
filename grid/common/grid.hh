@@ -640,7 +640,7 @@ public:
 
 protected:
   //! the outer normal 
-  Vec<dimworld,ct> * outerNormal_;
+  Vec<dimworld,ct> outerNormal_;
 
   //! tmp Vec for integration_element 
   Vec<dim-1,ct> tmp_;
