@@ -404,8 +404,8 @@ public:
         //! index is unique and consecutive per level and codim used for access to degrees of freedom
         int index (); 
 
-        //! so far equal to index 
-        int global_index() { return index(); }
+        //! global index is calculated from the index and grid size  
+        int global_index();
 
         //! geometry of this entity
         SElement<dim-codim,dimworld>& geometry ();
@@ -531,6 +531,9 @@ public:
 
         //! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
         SLevelIterator<0,dim,dimworld> father ();
+        //! Inter-level access to father element on coarser grid. 
+        //! Assumes that meshes are nested.
+        void father (SEntity<0,dim,dimworld> & pa); 
 
   //! return true if the entity has children 
   bool hasChildren ();
@@ -718,11 +721,8 @@ public:
         //! number of grid entities per level and codim
         int size (int level, int codim) const;
 
-        //! number of grid entities per level and codim
-        int global_size (int codim) const
-        { 
-          return size(this->maxlevel(),codim); 
-        }
+        //! number of grid entities of all level for given codim
+        int global_size (int codim) const;
 
   //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ... 
   GridIdentifier type() const; 
@@ -738,16 +738,15 @@ public:
         // these are all members specific to sgrid
 
         /*! constructor, subject to change!
-
-          \param H_: size of domain
-          \param N_: coarse grid size, #elements in one direction
+        \param H_: size of domain
+        \param N_: coarse grid size, #elements in one direction
         */
         SGrid (int* N_, sgrid_ctype* H_);
   
   //! empty constructor making grid of unit square 
         SGrid ();
 
-  //! refine mesh globally by one level
+  // refine mesh globally by one level
   void globalRefine (int refCount);
 
         //! map expanded coordinates to position
