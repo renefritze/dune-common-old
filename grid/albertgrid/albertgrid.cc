@@ -15,32 +15,10 @@ static ALBERT EL_INFO statElInfo[DIM+1];
 template<int dim> struct AlbertGridReferenceElement
 {
   enum { dimension = dim };
-  enum { type = unknown };  
   
   static AlbertGridElement<dim,dim> refelem;
   static ALBERT EL_INFO elInfo_;
-};
 
-struct AlbertGridReferenceElement<2> 
-{
-  enum { dimension = 2 };
-  enum { type = triangle };  
-
-  enum { make = true };
-  
-  static AlbertGridElement<dimension,dimension> refelem;
-  static ALBERT EL_INFO elInfo_;
-};
-
-// singleton holding reference elements
-template<>
-struct AlbertGridReferenceElement<3> 
-{ 
-  enum { dimension = 3 };
-  enum { type = tetrahedron };  
-  
-  static AlbertGridElement<dimension,dimension> refelem;
-  static ALBERT EL_INFO elInfo_;
 };
 
 // initialize static variable with bool constructor 
@@ -72,37 +50,35 @@ inline int AlbertGridElement<dim,dimworld>::mapVertices (int i) const
 template <> 
 inline int AlbertGridElement<1,2>::mapVertices (int i) const 
 {
-  // N_VERTICES (from ALBERT) = dim +1 
-  return ((face_ + 1 + i) % (dimension+1)); 
+  //std::cout << face_ << " Kante Map my Vertices!\n";
+  int vert = ((face_ + 1 + i) % (N_VERTICES)); 
+  //std::cout << vert << " Map my Vertices!\n";
+  return vert;
 }
 
 template <> 
 inline int AlbertGridElement<2,3>::mapVertices (int i) const 
 {
-  // N_VERTICES (from ALBERT) = dim +1 
-  return ((face_ + 1 + i) % (dimension+1)); 
+  return ((face_ + 1 + i) % (N_VERTICES)); 
 }
 
 // specialization for codim == 2, edges 
 template <> 
 inline int AlbertGridElement<1,3>::mapVertices (int i) const 
 {
-  // N_VERTICES (from ALBERT) = dim +1 = 4
-  return ((face_+1)+ (edge_+1) +i)% (dimension+1);
+  return ((face_+1)+ (edge_+1) +i)% (N_VERTICES);
 }
 
 template <> 
 inline int AlbertGridElement<0,2>::mapVertices (int i) const 
 {
-  // N_VERTICES (from ALBERT) = dim +1 = 3 
-  return ((face_+1)+ (vertex_+1) +i)% (dimension+1);
+  return ((face_+1)+ (vertex_+1) +i)% (N_VERTICES);
 }
 
 template <> 
 inline int AlbertGridElement<0,3>::mapVertices (int i) const 
 {
-  // N_VERTICES (from ALBERT) = dim +1 = 4
-  return ((face_+1)+ (edge_+1) +(vertex_+1) +i)% (dimension+1);
+  return ((face_+1)+ (edge_+1) +(vertex_+1) +i)% (N_VERTICES);
 }
 
 template< int dim, int dimworld>
@@ -251,8 +227,10 @@ inline bool AlbertGridElement<dim,dimworld>::
 builtGeom(ALBERT EL_INFO *elInfo, unsigned char face, 
           unsigned char edge, unsigned char vertex)
 {
+  //std::cout << " Built geom !\n";
   elInfo_ = elInfo;
   face_ = face;
+  //std::cout << face_ << " Kante !\n";
   edge_ = edge;
   vertex_ = vertex;
   volume_ = 0.0;
@@ -366,34 +344,43 @@ refelem()
   return AlbertGridReferenceElement<dim>::refelem;
 }
 
+
 template< int dim, int dimworld>
 inline Vec<dimworld,albertCtype> AlbertGridElement<dim,dimworld>:: 
 global(const Vec<dim>& local)
 {
-  ALBERT REAL *v = static_cast<ALBERT REAL *> (elInfo_->coord[0]);
-  ALBERT REAL c;
+  // checked, works 
+  
+  // we calculate interal in barycentric coordinates  
   // fake the third local coordinate via localFake
   albertCtype localFake=1.0;
-    
+  albertCtype c;
+
   c = local.read(0);
   localFake -= c;
-  
-  for (int j = 0; j < dimworld; j++)
-    globalCoord_(j) = c * v[j];
+ 
+  // the initialize 
+  // note that we have to swap the j and i 
+  // in coord(j,i) means coord_(i)(j)  
+  for(int j=0; j<dimworld; j++)
+    globalCoord_(j) = c * coord_(j,0);
       
+  // for all local coords 
   for (int i = 1; i < dim; i++)
   { 
-    v = static_cast<ALBERT REAL *> (elInfo_->coord[i]); 
     c = local.read(i);
     localFake -= c;
-    for (int j = 0; j < dimworld; j++)
-      globalCoord_(j) += c * v[j];
+    for(int j=0; j<dimworld; j++)
+      globalCoord_(j) += c * coord_(j,i);
   } 
+  
+  // for the last barycentric coord 
+  for(int j=0; j<dimworld; j++)
+    globalCoord_(j) += localFake * coord_(j,dim);
 
-  // we have allways dim+1 coords, therefore 
-  v = static_cast<ALBERT REAL *> (elInfo_->coord[dim]); 
-  for (int j = 0; j < dimworld; j++)
-    globalCoord_(j) += localFake * v[j];
+  std::cout << "*********************************\n";
+  globalCoord_.print(std::cout , 2); std::cout << "\n";
+  std::cout << "*********************************\n";
   
   return globalCoord_; 
 }
@@ -665,6 +652,7 @@ builtJacobianInverse(const Vec<dim,albertCtype>& local)
   builtinverse_ = true;
 }
 
+#if 0
 inline void AlbertGridElement<2,2>:: 
 builtJacobianInverse(const Vec<2,albertCtype>& local)
 {
@@ -775,6 +763,7 @@ builtJacobianInverse(const Vec<3,albertCtype>& local)
   builtinverse_ = true;
   return;
 }
+#endif
 
 template <>
 inline void AlbertGridElement<1,2>:: 
@@ -919,7 +908,7 @@ AlbertGridEntity < codim, dim ,dimworld >::father()
   travStack.stack_used--;
 
   AlbertGridLevelIterator <0,dim,dimworld>
-    it(travStack.elinfo_stack+travStack.stack_used);
+    it(grid_,travStack.elinfo_stack+travStack.stack_used,0,0,0,0);
   return it;
 }
 
@@ -1065,8 +1054,9 @@ AlbertGridEntity<0,2,2>::entity<2> ( int i )
 {
   std::cout << "entity<2> ,2,2 !\n";
   // we are looking at vertices 
-  enum { cc = dimension };
-  AlbertGridLevelIterator<cc,dimension,dimensionworld> 
+  //enum { cc = dimension };
+  enum { cc = 2 };
+  AlbertGridLevelIterator<cc,2,2> 
     tmp (grid_,elInfo_, grid_.indexOnLevel<cc>( elInfo_->el->dof[i][0],level_), 
          0,0,i);
   return tmp; 
@@ -1077,8 +1067,9 @@ inline AlbertGridLevelIterator<2,2,3>
 AlbertGridEntity<0,2,3>::entity<2> ( int i )
 {
   // we are looking at vertices 
-  enum { cc = dimension };
-  AlbertGridLevelIterator<cc,dimension,dimensionworld> 
+  //enum { cc = dimension };
+  enum { cc = 2 };
+  AlbertGridLevelIterator<cc,2,3> 
     tmp (grid_,elInfo_, grid_.indexOnLevel<cc>( elInfo_->el->dof[i][0],level_), 
          0,0,i);
   return tmp; 
@@ -1089,8 +1080,9 @@ inline AlbertGridLevelIterator<3,3,3>
 AlbertGridEntity<0,3,3>::entity<3> ( int i )
 {
   // we are looking at vertices 
-  enum { cc = dimension };
-  AlbertGridLevelIterator<cc,dimension,dimensionworld> 
+  enum { cc = 3 };
+  //enum { cc = dimension };
+  AlbertGridLevelIterator<cc,3,3> 
     tmp (grid_,elInfo_, grid_.indexOnLevel<cc>( elInfo_->el->dof[i][0],level_), 
          0,0,i);
   return tmp; 
@@ -1725,51 +1717,23 @@ template< int dim, int dimworld>
 inline void AlbertGridNeighborIterator<dim,dimworld>::setupVirtEn()
 {
 
-#if 0
-#if DIM > 2 
-  std::cout << "dim Formel not checked in setupVirtEn !\n ";
-  abort();
-#endif
-#endif
   // set the neighbor element as element
   neighElInfo_->el = elInfo_->neigh[neighborCount_];
 
   int vx = elInfo_->opp_vertex[neighborCount_];
-         
+  
+  /* now it's ok */
   memcpy(&(neighElInfo_->coord[vx]), &(elInfo_->opp_coord[neighborCount_]), 
          dimworld*sizeof(ALBERT REAL));
     
-#if 1    
   for(int i=1; i<dim+1; i++)
   {
     int nb = (((neighborCount_-i)%(dim+1)) +dim+1)%(dim+1);
     memcpy(&neighElInfo_->coord[(vx+i)%(dim+1)], &elInfo_->coord[nb],
             dimworld*sizeof(ALBERT REAL));
   }
-#else 
+  /* works, tested many times */
 
-  ALBERT REAL_D *elcoord = (REAL_D *) &elInfo_->coord;
-  ALBERT REAL_D *nbcoord = (REAL_D *) &neighElInfo_->coord;
-  
-  for(int j=0; j<dimworld; j++)
-    nbcoord[vx][j] = elcoord[neighborCount_][j];
-    
-  for(int i=1; i<dim+1; i++)
-  {
-    int nb = (neighborCount_-i+dim+1)%(dim+1);
-    for(int j=0; j<dimworld; j++)
-      nbcoord[(vx+i)%(dim+1)][j] = elcoord[nb][j];
-  }
-#endif
-
-#if 0
-  std::cout << "El \n";
-  ALBERT printElInfo(elInfo_);
-  std::cout << "Neigh \n";
-  ALBERT printElInfo(neighElInfo_);
-  std::cout << "--------------------------------\n";
-#endif
- 
   virtualEntity_->setElInfo(neighElInfo_);
   builtNeigh_ = true;
 }
@@ -2325,7 +2289,7 @@ inline void AlbertMarkerVector::markNewVertices(GridType &grid)
     LevelIteratorType endit = grid.template lend<0> (level);
     for(LevelIteratorType it = grid.template lbegin<0> (level); it != endit; ++it)
     {
-      for(int local=0; local<GridType::dimension+1; local++)
+      for(int local=0; local<dim+1; local++)
       { 
         int num = it->getElInfo()->el->dof[local][0];
         if( vec_[level * nvx + num] == -1 )
@@ -2903,7 +2867,7 @@ inline void AlbertGrid<dim,dimworld >::
 fillElInfo(int ichild, int actLevel , const ALBERT EL_INFO *elinfo_old, ALBERT EL_INFO *elinfo, bool hierarchical) const
 {
    
-#if 0
+#if 1
   ALBERT fill_elinfo(ichild,elinfo_old,elinfo);
 #else
       
