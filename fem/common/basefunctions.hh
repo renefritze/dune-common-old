@@ -223,7 +223,7 @@ public:
     {
       asImp().evaluate( baseFunct, jacobianDiffVar_[i] , x , tmp_ );
       for(int j=0; j<dimRow; j++)
-        phi(i,j) = tmp_(j);
+        phi(i,j) = tmp_[j];
     }
     return;
   }
