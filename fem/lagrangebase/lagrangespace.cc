@@ -8,8 +8,8 @@ namespace Dune {
 // Constructor 
 template< class FunctionSpaceType, class GridType,int polOrd, class DofManagerType >
 inline LagrangeDiscreteFunctionSpace<FunctionSpaceType,GridType,polOrd,DofManagerType>::
-LagrangeDiscreteFunctionSpace ( GridType & g, DofManagerType & dm ) :
-DiscreteFunctionSpaceType (g,id) , dm_ ( dm )
+LagrangeDiscreteFunctionSpace ( GridType & g, DofManagerType & dm , int level) :
+DiscreteFunctionSpaceType (g,id) , dm_ ( dm ) , level_ (level) 
 {
   mapper_ = 0;
   maxNumBase_ = 0;
@@ -125,9 +125,9 @@ dimensionOfValue () const
 
 template< class FunctionSpaceType, class GridType,int polOrd, class DofManagerType >
 inline int LagrangeDiscreteFunctionSpace<FunctionSpaceType,GridType,polOrd,DofManagerType>::
-size ( int level ) const
+size () const
 {
-  return mapper_->size ( level );
+  return mapper_->size ();
 }
 
 template< class FunctionSpaceType, class GridType,int polOrd, class DofManagerType >
@@ -196,7 +196,7 @@ makeBaseSet ()
 
   BaseFuncSetType * baseFuncSet = new BaseFuncSetType ( *this );
 
-  mapper_ = new LagrangeMapperType (dm_.indexSet(), baseFuncSet->getNumberOfBaseFunctions());
+  mapper_ = new LagrangeMapperType (dm_.indexSet(), baseFuncSet->getNumberOfBaseFunctions() , level_ );
 
   return baseFuncSet;
 }
