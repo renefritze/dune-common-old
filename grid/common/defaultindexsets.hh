@@ -142,7 +142,7 @@ class DefaultGridIndexSet : public DefaultGridIndexSetBase <GridType>
   template <class EntityType,int enCodim, int codim>
   struct IndexWrapper 
   {
-    static int index (EntityType & en , int num )
+    static inline int index (EntityType & en , int num )
     {
       return en.global_index();
     }
@@ -151,7 +151,7 @@ class DefaultGridIndexSet : public DefaultGridIndexSetBase <GridType>
   template <class EntityType, int codim>
   struct IndexWrapper<EntityType,codim,codim>
   {
-    static int index (EntityType & en , int num )
+    static inline int index (EntityType & en , int num )
     {
       return en.global_index();
     }
@@ -161,7 +161,7 @@ class DefaultGridIndexSet : public DefaultGridIndexSetBase <GridType>
   template <class EntityType>
   struct IndexWrapper<EntityType,0,2> 
   {
-    static int index (EntityType & en , int num )
+    static inline int index (EntityType & en , int num )
     {
       return en.template subIndex<2> (num);
     }
@@ -170,7 +170,7 @@ class DefaultGridIndexSet : public DefaultGridIndexSetBase <GridType>
   template <class EntityType>
   struct IndexWrapper<EntityType,0,3> 
   {
-    static int index (EntityType & en , int num )
+    static inline int index (EntityType & en , int num )
     {
       return en.template subIndex<3> (num);
     }
@@ -210,7 +210,7 @@ class DefaultGridIndexSet<GridType,LevelIndex>
   template <class EntityType,int enCodim, int codim>
   struct IndexWrapper 
   {
-    static int index (EntityType & en , int num )
+    static inline int index (EntityType & en , int num )
     {
       return en.index();
     }
@@ -220,7 +220,7 @@ class DefaultGridIndexSet<GridType,LevelIndex>
   template <class EntityType, int codim>
   struct IndexWrapper<EntityType,codim,codim>
   {
-    static int index (EntityType & en , int num )
+    static inline int index (EntityType & en , int num )
     {
       return en.index();
     }
@@ -230,7 +230,7 @@ class DefaultGridIndexSet<GridType,LevelIndex>
   template <class EntityType>
   struct IndexWrapper<EntityType,0,3> 
   {
-    static int index (EntityType & en , int num )
+    static inline int index (EntityType & en , int num )
     {
       return en.template subIndex<3> (num);
     }
@@ -241,7 +241,7 @@ class DefaultGridIndexSet<GridType,LevelIndex>
   template <class EntityType>
   struct IndexWrapper<EntityType,0,2> 
   {
-    static int index (EntityType & en , int num )
+    static inline int index (EntityType & en , int num )
     {
       return en.template subIndex<2> (num);
     }
@@ -253,7 +253,7 @@ class DefaultGridIndexSet<GridType,LevelIndex>
   template <class EntityType>
   struct IndexWrapper<EntityType,0,1> 
   {
-    static int index (EntityType & en , int num )
+    static inline int index (EntityType & en , int num )
     {
       return en.template subIndex<1> (num);
     }

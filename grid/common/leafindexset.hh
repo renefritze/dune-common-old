@@ -82,7 +82,7 @@ class AdaptiveLeafIndexSet : public DefaultGridIndexSetBase <GridType>
   template <class EntityType,int enCodim, int codim>
   struct IndexWrapper
   {
-    static int index (EntityType & en , const IndexArray<int> & leafIndex, int num )
+    static inline int index (EntityType & en , const IndexArray<int> & leafIndex, int num )
     {
       // this index set works only for codim = 0 at the moment
       assert(codim == 0);
@@ -98,7 +98,7 @@ class AdaptiveLeafIndexSet : public DefaultGridIndexSetBase <GridType>
   template <class EntityType>
   struct IndexWrapper<EntityType,0,2>
   {
-    static int index (EntityType & en , const IndexArray<int> & leafIndex, int num )
+    static inline int index (EntityType & en , const IndexArray<int> & leafIndex, int num )
     {
       return en.template subIndex<2> (num);
     }
@@ -107,7 +107,7 @@ class AdaptiveLeafIndexSet : public DefaultGridIndexSetBase <GridType>
   template <class EntityType>
   struct IndexWrapper<EntityType,0,3>
   {
-    static int index (EntityType & en , const IndexArray<int> & leafIndex, int num )
+    static inline int index (EntityType & en , const IndexArray<int> & leafIndex, int num )
     {
       return en.template subIndex<3> (num);
     }
