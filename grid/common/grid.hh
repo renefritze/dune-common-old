@@ -1108,6 +1108,7 @@ template<int dim,
 class GridDefault : public Grid <dim,dimworld,ct,GridImp,LevelIteratorImp,EntityImp> 
 {
 public:
+
   //! remember the types of template parameters
   template <int codim> 
   struct Traits 
@@ -1130,15 +1131,6 @@ public:
     //! Please doc me!
     class LeafIterator;
     
-    //! A grid exports its dimension
-    enum { dimension=dim };
-    
-    //! A grid knowns the dimension of the world
-    enum { dimensionworld=dimworld };
-    
-    //! Define type used for coordinates in grid module
-    typedef ct ctype;
-
   //! return LeafIterator which points to the first entity in maxLevel
   LeafIterator leafbegin(int maxLevel);
 
