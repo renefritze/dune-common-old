@@ -77,7 +77,7 @@ public:
     return ptr_;
   }
   
-private:
+//private:
   //! if copy is made than one more Reference exists  
   AutoPointer<Pointer> & operator = (const AutoPointer<Pointer> & copy)
   {
