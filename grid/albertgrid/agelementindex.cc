@@ -45,7 +45,7 @@ static void removeIndexManager_elmem_cc()
   Albert_global_im = NULL;
 }
 
-static const int newMemSize = 1000;
+static const int newMemSize = 10000;
 
 static ELNUM_STR * getNewElNumMem() 
 {
@@ -70,7 +70,9 @@ static int get_elIndex()
 
   if(actNum->count <= 0)
   {
-    actNum = actNum->next; 
+    while( actNum && ( actNum->count <= 0 ) )
+      actNum = actNum->next; 
+
     if(!actNum) 
     {
       int ind = Albert_global_im->el_index;
@@ -79,8 +81,8 @@ static int get_elIndex()
     }
   }
  
-  //printf("get Num from Stack \n");
   actNum->count--;
+  //printf("get Num from Stack %d \n",actNum->count);
   assert((actNum->count >=0) && (actNum->count < newMemSize));
 
   return actNum->elNumVec[actNum->count];
