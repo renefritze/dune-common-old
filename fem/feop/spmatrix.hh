@@ -119,7 +119,7 @@ public:
     void clear();
 
     //! Deep copy operator
-    SparseRowMatrix<T>& SparseRowMatrix<T>::operator=(const SparseRowMatrix<T>& other);
+    SparseRowMatrix<T>& operator=(const SparseRowMatrix<T>& other);
 
     /*******************************/
     /*  Access and info functions  */
