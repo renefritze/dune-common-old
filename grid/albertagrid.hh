@@ -414,6 +414,10 @@ private:
   void setTraverseStack (ALBERTA TRAVERSE_STACK *travStack);
   void setElInfo (ALBERTA EL_INFO *elInfo, int face,
                   int edge, int vertex );
+
+  // set level of entity 
+  void setLevel ( int newLevel ); 
+  
   // private Methods
   void makeDescription();
 
@@ -713,7 +717,8 @@ class AlbertaGridMakeableBoundaryEntity :
 {
 public:
   AlbertaGridMakeableBoundaryEntity () : 
-    GridImp::template codim<0>::BoundaryEntity (AlbertaGridBoundaryEntity<GridImp>()) {};
+    GridImp::template codim<0>::BoundaryEntity 
+      (AlbertaGridBoundaryEntity<GridImp>()) {};
   // set elInfo
   void setElInfo(ALBERTA EL_INFO * elInfo, int nb)
   {
@@ -807,6 +812,11 @@ public:
   AlbertaGridIntersectionIterator(const GridImp & grid,
                                   int level,
                                   ALBERTA EL_INFO *elInfo);
+  //! The copy constructor  
+  AlbertaGridIntersectionIterator(const AlbertaGridIntersectionIterator<GridImp> & org);
+
+  //! assignment operator, implemented because default does not the right thing 
+  AlbertaGridIntersectionIterator<GridImp> & operator = (const AlbertaGridIntersectionIterator<GridImp> & org);
   
   //! The Destructor 
   ~AlbertaGridIntersectionIterator();
@@ -1012,6 +1022,9 @@ private:
 
   //! level :)
   int level_;
+  
+  //! level :)
+  int enLevel_;
   
   mutable EntityImp virtualEntity_; 
     
