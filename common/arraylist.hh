@@ -275,7 +275,7 @@ namespace Dune
 
 	inline ArrayListIterator<MemberType,N,A>& operator=(const ArrayListIterator<MemberType,N,A>& other);
 
-	inline ArrayListIterator() : position_(0), list_(list_)
+	inline ArrayListIterator() : position_(0)
 	{}
 
     private:
@@ -359,7 +359,7 @@ namespace Dune
 
 	inline const ConstArrayListIterator<MemberType,N,A>& operator=(const ConstArrayListIterator<MemberType,N,A>& other);
 	
-	inline ConstArrayListIterator() : position_(0), list_(list_)
+	inline ConstArrayListIterator() : position_(0)
 	{}
 
 	inline ConstArrayListIterator(const ArrayListIterator<MemberType,N,A>& other);
