@@ -80,7 +80,7 @@ private:
     }
 
   // private Members
-    mutable UGMakeableEntity<0,GridImp::dimension,GridImp> virtualEntity_;
+    mutable UGMakeableEntity<codim,GridImp::dimension,GridImp> virtualEntity_;
 
   //! element number 
   int elNum_; 
