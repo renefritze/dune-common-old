@@ -114,6 +114,9 @@ public:
   void addScaled (int level, const DFAdapt <DiscreteFunctionSpaceType> & g,
       const RangeFieldType &scalar); 
   
+  void addScaled (const DFAdapt <DiscreteFunctionSpaceType> & g,
+      const RangeFieldType &scalar); 
+  
   template <class EntityType>
   void addScaledLocal (EntityType &en, 
       const DFAdapt <DiscreteFunctionSpaceType> & g,
@@ -326,6 +329,9 @@ public:
 
   //! set dof iterator back to begin , for const and not const Iterators
   void reset () const;
+
+  DofType * vector() { return dofArray_.vector(); }
+  const DofType * vector() const { return dofArray_.vector(); }
   
 private: 
   //! the array holding the dofs 
