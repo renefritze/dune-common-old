@@ -7,6 +7,7 @@
 
 #include "ugtypes.hh"
 #include <dune/common/fixedarray.hh>
+#include <dune/common/fmatrix.hh>
 
 namespace Dune {
 
@@ -148,7 +149,7 @@ public:
     UGCtype integrationElement (const FieldVector<UGCtype, mydim>& local) const;
 
     //! The Jacobian matrix of the mapping from the reference element to this element
-    const Mat<mydim,mydim>& jacobianInverse (const FieldVector<UGCtype, mydim>& local) const;
+    const FieldMatrix<UGCtype, mydim,mydim>& jacobianInverse (const FieldVector<UGCtype, mydim>& local) const;
 
 
 private:
@@ -163,7 +164,7 @@ private:
     mutable FixedArray<FieldVector<UGCtype, coorddim>, (mydim==2) ? 4 : 8> coord_;
 
     //! The jacobian inverse
-    mutable Mat<coorddim,coorddim> jac_inverse_;
+    mutable FieldMatrix<UGCtype,coorddim,coorddim> jac_inverse_;
 
   //! storage for global coords 
     FieldVector<UGCtype, coorddim> globalCoord_;
@@ -235,7 +236,7 @@ public:
     UGCtype integrationElement (const FieldVector<UGCtype, 2>& local) const;
 
   //! can only be called for dim=dimworld!
-    const Mat<2,2>& jacobianInverse (const FieldVector<UGCtype, 2>& local) const;
+    const FieldMatrix<UGCtype,2,2>& jacobianInverse (const FieldVector<UGCtype, 2>& local) const;
 
 private:
 
@@ -254,7 +255,7 @@ private:
     mutable FixedArray<FieldVector<UGCtype, 3>, 4> coord_;
 
     //! The jacobian inverse
-    mutable Mat<3,3> jac_inverse_;
+    mutable FieldMatrix<UGCtype,3,3> jac_inverse_;
 
   //! storage for global coords 
     FieldVector<UGCtype, 4> globalCoord_;
@@ -326,7 +327,7 @@ public:
     UGCtype integrationElement (const FieldVector<UGCtype, 1>& local) const;
 
   //! can only be called for dim=dimworld!
-    const Mat<1,1>& jacobianInverse (const FieldVector<UGCtype, 1>& local) const;
+    const FieldMatrix<UGCtype,1,1>& jacobianInverse (const FieldVector<UGCtype, 1>& local) const;
 
 private:
 
@@ -340,17 +341,6 @@ private:
 
   //! the vertex coordinates 
     FixedArray<FieldVector<UGCtype, 2>, 2> coord_;
-
-#if 0
-    //! The jacobian inverse
-    Mat<2,2> jac_inverse_;
-
-  //! storage for global coords 
-    FieldVector<UGCtype, 2> globalCoord_;
-
-  //! storage for local coords
-    FieldVector<UGCtype, 1> localCoord_;
-#endif
 
 };
 

@@ -1,5 +1,5 @@
-#ifndef __DUNE__LAGRANGEBASE_HH__
-#define __DUNE__LAGRANGEBASE_HH__
+#ifndef DUNE_LAGRANGEBASE_HH
+#define DUNE_LAGRANGEBASE_HH
 
 #include <dune/grid/common/grid.hh>
 
@@ -58,7 +58,6 @@ public:
   /** \todo Please doc me! */
   typedef typename DofManagerType::MemObjectType MemObjectType;
 
-  // for gcc ( gcc sucks )
     /** \todo Please doc me! */
   typedef typename FunctionSpaceType::Domain     Domain;  
     /** \todo Please doc me! */
@@ -193,7 +192,6 @@ public:
   
   typedef typename DofManagerType::MemObjectType MemObjectType;
 
-  // for gcc ( gcc sucks )
   typedef typename FunctionSpaceType::Domain     Domain;  
   typedef typename FunctionSpaceType::Range      Range;  
   typedef typename FunctionSpaceType::RangeField DofType;  
@@ -718,7 +716,7 @@ public:
     enum { dim = EntityType::dimension };
     const FastBaseFunctionSetType & baseSet = getBaseFunctionSet(en);  
     
-    Mat<dim,dim> & inv =
+    FieldMatrix<double,dim,dim> & inv =
       en.geometry().Jacobian_inverse(local);
     baseSet.eval( baseFunc , local , ret);
     ret = inv * ret;
@@ -733,7 +731,7 @@ public:
     enum { dim = EntityType::dimension };
     const FastBaseFunctionSetType & baseSet = getBaseFunctionSet(en);  
     
-    Mat<dim,dim> & inv =
+    FieldMatrix<double,dim,dim> & inv =
       en.geometry().Jacobian_inverse(quad.point(quadPoint));
     baseSet.eval( baseFunc , quad, quadPoint , ret);
     ret = inv * ret;
@@ -936,7 +934,7 @@ public:
     enum { dim = EntityType::dimension };
     const FastBaseFunctionSetType & baseSet = getBaseFunctionSet(en);  
     
-    Mat<dim,dim> & inv =
+    FieldMatrix<double,dim,dim> & inv =
       en.geometry().Jacobian_inverse(local);
     baseSet.eval( baseFunc , local , ret);
     ret = inv * ret;
@@ -951,7 +949,7 @@ public:
     enum { dim = EntityType::dimension };
     const FastBaseFunctionSetType & baseSet = getBaseFunctionSet(en);  
     
-    Mat<dim,dim> & inv =
+    FieldMatrix<double,dim,dim> & inv =
       en.geometry().Jacobian_inverse(quad.point(quadPoint));
     baseSet.eval( baseFunc , quad, quadPoint , ret);
     ret = inv * ret;
