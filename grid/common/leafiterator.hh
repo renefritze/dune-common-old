@@ -107,7 +107,11 @@ public:
         if (hit == hend)
         {
           ++lit;
-          if (lit != lend)
+          if (lit == lend)
+          {
+            break;
+          }
+          else
           {
             hit = lit->hbegin(maxlevel);
             hend = lit->hend(maxlevel);
