@@ -540,7 +540,7 @@ inline albertCtype AlbertGridElement<2,2>::elVolume () const
 {
   enum { dim = 2 };
   enum { dimworld = 2 };
-  const albertCtype volFac = 0.5;
+  //const albertCtype volFac = 0.5;
   REAL        e1[dimworld], e2[dimworld], det;
   const REAL  *v0;
 
@@ -553,8 +553,9 @@ inline albertCtype AlbertGridElement<2,2>::elVolume () const
 
   det = e1[0]*e2[1] - e1[1]*e2[0];
   det = ABS(det);
-
-  return volFac*det;
+  
+  //return volFac*det;
+  return det;
 }
 
 // volume of one Element, here therahedron  
@@ -563,7 +564,7 @@ inline albertCtype AlbertGridElement<3,3>::elVolume () const
 {
   enum { dim = 3 };
   enum { dimworld = 3 };
-  const albertCtype volFac = 1.0/6.0;
+  //const albertCtype volFac = 1.0/6.0;
 
   REAL        e1[dimworld], e2[dimworld], e3[dimworld], det;
   const REAL  *v0;
@@ -581,7 +582,8 @@ inline albertCtype AlbertGridElement<3,3>::elVolume () const
         + e1[2] * (e2[0]*e3[1] - e2[1]*e3[0]);
   det = ABS(det);
 
-  return volFac*det;
+  //return volFac*det;
+  return det;
 }
   
 template< int dim, int dimworld>
@@ -1464,17 +1466,22 @@ template< int dim, int dimworld>
 inline void AlbertGridIntersectionIterator<dim,dimworld>::freeObjects ()
 {
   if(manageObj_) 
-    grid_->entityProvider_.freeObjectEntity(manageObj_);
+    manageObj_ = grid_->entityProvider_.freeObjectEntity(manageObj_);
   
   if(manageInterEl_) 
-    grid_->interSelfProvider_.freeObjectEntity(manageInterEl_);
+    manageInterEl_ = grid_->interSelfProvider_.freeObjectEntity(manageInterEl_);
   
   if(manageNeighEl_) 
-    grid_->interNeighProvider_.freeObjectEntity(manageNeighEl_);
+    manageNeighEl_ = grid_->interNeighProvider_.freeObjectEntity(manageNeighEl_);
 
-  if(boundaryEntity_) delete boundaryEntity_;
+  if(boundaryEntity_) 
+  {
+    delete boundaryEntity_;
+    boundaryEntity_ = NULL;
+  }
 
-  if(manageNeighInfo_) elinfoProvider.freeObjectEntity(manageNeighInfo_);
+  if(manageNeighInfo_) 
+    manageNeighInfo_ = elinfoProvider.freeObjectEntity(manageNeighInfo_);
 }
 
 template< int dim, int dimworld>
@@ -1533,6 +1540,7 @@ inline void AlbertGridIntersectionIterator<dim,dimworld>::makeBegin
   level_ = level;
   elInfo_ = elInfo;
   neighborCount_ = 0;
+  builtNeigh_ = false; 
 
   // remove old objects 
   freeObjects();
@@ -1549,6 +1557,7 @@ inline void AlbertGridIntersectionIterator<dim,dimworld>::makeEnd
   level_ = level;
   elInfo_ = NULL;
   neighborCount_ = dim+1;
+  builtNeigh_ = false; 
   
   // remove old objects 
   freeObjects();
@@ -2992,7 +3001,7 @@ inline void AlbertGrid<dim,dimworld >::
 fillElInfo(int ichild, int actLevel , const ALBERT EL_INFO *elinfo_old, ALBERT EL_INFO *elinfo, bool hierarchical) const
 {
    
-#if 1
+#if 0
   ALBERT fill_elinfo(ichild,elinfo_old,elinfo);
 #else
       

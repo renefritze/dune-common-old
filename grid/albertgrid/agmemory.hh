@@ -40,10 +40,10 @@ public:
   ObjectEntity *getNewObjectEntity(const FuncSpaceType &f, DofVecType &d);
   
   // i.e. get pointer to element 
-  ObjectEntity *getNewObjectEntity();
+  ObjectEntity * getNewObjectEntity();
 
-  // free, move element to stack 
-  void freeObjectEntity (ObjectEntity *obj);
+  // free, move element to stack, returns NULL 
+  ObjectEntity * freeObjectEntity (ObjectEntity *obj);
 
 private:
   ObjectEntity  *freeEntity_;
@@ -135,10 +135,12 @@ inline MemoryProvider<Object>::~MemoryProvider()
 }
 
 template <class Object>
-inline void MemoryProvider<Object>::freeObjectEntity(ObjectEntity *obj)
+inline MemoryProvider<Object>::ObjectEntity *
+MemoryProvider<Object>::freeObjectEntity(ObjectEntity *obj)
 {
   obj->next = freeEntity_;
   freeEntity_ = obj;
+  return NULL;
 }
 
 template <class Object>
