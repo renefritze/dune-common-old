@@ -75,7 +75,7 @@ public:
   int corners ();
 
   //! access to coordinates of corners. Index is the number of the corner 
-    FieldVector<bs_ctype, dimworld>& operator[] (int i);
+  FieldVector<bs_ctype, dimworld>& operator[] (int i);
 
   /*! return reference element corresponding to this element. If this is
     a reference element then self is returned.
@@ -84,14 +84,14 @@ public:
 
   //! maps a local coordinate within reference element to 
   //! global coordinate in element 
-    FieldVector<bs_ctype, dimworld> global (const FieldVector<bs_ctype, dim>& local);
+  FieldVector<bs_ctype, dimworld> global (const FieldVector<bs_ctype, dim>& local);
   
   //! maps a global coordinate within the element to a 
   //! local coordinate in its reference element
-    FieldVector<bs_ctype, dim> local (const FieldVector<bs_ctype, dimworld>& global);
+  FieldVector<bs_ctype, dim> local (const FieldVector<bs_ctype, dimworld>& global);
   
   //! returns true if the point in local coordinates is inside reference element
-    bool checkInside(const FieldVector<bs_ctype, dim>& local);
+  bool checkInside(const FieldVector<bs_ctype, dim>& local);
 
   /*! 
     Copy from grid.hh:
