@@ -118,13 +118,6 @@ public ElementDefault <dim,dimworld,albertCtype,AlbertGridElement>
 { 
   friend class AlbertGridBoundaryEntity<dim,dimworld>;
 public:
-#if 0
-  //! know dimension
-  enum { dimension=dim };
-
-  //! know dimension of world
-  enum { dimensionworld=dimworld };
-#endif
 
   //! know dimension of world
   enum { dimbary=dim+1};
@@ -156,8 +149,8 @@ public:
   //! local coordinate in its reference element
   Vec<dim,albertCtype>& local (const Vec<dimworld,albertCtype>& global);
   
-  //! returns true if the point is in the current element
-  bool checkInside(const Vec<dimworld,albertCtype> &global);
+  //! returns true if the point in local coordinates is inside reference element
+  bool checkInside(const Vec<dim,albertCtype>& local);
 
   /*! 
     Copy from sgrid.hh:
@@ -1065,7 +1058,7 @@ private:
   bool wasChanged_; 
   
   // number of entitys of each level an codim 
-  Array<int> size_;
+  mutable Array<int> size_;
 
   // remember on which level an ALBERT EL lives, is needed for the new
   // fillElInfo method that takes the level of an element into account
