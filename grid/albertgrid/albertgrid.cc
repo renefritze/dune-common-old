@@ -145,7 +145,7 @@ makeEmptyElInfo()
   return elInfo;
 }
 
-
+template <>
 inline void AlbertGridElement<3,3>:: 
 makeRefElemCoords()
 {
@@ -185,6 +185,7 @@ makeRefElemCoords()
 #endif
 }
 
+template <> 
 inline void AlbertGridElement<2,2>:: 
 makeRefElemCoords()
 {
@@ -208,6 +209,7 @@ makeRefElemCoords()
     
 }
 
+template <> 
 inline void AlbertGridElement<1,1>:: 
 makeRefElemCoords()
 {
@@ -273,6 +275,7 @@ builtGeom(ALBERT EL_INFO *elInfo, unsigned char face,
 
 
 // specialization yields speed up, because vertex_ .. is not copied 
+template <>
 inline bool AlbertGridElement<2,2>:: 
 builtGeom(ALBERT EL_INFO *elInfo, unsigned char face, 
           unsigned char edge, unsigned char vertex)
@@ -296,6 +299,7 @@ builtGeom(ALBERT EL_INFO *elInfo, unsigned char face,
   return false;
 }
 
+template <>
 inline bool AlbertGridElement<3,3>:: 
 builtGeom(ALBERT EL_INFO *elInfo, unsigned char face, 
           unsigned char edge, unsigned char vertex)
@@ -431,6 +435,7 @@ localBary(const Vec<dimworld>& global)
   return tmp;
 }
 
+template <>
 inline Vec<3> AlbertGridElement<2,2>:: 
 localBary(const Vec<2>& global)
 {
@@ -484,7 +489,7 @@ localBary(const Vec<2>& global)
   return lambda;
 }
 
-//template< int dim, int dimworld>
+template <>
 inline Vec<4> AlbertGridElement<3,3>:: 
 localBary(const Vec<3>& global)
 {
@@ -558,6 +563,8 @@ integration_element (const Vec<dim,albertCtype>& local)
   builtJacobianInverse(local);
   return volume_;
 }
+
+template <>
 inline Mat<1,1>& AlbertGridElement<1,2>:: 
 Jacobian_inverse (const Vec<1,albertCtype>& local)
 {
@@ -598,6 +605,7 @@ builtJacobianInverse(const Vec<dim,albertCtype>& local)
   builtinverse_ = true;
 }
 
+template <>
 inline void AlbertGridElement<1,2>:: 
 builtJacobianInverse(const Vec<1,albertCtype>& local)
 {
@@ -817,7 +825,7 @@ inline int AlbertGridEntity<0,dim,dimworld>::count ()
 }
 //! specialization only for codim == 2 , edges, 
 //! a tetrahedron has always 6 edges 
-template <> 
+template <> template <>
 inline int AlbertGridEntity<0,3,3>::count<2> ()
 {
   return 6;
@@ -827,8 +835,28 @@ inline int AlbertGridEntity<0,3,3>::count<2> ()
 template <int dim, int dimworld> template <int cc>
 inline int AlbertGridEntity<0,dim,dimworld>::subIndex ( int i )
 {
-  assert(cc == dim);
-  return grid_.template indexOnLevel<dim>(elInfo_->el->dof[i][0],level_);
+  return entity<cc>(i)->index();
+}
+
+// subIndex 
+template <> template <>
+inline int AlbertGridEntity<0,2,2>::subIndex<2> ( int i )
+{
+  return grid_.indexOnLevel<2>(elInfo_->el->dof[i][0],level_);
+}
+
+// subIndex 
+template <> template <>
+inline int AlbertGridEntity<0,2,3>::subIndex<2> ( int i )
+{
+  return grid_.indexOnLevel<2>(elInfo_->el->dof[i][0],level_);
+}
+
+// subIndex 
+template <> template <>
+inline int AlbertGridEntity<0,3,3>::subIndex<3> ( int i )
+{
+  return grid_.indexOnLevel<3>(elInfo_->el->dof[i][0],level_);
 }
 
 // default is faces 
@@ -841,26 +869,26 @@ AlbertGridEntity<0,dim,dimworld>::entity ( int i )
   return tmp;
 }
 
-template <>
+template <> template <>
 inline AlbertGridLevelIterator<2,3,3> 
 AlbertGridEntity<0,3,3>::entity<2> ( int i )
 {
-  enum { cc = 2 };
-  int num = grid_.indexOnLevel<cc>(globalIndex() ,level_);
+  //enum { cc = 2 };
+  int num = grid_.indexOnLevel<2>(globalIndex() ,level_);
   if(i < 3)
   { // 0,1,2 
-    AlbertGridLevelIterator<cc,3,3> tmp (grid_,elInfo_,num, 0,i,0);
+    AlbertGridLevelIterator<2,3,3> tmp (grid_,elInfo_,num, 0,i,0);
     return tmp;
   }  
   else
   { // 3,4,5
-    AlbertGridLevelIterator<cc,3,3> tmp (grid_,elInfo_,num, i-2,1,0);
+    AlbertGridLevelIterator<2,3,3> tmp (grid_,elInfo_,num, i-2,1,0);
     return tmp;
   }
 }
 
 // specialization for vertices 
-template <>
+template <> template <>
 inline AlbertGridLevelIterator<2,2,2> 
 AlbertGridEntity<0,2,2>::entity<2> ( int i )
 {
@@ -873,7 +901,7 @@ AlbertGridEntity<0,2,2>::entity<2> ( int i )
   return tmp; 
 }
 // specialization for vertices 
-template <>
+template <> template <>
 inline AlbertGridLevelIterator<2,2,3> 
 AlbertGridEntity<0,2,3>::entity<2> ( int i )
 {
@@ -885,7 +913,7 @@ AlbertGridEntity<0,2,3>::entity<2> ( int i )
   return tmp; 
 }
 // specialization for vertices 
-template <>
+template <> template <>
 inline AlbertGridLevelIterator<3,3,3> 
 AlbertGridEntity<0,3,3>::entity<3> ( int i )
 {
@@ -942,8 +970,7 @@ template< int dim, int dimworld>
 inline AlbertGridElement<dim,dimworld>& 
 AlbertGridEntity < 0, dim ,dimworld >::geometry()
 {
-  if(!builtgeometry_) 
-    std::cout << "AlbertGridEntity<0,dim,dimworld>::geometry(): Warning, geometry has not been built! \n";
+  assert(builtgeometry_ == true);
   return geo_;
 }
 
@@ -1225,9 +1252,9 @@ inline AlbertGridNeighborIterator<dim,dimworld>::~AlbertGridNeighborIterator ()
 template< int dim, int dimworld>
 inline AlbertGridNeighborIterator<dim,dimworld>::
 AlbertGridNeighborIterator(AlbertGrid<dim,dimworld> &grid, int level) : 
-grid_(grid), level_ (level) , virtualEntity_ (NULL) 
+grid_(grid), level_ (level) , neighborCount_ (dim+1), virtualEntity_ (NULL) 
   , fakeNeigh_ (NULL) 
-  , neighGlob_ (NULL) , elInfo_ (NULL) , neighborCount_ (dim+1) 
+  , neighGlob_ (NULL) , elInfo_ (NULL)  
   , manageObj_ (NULL) 
   , manageInterEl_ (NULL) 
   , manageNeighEl_ (NULL) 
@@ -1401,6 +1428,7 @@ outer_normal()
   return outerNormal_; 
 }
 
+template <>
 inline Vec<2,albertCtype>& AlbertGridNeighborIterator<2,2>:: 
 outer_normal()
 {
@@ -1413,6 +1441,7 @@ outer_normal()
   return outerNormal_; 
 }
 
+template <>
 inline Vec<3,albertCtype>& AlbertGridNeighborIterator<3,3>:: 
 outer_normal()
 {
@@ -1584,16 +1613,19 @@ goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 }
 
 // specializations for codim 1, go next face
+template <>
 inline ALBERT EL_INFO * AlbertGridLevelIterator<1,2,2>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
   return goNextFace(stack,elinfo_old);
 }
+template <>
 inline ALBERT EL_INFO * AlbertGridLevelIterator<1,2,3>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
   return goNextFace(stack,elinfo_old);
 }
+template <>
 inline ALBERT EL_INFO * AlbertGridLevelIterator<1,3,3>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
@@ -1602,6 +1634,7 @@ goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 
 // specialization for codim 2, if dim > 2, go next edge, 
 // only if dim == dimworld == 3
+template <>
 inline ALBERT EL_INFO * AlbertGridLevelIterator<2,3,3>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
@@ -1609,16 +1642,19 @@ goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 }
 
 // specialization for codim == dim , go next vertex 
+template <>
 inline ALBERT EL_INFO * AlbertGridLevelIterator<2,2,2>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
   return goNextVertex(stack,elinfo_old);
 }
+template <>
 inline ALBERT EL_INFO * AlbertGridLevelIterator<2,2,3>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
   return goNextVertex(stack,elinfo_old);
 }
+template <>
 inline ALBERT EL_INFO * AlbertGridLevelIterator<3,3,3>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
@@ -2408,7 +2444,7 @@ writeGridUSPM ( const char * filename, double time , int level)
   return false;
 }
 
-
+template <>
 inline bool AlbertGrid <2,2>::
 writeGridUSPM ( const char * filename, double time , int level)
 {
@@ -2508,6 +2544,7 @@ writeGridUSPM ( const char * filename, double time , int level)
   return true;
 }
 
+template <>
 inline bool AlbertGrid<3,3>::
 writeGridUSPM ( const char * filename, double time , int level)
 {
