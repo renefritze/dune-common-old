@@ -31,7 +31,7 @@ inline SElement<dim,dimworld>::SElement (bool b)
 
 	// copy arguments
 	s = 0.0;
-	for (int j=0; j<dim; j++) A(j) = Vec<dimworld,sgrid_ctype>(j); // make unit vectors
+	for (int j=0; j<dim; j++) A(j) = Vec<dimworld,sgrid_ctype>(j,1.0); // make unit vectors
 
 	// make corners
 	for (int i=0; i<(1<<dim); i++) // there are 2^d corners
@@ -226,7 +226,7 @@ static inline Tupel<int,n>& coarsen (Tupel<int,n>& in)
 template<int codim, int dim, int dimworld>
 inline SEntityBase<codim,dim,dimworld>::SEntityBase (SGrid<dim,dimworld>& _grid, int _l, int _id) : geo(true)
 {
-    grid = &_grid;
+  grid = &_grid;
 	l = _l;
 	id = _id;
 	z = grid->z(_l,_id,codim);
