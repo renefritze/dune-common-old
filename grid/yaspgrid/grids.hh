@@ -1,5 +1,5 @@
-#ifndef __SG_GRIDS_HH__
-#define __SG_GRIDS_HH__
+#ifndef __DUNE_GRIDS_HH__
+#define __DUNE_GRIDS_HH__
 
 // C++ includes
 #include<iostream>
@@ -16,7 +16,7 @@
 #include"dune/common/array.hh"
 
 
-namespace SG {
+namespace Dune {
 
   /** @defgroup yaspgrid Yet Another Structured Parallel Grid
 
