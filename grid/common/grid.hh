@@ -70,8 +70,9 @@ namespace Dune {
                         Periodic   //!< Periodic boundary
                       };
     
-  enum AdaptationState { NONE ,   //!< notin' to do and notin' was done 
-						 COARSEN, //!< entity could be coarsen in adaptation step  
+  enum AdaptationState { 
+             NONE ,   //!< notin' to do and notin' was done 
+						 COARSEN, //!< entity could be coarsend in adaptation step  
 						 REFINED  //!< enity was refined in adaptation step
   };
 
