@@ -40,6 +40,7 @@ public:
   //! need virtual desctructor for deleting the real objects. 
   virtual ~ObjPointerStorage ()
   {
+    //std::cout << "delete " << item_ << "\n";
     if(item_) delete item_; item_ = 0;
   }
 
