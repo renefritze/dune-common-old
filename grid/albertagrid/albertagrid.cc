@@ -376,7 +376,7 @@ inline int AlbertaGridGeometry<mydim,cdim,GridImp>::corners() const
 
 ///////////////////////////////////////////////////////////////////////
 template <int mydim, int cdim, class GridImp>
-inline FieldVector<albertCtype, cdim>& AlbertaGridGeometry<mydim,cdim,GridImp>:: 
+inline const FieldVector<albertCtype, cdim>& AlbertaGridGeometry<mydim,cdim,GridImp>:: 
 operator [](int i) const
 {
   return coord_[i];

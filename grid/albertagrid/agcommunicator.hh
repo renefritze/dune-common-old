@@ -32,7 +32,6 @@ typedef BernhardSchuppGrid :: ObjectStream AlbertaObjectStream;
 
 namespace Dune {
 
- static int cycle_ = 0;
 
   enum ObjectId { BEGINELEMENT = -665 , ENDOFSTREAM = -666 , REFINEEL = 1 , STOPHERE = 0 };
 
@@ -75,6 +74,8 @@ struct MPIType
 template <> struct MPIType<double> { enum { MpiType = MPI_DOUBLE }; };
 template <> struct MPIType<int>    { enum { MpiType = MPI_INT    }; };
 
+static int cycle_ = 0;
+ 
 template <class GridType, class DofManagerType>
 class AlbertGridCommunicator : public CommunicatorInterface<DofManagerType>
 {
