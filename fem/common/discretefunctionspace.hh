@@ -14,6 +14,8 @@ namespace Dune{
   @{
  */
 
+enum DFSpaceIdentifier {  LagrangeSpace_id , DGSpace_id , RaviartThomasSpace_id };
+    
  
 //**************************************************************************
 //
