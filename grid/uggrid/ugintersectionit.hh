@@ -63,7 +63,7 @@ public:
   bool neighbor () const;
 
   //! return information about the Boundary 
-  UGGridBoundaryEntity<GridImp> & boundaryEntity (); 
+    const UGGridBoundaryEntity<GridImp> & boundaryEntity () const;
       
   //! intersection of codimension 1 of this neighbor with element where
   //! iteration started. 
