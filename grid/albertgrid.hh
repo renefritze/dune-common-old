@@ -1,5 +1,3 @@
-// $Id$
-
 #ifndef DUNE_ALBERTGRID_HH
 #define DUNE_ALBERTGRID_HH
 
@@ -8,12 +6,13 @@
 #include "../common/Stack.hh"
 #include "common/grid.hh"
 
+
 #ifdef __ALBERTNAME__
 
 #define ALBERT Albert:: 
 namespace Albert 
 {
-  
+
 #else 
 #define ALBERT
 #endif
@@ -41,6 +40,7 @@ typedef struct albert_leaf_data
   //S_CHAR reached[N_VERTICES]; // N_NEIGH ? Element durchlaufen ? 
 } AlbertLeafData;
 
+void initialReached(const EL_INFO *elInfo);
 void setReached(const EL_INFO *elInfo);
 void markNewVertices(const EL_INFO *elInfo);
 void AlbertLeafRefine(EL *parent, EL *child[2]);
@@ -57,16 +57,22 @@ const BOUNDARY *initBoundary(MESH *Spmesh, int bound);
 namespace Dune 
 {
 
+
+typedef ALBERT REAL agTYPE;
+
+// Class to mark the Vertices on the leaf level
+// to visit every vertex only once
 class AlbertMarkerVector 
 {
   int *vec_;
   int numberOfEntries_;
 public:
   AlbertMarkerVector ();
+  ~AlbertMarkerVector ();
 
   void makeNewSize(int newNumberOfEntries);
   void makeSmaller(int newNumberOfEntries);
-  bool vertexNotOnElement(ALBERT EL_INFO * elInfo, int vertex);
+  bool notOnThisElement(ALBERT EL_INFO * elInfo, int vertex);
   void markNewVertices(ALBERT MESH * mesh);
   void print();
 private: 
@@ -79,9 +85,6 @@ template<int dim, int dimworld> class AlbertGridElement;
 template<int codim, int dim, int dimworld> class AlbertGridEntity;
 template<int codim, int dim, int dimworld> class AlbertGridLevelIterator;
 template<int dim, int dimworld> class AlbertGrid;
-
-
- 
 
 
 //**********************************************************************
@@ -103,6 +106,8 @@ template<int dim, int dimworld>
 class AlbertGridElement
 { 
 public:
+  typedef agTYPE agType;
+  
   //! know dimension
   enum { dimension=dim };
 
@@ -124,7 +129,7 @@ public:
   int corners ();
 
   //! access to coordinates of corners. Index is the number of the corner 
-  Vec<dimworld>& operator[] (int i);
+  Vec<dimworld,agType>& operator[] (int i);
 
   /*! return reference element corresponding to this element. If this is
     a reference element then self is returned.
@@ -132,33 +137,40 @@ public:
   AlbertGridElement<dim,dim> refelem ();
 
   //! maps a local coordinate within reference element to global coordinate in element 
-  Vec<dimworld> global (Vec<dim> local);
+  Vec<dimworld,agType> global (Vec<dim,agType> local);
+  
+  //! maps a local coordinate within reference element to global coordinate in element 
+  Vec<dimworld,agType> globalBary (Vec<dim+1,agType> local);
 
   //! maps a global coordinate within the element to a local coordinate in its reference eleme
-  Vec<dim> local (Vec<dimworld> global);
+  Vec<dim,agType> local (Vec<dimworld,agType> global);
+  
+  Vec<dim+1,agType> localBary (Vec<dimworld,agType> global);
 
   //! print internal data
   void print (std::ostream& ss, int indent);
   
 private:
+  Mat<dimworld,dim+1,agType> coord_;
+  
   template <int cc>
   int mapVertices (int i) { return i; }; 
 
   template <> int mapVertices< 1 > (int i) { return ((face_+1)+i); };
   template <> int mapVertices< 2 > (int i) { return ((face_+1)+ (edge_+1) +i); };
   template <> int mapVertices< 3 > (int i) { return ((face_+1)+ (edge_+1) +(vertex_+1) +i); };
-  
+
   ALBERT EL_INFO * makeEmptyElInfo();
   
   ALBERT EL_INFO * elInfo_;
   
-  //! Which Face of the Element 
+  //! Which Face of the Element 0...dim+1
   unsigned char face_;
   
-  //! Which Edge of the Face of the Element 
+  //! Which Edge of the Face of the Element 0...dim
   unsigned char edge_;
   
-  //! Which Edge of the Face of the Element 
+  //! Which Edge of the Face of the Element 0...dim-1
   unsigned char vertex_;
 };
 
@@ -192,8 +204,6 @@ public:
   //! index is unique and consecutive per level and codim used for access to degrees of freedo
   int index ();
 
-  AlbertGridEntity(bool makeNeigh);
-  
   AlbertGridEntity(ALBERT TRAVERSE_STACK * travStack);
   
   AlbertGridEntity();
@@ -227,22 +237,29 @@ public:
 //************************************************************
 //  Methoden zum Anbinden von Albert
 //************************************************************
+  void setTraverseStack (ALBERT TRAVERSE_STACK *travStack);
   void setElInfo (ALBERT EL_INFO *elInfo, unsigned char face,
                   unsigned char edge, unsigned char vertex );
-  ALBERT EL_INFO *getElInfo ();
+  ALBERT EL_INFO *getElInfo () const;
 
 private: 
   // private Methods
   void makeDescription();
 
+  template <int cc> 
+  int indexMap () { return elInfo_->el->index; };  
+  template <> 
+  int indexMap<1> () { return (face_*elInfo_->mesh->n_elements)+elInfo_->el->index; };  
+  template <> 
+  int indexMap<dim> () { return elInfo_->el->dof[vertex_][0]; };  
+
   // private Members
   ALBERT EL_INFO *elInfo_;
-
   ALBERT TRAVERSE_STACK * travStack_;
 
   //! Which Face of the Element 
   unsigned char face_;
-  
+
   //! Which Edge of the Face of the Element 
   unsigned char edge_;
   
@@ -267,6 +284,8 @@ template<int dim, int dimworld>
 class AlbertGridEntity<0,dim,dimworld>
 {
 public:
+  typedef agTYPE agType;
+
   //! forward declaration of nested class
   class HierarchicIterator;
 
@@ -283,15 +302,16 @@ public:
   enum { dimensionworld=dimworld };
 
   AlbertGridEntity();
-  AlbertGridEntity(ALBERT TRAVERSE_STACK * travStack);
 
-  AlbertGridEntity(bool makeNeigh);
+  AlbertGridEntity(ALBERT TRAVERSE_STACK * travStack);
 
   //! level of this element
   int level ();
 
   //! index is unique and consecutive per level and codim used for access to degrees of freedo
   int index ();
+
+  bool pointInEntity (const Vec<dimworld,agType> &point);
   
   //! geometry of this entity
   AlbertGridElement<dim,dimworld> geometry ();
@@ -391,11 +411,12 @@ public:
 //************************************************************
 // face, edge and vertex only for codim > 0, in this
 // case jutst to supply the same interface
+  void setTraverseStack (ALBERT TRAVERSE_STACK *travStack);
   void setElInfo (ALBERT EL_INFO *elInfo,
                   unsigned char face = 0,
                   unsigned char edge = 0,
                   unsigned char vertex = 0 );
-  ALBERT EL_INFO *getElInfo ();
+  ALBERT EL_INFO *getElInfo () const;
 
 private: 
   //! make a new AlbertGridEntity 
@@ -433,7 +454,7 @@ public:
   enum { numberOfVertices_= 4 };
 
   // the normal Constructor
-  HierarchicIterator(ALBERT TRAVERSE_STACK *travStack, int travLevel);
+  HierarchicIterator(ALBERT TRAVERSE_STACK travStack, int travLevel);
 
   // the default Constructor
   HierarchicIterator();
@@ -455,13 +476,14 @@ public:
 
   //! dereferencing
   AlbertGridEntity<0,dim,dimworld>& operator*();
+//  AlbertGrid<dim,dimworld>::Entity<0> & operator*();
 
   //! arrow
   AlbertGridEntity<0,dim,dimworld>* operator->();
 
 private:
   //! implement with virtual element
-  AlbertGridEntity<0,dim,dimworld> *virtualEntity_;
+  AlbertGridEntity<0,dim,dimworld> virtualEntity_;
 
 
   //! The nessesary things for Albert
@@ -469,7 +491,7 @@ private:
   void makeIterator();
 
   //! we need this for Albert traversal 
-  ALBERT TRAVERSE_STACK *travStack_;
+  ALBERT TRAVERSE_STACK travStack_;
 
 };
 
@@ -547,15 +569,15 @@ public:
 
 private:
   void makeIterator();
-  
+  void initElInfo(ALBERT EL_INFO * elInfo); 
   //! implement with virtual element
-  AlbertGridEntity<0,dim,dimworld> *virtualEntity_;
+  AlbertGridEntity<0,dim,dimworld> virtualEntity_;
 
   ALBERT EL_INFO * elInfo_;
-  ALBERT EL_INFO * neighElInfo_;
+  ALBERT EL_INFO neighElInfo_;
   ALBERT TRAVERSE_STACK * travStack_;
+  
   int neighborCount_;
-  int oppEdge_;
 };
 
 
@@ -647,8 +669,9 @@ private:
 
 
   // private Members
-  AlbertGridEntity<codim,dim,dimworld> *virtualEntity_;
-  ALBERT TRAVERSE_STACK *travStack_;
+  AlbertGridEntity<codim,dim,dimworld> virtualEntity_;
+  //ALBERT TRAVERSE_STACK travStack_;
+  ALBERT ManageTravStack manageStack_;
 
   unsigned char face_;
   unsigned char edge_;
@@ -679,6 +702,12 @@ public:
   enum { dimensionworld=dimworld }; 
 
   AlbertGrid(char* macroTriangFilename);
+  
+  ~AlbertGrid()
+  {
+    ALBERT free_mesh(mesh_);  
+    delete vertexMarker_;
+  };
    
   //! Return maximum level defined in this grid. Levels are numbered
   //! 0 ... maxlevel with 0 the coarsest level.  
@@ -699,9 +728,13 @@ public:
     AlbertGridLevelIterator<codim,dim,dimworld> it;
     return it;
   };
+  int numberVertices ();
 
   //! number of grid entities per level and codim
   int size (int level, int codim);
+  
+  //! number of grid entities per level and codim
+  int hiersize (int level, int codim);
 
   //! inlcude level iterator in scope
   template<int codim>
