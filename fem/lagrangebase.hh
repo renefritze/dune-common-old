@@ -115,11 +115,13 @@ class LagrangeBaseFunction < FunctionSpaceType , triangle , 1 >
 {
   typedef typename FunctionSpaceType::RangeField RangeField;  
   RangeField factor[3];
+  int baseNum_;
   
 public:
   LagrangeBaseFunction ( FunctionSpaceType & f , int baseNum  ) 
     : BaseFunctionInterface<FunctionSpaceType> (f) 
   {
+    baseNum_ = baseNum;
     if(baseNum == 2)
     { // 1 - x - y 
       factor[0] = -1.0;
@@ -564,7 +566,6 @@ private:
   Vec < numOfBaseFct , LagrangeBaseFunctionType *> baseFuncList_; 
 };
 
-
 //************************************************************************
 //
 //  --LagrangeMapper
@@ -593,10 +594,32 @@ public:
   int mapToGlobal (EntityType &en, int localNum ) const 
   {
     enum { codim = EntityType::dimension };
-    // return vertex number , very slow 
-    return (*en.entity<codim>( localNum )).index(); 
-    //int num = (*en.entity<codim>( localNum )).index(); 
-    //return num;
+    // get global vertex number 
+    return en.subIndex<codim>(localNum);
+  };
+  
+};
+
+class LagrangeMapper<0>
+: public MapperDefault < LagrangeMapper <0> > 
+{
+public: 
+
+  //! default is Lagrange with polOrd = 1 
+  template <class GridType>      
+  int size (const GridType &grid , int level ) const 
+  {
+    // return number of vertices 
+    return grid.size( level , 0 );     
+  };
+
+  //! map Entity an local Dof number to global Dof number 
+  //! for Lagrange with polOrd = 1
+  template <class EntityType>
+  int mapToGlobal (EntityType &en, int localNum ) const 
+  {
+    // return entity index 
+    return en.index();
   };
   
 };
@@ -628,7 +651,7 @@ FastBaseFunctionSet < LagrangeDiscreteFunctionSpace
       < FunctionSpaceType , GridType , polOrd > LagrangeDiscreteFunctionSpaceType;
   typedef BaseFunctionSetType FastBaseFunctionSetType;
 
-  // id is  neighbor of the beast
+  //! id is  neighbor of the beast
   static const IdentifierType id = 665;
 
   // Lagrange 1 , to be revised in this matter 
@@ -640,6 +663,8 @@ public:
   LagrangeDiscreteFunctionSpace ( GridType & g ) : 
     DiscreteFunctionSpaceType (g,id) // ,baseFuncSet_(*this)  { };
   {
+//    g.globalRefine ( maxLevel );
+    
     //std::cout << "Constructor of LagrangeDiscreteFunctionSpace! \n";
     for(int i=0; i<numOfDiffBase_; i++)
       baseFuncSet_(i) = NULL;
@@ -670,6 +695,19 @@ public:
     return (*baseFuncSet_.get( type ));
   }; 
 
+  //! get maximal global polynom order 
+  int polynomOrder ( ) const
+  {
+    return polOrd;
+  }
+  
+  //! get local polynom order on entity  
+  template <class EntityType>
+  int localPolynomOrder ( EntityType &en ) const
+  {
+    return polOrd;
+  }
+  
   //! length of the dof vector  
   //! size knows the correct way to calculate the size of the functionspace
   int size ( int level ) const 
@@ -715,7 +753,7 @@ protected:
     BaseFuncSetType * baseFuncSet = new BaseFuncSetType ( *this );
     return baseFuncSet;
   }
-
+  
   //! the corresponding vector of base function sets
   //! lenght is diffrent element types 
   Vec< numOfDiffBase_ , FastBaseFunctionSetType * > baseFuncSet_;
