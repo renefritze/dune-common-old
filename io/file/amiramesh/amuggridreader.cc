@@ -9,10 +9,8 @@
 #include <vector>
 #include <algorithm>
 
-//#define __USE_PARAMETRIZATION_LIBRARY__
-
-#ifdef __USE_PARAMETRIZATION_LIBRARY__
-#include "../../../AmiraLibs/include/AmiraParamAccess.h"
+#ifdef HAVE_PARAMETRIZATION_LIBRARY
+#include <AmiraParamAccess.h>
 #endif
 
 namespace Dune {
@@ -25,7 +23,7 @@ namespace Dune {
         static void read(UGGrid<3,3>& grid, 
                           const std::string& filename);
 
-#ifdef __USE_PARAMETRIZATION_LIBRARY__
+#ifdef HAVE_PARAMETRIZATION_LIBRARY
         static void read(UGGrid<3,3>& grid, 
                          const std::string& gridFilename,
                          const std::string& domainFilename);
@@ -33,8 +31,8 @@ namespace Dune {
 
     protected:
 
-#ifdef __USE_PARAMETRIZATION_LIBRARY__
-        static int CreateDomain(UGGrid<3,3>& grid,
+#ifdef HAVE_PARAMETRIZATION_LIBRARY
+        static void CreateDomain(UGGrid<3,3>& grid,
                                 const std::string& domainName, 
                                 const std::string& filename);
 #endif
@@ -66,11 +64,12 @@ namespace Dune {
 
 // //////////////////////////////////////////////////
 // //////////////////////////////////////////////////
-#ifdef __USE_PARAMETRIZATION_LIBRARY__
+#ifdef HAVE_PARAMETRIZATION_LIBRARY
 static int SegmentDescriptionByAmira(void *data, double *param, double *result)
 {
 
-  int triNum = * (int*) data;
+    int domainNum = ((int*)data)[0];
+    int triNum    = ((int*)data)[1];
 
   double barCoords[2];
   double A[4] = {-1, 1, 0, -1};
@@ -91,11 +90,11 @@ static int SegmentDescriptionByAmira(void *data, double *param, double *result)
   }
 #endif
 
-  AmiraCallPositionParametrization(triNum, barCoords, result);
+  AmiraCallPositionParametrizationForDomain(domainNum, triNum, barCoords, result);
 
-  return(0);
+  return 0;
 }
-#endif // #define __USE_PARAMETRIZATION_LIBRARY__
+#endif // #define HAVE_PARAMETRIZATION_LIBRARY
 
 /** This method implements a linear function in order to be able to
  *  work with straight line boundaries.  
@@ -239,7 +238,7 @@ static int detectBoundaryNodes(const std::vector< Dune::FieldVector<int, NUM_VER
 }
 
 #ifdef _3
-#ifdef __USE_PARAMETRIZATION_LIBRARY__
+#ifdef HAVE_PARAMETRIZATION_LIBRARY
 // Create the domain from an explicitly given boundary description
 void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::CreateDomain(UGGrid<3,3>& grid,
                                                             const std::string& domainName, 
@@ -263,18 +262,11 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::CreateDomain(UGGrid<3,3>& grid,
   
     int noOfSegments = AmiraGetNoOfSegments();
     if(noOfSegments <= 0)
-        {
-            UG3d::PrintErrorMessage('E', "CreateAmiraDomain", "no segments found");
-            return(1);
-        }
+        DUNE_THROW(IOError, "no segments found");
   
     int noOfNodes = AmiraGetNoOfNodes();
     if(noOfNodes <= 0)
-        {
-             UG3d::PrintErrorMessage('E', "CreateAmiraDomain", "no nodes found");
-            return(1);
-        }
-  
+        DUNE_THROW(IOError, "No nodes found");
 
     /* Wir brauchen eine Kugel, die das Gebiet komplett  enthaelt.  Diese Information 
        wird für die UG-Graphik benoetigt, die Werte sind hier also komplett egal. */
@@ -284,15 +276,14 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::CreateDomain(UGGrid<3,3>& grid,
     /* Jetzt geht es an's eingemachte. Zuerst wird ein neues gebiet konstruiert und
        in der internen UG Datenstruktur eingetragen */
     
-    UG3d::domain* newDomain = UG3d::CreateDomain(domainName.c_str(), 
-                                                 MidPoint, radius, 
-                                                 noOfSegments, noOfNodes, 
-                                                 false );
+    UG3d::domain* newDomain = (UG3d::domain*) UG3d::CreateDomain(domainName.c_str(), 
+                                                                 MidPoint, radius, 
+                                                                 noOfSegments, noOfNodes, 
+                                                                 false );
 
 
     if (!newDomain)
-        return(1);
-
+        DUNE_THROW(IOError, "Could not create UG domain data structure!");
  
     /* Alle weiteren Aufrufe von 'CreateBoundarySegment' beziehen sich jetzt auf das eben
        erzeugte Gebiet */
@@ -302,12 +293,14 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::CreateDomain(UGGrid<3,3>& grid,
        Segment weitergereicht 
     */
     
-    grid.extra_boundary_data_ =  ::malloc(noOfSegments*sizeof(int));
+    grid.extra_boundary_data_ =  ::malloc(noOfSegments*2*sizeof(int));
     if (grid.extra_boundary_data_ == NULL)
-        return 1;
+        DUNE_THROW(IOError, "Could not allocate extra_boundary_data");
+
+    static int boundaryNumber = 0;
     
     for(int i = 0; i < noOfSegments; i++) {
-        printf("%d\n", i);
+        
         char segmentName[200];
         int left, right;
 
@@ -315,12 +308,15 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::CreateDomain(UGGrid<3,3>& grid,
         AmiraGetNodeNumbersOfSegment(point, i);
         
         if(sprintf(segmentName, "AmiraSegment %d", i) < 0)
-            return 1;
+            DUNE_THROW(IOError, "sprintf returned error code");
             
         /* left = innerRegion, right = outerRegion */
         AmiraGetLeftAndRightSideOfSegment(&left, &right, i);
         
-        ((int*)grid.extra_boundary_data_)[i] = i;
+        // The segment-describing methods gets the number of the boundary
+        // and the number of the boundary segment in that boundary
+        ((int*)grid.extra_boundary_data_)[2*i] = boundaryNumber;
+        ((int*)grid.extra_boundary_data_)[2*i+1] = i;
             
         /* map Amira Material ID's to UG material ID's */
         left++; 
@@ -334,20 +330,20 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::CreateDomain(UGGrid<3,3>& grid,
                                         right,        /*id of right subdomain*/
                                         i,            /*id of segment*/
                                         UG3d::NON_PERIODIC,
-                                        1,          // resolution, whatever that is
+                                        1,          // only needed for UG graphics
                                         point,
                                         alpha, beta,
                                         SegmentDescriptionByAmira,
-                                        ((int*)grid.extra_boundary_data_)+i
+                                        ((int*)grid.extra_boundary_data_)+2*i
                                       )==NULL) 
-            return(1);
+            DUNE_THROW(IOError, "UG3d::CreateBoundarySegment returned error code!");
         
     }
-    
+    boundaryNumber++;
     std::cout << noOfSegments << " segments created!" << std::endl;
     
 } 
-#endif // #define __USE_PARAMETRIZATION_LIBRARY__
+#endif // #define HAVE_PARAMETRIZATION_LIBRARY
 
 
 // Create the domain by extracting the boundary of the given grid
@@ -496,13 +492,13 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::CreateDomain(UGGrid<3,3>& grid,
 } 
 
 
-#ifdef __USE_PARAMETRIZATION_LIBRARY__
+#ifdef HAVE_PARAMETRIZATION_LIBRARY
 /** \todo Clear grid before reading! */
 void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(Dune::UGGrid<3,3>& grid, 
                                                      const std::string& filename,
                                                      const std::string& domainFilename)
 {
-    std::cout << ("This is the AmiraMesh reader for UGGrid<3,3>!" << std::endl;
+    std::cout << "This is the AmiraMesh reader for UGGrid<3,3>!" << std::endl;
 
     // /////////////////////////////////////////////////////
     // Load the AmiraMesh file
@@ -516,13 +512,16 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(Dune::UGGrid<3,3>& grid,
         return;
     }
 
+    // Construct a domain name from the multigrid name
+    std::string domainName = grid.name() + "_Domain";
+
     //loaddomain $file @PARA_FILE $name @DOMAIN
     CreateDomain(grid, domainName, domainFilename);
 
     // read and build the grid
     buildGrid(grid, am);
 } 
-#endif // #define __USE_PARAMETRIZATION_LIBRARY__
+#endif // #define HAVE_PARAMETRIZATION_LIBRARY
 
 
 /** \todo Clear grid before reading! */
