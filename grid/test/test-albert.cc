@@ -1,5 +1,7 @@
 // $Id$
 
+#include <config.h>
+
 /*
 
   Instantiate Albert-Grid and feed it to the generic gridcheck()

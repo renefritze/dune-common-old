@@ -1,5 +1,7 @@
 // $Id$
 
+#include <config.h>
+
 #include <iostream>
 
 #include <dune/grid/sgrid.hh>
