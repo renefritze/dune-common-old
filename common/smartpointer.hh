@@ -9,12 +9,12 @@
  * pointer.
  * @author Markus Blatt
  */
-namespace Dune{
-/** @addtogroup Common
+namespace Dune
+{
+    /** @addtogroup Common
      *
      * @{
      */
-  int smcounter=0;
     /**
      * @brief A reference counting smart pointer.
      *
@@ -23,7 +23,8 @@ namespace Dune{
      * references to it.
      */
     template<class T>
-    class SmartPointer{
+    class SmartPointer
+    {
     public:
 	/**
 	 * @brief The data type we are a pointer for.
@@ -58,6 +59,11 @@ namespace Dune{
 	
 	inline const MemberType* operator->() const;
 
+      /**
+       * @brief Deallocates the references object if no other
+       * pointers reference it.
+       */
+      inline void deallocate();
 	int count() const;
     private:
 	/** @brief The object we reference. */	
@@ -77,7 +83,6 @@ namespace Dune{
     inline SmartPointer<T>::SmartPointer()
     {
 	rep_ = new PointerRep(MemberType());
-	//std::cout<<"Constructing "<<smcounter++<<std::endl;
     }
 
     template<class T>
@@ -99,7 +104,6 @@ namespace Dune{
     inline SmartPointer<T>::~SmartPointer()
     {
 	if(rep_!=0 && --(rep_->count_)==0){
-	  //std::cout<< "Deleting! "<<rep_->count_<<" "<<rep_<<std::endl;
 	    delete rep_;
 	    rep_=0;
 	}
@@ -135,6 +139,13 @@ namespace Dune{
 	return rep_->count_;
     }
 
+    template<class T>
+    inline void SmartPointer<T>::deallocate()
+    {
+      assert(rep_!=0 && rep_->count_==1);
+      delete rep_;
+      rep_=0;
+    }
     /** @} */
 }
 #endif
