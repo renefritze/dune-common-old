@@ -201,7 +201,7 @@ namespace Dune
       : current_(item), allocator_(&alloc)
     {}
 
-    inline SLListIterator(typename SLList<T,A>::Element* item)
+    inline SLListIterator()
       : current_(0), allocator_(0)
     {}
       
@@ -445,13 +445,13 @@ namespace Dune
   template<typename T, class A>
   inline SLListIterator<T,A> SLList<T,A>::end()
   {
-    return iterator(static_cast<Element*>(0));
+    return iterator();
   }
   
   template<typename T, class A>
   inline SLListConstIterator<T,A> SLList<T,A>::end() const
   {
-    return const_iterator(static_cast<Element*>(0));
+    return const_iterator();
   }
 }
   /** }@ */
