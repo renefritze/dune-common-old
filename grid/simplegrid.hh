@@ -40,7 +40,7 @@ template<int dim, int dimworld>            class SimpleElement;
 template<int codim, int dim, int dimworld> class SimpleEntity;
 template<int dim, int dimworld>            class SimpleBoundaryEntity;
 template<int dim, int dimworld>            class SimpleGrid;
-template<int codim, int dim, int dimworld> class SimpleLevelIterator;
+template<int codim, int dim, int dimworld,PartitionIteratorType> class SimpleLevelIterator;
 template<int dim, int dimworld>            class SimpleIntersectionIterator;
 template<int dim, int dimworld>            class SimpleHierarchicIterator;
 
@@ -117,6 +117,9 @@ template<int dim, int dimworld>
 class SimpleElement : public ElementDefault<dim,dimworld,simplegrid_ctype,SimpleElement>
 {
 public:
+  friend class SimpleHierarchicIterator<dim,dimworld>; 
+  friend class SimpleEntity<0,dim,dimworld>; 
+    
   //! define type used for coordinates in grid module
   typedef simplegrid_ctype ctype;
 
@@ -176,7 +179,7 @@ public:
                 g(k) = e.s[k];
                 if (k!=c)
                 {
-                  g(k) += local.read(lk)*e.li->h[k];
+                  g(k) += local(lk)*e.li->h[k];
                   lk++;
                 }
           }
@@ -226,6 +229,7 @@ public:
   //! constructor without arguments makes uninitialized element
   SimpleElement (SimpleElement<dim+1,dimworld>& _e) : e(_e) 
   {  }
+  SimpleElement () : e( * (new SimpleElement<dim+1,dimworld> ()) ) {}
 
   void set_face (int _c, int _d) 
   { 
@@ -256,6 +260,7 @@ class SimpleElement<dim,dim> : public ElementDefault<dim,dim,simplegrid_ctype,Si
 {
 public:
   friend class SimpleElement<dim-1,dim>; // access granted for faces
+  friend class SimpleEntity<0,dim,dim>; 
 
   //! define type used for coordinates in grid module
   typedef simplegrid_ctype ctype;
@@ -303,7 +308,7 @@ public:
   Vec<dim,simplegrid_ctype> global (const Vec<dim,simplegrid_ctype>& local)
   {
         Vec<dim,simplegrid_ctype> g;
-        for (int k=0; k<dim; k++) g(k) = s[k] + local.read(k)*li->h[k];
+        for (int k=0; k<dim; k++) g(k) = s[k] + local(k)*li->h[k];
         return g;
   }
 
@@ -459,6 +464,8 @@ template<int dimworld>
 class SimpleElement<0,dimworld> : public ElementDefault<0,dimworld,simplegrid_ctype,SimpleElement>
 {
 public:
+  friend class SimpleEntity<0,dimworld,dimworld>;
+  
   //! define type used for coordinates in grid module
   typedef simplegrid_ctype ctype;
   
@@ -786,10 +793,78 @@ private:
   Vec<dimworld,sgrid_ctype> normal;
 };
 
+/*! 
+  Dummy implementation of HierarchicIterator. 
+  Every method throws assertion, if used. 
+ */
 template<int dim, int dimworld>
-class SimpleHierarchicIterator
+class SimpleHierarchicIterator  
+: public HierarchicIteratorDefault <dim,dimworld,sgrid_ctype,
+  SimpleHierarchicIterator,SimpleEntity>
 {
 public:
+  typedef SimpleHierarchicIterator<dim,dimworld> SimpleHierarchicIteratorType;
+
+  SimpleHierarchicIterator(SimpleElement<dim,dimworld> & geo) : enty(geo) 
+  {
+    //throw GridError ("SimpleHierarchicIterator not implemented!");
+    assert(false);
+    //abort();
+  }
+  
+  //! prefix increment
+  SimpleHierarchicIteratorType& operator++()
+  {
+    //throw GridError ("SimpleHierarchicIterator not implemented!");
+    assert(false);
+    //abort();
+    return *this;
+  }
+
+  //! equality
+  bool operator== (const SimpleHierarchicIteratorType& i) const
+  {
+    //throw GridError ("SimpleHierarchicIterator not implemented!");
+    assert(false);
+    //abort();
+    return false;
+  }
+
+  //! inequality
+  bool operator!= (const SimpleHierarchicIteratorType& i) const
+  {
+    //throw GridError ("SimpleHierarchicIterator not implemented!");
+    assert(false);
+    //abort();
+    return true;
+  }
+
+  //! dereferencing
+  SimpleEntity<0,dim,dimworld>& operator*()
+  {
+    //throw GridError ("SimpleHierarchicIterator not implemented!");
+    assert(false);
+    return enty;
+  }
+
+  //! arrow
+  SimpleEntity<0,dim,dimworld>* operator->()
+  {
+    throw GridError ("SimpleHierarchicIterator not implemented!");
+    assert(false);
+    abort();
+    return &enty;
+  }
+
+  //! ask for level of entity
+  int level () 
+  {
+    assert(false);
+    return 0;
+  }
+
+private:
+  SimpleEntity<0,dim,dimworld> enty;
 };
 
 //************************************************************************
@@ -823,7 +898,11 @@ public:
   //! index is unique and consecutive per level and codim used for access to degrees of freedom
   int index ()
   {
-        return geo.index();
+     return geo.index();
+  }
+  int global_index ()
+  {
+     return this->index();
   }
   
   //! geometry of this entity
@@ -831,6 +910,15 @@ public:
   {
         return geo;
   }
+
+  bool hasChildren () const 
+  {
+    std::cerr << "SimpleEntity<0>::hasChildren not implemented! \n";
+    assert(false);
+    return false;
+  }
+
+  PartitionType partitionType () { return InteriorEntity; }
 
   /*! Intra-element access to entities of codimension cc > codim. Return number of entities
         with codimension cc.
@@ -843,13 +931,13 @@ public:
         are numbered 0 ... count<cc>()-1
   */ 
   template<int cc> 
-  SimpleLevelIterator<cc,dim,dimworld> entity (int i)
+  SimpleLevelIterator<cc,dim,dimworld,All_Partition> entity (int i)
   {
           assert(cc==dim); // support only vertices
           return SimpleLevelIterator<cc,dim,dimworld>();
   }
   template<> 
-  SimpleLevelIterator<dim,dim,dimworld> entity<dim> (int i)
+  SimpleLevelIterator<dim,dim,dimworld,All_Partition> entity<dim> (int i)
   {
         // THIS FUNCTION IS NOT IMPLEMENTED CORRECTLY
 //      int n=0;
@@ -879,17 +967,25 @@ public:
   //! Reference to one past the last neighbor
   SimpleIntersectionIterator<dim,dimworld> iend ()
   {
-        return SimpleIntersectionIterator<dim,dimworld>(geo,2*dim);
+    return SimpleIntersectionIterator<dim,dimworld>(geo,2*dim);
   }
   void iend (SimpleIntersectionIterator<dim,dimworld>& i)
   {
-        i.make(geo,2*dim);
+    i.make(geo,2*dim);
   }
 
   //! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
-  SimpleLevelIterator<0,dim,dimworld> father ()
+  SimpleLevelIterator<0,dim,dimworld,All_Partition> father ()
   {
-        SimpleLevelIterator<0,dim,dimworld>();
+    std::cerr << "SimpleEntity<0>::father () not implemented! \n";
+    assert(false);
+    return SimpleLevelIterator<0,dim,dimworld,All_Partition>(*geo.li,0);
+  }
+
+  void father ( SimpleEntity<0,dim,dimworld> & vati )
+  {
+    std::cerr << "SimpleEntity<0>::father( SimpleEntity<0> & ) not implemented! \n";
+    assert(false);
   }
 
   /*! Location of this element relative to the reference element element of the father.
@@ -912,13 +1008,13 @@ public:
   */
   SimpleHierarchicIterator<dim,dimworld> hbegin (int maxlevel)
   {
-        return SimpleHierarchicIterator<dim,dimworld>();
+        return SimpleHierarchicIterator<dim,dimworld>(geo);
   }
 
   //! Returns iterator to one past the last son
   SimpleHierarchicIterator<dim,dimworld> hend (int maxlevel)
   {
-        return SimpleHierarchicIterator<dim,dimworld>();
+        return SimpleHierarchicIterator<dim,dimworld>(geo);
   }
 
   // constructor
@@ -942,6 +1038,7 @@ public:
 
   //! index is unique and consecutive per level and codim used for access to degrees of freedom
   int index () {return geo.index();}
+  int global_index () { return this->index(); }
 
   //! geometry of this entity
   SimpleElement<0,dimworld>& geometry () {return geo;} 
@@ -950,9 +1047,9 @@ public:
         This can speed up on-the-fly interpolation for linear conforming elements
         Possibly this is sufficient for all applications we want on-the-fly.
   */
-  SimpleLevelIterator<0,dim,dimworld> father ()
+  SimpleLevelIterator<0,dim,dimworld,All_Partition> father ()
   {
-        return SimpleLevelIterator<0,dim,dimworld>(); // not implemented yet
+    return SimpleLevelIterator<0,dim,dimworld,All_Partition>(); // not implemented yet
   }
   
   //! local coordinates within father
@@ -971,34 +1068,35 @@ private:
 /*! Enables iteration over all entities of a given codimension and level of a grid.
   General version is dummy, only specializations for codim=0 and codim=dim can be used
  */
-template<int codim, int dim, int dimworld>
-class SimpleLevelIterator : public LevelIteratorDefault<codim,dim,dimworld,simplegrid_ctype,SimpleLevelIterator,SimpleEntity>
+template<int codim, int dim, int dimworld, PartitionIteratorType ptype>
+class SimpleLevelIterator : public LevelIteratorDefault<codim,dim,dimworld,ptype,simplegrid_ctype,SimpleLevelIterator,SimpleEntity>
 {
-  SimpleLevelIterator () {}
+  SimpleLevelIterator () { assert(false); }
 };
 
 // specialization for codim==0 -- the elements
-template<int dim, int dimworld>
-class SimpleLevelIterator<0,dim,dimworld> : public LevelIteratorDefault<0,dim,dimworld,simplegrid_ctype,SimpleLevelIterator,SimpleEntity>
+template<int dim, int dimworld,PartitionIteratorType ptype>
+class SimpleLevelIterator<0,dim,dimworld,ptype> 
+: public LevelIteratorDefault<0,dim,dimworld,ptype,simplegrid_ctype,SimpleLevelIterator,SimpleEntity>
 {
 public:
   //! prefix increment
-  SimpleLevelIterator<0,dim,dimworld>& operator++()
+  SimpleLevelIterator<0,dim,dimworld,ptype>& operator++()
   {
-        ++elem;
-        return *this;
+    ++elem;
+    return *this;
   }
 
   //! equality
-  bool operator== (const SimpleLevelIterator<0,dim,dimworld>& i) const
+  bool operator== (const SimpleLevelIterator<0,dim,dimworld,ptype>& i) const
   {
-        return elem==i.elem;
+    return elem==i.elem;
   }
 
   //! inequality
-  bool operator!= (const SimpleLevelIterator<0,dim,dimworld>& i) const
+  bool operator!= (const SimpleLevelIterator<0,dim,dimworld,ptype>& i) const
   {
-        return (elem!=i.elem);
+    return (elem!=i.elem);
   }
 
   //! dereferencing
@@ -1021,7 +1119,7 @@ public:
   {  }
 
   //! copy constructor
-  SimpleLevelIterator (const SimpleLevelIterator<0,dim,dimworld>& i) : elem(i.elem),enty(elem)
+  SimpleLevelIterator (const SimpleLevelIterator<0,dim,dimworld,ptype>& i) : elem(i.elem),enty(elem)
   {  }
 
 private:
@@ -1031,25 +1129,26 @@ private:
 
 
 // specialization for codim==dim -- the vertices
-template<int dim, int dimworld>
-class SimpleLevelIterator<dim,dim,dimworld> : public LevelIteratorDefault<dim,dim,dimworld,simplegrid_ctype,SimpleLevelIterator,SimpleEntity>
+template<int dim, int dimworld,PartitionIteratorType ptype>
+class SimpleLevelIterator<dim,dim,dimworld,ptype> 
+: public LevelIteratorDefault<dim,dim,dimworld,ptype,simplegrid_ctype,SimpleLevelIterator,SimpleEntity>
 {
 public:
   //! prefix increment
-  SimpleLevelIterator<dim,dim,dimworld>& operator++()
+  SimpleLevelIterator<dim,dim,dimworld,ptype>& operator++()
   {
         ++elem; // go to next 
         return *this;
   }
 
   //! equality
-  bool operator== (const SimpleLevelIterator<dim,dim,dimworld>& i) const
+  bool operator== (const SimpleLevelIterator<dim,dim,dimworld,ptype>& i) const
   {
         return elem==i.elem;
   }
 
   //! inequality
-  bool operator!= (const SimpleLevelIterator<dim,dim,dimworld>& i) const
+  bool operator!= (const SimpleLevelIterator<dim,dim,dimworld,ptype>& i) const
   {
         return elem!=i.elem;
   }
@@ -1074,7 +1173,7 @@ public:
   {  }
 
   //! copy constructor
-  SimpleLevelIterator (const SimpleLevelIterator<dim,dim,dimworld>& i) : elem(i.elem),enty(elem)
+  SimpleLevelIterator (const SimpleLevelIterator<dim,dim,dimworld,ptype>& i) : elem(i.elem),enty(elem)
   {  }
 
 private:
@@ -1106,51 +1205,69 @@ public:
     //! define type used for coordinates in grid module
     typedef simplegrid_ctype ctype;
 
+    typedef SimpleLevelIterator<0,dim,dimworld,All_Partition> LeafIterator;
+
   //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ... 
-  GridIdentifier type() const { return SimpleGrid_id; };
+  //! hack, return SGrid_Id for visualisation 
+  GridIdentifier type() const { return SGrid_Id; };
   
-        /*! Return maximum level defined in this grid. Levels are numbered
-          0 ... maxlevel with 0 the coarsest level.
-     */
-    int maxlevel() const {return L-1;}
+  /*! Return maximum level defined in this grid. Levels are numbered
+      0 ... maxlevel with 0 the coarsest level.
+  */
+ int maxlevel() const {return L-1;}
     
-    //! Iterator to first entity of given codim on level
+ //! Iterator to first entity of given codim on level
+ template<int cd>
+ SimpleLevelIterator<cd,dim,dimworld,All_Partition> lbegin (int level)
+ {
+   assert(cd==0 || cd==dim)
+   return SimpleLevelIterator<cd,dim,dimworld,All_Partition>(li[level],-1);
+ }
+    template<>
+    SimpleLevelIterator<0,dim,dimworld,All_Partition> lbegin (int level)
+    {
+        return SimpleLevelIterator<0,dim,dimworld,All_Partition>(li[level],0);
+    }
+    template<>
+    SimpleLevelIterator<dim,dim,dimworld,All_Partition> lbegin (int level)
+    {
+          return SimpleLevelIterator<dim,dim,dimworld,All_Partition>(li[level],0);
+    }
+
+    //! one past the end on this level
     template<int cd>
-    SimpleLevelIterator<cd,dim,dimworld> lbegin (int level)
+    SimpleLevelIterator<cd,dim,dimworld,All_Partition> lend (int level)
     {
-        assert(cd==0 || cd==dim)
-            return SimpleLevelIterator<cd,dim,dimworld>(li[level],-1);
+      assert(cd==0 || cd==dim)
+      return SimpleLevelIterator<cd,dim,dimworld,All_Partition>(li[level],-1);
     }
+    
     template<>
-    SimpleLevelIterator<0,dim,dimworld> lbegin (int level)
+    SimpleLevelIterator<0,dim,dimworld,All_Partition> lend (int level)
     {
-        return SimpleLevelIterator<0,dim,dimworld>(li[level],0);
+      return SimpleLevelIterator<0,dim,dimworld,All_Partition>(li[level],li[level].nelements);
     }
+    
     template<>
-    SimpleLevelIterator<dim,dim,dimworld> lbegin (int level)
+    SimpleLevelIterator<dim,dim,dimworld,All_Partition> lend (int level)
     {
-          return SimpleLevelIterator<dim,dim,dimworld>(li+level,0);
+      return SimpleLevelIterator<dim,dim,dimworld,All_Partition>(li[level],li[level].nvertices);
     }
 
-        //! one past the end on this level
-        template<int cd>
-        SimpleLevelIterator<cd,dim,dimworld> lend (int level)
+    //! Iterator to first entity of given codim on level
+    LeafIterator leafbegin (int level)
     {
-          assert(cd==0 || cd==dim)
-          return SimpleLevelIterator<cd,dim,dimworld>(li[level],-1);
-    }
-        template<>
-        SimpleLevelIterator<0,dim,dimworld> lend (int level)
+      return this->template lbegin<0> (level);
+    };
+
+    //! one past the end on this level
+    LeafIterator leafend (int level)
     {
-          return SimpleLevelIterator<0,dim,dimworld>(li[level],li[level].nelements);
-    }
-        template<>
-        SimpleLevelIterator<dim,dim,dimworld> lend (int level)
-    {
-          return SimpleLevelIterator<dim,dim,dimworld>(li[level],li[level].nvertices);
+      return this->template lend<0> ( level );
     }
 
-        //! number of grid entities per level and codim
+
+  //! number of grid entities per level and codim
   int size (int level, int codim) const 
   {
         if (codim==0)
@@ -1165,14 +1282,30 @@ public:
         return -1;
   }
 
-        // these are all members specific to sgrid
+  //! number of grid entities per level and codim
+  int global_size (int codim) const 
+  {
+    return size(this->maxlevel(),codim);
+  }
 
-        /*! constructor, subject to change!
-          @param H_ size of domain
-          @param N_ coarse grid size, #elements in one direction
-          \todo The following parameter doesn't actually exist!
-          @param L_ number of levels 0,...,L_-1, maxlevel = L_-1
-        */
+  double calcGridWidth() 
+  {
+    double w = 0.0;
+    for (int i=0; i<dim; i++)
+      w = MAX(w,li[L-1].h[i]);
+     
+    //std::cout << w << " widht \n";       
+    return w;      
+  }
+  
+  // these are all members specific to sgrid
+   
+  /*! constructor, subject to change!
+    @param H_ size of domain
+    @param N_ coarse grid size, #elements in one direction
+    \todo The following parameter doesn't actually exist!
+    @param L_ number of levels 0,...,L_-1, maxlevel = L_-1
+  */
   SimpleGrid (int* N_, double* H_)
   {
         L=1;
@@ -1303,9 +1436,17 @@ public:
     const levelinfo<dim>* get_levelinfo (int l) const {return &li[l];}
 
   //! write Grid to file filename and store time  
+  //! writeout is SGrid format, so u can use SGrid for visualisation 
   template <FileFormatType ftype>
   bool writeGrid ( const char * filename , sgrid_ctype time)
   {
+    std::fstream file (filename,std::ios::out);
+    file << dim << " " << dimworld << " " << time << "\n";
+    file << L << " ";
+    for(int i=0; i<dim; i++) file << li[0].ne[i] << " ";
+    for(int i=0; i<dim; i++) file << 0.0 << " ";
+    for(int i=0; i<dim; i++) file << li[0].h[i]*li[0].ne[i] << " ";
+    file.close();
     return true;
   };
 
