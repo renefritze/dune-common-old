@@ -2,6 +2,8 @@
 #ifndef DUNE_TUPLES_HH
 #define DUNE_TUPLES_HH
 
+#include<ostream>
+
 namespace Dune 
 {
   /** @addtogroup Common
@@ -190,9 +192,12 @@ namespace Dune
    \code
       Tuple<std::string, float*, int> my_tuple;
 
-      std:string s = Element<0>::get(my_tuple);
-      float      p = Element<1>::get(my_tuple);
-      int        i = Element<0>::get(my_tuple);
+      std:string& s = Element<0>::get(my_tuple);
+      float*      p = Element<1>::get(my_tuple);
+
+      // Access the third element in a generic way
+      typedef ElementType<2, Tuple<std::string, float*, int> >::Type Type;
+      Type&       i = Element<2>::get(my_tuple);
    \endcode
    */
   template<typename T1, typename T2 = Nil, typename T3 = Nil, 
@@ -402,7 +407,24 @@ namespace Dune
   {
     return Pair<T1,T2>(first, second);
   }
-  
+
+  /**
+   * @brief Print a pair or tuple.
+   */
+  template<typename T1, typename T2>
+  inline std::ostream& operator<<(std::ostream& os, const Pair<T1,T2>& pair)
+  {
+    os<<pair.first()<<" "<<pair.second();
+    return os;
+  }
+
+  template<typename T1>
+  inline std::ostream& operator<<(std::ostream& os, const Pair<T1,Nil>& pair)
+  {
+    os<<pair.first();
+    return os;
+  }
+
   template<typename T1, typename TT>
   template<typename T2, typename T3, typename T4, typename T5,
 	   typename T6, typename T7, typename T8, typename T9>
