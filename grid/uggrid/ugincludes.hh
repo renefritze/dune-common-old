@@ -19,5 +19,6 @@
 #include <elements.h>
 #include <shapes.h>
 #include <algebra.h>
+#include <refine.h>
 
 #endif
