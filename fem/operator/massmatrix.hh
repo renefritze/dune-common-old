@@ -48,8 +48,8 @@ namespace Dune {
         
     //! ???
     SparseRowMatrix<double>* newEmptyMatrix( ) const {
-      return new SparseRowMatrix<double>( this->functionSpace_.size ( this->functionSpace_.getGrid().maxlevel() ) , 
-                                          this->functionSpace_.size ( this->functionSpace_.getGrid().maxlevel() ) , 
+      return new SparseRowMatrix<double>( this->functionSpace_.size () , 
+                                          this->functionSpace_.size () , 
                                           10);
     }
         

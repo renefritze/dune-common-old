@@ -87,8 +87,8 @@ namespace Dune
         //! Creates a new empty matrix
         SparseRowMatrix<double>* newEmptyMatrix( ) const 
         {
-            return new SparseRowMatrix<double>( this->functionSpace_.size ( this->functionSpace_.getGrid().maxlevel() ) , 
-                                                this->functionSpace_.size ( this->functionSpace_.getGrid().maxlevel() ) , 
+            return new SparseRowMatrix<double>( this->functionSpace_.size () , 
+                                                this->functionSpace_.size () , 
                                                 15 * dim);
         }
         
@@ -97,7 +97,7 @@ namespace Dune
         {
             this->arg_  = &arg.argument();
             this->dest_ = &dest.destination();
-            assert(this->arg_ != NULL); assert(this->dest_ != NULL);
+            assert(this->arg_ != 0); assert(this->dest_ != 0);
             dest.clear();
         }
         
@@ -145,6 +145,7 @@ namespace Dune
         template < class  EntityType, class MatrixType>
         void getLocalMatrix( EntityType &entity, const int matSize, MatrixType& mat) const {
             enum { dim = GridType::dimension };
+
             typedef typename FunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
             
             const BaseFunctionSetType & baseSet = this->functionSpace_.getBaseFunctionSet( entity );
