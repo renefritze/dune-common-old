@@ -166,7 +166,7 @@ public:
 
   //! default is Lagrange with polOrd = 1 
   template <class GridType>      
-  int size (GridType &grid , int level ) const 
+  int size (const GridType &grid , int level ) const 
   {
     // return number of vertices 
     return grid.size( level , GridType::dimension );     
@@ -175,7 +175,7 @@ public:
   //! map Entity an local Dof number to global Dof number 
   //! for Lagrange with polOrd = 1
   template <class EntityType>
-  int mapToGlobal ( EntityType &en, int localNum ) const 
+  int mapToGlobal (EntityType &en, int localNum ) const 
   {
     enum { codim = EntityType::dimension };
     // return vertex number 
@@ -210,8 +210,8 @@ LinFastBaseFunctionSet < LinDiscreteFunctionSpace
   typedef LinFastBaseFunctionSet < LinDiscreteFunctionSpaceType > LinFastBaseFunctionSetType;
   typedef FastBaseFunctionSet < LinDiscreteFunctionSpaceType > FastBaseFunctionSetType;
 
-  // at the moment just for fake
-  static const IdentifierType id = 2;
+  // id is  neighbor of the beast
+  static const IdentifierType id = 665;
 
   // Lagrange 1 , to be revised in this matter 
 public:
