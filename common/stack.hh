@@ -142,7 +142,7 @@ namespace Dune {
         }
   
       //! Dynamic stacksize
-        int size ()
+        int size () const
         {
           return f;
         }
