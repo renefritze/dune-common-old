@@ -23,7 +23,7 @@ enum { lengthOfFiniteStack = 10000 };
 typedef Dune::IndexStack<int,lengthOfFiniteStack> IndexManagerType; 
 
 // type for outer normal of intersection iterator 
-typedef Dune::Vec<double,3> BSGridVecType;
+typedef Dune::FieldVector <double,3> BSGridVecType;
 
 typedef enum {hexa,tetra} grid_t;
   
