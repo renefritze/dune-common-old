@@ -149,7 +149,7 @@ UGGridIntersectionIterator < 3,3 >::unit_outer_normal ()
 #undef V3_VECTOR_PRODUCT
 
     // normalize
-    outerNormal_ *= (1/outerNormal_.norm2());
+    outerNormal_ *= (1/outerNormal_.two_norm());
 #endif
     return outerNormal_;
 
