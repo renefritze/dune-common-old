@@ -1086,16 +1086,10 @@ public:
   }
   
   //! dereferencing
-  Entity& dereference() const
-  {
-    return it.dereference(); 
-  }
+  Entity& dereference() const { return it.dereference(); }
 
   //! ask for level of entity
-  int level () const
-  {
-    return it.level(); 
-  }
+  int level () const { return it.level(); }
 };
 
 //**********************************************************************
