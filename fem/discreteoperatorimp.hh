@@ -39,7 +39,8 @@ class DiscreteOperator
                                       RangeField RangeFieldType;
   typedef DiscreteOperator<DiscreteFunctionType,LocalOperatorImp> MyType;
 
-  typedef ScaledLocalOperator < LocalOperatorImp > ScalOperatorType;
+  typedef ScaledLocalOperator < LocalOperatorImp, 
+      typename  DiscreteFunctionType::RangeFieldType > ScalOperatorType;
   typedef DiscreteOperator<DiscreteFunctionType,ScalOperatorType> ScalDiscrType;
 
 public:
@@ -47,7 +48,8 @@ public:
   DiscreteOperator (LocalOperatorImp &op, bool leaf=false , bool printMsg = false ) 
    : localOp_ ( op ) , leaf_ (leaf), prepared_ (false) , printMsg_ (printMsg)
   {
-    std::cout << "Make new Operator "<< this << "\n";
+    if(printMsg)
+      std::cout << "Make new Operator "<< this << "\n";
   }
 
   /*! add another discrete operator by combining the two local operators
@@ -65,7 +67,7 @@ public:
     typedef CombinedLocalOperator <LocalOperatorImp,LocalOperatorType> COType;
      
     COType *locOp = 
-      new COType ( addLocalOperators ( localOp_ , const_cast<CopyType &> (op).getLocalOp ()));
+      new COType ( localOp_ , const_cast<CopyType &> (op).getLocalOp ());
     typedef DiscreteOperator < DiscreteFunctionType , COType > OPType;
    
     OPType *discrOp = new OPType ( *locOp, leaf_, printMsg_ );    
@@ -124,7 +126,8 @@ private:
   //! remember time step size 
   void prepare ( const DomainType &Arg, RangeType &Dest ) const
   {
-    localOp_.prepareGlobal(level_,Arg,Dest);
+    localOp_.setArguments(Arg,Dest);
+    localOp_.prepareGlobal();
     prepared_ = true;
   }
   
@@ -132,7 +135,7 @@ private:
   //! go over all Entitys and call the LocalOperator.applyLocal Method 
   //! Note that the LocalOperator can be an combined Operator 
   //! Domain and Range are defined through class Operator
-  void apply ( int level, const DomainType &Arg, RangeType &Dest ) const 
+  void apply ( int level, const DomainType &Arg, RangeType &Dest ) const  
   {
     if(!prepared_)
     {
@@ -155,14 +158,13 @@ private:
       LeafIterator it     = grid.leafbegin ( level_ );
       LeafIterator endit  = grid.leafend   ( level_ );
       applyOnGrid( it, endit , Arg, Dest );
-
     }
     else 
     {
       typedef typename GridType::Traits<0>::LevelIterator LevelIterator;
 
       // make run through grid 
-      LevelIterator it = grid.template lbegin<0>( level_ );
+      LevelIterator it    = grid.template lbegin<0>( level_ );
       LevelIterator endit = grid.template lend<0>  ( level_ );
       applyOnGrid( it, endit , Arg, Dest );
     }
@@ -174,23 +176,24 @@ private:
   void finalize ( const DomainType &Arg, RangeType &Dest ) const
   {
     prepared_ = false;
-    localOp_.finalizeGlobal(Arg,Dest);
+    localOp_.finalizeGlobal();
+    localOp_.removeArguments();
   }
   
   template <class GridIteratorType>
   void applyOnGrid ( GridIteratorType &it, GridIteratorType &endit,
                      const DomainType &Arg, RangeType &Dest ) const 
   {
-      // erase destination function
-      Dest.clearLevel ( level_ );
+    // erase destination function
+    Dest.clearLevel ( level_ );
 
-      // run through grid and apply the local operator
-      for( it ; it != endit; ++it )
-      {
-        localOp_.prepareLocal (it , Arg, Dest);
-        localOp_.applyLocal   (it , Arg, Dest);
-        localOp_.finalizeLocal(it , Arg, Dest);
-      }
+    // run through grid and apply the local operator
+    for( it ; it != endit; ++it )
+    {
+      localOp_.prepareLocal (*it);
+      localOp_.applyLocal   (*it);
+      localOp_.finalizeLocal(*it);
+    }
   }
 
   //! true if operator was prepared for apply 
