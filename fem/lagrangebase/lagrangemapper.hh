@@ -131,7 +131,8 @@ public:
   {
     getIndex ( en , 0 ); 
     // return insertionPoint + index(codim)
-    return (insertionPoint_[codimOfDof_[localNum]] + index_[codimOfDof_[localNum]]);
+    //return (insertionPoint_[codimOfDof_[localNum]] + index_[codimOfDof_[localNum]]);
+    return index_[0];
   }
   
   // is called once and calcs the insertion points too
