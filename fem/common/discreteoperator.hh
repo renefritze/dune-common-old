@@ -15,18 +15,16 @@ namespace Dune{
   @{
  */
 
-//*******************************************************************
-//*******************************************************************
-//*******************************************************************
-//*******************************************************************
-
 /*! Default Implementation class for DiscreteOperators 
  Here the ObjPointer is stored which is used during 
  the generation of new objects with the operator + method.
  There is corresponding interface class is Operator. 
+ NOTE: if operator + and operator * are used the inherited class 
+ DiscreteOperatorImp has to implement a Constructor which gets a copy and
+ the new LocalOperatorType which is created by the operator + ...
 */ 
 template <class LocalOperatorImp, class DFDomainType, class DFRangeType ,
-      template <class,class,class> class DiscreteOperatorImp >
+          template <class,class,class> class DiscreteOperatorImp >
 class DiscreteOperatorDefault
 : public Operator <typename DFDomainType::RangeFieldType, 
                    typename DFRangeType::RangeFieldType, 
@@ -39,20 +37,21 @@ protected:
   typedef DiscreteOperatorDefault < LocalOperatorImp , DFDomainType ,
   DFRangeType , DiscreteOperatorImp > DiscreteOperatorDefaultType;
 
-  //! Operator which is called on each entity
-  LocalOperatorImp & localOp_;
-   
+  typedef typename DFRangeType::RangeFieldType RangeFieldType;
+
 public:
   //! make new operator with item points to null 
-  DiscreteOperatorDefault (LocalOperatorImp & op) 
-    : localOp_ (op) , level_ (0) {}
+  DiscreteOperatorDefault () : level_ (0) {}
 
-  //! no public method, but has to be public, because all discrete operator 
-  //! must be able to call this method an the template parameters are
-  //! allways diffrent 
-  LocalOperatorImp & getLocalOp ()
+  /*! 
+   no public method, but has to be public, because all discrete operator 
+   must be able to call this method an the template parameters are
+   allways diffrent. 
+   NOTE: this method has to be overloaded by the DiscreteOperatorImp class
+   ans must return the reference to local operator  */
+  const LocalOperatorImp & getLocalOp () const 
   {
-    return localOp_;
+    return asImp().getLocalOp();
   }
 
   /*! add another discrete operator by combining the two local operators
@@ -64,13 +63,16 @@ public:
   template <class LocalOperatorType>
   DiscreteOperatorImp<  CombinedLocalOperator < LocalOperatorImp , LocalOperatorType> ,
                         DFDomainType, DFRangeType >  &
-  operator + (const DiscreteOperatorImp < LocalOperatorType, DFDomainType , DFRangeType > &op )
+  operator + (DiscreteOperatorImp < LocalOperatorType, DFDomainType , DFRangeType > &op )
   {
+    if(asImp().printInfo())
+      std::cout << "DiscreteOperatorDefault::operator + called! \n";
+
     typedef DiscreteOperatorImp < LocalOperatorType , DFDomainType, DFRangeType> CopyType;
     typedef CombinedLocalOperator < LocalOperatorImp , LocalOperatorType > COType;
 
     COType *locOp =
-      new COType ( localOp_ , const_cast<CopyType &> (op).getLocalOp (), asImp().printInfo() );
+      new COType ( asImp().getLocalOp() , op.getLocalOp () , asImp().printInfo() );
 
     typedef DiscreteOperatorImp <COType, DFDomainType, DFRangeType > OPType;
 
@@ -87,16 +89,19 @@ public:
   //! This method work just the same way like the operator + 
   //! but this time for mutiplication with scalar 
   DiscreteOperatorImp< ScaledLocalOperator < LocalOperatorImp , 
-      typename  DFDomainType::RangeFieldType > ,  DFDomainType,DFRangeType > & 
+      typename  DFDomainType::RangeFieldType > ,  DFDomainType, DFRangeType > & 
   operator * (const RangeFieldType& scalar)
   {
+    if(asImp().printInfo())
+      std::cout << "DiscreteOperatorDefault::operator * called! \n";
+
     typedef ScaledLocalOperator < LocalOperatorImp,
         typename  DFDomainType::RangeFieldType > ScalOperatorType;
   
     typedef DiscreteOperatorImp < ScalOperatorType , DFDomainType,DFRangeType > ScalDiscrType;
 
-    ScalOperatorType * sop = new ScalOperatorType ( localOp_ , scalar, asImp().printInfo() );
-    ScalDiscrType *discrOp = new ScalDiscrType ( asImp() , *sop );
+    ScalOperatorType * sop = new ScalOperatorType ( asImp().getLocalOp() , scalar, asImp().printInfo() );
+    ScalDiscrType *discrOp = new ScalDiscrType    ( asImp() , *sop );
 
     // memorize this new generated object because is represents this
     // operator and is deleted if this operator is deleted
@@ -129,13 +134,17 @@ public:
     std::cerr << "ERROR: DiscreteOperatorDefault::operator () called! \n";
   }
 
+  //! default implemenation of printInfo just returns false, no info is
+  //! printed, if true every constructor of CombinedLocalOperator prints
+  //! messages 
   bool printInfo () { return false; }
 
 protected:
-  // current level of operator 
+  //! current level of operator 
   mutable int level_;
 
 private:
+  //! Barton-Nackman 
   DiscreteOperatorImp < LocalOperatorImp , DFDomainType , DFRangeType > & 
   asImp() { return static_cast <DiscreteOperatorImp < LocalOperatorImp , DFDomainType , DFRangeType > &> (*this); }
 
