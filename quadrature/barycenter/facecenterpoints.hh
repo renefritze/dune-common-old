@@ -13,7 +13,7 @@ template <class Domain, class RangeField, ElementType ElType, int codim >
 struct BaryCenterPoints 
 {
   enum { identifier = 0 };
-  enum { numberQuadPoints = 0 };
+  enum { numberOfQuadPoints = 0 };
   enum { polynomOrder = 0 };
   static Domain getPoint (int i);
   static RangeField getWeight (int i);
@@ -33,9 +33,26 @@ Domain BaryCenterPoints<Domain,RangeField,ElType,codim>::getPoint(int i)
 
 //***********************************************************************
 //
-//  specialisations for triangles,quadrilateral,tetrahedrons,hexahedrons 
+//  specialisations for lines,triangles,quadrilateral,tetrahedrons,hexahedrons 
 //
 //***********************************************************************
+template <class Domain, class RangeField >
+struct BaryCenterPoints<Domain,RangeField,line,0> 
+{
+  enum { identifier = 0 };
+  enum { numberOfQuadPoints = 1 };
+  enum { polynomOrder = 1 };
+  static Domain getPoint (int i)
+  {
+    Domain tmp (0.5);
+    return tmp;
+  };
+  static RangeField getWeight (int i)
+  {
+    return 1.0;  
+  };
+};
+
 
 //! specialization triangles 
 template <class Domain, class RangeField>
