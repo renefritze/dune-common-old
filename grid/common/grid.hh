@@ -1516,6 +1516,9 @@ public:
     //! Constructor making new LeafIterator
     LeafIterator (GridType &grid, int maxlevel, bool end);
       
+    //! Desctructor removing underlying iterators 
+    ~LeafIterator ();
+      
     //! prefix increment
     LeafIterator& operator ++();
 
