@@ -11,6 +11,7 @@
 #include <initug.h>
 #include <commands.h>
 #include <formats.h>
+#include <elements.h>
 
 
 // for debugging

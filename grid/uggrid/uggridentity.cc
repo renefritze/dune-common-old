@@ -1,6 +1,6 @@
 //*************************************************************************
 //
-//  --AlbertGridEntity 
+//  --UGGridEntity 
 //  --Entity 
 //
 //*************************************************************************
@@ -9,24 +9,9 @@
 //
 //  codim > 0
 //
-// The Element is prescribed by the EL_INFO struct of ALBERT MESH
-// the pointer to this struct is set and get by setElInfo and
-// getElInfo. 
 //*********************************************************************8
 
 #if 0
-template<int codim, int dim, int dimworld>
-inline void AlbertGridEntity < codim, dim ,dimworld >::
-makeDescription()
-{
-  elInfo_ = NULL;
-  builtgeometry_ = false;
-
-  // to slow and not needed
-  //geo_.initGeom();
-}
-
-
 template<int codim, int dim, int dimworld>
 inline AlbertGridEntity < codim, dim ,dimworld >::
 AlbertGridEntity(AlbertGrid<dim,dimworld> &grid, int level, 
@@ -49,9 +34,8 @@ setTraverseStack(ALBERT TRAVERSE_STACK * travStack)
 
 template<int codim, int dim, int dimworld>
 inline UGGridEntity < codim, dim ,dimworld >::
-UGGridEntity(UGGrid<dim,dimworld> &grid, int level) : 
-  grid_(grid)
-, level_ (level)
+UGGridEntity(int level) : 
+level_ (level)
 , geo_ ( false )
 {
 #if 0
@@ -67,20 +51,29 @@ getElInfo() const
 {
   return elInfo_;
 }
+#endif
 
 template<int codim, int dim, int dimworld>
-inline void AlbertGridEntity < codim, dim ,dimworld >::
-setElInfo(ALBERT EL_INFO * elInfo, int elNum, unsigned char face,
+inline void UGGridEntity < codim, dim ,dimworld >::
+setElInfo(int elNum, unsigned char face,
           unsigned char edge, unsigned char vertex )
 {
   elNum_ = elNum;
   face_ = face;
   edge_ = edge;
   vertex_ = vertex;
-  elInfo_ = elInfo;
-  builtgeometry_ = geo_.builtGeom(elInfo_,face,edge,vertex);
+  //elInfo_ = elInfo;
+  //builtgeometry_ = geo_.builtGeom(elInfo_,face,edge,vertex);
 }
-#endif
+
+template<int codim, int dim, int dimworld>
+inline void UGGridEntity < codim, dim ,dimworld >::
+setToTarget(void* target)
+{
+    target_ = target;
+    geo_.setToTarget(target);
+    //printf("UGGridEntity::setToTarget  %d\n", target);
+}
 
 template<int codim, int dim, int dimworld>
 inline int UGGridEntity < codim, dim ,dimworld >::
@@ -89,21 +82,28 @@ level()
   return level_;
 }
 
-#if 0
+
 template<int codim, int dim, int dimworld>
-inline int AlbertGridEntity < codim, dim ,dimworld >::
+inline int UGGridEntity < codim, dim ,dimworld >::
 index()
 {
-  return elNum_;
+    if (codim==3) {
+        UG3d::vertex* myvertex = ((UG3d::node*)target_)->myvertex;
+        return myvertex->iv.id;
+    } 
+
+    return elNum_;
 }
 
 template< int codim, int dim, int dimworld>
-inline AlbertGridElement<dim-codim,dimworld>& 
-AlbertGridEntity < codim, dim ,dimworld >::geometry()
+inline UGGridElement<dim-codim,dimworld>& 
+UGGridEntity < codim, dim ,dimworld >::
+geometry()
 {
   return geo_;
 }
 
+#if 0
 template<int codim, int dim, int dimworld>
 inline Vec<dim,albertCtype>& 
 AlbertGridEntity < codim, dim ,dimworld >::local()
@@ -215,26 +215,22 @@ inline int AlbertGridEntity<0,dim,dimworld>::subIndex ( int i )
   return entity<cc>(i)->index();
 }
 
-// subIndex 
-template <> template <>
-inline int AlbertGridEntity<0,2,2>::subIndex<2> ( int i )
+#endif
+
+template <int codim, int dim, int dimworld>
+inline int UGGridEntity<codim, dim, dimworld>::subIndex(int i)
 {
-  return grid_.indexOnLevel<2>(elInfo_->el->dof[i][0],level_);
+    UG3d::ELEMENT* elem = (UG3d::ELEMENT*)target_;
+#define TAG(p) ReadCW(p, UG3d::TAG_CE)
+#define CORNER(p,i) ((UG3d::node *) (p)->ge.refs[UG3d::n_offset[TAG(p)]+(i)])
+    UG3d::node* node = CORNER(elem,i);
+#undef CORNER
+#undef TAG
+    UG3d::vertex* vertex = node->myvertex;
+    return vertex->iv.id;
 }
 
-// subIndex 
-template <> template <>
-inline int AlbertGridEntity<0,2,3>::subIndex<2> ( int i )
-{
-  return grid_.indexOnLevel<2>(elInfo_->el->dof[i][0],level_);
-}
-
-// subIndex 
-template <> template <>
-inline int AlbertGridEntity<0,3,3>::subIndex<3> ( int i )
-{
-  return grid_.indexOnLevel<3>(elInfo_->el->dof[i][0],level_);
-}
+#if 0
 
 // default is faces 
 template <int dim, int dimworld> template <int cc>
@@ -393,4 +389,50 @@ AlbertGridEntity < 0, dim ,dimworld >::father_relative_local()
   return fatherReLocal_;
 }
 #endif
-// end AlbertGridEntity
+
+template<int codim, int dim, int dimworld>
+inline UGGridIntersectionIterator<dim,dimworld> 
+UGGridEntity < codim, dim ,dimworld >::ibegin()
+{
+    UGGridIntersectionIterator<dim,dimworld> it;
+
+    if (codim==0) {
+        it.setToTarget((UG3d::element*)target_, 0);
+    } else
+        printf("UGGridEntity <%d, %d, %d>::ibegin() not implemented\n", codim, dim, dimworld);
+
+  return it;
+}
+
+
+template< int codim, int dim, int dimworld>
+inline UGGridIntersectionIterator<dim,dimworld> 
+UGGridEntity < codim, dim ,dimworld >::iend()
+{
+    UGGridIntersectionIterator<dim,dimworld> it;
+
+    if (codim==0) {
+        //printf("This is ibegin\n");
+        //printf("This is ib2egin\n");
+    } else
+        printf("UGGridEntity <%d, %d, %d>::iend() not implemented\n", codim, dim, dimworld);
+
+  return it;
+}
+
+#if 0
+template< int dim, int dimworld>
+inline void UGGridEntity < 0, dim ,dimworld >::
+ibegin(UGGridIntersectionIterator<dim,dimworld> &it) 
+{
+  it.makeBegin( grid_ , level() , elInfo_ );  
+}
+
+template< int dim, int dimworld>
+inline void UGGridEntity < 0, dim ,dimworld >::
+iend(AlbertGridIntersectionIterator<dim,dimworld> &it) 
+{
+  it.makeEnd( grid_ , level() );  
+}
+#endif
+// end UGGridEntity
