@@ -13,7 +13,7 @@ namespace Dune {
 template<class FunctionSpaceType, ElementType ElType, int polOrd> 
   class LagrangeBaseFunction;
          
-//! picewise const base functions 
+//! Piecewise const base functions 
 template<class FunctionSpaceType, ElementType ElType>
 class LagrangeBaseFunction < FunctionSpaceType , ElType , 0 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
@@ -74,14 +74,14 @@ public:
     : BaseFunctionInterface<FunctionSpaceType> (f) 
   {
     if(baseNum == 0) 
-    { // x 
-      factor[0] = 1.0;
-      factor[1] = 0.0;
-    } 
-    else 
-    { // 1 - x
+    { // 1 - x 
       factor[0] = -1.0;
       factor[1] =  1.0;
+    } 
+    else 
+    { // x
+      factor[0] = 1.0;
+      factor[1] = 0.0;
     }
   }  
 
@@ -105,7 +105,7 @@ public:
   virtual void evaluate ( const Vec<2,deriType> &diffVariable, 
                           const Domain & x, Range & phi) const 
   {
-    // function is linear, therfore 
+    // function is linear, therefore 
     phi = 0.0 ;
   }
 
@@ -181,7 +181,7 @@ public:
   virtual void evaluate ( const DiffVariable<2>::Type &diffVariable, 
                           const Domain & x, Range & phi) const 
   {
-    // function is linear, therfore 
+    // function is linear, therefore 
     phi = 0.0 ;
   }
 };
