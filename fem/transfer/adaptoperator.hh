@@ -290,7 +290,7 @@ class RestProlOperatorFV
   typedef BaryCenterQuad < RangeFieldType , DomainType , 0 > BaryQuadType;
 public:  
     //! ???
-  RestProlOperatorFV ( DiscreteFunctionType & df , ElementType eltype = tetrahedron  ) : df_ (df) , 
+  RestProlOperatorFV ( DiscreteFunctionType & df , GeometryType eltype = tetrahedron  ) : df_ (df) , 
   vati_ ( df_.newLocalFunction() ) , sohn_ ( df_.newLocalFunction() ) , quad_(eltype) , weight_(-1.0)
   {
   }

@@ -40,7 +40,7 @@ public:
   OrthonormalBaseFunctionSet (FunctionSpaceType & fuspace, int polOrder);
 
   //! change type
-  void changeType(ElementType & type)
+  void changeType(GeometryType & type)
   {
     type_ = type;
   }
@@ -91,7 +91,7 @@ private:
   int numOfBaseFct_; 
   
   //! Elementtype for which this basis is orthonormal 
-  ElementType type_;
+  GeometryType type_;
   
   //! eval
   inline void real_evaluate ( int baseFunct,

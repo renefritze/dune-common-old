@@ -343,7 +343,7 @@ inline void AlbertaGridElement<dim,dimworld>::print (std::ostream& ss, int inden
 }
 
 template< int dim, int dimworld>
-inline ElementType AlbertaGridElement<dim,dimworld>::type() const
+inline GeometryType AlbertaGridElement<dim,dimworld>::type() const
 {
   switch (dim)
   {
@@ -356,13 +356,13 @@ inline ElementType AlbertaGridElement<dim,dimworld>::type() const
 }
 
 template <> 
-inline ElementType AlbertaGridElement<2,2>::type() const
+inline GeometryType AlbertaGridElement<2,2>::type() const
 {
   return triangle;
 }
 
 template <> 
-inline ElementType AlbertaGridElement<3,3>::type() const
+inline GeometryType AlbertaGridElement<3,3>::type() const
 {
   return tetrahedron;
 }

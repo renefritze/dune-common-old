@@ -84,7 +84,7 @@ public:
 
   //! return the element type identifier
   //! line , triangle or tetrahedron, depends on dim 
-  ElementType type () const;
+  GeometryType type () const;
 
   //! return the number of corners of this element. Corners are numbered 0...n-1
   int corners () const;
@@ -159,7 +159,7 @@ private:
   void calcElMatrix () const;
 
   // element type of element 
-  const ElementType eltype_;
+  const GeometryType eltype_;
 
   //! the vertex coordinates 
   mutable Mat<dimworld,dim+1,bs_ctype> coord_; 

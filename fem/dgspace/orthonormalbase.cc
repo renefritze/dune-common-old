@@ -48,7 +48,7 @@ real_evaluate( int baseFunct, const FieldVector<deriType, 0> &diffVariable,
   case hexahedron:
     phi[0] = eval_hexahedron_3d (baseFunct, x); break;
   default:
-    DUNE_THROW(NotImplemented, "ElementType not suppoerted by OrthonormalBaseFunctionSet");
+    DUNE_THROW(NotImplemented, "GeometryType not suppoerted by OrthonormalBaseFunctionSet");
   }
 }
 
@@ -71,7 +71,7 @@ jacobian ( int baseFunct, const Domain & x, JacobianRange & grad ) const
   case hexahedron:
     return grad_hexahedron_3d (baseFunct, x, grad);
   default:
-    DUNE_THROW(NotImplemented, "ElementType not suppoerted by OrthonormalBaseFunctionSet");
+    DUNE_THROW(NotImplemented, "GeometryType not suppoerted by OrthonormalBaseFunctionSet");
   }
 }
 

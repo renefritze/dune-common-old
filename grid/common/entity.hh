@@ -19,11 +19,11 @@ public:
   typedef typename GridImp::template codim<codim>::Geometry Geometry;
   //! know your own codimension
   enum { codimension=codim };
-  //! know your own dimension
+  //! know the grid dimension
   enum { dimension=dim };
   //! know dimension of the entity
   enum { mydimension=dim-codim };
-  //! know your own dimension of world
+  //! know the dimension of world
   enum { dimensionworld=dimworld };
   //! define type used for coordinates in grid module
   typedef ct ctype;

@@ -124,7 +124,7 @@ public:
   typedef simplegrid_ctype ctype;
 
   //! return the element type identifier
-  ElementType type ()           
+  GeometryType type ()           
   {
         switch (dim)
           {
@@ -266,7 +266,7 @@ public:
   typedef simplegrid_ctype ctype;
 
   //! return the element type identifier
-  ElementType type ()           
+  GeometryType type ()           
   {
         switch (dim)
           {
@@ -470,7 +470,7 @@ public:
   typedef simplegrid_ctype ctype;
   
   //! return the element type identifier
-  ElementType type ()             
+  GeometryType type ()             
   {
         return vertex;
   }

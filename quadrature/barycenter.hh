@@ -45,12 +45,12 @@ public:
       case hexahedron:    { makeQuadrature<hexahedron> (); break; }
       case triangle:      { makeQuadrature<triangle> (); break; }
       case tetrahedron:   { makeQuadrature<tetrahedron> (); break; }
-      default :       { std::cerr << "Unkown ElementType in BaryCenterQuad::makeQuadrature()\n"; abort();  break; }
+      default :       { std::cerr << "Unkown GeometryType in BaryCenterQuad::makeQuadrature()\n"; abort();  break; }
     }
   };
 
   //! Constructor build the vec with the points and weights
-  BaryCenterQuad ( ElementType eltype )
+  BaryCenterQuad ( GeometryType eltype )
   {
     switch(eltype)
     {
@@ -59,7 +59,7 @@ public:
       case hexahedron:    { makeQuadrature<hexahedron> (); break; }
       case triangle:      { makeQuadrature<triangle> (); break; }
       case tetrahedron:   { makeQuadrature<tetrahedron> (); break; }
-      default :       { std::cerr << "Unkown ElementType in BaryCenterQuad::makeQuadrature()\n"; abort();  break; }
+      default :       { std::cerr << "Unkown GeometryType in BaryCenterQuad::makeQuadrature()\n"; abort();  break; }
     }
   };
 
@@ -84,7 +84,7 @@ public:
   }
 
 private:
-  template <ElementType ElType>
+  template <GeometryType ElType>
   void makeQuadrature ()
   {
     // is called by the constructor 

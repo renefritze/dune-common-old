@@ -130,9 +130,9 @@ public:
  
 private: 
   void setType(MonomialBaseFunctionSet<FunctionSpaceType> & b,
-               ElementType t) const {};
+               GeometryType t) const {};
   void setType(OrthonormalBaseFunctionSet<FunctionSpaceType> & b,
-               ElementType t) const
+               GeometryType t) const
     {
       b.changeType(t);
     };
