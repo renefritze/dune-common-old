@@ -14,4 +14,7 @@
 #include <elements.h>
 #include <shapes.h>
 
+// Only for CreateAlgebra
+#include <algebra.h>
+
 #endif
