@@ -106,12 +106,7 @@ template < int dim, int dimworld >
 inline int UGGrid < dim, dimworld >::maxlevel() const
 {
     /** \todo Use a member variable instead of search by name */
-#ifdef _3
-    //typename UGTypes<dimworld>::MultiGridType* theMG = UG3d::GetMultigrid("DuneMG");
-    UG3d::multigrid* theMG = UG3d::GetMultigrid("DuneMG");
-#else
-    typename UGTypes<dimworld>::MultiGridType* theMG = UG2d::GetMultigrid("DuneMG");
-#endif
+    typename UGTypes<dimworld>::MultiGridType* theMG = UG<dim>::GetMultigrid("DuneMG");
     return theMG->topLevel;
 }
 
@@ -251,7 +246,6 @@ inline int UGGrid < dim, dimworld >::size (int level, int codim) const
 template < int dim, int dimworld >
 inline void UGGrid < dim, dimworld >::makeNewUGMultigrid()
 {
-    printf("A\n");
     //configure @PROBLEM $d @DOMAIN;
     char* configureArgs[2] = {"configure DuneDummyProblem", "d olisDomain"};
 #ifdef _3
@@ -259,7 +253,6 @@ inline void UGGrid < dim, dimworld >::makeNewUGMultigrid()
 #else
     UG2d::ConfigureCommand(2, configureArgs);
 #endif
-    printf("B\n");
     
     //new @PROBLEM $b @PROBLEM $f @FORMAT $h @HEAP;
     char* newArgs[4];
@@ -281,24 +274,19 @@ inline void UGGrid < dim, dimworld >::makeNewUGMultigrid()
     /** \bug The newArgs array needs to be deleted here or when shutting down UG */
 //     for (int i=0; i<4; i++)
 //         free(newArgs[i]);
-    printf("C\n");
 }
 
 template < int dim, int dimworld >
 inline bool UGGrid < dim, dimworld >::adapt()
 {
     int rv;
+    int mode;
 
     /** \todo Use a member variable instead of search by name */
-#ifdef _3
-    typename UGTypes<dimworld>::MultiGridType* theMG = UG3d::GetMultigrid("DuneMG");
-#else
-    typename UGTypes<dimworld>::MultiGridType* theMG = UG2d::GetMultigrid("DuneMG");
-#endif
+    typename UGTypes<dimworld>::MultiGridType* theMG = UG<dim>::GetMultigrid("DuneMG");
     assert(theMG);
 
 #ifdef _3
-    int mode;
     mode = UG3d::GM_REFINE_TRULY_LOCAL;
     mode = mode | UG3d::GM_COPY_ALL;
 
@@ -306,11 +294,23 @@ inline bool UGGrid < dim, dimworld >::adapt()
     int seq = UG3d::GM_REFINE_PARALLEL;
 
     // I don't really know what this means either
-    int mgtest = UG3d::GM_REFINE_HEAPTEST;
+    int mgtest = UG3d::GM_REFINE_NOHEAPTEST;
+
+    rv = AdaptMultiGrid(theMG,mode,seq,mgtest);
+#else
+    mode = UG2d::GM_REFINE_TRULY_LOCAL;
+    mode = mode | UG2d::GM_COPY_ALL;
+
+    // I don't really know what this means
+    int seq = UG2d::GM_REFINE_PARALLEL;
+
+    // I don't really know what this means either
+    int mgtest = UG2d::GM_REFINE_NOHEAPTEST;
 
     rv = AdaptMultiGrid(theMG,mode,seq,mgtest);
 #endif
-    cout << "adapt():  error code " << rv << "\n";
+
+    std::cout << "adapt():  error code " << rv << "\n";
 
     /** \bug Should return true only if at least one element has actually
         been refined */
