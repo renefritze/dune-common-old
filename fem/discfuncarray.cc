@@ -51,7 +51,7 @@ inline DiscFuncArray< DiscreteFunctionSpaceType >::
 
 
 template<class DiscreteFunctionSpaceType >
-inline void DiscFuncArray< DiscreteFunctionSpaceType >::setLevel ( DofType x, int level )
+inline void DiscFuncArray< DiscreteFunctionSpaceType >::setLevel ( RangeField x, int level )
 {
   if(!allLevels_ && level != level_)
   {
@@ -59,27 +59,27 @@ inline void DiscFuncArray< DiscreteFunctionSpaceType >::setLevel ( DofType x, in
     return;
   }
   int size = dofVec_[level].size();
-  Array < DofType > &vec = dofVec_[level];
+  Array < RangeField > &vec = dofVec_[level];
   for(int i=0; i<size; i++)
     vec[i] = x; 
 }
 
 template<class DiscreteFunctionSpaceType >
-inline void DiscFuncArray< DiscreteFunctionSpaceType >::set ( DofType x )
+inline void DiscFuncArray< DiscreteFunctionSpaceType >::set ( RangeField x )
 {
   if(allLevels_)
   {
     for(int l=0; l<level_; l++)
     {
       int size = dofVec_[l].size();
-      Array < DofType > &vec = dofVec_[l];
+      Array < RangeField > &vec = dofVec_[l];
       for(int i=0; i<size; i++)
         vec[i] = x; 
     }
   }
  
   int size = dofVec_[level_].size();
-  Array < DofType > &vec = dofVec_[level_];
+  Array < RangeField > &vec = dofVec_[level_];
   for(int i=0; i<size; i++)
     vec[i] = x; 
 }  
@@ -99,7 +99,7 @@ inline void DiscFuncArray< DiscreteFunctionSpaceType >::clear ()
 template<class DiscreteFunctionSpaceType >
 inline void DiscFuncArray< DiscreteFunctionSpaceType >::print(std::ostream &s, int level )
 {
-  DofType sum = 0.;
+  RangeField sum = 0.;
   int numLevel = const_cast<GridType &> (functionSpace_.getGrid()).maxlevel();
   DofIteratorType enddof = dend ( numLevel );
   for(DofIteratorType itdof = dbegin ( numLevel ); itdof != enddof; ++itdof) 

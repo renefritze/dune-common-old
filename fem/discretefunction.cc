@@ -9,17 +9,17 @@ namespace Dune
 //  Default Implementations 
 //************************************************************
 // scalarProductDofs
-template<class DiscreteFunctionSpaceType,
-         class DofIteratorImp, class DiscreteFunctionImp >
+template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
+         class LocalFunctionImp, class DiscreteFunctionImp >
 inline DiscreteFunctionSpaceType::RangeField 
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-  DofIteratorImp , DiscreteFunctionImp >::
+  DofIteratorImp , LocalFunctionImp,DiscreteFunctionImp >::
 scalarProductDofs( const DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-                DofIteratorImp , DiscreteFunctionImp > &g ) 
+                DofIteratorImp ,LocalFunctionImp, DiscreteFunctionImp > &g ) 
 {
   typedef DiscreteFunctionSpaceType::RangeField RangeFieldType; 
-  typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType , DofIteratorImp , DiscreteFunctionImp >
-          DiscreteFunctionDefaultType ; 
+  typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
+    DofIteratorImp , LocalFunctionImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
 
   RangeFieldType skp = 0.;
 
@@ -40,15 +40,15 @@ scalarProductDofs( const DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
 }
 
 // assign
-template<class DiscreteFunctionSpaceType,
-         class DofIteratorImp, class DiscreteFunctionImp >
+template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
+         class LocalFunctionImp, class DiscreteFunctionImp >
 inline Vector< DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-  DofIteratorImp , DiscreteFunctionImp >::
+  DofIteratorImp , LocalFunctionImp, DiscreteFunctionImp >::
 assign( const Vector< DiscreteFunctionSpaceType::RangeField > & g ) 
 {
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
-    DofIteratorImp , DiscreteFunctionImp > DiscreteFunctionDefaultType;
+    DofIteratorImp , LocalFunctionImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
   
   DiscreteFunctionDefaultType &gc = 
     const_cast<DiscreteFunctionDefaultType &>( static_cast<const DiscreteFunctionDefaultType &> ( g ));
@@ -68,15 +68,15 @@ assign( const Vector< DiscreteFunctionSpaceType::RangeField > & g )
 }
 
 // operator =
-template<class DiscreteFunctionSpaceType,
-         class DofIteratorImp, class DiscreteFunctionImp >
+template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
+         class LocalFunctionImp, class DiscreteFunctionImp >
 inline Vector< DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-  DofIteratorImp , DiscreteFunctionImp >::
+  DofIteratorImp , LocalFunctionImp,DiscreteFunctionImp >::
 operator = ( const Vector< DiscreteFunctionSpaceType::RangeField > & g ) 
 {
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
-    DofIteratorImp , DiscreteFunctionImp > DiscreteFunctionDefaultType;
+    DofIteratorImp , LocalFunctionImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
     
   DiscreteFunctionDefaultType &gc = 
     const_cast<DiscreteFunctionDefaultType &>( static_cast<const DiscreteFunctionDefaultType &> ( g ));
@@ -96,15 +96,15 @@ operator = ( const Vector< DiscreteFunctionSpaceType::RangeField > & g )
 }
 
 // operator +=
-template<class DiscreteFunctionSpaceType,
-         class DofIteratorImp, class DiscreteFunctionImp >
+template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
+         class LocalFunctionImp, class DiscreteFunctionImp >
 inline Vector< DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-  DofIteratorImp , DiscreteFunctionImp >::
+  DofIteratorImp , LocalFunctionImp,DiscreteFunctionImp >::
 operator += ( const Vector< DiscreteFunctionSpaceType::RangeField > & g ) 
 {
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
-    DofIteratorImp , DiscreteFunctionImp > DiscreteFunctionDefaultType;
+    DofIteratorImp , LocalFunctionImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
     
   DiscreteFunctionDefaultType &gc = 
     const_cast<DiscreteFunctionDefaultType &>( static_cast<const DiscreteFunctionDefaultType &> ( g ));
@@ -123,15 +123,15 @@ operator += ( const Vector< DiscreteFunctionSpaceType::RangeField > & g )
 }
 
 // operator -=
-template<class DiscreteFunctionSpaceType,
-         class DofIteratorImp, class DiscreteFunctionImp >
+template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
+         class LocalFunctionImp, class DiscreteFunctionImp >
 inline Vector< DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-  DofIteratorImp , DiscreteFunctionImp >::
+  DofIteratorImp , LocalFunctionImp,DiscreteFunctionImp >::
 operator -= ( const Vector< DiscreteFunctionSpaceType::RangeField > & g ) 
 {
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
-    DofIteratorImp , DiscreteFunctionImp > DiscreteFunctionDefaultType;
+    DofIteratorImp , LocalFunctionImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
     
   DiscreteFunctionDefaultType &gc = 
     const_cast<DiscreteFunctionDefaultType &>( static_cast<const DiscreteFunctionDefaultType &> ( g ));
@@ -150,11 +150,11 @@ operator -= ( const Vector< DiscreteFunctionSpaceType::RangeField > & g )
 }
 
 // operator *=
-template<class DiscreteFunctionSpaceType,
-         class DofIteratorImp, class DiscreteFunctionImp >
+template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
+         class LocalFunctionImp, class DiscreteFunctionImp >
 inline Vector< DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-  DofIteratorImp , DiscreteFunctionImp >::
+  DofIteratorImp , LocalFunctionImp,DiscreteFunctionImp >::
 operator *= ( const DiscreteFunctionSpaceType::RangeField & scalar ) 
 {
   int level = getFunctionSpace().getGrid().maxlevel();
@@ -167,11 +167,11 @@ operator *= ( const DiscreteFunctionSpaceType::RangeField & scalar )
 }
 
 // operator /=
-template<class DiscreteFunctionSpaceType,
-         class DofIteratorImp, class DiscreteFunctionImp >
+template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
+         class LocalFunctionImp, class DiscreteFunctionImp >
 inline Vector< DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-  DofIteratorImp , DiscreteFunctionImp >::
+  DofIteratorImp , LocalFunctionImp,DiscreteFunctionImp >::
 operator /= ( const DiscreteFunctionSpaceType::RangeField & scalar ) 
 {
   (*this) *= (1./scalar);
@@ -180,16 +180,16 @@ operator /= ( const DiscreteFunctionSpaceType::RangeField & scalar )
 
 
 // add
-template<class DiscreteFunctionSpaceType,
-         class DofIteratorImp, class DiscreteFunctionImp >
+template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
+         class LocalFunctionImp, class DiscreteFunctionImp >
 inline Vector< DiscreteFunctionSpaceType::RangeField > &
 DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-  DofIteratorImp , DiscreteFunctionImp >::
+  DofIteratorImp , LocalFunctionImp,DiscreteFunctionImp >::
 add ( const Vector< DiscreteFunctionSpaceType::RangeField > & g ,
     DiscreteFunctionSpaceType::RangeField  scalar ) 
 {
   typedef DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
-    DofIteratorImp , DiscreteFunctionImp > DiscreteFunctionDefaultType;
+    DofIteratorImp , LocalFunctionImp, DiscreteFunctionImp > DiscreteFunctionDefaultType;
     
   DiscreteFunctionDefaultType &gc = 
     const_cast<DiscreteFunctionDefaultType &>( static_cast<const DiscreteFunctionDefaultType &> ( g ));
@@ -208,10 +208,10 @@ add ( const Vector< DiscreteFunctionSpaceType::RangeField > & g ,
 }
 
 // clear
-template<class DiscreteFunctionSpaceType,
-         class DofIteratorImp, class DiscreteFunctionImp >
+template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
+         class LocalFunctionImp, class DiscreteFunctionImp >
 inline void DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-  DofIteratorImp , DiscreteFunctionImp >:: clearLevel ( int level  )
+  DofIteratorImp , LocalFunctionImp,DiscreteFunctionImp >:: clearLevel ( int level  )
 {
   DofIteratorImp enddof = dend ( level_ );
   for(DofIteratorImp itdof = dbegin ( level_ );       
@@ -221,11 +221,11 @@ inline void DiscreteFunctionDefault<DiscreteFunctionSpaceType ,
   }
 }
 
-template<class DiscreteFunctionSpaceType,
-         class DofIteratorImp, class DiscreteFunctionImp >
+template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
+         class LocalFunctionImp, class DiscreteFunctionImp >
 template <FileFormatType ftype>
 inline bool DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-  DofIteratorImp , DiscreteFunctionImp >::
+  DofIteratorImp , LocalFunctionImp,DiscreteFunctionImp >::
 write(const char *filename, int timestep)
 {
   {
@@ -247,11 +247,11 @@ write(const char *filename, int timestep)
     return asImp().write_ascii(filename,timestep);
 }
 
-template<class DiscreteFunctionSpaceType,
-         class DofIteratorImp, class DiscreteFunctionImp >
+template<class DiscreteFunctionSpaceType, class DofIteratorImp, 
+         class LocalFunctionImp, class DiscreteFunctionImp >
 template <FileFormatType ftype>
 inline bool DiscreteFunctionDefault<DiscreteFunctionSpaceType , 
-  DofIteratorImp , DiscreteFunctionImp >::
+  DofIteratorImp , LocalFunctionImp,DiscreteFunctionImp >::
 read(const char *filename, int timestep)
 {
   {

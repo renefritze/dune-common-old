@@ -66,17 +66,18 @@ StringType typeIdentifier<double> ()
 //! 
 //************************************************************************
 template<class DiscreteFunctionSpaceType, 
-         class DofIteratorImp, class DiscreteFunctionImp >
+         class DofIteratorImp, class LocalFunctionImp , 
+         class DiscreteFunctionImp >
 class DiscreteFunctionInterface 
 : public Function < DiscreteFunctionSpaceType, 
       DiscreteFunctionInterface <DiscreteFunctionSpaceType, 
-      DofIteratorImp , DiscreteFunctionImp > > 
+      DofIteratorImp , LocalFunctionImp , DiscreteFunctionImp > > 
 {
+public:
   // just for readability 
   typedef Function < DiscreteFunctionSpaceType,  
         DiscreteFunctionInterface <DiscreteFunctionSpaceType,  
-              DofIteratorImp , DiscreteFunctionImp > > FunctionType;
-public:
+              DofIteratorImp , LocalFunctionImp,  DiscreteFunctionImp > > FunctionType;
   //! remember the template types 
   template <int cc>
   struct Traits 
@@ -89,6 +90,7 @@ public:
 
   typedef typename DiscreteFunctionSpaceType::GridType GridType;
   typedef DofIteratorImp DofIteratorType;
+  typedef LocalFunctionImp LocalFunctionType;
 
   DiscreteFunctionInterface ( const DiscreteFunctionSpaceType &f ) 
     : FunctionType ( f ) {} ;
@@ -97,10 +99,16 @@ public:
   //! access to the local function. Local functions can only be accessed
   //! for an existing entity. 
   template <class EntityType> 
-  typename Traits<EntityType::codimension>::LocalFunctionIteratorType  
-  access (EntityType & en )
+  LocalFunctionType & access (EntityType & en )
   {
     return asImp().access(en);
+  }
+  
+  //! access to the local function. Local functions can only be accessed
+  //! for an existing entity. 
+  void done (LocalFunctionType & lf )
+  {
+    return asImp().done(lf);
   }
   
   //! the implementation of an iterator to iterate efficient over all dof
@@ -143,14 +151,15 @@ private:
 //! 
 //*************************************************************************
 template<class DiscreteFunctionSpaceType, 
-         class DofIteratorImp, class DiscreteFunctionImp >
+         class DofIteratorImp, class LocalFunctionImp, class DiscreteFunctionImp >
 class DiscreteFunctionDefault 
 : public DiscreteFunctionInterface  
-  <DiscreteFunctionSpaceType, DofIteratorImp, DiscreteFunctionImp > 
+  <DiscreteFunctionSpaceType, DofIteratorImp, 
+  LocalFunctionImp, DiscreteFunctionImp > 
 { 
 
   typedef DiscreteFunctionInterface <DiscreteFunctionSpaceType, 
-    DofIteratorImp, DiscreteFunctionImp >  DiscreteFunctionInterfaceType;
+    DofIteratorImp, LocalFunctionImp, DiscreteFunctionImp >  DiscreteFunctionInterfaceType;
 
   enum { myId_ = 0 };  
 public:
