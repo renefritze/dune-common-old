@@ -13,7 +13,7 @@ class Function : public Mapping <typename FunctionSpaceType::RangeField , typena
 public:
   typedef typename FunctionSpaceType::Domain Domain ;
   typedef typename FunctionSpaceType::Range Range ;
-  typedef typename FunctionSpaceType::GradientRange GradientRange;
+  typedef typename FunctionSpaceType::JacobianRange JacobianRange;
   typedef typename FunctionSpaceType::HessianRange  HessianRange;
   typedef FunctionSpaceType FunctionSpace;
 

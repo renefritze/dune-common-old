@@ -31,7 +31,7 @@ public:
   enum { n = (dim > 0) ? dim : 1 };
   
   //! know length 
-  enum { dimension = dim};
+  enum { dimension = dim };
   
 	//! Constructor making uninizialized vector
 	Vec() {}
@@ -208,6 +208,10 @@ template<int n, int dim, class T = double>
 class Mat {
 public:
   enum { m = (dim > 0) ? dim : 1 };
+
+  //! remember the dimension of the matrix 
+  enum { dimRow = dim };
+  enum { dimCol = n };
   
 	//! Constructor making uninizialized matrix
 	Mat() {}
