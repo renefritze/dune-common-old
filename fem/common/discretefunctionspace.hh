@@ -71,7 +71,7 @@ public:
   typedef GridTemp GridType;
 
   //! Constructor 
-    DiscreteFunctionSpaceInterface ( GridType & g, int ident, int level ) : 
+    DiscreteFunctionSpaceInterface (const GridType & g, int ident, int level ) : 
         FunctionSpaceType (ident),  grid_ (g), level_(level) {};
 
   //! Get base function set for given entity. 
@@ -103,7 +103,7 @@ public:
   }
   
   //! return the corresponding Grid 
-  GridType & getGrid () const { return grid_; }
+    const GridType & getGrid () const { return grid_; }
 
   //! return number of degrees of freedom for spezified grid and level 
   //! which can also be the leaflevel and furthermore 
@@ -139,7 +139,7 @@ protected:
   }
   
   //! the corresponding Grid
-  GridType & grid_ ;
+    const GridType & grid_ ;
 
     //! The grid level
     int level_;
@@ -163,7 +163,7 @@ class DiscreteFunctionSpaceDefault
   
 public:
   // at the moment nothing
-    DiscreteFunctionSpaceDefault(GridTemp& g, int id, int level)
+    DiscreteFunctionSpaceDefault(const GridTemp& g, int id, int level)
         : DiscreteFunctionSpaceInterface < FunctionSpaceType , GridTemp,
                                            DiscreteFunctionSpaceImp, BaseFunctionSetInter>(g, id, level)
     {}
