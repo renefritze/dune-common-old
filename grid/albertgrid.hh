@@ -31,9 +31,9 @@ extern "C"
 {
 #endif
 
-#if EL_INDEX != 1
-#error "EL_INDEX must be set to 1 !!! \n"
-#endif
+//#if EL_INDEX != 1
+//#error "EL_INDEX must be set to 1 !!! \n"
+//#endif
   
 // the original ALBERT Lib 
 #include <albert.h>
