@@ -94,24 +94,7 @@ geometry()
   return geo_;
 }
 
-#if 0  // commented out because it doesn't compile
-#ifdef _3
-template<>
-inline UGGridLevelIterator<0,3,3, All_Partition> 
-UGGridEntity < 0, 3 ,3>::father()
-{
-    UGGridLevelIterator<0,3,3, All_Partition> it(level()-1);
-#define TAG(p) ReadCW(p, UG3d::TAG_CE)
-#define EFATHER(p) ((UG3d::ELEMENT *) (p)->ge.refs[UG3d::father_offset[TAG(p)]])
-    UG3d::ELEMENT* fatherTarget = EFATHER(target_);
-#undef TAG
-#undef EFATHER
 
-    it.setToTarget(fatherTarget);
-    return it;
-}
-#endif
-#endif
 
 //************************************
 //
@@ -388,3 +371,15 @@ geometry()
 {
   return geo_;
 }
+
+
+template<int dim, int dimworld>
+inline UGGridLevelIterator<0,dim,dimworld, All_Partition> 
+UGGridEntity < 0, dim, dimworld>::father()
+{
+    UGGridLevelIterator<0,dim,dimworld, All_Partition> it(level()-1);
+    it.setToTarget(UG_NS<dimworld>::EFather(target_));
+    return it;
+}
+
+
