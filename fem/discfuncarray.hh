@@ -150,12 +150,12 @@ public:
 
   //***** methods that not belong to the interface ************
   //***** but have to be public *******************************
-
+  
   //! get local function pointer, if not exists new object is created
-  LocalFunctionType * getLocalFunction ();
+  //LocalFunctionType * getLocalFunction ();
   
   //! free access to LocalFunction for next use 
-  void freeLocalFunction (LocalFunctionType * lf );
+  //void freeLocalFunction (LocalFunctionType * lf );
 private:  
   
   // get memory for discrete function
@@ -199,6 +199,9 @@ private:
   //! localFunction 
   LocalFunctionType * freeLocalFunc_;
 
+  //! hold one object for addLocal and setLocal and so on 
+  LocalFunctionType localFunc_;
+
   //! for all level an Array < RangeField > , the data 
   std::vector < Array < RangeFieldType > > dofVec_;
 }; // end class DiscFuncArray 
@@ -233,6 +236,9 @@ public:
 
   //! access to dof number num, all dofs of the dof entity
   RangeFieldType & operator [] (int num);
+  
+  //! access to dof number num, all dofs of the dof entity
+  const RangeFieldType & read (int num) const;
 
   //! return number of degrees of freedom 
   int numberOfDofs () const;
@@ -245,11 +251,9 @@ public:
   template <class EntityType, class QuadratureType> 
   void evaluate (EntityType &en, QuadratureType &quad, int quadPoint , RangeType & ret) const;
   
-  //********* Method that no belong to the interface *************
-  //! methods that do not belong to the interface but have to be public 
-  //! used like setElInfo and so on 
-  template <class EntityType > bool init ( EntityType &en );
 protected:
+  //! update local function for given Entity  
+  template <class EntityType > bool init ( EntityType &en ) const;
 
   //! get pointer to next LocalFunction 
   MyType * getNext() const;
@@ -257,29 +261,29 @@ protected:
   //! set pointer to next LocalFunction 
   void setNext (MyType * n);
   
+  //! remember pointer to next LocalFunction 
+  MyType * next_;
+  
   //! needed once 
   mutable RangeType tmp;
 
   //! needed once 
   JacobianRangeType tmpGrad_;
 
-  //! remember pointer to next LocalFunction 
-  MyType * next_;
-
   //! diffVar for evaluate, is empty 
   const DiffVariable<0>::Type diffVar;
 
   //! number of all dofs 
-  int numOfDof_;
+  mutable int numOfDof_;
 
   //! for example number of corners for linear elements 
-  int numOfDifferentDofs_;
+  mutable int numOfDifferentDofs_;
  
   //! the corresponding function space which provides the base function set
   const DiscreteFunctionSpaceType &fSpace_;
   
   //! Array holding pointers to the local dofs 
-  Array < RangeFieldType * > values_;
+  mutable Array < RangeFieldType * > values_;
 
   //! dofVec from all levels of the discrete function 
   typename std::vector < Array < RangeFieldType > > & dofVec_;
@@ -288,7 +292,7 @@ protected:
   bool uniform_;
   
   //! the corresponding base function set 
-  const BaseFunctionSetType *baseFuncSet_;
+  mutable const BaseFunctionSetType *baseFuncSet_;
 }; // end LocalFunctionArray 
 
 
@@ -366,6 +370,7 @@ private:
 //! The Storage of the dofs is implemented via an array 
 // 
 //**************************************************************************
+/* not needed anymore but keep for having it 
 template < class DiscFunctionType , class GridIteratorType > 
 class LocalFunctionArrayIterator 
 : public LocalFunctionIteratorDefault <  
@@ -429,6 +434,8 @@ private:
   //! pointer to the local function 
   LocalFunctionType *lf_; 
 }; // end LocalFunctionArrayIterator 
+*/
+
 
 } // end namespace Dune
 
