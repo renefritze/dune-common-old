@@ -156,7 +156,10 @@ private:
 //  -- Discontinous Galerkin Space
 //
 //***************************************************************************
-    /** \todo Please doc me! */
+
+
+#if 0
+/** \todo Please doc me! */
 template <class IndexSetType, int polOrd> 
 class DGMapper 
 : public DofMapperDefault < DGMapper <IndexSetType,polOrd> > 
@@ -172,13 +175,12 @@ public:
     return this->size(level);
   }
 
-    /** \todo Please doc me! */
+  /** \todo Please doc me! */
   //template <class GridType>      
   int size (int level ) const 
   {
     // return number of dofs * number of elements 
-    //return (numberOfDofs_ * grid.size( level , 0 ));     
-    return 0;
+    return (numberOfDofs_ * grid.size( level , 0 ));     
   };
 
   //! map Entity an local Dof number to global Dof number 
@@ -227,20 +229,20 @@ public:
     }
   };
  
-    /** \todo Please doc me! */
+  /** \todo Please doc me! */
   template <class DiscFuncType>
   MemObjectType & signIn (DiscFuncType & df)  
   {
   }
   
-    /** \todo Please doc me! */
+  /** \todo Please doc me! */
   template <class DiscFuncType>
   bool signOut (DiscFuncType & df)  
   {
     return false;
   }
   
-    /** \todo Please doc me! */
+  /** \todo Please doc me! */
   ~DGDiscreteFunctionSpace ()
   {
     if(mapper_) delete mapper_;
@@ -289,6 +291,7 @@ private:
   DGMapper<GridType, polOrd> *mapper_;
   
 };
+#endif
 
 //*************************************************************************
 //*************************************************************************
