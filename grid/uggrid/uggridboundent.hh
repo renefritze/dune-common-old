@@ -20,14 +20,6 @@ public:
     UGGridBoundaryEntity () : _neigh(-1), _geom (false)
     {}
 
-  //! return type of boundary , i.e. Neumann, Dirichlet ... 
-  BoundaryType type () 
-  {
-//       std::cerr << "UGGridBoundaryEntity::type(): Preliminary implementation,"
-//           "always returns 'Dirichlet'\n";
-      return Dirichlet;
-  }
-
   //! return identifier of boundary segment, number 
   int id ()
   {
