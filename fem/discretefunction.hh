@@ -2,8 +2,8 @@
 #define __DUNE_DISCRETEFUNCTION_HH__
 
 #include "../common/function.hh"
-#include "pwlinfunc.hh"
 #include "dofstoragearray.hh"
+
 
 namespace Dune{
 

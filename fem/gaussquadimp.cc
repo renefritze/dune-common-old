@@ -1,5 +1,5 @@
-#ifndef __GAUSSQUADRATURE_CC__
-#define __GAUSSQUADRATURE_CC__
+#ifndef __GAUSSQUADRATUREIMP_CC__
+#define __GAUSSQUADRATUREIMP_CC__
 
 #include<new>
 #include<iostream>

@@ -41,7 +41,7 @@ private:
 
 //***********************************************************************
 //
-//  Provide default implementation of MapperInterface 
+//!  Provide default implementation of MapperInterface 
 //
 //***********************************************************************
 template <class MapperImp> 
@@ -138,10 +138,10 @@ private:
   template <int diffOrd, class QuadratureType >
   void evaluateInit ( const Vec<diffOrd,char> & diffVariable,  
                       const QuadratureType & quad ) ;
-};
-
+}; // end class FastBaseFunctionSet
 
 #include "fastbase.cc"
-}
+
+} // end namespace Dune
 
 #endif
