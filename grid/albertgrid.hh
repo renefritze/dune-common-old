@@ -103,6 +103,14 @@ namespace Dune
 
   @{
  */
+    enum IteratorType { Master  , //!< iterate over all entities which belong to
+                        Interior, //!< iterate over all interior entities
+                        Border  , //!< iterate over entities which define the pr
+                                  //!< border , all codims possible             
+                        Ghosts ,  //!< iterate over all ghost cells
+                        InteriorBorder,  //!< iterate over Interior and Border
+                        All ,    //!< iterate over all cells on this processor
+                      };
 
   
 // i.e. double or float 
@@ -112,7 +120,9 @@ typedef ALBERT REAL albertCtype;
 class AlbertMarkerVector;
 
 template<int codim, int dim, int dimworld> class AlbertGridEntity;
-template<int codim, int dim, int dimworld> class AlbertGridLevelIterator;
+
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype> 
+                                           class AlbertGridLevelIterator;
 
 template<int dim, int dimworld>            class AlbertGridElement;
 template<int dim, int dimworld>            class AlbertGridBoundaryEntity;
@@ -307,7 +317,7 @@ public EntityDefault <codim,dim,dimworld,albertCtype,
 {
   friend class AlbertGrid < dim , dimworld >;
   friend class AlbertGridEntity < 0, dim, dimworld>;
-  friend class AlbertGridLevelIterator < codim, dim, dimworld>;
+  friend class AlbertGridLevelIterator < codim, dim, dimworld,All_Partition>;
   //friend class AlbertGridLevelIterator < dim, dim, dimworld>;
 public:
 
@@ -336,7 +346,7 @@ public:
     This can speed up on-the-fly interpolation for linear conforming elements
     Possibly this is sufficient for all applications we want on-the-fly.
   */
-  AlbertGridLevelIterator<0,dim,dimworld> father ();
+  AlbertGridLevelIterator<0,dim,dimworld,All_Partition> father ();
 
   //! local coordinates within father
   Vec<dim,albertCtype>& local ();
@@ -413,7 +423,7 @@ public EntityDefault<0,dim,dimworld,albertCtype,AlbertGridEntity,AlbertGridEleme
   friend class AlbertMarkerVector;
   friend class AlbertGridIntersectionIterator < dim, dimworld>;
   friend class AlbertGridHierarchicIterator < dim, dimworld>;
-  friend class AlbertGridLevelIterator <0,dim,dimworld>;
+  friend class AlbertGridLevelIterator <0,dim,dimworld,All_Partition>;
 public:
   typedef AlbertGridIntersectionIterator<dim,dimworld> IntersectionIterator; 
   typedef AlbertGridHierarchicIterator<dim,dimworld> HierarchicIterator; 
@@ -452,7 +462,7 @@ public:
 
   //! Provide access to mesh entity i of given codimension. Entities
   //!  are numbered 0 ... count<cc>()-1
-  template<int cc> AlbertGridLevelIterator<cc,dim,dimworld> entity (int i);
+  template<int cc> AlbertGridLevelIterator<cc,dim,dimworld,All_Partition> entity (int i);
 
   //! Provide access to mesh entity i of given codimension. Entities
   //!  are numbered 0 ... count<cc>()-1
@@ -480,7 +490,7 @@ public:
 
   //! Inter-level access to father element on coarser grid. 
   //! Assumes that meshes are nested.
-  AlbertGridLevelIterator<0,dim,dimworld> father ();
+  AlbertGridLevelIterator<0,dim,dimworld,All_Partition> father ();
   void father (AlbertGridEntity<0,dim,dimworld> & vati);
   AlbertGridEntity<0,dim,dimworld> newEntity();
 
@@ -567,7 +577,7 @@ private:
   int level_;
 
   //! for vertex access, to be revised, filled on demand
-  AlbertGridLevelIterator<dim,dim,dimworld> vxEntity_;
+  AlbertGridLevelIterator<dim,dim,dimworld,All_Partition> vxEntity_;
 
   //! pointer to the Albert TRAVERSE_STACK data
   ALBERT TRAVERSE_STACK * travStack_;
@@ -876,15 +886,17 @@ private:
 /*!
  Enables iteration over all entities of a given codimension and level of a grid.
  */
-template<int codim, int dim, int dimworld>
+template<int codim, int dim, int dimworld, PartitionIteratorType pitype> 
 class AlbertGridLevelIterator : 
-public LevelIteratorDefault <codim,dim,dimworld,albertCtype,
+public LevelIteratorDefault <codim,dim,dimworld,pitype,albertCtype,
           AlbertGridLevelIterator,AlbertGridEntity>
 {
   friend class AlbertGridEntity<2,dim,dimworld>;
   friend class AlbertGridEntity<1,dim,dimworld>;
   friend class AlbertGridEntity<0,dim,dimworld>;
   friend class AlbertGrid < dim , dimworld >;
+
+  typedef AlbertGridLevelIterator<codim,dim,dimworld,pitype>  AlbertGridLevelIteratorType;
 public:
 
   enum { dimension = dim };
@@ -903,13 +915,13 @@ public:
           IteratorType IType, int proc ,bool leafIt=false);
   
   //! prefix increment
-  AlbertGridLevelIterator<codim,dim,dimworld>& operator ++();
+  AlbertGridLevelIteratorType& operator ++();
 
   //! equality
-  bool operator== (const AlbertGridLevelIterator<codim,dim,dimworld>& i) const;
+  bool operator== (const AlbertGridLevelIteratorType & i) const;
 
   //! inequality
-  bool operator!= (const AlbertGridLevelIterator<codim,dim,dimworld>& i) const;
+  bool operator!= (const AlbertGridLevelIteratorType & i) const;
 
   //! dereferencing
   AlbertGridEntity<codim,dim,dimworld>& operator*() ;
@@ -1011,10 +1023,10 @@ class AlbertGrid : public GridDefault  < dim, dimworld,
   friend class AlbertMarkerVector;
 
   // friends because of fillElInfo
-  friend class AlbertGridLevelIterator<0,dim,dimworld>;
-  friend class AlbertGridLevelIterator<1,dim,dimworld>;
-  friend class AlbertGridLevelIterator<2,dim,dimworld>;
-  friend class AlbertGridLevelIterator<3,dim,dimworld>;
+  friend class AlbertGridLevelIterator<0,dim,dimworld,All_Partition>;
+  friend class AlbertGridLevelIterator<1,dim,dimworld,All_Partition>;
+  friend class AlbertGridLevelIterator<2,dim,dimworld,All_Partition>;
+  friend class AlbertGridLevelIterator<3,dim,dimworld,All_Partition>;
   friend class AlbertGridHierarchicIterator<dim,dimworld>;
 
   friend class AlbertGridIntersectionIterator<dim,dimworld>;
@@ -1027,7 +1039,7 @@ class AlbertGrid : public GridDefault  < dim, dimworld,
 // The Interface Methods
 //**********************************************************
 public: 
-  typedef AlbertGridLevelIterator<0,dim,dimworld> LeafIterator;
+  typedef AlbertGridLevelIterator<0,dim,dimworld,All_Partition> LeafIterator;
   typedef AlbertGridReferenceElement<dim> ReferenceElement;
 
   //! we always have dim+1 codimensions since we use only simplices 
@@ -1060,11 +1072,11 @@ public:
   int maxlevel() const;
 
   //! Iterator to first entity of given codim on level
-  template<int codim>  AlbertGridLevelIterator<codim,dim,dimworld> 
+  template<int codim> AlbertGridLevelIterator<codim,dim,dimworld,All_Partition> 
   lbegin (int level,IteratorType IType = InteriorBorder, int proc = -1 );
 
   //! one past the end on this level
-  template<int codim>  AlbertGridLevelIterator<codim,dim,dimworld> 
+  template<int codim> AlbertGridLevelIterator<codim,dim,dimworld,All_Partition> 
   lend (int level, IteratorType IType = InteriorBorder, int proc = -1 );
 
   //! number of grid entities per level and codim

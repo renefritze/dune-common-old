@@ -937,7 +937,7 @@ AlbertGridEntity < codim, dim ,dimworld >::local()
 }
 
 template<int codim, int dim, int dimworld>
-inline AlbertGridLevelIterator<0,dim,dimworld> 
+inline AlbertGridLevelIterator<0,dim,dimworld,All_Partition> 
 AlbertGridEntity < codim, dim ,dimworld >::father()
 {
   //std::cout << "\nAlbertGridEntity<" << codim << "," << dim << "," << dimworld <<">::father not correctly implemented! \n";
@@ -948,7 +948,7 @@ AlbertGridEntity < codim, dim ,dimworld >::father()
 
   travStack.stack_used--;
 
-  AlbertGridLevelIterator <0,dim,dimworld>
+  AlbertGridLevelIterator <0,dim,dimworld,All_Partition>
     it(grid_,level(),travStack.elinfo_stack+travStack.stack_used,0,0,0,0);
   return it;
 }
@@ -1148,10 +1148,10 @@ inline int AlbertGridEntity<0,3,3>::subIndex<3> ( int i )
 
 // default is faces 
 template <int dim, int dimworld> template <int cc>
-inline AlbertGridLevelIterator<cc,dim,dimworld> 
+inline AlbertGridLevelIterator<cc,dim,dimworld,All_Partition> 
 AlbertGridEntity<0,dim,dimworld>::entity ( int i )
 {
-  AlbertGridLevelIterator<cc,dim,dimworld> tmp (grid_, level() ,elInfo_,
+  AlbertGridLevelIterator<cc,dim,dimworld,All_Partition> tmp (grid_, level() ,elInfo_,
       grid_. template indexOnLevel<cc>( el_index() ,level()),i,0,0);
   return tmp;
 }
@@ -1160,19 +1160,19 @@ template <>
 #ifdef TEMPPARAM2
 template <>
 #endif
-inline AlbertGridLevelIterator<2,3,3> 
+inline AlbertGridLevelIterator<2,3,3,All_Partition> 
 AlbertGridEntity<0,3,3>::entity<2> ( int i )
 {
   //enum { cc = 2 };
   int num = grid_.indexOnLevel<2>(el_index() ,level_);
   if(i < 3)
   { // 0,1,2 
-    AlbertGridLevelIterator<2,3,3> tmp (grid_,level_,elInfo_,num, 0,i,0);
+    AlbertGridLevelIterator<2,3,3,All_Partition> tmp (grid_,level_,elInfo_,num, 0,i,0);
     return tmp;
   }  
   else
   { // 3,4,5
-    AlbertGridLevelIterator<2,3,3> tmp (grid_,level_,elInfo_,num, i-2,1,0);
+    AlbertGridLevelIterator<2,3,3,All_Partition> tmp (grid_,level_,elInfo_,num, i-2,1,0);
     return tmp;
   }
 }
@@ -1182,14 +1182,14 @@ template <>
 #ifdef TEMPPARAM2
 template <>
 #endif
-inline AlbertGridLevelIterator<2,2,2> 
+inline AlbertGridLevelIterator<2,2,2,All_Partition> 
 AlbertGridEntity<0,2,2>::entity<2> ( int i )
 {
   //std::cout << "entity<2> ,2,2 !\n";
   // we are looking at vertices 
   //enum { cc = dimension };
   enum { cc = 2 };
-  AlbertGridLevelIterator<cc,2,2> 
+  AlbertGridLevelIterator<cc,2,2,All_Partition> 
     tmp (grid_,level_,elInfo_, grid_.indexOnLevel<cc>( elInfo_->el->dof[i][0],level_), 
          0,0,i);
   return tmp; 
@@ -1199,13 +1199,13 @@ template <>
 #ifdef TEMPPARAM2
 template <>
 #endif
-inline AlbertGridLevelIterator<2,2,3> 
+inline AlbertGridLevelIterator<2,2,3,All_Partition> 
 AlbertGridEntity<0,2,3>::entity<2> ( int i )
 {
   // we are looking at vertices 
   //enum { cc = dimension };
   enum { cc = 2 };
-  AlbertGridLevelIterator<cc,2,3> 
+  AlbertGridLevelIterator<cc,2,3,All_Partition> 
     tmp (grid_,level_,elInfo_, grid_.indexOnLevel<cc>( elInfo_->el->dof[i][0],level_), 
          0,0,i);
   return tmp; 
@@ -1215,13 +1215,13 @@ template <>
 #ifdef TEMPPARAM2
 template <>
 #endif
-inline AlbertGridLevelIterator<3,3,3> 
+inline AlbertGridLevelIterator<3,3,3,All_Partition> 
 AlbertGridEntity<0,3,3>::entity<3> ( int i )
 {
   // we are looking at vertices 
   enum { cc = 3 };
   //enum { cc = dimension };
-  AlbertGridLevelIterator<cc,3,3> 
+  AlbertGridLevelIterator<cc,3,3,All_Partition> 
     tmp (grid_,level_,elInfo_, grid_.indexOnLevel<cc>( elInfo_->el->dof[i][0],level_), 
          0,0,i);
   return tmp; 
@@ -1292,7 +1292,7 @@ AlbertGridEntity < 0, dim ,dimworld >::geometry()
 
 
 template< int dim, int dimworld>
-inline AlbertGridLevelIterator<0,dim,dimworld> 
+inline AlbertGridLevelIterator<0,dim,dimworld,All_Partition> 
 AlbertGridEntity < 0, dim ,dimworld >::father()
 {
   ALBERT EL_INFO * fatherInfo = NULL;
@@ -1312,7 +1312,7 @@ AlbertGridEntity < 0, dim ,dimworld >::father()
 
   int fatherIndex = grid_.template indexOnLevel<0>(grid_.getElementNumber(fatherInfo->el),fatherLevel);
   // new LevelIterator with EL_INFO one level above 
-  AlbertGridLevelIterator <0,dim,dimworld> it(grid_,fatherLevel,fatherInfo,fatherIndex,0,0,0);
+  AlbertGridLevelIterator <0,dim,dimworld,All_Partition> it(grid_,fatherLevel,fatherInfo,fatherIndex,0,0,0);
   return it;  
 }
 
@@ -1822,7 +1822,11 @@ outer_normal()
   ALBERT REAL_D *coord = elInfo_->coord;
   
   // in this case the orientation is negative, therefore multiply with -1
+#if DIM == 3
   const albertCtype val = (elInfo_->orientation > 0) ? 0.5 : -0.5;
+#else
+  const albertCtype val = 0.5;
+#endif 
 
   // neighborCount_ is the local face number 
   const int * localFaces = ALBERT AlbertHelp::localTetraFaceNumber[neighborCount_]; 
@@ -2000,8 +2004,8 @@ inline void AlbertGridIntersectionIterator<dim,dimworld>::setupVirtEn()
 //  some template specialization of goNextEntity
 //***********************************************************
 // default implementation, go next elInfo
-template<int codim, int dim, int dimworld>   
-inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
   return goNextElInfo(stack,elinfo_old);
@@ -2009,19 +2013,19 @@ goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 
 // specializations for codim 1, go next face
 template <>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<1,2,2>::
+inline ALBERT EL_INFO * AlbertGridLevelIterator<1,2,2,All_Partition>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
   return goNextFace(stack,elinfo_old);
 }
 template <>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<1,2,3>::
+inline ALBERT EL_INFO * AlbertGridLevelIterator<1,2,3,All_Partition>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
   return goNextFace(stack,elinfo_old);
 }
 template <>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<1,3,3>::
+inline ALBERT EL_INFO * AlbertGridLevelIterator<1,3,3,All_Partition>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
   return goNextFace(stack,elinfo_old);
@@ -2030,7 +2034,7 @@ goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 // specialization for codim 2, if dim > 2, go next edge, 
 // only if dim == dimworld == 3
 template <>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<2,3,3>::
+inline ALBERT EL_INFO * AlbertGridLevelIterator<2,3,3,All_Partition>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
   return goNextEdge(stack,elinfo_old);
@@ -2038,19 +2042,19 @@ goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 
 // specialization for codim == dim , go next vertex 
 template <>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<2,2,2>::
+inline ALBERT EL_INFO * AlbertGridLevelIterator<2,2,2,All_Partition>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
   return goNextVertex(stack,elinfo_old);
 }
 template <>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<2,2,3>::
+inline ALBERT EL_INFO * AlbertGridLevelIterator<2,2,3,All_Partition>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
   return goNextVertex(stack,elinfo_old);
 }
 template <>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<3,3,3>::
+inline ALBERT EL_INFO * AlbertGridLevelIterator<3,3,3,All_Partition>::
 goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 {
   return goNextVertex(stack,elinfo_old);
@@ -2058,8 +2062,8 @@ goNextEntity(ALBERT TRAVERSE_STACK *stack,ALBERT EL_INFO *elinfo_old)
 // end specialization of goNextEntity
 //***************************************
 
-template<int codim, int dim, int dimworld>
-inline void AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline void AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 makeIterator()
 {
   level_ = 0;
@@ -2073,8 +2077,8 @@ makeIterator()
 }
 
 // Make LevelIterator with point to element from previous iterations
-template<int codim, int dim, int dimworld>
-inline AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, int travLevel, 
     IteratorType IType, int proc, bool leafIt ) :
   grid_(grid), level_ (travLevel) ,  virtualEntity_(grid,travLevel) 
@@ -2084,8 +2088,8 @@ AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, int travLevel,
 }
 
 // Make LevelIterator with point to element from previous iterations
-template<int codim, int dim, int dimworld>
-inline AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, int level,  
 ALBERT EL_INFO *elInfo,int elNum,int face,int edge,int vertex) : 
   grid_(grid), level_ (level) , virtualEntity_(grid,level) , elNum_ ( elNum ) , face_ ( face ) ,
@@ -2103,8 +2107,8 @@ ALBERT EL_INFO *elInfo,int elNum,int face,int edge,int vertex) :
   }
 }
 
-template<int codim, int dim, int dimworld>
-inline AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid, 
   AlbertMarkerVector * vertexMark, 
   int travLevel, IteratorType IType , int proc, bool leafIt) 
@@ -2151,25 +2155,25 @@ AlbertGridLevelIterator(AlbertGrid<dim,dimworld> &grid,
 
 };
 
-template<int codim, int dim, int dimworld>
-inline bool AlbertGridLevelIterator<codim,dim,dimworld >::
-operator ==(const AlbertGridLevelIterator<codim,dim,dimworld > &I) const 
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline bool AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
+operator ==(const AlbertGridLevelIterator<codim,dim,dimworld,pitype> &I) const 
 {
   return (virtualEntity_.getElInfo() == I.virtualEntity_.getElInfo());
 }
 
-template<int codim, int dim, int dimworld>
-inline bool AlbertGridLevelIterator < codim,dim,dimworld >::
-operator !=(const AlbertGridLevelIterator< codim,dim,dimworld > & I) const
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline bool AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
+operator !=(const AlbertGridLevelIterator<codim,dim,dimworld,pitype> & I) const
 {
   return (virtualEntity_.getElInfo() != I.virtualEntity_.getElInfo() ); 
 }
 
 
 // gehe zum naechsten Element, wie auch immer
-template<int codim, int dim, int dimworld>
-inline AlbertGridLevelIterator < codim,dim,dimworld >& 
-AlbertGridLevelIterator < codim,dim,dimworld >::operator ++()
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline AlbertGridLevelIterator<codim,dim,dimworld,pitype>& 
+AlbertGridLevelIterator<codim,dim,dimworld,pitype>::operator ++()
 {
   elNum_++;
   virtualEntity_.setElInfo(
@@ -2179,8 +2183,8 @@ AlbertGridLevelIterator < codim,dim,dimworld >::operator ++()
   return (*this);
 }
 
-template<int codim, int dim, int dimworld>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 goNextFace(ALBERT TRAVERSE_STACK *stack, ALBERT EL_INFO *elInfo)
 {
   // go next Element, if face_ > numberOfVertices, then go to next elInfo 
@@ -2204,16 +2208,16 @@ goNextFace(ALBERT TRAVERSE_STACK *stack, ALBERT EL_INFO *elInfo)
   return elInfo;
 }
 
-template<int codim, int dim, int dimworld>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 goNextEdge(ALBERT TRAVERSE_STACK *stack, ALBERT EL_INFO *elInfo)
 {
   std::cout << "EdgeIterator not implemented for 3d!\n";
   return NULL;
 }
 
-template<int codim, int dim, int dimworld>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 goNextVertex(ALBERT TRAVERSE_STACK *stack, ALBERT EL_INFO *elInfo)
 {
   // go next Element, Vertex 0
@@ -2237,23 +2241,23 @@ goNextVertex(ALBERT TRAVERSE_STACK *stack, ALBERT EL_INFO *elInfo)
 }
 
 
-template<int codim, int dim, int dimworld>
-inline AlbertGridEntity<codim, dim, dimworld> & 
-AlbertGridLevelIterator< codim,dim,dimworld >::operator *()
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline AlbertGridEntity<codim,dim,dimworld> & 
+AlbertGridLevelIterator<codim,dim,dimworld,pitype>::operator *()
 {
   return virtualEntity_;
 }
 
-template<int codim, int dim, int dimworld>
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
 inline AlbertGridEntity< codim,dim,dimworld >* 
-AlbertGridLevelIterator< codim,dim,dimworld >::operator ->()
+AlbertGridLevelIterator<codim,dim,dimworld,pitype>::operator ->()
 {
   return &virtualEntity_;
 }
 
 
-template<int codim, int dim, int dimworld>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 goFirstElement(ALBERT TRAVERSE_STACK *stack,ALBERT MESH *mesh, int level, 
      ALBERT FLAGS fill_flag)
 {   
@@ -2291,8 +2295,8 @@ goFirstElement(ALBERT TRAVERSE_STACK *stack,ALBERT MESH *mesh, int level,
 }
 
 
-template<int codim, int dim, int dimworld>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 goNextElInfo(ALBERT TRAVERSE_STACK *stack, ALBERT EL_INFO *elinfo_old)
 {
   FUNCNAME("goNextElInfo");
@@ -2428,8 +2432,8 @@ goNextElInfo(ALBERT TRAVERSE_STACK *stack, ALBERT EL_INFO *elinfo_old)
 }
 
 
-template<int codim, int dim, int dimworld>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 traverseElLevel(ALBERT TRAVERSE_STACK *stack)
 {
   FUNCNAME("traverseElLevel");
@@ -2524,8 +2528,8 @@ traverseElLevel(ALBERT TRAVERSE_STACK *stack)
 }
 
 // iterate over interior elements
-template<int codim, int dim, int dimworld>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 traverseElLevelInteriorBorder(ALBERT TRAVERSE_STACK *stack)
 {
   FUNCNAME("traverseElLevel");
@@ -2634,8 +2638,8 @@ traverseElLevelInteriorBorder(ALBERT TRAVERSE_STACK *stack)
   return(stack->elinfo_stack+stack->stack_used);
 }
 
-template<int codim, int dim, int dimworld>
-inline ALBERT MACRO_EL * AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline ALBERT MACRO_EL * AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 nextGhostMacro(ALBERT MACRO_EL * oldmel)
 {
   ALBERT MACRO_EL * mel = oldmel;
@@ -2653,8 +2657,8 @@ nextGhostMacro(ALBERT MACRO_EL * oldmel)
   return mel;
 }
 
-template<int codim, int dim, int dimworld>
-inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld >::
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline ALBERT EL_INFO * AlbertGridLevelIterator<codim,dim,dimworld,pitype>::
 traverseElLevelGhosts(ALBERT TRAVERSE_STACK *stack)
 {
   FUNCNAME("traverseElLevel");
@@ -2755,11 +2759,15 @@ traverseElLevelGhosts(ALBERT TRAVERSE_STACK *stack)
   return(stack->elinfo_stack+stack->stack_used);
 }
 
-template<int codim, int dim, int dimworld>
-inline int AlbertGridLevelIterator<codim,dim,dimworld >::level()
+template<int codim, int dim, int dimworld,PartitionIteratorType pitype>   
+inline int AlbertGridLevelIterator<codim,dim,dimworld,pitype>::level()
 {
   return (manageStack_.getStack())->stack_used;
 }
+
+//*************************************************************************
+//  end AlbertGridLevelIterator
+//*************************************************************************
 
 
 template< int dim, int dimworld>
@@ -3014,7 +3022,7 @@ AlbertGrid(AlbertGrid<dim,dimworld> & oldGrid, int proc , bool levInd) :
       
       {
         int no = 0;
-        typedef AlbertGridLevelIterator<0,dim,dimworld> LeafIteratorType;
+        typedef AlbertGridLevelIterator<0,dim,dimworld,All_Partition> LeafIteratorType;
         LeafIteratorType it    = oldGrid.leafbegin (oldGrid.maxlevel ());
         LeafIteratorType endit = oldGrid.leafend   (oldGrid.maxlevel ());
 
@@ -3097,38 +3105,38 @@ inline AlbertGrid < dim, dimworld >::~AlbertGrid()
 };
 
 template < int dim, int dimworld > template<int codim>
-inline AlbertGridLevelIterator<codim,dim,dimworld> 
+inline AlbertGridLevelIterator<codim,dim,dimworld,All_Partition> 
 AlbertGrid < dim, dimworld >::lbegin (int level, IteratorType IType, int proc)
 {
-  AlbertGridLevelIterator<codim,dim,dimworld> it(*this,vertexMarker_,level,IType,proc);
+  AlbertGridLevelIterator<codim,dim,dimworld,All_Partition> it(*this,vertexMarker_,level,IType,proc);
   return it;
 }
 
 template < int dim, int dimworld > template<int codim>
-inline AlbertGridLevelIterator<codim,dim,dimworld> 
+inline AlbertGridLevelIterator<codim,dim,dimworld,All_Partition> 
 AlbertGrid < dim, dimworld >::lend (int level, IteratorType IType, int proc )
 {
-  AlbertGridLevelIterator<codim,dim,dimworld> it((*this),level,IType,proc);
+  AlbertGridLevelIterator<codim,dim,dimworld,All_Partition> it((*this),level,IType,proc);
   return it;
 }
 
 //*****************************************************************
 template < int dim, int dimworld >
-inline AlbertGridLevelIterator<0,dim,dimworld> 
+inline AlbertGridLevelIterator<0,dim,dimworld,All_Partition> 
 AlbertGrid < dim, dimworld >::leafbegin (int level, IteratorType IType, int proc )
 {
   bool leaf = true;
-  AlbertGridLevelIterator<0,dim,dimworld> 
+  AlbertGridLevelIterator<0,dim,dimworld,All_Partition> 
     it(*this,vertexMarker_,level,IType,proc,leaf);
   return it;
 }
 
 template < int dim, int dimworld >
-inline AlbertGridLevelIterator<0,dim,dimworld> 
+inline AlbertGridLevelIterator<0,dim,dimworld,All_Partition> 
 AlbertGrid < dim, dimworld >::leafend (int level, IteratorType IType, int proc )
 {
   bool leaf = true;
-  AlbertGridLevelIterator<0,dim,dimworld> it((*this),level,IType,proc,leaf);
+  AlbertGridLevelIterator<0,dim,dimworld,All_Partition> it((*this),level,IType,proc,leaf);
   return it;
 }
 
@@ -3311,30 +3319,30 @@ inline int AlbertGrid < dim, dimworld >::size (int level, int codim)
     
     if(codim == 0)
     {
-      AlbertGridLevelIterator<0,dim,dimworld> endit = lend<0>(level);
-      for(AlbertGridLevelIterator<0,dim,dimworld> it = lbegin<0>(level);
+      AlbertGridLevelIterator<0,dim,dimworld,All_Partition> endit = lend<0>(level);
+      for(AlbertGridLevelIterator<0,dim,dimworld,All_Partition> it = lbegin<0>(level);
           it != endit; ++it)
         numberOfElements++;
     }
     if(codim == 1)
     {
-      AlbertGridLevelIterator<1,dim,dimworld> endit = lend<1>(level);
-      for(AlbertGridLevelIterator<1,dim,dimworld> it = lbegin<1>(level);
+      AlbertGridLevelIterator<1,dim,dimworld,All_Partition> endit = lend<1>(level);
+      for(AlbertGridLevelIterator<1,dim,dimworld,All_Partition> it = lbegin<1>(level);
           it != endit; ++it)
         numberOfElements++;
     }
     if(codim == 2)
     {
-      AlbertGridLevelIterator<2,dim,dimworld> endit = lend<2>(level);
-      for(AlbertGridLevelIterator<2,dim,dimworld> it = lbegin<2>(level);
+      AlbertGridLevelIterator<2,dim,dimworld,All_Partition> endit = lend<2>(level);
+      for(AlbertGridLevelIterator<2,dim,dimworld,All_Partition> it = lbegin<2>(level);
           it != endit; ++it)
         numberOfElements++;
     }
     
     if(codim == 3)
     {
-      AlbertGridLevelIterator<3,dim,dimworld> endit = lend<3>(level);
-      for(AlbertGridLevelIterator<3,dim,dimworld> it = lbegin<3>(level);
+      AlbertGridLevelIterator<3,dim,dimworld,All_Partition> endit = lend<3>(level);
+      for(AlbertGridLevelIterator<3,dim,dimworld,All_Partition> it = lbegin<3>(level);
           it != endit; ++it)
         numberOfElements++;
     }
@@ -3640,7 +3648,7 @@ writeGridUSPM ( const char * filename, double time , int level)
   std::cout << "\nStarting 3d Grid write\n";
 
   enum {dim = 3}; enum {dimworld = 3};  
-  typedef AlbertGridLevelIterator<0,dim,dimworld> LEVit;
+  typedef AlbertGridLevelIterator<0,dim,dimworld,All_Partition> LEVit;
 
   double **coord = new double *[mesh_->n_vertices];
   for (int i = 0; i < mesh_->n_vertices; i++)
@@ -3770,7 +3778,7 @@ inline void AlbertGrid < dim, dimworld >::markNew()
   // global unique number the local level number 
   for(int level=0; level <= maxlevel_; level++)
   {
-    typedef AlbertGridLevelIterator<0,dim,dimworld> LevelIterator;
+    typedef AlbertGridLevelIterator<0,dim,dimworld,All_Partition> LevelIterator;
     int num = 0;
     LevelIterator endit = lend<0>(level);
     for(LevelIterator it = lbegin<0> (level); it != endit; ++it)
@@ -3795,7 +3803,7 @@ inline void AlbertGrid < dim, dimworld >::markNew()
   for(int level=0; level <= maxlevel_; level++)
   {
     //std::cout << level << " " << maxlevel_ << "\n";
-    typedef AlbertGridLevelIterator<dim,dim,dimworld> LevelIterator;
+    typedef AlbertGridLevelIterator<dim,dim,dimworld,All_Partition> LevelIterator;
     int num = 0;
     LevelIterator endit = lend<dim> (level);
     //std::cout << levelIndex_[dim][level].size() << " Size \n";;
