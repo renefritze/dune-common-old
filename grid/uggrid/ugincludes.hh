@@ -1,10 +1,14 @@
-// All UG includes have to be made from this file, and from
-// this file only!  This is because undefAllMacros.pl takes
-// all headers from this file and undefs the macros defined
-// therein.
-
 #ifndef DUNE_UGINCLUDES_HH
 #define DUNE_UGINCLUDES_HH
+
+/** \file
+ * \brief All includes of UG headers in one single spot
+
+ All UG includes have to be made from this file, and from
+ this file only!  This is because undefAllMacros.pl takes
+ all headers from this file and undefs the macros defined
+ therein.
+*/
 
 #include <std_internal.h>
 #include <gm.h>
@@ -14,8 +18,6 @@
 #include <formats.h>
 #include <elements.h>
 #include <shapes.h>
-
-// Only for CreateAlgebra
 #include <algebra.h>
 
 #endif

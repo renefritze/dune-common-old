@@ -1,3 +1,8 @@
+/** \file
+ * \brief Contains <tt>#undef</tt>s for all preprocessor macros
+ * defined by UG
+ */
+
 #undef DUNE_UGINCLUDES_HH
 #undef UG_STD_INTERNAL_H
 #undef BVP_STANDARD
