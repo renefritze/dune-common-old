@@ -27,6 +27,7 @@ class MonomialBaseFunctionSet
 <FunctionSpaceType, MonomialBaseFunctionSet<FunctionSpaceType> >  
 {
   typedef typename FunctionSpaceType::Domain Domain;
+  typedef typename FunctionSpaceType::DomainField DomainField;
   typedef typename FunctionSpaceType::Range  Range;
   enum { DimDomain = FunctionSpaceType::DimDomain }; 
   enum { DimRange  = FunctionSpaceType::DimRange  }; 
@@ -79,7 +80,7 @@ private:
   //! vector which holds the base function pointers 
     SimpleVector<FieldVector<int, DimDomain> > Phi_ ;
 
-  double power(double x, int p) const {
+  DomainField power(DomainField x, int p) const {
     if (p <= 0)
       return 1.0;
     return x*power(x, p-1);
