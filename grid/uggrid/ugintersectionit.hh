@@ -1,5 +1,8 @@
 #ifndef DUNE_UGINTERSECTIONIT_HH
 #define DUNE_UGINTERSECTIONIT_HH
+
+namespace Dune {
+
 //**********************************************************************
 //
 // --UGGridIntersectionIterator
@@ -163,6 +166,11 @@ private:
 
 };
 
+};  // namespace Dune
+
+
 #include "ugintersectionit.cc"
+
+
 
 #endif

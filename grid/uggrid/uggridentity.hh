@@ -1,7 +1,9 @@
 #ifndef DUNE_UGGRIDENTITY_HH
 #define DUNE_UGGRIDENTITY_HH
 
+#include "ugtypes.hh"
 
+namespace Dune {  
 
 //**********************************************************************
 //
@@ -282,5 +284,7 @@ private:
 }; // end of UGGridEntity codim = 0
 
 #endif  // #if 0
+
+} // namespace Dune
 
 #endif

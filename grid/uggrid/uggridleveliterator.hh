@@ -2,6 +2,7 @@
 #define DUNE_UGGRIDLEVELITERATOR_HH
 
 
+namespace Dune {
 
 //**********************************************************************
 //
@@ -32,8 +33,8 @@ public:
   UGGridLevelIterator(UGGrid<dim,dimworld> &grid, int travLevel);
 
   //! Constructor
-  UGGridLevelIterator(UGGrid<dim,dimworld> &grid, 
-          UGMarkerVector * vec ,int travLevel);
+//   UGGridLevelIterator(UGGrid<dim,dimworld> &grid, 
+//           UGMarkerVector * vec ,int travLevel);
   
   //! prefix increment
   UGGridLevelIterator<codim,dim,dimworld>& operator ++();
@@ -85,5 +86,7 @@ private:
     TargetType<codim,dim>::T* target_;
 
 };
+
+}  // namespace Dune
   
 #endif

@@ -12,9 +12,6 @@
 #include <commands.h>
 #include <formats.h>
 #include <elements.h>
-
-
-// for debugging
-#include <ugdevices.h>
+#include <shapes.h>
 
 #endif

@@ -1,3 +1,5 @@
+namespace Dune {
+
 template< int dim, int dimworld>
 inline UGGridIntersectionIterator<dim,dimworld>::
 UGGridIntersectionIterator() : center_(NULL), neighborCount_(-1),
@@ -225,3 +227,5 @@ number_in_neighbor ()
 #undef NBELEM
 #undef TAG
 }
+
+};

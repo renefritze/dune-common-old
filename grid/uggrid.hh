@@ -1,13 +1,48 @@
 #ifndef DUNE_UGGRID_HH
 #define DUNE_UGGRID_HH
 
-
-//#include <vector>
-//#include <assert.h>
-
-// All UG includes have to be includes via this file
+// All UG includes have to be includes via the file ugincludes.hh
 // for easier parsing by undefAllMacros.pl
+#define __PC__  // hack:  choose the architecture
 #include "uggrid/ugincludes.hh"
+#undef __PC__
+
+// Wrap a few large UG macros by functions before they get undef'ed away
+
+// I can't use the following because the index operator of Vec is () and not []
+#if 0
+void Local_To_Global(int n, DOUBLE** y, 
+                     const Dune::Vec<3, double>& local,  const Dune::Vec<3, double>& global)
+{
+    LOCAL_TO_GLOBAL(n,y,local,global);
+}
+#endif
+void Local_To_Global(int n, DOUBLE** y, DOUBLE* local, DOUBLE* global)
+{
+    LOCAL_TO_GLOBAL(n,y,local,global);
+}
+
+/** \brief Computes the volume of an element */
+void Area_Of_Element(int n, DOUBLE** y, double& area)
+{
+    using UG3d::DOUBLE_VECTOR;
+
+    AREA_OF_ELEMENT(n,y,area);
+}
+
+/** \brief Returns pointers to the coordinate arrays of an UG element */
+void Corner_Coordinates(UG3d::ELEMENT* theElement, double* x[])
+{
+    using UG3d::TETRAHEDRON;
+    using UG3d::NODE;
+    using UG3d::PYRAMID;
+    using UG3d::PRISM;
+    using UG3d::HEXAHEDRON;
+    using UG3d::n_offset;
+    int n;  // Dummy variable just to please the macro
+    CORNER_COORDINATES(theElement, n, x);
+}
+
 
 // undef stuff defined by UG
 #include "uggrid/ug_undefs.hh"
@@ -42,7 +77,7 @@ typedef double UGCtype;
 
 
 // forward declarations 
-class UGMarkerVector;
+//class UGMarkerVector;
 
 template<int codim, int dim, int dimworld> class UGGridEntity;
 template<int codim, int dim, int dimworld> class UGGridLevelIterator;
@@ -58,10 +93,12 @@ template <class Object> class UGGridMemory;
 // singleton holding reference elements
 template<int dim> struct UGGridReferenceElement;
 
+}  // namespace Dune
 
 #include "uggrid/uggridelement.hh"
 #include "uggrid/uggridentity.hh"
 
+namespace Dune {
 
 
 //**********************************************************************
@@ -138,7 +175,7 @@ private:
   int level_;
 
   //! max level to go down 
-  int maxlevel_;
+  //int maxlevel_;
 
 #if 0
   //! we need this for Albert traversal, and we need ManageTravStack, which
@@ -226,9 +263,13 @@ private:
 #endif
 };
 
+}  // namespace Dune
+
 #include "uggrid/ugintersectionit.hh"
 #include "uggrid/uggridleveliterator.hh"
-  
+
+namespace Dune {
+
 //**********************************************************************
 //
 // --UGGrid
@@ -419,6 +460,7 @@ protected:
 
 }; // end Class UGGrid
 
+#if 0
 // Class to mark the Vertices on the leaf level
 // to visit every vertex only once
 // for the LevelIterator codim == dim
@@ -429,9 +471,7 @@ class UGMarkerVector
 public:
   UGMarkerVector () {} ;
 
-#if 0
   bool notOnThisElement(ALBERT EL * el, int level , int vertex);
-#endif
 
   template <class GridType>
   void markNewVertices(GridType &grid);
@@ -444,12 +484,11 @@ private:
   // number of vertices 
   int numVertex_;
 };
-
+#endif
 /** @} end documentation group */
 
 
 }; // namespace Dune
 
 #include "uggrid/uggrid.cc"
-
 #endif

@@ -1,6 +1,8 @@
 #ifndef DUNE_UGGRIDELEMENT_HH
 #define DUNE_UGGRIDELEMENT_HH
 
+#include "ugtypes.hh"
+
 //**********************************************************************
 //
 // --UGGridElement
@@ -16,6 +18,8 @@
 
   dimworld: Each corner is a point with dimworld coordinates.
 */
+
+namespace Dune {
 
 template<int dim, int dimworld>  
 class UGGridElement : 
@@ -145,11 +149,13 @@ private:
   Vec<dimbary, UGCtype> localBary_;
   
   //! is true if Jinv_ and volume_ is calced
-  bool builtinverse_;
-  Mat<dim,dim, UGCtype> Jinv_;  //!< storage for inverse of jacobian
-  UGCtype volume_; //!< storage of element volume
+  //bool builtinverse_;
+  //Mat<dim,dim, UGCtype> Jinv_;  //!< storage for inverse of jacobian
+  //UGCtype volume_; //!< storage of element volume
     
-   void* target_;
+   TargetType<dimworld-dim,dimworld>::T* target_;
 };
+
+}  // namespace Dune
 
 #endif
