@@ -12,6 +12,8 @@ namespace Dune {
  Enables iteration over all entities of a given codimension and level of a grid.
  */
 
+    template <int codim, int dim, int dimworld, PartitionIteratorType PiType>
+    class LevelIteratorFactory;
 
 template<int codim, int dim, int dimworld, PartitionIteratorType pitype>
 class UGGridLevelIterator : 
@@ -22,6 +24,10 @@ class UGGridLevelIterator :
   friend class UGGridEntity<1,dim,dimworld>;
   friend class UGGridEntity<0,dim,dimworld>;
   friend class UGGrid < dim , dimworld >;
+
+    friend class LevelIteratorFactory<2,2,2,All_Partition>;
+    friend class LevelIteratorFactory<0,2,2,All_Partition>;
+
 public:
 
   //friend class UGGrid<dim,dimworld>;
