@@ -111,7 +111,7 @@ struct BaryCenterPoints<Domain,RangeField,tetrahedron,0>
   enum { polynomOrder = 1 };
   static Domain getPoint (int i) 
   {
-    Domain tmp = (1.0/3.0);
+    Domain tmp = (0.25);
     return tmp;
   };
   static RangeField getWeight (int i) { return (1.0/6.0); };
