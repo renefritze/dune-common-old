@@ -185,6 +185,8 @@ public:
     it_.reset();
   }
 
+  const DofType * vector () const { return it_.vector(); }
+
 private:  
   DofIteratorImp it_;
 }; // end class DofIteratorDefault
