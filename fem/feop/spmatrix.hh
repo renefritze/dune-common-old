@@ -15,7 +15,7 @@ template <class T>
 class SparseRowMatrix 
 {
 public: 
-  typedef T Ttype;  //! remember the value type
+  typedef T Ttype;  //!< remember the value type
 
 private:
   T* values_;       //! data values (nz_ elements)
@@ -24,64 +24,98 @@ private:
   int nz_;          //! number of nonzeros per row
   
 public:
-  SparseRowMatrix(); //! makes Matrix of zero length
-  SparseRowMatrix(const SparseRowMatrix<T> &S); //! Copy Constructor
 
-  //! make matrix with 'rows' rows and 'cols' columns,
-  //! maximum 'nz' non zero values in each row 
-  //! and intialize all values with 'val'
-  SparseRowMatrix(int rows, int cols, int nz, T val);
+    //! makes Matrix of zero length
+    SparseRowMatrix(); 
 
-  //! free memory for values_ and col_
-  ~SparseRowMatrix();
+    //! Copy Constructor
+    SparseRowMatrix(const SparseRowMatrix<T> &S);
+
+    //! make matrix with 'rows' rows and 'cols' columns,
+    //! maximum 'nz' non zero values in each row 
+    //! and intialize all values with 'val'
+    SparseRowMatrix(int rows, int cols, int nz, T val);
+
+    //! free memory for values_ and col_
+    ~SparseRowMatrix();
     
-/*******************************/
-/*  Access and info functions  */
-/*******************************/
-  T&      val(int i) { return values_[i]; }
-  int colIndex(int row, int col);
+    /*******************************/
+    /*  Access and info functions  */
+    /*******************************/
+    
+    //! ???
+    T&      val(int i) { return values_[i]; }
 
-  const T&  val(int i) const { return values_[i]; }
-  //const int&         row_ptr(int i) const { return rowptr_(i); }
-  //const int&         col_ind(int i) const { return colind_(i);}
+    //! ???
+    const T&  val(int i) const { return values_[i]; }
 
-  int dim(int i) const {return dim_[i];};
-  int size(int i) const {return dim_[i];};
-  int NumNonZeros() const {return nz_;};
-  //int base() const {return base_;}
-  T  operator() (int i, int j) const;        
+    //! ???
+    int colIndex(int row, int col);
+    
+    //const int&         row_ptr(int i) const { return rowptr_(i); }
+    //const int&         col_ind(int i) const { return colind_(i);}
 
-  void set(int row, int col, T val);
-  void add(int row, int col, T val);
-  void multScalar(int row, int col, T val);
-   
-  void kroneckerKill(int row, int col);
+    //! Returns number of matrix rows (i==0) and columns (i==1)
+    int dim(int i) const {return dim_[i];};
 
-  template <class VECtype> 
-  void mult(VECtype &ret, VECtype& x) const;
+    //! Returns number of matrix rows (i==0) and columns (i==1)
+    int size(int i) const {return dim_[i];};
 
-  template <class DiscFType, class DiscFuncType>
-  void apply(const DiscFType &f, DiscFuncType &ret) const;
+    //! Returns total number of nonzero entries
+    int numNonZeros() const {return nz_;};
+
+    //int base() const {return base_;}
+
+    //! Const index operator
+    const T&  operator() (int i, int j) const;        
+    
+    //! Set matrix entry
+    void set(int row, int col, T val);
+
+    //! Add to matrix entry
+    void add(int row, int col, T val);
+
+    //! Multiply an entry with a scalar
+    void multScalar(int row, int col, T val);
+    
+    //! ???
+    void kroneckerKill(int row, int col);
+    
+    //! Multiply with a vector
+    template <class VECtype> 
+    void mult(VECtype &ret, VECtype& x) const;
+    
+    //! Multiply with a vector
+    template <class DiscFType, class DiscFuncType>
+    void apply(const DiscFType &f, DiscFuncType &ret) const;
+    
+    //template <class DiscFuncType>
+    //void apply(const DiscFuncType &f, DiscFuncType &ret) const;
+    
+    //! Multiply the transpose with a vector
+    template <class DiscFuncType>
+    void apply_t(const DiscFuncType &f, DiscFuncType &ret) const;
+    
+    //! Multiply with a vector
+    template <class DiscFuncType> 
+    void operator () (const DiscFuncType &f, DiscFuncType &ret) const 
+    {
+        apply(f,ret); 
+    };
   
-  //template <class DiscFuncType>
-  //void apply(const DiscFuncType &f, DiscFuncType &ret) const;
-  
-  template <class DiscFuncType>
-  void apply_t(const DiscFuncType &f, DiscFuncType &ret) const;
-  
-  template <class DiscFuncType> 
-  void operator () (const DiscFuncType &f, DiscFuncType &ret) const 
-  {
-    apply(f,ret); 
-  };
-  
-  void print (std::ostream& s) const;
-  void printReal (std::ostream& s) const;
-     
-  void unitRow(int row);
-  void unitCol(int col);
+    //! ???
+    void print (std::ostream& s) const;
+
+    //! ???
+    void printReal (std::ostream& s) const;
+    
+    //! Makes a given row a unit row
+    void unitRow(int row);
+
+    //! Makes a given column a unit column
+    void unitCol(int col);
 private:
-   
+    
 };
 
 
