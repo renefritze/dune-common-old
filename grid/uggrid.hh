@@ -150,7 +150,6 @@ public:
     //! Triggers the grid refinement process
     bool adapt();
 
-#if 0
     /** \brief Please doc me! */
   GridIdentifier type () { return UGGrid_Id; };
   
@@ -158,23 +157,22 @@ public:
 // End of Interface Methods
 //**********************************************************
 
-  //! uses the interface, mark on entity and refineLocal 
-  bool globalRefine(int refCount);
-
-  // write Grid to file
-  //void writeGrid(int level=-1);
-
-#endif
   UGCtype getTime () const { return time_; };
+
+    void makeNewUGMultigrid();
   
-    //private:
-public:
-
   // UG multigrid, which contains the data
-    typename UGTypes<dimworld>::MultiGridType* mesh_;
+    typename UGTypes<dimworld>::MultiGridType* multigrid_;
 
-    /// Pointer to a UG domain
-    typename UGTypes<dimworld>::DomainType* domain_;
+public:
+    // I need this to store some information that gets passed
+    // to the boundary description
+    void* extra_boundary_data_;
+
+private:
+    // Each UGGrid object has a unique name to identify it in the
+    // UG environment structure
+    std::string name;
 
   // number of maxlevel of the mesh
   int maxlevel_;
@@ -185,7 +183,6 @@ public:
   // number of entitys of each level an codim 
   Array<int> size_;
 
-    void makeNewUGMultigrid();
 protected:
     /** \brief Number of UGGrids currently in use.
      *
