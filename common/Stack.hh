@@ -5,103 +5,102 @@
 
 namespace Dune {
 
-template<class T>
-class Stack : private DoubleLinkedList<T> {
-public :
+  template<class T>
+  class Stack : private DoubleLinkedList<T> {
+  public :
 	bool isempty () const; // Stack leer ?
 	bool isfull () const;  // Stack voll (nur bei vorgegebener Groesse)
-	void push_front (T t); // Einfuegen eines Elementes
+	void push_front (T& t); // Einfuegen eines Elementes
 	T pop_front ();        // Entfernen eines Elementes
 	T front () const;      // Inspizieren des obersten Elementes
 	int size() const;      // get number of elements in stack
-} ;
+  } ;
 
-template<class T>
-inline int Stack<T>::size () const
-{
+  template<class T>
+  inline int Stack<T>::size () const
+  {
 	return DoubleLinkedList<T>::size();
-}
+  }
 
-template<class T>
-inline bool Stack<T>::isempty () const
-{
+  template<class T>
+  inline bool Stack<T>::isempty () const
+  {
 	return size()==0;
-}
+  }
 
-template<class T>
-inline bool Stack<T>::isfull () const
-{
+  template<class T>
+  inline bool Stack<T>::isfull () const
+  {
 	return false;
-}
+  }
 
-template<class T>
-inline void Stack<T>::push_front (T t)
-{
+  template<class T>
+  inline void Stack<T>::push_front (T& t)
+  {
 	insert_after(this->rbegin(),t);
-}
+  }
 
-template<class T>
-inline T Stack<T>::pop_front ()
-{
+  template<class T>
+  inline T Stack<T>::pop_front ()
+  {
 	typename DoubleLinkedList<T>::Iterator i=this->rbegin();
 	T t = *i;
 	erase(i);
 	return t;
-}
+  }
 
-template<class T>
-inline T Stack<T>::front () const
-{
+  template<class T>
+  inline T Stack<T>::front () const
+  {
 	typename DoubleLinkedList<T>::Iterator i=this->rbegin();
 	T t = *i;
 	return t;
-}
-
-}
-
-template<class T, int n>
-class FiniteStack {
-public :
-  bool isempty () const
-  {
-	return f==0;
   }
 
-  bool isfull () const
-  {
-	return f>=n;
-  }
 
-  void push_front (T t)
-  {
-	s[f++] = t;
-  }
+  template<class T, int n>
+  class FiniteStack {
+  public :
+	bool isempty () const
+	{
+	  return f==0;
+	}
 
-  T pop_front ()
-  {
-	return s[--f];
-  }
+	bool isfull () const
+	{
+	  return f>=n;
+	}
+
+	void push_front (T t)
+	{
+	  s[f++] = t;
+	}
+
+	T pop_front ()
+	{
+	  return s[--f];
+	}
        
-  T front () const
-  {
-	return s[f-1];
-  }
+	T front () const
+	{
+	  return s[f-1];
+	}
   
-  int size ()
-  {
-	return f;
-  }
+	int size ()
+	{
+	  return f;
+	}
 
-  FiniteStack ()
-  {
-	f = 0;
-  }
+	FiniteStack ()
+	{
+	  f = 0;
+	}
 
-private:
-  T s[n];
-  int f;
-} ;
+  private:
+	T s[n];
+	int f;
+  };
 
-
+}
 
 #endif
