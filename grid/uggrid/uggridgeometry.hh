@@ -1,5 +1,5 @@
-#ifndef DUNE_UGGRIDELEMENT_HH
-#define DUNE_UGGRIDELEMENT_HH
+#ifndef DUNE_UGGRIDGEOMETRY_HH
+#define DUNE_UGGRIDGEOMETRY_HH
 
 /** \file
  * \brief The UGGridElement class and its specializations
@@ -320,7 +320,7 @@ private:
 };
 
 // Include method definitions
-#include "uggridelement.cc"
+#include "uggridgeometry.cc"
 
 }  // namespace Dune
 
