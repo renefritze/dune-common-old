@@ -1,5 +1,5 @@
-#ifndef __DUNE_QUADLQH_HH__
-#define __DUNE_QUADLQH_HH__
+#ifndef DUNE_QUADLQH_HH
+#define DUNE_QUADLQH_HH
 
 #include <dune/common/misc.hh>
 #include "gaussquadimp.hh"
