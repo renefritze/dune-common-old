@@ -4,6 +4,85 @@
 
 #include<dune/common/iteratorfacades.hh>
 
+namespace Dune
+{
+
+  /*! \defgroup GenericIterator GenericIterator
+    \ingroup IteratorFacades
+
+    \brief Generic Iterator class for writing stl conformant iterators
+    for any Container class with operator[]
+   
+    Using this template class you can create an iterator and a const_iterator
+    for any Container class.
+
+    Imagine you have SimpleContainer and would like to have an iterator.
+    All you have to do is provide operator[], begin() and end()
+    (for const and for non-const).
+    
+    \code
+    template<class T> 
+    class SimpleContainer{
+    public:
+      typedef GenericIterator<SimpleContainer<T>,T> iterator;
+  
+      typedef GenericIterator<const SimpleContainer<T>,const T> const_iterator;
+
+      SimpleContainer(){
+        for(int i=0; i < 100; i++)
+          values_[i]=i;
+      }
+
+      iterator begin(){
+        return iterator(*this, 0);
+      }
+
+      const_iterator begin() const{    
+        return const_iterator(*this, 0);
+      }
+
+      iterator end(){
+        return iterator(*this, 100);
+      }
+
+      const_iterator end() const{    
+        return const_iterator(*this, 100);
+      }
+  
+      T& operator[](int i){
+        return values_[i];
+      }
+
+  
+      const T& operator[](int i) const{
+        return values_[i];
+      }
+    private:
+      T values_[100];
+    };
+    \endcode
+
+    See dune/common/test/iteratorfacestest.hh for details or
+    Dune::QuadratureDefault in dune/quadrature/quadrature.hh
+    for a real example.
+  */
+  
+/**
+ * @file
+ * @brief This file implements a generic iterator classes for writing stl conformant iterators.
+ *
+ * With using this generic iterator writing iterators for containers
+ * with operator[] is only a matter of seconds
+ */
+
+    /** @addtogroup GenericIterator
+     *
+     * @{
+     */
+  /**
+   * @brief Generic class for stl conformant iterators for container classes with operator[].
+   *
+   */
 template<class C, class T>
 class GenericIterator : public Dune::RandomAccessIteratorFacade<GenericIterator<C,T>,T, T&, int>
 {
@@ -76,5 +155,9 @@ private:
   C *container_;
   size_t position_;
 };
+
+  /** @} */
+  
+}
 
 #endif
