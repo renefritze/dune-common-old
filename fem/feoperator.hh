@@ -4,6 +4,8 @@
 #include <dune/fem/common/discreteoperator.hh>
 
 namespace Dune {
+
+static const int edge[4][2] = { {0,2}, {1,3} , {0,1} , {2,3}}; 
   
 template <class DiscFunctionType, class MatrixType, class FEOpImp>
 class FiniteElementOperatorInterface 
@@ -86,8 +88,7 @@ protected:
   }
 
   {
-
-    // eliminate the Dirichlet rows 
+    // eliminate the Dirichlet rows and columns 
     typedef typename GridType::Traits<0>::Entity EntityType;
     typedef typename EntityType::Traits::IntersectionIterator NeighIt;
     typedef typename NeighIt::Traits::BoundaryEntity BoundaryEntityType;
@@ -122,13 +123,24 @@ protected:
               matrix_->kroneckerKill(col,col); 
             }
           }
+          if((*it).geometry().type() == quadrilateral)
+          {
+            for(int i=0; i<2; i++)
+            {
+              // funktioniert nur fuer Dreiecke 
+              // hier muss noch gearbeitet werden. Wie kommt man von den
+              // Intersections zu den localen Dof Nummern?
+              int col = functionSpace_.mapToGlobal(*it,edge[neigh][i]);
+              // unitRow unitCol for boundary
+              matrix_->kroneckerKill(col,col); 
+            }
+          }
         }
       }
 
       }
     }
   }
-    //matrix_->print(std::cout);
     matrix_assembled_ = true;
   }
 
@@ -246,7 +258,7 @@ public:
     int level = grid.maxlevel();
 
     DofIteratorType dest_it = dest.dbegin( level );
-    DofIteratorType arg_it = const_cast<DiscFunctionType&>(arg).dbegin( level );
+    DofIteratorType arg_it = arg.dbegin( level );
       
     const BaseFunctionSetType & baseSet = functionSpace_.getBaseFunctionSet( en );
     int numOfBaseFct = baseSet.getNumberOfBaseFunctions();  
@@ -263,62 +275,11 @@ public:
       }
     }
   } // end applyLocal
- 
+
+
   // find Dirichlet points and erase them
   void finalizeGlobal (const DiscFunctionType &arg , DiscFunctionType &dest ) 
   {
-#if 0
-    typedef typename DiscFunctionType::FunctionSpace FunctionSpaceType;
-    typedef typename FunctionSpaceType::GridType GridType; 
-    typedef typename GridType::Traits<0>::LevelIterator LevelIterator; 
-    typedef typename GridType::Traits<0>::Entity EntityType; 
-    typedef typename FunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
-
-    GridType &grid = const_cast<GridType &> (functionSpace_.getGrid());
-
-    typedef typename DiscFunctionType::DofIteratorType DofIteratorType;
-    int level = grid.maxlevel();
-
-    DofIteratorType dest_it = dest.dbegin( level );
-
-    LevelIterator it = grid.lbegin<0>( grid.maxlevel() );
-    LevelIterator endit = grid.lend<0> ( grid.maxlevel() );
-    for( ; it != endit; ++it ) 
-    {
-      typedef typename EntityType::Traits::IntersectionIterator NeighIt;
-      typedef typename NeighIt::Traits::BoundaryEntity BoundaryEntityType;
-
-      EntityType &en = (*it);
-    
-      const BaseFunctionSetType & baseSet = functionSpace_.getBaseFunctionSet( en );
-      int numDof = baseSet.getNumberOfBaseFunctions();  
-
-      NeighIt nit = en.ibegin();
-      NeighIt endnit = en.iend();
-      for(nit; nit != endnit ; ++nit)
-      {
-        if(nit.boundary())
-        {
-          BoundaryEntityType & bEl = nit.boundaryEntity();
-
-          if( bEl.type() == Dirichlet )
-          {
-            int neigh = nit.number_in_self();
-
-            if(en.geometry().type() == triangle)
-            {
-              for(int i=1; i<numDof; i++)
-              {
-                int col = functionSpace_.mapToGlobal(*it,(neigh+i)%numDof);
-                dest_it[col] = 0.0;
-              }
-            }
-          }
-        }
-      }  // end fot(nit..
-    
-    } // end for(it .. 
-#endif
   }
   
 private:
