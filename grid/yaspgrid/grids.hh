@@ -367,6 +367,13 @@ namespace Dune {
                 return _index+_increment[i];
           }
 
+          //! move this iterator dist cells in direction i
+          void move (int i, int dist)
+          {
+			_coord[i] += dist;
+			_index += dist*_increment[i];
+          }
+
           //! Increment iterator to next cell.
           Iterator& operator++ ()
           {
@@ -457,7 +464,13 @@ namespace Dune {
                 return _position;
           }
 
-          //! Return position of current cell as reference.
+          //! Return meshsize in direction i
+          ct meshsize (int i)
+          {
+                return _h[i];
+          }
+
+          //! Return meshsize of current cell as reference.
           fTupel& meshsize ()
           {
                 return _h;
@@ -466,7 +479,8 @@ namespace Dune {
           //! Move cell position by dist cells in direction i.
           void move (int i, int dist)
           {
-                _position[i] += dist*_h[i];
+			Iterator::move(i,dist);
+			_position[i] += dist*_h[i];
           }
 
           //! Print contents of iterator
