@@ -1,5 +1,5 @@
-#ifndef __DUNE_UGGRIDENTITY_HH__
-#define __DUNE_UGGRIDENTITY_HH__
+#ifndef DUNE_UGGRIDENTITY_HH
+#define DUNE_UGGRIDENTITY_HH
 
 /** \file
  * \brief The UGGridEntity class and its specializations
@@ -118,10 +118,12 @@ public EntityDefault<0,dim,dimworld, UGCtype,UGGridEntity,UGGridElement,
               UGGridLevelIterator,UGGridIntersectionIterator,
               UGGridHierarchicIterator>
 {
-  friend class UGGrid < dim , dimworld >;
-  friend class UGGridIntersectionIterator < dim, dimworld>;
-  friend class UGGridHierarchicIterator < dim, dimworld>;
-    friend class UGGridLevelIterator <0,dim,dimworld,All_Partition>;
+    friend class UGGrid < dim , dimworld >;
+    friend class UGGridIntersectionIterator < dim, dimworld>;
+    friend class UGGridHierarchicIterator < dim, dimworld>;
+
+    template <int codim_, int dim_, int dimworld_, PartitionIteratorType PiType_>
+    friend class UGGridLevelIterator;
 
     // Either UG3d::ELEMENT or UG2d:ELEMENT
     typedef typename TargetType<0,dim>::T UGElementType;
