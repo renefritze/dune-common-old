@@ -128,8 +128,8 @@ private:
   int order_;
 
   //! Vecs with constant length holding the weights and points 
-    FieldVector<RangeFieldType, maxQuadPoints> weights_;
-    FieldVector<DomainType, maxQuadPoints>     points_;
+  FieldVector<RangeFieldType, maxQuadPoints> weights_;
+  FieldVector<DomainType, maxQuadPoints>     points_;
 
 }; // end class FastQuadrature 
 
@@ -199,13 +199,13 @@ public:
   //! return weight for point i
   const RangeFieldType& weight ( int i) const
   {
-    return (weights_(i)); 
+    return (weights_[i]); 
   }
   
   //! return point i in local coordinates
   const DomainType& point (int i) const 
   {
-    return (points_(i));
+    return (points_[i]);
   }
 
 private:
@@ -222,8 +222,8 @@ private:
 
     for(int i=0; i<numberOfQuadPoints_; i++)
     {
-      points_(i)  = QuadInitializerType::getPoint(i);
-      weights_(i) = QuadInitializerType::getWeight(i);
+      points_[i]  = QuadInitializerType::getPoint(i);
+      weights_[i] = QuadInitializerType::getWeight(i);
     }
     int myType = (int) ElType;
     myType *= 10 * codim;
