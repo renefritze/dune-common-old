@@ -36,7 +36,7 @@ namespace Dune {
 /*! define name for floating point type used for coordinates in yaspgrid.
   You can change the type for coordinates by changing this single typedef.
  */
-typedef double yaspgrid_ctype; 
+typedef double yaspgrid_ctype;
 
 static const yaspgrid_ctype yasptolerance=1E-13; // tolerance in coordinate computations
 
@@ -105,14 +105,14 @@ Vec<dim,yaspgrid_ctype> YaspFatherRelativeLocalElement<dim>::extension(0.5);
 /*!
   YaspElement realizes the concept of the geometric part of a mesh entity.
 
-  We have specializations for dim==dimworld (elements), 
+  We have specializations for dim==dimworld (elements),
   dim = dimworld-1 (faces) and dim=0 (vertices).
   The general version throws a GridError on construction.
  */
 //========================================================================
 
 //! The general version implements dimworld==dimworld. If this is not the case an error is thrown
-template<int dim,int dimworld> 
+template<int dim,int dimworld>
 class YaspElement : public ElementDefault<dim,dimworld,yaspgrid_ctype,YaspElement>
 {
 public:
@@ -120,7 +120,7 @@ public:
   typedef yaspgrid_ctype ctype;
 
   //! return the element type identifier
-  ElementType type ()           
+  ElementType type ()
   {
         switch (dim)
           {
@@ -132,12 +132,12 @@ public:
   }
 
   //! return the number of corners of this element. Corners are numbered 0...n-1
-  int corners ()                
+  int corners ()
   {
         return 1<<dim;
   }
-  
-  //! access to coordinates of corners. Index is the number of the corner 
+
+  //! access to coordinates of corners. Index is the number of the corner
   Vec<dim,yaspgrid_ctype>& operator[] (int i)
   {
         int bit=0;
@@ -148,7 +148,7 @@ public:
                         c(k) = midpoint(k);
                         continue;
                   }
-                //k is not the missing direction 
+                //k is not the missing direction
                 if (i&(1<<bit))  // check whether bit is set or not
                   c(k) = midpoint(k)+0.5*extension(k); // bit is 1 in i
                 else
@@ -159,17 +159,17 @@ public:
         return c;
   }
 
-  /*! return reference element corresponding to this element. 
+  /*! return reference element corresponding to this element.
           Usually, the implementation will store the finite
           set of reference elements as global variables.
           But why in the hell do we need this reference element?
   */
-  static YaspElement<dim,dim>& refelem ()   
+  static YaspElement<dim,dim>& refelem ()
   {
         return YaspReferenceElement<dim>::refelem;
   }
 
-  //! maps a local coordinate within reference element to global coordinate in element 
+  //! maps a local coordinate within reference element to global coordinate in element
   Vec<dimworld,yaspgrid_ctype> global (const Vec<dim,yaspgrid_ctype>& local)
   {
         Vec<dimworld,yaspgrid_ctype> g;
@@ -204,7 +204,7 @@ public:
   yaspgrid_ctype integration_element (const Vec<dim,yaspgrid_ctype>& local)
   {
         yaspgrid_ctype volume=1.0;
-        for (int k=0; k<dimworld; k++) 
+        for (int k=0; k<dimworld; k++)
           if (k!=missing) volume *= extension(k);
         return volume;
   }
@@ -222,7 +222,7 @@ public:
         : midpoint(p), extension(h), missing(m)
   {
         if (dimworld!=dim+1)
-          throw GridError("general YaspElement assumes dimworld=dim+1",__FILE__,__LINE__);
+          DUNE_THROW(GridError, "general YaspElement assumes dimworld=dim+1");
   }
 
   //! print function
@@ -230,17 +230,17 @@ public:
   {
         s << "YaspElement<"<<dim<<","<<dimworld<< "> ";
         s << "midpoint";
-        for (int i=0; i<dimworld; i++) 
+        for (int i=0; i<dimworld; i++)
                   s << " " << midpoint[i];
                 s << " extension";
-        for (int i=0; i<dimworld; i++) 
+        for (int i=0; i<dimworld; i++)
                   s << " " << extension[i];
                 s << " missing is " << missing;
   }
 
 private:
   // the element is fully defined by its midpoint the extension
-  // in each direction and the missing direction. 
+  // in each direction and the missing direction.
   // References are used because this information
   // is known outside the element in many cases.
   // Note dimworld==dim+1
@@ -256,7 +256,7 @@ private:
 
 
 //! specialize for dim=dimworld, i.e. a volume element
-template<int dim> 
+template<int dim>
 class YaspElement<dim,dim> : public ElementDefault<dim,dim,yaspgrid_ctype,YaspElement>
 {
 public:
@@ -264,7 +264,7 @@ public:
   typedef yaspgrid_ctype ctype;
 
   //! return the element type identifier
-  ElementType type ()           
+  ElementType type ()
   {
         switch (dim)
           {
@@ -276,37 +276,37 @@ public:
   }
 
   //! return the number of corners of this element. Corners are numbered 0...n-1
-  int corners ()                
+  int corners ()
   {
         return 1<<dim;
   }
-  
-  //! access to coordinates of corners. Index is the number of the corner 
+
+  //! access to coordinates of corners. Index is the number of the corner
   Vec<dim,yaspgrid_ctype>& operator[] (int i)
   {
         for (int k=0; k<dim; k++)
-          if (i&(1<<k))  
+          if (i&(1<<k))
                 c(k) = midpoint(k)+0.5*extension(k); // kth bit is 1 in i
           else
                 c(k) = midpoint(k)-0.5*extension(k); // kth bit is 0 in i
         return c;
   }
 
-  /*! return reference element corresponding to this element. 
+  /*! return reference element corresponding to this element.
           Usually, the implementation will store the finite
           set of reference elements as global variables.
           But why in the hell do we need this reference element?
   */
-  static YaspElement<dim,dim>& refelem ()   
+  static YaspElement<dim,dim>& refelem ()
   {
         return YaspReferenceElement<dim>::refelem;
   }
 
-  //! maps a local coordinate within reference element to global coordinate in element 
+  //! maps a local coordinate within reference element to global coordinate in element
   Vec<dim,yaspgrid_ctype> global (const Vec<dim,yaspgrid_ctype>& local)
   {
         Vec<dim,yaspgrid_ctype> g;
-        for (int k=0; k<dim; k++) 
+        for (int k=0; k<dim; k++)
           g(k) = midpoint(k) + (local(k)-0.5)*extension(k);
         return g;
   }
@@ -315,7 +315,7 @@ public:
   Vec<dim,yaspgrid_ctype> local (const Vec<dim,yaspgrid_ctype>& global)
   {
         Vec<dim,yaspgrid_ctype> l; // result
-        for (int k=0; k<dim; k++) 
+        for (int k=0; k<dim; k++)
           l(k) = (global(k)-midpoint(k))/extension(k) + 0.5;
         return l;
   }
@@ -332,14 +332,14 @@ public:
   //! can only be called for dim=dim!
   Mat<dim,dim>& Jacobian_inverse (const Vec<dim,yaspgrid_ctype>& local)
   {
-        for (int i=0; i<dim; ++i) 
+        for (int i=0; i<dim; ++i)
           {
                 Jinv(i) = 0.0;                // set column to zero
                 Jinv(i,i) = 1.0/extension(i); // set diagonal element
           }
         return Jinv;
   }
-  
+
   //! check whether local is inside reference element
   bool checkInside (const Vec<dim,yaspgrid_ctype>& local)
   {
@@ -358,10 +358,10 @@ public:
   {
         s << "YaspElement<"<<dim<<","<<dim<< "> ";
         s << "midpoint";
-        for (int i=0; i<dim; i++) 
+        for (int i=0; i<dim; i++)
                   s << " " << midpoint[i];
                 s << " extension";
-        for (int i=0; i<dim; i++) 
+        for (int i=0; i<dim; i++)
                   s << " " << extension[i];
   }
 
@@ -383,31 +383,31 @@ private:
 
 
 //! specialization for dim=0, this is a vertex
-template<int dimworld> 
+template<int dimworld>
 class YaspElement<0,dimworld> : public ElementDefault<0,dimworld,yaspgrid_ctype,YaspElement>
 {
 public:
   //! define type used for coordinates in grid module
   typedef yaspgrid_ctype ctype;
-  
+
   //! return the element type identifier
-  ElementType type ()             
+  ElementType type ()
   {
         return vertex;
   }
-  
+
   //! return the number of corners of this element. Corners are numbered 0...n-1
-  int corners ()                  
+  int corners ()
   {
         return 1;
-  }     
+  }
 
-  //! access to coordinates of corners. Index is the number of the corner 
+  //! access to coordinates of corners. Index is the number of the corner
   Vec<dimworld,yaspgrid_ctype>& operator[] (int i)
   {
         return position;
   }
-  
+
   //! constructor
   YaspElement (Vec<dimworld,yaspgrid_ctype>& p) : position(p)
   {
@@ -419,7 +419,7 @@ public:
         s << "YaspElement<"<<0<<","<<dimworld<< "> ";
         s << "position " << position;
   }
-  
+
 private:
   Vec<dimworld,yaspgrid_ctype>& position; //!< where the vertex is
 };
@@ -436,14 +436,14 @@ inline std::ostream& operator<< (std::ostream& s, YaspElement<dim,dimworld>& e)
 /*!
   YaspEntity realizes the concept a mesh entity.
 
-  We have specializations for codim==0 (elements) and 
+  We have specializations for codim==0 (elements) and
   codim=dim (vertices).
   The general version throws a GridError.
  */
 //========================================================================
 
 
-template<int codim, int dim, int dimworld> 
+template<int codim, int dim, int dimworld>
 class YaspEntity :  public EntityDefault <codim,dim,dimworld,yaspgrid_ctype,YaspEntity,YaspElement,
                                                    YaspLevelIterator,YaspIntersectionIterator,YaspHierarchicIterator>
 {
@@ -452,40 +452,40 @@ public:
   typedef yaspgrid_ctype ctype;
 
   //! level of this element
-  int level () 
+  int level ()
   {
-        throw GridError("YaspEntity not implemented",__FILE__,__LINE__);
+        DUNE_THROW(GridError, "YaspEntity not implemented");
   }
 
   //! index is unique and consecutive per level and codim used for access to degrees of freedom
-  int index () 
+  int index ()
   {
-        throw GridError("YaspEntity not implemented",__FILE__,__LINE__);
+        DUNE_THROW(GridError, "YaspEntity not implemented");
   }
-  
+
   //! geometry of this entity
-  YaspElement<dim-codim,dimworld>& geometry () 
+  YaspElement<dim-codim,dimworld>& geometry ()
   {
-        throw GridError("YaspEntity not implemented",__FILE__,__LINE__);
+        DUNE_THROW(GridError, "YaspEntity not implemented");
   }
 
   //! return partition type attribute
   PartitionType partition_type ()
   {
-        throw GridError("YaspEntity not implemented",__FILE__,__LINE__);
+        DUNE_THROW(GridError, "YaspEntity not implemented");
   }
 };
 
 
 // specialization for codim=0
-template<int dim, int dimworld> 
+template<int dim, int dimworld>
 class YaspEntity<0,dim,dimworld> :  public EntityDefault <0,dim,dimworld,yaspgrid_ctype,YaspEntity,YaspElement,
                                                                            YaspLevelIterator,YaspIntersectionIterator,YaspHierarchicIterator>
 {
 public:
   typedef typename MultiYGrid<dim,yaspgrid_ctype>::YGridLevelIterator YGLI;
   typedef typename SubYGrid<dim,yaspgrid_ctype>::TransformingSubIterator TSI;
-  
+
   //! define type used for coordinates in grid module
   typedef yaspgrid_ctype ctype;
   typedef typename YGrid<dim,ctype>::iTupel iTupel;
@@ -495,7 +495,7 @@ public:
         : _it(it), _g(g), _element(it.position(),it.meshsize())
   {
   }
-  
+
   //! level of this element
   int level () {return _g.level();}
 
@@ -516,17 +516,17 @@ public:
   /*! Intra-element access to entities of codimension cc > codim. Return number of entities
         with codimension cc.
   */
-  template<int cc> int count () 
+  template<int cc> int count ()
   {
         if (cc==1) return 2*dim;
         if (cc==dim) return 1<<dim;
-        throw GridError("codim not (yet) implemented",__FILE__,__LINE__);
+        DUNE_THROW(GridError, "codim not (yet) implemented");
   }
 
   /*! Intra-element access to entities of codimension cc > codim. Return number of entities
         with codimension cc.
   */
-  template<int cc> 
+  template<int cc>
   YaspLevelIterator<cc,dim,dimworld,All_Partition> entity (int i)
   {
         // coordinates of the cell == coordinates of lower left corner
@@ -540,7 +540,7 @@ public:
 
                 return YaspLevelIterator<dim,dim,dimworld,All_Partition>(_g,_g.vertex_overlapfront().tsubbegin(coord));
           }
-        throw GridError("codim not (yet) implemented",__FILE__,__LINE__);
+        DUNE_THROW(GridError, "codim not (yet) implemented");
   }
 
   //! Inter-level access to father element on coarser grid. Assumes that meshes are nested.
@@ -548,12 +548,12 @@ public:
   {
         // check if coarse level exists
         if (_g.level<=0)
-          throw GridError("tried to call father on level 0",__FILE__,__LINE__);
+          DUNE_THROW(GridError, "tried to call father on level 0");
 
         // yes, get iterator to it
         YGLI cg = _g.coarser();
 
-        // coordinates of the cell 
+        // coordinates of the cell
         iTupel coord = _it.coord();
 
         // get coordinates on next coarser level
@@ -575,7 +575,7 @@ public:
   {
         // determine which son we are
         int son = 0;
-        for (int k=0; k<dim; k++) 
+        for (int k=0; k<dim; k++)
           if (_it.coord(k)%2)
                 son += (1<<k);
 
@@ -629,7 +629,7 @@ private:
 
 
 // specialization for codim=dim
-template<int dim, int dimworld> 
+template<int dim, int dimworld>
 class YaspEntity<dim,dim,dimworld> :  public EntityDefault <dim,dim,dimworld,yaspgrid_ctype,YaspEntity,YaspElement,
                                                                            YaspLevelIterator,YaspIntersectionIterator,YaspHierarchicIterator>
 {
@@ -645,7 +645,7 @@ public:
   YaspEntity (YGLI& g, TSI& it)
         : _it(it), _g(g), _element(it.position())
   {  }
-  
+
   //! level of this element
   int level () {return _g.level();}
 
@@ -673,12 +673,12 @@ public:
   {
         // check if coarse level exists
         if (_g.level<=0)
-          throw GridError("tried to call father on level 0",__FILE__,__LINE__);
+          DUNE_THROW(GridError, "tried to call father on level 0");
 
         // yes, get iterator to it
         YGLI cg = _g.coarser();
 
-        // coordinates of the vertex == coordinates of upper right element 
+        // coordinates of the vertex == coordinates of upper right element
         iTupel coord = _it.coord();
 
         // get coordinates of cell on coarser level
@@ -693,16 +693,16 @@ public:
   }
 
   //! local coordinates within father
-  Vec<dim,ctype>& local () 
+  Vec<dim,ctype>& local ()
   {
         // check if coarse level exists
         if (_g.level<=0)
-          throw GridError("tried to call local on level 0",__FILE__,__LINE__);
+          DUNE_THROW(GridError, "tried to call local on level 0");
 
         // yes, get iterator to it
         YGLI cg = _g.coarser();
 
-        // coordinates of the vertex == coordinates of upper right element 
+        // coordinates of the vertex == coordinates of upper right element
         iTupel coord = _it.coord();
 
         // get coordinates of cell on coarser level
@@ -715,14 +715,14 @@ public:
         // interpolate again, i.e. coord == lower left in 2**dim cells
         for (int k=0; k<dim; k++)
           coord[k] = 2*coord[k];
-        
+
         // now it is simple ...
         for (int k=0; k<dim; k++)
           loc[k] = 0.5*(_it.coord(k)-coord[k]); // expr in brackets is in 0..2
 
         // return result
         return loc;
-  } 
+  }
 
 private:
   TSI& _it;                           // position in the grid level
@@ -738,11 +738,11 @@ private:
  */
 //========================================================================
 
-template <int dim, int dimworld> 
-class YaspBoundaryEntity 
+template <int dim, int dimworld>
+class YaspBoundaryEntity
   : public BoundaryEntityDefault <dim,dimworld,yaspgrid_ctype,YaspElement,YaspBoundaryEntity>
 {
-public: 
+public:
 private:
 };
 
@@ -814,7 +814,7 @@ public:
                 _pos_world[_dir] -= 0.5*_myself.transformingsubiterator().meshsize(_dir);
 
                 // make up unit outer normal direction
-                _normal[_dir] = -1.0;           
+                _normal[_dir] = -1.0;
           }
 
         return *this;
@@ -834,32 +834,32 @@ public:
 
   /*! return true if neighbor ist outside the domain. Still the neighbor might
       exist in case of periodic boundary conditions, i.e. true is returned
-      if the neighbor is outside the periodic unit cell 
+      if the neighbor is outside the periodic unit cell
   */
   bool boundary ()
   {
         // The transforming iterator can be safely moved beyond the boundary.
         // So we only have to compare against the cell_global grid
-        if (   _itnb.coord(_dir)<_myself.gridlevel().cell_global().min(_dir) 
+        if (   _itnb.coord(_dir)<_myself.gridlevel().cell_global().min(_dir)
                    || _itnb.coord(_dir)>_myself.gridlevel().cell_global().max(_dir))
           return true;
         else
           return false;
   }
-  
+
   //! return true if neighbor across intersection exists in this processor
   bool neighbor ()
   {
         // The transforming iterator can be safely moved beyond the boundary.
         // So we only have to compare against the cell_global grid
-        if (_itnb.coord(_dir)>=_myself.gridlevel().cell_overlap().min(_dir) 
+        if (_itnb.coord(_dir)>=_myself.gridlevel().cell_overlap().min(_dir)
                 && _itnb.coord(_dir)<=_myself.gridlevel().cell_overlap().max(_dir))
           return true;
         else
           return false;
   }
 
-  //! access neighbor, dereferencing 
+  //! access neighbor, dereferencing
   YaspEntity<0,dim,dimworld>& operator*()
   {
         return _nb;
@@ -871,7 +871,7 @@ public:
         return &_nb;
   }
 
-  //! return unit outer normal, this should be dependent on local coordinates for higher order boundary 
+  //! return unit outer normal, this should be dependent on local coordinates for higher order boundary
   Vec<dimworld,yaspgrid_ctype>& unit_outer_normal (Vec<dim-1,yaspgrid_ctype>& local)
   {
         return _normal;
@@ -883,7 +883,7 @@ public:
         return _normal;
   }
 
-  /*! intersection of codimension 1 of this neighbor with element where iteration started. 
+  /*! intersection of codimension 1 of this neighbor with element where iteration started.
         Here returned element is in LOCAL coordinates of the element where iteration started.
   */
   YaspElement<dim-1,dim>& intersection_self_local ()
@@ -891,7 +891,7 @@ public:
         return _is_self_local;
   }
 
-  /*! intersection of codimension 1 of this neighbor with element where iteration started. 
+  /*! intersection of codimension 1 of this neighbor with element where iteration started.
         Here returned element is in GLOBAL coordinates of the element where iteration started.
   */
   YaspElement<dim-1,dimworld>& intersection_self_global ()
@@ -899,13 +899,13 @@ public:
         return _is_global;
   }
 
-  //! local number of codim 1 entity in self where intersection is contained in 
+  //! local number of codim 1 entity in self where intersection is contained in
   int number_in_self ()
   {
         return _count;
   }
 
-  /*! intersection of codimension 1 of this neighbor with element where iteration started. 
+  /*! intersection of codimension 1 of this neighbor with element where iteration started.
         Here returned element is in LOCAL coordinates of neighbor
   */
   YaspElement<dim-1,dim>& intersection_neighbor_local ()
@@ -913,7 +913,7 @@ public:
         return _is_nb_local;
   }
 
-  /*! intersection of codimension 1 of this neighbor with element where iteration started. 
+  /*! intersection of codimension 1 of this neighbor with element where iteration started.
         Here returned element is in LOCAL coordinates of neighbor
   */
   YaspElement<dim-1,dimworld>& intersection_neighbor_global ()
@@ -921,23 +921,23 @@ public:
         return _is_global;
   }
 
-  //! local number of codim 1 entity in neighbor where intersection is contained in 
+  //! local number of codim 1 entity in neighbor where intersection is contained in
   int number_in_neighbor ()
   {
         return _count + 1-2*_face;
   }
 
   //! make intersection iterator from entity
-  YaspIntersectionIterator (YaspEntity<0,dim,dimworld>& myself, bool toend) 
+  YaspIntersectionIterator (YaspEntity<0,dim,dimworld>& myself, bool toend)
         : _itnb(myself.transformingsubiterator()),
-          _myself(myself), 
-          _nb(myself.gridlevel(),_itnb), 
+          _myself(myself),
+          _nb(myself.gridlevel(),_itnb),
           _pos_self_local(0.5),
           _pos_nb_local(0.5),
           _pos_world(myself.transformingsubiterator().position()),
           _ext_local(1.0),
           _is_self_local(_pos_self_local,_ext_local,_dir),
-          _is_nb_local(_pos_nb_local,_ext_local,_dir), 
+          _is_nb_local(_pos_nb_local,_ext_local,_dir),
           _is_global(_pos_world,myself.transformingsubiterator().meshsize(),_dir),
           _normal(0.0)
   {
@@ -949,7 +949,7 @@ public:
                 return;
           }
 
-        // initialize to first neighbor 
+        // initialize to first neighbor
         _count = 0;
         _dir = 0;
         _face = 0;
@@ -1003,7 +1003,7 @@ public:
   typedef typename YGrid<dim,ctype>::iTupel iTupel;
 
   //! constructor
-  YaspHierarchicIterator (YGLI& g, TSI& it, int maxlevel) : _g(g), _it(it), _entity(_g,_it) 
+  YaspHierarchicIterator (YGLI& g, TSI& it, int maxlevel) : _g(g), _it(it), _entity(_g,_it)
   {
         // now iterator points to current cell
 
@@ -1035,7 +1035,7 @@ public:
           push_sons();
 
         // in any case pop one element
-        pop_tos();      
+        pop_tos();
 
         return *this;
   }
@@ -1045,7 +1045,7 @@ public:
   {
         if (_g.level()==i._g.level() && _it.superindex()==i._it.superindex())
           return true;
-        else 
+        else
           return false;
   }
 
@@ -1120,7 +1120,7 @@ private:
 /*!
   YaspLevelIterator enables iteration over entities of one grid level
 
-  We have specializations for codim==0 (elements) and 
+  We have specializations for codim==0 (elements) and
   codim=dim (vertices).
   The general version throws a GridError.
  */
@@ -1134,11 +1134,11 @@ public:
   typedef typename SubYGrid<dim,yaspgrid_ctype>::TransformingSubIterator TSI;
 
   //! constructor
-  YaspLevelIterator (YGLI g, TSI it) : _g(g), _it(it), _entity(_g,_it) 
-  {  
+  YaspLevelIterator (YGLI g, TSI it) : _g(g), _it(it), _entity(_g,_it)
+  {
         if (codim>0 && codim<dim)
           {
-                throw GridError("YaspLevelIterator: codim not implemented",__FILE__,__LINE__);          
+                DUNE_THROW(GridError, "YaspLevelIterator: codim not implemented");
           }
   }
 
@@ -1187,8 +1187,8 @@ private:
 
 //************************************************************************
 /*!
-  A Grid is a container of grid entities. Given a dimension dim these entities have a 
-  codimension codim with 0 <= codim <= dim. 
+  A Grid is a container of grid entities. Given a dimension dim these entities have a
+  codimension codim with 0 <= codim <= dim.
 
   The Grid is assumed to be hierachically refined and nested. It enables iteration over
   entities of a given level and codimension.
@@ -1213,9 +1213,9 @@ public:
   typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
   typedef typename SubYGrid<dim,yaspgrid_ctype>::TransformingSubIterator TSI;
 
-  //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ... 
+  //! return GridIdentifierType of Grid, i.e. SGrid_Id or AlbertGrid_Id ...
   GridIdentifier type() const { return YaspGrid_Id; };
-  
+
   /*! Constructor for a YaspGrid, they are all forwarded to the base class
         @param comm MPI communicator where this mesh is distributed to
         @param L extension of the domain
@@ -1231,7 +1231,7 @@ public:
         0 ... maxlevel with 0 the coarsest level.
   */
   int maxlevel() const {return _mg.maxlevel();} // delegate
-    
+
   //! refine the grid refCount times. What about overlap?
   void globalRefine (int refCount)
   {
@@ -1257,7 +1257,7 @@ public:
                 if (pitype==Overlap_Partition)        return YaspLevelIterator<cd,dim,dimworld,pitype>(g,g.vertex_overlap().tsubbegin());
                 if (pitype<=All_Partition)            return YaspLevelIterator<cd,dim,dimworld,pitype>(g,g.vertex_overlapfront().tsubbegin());
           }
-        throw GridError("YaspLevelIterator with this codim or partition type not implemented",__FILE__,__LINE__);       
+        DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
   }
 
   //! Iterator to one past the last entity of given codim on level for partition type
@@ -1277,7 +1277,7 @@ public:
                 if (pitype==Overlap_Partition)        return YaspLevelIterator<cd,dim,dimworld,pitype>(g,g.vertex_overlap().tsubend());
                 if (pitype<=All_Partition)            return YaspLevelIterator<cd,dim,dimworld,pitype>(g,g.vertex_overlapfront().tsubend());
           }
-        throw GridError("YaspLevelIterator with this codim or partition type not implemented",__FILE__,__LINE__);       
+        DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
   }
 
   //! version without second template parameter for convenience
@@ -1293,7 +1293,7 @@ public:
           {
                 return YaspLevelIterator<cd,dim,dimworld,All_Partition>(g,g.vertex_overlapfront().tsubbegin());
           }
-        throw GridError("YaspLevelIterator with this codim or partition type not implemented",__FILE__,__LINE__);       
+        DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
   }
 
   //! version without second template parameter for convenience
@@ -1309,7 +1309,7 @@ public:
           {
                 return YaspLevelIterator<cd,dim,dimworld,All_Partition>(g,g.vertex_overlapfront().tsubend());
           }
-        throw GridError("YaspLevelIterator with this codim or partition type not implemented",__FILE__,__LINE__);       
+        DUNE_THROW(GridError, "YaspLevelIterator with this codim or partition type not implemented");
   }
 
   //! return size (= distance in graph) of overlap region
@@ -1337,7 +1337,7 @@ public:
           {
                 return g.vertex_overlapfront().totalsize();
           }
-        throw GridError("Yasp does not implement this codim (yet)",__FILE__,__LINE__);  
+        DUNE_THROW(GridError, "Yasp does not implement this codim (yet)");
   }
 
   /*! The communication interface
@@ -1402,7 +1402,7 @@ public:
           }
         if (codim>0 && codim<dim)
           {
-                throw GridError("interface communication not implemented",__FILE__,__LINE__);                   
+                DUNE_THROW(GridError, "interface communication not implemented");
           }
 
         // change communication direction?
@@ -1464,7 +1464,7 @@ public:
 
                 // delete buffer
                 delete[] buf;
-          }       
+          }
   }
 
   // implement leaf communication. Problem: supply vector of vectors
