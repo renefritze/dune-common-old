@@ -38,7 +38,7 @@ namespace Dune {
       return this->matrix_;
     }
 
-    //! ???
+    //! Constructor
     MassMatrixFEOp( const typename DiscFunctionType::FunctionSpace &f, OpMode opMode )://= ON_THE_FLY ) :
       FiniteElementOperator<DiscFunctionType,
                             SparseRowMatrix<double>,
@@ -94,7 +94,9 @@ namespace Dune {
       const double vol = entity.geometry().integration_element(tmp);
       
       static RangeType v[4];
-      
+      // Check magic constant. Otherwise program will fail in loop below
+      assert(matSize <= 4); 
+
       for(i=0; i<matSize; i++) 
         for (j=0; j<=i; j++ ) 
           mat(i,j)=0.0;
