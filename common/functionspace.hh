@@ -10,8 +10,8 @@ template< typename DomainFieldType, typename RangeFieldType, int n, int m >
 class FunctionSpace : public DynamicType {
 public:
 
-  typedef DomainFieldType DomainField ;
-  typedef RangeFieldType RangeField ;
+  typedef DomainFieldType DomainField;
+  typedef RangeFieldType  RangeField;
   
   typedef Mat < n, m, RangeField> JacobianRange;
   typedef Vec < m,  Mat< n, n, RangeField> > HessianRange ;
