@@ -1,4 +1,6 @@
+#define NEWSTYLE_IOSTREAM
 #include <amiramesh/AmiraMesh.h>
+#undef NEWSTYLE_IOSTREAM
 
 #include <algorithm>
 
