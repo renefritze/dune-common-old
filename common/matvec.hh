@@ -81,14 +81,11 @@ public:
 	//! operator () for read/write access to element of the vector
 	T& operator() (int i) {return x[i];}
 
-	//! operator () for read/write access to element of the vector
+	//! operator () for read access to element of the vector
 	const T& operator() (int i) const {return x[i];}
 
 	//! read only operation needed
 	T read (int i) const { return x[i];}
-
-	//! read only operation needed
-	const T & get (int i) const { return x[i];}
 
 	//! operator+ adds two vectors
 	Vec<n,T>& operator+= (const Vec<n,T>& b)
@@ -223,9 +220,11 @@ public:
 		  for (int i=0; i<n; i++) a[j](i) = t;
 	}
 
-  
 	//! operator () for read/write access to element in matrix
 	T& operator() (int i, int j) {return a[j](i);}
+  
+	//! operator () for read/write access to element in matrix
+	const T& operator() (int i, int j) const {return a[j](i);} 
 
 	//! operator () for read/write access to column vector
 	Vec<n,T>& operator() (int j) {return a[j];}
