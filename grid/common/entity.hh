@@ -46,10 +46,10 @@ public:
   const Geometry& geometry () const { return realEntity.geometry(); }
 
   //! Copy constructor from EntityImp
-  Entity(const EntityImp<codim,dim,GridImp> & e) : realEntity(e) {};  
+  explicit Entity(const EntityImp<codim,dim,GridImp> & e) : realEntity(e) {};  
 
   typedef typename RemoveConst<GridImp>::Type mutableGridImp;
-
+  
 #ifdef __ICC
   // for icc
   friend EntityImp<codim,dim,GridImp>& mutableGridImp::template getRealEntity<>(typename GridImp::Traits::template codim<codim>::Entity& e );
@@ -62,6 +62,11 @@ public:
   friend const EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(const typename GridImp::Traits::template codim<cd>::Entity& e ) const;
 #endif
 
+private:
+  /** hide copy constructor */
+  Entity(const Entity& rhs);
+  /** hide assignement operator */
+  Entity & operator = (const Entity& rhs);
 };
 
     /** \brief The wrapper class for entities of codimension zero, i.e. elements 
@@ -235,7 +240,13 @@ public:
   AdaptationState state () const { return realEntity.state(); }
 
   //! Copy constructor from EntityImp
-  Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {};  
+  explicit Entity(const EntityImp<0,dim,GridImp> & e) : realEntity(e) {};  
+
+private:
+  /** hide copy constructor */
+  Entity(const Entity& rhs);
+  /** hide assignement operator */
+  Entity & operator = (const Entity& rhs);
 };
 
     /** \brief The wrapper class for entities representing vertices 
@@ -299,7 +310,13 @@ public:
   FieldVector<ct, dim>& positionInOwnersFather () const { return realEntity.positionInOwnersFather(); }
 
   //! Copy constructor from EntityImp
-  Entity(const EntityImp<dim,dim,GridImp> & e) : realEntity(e) {};  
+  explicit Entity(const EntityImp<dim,dim,GridImp> & e) : realEntity(e) {};  
+
+private:
+  /** hide copy constructor */
+  Entity(const Entity& rhs);
+  /** hide assignement operator */
+  Entity & operator = (const Entity& rhs);
 };
 
 //********************************************************************

@@ -109,6 +109,12 @@ public:
 
   //! copy constructor from GeometryImp
   explicit Geometry(const GeometryImp<mydim,cdim,GridImp> & e) : realGeometry(e) {};
+
+private:
+  /** hide copy constructor */
+  Geometry(const Geometry& rhs);
+  /** hide assignement operator */
+  Geometry & operator = (const Geometry& rhs);
 };
 
 //! Specialization of Geometry for mydim=0 (vertices)
@@ -144,6 +150,12 @@ public:
 
   //! copy constructor from GeometryImp
   Geometry(const GeometryImp<0,cdim,GridImp> & e) : realGeometry(e) {};
+
+private:
+  /** hide copy constructor */
+  Geometry(const Geometry& rhs);
+  /** hide assignement operator */
+  Geometry & operator = (const Geometry& rhs);
 };
 
 //************************************************************************
