@@ -422,9 +422,10 @@ public:
 
       if(nit.boundary())
         {
+            
           BoundaryEntityType & bEl = nit.boundaryEntity();
 
-          if( bEl.type() == Dirichlet )
+          if( functionSpace_.boundaryType( bEl.id() ) == Dirichlet )
             {
               int neigh = nit.number_in_self();
                   
