@@ -36,6 +36,9 @@ namespace Dune
 
 class ALU3dGridError : public Exception {};   
 
+//#undef DUNE_THROW 
+//#define DUNE_THROW(e,m) assert(false);
+
 enum ALU3dGridElementType { tetra = 4, hexa = 7 };  
   
 // i.e. double or float 
@@ -87,6 +90,9 @@ class ALU3dGridMakeableGeometry : public Geometry<mydim, coorddim,
 public:
   ALU3dGridMakeableGeometry(bool makeRefelem=false) :
     GeometryType (ALU3dGridGeometry<mydim, coorddim,GridImp>(makeRefelem)) {}
+  
+  ALU3dGridMakeableGeometry(GridImp & grid , int level ) : 
+    GeometryType (ALU3dGridGeometry<mydim, coorddim,GridImp>(false)) {}
   
   //! build geometry out of different ALU3dGrid Geometrys
   //! ItemType are HElementType, HFaceType, HEdgeType and VertexType 
@@ -600,6 +606,9 @@ public:
   ALU3dGridMakeableBoundaryEntity () :
     GridImp::template codim<0>::BoundaryEntity (ALU3dGridBoundaryEntity<GridImp>()) {};
 
+  ALU3dGridMakeableBoundaryEntity (GridImp & grid, int level ) :
+    GridImp::template codim<0>::BoundaryEntity (ALU3dGridBoundaryEntity<GridImp>()) {};
+
   // set boundary Id, done by IntersectionIterator 
   void setId ( int id ) 
   {
@@ -669,7 +678,6 @@ public:
   typedef ALU3dGridMakeableGeometry<dim-1,dimworld,GridImp> GeometryImp;
   typedef ALU3dGridMakeableGeometry<dim-1,dimworld,GridImp> LocalGeometryImp;
 
-  
   //! The default Constructor , level tells on which level we want
   //! neighbours 
   ALU3dGridIntersectionIterator(const GridImp & grid, ALU3DSPACE HElementType *el,
@@ -724,15 +732,15 @@ public:
   //! coordinates for higher order boundary 
   typedef FieldVector<alu3d_ctype, dimworld> NormalType;
   
-  const NormalType & unitOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const ;
+  NormalType unitOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const ;
   
   //! return outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
-  const NormalType & outerNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
+  NormalType outerNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
 
   //! return outer normal, this should be dependent on local 
   //! coordinates for higher order boundary 
-  const NormalType & integrationOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
+  NormalType integrationOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
 
 private:
   // if neighbour exists , do setup of new neighbour 
@@ -754,9 +762,7 @@ private:
   const GridImp & grid_;
   int walkLevel_;
 
-  //ALU3DSPACE MemoryPointer < EntityImp , ALU3DSPACE MemoryProvider<EntityImp> > entity_;
   EntityImp * entity_; //! neighbour entity 
-  //EntityImp fEntity_; //! neighbour entity 
 
   // current element from which we started the intersection iterator
   mutable ALU3DSPACE GEOElementType *item_;  
@@ -777,9 +783,6 @@ private:
   mutable bool isBoundary_; //! true if intersection is with boundary 
   mutable bool isGhost_;  //! true if intersection is with internal boundary (only parallel grid) 
 
-  mutable FieldVector<alu3d_ctype, dimworld> outNormal_;  //! outerNormal of current intersection
-  mutable FieldVector<alu3d_ctype, dimworld> unitOuterNormal_; //! unitOuterNormal of current intersection
-
   mutable bool needSetup_; //! true if setup is needed
   mutable bool needNormal_;//! true if normal has to be calculated
 
@@ -787,9 +790,9 @@ private:
   mutable ALU3DSPACE NeighbourFaceType neighpair_;
 
   mutable bool initInterGl_; //! true if interSelfGlobal_ was initialized
-  mutable GeometryImp interSelfGlobal_; //! intersection_self_global
+  GeometryImp * interSelfGlobal_; //! intersection_self_global
 
-  mutable MakeableBndEntityImp bndEntity_; //! boundaryEntity  
+  MakeableBndEntityImp * bndEntity_; //! boundaryEntity  
 };
 
 //**********************************************************************
@@ -1232,12 +1235,20 @@ private:
 
   // the entity codim 0 
   typedef ALU3dGridMakeableEntity<0,dim,const MyType> EntityImp;
-  typedef ALU3DSPACE MemoryProvider< EntityImp > EntityProvider;
+  typedef ALU3DSPACE ALUMemoryProvider< EntityImp > EntityProvider;
+  
+  typedef ALU3dGridMakeableGeometry<dim-1,dimworld,const MyType> LGeometryImp;
+  typedef ALU3DSPACE ALUMemoryProvider< LGeometryImp > GeometryProvider;
+  
+  typedef ALU3dGridMakeableBoundaryEntity<const MyType> BndGeometryImp;
+  typedef ALU3DSPACE ALUMemoryProvider< BndGeometryImp > BndProvider;
   
   //typedef ALU3dGridMakeableEntity<3,dim,const MyType> VertexImp;
   //typedef ALU3DSPACE MemoryProvider< VertexImp > VertexProvider;
 
-  mutable EntityProvider entityProvider_;
+  mutable GeometryProvider geometryProvider_;
+  mutable EntityProvider   entityProvider_;
+  mutable BndProvider      bndProvider_;
   //mutable VertexProvider vertexProvider_;
 
 }; // end Class ALU3dGridGrid
