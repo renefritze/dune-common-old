@@ -90,18 +90,23 @@ typedef double UGCtype;
 
 
 // forward declarations 
-template<int dim, int dimworld>            class UGGrid;
-template<int codim, int dim, class GridImp> class UGGridEntity;
-template<int codim, PartitionIteratorType pitype, class GridImp> class UGGridLevelIterator;
-template<int mydim, int coorddim, class GridImp>            class UGGridGeometry;
-template<class GridImp>            class UGGridBoundaryEntity;
-template<class GridImp>            class UGGridHierarchicIterator;
-template<class GridImp>            class UGGridIntersectionIterator;
+template<int dim, int dimworld>          class UGGrid;
+template<int codim, int dim, 
+         class GridImp>                  class UGGridEntity;
+template<int codim, 
+         PartitionIteratorType pitype, 
+         class GridImp>                  class UGGridLevelIterator;
+template<int mydim, int coorddim, 
+         class GridImp>                  class UGGridGeometry;
+template<class GridImp>                 class UGGridBoundaryEntity;
+template<class GridImp>                 class UGGridHierarchicIterator;
+template<class GridImp>                 class UGGridIntersectionIterator;
 
 }  // namespace Dune
 
 #include "uggrid/uggridgeometry.hh"
 #include "uggrid/uggridentity.hh"
+#include "uggrid/uggridentitypointer.hh"
 #include "uggrid/uggridboundent.hh"
 #include "uggrid/ugintersectionit.hh"
 #include "uggrid/uggridleveliterator.hh"
@@ -163,7 +168,7 @@ public:
                          UGGridGeometry,
                          UGGridEntity,
                          UGGridBoundaryEntity,
-                         UGGridLevelIterator, // to be replaced by UGGridEntityPointer
+                         UGGridEntityPointer,
                          UGGridLevelIterator,
                          UGGridIntersectionIterator,
                          UGGridHierarchicIterator> Traits;

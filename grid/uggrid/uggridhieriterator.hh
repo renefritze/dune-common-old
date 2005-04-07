@@ -25,6 +25,7 @@ namespace Dune {
 
 template<class GridImp>
 class UGGridHierarchicIterator :
+        public Dune::UGGridEntityPointer <0,GridImp>,
         public HierarchicIteratorDefault <GridImp,UGGridHierarchicIterator>
 {
 
@@ -47,14 +48,18 @@ public:
 
     void increment();
 
+#if 0
     bool equals (const UGGridHierarchicIterator& i) const;
 
     Entity& dereference() const;
+#endif
 
 private:
 
+#if 0
   //! implement with virtual element
     mutable UGMakeableEntity<0,GridImp::dimension,GridImp> virtualEntity_;
+#endif
 
   //! max level to go down 
   int maxlevel_;

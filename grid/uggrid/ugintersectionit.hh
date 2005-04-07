@@ -21,6 +21,7 @@ namespace Dune {
  */
 template<class GridImp>
 class UGGridIntersectionIterator : 
+        public Dune::UGGridEntityPointer <0,GridImp>,
         public IntersectionIteratorDefault <GridImp,UGGridIntersectionIterator>
 {
 

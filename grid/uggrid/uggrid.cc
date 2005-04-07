@@ -887,9 +887,9 @@ void Dune::UGGrid < dim, dimworld >::setLocalIndices()
         
         typename Traits::template codim<0>::LevelIterator eIt    = lbegin<0>(i);
         typename Traits::template codim<0>::LevelIterator eEndIt = lend<0>(i);
-        
+
         int id = 0;
-        for (; eIt!=eEndIt; ++eIt)
+        for (; eIt!=eEndIt; ++eIt) 
             UG_NS<dim>::index(getRealEntity<0>(*eIt).target_) = id++;
 
         typename Traits::template codim<dim>::LevelIterator vIt    = lbegin<dim>(i);
