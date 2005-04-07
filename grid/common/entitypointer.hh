@@ -87,6 +87,8 @@ namespace Dune
 template<class GridImp, class IteratorImp>
 class EntityPointer
 {
+  // we must be able to initialize a GenericLeafIterator.realIterator from
+  // EntityPointer.realIterator
   friend class Dune::GenericLeafIterator<GridImp>;
 protected:
   IteratorImp realIterator;
