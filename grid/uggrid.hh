@@ -253,6 +253,9 @@ public:
     //! Triggers the grid refinement process
     bool adapt();
 
+    /** \brief Clean up refinement markers */
+    void postAdapt();
+
     /** \brief Please doc me! */
     GridIdentifier type () const { return UGGrid_Id; };
     
