@@ -168,6 +168,7 @@ namespace Dune
   struct EnableIf
   {
     typedef T type;
+    typedef T Type;
   };
 
   template<typename T>
