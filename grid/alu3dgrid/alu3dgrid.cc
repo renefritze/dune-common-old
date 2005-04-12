@@ -18,7 +18,7 @@ inline ALU3dGrid<dim,dimworld>::ALU3dGrid(const char* macroTriangFilename
 #endif
     ) 
   : mygrid_ (0) , maxlevel_(0) 
-  , coarsenMark_(false)
+  , coarsenMarked_(0) , refineMarked_(0) 
 #ifdef _ALU3DGRID_PARALLEL_
   , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
 #else 
@@ -49,7 +49,7 @@ inline ALU3dGrid<dim,dimworld>::ALU3dGrid(const char* macroTriangFilename
 template <int dim, int dimworld>
 inline ALU3dGrid<dim,dimworld>::ALU3dGrid(MPI_Comm mpiComm) 
   : mygrid_ (0) , maxlevel_(0) 
-  , coarsenMark_(false)
+  , coarsenMarked_(0) , refineMarked_(0) 
   , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
   , hIndexSet_ (*this,globalSize_)
   , levelIndexSet_(0)
@@ -59,7 +59,7 @@ inline ALU3dGrid<dim,dimworld>::ALU3dGrid(MPI_Comm mpiComm)
 template <int dim, int dimworld>
 inline ALU3dGrid<dim,dimworld>::ALU3dGrid(int myrank) 
   : mygrid_ (0) , maxlevel_(0) 
-  , coarsenMark_(false)
+  , coarsenMarked_(0) , refineMarked_(0) 
   , myRank_(myrank) 
   , hIndexSet_ (*this,globalSize_)
   , levelIndexSet_(0)
@@ -71,7 +71,8 @@ inline ALU3dGrid<dim,dimworld>::ALU3dGrid(int myrank)
 template <int dim, int dimworld>
 inline ALU3dGrid<dim,dimworld>::ALU3dGrid(const ALU3dGrid<dim,dimworld> & g)
   : mygrid_ (0) , maxlevel_(0) 
-  , coarsenMark_(false) , myRank_(-1) 
+  , coarsenMarked_(0) , refineMarked_(0) 
+  , myRank_(-1) 
   , hIndexSet_(*this,globalSize_) , levelIndexSet_(0)
 {
   DUNE_THROW(ALU3dGridError,"Do not use copy constructor of ALU3dGrid! \n");
@@ -122,12 +123,14 @@ inline void ALU3dGrid<dim,dimworld>::calcExtras()
   // set max index of grid 
   for(int i=0; i<dim+1; i++)
   {
-    globalSize_[i] = (*mygrid_).indexManager(i).getMaxIndex() + 1;
-    //std::cout << " global Size " << globalSize_[i] << "\n";
+    globalSize_[i] = (*mygrid_).indexManager(i).getMaxIndex();
   }
 
   //std::cout << "proc " << mpAccess_.myrank() << " num el = " << globalSize_[0] << "\n";
   if(levelIndexSet_) (*levelIndexSet_).calcNewIndex();
+
+  coarsenMarked_ = 0;
+  refineMarked_  = 0;
 }
 
 template <int dim, int dimworld>
@@ -199,7 +202,13 @@ template <int dim, int dimworld>
 inline bool ALU3dGrid<dim,dimworld>::
 mark(int ref, const typename Traits::template codim<0>::Entity & ep ) const 
 {
-  return (this->template getRealEntity<0> (ep)).mark(ref);
+  bool marked = (this->template getRealEntity<0> (ep)).mark(ref);
+  if(marked) 
+  {
+    if(ref > 0) refineMarked_ ++ ;
+    if(ref < 0) coarsenMarked_ ++ ;
+  }
+  return marked;
 }
   
 // global refine 
@@ -221,18 +230,11 @@ inline bool ALU3dGrid<dim,dimworld>::globalRefine(int anzahl)
   return ref;
 }
 
-// adapt grid  
-template <int dim, int dimworld>
-inline void ALU3dGrid<dim,dimworld>:: setCoarsenMark () const  
-{
-  coarsenMark_ = true;
-}
-
 // preprocess grid  
 template <int dim, int dimworld>
 inline bool ALU3dGrid<dim,dimworld>::preAdapt() 
 {
-  return coarsenMark_;
+  return (coarsenMarked_ > 0);
 }
 
 // adapt grid  
@@ -250,6 +252,36 @@ inline bool ALU3dGrid<dim,dimworld>::adapt()
     //calcMaxlevel();             // calculate new maxlevel 
     calcExtras();                 // reset size and things  
   }
+  return ref;
+}
+
+// adapt grid  
+template <int dim, int dimworld>
+template <class DofManagerType, class RestrictProlongOperatorType> 
+inline bool ALU3dGrid<dim,dimworld>::
+adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo) 
+{
+//#ifdef _ALU3DGRID_PARALLEL_
+  //bool ref = myGrid().duneAdapt(); // adapt grid 
+//#else 
+  typedef EntityImp EntityType;
+  EntityType f ( *this, this->maxlevel() );    
+  EntityType s ( *this, this->maxlevel() );    
+
+  int newElements = 16*refineMarked_;
+  ALU3DSPACE AdaptRestrictProlongImpl<ALU3dGrid<dim,dimworld> , EntityType , 
+      DofManagerType, RestrictProlongOperatorType > rp(*this,f,s,dm,rpo, newElements);
+
+  dm.resizeMem( newElements );
+  bool ref = myGrid().duneAdapt(rp); // adapt grid 
+  if(rp.maxlevel() >= 0) maxlevel_ = rp.maxlevel();
+//#endif
+  if(ref)
+  {
+    calcExtras();   // reset size and things  
+    dm.dofCompress();
+  }
+  postAdapt();
   return ref;
 }
 
@@ -288,7 +320,6 @@ inline void ALU3dGrid<dim,dimworld>::postAdapt()
     }
   }
 #endif
-  coarsenMark_ = false;
 }
 
 template <int dim, int dimworld> template <class T>
@@ -1064,10 +1095,11 @@ setNeighbor () const
     // children on this face. If we went down then we also are allowed to
     // go next otherwise we are not allowe to go next which is described as
     // "da other situation" 
-    
-    if( theSituation_ && neighpair_.first->down())
+   
+    ALU3DSPACE GEOFaceType * dwn = neighpair_.first->down();
+    if( theSituation_ && dwn )
     {
-      neighpair_.first = neighpair_.first->down();
+      neighpair_.first = dwn;
       daOtherSituation_ = true;
     }
     else 
@@ -1085,12 +1117,12 @@ setNeighbor () const
         (neighpair_.first->nb.front()) : (neighpair_.first->nb.rear());
 
    
-    ghost_ = dynamic_cast<ALU3DSPACE PLLBndFaceType *> (np.first); 
+    ghost_ = static_cast<ALU3DSPACE PLLBndFaceType *> (np.first); 
     numberInNeigh_ = np.second;
 
     // if our level is smaller then the level of the real ghost then go one
     // level up and set the element
-    if(ghost_->ghostLevel() != ghost_->level())
+    if((*ghost_).ghostLevel() != (*ghost_).level())
     {
       assert(ghost_->ghostLevel() < ghost_->level());
       assert(ghost_->up());
@@ -1541,7 +1573,6 @@ inline bool ALU3dGridEntity<0,dim,GridImp> :: mark (int ref) const
     }
 
     (*item_).request( ALU3DSPACE coarse_element_t );
-    grid_.setCoarsenMark();
     return true;
   }
  
