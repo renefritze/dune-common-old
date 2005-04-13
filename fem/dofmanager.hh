@@ -229,7 +229,7 @@ public:
       return ;
     }
   
-    int nMemSize = (int) (nsize * 0.02); 
+    int nMemSize = (int) (nsize * 0.1); 
     nMemSize += nsize;
     vec_ = AllocatorType :: realloc (vec_,size_,nMemSize);
 
@@ -265,6 +265,7 @@ inline bool DofArray<double>::processXdr(XDR *xdrs)
   {
     int len = size_;
     xdr_int( xdrs, &len );
+    //std::cout << len << " len|size "<< size_ << "\n";
     assert(size_ <= len);
 
     xdr_vector(xdrs,(char *) vec_,size_, sizeof(T) ,(xdrproc_t)xdr_double);
@@ -488,7 +489,7 @@ private:
  
   // the dofmanager belong to one grid only 
   const GridType & grid_;
-  
+
   // index set for mapping 
   mutable DataCollectorType dataInliner_;
   mutable DataCollectorType dataXtractor_;
@@ -499,6 +500,8 @@ private:
 
   typedef LocalInterface<typename GridType::template codim<0>::Entity> LocalIndexSetObjectsType;
   mutable LocalIndexSetObjectsType indexSets_; 
+
+  int maxIndex_;
   
 public:  
   template <class MapperType , class DofStorageType >
@@ -508,7 +511,7 @@ public:
   };
   
   //! Constructor 
-  DofManager (const GridType & grid) : grid_(grid) {}
+  DofManager (const GridType & grid) : grid_(grid) , maxIndex_(0) {}
   
   //! Desctructor, removes all MemObjects and IndexSetObjects 
   ~DofManager () 
@@ -647,9 +650,30 @@ public:
     ListIteratorType it    = memList_.begin();
     ListIteratorType endit = memList_.end();
 
+    maxIndex_ = 0;
     for( ; it != endit ; ++it)
     {
       (*it)->realloc ( (*it)->size() + (*it)->additionalSizeEstimate() );
+      maxIndex_ = std::max( (*it)->size() , maxIndex_ );
+    }
+  }
+  
+  void resizeChunk (int index, int chunkSize) 
+  {
+    //std::cout << "index = " << index << " |m=" << maxIndex_ << "\n";
+    if(index >= maxIndex_)
+    {
+      ListIteratorType it    = memList_.begin();
+      ListIteratorType endit = memList_.end();
+
+      maxIndex_ = 0;
+      for( ; it != endit ; ++it)
+      {
+        (*it)->realloc ( (*it)->size() + chunkSize );
+        //std::cout << "Resized with new size = " << (*it)->size() << "\n";
+        maxIndex_ = std::max( (*it)->size() , maxIndex_ );
+        //std::cout << "index = " << index << " |m=" << maxIndex_ << "\n";
+      }
     }
   }
   
@@ -658,9 +682,11 @@ public:
     ListIteratorType it    = memList_.begin();
     ListIteratorType endit = memList_.end();
 
+    maxIndex_ = 0;
     for( ; it != endit ; ++it)
     {
       (*it)->realloc ( (*it)->size() + nsize );
+      maxIndex_ = std::max( (*it)->size() , maxIndex_ );
     }
   }
 
@@ -682,10 +708,12 @@ private:
     ListIteratorType it    = memList_.begin();
     ListIteratorType endit = memList_.end();
 
+    maxIndex_ = 0;
     for( ; it != endit ; ++it)
     {
       int nSize = (*it)->newSize();
       (*it)->realloc ( nSize );
+      maxIndex_ = std::max( (*it)->size() , maxIndex_ );
     }
   }
 
@@ -707,11 +735,13 @@ public:
     ListIteratorType it    = memList_.begin();
     ListIteratorType endit = memList_.end();
 
+    maxIndex_ = 0;
     for( ; it != endit ; ++it)
     {
       // if correponding index was not compressed yet, yhis is called in
       // the MemObject dofCompress, if index has not changes, nothing happens  
       (*it)->dofCompress () ;
+      maxIndex_ = std::max( (*it)->size() , maxIndex_ );
     }
   }
 
