@@ -261,26 +261,30 @@ template <class DofManagerType, class RestrictProlongOperatorType>
 inline bool ALU3dGrid<dim,dimworld>::
 adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo) 
 {
-//#ifdef _ALU3DGRID_PARALLEL_
-  //bool ref = myGrid().duneAdapt(); // adapt grid 
-//#else 
-  typedef EntityImp EntityType;
-  EntityType f ( *this, this->maxlevel() );    
-  EntityType s ( *this, this->maxlevel() );    
+  EntityImp f ( *this, this->maxlevel() );    
+  EntityImp s ( *this, this->maxlevel() );    
 
-  int newElements = 16*refineMarked_;
-  ALU3DSPACE AdaptRestrictProlongImpl<ALU3dGrid<dim,dimworld> , EntityType , 
-      DofManagerType, RestrictProlongOperatorType > rp(*this,f,s,dm,rpo, newElements);
+  int newElements = 16*refineMarked_; // guess how many new elements we get 
+  ALU3DSPACE AdaptRestrictProlongImpl<ALU3dGrid<dim,dimworld>, EntityImp, DofManagerType, RestrictProlongOperatorType > 
+        rp(*this,f,s,dm,rpo, newElements);
 
   dm.resizeMem( newElements );
   bool ref = myGrid().duneAdapt(rp); // adapt grid 
+  
+  // if new maxlevel was claculated 
   if(rp.maxlevel() >= 0) maxlevel_ = rp.maxlevel();
-//#endif
+  //std::cout << maxlevel_ << "\n";
+  
   if(ref)
   {
     calcExtras();   // reset size and things  
     dm.dofCompress();
   }
+
+  loadBalance(dm);
+  dm.dofCompress();
+  communicate(dm);
+
   postAdapt();
   return ref;
 }
@@ -386,18 +390,16 @@ template <int dim, int dimworld> template <class DataCollectorType>
 inline bool ALU3dGrid<dim,dimworld>::loadBalance(DataCollectorType & dc) 
 {
 #ifdef _ALU3DGRID_PARALLEL_
-  //typedef typename Traits::template codim<0>::Entity EntityType;
-  typedef EntityImp EntityType;
-  EntityType en ( *this, this->maxlevel() );    
+  EntityImp en ( *this, this->maxlevel() );    
 
-  ALU3DSPACE GatherScatterImpl< ALU3dGrid<dim,dimworld> , EntityType , 
-        DataCollectorType > gs(*this,en,dc);
+  ALU3DSPACE GatherScatterImpl< ALU3dGrid<dim,dimworld>, EntityImp, DataCollectorType > 
+    gs(*this,en,dc);
   
   bool changed = myGrid().duneLoadBalance(gs);
   
   if(changed)
   {
-    calcMaxlevel();               // calculate new maxlevel 
+    //calcMaxlevel();               // calculate new maxlevel 
     calcExtras();                 // reset size and things  
   }
   return changed;
@@ -411,10 +413,9 @@ template <int dim, int dimworld> template <class DataCollectorType>
 inline bool ALU3dGrid<dim,dimworld>::communicate(DataCollectorType & dc) 
 {
 #ifdef _ALU3DGRID_PARALLEL_
-  typedef EntityImp EntityType;
-  EntityType en ( *this, this->maxlevel() );    
+  EntityImp en ( *this, this->maxlevel() );    
 
-  ALU3DSPACE GatherScatterImpl< ALU3dGrid<dim,dimworld> , EntityType , 
+  ALU3DSPACE GatherScatterImpl< ALU3dGrid<dim,dimworld> , EntityImp , 
     DataCollectorType > gs(*this,en,dc);
 
   myGrid().duneExchangeData(gs);
