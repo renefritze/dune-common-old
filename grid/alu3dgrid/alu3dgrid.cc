@@ -277,8 +277,8 @@ adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo)
   
   if(ref)
   {
+    calcMaxlevel();
     calcExtras();   // reset size and things  
-    dm.dofCompress();
   }
 
   // check whether we have balance 
