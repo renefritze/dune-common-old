@@ -108,8 +108,8 @@ inline void ALU3dGrid<dim,dimworld>::updateStatus()
 template <int dim, int dimworld>
 inline void ALU3dGrid<dim,dimworld>::calcMaxlevel()  
 {
+  assert(mygrid_);
   maxlevel_ = 0;
-  assert(mygrid_ != 0);
   ALU3DSPACE BSLeafIteratorMaxLevel w (*mygrid_) ;
   for (w->first () ; ! w->done () ; w->next ())
   {
@@ -242,14 +242,14 @@ template <int dim, int dimworld>
 inline bool ALU3dGrid<dim,dimworld>::adapt() 
 {
 #ifdef _ALU3DGRID_PARALLEL_
-  bool ref = myGrid().duneAdapt(); // adapt grid 
+  bool ref = myGrid().dAdapt(); // adapt grid 
 #else 
   bool ref = myGrid().adapt(); // adapt grid 
 #endif
   if(ref)
   {
-    maxlevel_++;
-    //calcMaxlevel();             // calculate new maxlevel 
+    //maxlevel_++;
+    calcMaxlevel();             // calculate new maxlevel 
     calcExtras();                 // reset size and things  
   }
   return ref;
@@ -281,6 +281,7 @@ adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo)
     dm.dofCompress();
   }
 
+  // check whether we have balance 
   loadBalance(dm);
   dm.dofCompress();
   communicate(dm);
@@ -295,7 +296,7 @@ template <int dim, int dimworld>
 inline void ALU3dGrid<dim,dimworld>::postAdapt() 
 {
 #ifdef _ALU3DGRID_PARALLEL_
-  if(mpAccess_.nlinks() <= 1)
+  if(mpAccess_.nlinks() < 1)
 #endif
   {
     maxlevel_ = 0;
@@ -307,8 +308,10 @@ inline void ALU3dGrid<dim,dimworld>::postAdapt()
     }
   }
 #ifdef _ALU3DGRID_PARALLEL_
-  else 
+  else
   {
+    // we have to walk over all hierarchcy because during loadBalance 
+    // we get newly refined elements, which have to be cleared 
     int fakeLevel = maxlevel_;
     maxlevel_ = 0;
     for(int l=0; l<= fakeLevel; l++)
@@ -321,6 +324,13 @@ inline void ALU3dGrid<dim,dimworld>::postAdapt()
           w.item ().resetRefinedTag();
         }
       }
+    }
+
+    ALU3DSPACE BSLeafIteratorMaxLevel w ( myGrid() ) ;
+    for (w->first () ; ! w->done () ; w->next ())
+    {
+      if(w->item().level() > maxlevel_ ) maxlevel_ = w->item().level();
+      w->item ().resetRefinedTag();
     }
   }
 #endif
@@ -399,7 +409,7 @@ inline bool ALU3dGrid<dim,dimworld>::loadBalance(DataCollectorType & dc)
   
   if(changed)
   {
-    //calcMaxlevel();               // calculate new maxlevel 
+    calcMaxlevel();               // calculate new maxlevel 
     calcExtras();                 // reset size and things  
   }
   return changed;
@@ -1368,6 +1378,7 @@ template<int dim, class GridImp>
 inline void 
 ALU3dGridEntity<0,dim,GridImp> :: setGhost(ALU3DSPACE PLLBndFaceType & ghost) 
 {
+  abort();
   item_    = 0;
   ghost_   = &ghost;
   isGhost_ = true;
