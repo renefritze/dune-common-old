@@ -875,7 +875,7 @@ public:
 
     /** \brief Get upper right corner */
     FieldVector<sgrid_ctype, dimworld> upperRight() const {
-        return low+H;
+        return H;
     }
 
   //! map expanded coordinates to position
