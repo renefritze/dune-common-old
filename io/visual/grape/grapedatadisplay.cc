@@ -148,7 +148,7 @@ evalScalar (EntityType &en, DiscFuncType & func, LocalFuncType &lf,
   // corners , kind of hack, but works for the moment 
   if(func.getFunctionSpace().polynomOrder() == 0)
   {
-    val[0] = lf[0];
+    val[0] = lf[comp];
     return;
   }
   else 
@@ -299,8 +299,7 @@ addData(DiscFuncType &func , const char *name , double time )
   // add function wether is exists or not 
   if(!already)
   {
-    //int num = (int) DiscFuncType::FunctionSpace::DimRange;
-    int num = 1;
+    int num = (int) DiscFuncType::FunctionSpace::DimRange;
     vecFdata_.resize(size+num);
     for(int n=size; n < size+num; n++)
     {
