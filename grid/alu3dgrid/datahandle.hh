@@ -108,17 +108,17 @@ public:
     //elem.resetRefinedTag();
     assert( son );
    
-    dm_.resizeChunk(elem.getIndex(),chunkSize_);
+    //dm_.resizeChunk(elem.getIndex(),chunkSize_);
     
     realSon_.setElement(*son);
     realFather_.setElement(elem);
-    rp_.restrictLocal(reFather_,reSon_,true);
+    rp_.restrictLocal(reFather_,reSon_, chunkSize_ ,true);
 
     son = son->next();
     while( son )
     {
       realSon_.setElement(*son);
-      rp_.restrictLocal(reFather_,reSon_,false);
+      rp_.restrictLocal(reFather_,reSon_, chunkSize_,false);
       son = son->next();
     }
     return 0;
@@ -132,21 +132,19 @@ public:
     assert( son );
     //elem.resetRefinedTag();
    
-    dm_.resizeChunk((*son).getIndex(),chunkSize_);
-
     realFather_.setElement(elem);
     realSon_.setElement(*son);
     if(realSon_.level() > maxlevel_) maxlevel_ = realSon_.level();
     
-    rp_.prolongLocal(reFather_,reSon_,false);
+    rp_.prolongLocal(reFather_,reSon_, chunkSize_, false);
 
     son = son->next();
     while( son )
     {
       assert( son );
-      dm_.resizeChunk((*son).getIndex(),chunkSize_);
+  
       realSon_.setElement(*son);
-      rp_.prolongLocal(reFather_,reSon_,false);
+      rp_.prolongLocal(reFather_,reSon_, chunkSize_, false);
       //(*son).resetRefinedTag();
       
       son = son->next();
