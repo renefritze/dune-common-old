@@ -1052,6 +1052,13 @@ public:
   //! maximal number of levels 
   enum { MAXL = 64 };
 
+  //! normal default number of new elements for new adapt method 
+  enum { newElementsChunk_ = 100 };
+
+  //! if one element is refined then it causes apporximately not more than 
+  //! this number of new elements  
+  enum { refineEstimate_ = 40 };
+
   //! Constructor which reads an ALU3dGrid Macro Triang file 
   //! or given GridFile 
 #ifdef _ALU3DGRID_PARALLEL_
@@ -1144,7 +1151,7 @@ public:
   bool adapt ( );
 
   template <class DofManagerType, class RestrictProlongOperatorType>
-  bool adapt (DofManagerType &, RestrictProlongOperatorType &);
+  bool adapt (DofManagerType &, RestrictProlongOperatorType &, bool verbose=false );
 
   //**********************************************************
   // End of Interface Methods
