@@ -24,6 +24,7 @@ namespace Dune {
  */
 template<class GridImp>
 class OneDGridHierarchicIterator :
+        public Dune::OneDGridEntityPointer <0,GridImp>,
         public HierarchicIteratorDefault <GridImp, OneDGridHierarchicIterator>
 {
     enum { dim = GridImp::dimension };
@@ -36,9 +37,9 @@ class OneDGridHierarchicIterator :
         int level;
     };
 
-    typedef typename GridImp::template codim<0>::Entity Entity;
-
 public:
+
+    typedef typename GridImp::template codim<0>::Entity Entity;
  
   //! the default Constructor
     OneDGridHierarchicIterator(int maxlevel) : elemStack() {

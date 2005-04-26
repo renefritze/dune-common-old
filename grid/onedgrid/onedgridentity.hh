@@ -27,8 +27,6 @@ public:
 
     FieldVector<double, 1> pos_;
 
-    //FieldVector<OneDCType, dim> localFatherCoords_; 
-
     //! entity number 
     int index_;
     
@@ -50,7 +48,9 @@ class OneDEntityImp<1>
 public:
 
     OneDEntityImp(int level) : level_(level), pred_(NULL), succ_(NULL)
-    {}
+    {
+        sons_[0] = sons_[1] = NULL;
+    }
 
     bool isLeaf() const {
         return sons_[0]==NULL && sons_[1]==NULL;
@@ -151,6 +151,9 @@ public:
   //! used for access to degrees of freedom
     int index () const {return target_->index_;}
 
+    /** \todo So far only returns index() */
+    int globalIndex() const {return index();}
+
     /*! Intra-element access to entities of codimension cc > codim. Return number of entities
       with codimension cc.
     */
@@ -233,11 +236,6 @@ public:
     typedef typename GridImp::template codim<0>::IntersectionIterator IntersectionIterator;
     typedef typename GridImp::template codim<0>::HierarchicIterator HierarchicIterator;
     
-    //! Constructor
-    OneDGridEntity(int level) {
-        DUNE_THROW(NotImplemented, "OneDGridEntity(int level)");
-    }
-
     //! Default Constructor
     OneDGridEntity() {};
 
@@ -329,12 +327,12 @@ public:
 
         if (level()<=maxlevel) {
 
-            typename OneDGridHierarchicIterator<GridImp>::StackEntry se;
-            se.element = target_;
-            se.level   = level();
-            it.elemStack.push(se);
+            //             typename OneDGridHierarchicIterator<GridImp>::StackEntry se;
+//             se.element = target_;
+//             se.level   = level();
+//             it.elemStack.push(se);
 
-#if 0
+#if 1
           // Load sons of old target onto the iterator stack
             if (!isLeaf()) {
                 typename OneDGridHierarchicIterator<GridImp>::StackEntry se0;
@@ -358,7 +356,7 @@ public:
     
     //! Returns iterator to one past the last son
     HierarchicIterator hend (int maxlevel) const {
-        return HierarchicIterator(maxlevel);;
+        return HierarchicIterator(maxlevel);
     }
     
     // ***************************************************************

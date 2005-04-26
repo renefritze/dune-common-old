@@ -120,7 +120,7 @@ public:
     /** \brief Return reference element corresponding to this element. 
      */
     static const Dune::Geometry<mydim,mydim,GridImp,Dune::OneDGridGeometry>& refelem () {
-        std::cout << "Calling unimplemented method OneDGridGeometry::refelem()" << std::endl;
+        DUNE_THROW(NotImplemented, "Calling unimplemented method OneDGridGeometry::refelem()");
     }
 
     /** \brief Return the element type identifier 
