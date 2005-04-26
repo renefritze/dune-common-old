@@ -123,7 +123,7 @@ public:
     grid(g), maxlevel(maxl),
     lit(grid.template lbegin<0>(0)),
     lend(grid.template lend<0>(0)),
-    hit(lit->hbegin(maxlevel)),
+    hit(lit->hbegin(maxlevel)),  // wird hier wirklich die Reihenfolge eingehalten ?
     hend(lit->hend(maxlevel))
     {
       if (end)
@@ -135,8 +135,10 @@ public:
       }
       if (hit != hend)
       {
-        // find first leaf
-        increment();
+        // find first leaf 
+		if (hit->level() != maxlevel && !hit->isLeaf()) // PB 25.04.05: Added this, otherwise grids with one level do not work!
+		  increment();
+
         // assign
         static_cast<EntityPointerImp&>(*this) = hit.realIterator;
       }
