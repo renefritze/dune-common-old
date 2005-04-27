@@ -47,8 +47,9 @@ namespace Dune {
  */
 
   enum GeometryType {vertex=0,line=1, triangle=2, quadrilateral=3, tetrahedron=4, 
-                                        pyramid=5, prism=6, hexahedron=7,
-                                        iso_triangle=8, iso_quadrilateral=9, unknown=127};
+					 pyramid=5, prism=6, hexahedron=7,
+					 iso_triangle=8, iso_quadrilateral=9,
+					 simplex=64, hypercube=65, unknown=127};
 
   /*! 
     Specify the format to store grid and vector data
@@ -145,6 +146,10 @@ namespace Dune {
       return "iso_triangle";
     case iso_quadrilateral:
       return "iso_quadrilateral";
+    case simplex:
+      return "simplex";
+    case hypercube:
+      return "hypercube";
     case unknown:
       return "unknown";
     }
@@ -331,6 +336,24 @@ public:
       return asImp().size(level,codim);
     }
 
+  //! number of leaf entities per codim in this process
+  int size (int codim) const
+  {
+      return asImp().size(codim);
+  }
+
+  //! number of entities per level, codim and geometry type in this process
+  int size (int level, int codim, GeometryType type) const
+  {
+      return asImp().size(level,codim,type);
+  }
+
+  //! number of leaf entities per codim and geometry type in this process
+  int size (int codim, GeometryType type) const
+  {
+      return asImp().size(codim,type);
+  }
+
   //! return size (= distance in graph) of overlap region
   int overlapSize (int level, int codim) const
     {
@@ -422,6 +445,7 @@ public:
   template<PartitionIteratorType pitype>
   LeafIterator leafbegin(int maxLevel) const
     {
+	  DUNE_THROW(Dune::NotImplemented, "PartitionIteratorType for leafbegin is ignored");
       return GenericLeafIterator< const GridImp >(asImp(),maxLevel,false);
     };
 
@@ -429,6 +453,7 @@ public:
   template<PartitionIteratorType pitype>
   LeafIterator leafend(int maxLevel) const
     {
+	  DUNE_THROW(Dune::NotImplemented, "PartitionIteratorType for leafend is ignored");
       return GenericLeafIterator< const GridImp >(asImp(),maxLevel,true);
     }
 
