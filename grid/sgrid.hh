@@ -902,7 +902,7 @@ public:
   //! number of leaf entities per codim in this process
   int size (int codim) const
   {
-	return size(maxlevel(),codim;
+	return size(maxlevel(),codim);
   }
 
   //! number of entities per level, codim and geometry type in this process
