@@ -6,6 +6,7 @@
 #include"../common/capabilities.hh"
 #include"common/grid.hh"
 #include"sgrid/numbering.hh"
+#include"../common/bigunsignedint.hh"
 
 #include <limits>
 
@@ -60,7 +61,10 @@ namespace Dune {
 /*! define name for floating point type used for coordinates in sgrid.
   You can change the type for coordinates by changing this single typedef.
  */
-typedef double sgrid_ctype; 
+  typedef double sgrid_ctype; 
+
+  // globally define the persistent index type
+  typedef bigunsignedint<64> sgrid_persistentindextype;
 
 //************************************************************************
 // forward declaration of templates
@@ -333,6 +337,7 @@ public:
   typedef typename GridImp::template codim<codim>::LevelIterator LevelIterator;
   typedef typename GridImp::template codim<0>::IntersectionIterator IntersectionIterator;
   typedef typename GridImp::template codim<0>::HierarchicIterator HierarchicIterator;
+
   
   // disambiguate member functions with the same name in both bases
   //! level of this element
@@ -340,6 +345,7 @@ public:
   
   //! index is unique and consecutive per level and codim used for access to degrees of freedom
   int index () const {return SEntityBase<codim,dim,GridImp>::index();}
+
   //! geometry of this entity
   const Geometry& geometry () const { return SEntityBase<codim,dim,GridImp>::geometry(); }
   
@@ -349,6 +355,23 @@ public:
   // specific to SEntity
   //! constructor
   SEntity (GridImp* _grid, int _l, int _id) : SEntityBase<codim,dim,GridImp>::SEntityBase(_grid,_l,_id) {};
+
+private:
+  typedef sgrid_persistentindextype PersistentIndexType;
+
+  //! globally unique, persistent index
+  PersistentIndexType persistentIndex () const 
+  { 
+	PersistentIndexType number1(SEntityBase<codim,dim,GridImp>::index());
+	PersistentIndexType number2((SEntityBase<codim,dim,GridImp>::level()<<4)+codim);
+	return number1|(number2<<52);
+  }
+
+  //! consecutive, codim-wise, level-wise index
+  int compressedIndex () const 
+  {
+	return SEntityBase<codim,dim,GridImp>::index();
+  }
 };
 
 /*! 
@@ -481,6 +504,37 @@ public:
     }
   
 private:
+  typedef sgrid_persistentindextype PersistentIndexType;
+
+  //! globally unique, persistent index
+  PersistentIndexType persistentIndex () const 
+  { 
+	PersistentIndexType number1(SEntityBase<0,dim,GridImp>::index());
+	PersistentIndexType number2((SEntityBase<0,dim,GridImp>::level()<<4));
+	return number1|(number2<<52);
+  }
+
+  //! consecutive, codim-wise, level-wise index
+  int compressedIndex () const 
+  {
+	return SEntityBase<0,dim,GridImp>::index();
+  }
+
+  //! subentity compressed index
+  template<int cc>
+  int subCompressedIndex (int i) const; // is implemented in sgrid/sgrid.cc !
+
+  //! subentity persistent index
+  template<int cc>
+  PersistentIndexType subPersistentIndex (int i) const
+  {
+	PersistentIndexType number1(this->template subCompressedIndex<cc>(i));
+	PersistentIndexType number2((SEntityBase<0,dim,GridImp>::level()<<4)+cc);
+	return number1|(number2<<52);
+  }
+
+
+
   mutable bool built_father;
   mutable int father_id;
   mutable MakeableGeometry in_father_local;
@@ -540,6 +594,22 @@ public:
         }
 
 private:
+  typedef sgrid_persistentindextype PersistentIndexType;
+
+  //! globally unique, persistent index
+  PersistentIndexType persistentIndex () const 
+  { 
+	PersistentIndexType number1(SEntityBase<dim,dim,GridImp>::index());
+	PersistentIndexType number2((SEntityBase<dim,dim,GridImp>::level()<<4)+dim);
+	return number1|(number2<<52);
+  }
+
+  //! globally unique, persistent leaf index (only valid on leaves and copies)
+  PersistentIndexType persistentLeafIndex () const 
+  { 
+	return persistentIndex();
+  }
+
   mutable bool built_father;
   mutable int father_id;
   mutable FieldVector<sgrid_ctype, dim> in_father_local;
@@ -774,6 +844,8 @@ public:
                      SEntityPointer,SLevelIterator,
                      SIntersectionIterator,SHierarchicIterator> Traits;
 
+  typedef sgrid_persistentindextype PersistentIndexType;
+
   //! maximum number of levels allowed
   enum { MAXL=32 };
 
@@ -826,6 +898,45 @@ public:
 
   //! number of grid entities per level and codim
   int size (int level, int codim) const;
+
+  //! number of leaf entities per codim in this process
+  int size (int codim) const
+  {
+	return size(maxlevel(),codim;
+  }
+
+  //! number of entities per level, codim and geometry type in this process
+  int size (int level, int codim, GeometryType type) const
+  {
+	if (type==hypercube) return size(level,codim);
+	switch (dim-codim)
+	  {
+	  case 0:
+		if (type==vertex) return size(level,codim);
+		break;
+
+	  case 1:
+		if (type==line) return size(level,codim);
+		break;
+		
+	  case 2:
+		if (type==quadrilateral) return size(level,codim);
+		if (type==iso_quadrilateral) return size(level,codim);
+		break;
+		
+	  case 3:
+		if (type==hexahedron) return size(level,codim);
+		break;
+	  }
+	return 0;
+  }
+
+  //! number of leaf entities per codim and geometry type in this process
+  int size (int codim, GeometryType type) const
+  {
+	return size(maxlevel(),codim,type);
+  }
+
 
   //! number of grid entities of all level for given codim
   int global_size (int codim) const;
