@@ -17,6 +17,7 @@
 */
 
 /*! @defgroup Refinement
+    @ingroup Grid
     <!--WWWWWWWWWWWWW-->
 
   @section General

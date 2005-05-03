@@ -19,21 +19,6 @@
 
 namespace Dune {
 
-/** @defgroup YaspGrid Yet Another Structured Parallel Grid (YaspGrid)
-    \ingroup GridCommon
-
-  Yaspgrid stands for yet another structured parallel grid.
-  It will implement the dune grid interface for structured grids with codim 0
-  and dim, with arbitrary overlap, parallel features with two overlap
-  models, periodic boundaries and fast a implementation allowing on-the-fly computations.
-
-
-  History:
-  - started on July 31, 2004 by PB based on abstractions developed in summer 2003
-
-  @{
- */
-
 //************************************************************************
 /*! define name for floating point type used for coordinates in yaspgrid.
   You can change the type for coordinates by changing this single typedef.
@@ -366,7 +351,7 @@ public:
   static const ReferenceGeometry& refelem ()
   {
 #warning Yasp::ReferenceGeometry not working!
-    throw -1;
+    DUNE_THROW(NotImplemented, "Yasp::ReferenceGeometry");
 #if 0
     return YaspReferenceElement<mydim>::refelem;
 #endif
@@ -718,7 +703,7 @@ public:
                 son += (1<<k);
 
         // access to one of the 2**dim predefined elements
-        DUNE_THROW(NotImplemented,"");
+        DUNE_THROW(NotImplemented," geometryInFather");
 #if 0
         return YaspFatherRelativeLocalElement<dim>::getson(son);
 #endif
@@ -736,9 +721,6 @@ public:
 
   bool isLeaf() const
   {
-	//    std::cout << _g.level() << " ... " << _g.mg()->maxlevel() << std::endl;
-	//   if (_g.level() == _g.mg()->maxlevel())
-	//      std::cout << "is Leaf\n";
     return (_g.level() == _g.mg()->maxlevel());
   }
   
@@ -1686,8 +1668,6 @@ public:
     {}
 };
 
-
-
 //========================================================================
 /*!
   YaspIndex provides mappers with index information for an entity
@@ -1741,16 +1721,20 @@ private:
 
 //************************************************************************
 /*!
-  A Grid is a container of grid entities. Given a dimension dim these entities have a
-  codimension codim with 0 <= codim <= dim.
+  \brief [<em> provides \ref Dune::Grid </em>]
+  \brief Provides a distributed structured cube mesh.
+  \ingroup GridInterface
 
-  The Grid is assumed to be hierachically refined and nested. It enables iteration over
-  entities of a given level and codimension.
+  YaspGrid stands for yet another structured parallel grid.
+  It will implement the dune grid interface for structured grids with codim 0
+  and dim, with arbitrary overlap, parallel features with two overlap
+  models, periodic boundaries and fast a implementation allowing on-the-fly computations.
 
-  The grid can consist of several subdomains and it can be non-matching.
+  \par History:
+  \li started on July 31, 2004 by PB based on abstractions developed in summer 2003
 
-  All information is provided to allocate degrees of freedom in appropriate vector
-  data structures (which are not part of this module).
+  \note The only class intended for public use is \ref Dune::YaspGrid
+  itself. All other classes are of no use for an application writer.
  */
 template<int dim, int dimworld>
 class YaspGrid :
@@ -2205,8 +2189,6 @@ private:
 
   int sizes[MAXL][dim+1]; // total number of entities per level and codim
 };
-
-/** @} end documentation group */
 
 namespace Capabilities
 {

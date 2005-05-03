@@ -16,16 +16,6 @@
 
 namespace Dune {
 
-/** @defgroup SimpleGrid SimpleGrid
-    @ingroup GridCommon
-
-        This module describes the pilot implementation of the Dune grid interface.
-        It implements the grid interface for simple structured meshes.
-
-        @{
- */
-
-
 //************************************************************************
 /*! define name for floating point type used for coordinates in sgrid.
   You can change the type for coordinates by changing this single typedef.
@@ -1178,6 +1168,10 @@ private:
 
 //************************************************************************
 /*!
+  \bug completely broken
+
+  It implements the grid interface for simple structured meshes.
+
   A Grid is a container of grid entities. Given a dimension dim these entities have a 
   codimension codim with 0 <= codim <= dim. 
 
@@ -1455,9 +1449,6 @@ private:
   int L;                              // number of levels in hierarchic mesh 0<=level<L
   LevelInfo<dim> li[MAXL];            // array of info structures
 };
-
-
-/** @} end documentation group */
 
 } // end namespace
 

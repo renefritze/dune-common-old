@@ -22,48 +22,44 @@
 
 namespace Dune {
 
-  /** @addtogroup YaspGrid
-      \ingroup GridCommon
-
-	  This is the basis of a parallel implementation of the dune grid interface
-	  supporting codim 0 and dim.
-
-	  You can also use the structured interface and write really fast code.
-  */
-
-
   // forward declarations
   template<int d, typename ct> class YGrid;
   template<int d, typename ct> class SubYGrid;
 
   static const double Ytolerance=1E-13;
  
-  /*! The YGrid considered here describes a finite set \f$d\f$-tupels of the form 
-	\f[ G = \{ (k_0,\ldots,k_{d-1}) | o_o \leq k_i < o_i+s_i \}  \f]
-
-	togehter with an affine mapping
-
-	\f[ t : G \to R^d, \ \ \ t(k)_i = k_i h_i + r_i \f].
-
-	Therefore a YGrid is characterized by the following four quantities:
-
-	- The origin \f$ o=(o_0,\ldots,o_{d-1}) \in Z^d\f$,
-	- the size \f$ s=(s_0,\ldots,s_{d-1}) \in Z^d\f$,
-	- the mesh width \f$ h=(h_0,\ldots,h_{d-1}) \in R^d\f$,
-	- The shift \f$ r=(r_0,\ldots,r_{d-1}) \in R^d\f$. The shift can be used to interpret the 
-	points of a grid as midpoints of cells, faces, edges, etc.
-
-	The YGrid can be parametrized by the dimension d and the type to be used for the coordinates.
-
-    Here is a graphical illustration of a grid:
-
-	\image html  grid.png "A YGrid."
-	\image latex grid.eps "A YGrid." width=\textwidth
-
-	A grid can be manipulated either in the origin/size representation or in the
-    min index / max index representation.
-
-	A YGrid allows to iterate over all its cells with an Iterator class.
+  /**
+     This is the basis of a parallel implementation of the dune grid interface
+     supporting codim 0 and dim.
+     
+     You can also use the structured interface and write really fast code.
+     
+     The YGrid considered here describes a finite set \f$d\f$-tupels of the form 
+     \f[ G = \{ (k_0,\ldots,k_{d-1}) | o_o \leq k_i < o_i+s_i \}  \f]
+     
+     togehter with an affine mapping
+     
+     \f[ t : G \to R^d, \ \ \ t(k)_i = k_i h_i + r_i \f].
+     
+     Therefore a YGrid is characterized by the following four quantities:
+     
+     - The origin \f$ o=(o_0,\ldots,o_{d-1}) \in Z^d\f$,
+     - the size \f$ s=(s_0,\ldots,s_{d-1}) \in Z^d\f$,
+     - the mesh width \f$ h=(h_0,\ldots,h_{d-1}) \in R^d\f$,
+     - The shift \f$ r=(r_0,\ldots,r_{d-1}) \in R^d\f$. The shift can be used to interpret the 
+     points of a grid as midpoints of cells, faces, edges, etc.
+     
+     The YGrid can be parametrized by the dimension d and the type to be used for the coordinates.
+     
+     Here is a graphical illustration of a grid:
+     
+     \image html  grid.png "A YGrid."
+     \image latex grid.eps "A YGrid." width=\textwidth
+     
+     A grid can be manipulated either in the origin/size representation or in the
+     min index / max index representation.
+     
+     A YGrid allows to iterate over all its cells with an Iterator class.
   */
   template<int d, typename ct>
   class YGrid {
