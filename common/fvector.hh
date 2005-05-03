@@ -936,6 +936,9 @@ representing a field and a compile-time given size.
 	//! export size
 	enum {size = 1};
 
+	//! export size
+	enum {dimension = 1};
+
 	//===== construction
 
       /** \brief Default constructor */
