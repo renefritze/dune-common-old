@@ -155,13 +155,18 @@ public:
       return rhs.equals(*this);
     }
 
-   /** Checks for inequality.
-    * only works EntityPointers on the same grid */
-   bool operator!=(const EntityPointer<GridImp,base>& rhs) const
-   {
-     return ! rhs.equals(*this);
-   }
+  /** Checks for inequality.
+   * only works EntityPointers on the same grid */
+  bool operator!=(const EntityPointer<GridImp,base>& rhs) const
+    {
+      return ! rhs.equals(*this);
+    }
 
+  /** @brief forward equality check to realIterator */
+  bool equals(const EntityPointer& rhs) const
+    {
+      return this->realIterator.equals(rhs.realIterator);
+    }
 };
 
 //************************************************************************
