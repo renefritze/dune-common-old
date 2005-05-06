@@ -50,6 +50,8 @@ inline LagrangeDiscreteFunctionSpace<FunctionSpaceT,GridType,IndexSetType,polOrd
   for(int i=0; i<numOfDiffBase_; i++)
     if (baseFuncSet_[i] != 0)
       delete baseFuncSet_[i];
+
+  delete(mapper_);
 }  
 
 template< class FunctionSpaceT, class GridType, class IndexSetType , int polOrd, class DofManagerType >
