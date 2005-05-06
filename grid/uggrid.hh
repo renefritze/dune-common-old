@@ -228,13 +228,6 @@ public:
 	return 0;
   }
 
-   
-#ifdef UGGRID_WITH_INDEX_SETS
-    int global_size (int codim) const DUNE_DEPRECATED { return hierarchicIndexSet().size(maxlevel(),codim); }
-#else 
-    int global_size (int codim) const DUNE_DEPRECATED { return size(maxlevel(),codim); }
-#endif
-
         /** \brief Mark entity for refinement
      *
      * This only works for entities of codim 0.
@@ -245,12 +238,7 @@ public:
      * <li> false, if nothing changed </li>
      * </ul>
      */
-    bool mark(int refCount, typename Traits::template codim<0>::EntityPointer & e ) {
-        return mark(refCount, *e);
-    }
-
-    /** \brief Tempory for Robert */
-    bool mark(int refCount, typename Traits::template codim<0>::Entity& e );
+    bool mark(int refCount, typename Traits::template codim<0>::EntityPointer & e );
 
     /** \brief Mark method accepting a UG refinement rule
      */
