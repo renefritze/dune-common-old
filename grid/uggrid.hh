@@ -164,6 +164,9 @@ public:
     typedef UGGridHierarchicIndexSet<Dune::UGGrid<dim,dimworld> > HierarchicIndexSetType;
     typedef DefaultLevelIndexSet<Dune::UGGrid<dim,dimworld> >      LevelIndexSetType;
 
+    //! The type used to store coordinates
+    typedef double ctype;
+
     /** \brief Constructor with control over UG's memory requirements 
      *
      * \param heapSize The size of UG's internal memory in megabytes.  UG allocates 
@@ -380,7 +383,7 @@ private:
     //! Marks whether the UG environment heap size is taken from
     //! an existing defaults file or whether the values from
     //! the UGGrid constructor are taken
-    bool useExistingDefaultsFile;
+    static bool useExistingDefaultsFile;
 
     //! The type of grid refinement currently in use
     RefinementType refinementType_;
