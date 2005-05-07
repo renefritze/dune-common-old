@@ -442,7 +442,7 @@ inline bool ALU3dGrid<dim,dimworld>::communicate(DataCollectorType & dc)
 }
 
 template <int dim, int dimworld>
-template <FileFormatType ftype>
+template <GrapeIOFileFormatType ftype>
 inline bool ALU3dGrid<dim,dimworld>::
 writeGrid( const std::basic_string<char> filename, alu3d_ctype time ) const
 {
@@ -473,7 +473,7 @@ writeGrid( const std::basic_string<char> filename, alu3d_ctype time ) const
 }
 
 template <int dim, int dimworld>
-template <FileFormatType ftype>
+template <GrapeIOFileFormatType ftype>
 inline bool ALU3dGrid<dim,dimworld>::
 readGrid( const std::basic_string<char> filename, alu3d_ctype & time )
 {

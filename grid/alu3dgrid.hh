@@ -15,6 +15,8 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/stdstreams.hh>
 
+#include <dune/io/file/grapedataio.hh>
+
 namespace Dune 
 {
 
@@ -1152,12 +1154,12 @@ public:
 
   /** \brief write Grid to file in specified FileFormatType 
    */
-  template <FileFormatType ftype>
+  template <GrapeIOFileFormatType ftype>
   bool writeGrid( const std::basic_string<char> filename, alu3d_ctype time ) const ;
   
   /** \brief read Grid from file filename and store time of mesh in time 
    */
-  template <FileFormatType ftype>
+  template <GrapeIOFileFormatType ftype>
   bool readGrid( const std::basic_string<char> filename, alu3d_ctype & time );
 
   //! return pointer to org ALU3dGrid 
