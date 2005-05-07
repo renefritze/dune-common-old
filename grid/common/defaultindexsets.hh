@@ -80,7 +80,7 @@ public:
   {
     FILE  *file;
     XDR   xdrs;
-    const char *path = NULL;
+    const char *path = "";
 
     std::basic_string<char> fnstr  = genFilename(path,filename, timestep);
     const char * fn = fnstr.c_str();
@@ -106,7 +106,7 @@ public:
   {
     FILE   *file;
     XDR     xdrs;
-    const char *path = NULL;
+    const char *path = "";
 
     std::basic_string<char> fnstr = genFilename(path,filename, timestep);
     const char * fn  = fnstr.c_str();

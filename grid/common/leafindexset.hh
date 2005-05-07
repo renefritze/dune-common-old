@@ -463,7 +463,7 @@ bool write_xdr(const std::basic_string<char> filename, int timestep)
 {
   FILE  *file;
   XDR   xdrs;
-  const char *path = NULL;
+  const char *path = "";
 
   std::basic_string<char> fnstr = genFilename(path,filename, timestep);
   const char * fn = fnstr.c_str();
@@ -488,7 +488,7 @@ bool read_xdr(const std::basic_string<char> filename , int timestep)
 {
   FILE   *file;
   XDR     xdrs;
-  const char *path = NULL;
+  const char *path = "";
 
   std::basic_string<char> fnstr = genFilename(path,filename, timestep);
   const char * fn = fnstr.c_str();

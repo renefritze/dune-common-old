@@ -42,8 +42,11 @@ inline std::basic_string<char> genFilename(std::basic_string <char> path, std::b
 {
   std::ostringstream name;
 
-  name << path; 
-  name << "/"; 
+  if(path.size() > 0)
+  {
+    name << path; 
+    name << "/"; 
+  }
   name << fn;
  
   char cp[256];
