@@ -86,7 +86,7 @@ inline bool GrapeDataIO<GridType> :: writeGrid
   const FileFormatType ftype, const GrapeIOStringType fnprefix , 
   double time, int timestep, int precision )
 {
-  const char *path = 0;
+  const char *path = "";
   std::fstream file (fnprefix.c_str(),std::ios::out);
   file << "Grid: "   << transformToGridName(grid.type()) << std::endl;
   file << "Format: " << ftype <<  std::endl;
@@ -132,7 +132,7 @@ inline bool GrapeDataIO<GridType> :: readGrid
   int precision = 6;
   readParameter(fnprefix,"Precision",precision);
 
-  const char *path = 0;
+  const char *path = "";
   GrapeIOStringType fn = genFilename(path,fnprefix,timestep,precision);
   printf("Read file: fnprefix = `%s' \n",fn);
 
@@ -179,7 +179,7 @@ const FileFormatType ftype, const GrapeIOStringType filename, int timestep, int 
     file.close();
   }
 
-  const char * path = 0;
+  const char * path = "";
   GrapeIOStringType fn = genFilename(path,filename,timestep,precision);
 
   if(ftype == xdr)
@@ -231,7 +231,7 @@ readData(DiscreteFunctionType & df, const GrapeIOStringType filename, int timest
       abort();
     }
 
-  const char * path = 0;
+  const char * path = "";
   GrapeIOStringType fn = genFilename(path,filename,timestep,precision);
 
   if(ftype == xdr)
