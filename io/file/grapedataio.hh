@@ -6,6 +6,17 @@
 
 namespace Dune {
 
+  /*! 
+    Specify the format to store grid and vector data
+  */
+  enum GrapeIOFileFormatType 
+      { ascii , //!< store data in a human readable form
+        xdr ,   //!< store data in SUN's library routines
+                //!< for external data representation (xdr)
+        pgm };  //!< store data in portable graymap file format 
+
+
+
 typedef std::basic_string <char> GrapeIOStringType;
 
 /** \brief convert type to string 
@@ -54,7 +65,7 @@ public:
    * generated out of filename and timestep 
    */
   inline bool writeGrid (const GridType & grid, 
-    const FileFormatType ftype, const GrapeIOStringType fnprefix 
+    const GrapeIOFileFormatType ftype, const GrapeIOStringType fnprefix 
       , double time=0.0, int timestep=0, int precision = 6);
 
   //! get Grid from file with time and timestep , return true if ok 
@@ -70,7 +81,7 @@ public:
   //! discrete function
   template <class DiscreteFunctionType>
   inline bool writeData(DiscreteFunctionType & df,
-     const FileFormatType ftype, const GrapeIOStringType filename, 
+     const GrapeIOFileFormatType ftype, const GrapeIOStringType filename, 
       int timestep, int precision = 6);
 
   //! same as write only read
@@ -83,7 +94,7 @@ public:
 template <class GridType>
 inline bool GrapeDataIO<GridType> :: writeGrid 
 (const GridType & grid,
-  const FileFormatType ftype, const GrapeIOStringType fnprefix , 
+  const GrapeIOFileFormatType ftype, const GrapeIOStringType fnprefix , 
   double time, int timestep, int precision )
 {
   const char *path = "";
@@ -100,7 +111,7 @@ inline bool GrapeDataIO<GridType> :: writeGrid
     case ascii:   return grid.template writeGrid<ascii>(fnstr,time);
     default:
         {
-          std::cerr << ftype << " FileFormatType not supported at the moment! " << __FILE__ << __LINE__ << "\n";
+          std::cerr << ftype << " GrapeIOFileFormatType not supported at the moment! " << __FILE__ << __LINE__ << "\n";
           assert(false);
           abort();
           return false;
@@ -127,7 +138,7 @@ inline bool GrapeDataIO<GridType> :: readGrid
   }
 
   readParameter(fnprefix,"Format",helpType);
-  FileFormatType ftype = (FileFormatType) helpType;
+  GrapeIOFileFormatType ftype = (GrapeIOFileFormatType) helpType;
 
   int precision = 6;
   readParameter(fnprefix,"Precision",precision);
@@ -142,7 +153,7 @@ inline bool GrapeDataIO<GridType> :: readGrid
     case ascii:   return grid.template readGrid<ascii>(fn,time);
     default:
         {
-          std::cerr << ftype << " FileFormatType not supported at the moment! \n";
+          std::cerr << ftype << " GrapeIOFileFormatType not supported at the moment! \n";
           assert(false);
           abort();
           return false;
@@ -154,7 +165,7 @@ inline bool GrapeDataIO<GridType> :: readGrid
 template <class GridType>
 template <class DiscreteFunctionType> 
 inline bool GrapeDataIO<GridType> :: writeData(DiscreteFunctionType & df, 
-const FileFormatType ftype, const GrapeIOStringType filename, int timestep, int  precision )
+const GrapeIOFileFormatType ftype, const GrapeIOStringType filename, int timestep, int  precision )
 {
   {
     typedef typename DiscreteFunctionType::FunctionSpaceType DiscreteFunctionSpaceType;
@@ -217,7 +228,7 @@ readData(DiscreteFunctionType & df, const GrapeIOStringType filename, int timest
     readParameter(filename,"Space",space,false);
     int filetype;
     readParameter(filename,"Format",filetype,false);
-    FileFormatType ftype = static_cast<FileFormatType> (filetype);
+    GrapeIOFileFormatType ftype = static_cast<GrapeIOFileFormatType> (filetype);
     int precision;
     readParameter(filename,"Precision",precision,false);
 
@@ -241,7 +252,7 @@ readData(DiscreteFunctionType & df, const GrapeIOStringType filename, int timest
   if(ftype == pgm)
     return df.read_pgm(fn);
 
-  std::cerr << ftype << " FileFormatType not supported at the moment! in file " << __FILE__ << " line " << __LINE__ << "\n"; 
+  std::cerr << ftype << " GrapeIOFileFormatType not supported at the moment! in file " << __FILE__ << " line " << __LINE__ << "\n"; 
   abort();
 
   return false;
