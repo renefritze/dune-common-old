@@ -13,6 +13,8 @@
 #include <dune/grid/common/defaultindexsets.hh>
 #include <dune/fem/transfer/datacollector.hh>
 
+#include <dune/io/file/grapedataio.hh>
+
 namespace Dune {
 
 // forward declaration 
@@ -812,7 +814,7 @@ public:
   //********************************************************
   // read-write Interface for index set 
   //********************************************************
-  bool write(const FileFormatType ftype, const char *filename, int timestep);
+  bool write(const GrapeIOFileFormatType ftype, const char *filename, int timestep);
   bool read(const char *filename, int timestep);
   bool write_xdr( const char * filename, int timestep);
   bool read_xdr( const char * filename, int timestep);
@@ -820,7 +822,7 @@ public:
 
 template <class GridType, class DataCollectorType>
 inline bool DofManager<GridType,DataCollectorType>::
-write(const FileFormatType ftype, const char *filename, int timestep)
+write(const GrapeIOFileFormatType ftype, const char *filename, int timestep)
 {
   assert(ftype == xdr);     
   return write_xdr(filename,timestep);
