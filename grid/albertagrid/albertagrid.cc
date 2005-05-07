@@ -3649,7 +3649,7 @@ inline void AlbertaGrid < dim, dimworld >::calcExtras ()
   wasChanged_ = true;
 }
 
-template < int dim, int dimworld >  template <FileFormatType ftype> 
+template < int dim, int dimworld >  template <GrapeIOFileFormatType ftype> 
 inline bool AlbertaGrid < dim, dimworld >::
 writeGrid (const char * filename, albertCtype time ) const
 {
@@ -3658,7 +3658,7 @@ writeGrid (const char * filename, albertCtype time ) const
   return writeGridXdr (filename , time ); 
 }
 
-template < int dim, int dimworld >  template <FileFormatType ftype> 
+template < int dim, int dimworld >  template <GrapeIOFileFormatType ftype> 
 inline bool AlbertaGrid < dim, dimworld >::
 readGrid (const std::basic_string<char> filename, albertCtype &time )
 {
