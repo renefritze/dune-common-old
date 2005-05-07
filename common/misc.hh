@@ -2,6 +2,7 @@
 #define __MISC_HH__
 
 #include <iostream>
+#include <sstream>
 
 //! Check condition at compilation time 
 template <bool flag> class CompileTimeChecker;
@@ -37,31 +38,15 @@ T SQR (T t)
 //
 //********************************************************************
 
-template <typename T>
-inline const char *genFilename(T *path, T *fn, int ntime, int precision = 6)
+inline std::basic_string<char> genFilename(std::basic_string <char> path, std::basic_string <char> fn, int ntime, int precision = 6)
 {
-  static char  name[256];
-  char         *cp;
-  
-  if (path == 0 || path[0] == '\0')
-  {
-    sprintf(name, "%s", fn);
-  }
-  else 
-  {
-    const char *cp = path;
-    while (*cp) 
-      cp++;
-    cp--;
-    if (*cp == '/')
-      sprintf(name, "%s%s", path, fn);
-    else
-      sprintf(name, "%s/%s", path, fn);
-  } 
-  cp = name;
-  while (*cp)
-    cp++;
+  std::ostringstream name;
 
+  name << path; 
+  name << "/"; 
+  name << fn;
+ 
+  char cp[256];
   switch(precision)
   {
     case 2  : { sprintf(cp, "%02d", ntime); break; }
@@ -79,8 +64,10 @@ inline const char *genFilename(T *path, T *fn, int ntime, int precision = 6)
         abort();
       }
   }
+  name << cp;
 
-  return( (T *) name);
+  // here implicitly a string is generated 
+  return name.str().c_str();
 }
     
 /** @} */
