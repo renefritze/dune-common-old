@@ -66,14 +66,16 @@ public:
   //! return object reference 
   Pointer & operator * () const 
   {
-    assert((ptr_ != 0) && (owner_) );
+    assert(ptr_ != 0);
+    assert(owner_);
     return *ptr_;
   }
 
   //! return object pointer 
   Pointer * operator -> () const
   {
-    assert((ptr_ != 0) && (owner_) );
+    assert(ptr_ != 0);
+    assert(owner_);
     return ptr_;
   }
   
