@@ -6,35 +6,35 @@
 
 namespace Dune {
 
-typedef std::basic_string <char> StringType;
+typedef std::basic_string <char> GrapeIOStringType;
 
 /** \brief convert type to string 
  */
 template <typename T>
-inline StringType typeIdentifier ()
+inline GrapeIOStringType typeIdentifier ()
 {
-  StringType tmp = "unknown";
+  GrapeIOStringType tmp = "unknown";
   return tmp;
 };
 
 template <>
-inline StringType typeIdentifier<float> ()
+inline GrapeIOStringType typeIdentifier<float> ()
 {
-  StringType tmp = "float";
+  GrapeIOStringType tmp = "float";
   return tmp;
 };
 
 template <>
-inline StringType typeIdentifier<int> ()
+inline GrapeIOStringType typeIdentifier<int> ()
 {
-  StringType tmp = "int";
+  GrapeIOStringType tmp = "int";
   return tmp;
 };
 
 template <>
-inline StringType typeIdentifier<double> ()
+inline GrapeIOStringType typeIdentifier<double> ()
 {
-  StringType tmp = "double";
+  GrapeIOStringType tmp = "double";
   return tmp;
 };
 
@@ -54,12 +54,12 @@ public:
    * generated out of filename and timestep 
    */
   inline bool writeGrid (const GridType & grid, 
-    const FileFormatType ftype, const char * fnprefix 
+    const FileFormatType ftype, const GrapeIOStringType fnprefix 
       , double time=0.0, int timestep=0, int precision = 6);
 
   //! get Grid from file with time and timestep , return true if ok 
   inline bool readGrid (GridType & grid, 
-      const char * fnprefix , double & time , int timestep);
+      const GrapeIOStringType fnprefix , double & time , int timestep);
 
 
   /**
@@ -70,20 +70,20 @@ public:
   //! discrete function
   template <class DiscreteFunctionType>
   inline bool writeData(DiscreteFunctionType & df,
-     const FileFormatType ftype, const char *filename, 
+     const FileFormatType ftype, const GrapeIOStringType filename, 
       int timestep, int precision = 6);
 
   //! same as write only read
   template <class DiscreteFunctionType>
   inline bool readData(DiscreteFunctionType & df,
-        const char *filename, int timestep);
+        const GrapeIOStringType filename, int timestep);
 };
 
 
 template <class GridType>
 inline bool GrapeDataIO<GridType> :: writeGrid 
 (const GridType & grid,
-  const FileFormatType ftype, const char * fnprefix , 
+  const FileFormatType ftype, const GrapeIOStringType fnprefix , 
   double time, int timestep, int precision )
 {
   const char *path = 0;
@@ -92,12 +92,12 @@ inline bool GrapeDataIO<GridType> :: writeGrid
   file << "Format: " << ftype <<  std::endl;
   file << "Precision: " << precision << std::endl;
 
-  const char * fn = genFilename(path,fnprefix,timestep,precision);
+  const GrapeIOStringType fnstr = genFilename(path,fnprefix,timestep,precision);
   file.close();
   switch (ftype)
   {
-    case xdr  :   return grid.template writeGrid<xdr>  (fn,time);
-    case ascii:   return grid.template writeGrid<ascii>(fn,time);
+    case xdr  :   return grid.template writeGrid<xdr>  (fnstr,time);
+    case ascii:   return grid.template writeGrid<ascii>(fnstr,time);
     default:
         {
           std::cerr << ftype << " FileFormatType not supported at the moment! " << __FILE__ << __LINE__ << "\n";
@@ -112,9 +112,8 @@ inline bool GrapeDataIO<GridType> :: writeGrid
 
 template <class GridType>
 inline bool GrapeDataIO<GridType> :: readGrid 
-(GridType & grid, const char * fnprefix , double & time , int timestep)
+(GridType & grid, const GrapeIOStringType fnprefix , double & time , int timestep)
 {
-  const char * fn;
   int helpType;
 
   char gridname [1024];
@@ -134,7 +133,7 @@ inline bool GrapeDataIO<GridType> :: readGrid
   readParameter(fnprefix,"Precision",precision);
 
   const char *path = 0;
-  fn = genFilename(path,fnprefix,timestep,precision);
+  GrapeIOStringType fn = genFilename(path,fnprefix,timestep,precision);
   printf("Read file: fnprefix = `%s' \n",fn);
 
   switch (ftype)
@@ -155,7 +154,7 @@ inline bool GrapeDataIO<GridType> :: readGrid
 template <class GridType>
 template <class DiscreteFunctionType> 
 inline bool GrapeDataIO<GridType> :: writeData(DiscreteFunctionType & df, 
-const FileFormatType ftype, const char *filename, int timestep, int  precision )
+const FileFormatType ftype, const GrapeIOStringType filename, int timestep, int  precision )
 {
   {
     typedef typename DiscreteFunctionType::FunctionSpaceType DiscreteFunctionSpaceType;
@@ -166,8 +165,8 @@ const FileFormatType ftype, const char *filename, int timestep, int  precision )
     enum { m = DiscreteFunctionSpaceType::DimRange };
 
     std::fstream file( filename , std::ios::out );
-    StringType d = typeIdentifier<DomainFieldType>();
-    StringType r = typeIdentifier<RangeFieldType>();
+    GrapeIOStringType d = typeIdentifier<DomainFieldType>();
+    GrapeIOStringType r = typeIdentifier<RangeFieldType>();
 
     file << "DomainField: " << d << std::endl;
     file << "RangeField: " << r << std::endl;
@@ -181,7 +180,7 @@ const FileFormatType ftype, const char *filename, int timestep, int  precision )
   }
 
   const char * path = 0;
-  const char * fn = genFilename(path,filename,timestep,precision);
+  GrapeIOStringType fn = genFilename(path,filename,timestep,precision);
 
   if(ftype == xdr)
     return df.write_xdr(fn);
@@ -196,7 +195,7 @@ const FileFormatType ftype, const char *filename, int timestep, int  precision )
 template <class GridType>
 template <class DiscreteFunctionType> 
 inline bool GrapeDataIO<GridType> :: 
-readData(DiscreteFunctionType & df, const char *filename, int timestep)
+readData(DiscreteFunctionType & df, const GrapeIOStringType filename, int timestep)
 {
     typedef typename DiscreteFunctionType::FunctionSpaceType DiscreteFunctionSpaceType;
     typedef typename DiscreteFunctionSpaceType::DomainField DomainFieldType;
@@ -206,9 +205,9 @@ readData(DiscreteFunctionType & df, const char *filename, int timestep)
     enum { tm = DiscreteFunctionSpaceType::DimRange };
 
     int n,m;
-    std::basic_string <char> r,d;
-    std::basic_string <char> tr (typeIdentifier<RangeFieldType>());
-    std::basic_string <char> td (typeIdentifier<DomainFieldType>());
+    GrapeIOStringType r,d;
+    GrapeIOStringType tr (typeIdentifier<RangeFieldType>());
+    GrapeIOStringType td (typeIdentifier<DomainFieldType>());
 
     readParameter(filename,"DomainField",d,false);
     readParameter(filename,"RangeField",r,false);
@@ -233,7 +232,7 @@ readData(DiscreteFunctionType & df, const char *filename, int timestep)
     }
 
   const char * path = 0;
-  const char * fn = genFilename(path,filename,timestep,precision);
+  GrapeIOStringType fn = genFilename(path,filename,timestep,precision);
 
   if(ftype == xdr)
     return df.read_xdr(fn);
