@@ -87,8 +87,8 @@ public:
     file = fopen(fn, "wb");
     if (!file)
     {
-      fprintf(stderr,"\aERROR in DefaultGridIndexSet::write_xdr(..): couldnot open <%s>!\n", filename);
-      fflush(stderr);
+        std::cerr << "\aERROR in DefaultGridIndexSet::write_xdr(..): could not open <"
+                  << filename << ">!" << std::endl;
       return false;
     }
 
@@ -114,8 +114,8 @@ public:
     file = fopen(fn, "rb");
     if(!file)
     {
-      fprintf(stderr,"\aERROR in DefaultGridIndexSet::read_xdr(..): couldnot open <%s>!\n", filename);
-      fflush(stderr);
+      std::cerr << "\aERROR in DefaultGridIndexSet::read_xdr(..): could not open <" 
+                << filename << ">!" << std::endl;
       return(false);
     }
 
