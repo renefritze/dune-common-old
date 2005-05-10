@@ -766,7 +766,7 @@ public EntityPointerDefault <cd, GridImp, ALU3dGridEntityPointer<cd,GridImp> >
     
   friend class ALU3dGridEntity<cd,dim,GridImp>;
   friend class ALU3dGridEntity< 0,dim,GridImp>;
-  friend class ALU3dGrid < dim , dimworld >;
+  friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
 
   typedef typename ALU3DSPACE ALUHElementType<cd>::ElementType  MyHElementType;
 public:
