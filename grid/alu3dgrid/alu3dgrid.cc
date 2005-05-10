@@ -126,7 +126,7 @@ inline void ALU3dGrid<dim,dimworld>::calcExtras()
     globalSize_[i] = (*mygrid_).indexManager(i).getMaxIndex();
   }
 
-  //std::cout << "proc " << mpAccess_.myrank() << " num el = " << globalSize_[0] << "\n";
+  //dverb << "proc " << mpAccess_.myrank() << " num el = " << globalSize_[0] << "\n";
   if(levelIndexSet_) (*levelIndexSet_).calcNewIndex();
 
   coarsenMarked_ = 0;
@@ -137,7 +137,7 @@ template <int dim, int dimworld>
 inline int ALU3dGrid<dim,dimworld>::global_size(int codim) const 
 {
   assert(globalSize_[codim] >= 0);
-  //std::cout << globalSize_[codim] << " Size of cd " << codim << "\n";
+  //dverb << globalSize_[codim] << " Size of cd " << codim << "\n";
   return globalSize_[codim];
 }
 
@@ -200,7 +200,15 @@ ALU3dGrid<dim,dimworld>::leafend(int level, PartitionIteratorType pitype) const
 // global refine 
 template <int dim, int dimworld>
 inline bool ALU3dGrid<dim,dimworld>::
-mark(int ref, const typename Traits::template codim<0>::Entity & ep ) const 
+mark(int ref, typename Traits::template codim<0>::EntityPointer & ep ) 
+{
+  return this->mark(ref,*ep);
+}
+
+// global refine 
+template <int dim, int dimworld>
+inline bool ALU3dGrid<dim,dimworld>::
+mark(int ref, const typename Traits::template codim<0>::Entity & ep ) 
 {
   bool marked = (this->template getRealEntity<0> (ep)).mark(ref);
   if(marked) 
@@ -261,7 +269,7 @@ template <class DofManagerType, class RestrictProlongOperatorType>
 inline bool ALU3dGrid<dim,dimworld>::
 adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo, bool verbose ) 
 {
-  assert( ((verbose) ? (std::cout << "ALU3dGrid :: adapt() new method called!\n", 1) : 1 ) );
+  assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method called!\n", 1) : 1 ) );
   EntityImp f ( *this, this->maxlevel() );    
   EntityImp s ( *this, this->maxlevel() );    
 
@@ -278,7 +286,7 @@ adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo, bool verbose )
   
   // if new maxlevel was claculated 
   if(rp.maxlevel() >= 0) maxlevel_ = rp.maxlevel();
-  assert( ((verbose) ? (std::cout << "maxlevel = " << maxlevel_ << "!\n", 1) : 1 ) );
+  assert( ((verbose) ? (dverb << "maxlevel = " << maxlevel_ << "!\n", 1) : 1 ) );
   
   if(ref)
   {
@@ -292,7 +300,7 @@ adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo, bool verbose )
   communicate(dm);
 
   postAdapt();
-  assert( ((verbose) ? (std::cout << "ALU3dGrid :: adapt() new method finished!\n", 1) : 1 ) );
+  assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method finished!\n", 1) : 1 ) );
   return ref;
 }
 
@@ -1009,21 +1017,21 @@ ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org
 {
   if(org.item_) // else its a end iterator 
   {
-    walkLevel_      = org.walkLevel_;
-    item_           = org.item_;
-    neigh_          = org.neigh_;
-    ghost_          = org.ghost_;
-    index_          = org.index_;
-    numberInNeigh_  = org.numberInNeigh_;
-    theSituation_   = org.theSituation_;
-    daOtherSituation_ = org.daOtherSituation_;
-    isBoundary_     = org.isBoundary_; // isBoundary_ == true means no neighbour 
-    isGhost_        = org.isGhost_;
-    needSetup_      = true;
-    needNormal_     = true;
-    initInterGl_    = false;
-    interSelfGlobal_  = (org.interSelfGlobal_) ? this->grid_.geometryProvider_.getNewObjectEntity( this->grid_ , walkLevel_ ) : 0;
-    bndEntity_      = (org.bndEntity_) ? this->grid_.bndProvider_.getNewObjectEntity( this->grid_ , walkLevel_ ) : 0;
+    walkLevel_       = org.walkLevel_;
+    item_            = org.item_;
+    neigh_           = org.neigh_;
+    ghost_           = org.ghost_;
+    index_           = org.index_;
+    numberInNeigh_   = org.numberInNeigh_;
+    theSituation_    = org.theSituation_;
+    daOtherSituation_= org.daOtherSituation_;
+    isBoundary_      = org.isBoundary_; // isBoundary_ == true means no neighbour 
+    isGhost_         = org.isGhost_;
+    needSetup_       = true;
+    needNormal_      = true;
+    initInterGl_     = false;
+    interSelfGlobal_ = (org.interSelfGlobal_) ? this->grid_.geometryProvider_.getNewObjectEntity( this->grid_ , walkLevel_ ) : 0;
+    bndEntity_       = (org.bndEntity_) ? this->grid_.bndProvider_.getNewObjectEntity( this->grid_ , walkLevel_ ) : 0;
   }
   else 
   {
@@ -1205,7 +1213,7 @@ inline typename ALU3dGridIntersectionIterator<GridImp>::Entity &
 ALU3dGridIntersectionIterator<GridImp>::dereference () const
 {
   if(needSetup_) setNeighbor(); 
-  return (*(this->entity_));
+  return ALU3dGridEntityPointer<0,GridImp>::dereference();
 }
 
 template<class GridImp>
@@ -1311,6 +1319,7 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
     return outNormal;
   }
   assert(false);
+  DUNE_THROW(ALU3dGridError,"Error in IntersectionIterator::outerNormal()! \n");
   NormalType tmp;
   return tmp;
 }
