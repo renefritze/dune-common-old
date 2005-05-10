@@ -2,7 +2,6 @@
 #define DUNE_ALU3DMAPPINGS_HH
 
 //- Dune includes
-//#include <dune/grid/alu3dgrid.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 
@@ -44,26 +43,27 @@ public :
   void world2map (const coord_t&, coord_t&) ;
 };
 
-//! A bilinear surface mapping
-class BilinearSurfaceMapping {
-  typedef FieldVector<double, 3> coord3_t;
-  typedef FieldVector<double, 2> coord2_t;
-  const coord3_t& _p0;
-  const coord3_t& _p1;
-  const coord3_t& _p2;
-  const coord3_t& _p3;
-  double _b [4][3] ;
-  double _n [3][3] ;
+  //! A bilinear surface mapping
+  class BilinearSurfaceMapping {
+    typedef FieldVector<double, 3> coord3_t;
+    typedef FieldVector<double, 2> coord2_t;
+    const coord3_t& _p0;
+    const coord3_t& _p1;
+    const coord3_t& _p2;
+    const coord3_t& _p3;
+    double _b [4][3] ;
+    double _n [3][3] ;
   public :
     BilinearSurfaceMapping (const coord3_t&, const coord3_t&,
-                                   const coord3_t&, const coord3_t&) ;
+                            const coord3_t&, const coord3_t&) ;
     BilinearSurfaceMapping (const BilinearSurfaceMapping &) ;
-   ~BilinearSurfaceMapping () {}
+    ~BilinearSurfaceMapping () {}
     void map2world(const coord2_t&, coord3_t&) const ;
     void map2world(double x, double y, coord3_t&) const ;
     void normal(const coord2_t&, coord3_t&) const ;
-} ;
-
+  } ;
+  
+  
 } // end namespace Dune
 
 #endif
