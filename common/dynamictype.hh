@@ -1,7 +1,8 @@
-#ifndef __DUNE_DYNAMICTYPE_HH__
-#define __DUNE_DYNAMICTYPE_HH__
+#ifndef DUNE_DYNAMICTYPE_HH
+#define DUNE_DYNAMICTYPE_HH
 
-#include <assert.h>
+#include <cassert>
+//#include <iostream>
 
 namespace Dune{
 
@@ -35,6 +36,7 @@ public:
   //! return identifier
   IdentifierType getIdentifier() const 
   { 
+    //std::cout << "Id: " << identifier_ << "(" << undefined << ")" << std::endl;
     assert(identifier_ != undefined);
     return identifier_; 
   }

@@ -38,7 +38,10 @@ T SQR (T t)
 //
 //********************************************************************
 
-inline std::basic_string<char> genFilename(std::basic_string <char> path, std::basic_string <char> fn, int ntime, int precision = 6)
+inline std::string genFilename(const std::string& path, 
+                               const std::string& fn, 
+                               int ntime, 
+                               int precision = 6)
 {
   std::ostringstream name;
 
@@ -70,7 +73,7 @@ inline std::basic_string<char> genFilename(std::basic_string <char> path, std::b
   name << cp;
 
   // here implicitly a string is generated 
-  return name.str().c_str();
+  return name.str();
 }
     
 /** @} */
