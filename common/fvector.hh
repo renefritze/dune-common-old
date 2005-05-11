@@ -470,11 +470,12 @@ representing a field and a compile-time given size.
 
 	//===== assignment from scalar
         //! Assignment operator for scalar
-	const FieldVector& operator= (const K& k)
+	FieldVector& operator= (const K& k)
 	{
 	  fvmeta_assignscalar<n-1>::assignscalar(*this,k);
 	  return *this;   
 	}
+
 
 	//===== access to components
 
