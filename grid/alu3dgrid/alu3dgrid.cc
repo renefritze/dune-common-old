@@ -708,7 +708,7 @@ inline bool ALU3dGrid<dim, dimworld, elType>::communicate(DataCollectorType & dc
 template <int dim, int dimworld, ALU3dGridElementType elType>
 template <GrapeIOFileFormatType ftype>
 inline bool ALU3dGrid<dim, dimworld, elType>::
-writeGrid(const std::string& filename, alu3d_ctype time ) const
+writeGrid(const std::string filename, alu3d_ctype time ) const
 {
   ALU3DSPACE GitterImplType & mygrd = const_cast<ALU3dGrid<dim, dimworld, elType> &> (*this).myGrid();
   mygrd.duneBackup(filename.c_str());
@@ -736,7 +736,7 @@ writeGrid(const std::string& filename, alu3d_ctype time ) const
 template <int dim, int dimworld, ALU3dGridElementType elType>
 template <GrapeIOFileFormatType ftype>
 inline bool ALU3dGrid<dim,dimworld, elType>::
-readGrid( const std::string& filename, alu3d_ctype & time )
+readGrid( const std::string filename, alu3d_ctype & time )
 {
   {
     typedef std::ostringstream StreamType;
@@ -1281,7 +1281,6 @@ ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org
 {
   if(org.item_) // else its a end iterator 
   {
-          //entity_         = (org.entity_) ? grid_.entityProvider_.getNewObjectEntity( grid_ , walkLevel_ ) : 0;
     walkLevel_      = org.walkLevel_;
     item_           = org.item_;
     neigh_          = org.neigh_;
@@ -1295,8 +1294,8 @@ ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org
     needSetup_      = true;
     twist_          = org.twist_;
     initInterGl_    = false;
-    interSelfGlobal_  = (org.interSelfGlobal_) ? this->grid_.geometryProvider_.getNewObjectEntity( grid_ , walkLevel_ ) : 0;
-    bndEntity_      = (org.bndEntity_) ? this->grid_.bndProvider_.getNewObjectEntity( grid_ , walkLevel_ ) : 0;
+    interSelfGlobal_  = (org.interSelfGlobal_) ? this->grid_.geometryProvider_.getNewObjectEntity( this->grid_ , walkLevel_ ) : 0;
+    bndEntity_      = (org.bndEntity_) ? this->grid_.bndProvider_.getNewObjectEntity( this->grid_ , walkLevel_ ) : 0;
   }
   else 
   {
@@ -1683,7 +1682,7 @@ ALU3dGridIntersectionIterator<GridImp>::boundaryEntity () const
 }
 
 template <class GridImp>
-inline ALU3dImplTraits<GridImp::elementType>::NeighbourPairType 
+inline typename ALU3dImplTraits<GridImp::elementType>::NeighbourPairType 
 ALU3dGridIntersectionIterator<GridImp>::
 getNeighPair (int index) const {
   return item_->myneighbour
@@ -1691,7 +1690,7 @@ getNeighPair (int index) const {
 }
 
 template <class GridImp>
-inline ALU3dImplTraits<GridImp::elementType>::NeighbourFaceType 
+inline typename ALU3dImplTraits<GridImp::elementType>::NeighbourFaceType 
 ALU3dGridIntersectionIterator<GridImp>::
 getNeighFace (int index) const {
   return item_->myintersection
@@ -1931,7 +1930,7 @@ template <class GridImp, int dim>
 struct SubEntities<GridImp,dim,1>
 {
   static typename ALU3dGridEntity<0,dim,GridImp> :: template codim<1>:: EntityPointer
-  entity (const GridImp & grid, const ALU3dImplTraits<GridImp::elementType>::IMPLElementType & item, int i)
+  entity (const GridImp & grid, const typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType & item, int i)
   {
     return ALU3dGridEntityPointer<1,GridImp> (grid, *(item.myhface3(i)) );
   }
@@ -1942,7 +1941,7 @@ template <class GridImp, int dim>
 struct SubEntities<GridImp,dim,2>
 {
   static typename ALU3dGridEntity<0,dim,GridImp> :: template codim<2>:: EntityPointer
-  entity (const GridImp & grid, const ALU3dImplTraits<GridImp::elementType>::IMPLElementType & item, int i)
+  entity (const GridImp & grid, const typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType & item, int i)
   {
     dwarn << "method not tested yet. ! in:" << __FILE__ << " line:" << __LINE__ << "\n";
     if(i<3)
@@ -1961,7 +1960,7 @@ template <class GridImp, int dim>
 struct SubEntities<GridImp,dim,3>
 {
   static typename ALU3dGridEntity<0,dim,GridImp> :: template codim<3>:: EntityPointer
-  entity (const GridImp & grid, const ALU3dImplTraits<GridImp::elementType>::IMPLElementType & item, int i)
+  entity (const GridImp & grid, const typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType & item, int i)
   {
     return ALU3dGridEntityPointer<3,GridImp> (grid, (*(item.myvertex(i))) );
   }
@@ -2630,6 +2629,7 @@ inline void ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> >::print (
   ss << "} \n";
 }
 
+template <class GridImp, int dim> struct ALU3dGridRefElem;
 template<int mydim, int cdim>
 inline const Dune::Geometry<mydim,mydim,const ALU3dGrid<3,3,tetra>, Dune::ALU3dGridGeometry> & 
 ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3,3,tetra> >:: refelem () {
@@ -2991,7 +2991,6 @@ const int ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> >::
 //**********************************************************
 //  Reference Element 
 //**********************************************************
-template <class GridImp, int dim> struct ALU3dGridRefElem;
 template <class GridImp> struct ALU3dGridRefElem<GridImp,1> {
   static const Dune::Geometry<1,1,GridImp,Dune::ALU3dGridGeometry> & refelem ()
   {
@@ -3014,7 +3013,6 @@ template <class GridImp> struct ALU3dGridRefElem<GridImp,3> {
     return ref.refelem;
   }
 };
-
 
 }
 
