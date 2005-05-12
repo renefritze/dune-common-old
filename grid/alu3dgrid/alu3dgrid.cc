@@ -35,7 +35,7 @@ namespace Dune {
     a [7][0] = p7 [0] - p5 [0] + p4 [0] - p6 [0] - p3 [0] + p1 [0] + a [2][0] ;
     a [7][1] = p7 [1] - p5 [1] + p4 [1] - p6 [1] - p3 [1] + p1 [1] + a [2][1] ;
     a [7][2] = p7 [2] - p5 [2] + p4 [2] - p6 [2] - p3 [2] + p1 [2] + a [2][2] ;
-    return ;	 
+    return ;   
   }
 
   inline TrilinearMapping :: TrilinearMapping (const TrilinearMapping & map)
@@ -1879,32 +1879,31 @@ inline int ALU3dGridEntity<0,dim,GridImp> :: getIndex() const
 }
 
 //********* begin method subIndex ********************
-/*
 // partial specialisation of subIndex 
-template <int codim> struct IndexWrapper;
+template <class IMPLElemType, int codim> struct IndexWrapper;
 
 // specialisation for vertices
-template <> struct IndexWrapper<3>
+template <class IMPLElemType> struct IndexWrapper<IMPLElemType,3>
 {
-  static inline int subIndex(const ALU3DSPACE IMPLElementType &elem, int i)
+  static inline int subIndex(const IMPLElemType &elem, int i)
   {
     return elem.myvertex(i)->getIndex();
   }
 };
 
 // specialisation for faces
-template <> struct IndexWrapper<1>
+template <class IMPLElemType> struct IndexWrapper<IMPLElemType,1>
 {
-  static inline int subIndex(const ALU3DSPACE IMPLElementType &elem, int i)
+  static inline int subIndex(const IMPLElemType &elem, int i)
   {
     return elem.myhface3(i)->getIndex();
   }
 };
 
 // specialisation for faces
-template <> struct IndexWrapper<2>
+template <class IMPLElemType> struct IndexWrapper<IMPLElemType,2>
 {
-  static inline int subIndex(const ALU3DSPACE IMPLElementType &elem, int i)
+  static inline int subIndex(const IMPLElemType &elem, int i)
   {
     dwarn << "method not tested yet. ! in:" << __FILE__ << " line:" << __LINE__ << "\n";
     if(i<3)
@@ -1920,9 +1919,9 @@ inline int ALU3dGridEntity<0,dim,GridImp> :: subIndex (int i) const
 {
   assert(cc == dim);
   assert(item_ != 0);
-  return IndexWrapper<cc>::subIndex ( *item_ ,i);
+  typedef typename  ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElType;
+  return IndexWrapper<IMPLElType,cc>::subIndex ( *item_ ,i);
 }
-*/
 //******** end method subIndex *************
 
 template <class GridImp, int dim, int cc> struct ALU3dGridCount {
