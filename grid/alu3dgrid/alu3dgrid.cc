@@ -708,20 +708,16 @@ inline bool ALU3dGrid<dim, dimworld, elType>::communicate(DataCollectorType & dc
 template <int dim, int dimworld, ALU3dGridElementType elType>
 template <GrapeIOFileFormatType ftype>
 inline bool ALU3dGrid<dim, dimworld, elType>::
-writeGrid( std::string filename, alu3d_ctype time ) const
+writeGrid(const std::string& filename, alu3d_ctype time ) const
 {
   ALU3DSPACE GitterImplType & mygrd = const_cast<ALU3dGrid<dim, dimworld, elType> &> (*this).myGrid();
   mygrd.duneBackup(filename.c_str());
 
   // write time and maxlevel 
   {
-    typedef std::ostringstream StreamType;
-    StreamType eName;
-    
-    eName << filename;
-    eName << ".extra";
-    const char * extraName = eName.str().c_str();
-    std::ofstream out (extraName);
+    std::string extraName(filename);
+    extraName += ".extra";
+    std::ofstream out (extraName.c_str());
     if(out)
     {
       out.precision (16);
@@ -740,7 +736,7 @@ writeGrid( std::string filename, alu3d_ctype time ) const
 template <int dim, int dimworld, ALU3dGridElementType elType>
 template <GrapeIOFileFormatType ftype>
 inline bool ALU3dGrid<dim,dimworld, elType>::
-readGrid( const std::basic_string<char> filename, alu3d_ctype & time )
+readGrid( const std::string& filename, alu3d_ctype & time )
 {
   {
     typedef std::ostringstream StreamType;
@@ -1327,8 +1323,8 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: checkGhost () const
   ghost_   = 0;
   if(isBoundary_)
   {
-    ALU3DSPACE PLLBndFaceType * bnd = 
-        dynamic_cast<ALU3DSPACE PLLBndFaceType *> (getNeighPair(index_).first);
+    PLLBndFaceType * bnd = 
+        dynamic_cast<PLLBndFaceType *> (getNeighPair(index_).first);
     if(bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
     {
       isBoundary_ = false;
@@ -1775,7 +1771,7 @@ template<int dim, class GridImp>
 inline void 
 ALU3dGridEntity<0,dim,GridImp> :: setGhost(ALU3DSPACE HElementType & element) 
 {
-  item_= static_cast<ALU3DSPACE IMPLElementType *> (&element);
+  item_= static_cast<IMPLElementType *> (&element);
   isGhost_ = true;
   ghost_ = 0;
   builtgeometry_=false;
