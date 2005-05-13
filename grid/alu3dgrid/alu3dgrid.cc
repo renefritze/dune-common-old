@@ -262,7 +262,7 @@ struct ALU3dGridReferenceGeometry
   ALU3dGridReferenceGeometry () : refelem (true) {};
 };
 
-const char * elType2Name( ALU3dGridElementType elType )
+inline const char * elType2Name( ALU3dGridElementType elType )
 {
   switch( elType )
   {
@@ -273,7 +273,7 @@ const char * elType2Name( ALU3dGridElementType elType )
   }
 }
 
-bool checkMacroGrid ( ALU3dGridElementType elType , const std::string filename )
+inline bool checkMacroGrid ( ALU3dGridElementType elType , const std::string filename )
 {
   std::fstream file (filename.c_str(),std::ios::in);
   if( file )
@@ -336,7 +336,7 @@ inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const char* macroTriangFilena
   assert(mygrid_ != 0);
 
 #ifdef _ALU3DGRID_PARALLEL_
-  //loadBalance();
+  loadBalance();
   __MyRank__ = mpAccess_.myrank();
 
   dverb << "************************************************\n";
@@ -710,6 +710,7 @@ inline bool ALU3dGrid<dim, dimworld, elType>::loadBalance()
   bool changed = myGrid().duneLoadBalance();
   if(changed)
   {
+    std::cout << "Grid was balanced on p=" << myRank() << "\n";
     calcMaxlevel();               // calculate new maxlevel 
     calcExtras();                 // reset size and things  
   }
@@ -733,7 +734,7 @@ inline bool ALU3dGrid<dim, dimworld, elType>::loadBalance(DataCollectorType & dc
   
   if(changed)
   {
-    std::cout << "Grid was balanced no p = " << mpAccess_.myrank() << "\n";
+    std::cout << "Grid was balanced on p = " << myRank() << "\n";
     calcMaxlevel();               // calculate new maxlevel 
     calcExtras();                 // reset size and things  
   }
