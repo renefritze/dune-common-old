@@ -931,24 +931,6 @@ Has to be checked
     };
 
     template<class CoordType>
-    struct Traits<iso_triangle, CoordType, triangle>
-    {
-      typedef Simplex::RefinementImp<2, CoordType> Imp;
-    };
-
-    template<class CoordType>
-    struct Traits<triangle, CoordType, iso_triangle>
-    {
-      typedef Simplex::RefinementImp<2, CoordType> Imp;
-    };
-
-    template<class CoordType>
-    struct Traits<iso_triangle, CoordType, iso_triangle>
-    {
-      typedef Simplex::RefinementImp<2, CoordType> Imp;
-    };
-
-    template<class CoordType>
     struct Traits<tetrahedron, CoordType, tetrahedron>
     {
       typedef Simplex::RefinementImp<3, CoordType> Imp;

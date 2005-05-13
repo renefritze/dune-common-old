@@ -1953,7 +1953,6 @@ public:
 		
 	  case 2:
 		if (type==quadrilateral) return sizes[level][codim];
-		if (type==iso_quadrilateral) return sizes[level][codim];
 		break;
 		
 	  case 3:

@@ -918,7 +918,6 @@ public:
 		
 	  case 2:
 		if (type==quadrilateral) return size(level,codim);
-		if (type==iso_quadrilateral) return size(level,codim);
 		break;
 		
 	  case 3:

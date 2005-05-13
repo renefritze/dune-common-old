@@ -469,24 +469,6 @@ namespace Dune {
     };
 
     template<class CoordType>
-    struct Traits<iso_quadrilateral, CoordType, triangle>
-    {
-      typedef HCubeTriangulation::RefinementImp<2, CoordType> Imp;
-    };
-
-    template<class CoordType>
-    struct Traits<quadrilateral, CoordType, iso_triangle>
-    {
-      typedef HCubeTriangulation::RefinementImp<2, CoordType> Imp;
-    };
-
-    template<class CoordType>
-    struct Traits<iso_quadrilateral, CoordType, iso_triangle>
-    {
-      typedef HCubeTriangulation::RefinementImp<2, CoordType> Imp;
-    };
-
-    template<class CoordType>
     struct Traits<hexahedron, CoordType, tetrahedron>
     {
       typedef HCubeTriangulation::RefinementImp<3, CoordType> Imp;
