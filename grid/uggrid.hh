@@ -285,6 +285,7 @@ public:
     // End of Interface Methods
     // **********************************************************
 
+#ifdef UGGRID_WITH_INDEX_SETS
     const HierarchicIndexSetType& hierarchicIndexSet() const {
         return hierarchicIndexSet_;
     }
@@ -294,6 +295,7 @@ public:
             levelIndexSet_ = new LevelIndexSetType(*this);
         return *levelIndexSet_;
     }
+#endif
 
     void createbegin();
 
@@ -446,6 +448,6 @@ namespace Capabilities
 } // namespace Dune
 
 // Include the method definitions
-#include "uggrid/uggrid.cc"
+//#include "uggrid/uggrid.cc"
 
 #endif
