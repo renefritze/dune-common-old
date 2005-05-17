@@ -215,9 +215,9 @@ namespace Dune {
   normal (const coord2_t& map, coord3_t& normal) const {
     double x = map [0];
     double y = map [1];
-    normal [0] = _n [0][0] + _n [1][0] * x + _n [2][0] * y ;
-    normal [1] = _n [0][1] + _n [1][1] * x + _n [2][1] * y ;
-    normal [2] = _n [0][2] + _n [1][2] * x + _n [2][2] * y ;
+    normal [0] = -(_n [0][0] + _n [1][0] * x + _n [2][0] * y);
+    normal [1] = -(_n [0][1] + _n [1][1] * x + _n [2][1] * y);
+    normal [2] = -(_n [0][2] + _n [1][2] * x + _n [2][2] * y);
     return ;
   }
 
@@ -1269,7 +1269,7 @@ ALU3dGridIntersectionIterator(const GridImp & grid,
                               int wLevel,bool end) 
   : ALU3dGridEntityPointer<0,GridImp> ( grid , wLevel, end ),
     nFaces_(el? el->nFaces() : 0),
-    twist_(true)
+    twist_(false)
 {
   if( !end )
   {
@@ -1280,6 +1280,10 @@ ALU3dGridIntersectionIterator(const GridImp & grid,
     numberInNeigh_ = -1;
     interSelfGlobal_ = 
       this->grid_.geometryProvider_.getNewObjectEntity( this->grid_ ,wLevel );
+    interSelfLocal_ =
+      this->grid_.geometryProvider_.getNewObjectEntity(this->grid_, wLevel);
+    interNeighLocal_ =
+      this->grid_.geometryProvider_.getNewObjectEntity(this->grid_, wLevel);
     bndEntity_ = 
       this->grid_.bndProvider_.getNewObjectEntity( this->grid_ , walkLevel_ );
     first(*el,wLevel);
@@ -1295,6 +1299,7 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: resetBools () const
 {
   needSetup_   = true;
   initInterGl_ = false;
+  initInterLocal_ = false;
 }
 
 template<class GridImp>
@@ -1325,7 +1330,9 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: last ()
   // reset entity pointer for equality 
   this->done();
   
-  interSelfGlobal_ = 0;
+  interSelfGlobal_ = 0; // * Resource leak ?
+  interNeighLocal_ = 0;
+  interSelfLocal_ = 0;
   bndEntity_ = 0;
   item_      = 0;
   index_     = nFaces_;
@@ -1354,8 +1361,13 @@ ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org
     needSetup_      = true;
     twist_          = org.twist_;
     initInterGl_    = false;
-    interSelfGlobal_  = (org.interSelfGlobal_) ? this->grid_.geometryProvider_.getNewObjectEntity( this->grid_ , walkLevel_ ) : 0;
-    bndEntity_      = (org.bndEntity_) ? this->grid_.bndProvider_.getNewObjectEntity( this->grid_ , walkLevel_ ) : 0;
+    interSelfGlobal_  = (org.interSelfGlobal_) ? this->grid_.geometryProvider_.getNewObjectEntity( grid_ , walkLevel_ ) : 0;
+    initInterLocal_ = false;
+    interSelfLocal_ = (org.interSelfLocal_) ? 
+      this->grid_.geometryProvider_.getNewObjectEntity(grid_, walkLevel_) : 0;
+    interNeighLocal_ = (org.interNeighLocal_) ?
+      this->grid_.geometryProvider_.getNewObjectEntity(grid_, walkLevel_) : 0;
+    bndEntity_      = (org.bndEntity_) ? this->grid_.bndProvider_.getNewObjectEntity( grid_ , walkLevel_ ) : 0;
   }
   else 
   {
@@ -1412,7 +1424,7 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
   if( !neighpair_.first )  
   {
     ++index_;
-    twist_ = (index_ == 3 || index_ == 4) ? true : false;
+    //twist_ = (index_ == 3 || index_ == 4) ? true : false;
     // * overkill here: can't get here without neighpair_.first == 0
     neighpair_.first = 0;
   }
@@ -1564,6 +1576,33 @@ inline int ALU3dGridIntersectionIterator<GridImp>::numberInSelf () const
   return index_;
 }
 
+
+template <class GridImp>
+inline const ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
+ALU3dGridIntersectionIterator<GridImp>::intersectionSelfLocal() const {
+  initLocals();
+  return *interSelfLocal_;
+}
+
+template <class GridImp>
+inline void ALU3dGridIntersectionIterator<GridImp>::initLocals() const {
+  if (!initInterLocal_) {
+    initLocal(*item_, index_, *interSelfLocal_);
+    if (!boundary()) {
+      initLocal(*neigh_, numberInNeigh_, *interNeighLocal_);
+    } else {
+#ifdef _ALU3DGRID_PARALLEL_
+      // * init with ghost (how to do that?)
+#else
+      // * this is temporary (what else should I do here?)
+      //initLocal(*item_, index_, *interNeighLocal_);
+#endif
+    }
+    initInterLocal_ = true;
+  }
+  return;
+}
+
 template<class GridImp>
 inline int ALU3dGridIntersectionIterator<GridImp>::numberInNeighbor () const
 {
@@ -1571,6 +1610,15 @@ inline int ALU3dGridIntersectionIterator<GridImp>::numberInNeighbor () const
   
   if(needSetup_) setNeighbor();
   return numberInNeigh_;
+}
+
+template <class GridImp>
+inline const ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
+ALU3dGridIntersectionIterator<GridImp>::intersectionNeighborLocal() const {
+  assert(!boundary());
+
+  initLocals();
+  return *interNeighLocal_;
 }
 
 template<class GridImp>
@@ -1703,8 +1751,9 @@ ALU3dGridIntersectionIterator<GridImp>::intersectionGlobal () const
   { 
     assert( interSelfGlobal_ );
     NeighbourFaceType face = getNeighFace(index_);
+    twist_ = (face.second < 0);
     initInterGl_ = 
-      interSelfGlobal_->buildGeom(*face.first, face.second, index_);
+      interSelfGlobal_->buildGeom(*face.first);
     //const GEOFaceType & face = 
     //  getFace(index_, Int2Type<GridImp::elementType>());
     //initInterGl_ = (*interSelfGlobal_).buildGeom(face, index_);
@@ -1715,15 +1764,28 @@ ALU3dGridIntersectionIterator<GridImp>::intersectionGlobal () const
   if( needSetup_ ) setNeighbor();
   
   assert( interSelfGlobal_ );
+  twist_ = (neighpair_.second < 0);
   initInterGl_ = 
     //interSelfGlobal_->buildGeom( *(neighpair_.first), index_ );
-    interSelfGlobal_->buildGeom(*neighpair_.first, neighpair_.second, index_);
+    interSelfGlobal_->buildGeom(*neighpair_.first);
   return (*interSelfGlobal_);
+}
+
+
+template <class GridImp>
+inline void
+ALU3dGridIntersectionIterator<GridImp>::
+initLocal(const GEOElementType& item, int faceIdx, 
+          LocalGeometryImp& geo) const {
+  geo.buildGeom
+    (item.twist(ALU3dImplTraits<GridImp::elementType>::dune2aluFace(faceIdx)), 
+     faceIdx);
 }
 
 template <class GridImp>
 inline ALU3dImplTraits<tetra>::GEOFaceType&
-ALU3dGridIntersectionIterator<GridImp>::getFace(int index, Int2Type<tetra>) const {
+ALU3dGridIntersectionIterator<GridImp>::
+getFace(int index, Int2Type<tetra>) const {
   return *(item_->myhface3(ALU3dImplTraits<tetra>::dune2aluFace(index)));
 }
 
@@ -2475,7 +2537,7 @@ inline bool ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> > :: buildGhost(co
 
 template <>
 inline bool ALU3dGridGeometry<2,3, const ALU3dGrid<3,3,tetra> > :: 
-buildGeom(const ALU3DSPACE HFaceType & item, int twist, int faceIdx) 
+buildGeom(const ALU3DSPACE HFaceType & item) 
 {
   enum { dim = 2 };
   enum { dimworld = 3};
@@ -2492,6 +2554,30 @@ buildGeom(const ALU3DSPACE HFaceType & item, int twist, int faceIdx)
   } 
   
   buildJacobianInverse();
+  return true;
+}
+
+template <>
+inline bool ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, tetra> >::
+buildGeom(int twist, int faceIdx) {
+  enum { dim = 2 };
+  enum { dimworld = 3};
+  
+  const Geometry<3, 3, const ALU3dGrid<3, 3, tetra>, ALU3dGridGeometry>& 
+    refElem = 
+    ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, tetra> >::refelem();
+
+  const int aluFaceIdx = ALU3dImplTraits<tetra>::dune2aluFace(faceIdx);
+
+  for (int i = 0; i < corners(); ++i) {
+    const int localVertexIdx = invTwist(twist, i);
+    const int globalVertexIdx = faceIndex(faceIdx, localVertexIdx);
+    FieldVector<alu3d_ctype, dimworld> p = refElem[globalVertexIdx];
+    for (int j = 0; j < dimworld; ++j) {
+      coord_[i][j] = p[j];
+    }
+  }
+
   return true;
 }
 
@@ -2531,6 +2617,30 @@ inline bool ALU3dGridGeometry<0,3, const ALU3dGrid<3,3,tetra> > :: buildGeom(con
   return true;
 }
 
+template <int mydim, int cdim>
+int ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, tetra> >::
+faceTwist(int val, int idx) const {
+  return (val < 0) ? (7 - idx + val)%3 : (val + idx)%3 ;
+}
+
+template <int mydim, int cdim>
+int ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, tetra> >::
+invTwist(int val, int idx) const {
+  return (val < 0) ? (7 - idx + val)%3 : (3 + idx - val)%3;
+}
+
+template <int mydim, int cdim>
+int ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, tetra> >::
+faceIndex(int faceIdx, int vtxIdx) const {
+  return faceIndex_[faceIdx][vtxIdx];
+}
+
+template <int mydim, int cdim>
+const int ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, tetra> >::
+faceIndex_[4][3] = {{1, 3, 2},
+                    {0, 3, 1},
+                    {0, 2, 3},
+                    {0, 1, 2}};
 
 template <GeometryType eltype , int dim> struct ALU3dGridElType {  
   static inline GeometryType type () { return unknown; }
@@ -2947,6 +3057,7 @@ buildGhost(const PLLBndFaceType & ghost) {
   return true;
 }
 
+/*  * old version
 template <>
 inline bool 
 ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, hexa> > :: 
@@ -2961,6 +3072,58 @@ buildGeom(const ALU3DSPACE HFaceType & item, int twist, int faceIdx) {
    //static_cast<const GEOFaceType &>(item).myvertex(dune2aluQuad[i])->Point();
    //   face.myvertex(dune2aluQuad[i])->Point();
     face.myvertex(idx)->Point();
+    for (int j = 0; j < dimworld; ++j) {
+      coord_[i][j] = p[j];
+    }
+  }
+  
+  biMap_ = new BilinearSurfaceMapping(coord_[0], coord_[1],
+                                      coord_[2], coord_[3]);
+
+  return true;
+}
+*/
+
+template <>
+inline bool 
+ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, hexa> > :: 
+buildGeom(const ALU3DSPACE HFaceType & item) {
+  enum { dim = 2 };
+  enum { dimworld = 3 };
+
+  const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
+  for (int i = 0; i < 4; ++i) {
+    const double (&p)[3] = 
+      face.myvertex(dune2aluQuad[i])->Point();
+    for (int j = 0; j < dimworld; ++j) {
+      coord_[i][j] = p[j];
+    }
+  }
+  
+  biMap_ = new BilinearSurfaceMapping(coord_[0], coord_[1],
+                                      coord_[2], coord_[3]);
+
+  return true;
+}
+
+template <>
+inline bool
+ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, hexa> > :: 
+buildGeom(int twist, int duneFaceIdx) {
+  enum { dim = 2 };
+  enum { dimworld = 3 };
+
+  const Geometry<3, 3, const ALU3dGrid<3, 3, hexa>, ALU3dGridGeometry >&
+    refElem = 
+    ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::refelem();
+
+  const int aluFaceIdx = ALU3dImplTraits<hexa>::dune2aluFace(duneFaceIdx);
+
+  for (int i = 0; i < corners(); ++i) {
+    const int localAluVertexIdx = invTwist(twist, dune2aluQuad[i]);
+    const int globalDuneVertexIdx = 
+      alu2duneFaceVertexGlobal[aluFaceIdx][localAluVertexIdx];
+    FieldVector<alu3d_ctype, dimworld> p = refElem[globalDuneVertexIdx];
     for (int j = 0; j < dimworld; ++j) {
       coord_[i][j] = p[j];
     }
@@ -3009,6 +3172,12 @@ faceTwist(int val, int idx) const {
   return (val < 0) ? (9 - idx + val)%4 : (val + idx)%4 ;
 }
 
+template <int mydim, int cdim>
+int ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
+invTwist(int val, int idx) const {
+  return (val < 0) ? (9 - idx + val)%4 : (4 + idx - val)%4;
+}
+
 template<int mydim, int cdim>
 const int ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> >::
 alu2duneVol[8] = {1, 3, 2, 0, 5, 7, 6, 4};
@@ -3020,12 +3189,10 @@ dune2aluVol[8] = {3, 0, 2, 1, 7, 4, 6, 5};
 template<int mydim, int cdim>
 const int ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> >::
 alu2duneFace[6] = {4, 5, 1, 3, 0, 2};
-//alu2duneFace[6] = {4, 5, 2, 1, 3, 0};
 
 template<int mydim, int cdim>
 const int ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> >::
 dune2aluFace[6] = {4, 2, 5, 3, 0, 1};
-//dune2aluFace[6] = {5, 3, 2, 4, 0, 1};
 
 template<int mydim, int cdim>
 const int ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> >:: 
@@ -3037,18 +3204,36 @@ dune2aluQuad[4] = {0, 3, 1, 2};
 
 template<int mydim, int cdim>
 const int ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> >::
-  dune2aluFaceVertex[6][4] = {{1, 0, 2, 3},
-                              {0, 1, 3, 2},
-                              {3, 0, 2, 1},
-                              {1, 0, 2, 3},
-                              {1, 0, 2, 3},
-                              {3, 0, 2, 1}};
+dune2aluFaceVertex[6][4] = {{1, 0, 2, 3},
+                            {0, 1, 3, 2},
+                            {3, 0, 2, 1},
+                            {1, 0, 2, 3},
+                            {1, 0, 2, 3},
+                            {3, 0, 2, 1}};
 // dune2aluFaceVertex[6][4] = {{0, 1, 3, 2},
 //                             {0, 1, 3, 2},
 //                             {3, 0, 2, 1},
 //                             {3, 0, 2, 1},
 //                             {3, 0, 2, 1},
 //                             {3, 0, 2, 1}};
+
+template<int mydim, int cdim>
+const int ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> >::
+alu2duneFaceVertex[6][4] = {{1, 0, 2, 3},
+                            {1, 3, 2, 0},
+                            {0, 1, 3, 2},
+                            {1, 0, 2, 3},
+                            {1, 0, 2, 3},
+                            {1, 3, 2, 0}};
+
+template <int mydim, int cdim>
+const int ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
+alu2duneFaceVertexGlobal[6][4] = {{1, 0, 2, 3},
+                                  {5, 7, 6, 4},
+                                  {1, 3, 7, 5},
+                                  {3, 2, 6, 7},
+                                  {2, 0, 4, 6},
+                                  {1, 5, 4, 0}};
 
 //**********************************************************
 //  Reference Element 
