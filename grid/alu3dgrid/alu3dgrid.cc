@@ -628,6 +628,9 @@ inline void ALU3dGrid<dim, dimworld, elType>::postAdapt()
     {
       if(w->item().level() > maxlevel_ ) maxlevel_ = w->item().level();
       w->item ().resetRefinedTag();
+
+      // note, resetRefinementRequest sets the request to coarsen
+      w->item ().resetRefinementRequest();
     }
   }
 //#ifdef _ALU3DGRID_PARALLEL_
@@ -655,6 +658,9 @@ inline void ALU3dGrid<dim, dimworld, elType>::postAdapt()
     {
       if(w->item().level() > maxlevel_ ) maxlevel_ = w->item().level();
       w->item ().resetRefinedTag();
+
+      // note, resetRefinementRequest sets the request to coarsen
+      w->item ().resetRefinementRequest();
     }
   }
 #endif
@@ -1361,13 +1367,13 @@ ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org
     needSetup_      = true;
     twist_          = org.twist_;
     initInterGl_    = false;
-    interSelfGlobal_  = (org.interSelfGlobal_) ? this->grid_.geometryProvider_.getNewObjectEntity( grid_ , walkLevel_ ) : 0;
+    interSelfGlobal_  = (org.interSelfGlobal_) ? this->grid_.geometryProvider_.getNewObjectEntity( this->grid_ , walkLevel_ ) : 0;
     initInterLocal_ = false;
     interSelfLocal_ = (org.interSelfLocal_) ? 
-      this->grid_.geometryProvider_.getNewObjectEntity(grid_, walkLevel_) : 0;
+      this->grid_.geometryProvider_.getNewObjectEntity(this->grid_, walkLevel_) : 0;
     interNeighLocal_ = (org.interNeighLocal_) ?
-      this->grid_.geometryProvider_.getNewObjectEntity(grid_, walkLevel_) : 0;
-    bndEntity_      = (org.bndEntity_) ? this->grid_.bndProvider_.getNewObjectEntity( grid_ , walkLevel_ ) : 0;
+      this->grid_.geometryProvider_.getNewObjectEntity(this->grid_, walkLevel_) : 0;
+    bndEntity_      = (org.bndEntity_) ? this->grid_.bndProvider_.getNewObjectEntity( this->grid_ , walkLevel_ ) : 0;
   }
   else 
   {
@@ -1578,7 +1584,7 @@ inline int ALU3dGridIntersectionIterator<GridImp>::numberInSelf () const
 
 
 template <class GridImp>
-inline const ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
+inline const typename ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
 ALU3dGridIntersectionIterator<GridImp>::intersectionSelfLocal() const {
   initLocals();
   return *interSelfLocal_;
@@ -1613,7 +1619,7 @@ inline int ALU3dGridIntersectionIterator<GridImp>::numberInNeighbor () const
 }
 
 template <class GridImp>
-inline const ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
+inline const typename ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
 ALU3dGridIntersectionIterator<GridImp>::intersectionNeighborLocal() const {
   assert(!boundary());
 
@@ -2182,6 +2188,7 @@ inline bool ALU3dGridEntity<0,dim,GridImp> :: mark (int ref) const
     return true;  
   }
 
+  (*item_).request( nosplit_element_t );
   return false;
 }
 
@@ -2563,7 +2570,7 @@ buildGeom(int twist, int faceIdx) {
   enum { dim = 2 };
   enum { dimworld = 3};
   
-  const Geometry<3, 3, const ALU3dGrid<3, 3, tetra>, ALU3dGridGeometry>& 
+  const Geometry<3, 3, const ALU3dGrid<3, 3, tetra>, Dune::ALU3dGridGeometry> & 
     refElem = 
     ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, tetra> >::refelem();
 
@@ -3113,7 +3120,7 @@ buildGeom(int twist, int duneFaceIdx) {
   enum { dim = 2 };
   enum { dimworld = 3 };
 
-  const Geometry<3, 3, const ALU3dGrid<3, 3, hexa>, ALU3dGridGeometry >&
+  const Geometry<3, 3, const ALU3dGrid<3, 3, hexa>, Dune::ALU3dGridGeometry >&
     refElem = 
     ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::refelem();
 
