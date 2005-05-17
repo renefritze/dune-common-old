@@ -336,7 +336,7 @@ inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const char* macroTriangFilena
   assert(mygrid_ != 0);
 
 #ifdef _ALU3DGRID_PARALLEL_
-  loadBalance();
+  //loadBalance();
   __MyRank__ = mpAccess_.myrank();
 
   dverb << "************************************************\n";
@@ -464,6 +464,7 @@ template <int dim, int dimworld, ALU3dGridElementType elType>
 template <int cd, PartitionIteratorType pitype>
 inline typename ALU3dGrid<dim, dimworld, elType>::Traits::template codim<cd>::template partition<pitype>::LevelIterator 
 ALU3dGrid<dim, dimworld, elType>::lbegin(int level) const {
+  assert( level >= 0 );
   return ALU3dGridLevelIterator<cd,pitype,const MyType> (*this,level);
 }
 
@@ -471,6 +472,7 @@ template <int dim, int dimworld, ALU3dGridElementType elType>
 template <int cd, PartitionIteratorType pitype>
 inline typename ALU3dGrid<dim, dimworld, elType>::Traits::template codim<cd>::template partition<pitype>::LevelIterator 
 ALU3dGrid<dim, dimworld, elType>::lend(int level) const {
+  assert( level >= 0 );
   return ALU3dGridLevelIterator<cd,pitype,const MyType> (*this,level,true);
 }
 
@@ -479,6 +481,7 @@ template <int dim, int dimworld, ALU3dGridElementType elType>
 template <int cd>
 inline typename ALU3dGrid<dim, dimworld, elType>::Traits::template codim<cd>::template partition<All_Partition>::LevelIterator 
 ALU3dGrid<dim, dimworld, elType>::lbegin(int level) const {
+  assert( level >= 0 );
   return ALU3dGridLevelIterator<cd,All_Partition,const MyType> (*this,level);
 }
 
@@ -486,6 +489,7 @@ template <int dim, int dimworld, ALU3dGridElementType elType>
 template <int cd>
 inline typename ALU3dGrid<dim, dimworld, elType>::Traits::template codim<cd>::template partition<All_Partition>::LevelIterator 
 ALU3dGrid<dim, dimworld, elType>::lend(int level) const {
+  assert( level >= 0 );
   return ALU3dGridLevelIterator<cd,All_Partition,const MyType> (*this,level,true);
 }
 
@@ -494,12 +498,14 @@ template <int dim, int dimworld, ALU3dGridElementType elType>
 inline typename ALU3dGrid<dim, dimworld, elType>::LeafIteratorType 
 ALU3dGrid<dim, dimworld, elType>::leafbegin(int level, PartitionIteratorType pitype) const
 {
+  assert( level >= 0 );
   return ALU3dGridLeafIterator<const MyType> ((*this),level,false,pitype);
 }
 template <int dim, int dimworld, ALU3dGridElementType elType>
 inline typename ALU3dGrid<dim, dimworld, elType>::LeafIteratorType 
 ALU3dGrid<dim, dimworld, elType>::leafend(int level, PartitionIteratorType pitype) const
 {
+  assert( level >= 0 );
   return ALU3dGridLeafIterator<const MyType> ((*this),level,true,pitype);
 }
 
@@ -716,7 +722,7 @@ inline bool ALU3dGrid<dim, dimworld, elType>::loadBalance()
   bool changed = myGrid().duneLoadBalance();
   if(changed)
   {
-    std::cout << "Grid was balanced on p=" << myRank() << "\n";
+    dverb << "Grid was balanced on p = " << myRank() << std::endl;
     calcMaxlevel();               // calculate new maxlevel 
     calcExtras();                 // reset size and things  
   }
@@ -740,7 +746,7 @@ inline bool ALU3dGrid<dim, dimworld, elType>::loadBalance(DataCollectorType & dc
   
   if(changed)
   {
-    std::cout << "Grid was balanced on p = " << myRank() << "\n";
+    dverb << "Grid was balanced on p = " << myRank() << std::endl;
     calcMaxlevel();               // calculate new maxlevel 
     calcExtras();                 // reset size and things  
   }
@@ -789,7 +795,7 @@ writeGrid(const std::string filename, alu3d_ctype time ) const
     }
     else 
     {
-      std::cerr << "ALU3dGrid::writeGrid: couldn't open <" << extraName << ">! \n";
+      derr << "ALU3dGrid::writeGrid: couldn't open <" << extraName << ">! \n";
     }
   }
   return true;
@@ -840,7 +846,7 @@ readGrid( const std::string filename, alu3d_ctype & time )
     }
     else 
     {
-      std::cerr << "ALU3dGrid::readGrid: couldn't open <" << extraName << ">! \n";
+      derr << "ALU3dGrid::readGrid: couldn't open <" << extraName << ">! \n";
     }
   }
   
@@ -937,7 +943,8 @@ inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
     {
       assert((*iter_).size() > 0);
       index_=0;
-      (*(this->entity_)).setElement( (*iter_).item()); 
+      myEntity().reset( level_ );
+      myEntity().setElement( (*iter_).item()); 
     }
   }
   else
@@ -947,14 +954,15 @@ inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
 template<int codim, PartitionIteratorType pitype, class GridImp >
 inline ALU3dGridLevelIterator<codim,pitype,GridImp> :: 
   ALU3dGridLevelIterator(const ALU3dGridLevelIterator<codim,pitype,GridImp> & org ) 
-  : ALU3dGridEntityPointer<codim,GridImp> ( org.grid_,org.level(),(org.index_ < 0) ? true : false )
+  : ALU3dGridEntityPointer<codim,GridImp> ( org.grid_,org.level_,(org.index_ < 0) ? true : false )
   , index_( org.index_ ) 
   , level_( org.level_ )
   , iter_ ( org.iter_ )
 {
   if(index_ >= 0)
   {
-    (*(this->entity_)).setElement( (*iter_).item());
+    myEntity().reset( level_ );
+    myEntity().setElement( (*iter_).item());
   }
 }
 
@@ -973,7 +981,7 @@ inline void ALU3dGridLevelIterator<codim,pitype,GridImp> :: increment ()
     return ;
   }
    
-  (*(this->entity_)).setElement( (*iter_).item()); 
+  myEntity().setElement( (*iter_).item()); 
   return ;
 }
 
@@ -1002,7 +1010,8 @@ inline ALU3dGridLeafIterator<GridImp> ::
     {
       assert((*iter_).size() > 0);
       index_=0;
-      (*(this->entity_)).setElement( (*iter_).item());
+      myEntity().reset( level_ );
+      myEntity().setElement( (*iter_).item() );
     }
   }
   else 
@@ -1012,7 +1021,7 @@ inline ALU3dGridLeafIterator<GridImp> ::
 template<class GridImp>
 inline ALU3dGridLeafIterator<GridImp> ::
 ALU3dGridLeafIterator(const ALU3dGridLeafIterator<GridImp> &org)
- : ALU3dGridEntityPointer <0,GridImp> ( org.grid_,org.level(),(org.index_ < 0) ? true : false )
+ : ALU3dGridEntityPointer <0,GridImp> ( org.grid_,org.level_,(org.index_ < 0) ? true : false )
  , index_(org.index_) 
  , level_(org.level_)
  , iter_ ( org.iter_ ) 
@@ -1020,7 +1029,8 @@ ALU3dGridLeafIterator(const ALU3dGridLeafIterator<GridImp> &org)
 { 
   if(index_ >= 0)
   {
-    (*(this->entity_)).setElement( iter_->item() );
+    myEntity().reset( level_ );
+    myEntity().setElement( iter_->item() );
   }
 }
 
@@ -1040,7 +1050,7 @@ inline void ALU3dGridLeafIterator<GridImp> :: increment ()
     return ;
   }
    
-  (*(this->entity_)).setElement( (*iter_).item());
+  myEntity().setElement( (*iter_).item());
   return ;
 }
 
@@ -1142,8 +1152,8 @@ inline ALU3dGridHierarchicIterator<GridImp> ::
       // we have children and they lie in the disired level range 
       if(item_->level() <= maxlevel_)
       {
-        (*(this->entity_)).reset( maxlevel_ );
-        (*(this->entity_)).setElement(*item_);
+        myEntity().reset( maxlevel_ );
+        myEntity().setElement(*item_);
       }
       else 
       { // otherwise do nothing 
@@ -1165,7 +1175,10 @@ ALU3dGridHierarchicIterator(const ALU3dGridHierarchicIterator<GridImp> & org)
   , elem_ (org.elem_) , item_(org.item_) , maxlevel_(org.maxlevel_) 
 {
   if(item_) 
-    (*(this->entity_)).setElement(*item_);
+  {
+    myEntity().reset( maxlevel_ );
+    myEntity().setElement(*item_);
+  }
   else 
     this->done();
 }
@@ -1218,7 +1231,7 @@ inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
     return ;
   }
 
-  (*(this->entity_)).setElement(*item_);
+  myEntity().setElement(*item_);
   return ;
 }
 
@@ -1275,14 +1288,11 @@ ALU3dGridIntersectionIterator(const GridImp & grid,
                               int wLevel,bool end) 
   : ALU3dGridEntityPointer<0,GridImp> ( grid , wLevel, end ),
     nFaces_(el? el->nFaces() : 0),
+    walkLevel_ ( wLevel ),
     twist_(false)
 {
   if( !end )
   {
-    walkLevel_  = wLevel;
-    // * what to do with this one? (probably ended up in entity pointer)
-    //entity_ = 
-    //  this->grid_.entityProvider_.getNewObjectEntity( this->grid_ , wLevel );
     numberInNeigh_ = -1;
     interSelfGlobal_ = 
       this->grid_.geometryProvider_.getNewObjectEntity( this->grid_ ,wLevel );
@@ -1324,7 +1334,7 @@ first (ALU3DSPACE HElementType & elem, int wLevel)
   isBoundary_ = getNeighPair(index_).first->isboundary();
   checkGhost();
   
-  theSituation_ = ( (elem.level() < wLevel ) && elem.leaf() );
+  theSituation_ = ( (item_->level() < wLevel ) && item_->leaf() );
   daOtherSituation_ = false;
   
   resetBools();
@@ -1338,7 +1348,7 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: last ()
   
   interSelfGlobal_ = 0; // * Resource leak ?
   interNeighLocal_ = 0;
-  interSelfLocal_ = 0;
+  interSelfLocal_  = 0;
   bndEntity_ = 0;
   item_      = 0;
   index_     = nFaces_;
@@ -1389,6 +1399,12 @@ inline ALU3dGridIntersectionIterator<GridImp> :: ~ALU3dGridIntersectionIterator(
 
   if(bndEntity_) this->grid_.bndProvider_.freeObjectEntity( bndEntity_ );
   bndEntity_ = 0;
+  
+  if(interSelfLocal_) this->grid_.geometryProvider_.freeObjectEntity( interSelfLocal_ );
+  interSelfLocal_ = 0;
+
+  if(interNeighLocal_) this->grid_.geometryProvider_.freeObjectEntity( interNeighLocal_ );
+  interNeighLocal_ = 0;
 }
 
 
@@ -1454,13 +1470,6 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
   return ;
 }
 
-template<class GridImp>
-inline bool ALU3dGridIntersectionIterator<GridImp> :: 
-equals (const ALU3dGridIntersectionIterator<GridImp>& i) const 
-{
-  return (item_ == i.item_);
-}
-
 // set new neighbor 
 template<class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp> :: 
@@ -1484,9 +1493,13 @@ setNeighbor () const
     // "da other situation" 
    
     GEOFaceType * dwn = neighpair_.first->down();
+
+#ifndef NDEBUG
+    if( theSituation_ )
+#endif
     if( theSituation_ && dwn )
     {
-      neighpair_.first = dwn;
+      neighpair_.first  = dwn;
       daOtherSituation_ = true;
     }
     else 
@@ -1523,13 +1536,12 @@ setNeighbor () const
       ghost_ = static_cast<PLLBndFaceType *> ( ghost_->up() );
       assert(ghost_->level() == ghost_->ghostLevel());
     }
-    
-    //assert( ghost_->getGhost() );
    
     // old set ghost method 
     (*(this->entity_)).setGhost( *ghost_ ); 
 
     // new ghost not supported for a moment 
+    //assert( ghost_->getGhost() );
     //(*(this->entity_)).setGhost( *(ghost_->getGhost()) ); 
    
     needSetup_ = false;
@@ -1561,6 +1573,13 @@ inline typename ALU3dGridIntersectionIterator<GridImp>::Entity &
 ALU3dGridIntersectionIterator<GridImp>::dereference () const
 {
   if(needSetup_) setNeighbor(); 
+
+  if( daOtherSituation_ ) 
+  {
+    if( neigh_ )  
+      assert( neigh_->down() == 0 );
+  }
+  
   return ALU3dGridEntityPointer<0,GridImp>::dereference();
 }
 
@@ -1760,9 +1779,6 @@ ALU3dGridIntersectionIterator<GridImp>::intersectionGlobal () const
     twist_ = (face.second < 0);
     initInterGl_ = 
       interSelfGlobal_->buildGeom(*face.first);
-    //const GEOFaceType & face = 
-    //  getFace(index_, Int2Type<GridImp::elementType>());
-    //initInterGl_ = (*interSelfGlobal_).buildGeom(face, index_);
     return (*interSelfGlobal_);
   }
 
@@ -1772,7 +1788,6 @@ ALU3dGridIntersectionIterator<GridImp>::intersectionGlobal () const
   assert( interSelfGlobal_ );
   twist_ = (neighpair_.second < 0);
   initInterGl_ = 
-    //interSelfGlobal_->buildGeom( *(neighpair_.first), index_ );
     interSelfGlobal_->buildGeom(*neighpair_.first);
   return (*interSelfGlobal_);
 }
@@ -1839,9 +1854,7 @@ getNeighFace (int index) const {
 // --0Entity
 template<int dim, class GridImp>
 inline ALU3dGridEntity<0,dim,GridImp> :: 
-ALU3dGridEntity(const GridImp  &grid,
-             //ALU3DSPACE HElementType & element,int index, 
-             int wLevel) 
+ALU3dGridEntity(const GridImp  &grid, int wLevel) 
   : grid_(grid)
   , item_(0) 
   , ghost_(0), isGhost_(false), geo_(false) , builtgeometry_(false)
@@ -1863,6 +1876,8 @@ template<int dim, class GridImp>
 inline void ALU3dGridEntity<0,dim,GridImp> :: 
 reset (int walkLevel ) 
 {
+  assert( walkLevel_ >= 0 );
+  
   item_       = 0;
   ghost_      = 0;
   isGhost_    = false; 
@@ -1872,6 +1887,7 @@ reset (int walkLevel )
   level_      = -1;
 }
 
+// works like assignment 
 template<int dim, class GridImp>
 inline void 
 ALU3dGridEntity<0,dim,GridImp> :: setEntity(const ALU3dGridEntity<0,dim,GridImp> & org) 
@@ -1882,6 +1898,7 @@ ALU3dGridEntity<0,dim,GridImp> :: setEntity(const ALU3dGridEntity<0,dim,GridImp>
   builtgeometry_ = false;
   index_         = org.index_;
   level_         = org.level_;
+  walkLevel_     = org.walkLevel_;
   glIndex_       = org.glIndex_;
 }
 
@@ -2154,7 +2171,7 @@ ALU3dGridEntity<0,dim,GridImp> :: father() const
 {
   if(! item_->up() )
   {
-    std::cerr << "ALU3dGridEntity<0," << dim << "," << dimworld << "> :: father() : no father of entity globalid = " << globalIndex() << "\n";
+    derr << "ALU3dGridEntity<0," << dim << "," << dimworld << "> :: father() : no father of entity globalid = " << globalIndex() << "\n";
     return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<ALU3DSPACE HElementType &> (*item_));
   }
   return ALU3dGridEntityPointer<0,GridImp> (grid_, static_cast<ALU3DSPACE HElementType &> (*(item_->up())));
@@ -2168,6 +2185,11 @@ inline bool ALU3dGridEntity<0,dim,GridImp> :: mark (int ref) const
   if(ghost_) return false;
 
   assert(item_ != 0);
+
+  // if this assertion is thrown then you try to mark a non leaf entity
+  // which is leads to unpredictable results  
+  assert( isLeaf() );
+  
   // mark for coarsening
   if(ref < 0) 
   {
@@ -2445,7 +2467,7 @@ inline void ALU3dGridGeometry<2,3, const ALU3dGrid<3,3,tetra> > :: buildJacobian
   {
     enum { dim = 3 };
     
-    //std::cerr << "WARNING: ALU3dGridGeometry::buildJacobianInverse not tested yet! " << __LINE__ <<"\n";
+    //derr << "WARNING: ALU3dGridGeometry::buildJacobianInverse not tested yet! " << __LINE__ <<"\n";
     // create vectors of face 
     tmpV_ = coord_[1] - coord_[0];
     tmpU_ = coord_[2] - coord_[1];
@@ -2468,7 +2490,7 @@ inline void ALU3dGridGeometry<1,3, const ALU3dGrid<3,3,tetra> > :: buildJacobian
   if(!builtinverse_)
   {
     enum { dim = 3 };
-    //std::cerr << "WARNING: ALU3dGridGeometry::buildJacobianInverse not tested yet! " << __LINE__ <<"\n";
+    //derr << "WARNING: ALU3dGridGeometry::buildJacobianInverse not tested yet! " << __LINE__ <<"\n";
     // create vectors of face 
     globalCoord_ = coord_[1] - coord_[0];
     detDF_ = std::abs ( globalCoord_.two_norm() );
@@ -2574,10 +2596,8 @@ buildGeom(int twist, int faceIdx) {
     refElem = 
     ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, tetra> >::refelem();
 
-  const int aluFaceIdx = ALU3dImplTraits<tetra>::dune2aluFace(faceIdx);
-
   for (int i = 0; i < corners(); ++i) {
-    const int localVertexIdx = invTwist(twist, i);
+    const int localVertexIdx  = invTwist(twist, i);
     const int globalVertexIdx = faceIndex(faceIdx, localVertexIdx);
     FieldVector<alu3d_ctype, dimworld> p = refElem[globalVertexIdx];
     for (int j = 0; j < dimworld; ++j) {
