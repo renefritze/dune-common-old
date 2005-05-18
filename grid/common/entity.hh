@@ -13,7 +13,7 @@ namespace Dune
       digraph entity {
          rankdir=LR;
          node [ shape=record, fontname=Helvetica, fontsize=10, height=0.25 ];
-         Entity [ label="Dune::Entity\<codim,dim,GridImp,EntityImp\>"
+         Entity [ label="Dune::Entity\<cd,dim,GridImp,EntityImp\>"
                   style=filled, bgcolor=lightgrey
                   shape=record, URL="\ref Dune::Entity"];
          Element [ label="Dune::Entity\<0,dim,GridImp,EntityImp\>"
@@ -23,19 +23,19 @@ namespace Dune
          Entity -> Element [ dirType="back", arrowType="open",
                              style="dashed"
                              fontname=Helvetica, fontsize=8, 
-                             label="codim=0" ];
+                             label="cd=0" ];
          Entity -> Vertex [ dirType="back", arrowType="open", style="dashed"
                              fontname=Helvetica, fontsize=8, 
-                             label="codim=dim" ];
+                             label="cd=dim" ];
       }
    \enddot
    
    @note @{
    There a three versions of Dune::Entity. Two of them are
    template specializations:
-   \li Dune::Entity<codim,dim,GridImp,EntityImp> (general version)
-   \li Dune::Entity<0,dim,GridImp,EntityImp> (Elements [codim=0])
-   \li Dune::Entity<dim,dim,GridImp,EntityImp> (Vertices [codim=dim])
+   \li Dune::Entity<cd,dim,GridImp,EntityImp> (general version)
+   \li Dune::Entity<0,dim,GridImp,EntityImp> (Elements [cd=0])
+   \li Dune::Entity<dim,dim,GridImp,EntityImp> (Vertices [cd=dim])
    These template specializations also show differences in the interface.
    \par
    An Entity is only accessible via an Iterator
@@ -59,19 +59,19 @@ namespace Dune
 
    \ingroup GridInterface
 */
-template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
+template<int cd, int dim, class GridImp, template<int,int,class> class EntityImp>
 class Entity {
   enum { dimworld = GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
 protected:
-  EntityImp<codim,dim,GridImp> realEntity;
+  EntityImp<cd,dim,GridImp> realEntity;
 public:
 
   /** The corresponding geometry type */
-  typedef typename GridImp::template codim<codim>::Geometry Geometry;
+  typedef typename GridImp::template codim<cd>::Geometry Geometry;
   enum {
     /** know your own codimension */
-    codimension=codim
+    codimension=cd
   };
   enum {
     /** know the grid dimension */
@@ -79,7 +79,7 @@ public:
   };
   enum {
     /** know dimension of the entity */
-    mydimension=dim-codim
+    mydimension=dim-cd
   };
   enum {
     /** know the dimension of world */
@@ -107,7 +107,7 @@ public:
   const Geometry& geometry () const { return realEntity.geometry(); }
 
   //! Copy constructor from EntityImp
-  explicit Entity(const EntityImp<codim,dim,GridImp> & e) : realEntity(e) {};  
+  explicit Entity(const EntityImp<cd,dim,GridImp> & e) : realEntity(e) {};  
 
   typedef typename RemoveConst<GridImp>::Type mutableGridImp;
   
@@ -122,14 +122,14 @@ public:
    */
 #ifdef __ICC
   // for icc
-  friend EntityImp<codim,dim,GridImp>& mutableGridImp::template getRealEntity<>(typename GridImp::Traits::template codim<codim>::Entity& e );
-  friend const EntityImp<codim,dim,GridImp>& mutableGridImp::template getRealEntity<>(const typename GridImp::Traits::template codim<codim>::Entity& e ) const;
+  friend EntityImp<cd,dim,GridImp>& mutableGridImp::template getRealEntity<>(typename GridImp::Traits::template codim<cd>::Entity& e );
+  friend const EntityImp<cd,dim,GridImp>& mutableGridImp::template getRealEntity<>(const typename GridImp::Traits::template codim<cd>::Entity& e ) const;
 #else
   // for g++
-  template <int cd>
-  friend EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<cd>::Entity& e );
-  template <int cd>
-  friend const EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(const typename GridImp::Traits::template codim<cd>::Entity& e ) const;
+  template <int cc>
+  friend EntityImp<cc,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<cc>::Entity& e );
+  template <int cc>
+  friend const EntityImp<cc,dim,GridImp>& mutableGridImp::getRealEntity(const typename GridImp::Traits::template codim<cc>::Entity& e ) const;
 #endif
 
 protected:
@@ -148,7 +148,7 @@ protected:
       digraph entity {
          rankdir=LR;
          node [ shape=record, fontname=Helvetica, fontsize=10, height=0.25 ];
-         Entity [ label="Dune::Entity\<codim,dim,GridImp,EntityImp\>"
+         Entity [ label="Dune::Entity\<cd,dim,GridImp,EntityImp\>"
                   shape=record, URL="\ref Dune::Entity"];
          Element [ label="Dune::Entity\<0,dim,GridImp,EntityImp\>"
                   style=filled, bgcolor=lightgrey
@@ -184,10 +184,10 @@ class Entity <0,dim,GridImp,EntityImp>
   friend const EntityImp<0,dim,GridImp>& mutableGridImp::template getRealEntity<>(const typename GridImp::Traits::template codim<0>::Entity& e ) const;
 #else
   // for g++
-  template <int cd>
-  friend EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(typename mutableGridImp::Traits::template codim<cd>::Entity& e );
-  template <int cd>
-  friend const EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(const typename mutableGridImp::Traits::template codim<cd>::Entity& e ) const;
+  template <int cc>
+  friend EntityImp<cc,dim,GridImp>& mutableGridImp::getRealEntity(typename mutableGridImp::Traits::template codim<cc>::Entity& e );
+  template <int cc>
+  friend const EntityImp<cc,dim,GridImp>& mutableGridImp::getRealEntity(const typename mutableGridImp::Traits::template codim<cc>::Entity& e ) const;
 #endif
   
 protected:
@@ -401,7 +401,7 @@ class Entity <dim,dim,GridImp,EntityImp>
   typedef typename RemoveConst<GridImp>::Type mutableGridImp;
 
   /*
-    see the comment in Entity<codim,dim,GridImp,EntityImp>
+    see the comment in Entity<cd,dim,GridImp,EntityImp>
    */
 #ifdef __ICC
   // for icc
@@ -409,10 +409,10 @@ class Entity <dim,dim,GridImp,EntityImp>
   friend const EntityImp<dim,dim,GridImp>& mutableGridImp::template getRealEntity<>(const typename GridImp::Traits::template codim<dim>::Entity& e ) const;
 #else
   // for g++
-  template <int cd>
-  friend EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<cd>::Entity& e );
-  template <int cd>
-  friend const EntityImp<cd,dim,GridImp>& mutableGridImp::getRealEntity(const typename GridImp::Traits::template codim<cd>::Entity& e ) const;
+  template <int cc>
+  friend EntityImp<cc,dim,GridImp>& mutableGridImp::getRealEntity(typename GridImp::Traits::template codim<cc>::Entity& e );
+  template <int cc>
+  friend const EntityImp<cc,dim,GridImp>& mutableGridImp::getRealEntity(const typename GridImp::Traits::template codim<cc>::Entity& e ) const;
 #endif
   
 protected:
@@ -478,16 +478,16 @@ protected:
 
    @ingroup GridDevel
 */
-template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
+template<int cd, int dim, class GridImp, template<int,int,class> class EntityImp>
 class EntityInterface {
   enum { dimworld = GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
 public:
 
-  typedef typename GridImp::template codim<codim>::Geometry Geometry;
+  typedef typename GridImp::template codim<cd>::Geometry Geometry;
   
   //! know your own codimension
-  enum { codimension=codim };
+  enum { codimension=cd };
 
   //! know your own dimension
   enum { dimension=dim };
@@ -501,7 +501,7 @@ public:
   //! level of this entity
   int level () const { return asImp().level(); }
 
-  //! index is unique and consecutive per level and codim used for access to degrees of freedom
+  //! index is unique and consecutive per level and cd used for access to degrees of freedom
   int index () const { return asImp().index(); } 
 
 
@@ -517,14 +517,14 @@ public:
 
 private:
   //!  Barton-Nackman trick 
-  EntityImp<codim,dim,GridImp>& asImp () {return static_cast<EntityImp<codim,dim,GridImp>&>(*this);}
-  const EntityImp<codim,dim,GridImp>& asImp () const { return static_cast<const EntityImp<codim,dim,GridImp>&>(*this); }
+  EntityImp<cd,dim,GridImp>& asImp () {return static_cast<EntityImp<cd,dim,GridImp>&>(*this);}
+  const EntityImp<cd,dim,GridImp>& asImp () const { return static_cast<const EntityImp<cd,dim,GridImp>&>(*this); }
 };
 
 
 //********************************************************************
 /**
-   @brief Interface Definition for EntityImp (Vertices [codim=dim])
+   @brief Interface Definition for EntityImp (Vertices [cd=dim])
 
    @note
    this specialization has an extended interface compared to the general case
@@ -558,7 +558,7 @@ public:
   //! level of this entity
   int level () const { return asImp().level(); }
 
-  //! index is unique and consecutive per level and codim used for access to degrees of freedom
+  //! index is unique and consecutive per level and cd used for access to degrees of freedom
   int index () const { return asImp().index(); } 
 
   //! return partition type attribute
@@ -567,7 +567,7 @@ public:
   //! geometry of this entity
   const Geometry& geometry () const { return asImp().geometry(); }
 
-  /*! Intra-element access to entities of codimension cc > codim. Return number of entities
+  /*! Intra-element access to entities of codimension cc > cd. Return number of entities
     with codimension cc.
    */
   template<int cc> int count () const { return asImp().count<cc>(); }
@@ -646,7 +646,7 @@ private:
 
 //********************************************************************
 /**
-   @brief Interface Definition for EntityImp (Vertices [codim=dim])
+   @brief Interface Definition for EntityImp (Vertices [cd=dim])
 
    @note
    this specialization has a reduced interface compared to the general case
@@ -677,7 +677,7 @@ public:
   //! level of this entity
   int level () const { return asImp().level(); }
 
-  //! index is unique and consecutive per level and codim used for access to degrees of freedom
+  //! index is unique and consecutive per level and cd used for access to degrees of freedom
   int index () const { return asImp().index(); }
 
   //! return partition type attribute
@@ -712,25 +712,25 @@ private:
    the implemented interface which has to be done by the user. 
 
    @note this is the general version, but there are specializations
-   for codim=0 and codim=dim
+   for cd=0 and cd=dim
 
    @ingroup GridDevel
 */
-template<int codim, int dim, class GridImp, template<int,int,class> class EntityImp>
+template<int cd, int dim, class GridImp, template<int,int,class> class EntityImp>
 class EntityDefault 
-: public EntityInterface <codim,dim,GridImp,EntityImp> 
+: public EntityInterface <cd,dim,GridImp,EntityImp> 
 {
   enum { dimworld = GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
 private:
   //!  Barton-Nackman trick 
-  EntityImp<codim,dim,GridImp>& asImp () { return static_cast<EntityImp<codim,dim,GridImp>&>(*this); }
-  const EntityImp<codim,dim,GridImp>& asImp () const { return static_cast<const EntityImp<codim,dim,GridImp>&>(*this); }
+  EntityImp<cd,dim,GridImp>& asImp () { return static_cast<EntityImp<cd,dim,GridImp>&>(*this); }
+  const EntityImp<cd,dim,GridImp>& asImp () const { return static_cast<const EntityImp<cd,dim,GridImp>&>(*this); }
 }; // end EntityDefault
 
 //********************************************************************
 /**
-   @brief Default Implementations for EntityImp (Elements [codim=0])
+   @brief Default Implementations for EntityImp (Elements [cd=0])
 
    EntityDefault provides default implementations for Entity which uses
    the implemented interface which has to be done by the user. 
@@ -782,7 +782,7 @@ private:
 
 //********************************************************************
 /**
-   @brief Default Implementations for EntityImp (Vertice [codim=dim])
+   @brief Default Implementations for EntityImp (Vertice [cd=dim])
 
    EntityDefault provides default implementations for Entity which uses
    the implemented interface which has to be done by the user. 
