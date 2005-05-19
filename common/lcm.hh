@@ -2,6 +2,7 @@
 #define DUNE_LCM_HH
 
 #include<dune/common/helpertemplates.hh>
+#include<dune/common/gcd.hh>
 
 namespace Dune
 {
