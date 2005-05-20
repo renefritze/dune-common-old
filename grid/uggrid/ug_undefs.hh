@@ -1066,12 +1066,6 @@
 #undef MIDNODE
 #undef EDDATA
 #undef EDVECTOR
-#undef TRIANGLE
-#undef QUADRILATERAL
-#undef TETRAHEDRON
-#undef PYRAMID
-#undef PRISM
-#undef HEXAHEDRON
 #undef ELEMENT_OFFSET
 #undef FLAG_OFFSET
 #undef PROPERTY_OFFSET
