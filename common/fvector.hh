@@ -887,6 +887,19 @@ representing a field and a compile-time given size.
 	  return *this;
 	}
 
+	//! Binary vector addition
+	FieldVector operator+ (const FieldVector& b) const
+	{
+	  FieldVector z = *this;
+	  return (z+=b);
+	}
+
+	//! Binary vector subtraction
+	FieldVector operator- (const FieldVector& b) const
+	{
+	  FieldVector z = *this;
+	  return (z-=b);
+	}
 	//! vector space add scalar to each comp
 	FieldVector& operator+= (const K& k)
 	{
