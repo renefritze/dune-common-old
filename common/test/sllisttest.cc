@@ -56,6 +56,17 @@ typedef Dune::PoolAllocator<double,8*1024-16> DoubleAllocator;
 typedef Dune::PoolAllocator<DoubleWrapper,8*1024-16> DoubleWAllocator;
 //typedef std::allocator<DoubleWrapper> DoubleWAllocator;
 
+template<typename T, typename A>
+const T& tail(const Dune::SLList<T,A>& alist)
+{
+  typedef typename Dune::SLList<T,A>::const_iterator Iterator;
+  Iterator tail=alist.begin();
+  
+  for(int i = alist.size() - 1; i > 0; --i)
+    ++tail;
+  return *tail;
+}
+  
 template<typename T,class A>
 int check(const Dune::SLList<T,A>& alist, const T* vals)
 {
@@ -133,7 +144,7 @@ int testDelete()
     std::cerr<<"delete next failed! "<<__FILE__<<":"<<__LINE__<<std::endl;
     return 1;
   }
-  if(*(alist.tail())!=4){
+  if(tail(alist)!=4){
     std::cerr<<"delete before tail did not change tail! "<<__FILE__<<":"<<__LINE__<<std::endl;
   }
   
@@ -263,7 +274,7 @@ int testInsert()
     ++ret;
   }
 
-  if(*(alist.tail())!=20){
+  if(tail(alist)!=20){
     std::cerr<<"tail was not changed!! "<<__FILE__<<":"<<__LINE__<<std::endl;
     ++ret;
   }
@@ -361,8 +372,8 @@ int main()
 
   randomizeListBack(list1);
   randomizeListFront(list);
-  randomizeListFront(list2);
-  
+  //randomizeListFront(list2);
+  /*
   Printer<std::iterator_traits<Dune::SLList<double,DoubleAllocator>::ModifyIterator>::value_type> print;
   
   Dune::SLList<double,DoubleAllocator>::ModifyIterator lbegin = list.beginModify(), lend = list.endModify();
@@ -399,7 +410,7 @@ int main()
     ret+=testInsert();
   std::cout<< "test delete"<<std::endl;
   ret+=testDelete();
-  
+  */
   list.clear();
   list1.clear();
   list2.clear();
@@ -407,7 +418,5 @@ int main()
   randomizeListBack(list);
   std::cout<<" randomize front"<<std::endl;
   randomizeListFront(list1);
-  
-  exit(ret);
-  
+  return ret;
 }
