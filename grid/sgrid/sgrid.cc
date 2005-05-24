@@ -362,7 +362,7 @@ template<int dim, class GridImp> template<int cc>
 inline int SEntity<0,dim,GridImp>::subCompressedIndex (int i) const
 {
   int cindex;
-  if(cc == 100) // the vertex case 
+  if(cc == 0) // the vertex case 
 	{
 	  // find expanded coordinates of entity in reference cube
 	  // has components in {0,1,2}
@@ -378,6 +378,7 @@ inline int SEntity<0,dim,GridImp>::subCompressedIndex (int i) const
 	{
 	  cindex = entity<cc>(i)->index();
 	}
+  return cindex;
 }
 
 template<int dim, class GridImp> template<int cc> 
