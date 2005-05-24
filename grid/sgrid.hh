@@ -412,7 +412,7 @@ public:
   EntityPointer father () const;
 
   //! return true if the entity is leaf 
-  bool isLeaf ()
+  bool isLeaf () const
     {
       return ( this->grid->maxlevel() == level() );
     }
