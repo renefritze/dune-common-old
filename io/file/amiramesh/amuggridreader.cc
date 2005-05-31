@@ -2,6 +2,7 @@
 // Specialization of the AmiraMesh reader for UGGrid<3,3> and UGGrid<2,2>
 // /////////////////////////////////////////////////////////////////////////
 
+#include <dune/io/file/amiramesh/amuggridreader.hh>
 #include <dune/grid/uggrid.hh>
 #include <dune/common/stdstreams.hh>
 
@@ -14,53 +15,8 @@
 #include <AmiraParamAccess.h>
 #endif
 
-namespace Dune {
-    
-    template<>
-    class AmiraMeshReader<UGGrid<3,3> > {
-        
-    public:
-        
-        static void read(UGGrid<3,3>& grid, 
-                          const std::string& filename);
 
-#ifdef HAVE_PARAMETRIZATION_LIBRARY
-        static void read(UGGrid<3,3>& grid, 
-                         const std::string& gridFilename,
-                         const std::string& domainFilename);
-#endif
-
-    protected:
-
-#ifdef HAVE_PARAMETRIZATION_LIBRARY
-        static void CreateDomain(UGGrid<3,3>& grid,
-                                const std::string& domainName, 
-                                const std::string& filename);
-#endif
-
-        static void CreateDomain(UGGrid<3,3>& grid,
-                                const std::string& domainName,
-                                AmiraMesh* am);
-
-        static void buildGrid(UGGrid<3,3>& grid, AmiraMesh* am);
-
-        static void createHexaDomain(UGGrid<3,3>& grid, AmiraMesh* am);
-
-        static void detectBoundarySegments(int* elemData, 
-                                           int noOfElem, 
-                                           std::vector<FieldVector<int, 4> >& face_list);
-
-        static void detectBoundarySegments(int* elemData, 
-                                           int noOfElem, 
-                                           std::vector<FieldVector<int, 3> >& face_list);
-
-        AmiraMeshReader() {}
-
-    };
-
-}
-
-
+#ifdef _3
 // //////////////////////////////////////////////////
 // //////////////////////////////////////////////////
 #ifdef HAVE_PARAMETRIZATION_LIBRARY
@@ -95,7 +51,6 @@ static int SegmentDescriptionByAmira(void *data, double *param, double *result)
  * \todo This should actually be replaced by using LinearSegments
  * instead of BoundarySegments.  But LinearSegments are buggy in UG.
  */
-#ifdef _3
 static int linearSegmentDescription3d(void *data, double *param, double *result)
 {
     Dune::FieldVector<double, 3> a,b,c,d;
@@ -117,10 +72,6 @@ static int linearSegmentDescription3d(void *data, double *param, double *result)
         result[i] = a[i] + param[0]*(b[i]-a[i]) + param[1]*(d[i]-a[i]) 
             + param[0]*param[1]*(a[i]+c[i]-b[i]-d[i]);
   
-//     printf("local: %g %g\n", param[0], param[1]);
-//     std::cout << "vertices: " << a << std::endl << b << std::endl << c << std::endl << d << std::endl;
-
-//     printf("result: %g %g %g\n", result[0], result[1], result[2]);
   return 0;
 }
 
@@ -142,13 +93,8 @@ static int linearSegmentDescription3d_tri(void *data, double *param, double *res
     for (int i=0; i<3; i++)
         result[i] = a[i] + param[0]*(b[i]-a[i]) + param[1]*(c[i]-b[i]);
 
-//     printf("triangular patch. local: %g %g\n", param[0], param[1]);
-//     std::cout << "vertices: " << a << std::endl << b << std::endl << c << std::endl;
-
-//     printf("triangular patch. result: %g %g %g\n", result[0], result[1], result[2]);
   return 0;
 }
-#endif // #ifdef _3
 
 /** \todo This is quadratic --> very slow */
 void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::detectBoundarySegments(int* elemData, 
@@ -209,6 +155,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::detectBoundarySegments(int* elem
             face_list[i][j]--;
 
 }
+#endif // #ifdef _3
 
 template<int NUM_VERTICES>
 static int detectBoundaryNodes(const std::vector< Dune::FieldVector<int, NUM_VERTICES> >& face_list, 
@@ -235,12 +182,13 @@ static int detectBoundaryNodes(const std::vector< Dune::FieldVector<int, NUM_VER
 }
 
 #ifdef _3
-#ifdef HAVE_PARAMETRIZATION_LIBRARY
+
 // Create the domain from an explicitly given boundary description
 void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::CreateDomain(UGGrid<3,3>& grid,
                                                             const std::string& domainName, 
                                                             const std::string& filename)
 {
+#ifdef HAVE_PARAMETRIZATION_LIBRARY
     const int CORNERS_OF_BND_SEG = 4;
     int point[CORNERS_OF_BND_SEG] = {-1, -1, -1, -1};
     double alpha[2], beta[2];
@@ -338,9 +286,10 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::CreateDomain(UGGrid<3,3>& grid,
     }
     boundaryNumber++;
     std::cout << noOfSegments << " segments created!" << std::endl;
-    
-} 
+
 #endif // #define HAVE_PARAMETRIZATION_LIBRARY
+
+} 
 
 
 // Create the domain by extracting the boundary of the given grid
@@ -432,7 +381,6 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::CreateDomain(UGGrid<3,3>& grid,
         point[0] = face_list[i][0];
         point[1] = face_list[i][1];
         point[2] = face_list[i][2];
-        //point[3] = face_list[i][3];
             
         if(sprintf(segmentName, "Segment %d", i) < 0)
             DUNE_THROW(IOError, "CreateDomain: sprintf returned error value");
@@ -486,12 +434,15 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::CreateDomain(UGGrid<3,3>& grid,
 } 
 
 
-#ifdef HAVE_PARAMETRIZATION_LIBRARY
 /** \todo Clear grid before reading! */
 void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(Dune::UGGrid<3,3>& grid, 
                                                      const std::string& filename,
                                                      const std::string& domainFilename)
 {
+#ifndef HAVE_PARAMETRIZATION_LIBRARY
+    DUNE_THROW(IOError, "Dune has not be built with support for the "
+               << "AmiraMesh-Parametrization library!");
+#else
     dverb << "This is the AmiraMesh reader for UGGrid<3,3>!" << std::endl;
 
     // /////////////////////////////////////////////////////
@@ -518,8 +469,8 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(Dune::UGGrid<3,3>& grid,
 
     // read and build the grid
     buildGrid(grid, am);
-} 
 #endif // #define HAVE_PARAMETRIZATION_LIBRARY
+} 
 
 
 /** \todo Clear grid before reading! */
@@ -572,9 +523,6 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid, Ami
     }
 #endif
 
-    // ////////////////////////////////////////////
-    // loadmesh $file @GRID_FILE $name @DOMAIN;
-
     const int DIM = 3;
 
     int i;
@@ -608,8 +556,6 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid, Ami
      All Boundary nodes are  assumed to be inserted already.
      We just have to insert the inner nodes and the elements 
      */
-  assert(grid.multigrid_);
-
   int maxBndNodeID = -1;
   for (theNode=UG_NS<3>::FirstNode(grid.multigrid_->grids[0]); theNode!=NULL; theNode=theNode->succ)
       maxBndNodeID = std::max(theNode->id, maxBndNodeID);
@@ -717,7 +663,6 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid, Ami
 /*****************************************************************/
 
 /** \todo This is quadratic --> very slow */
-/** \todo Handle triangular boundary segments */
 void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::detectBoundarySegments(int* elemData, 
                                                                        int numHexas, 
                                                                        std::vector<FieldVector<int, 4> >& face_list)
@@ -995,7 +940,6 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::createHexaDomain(UGGrid<3,3>& gr
 
 #endif // #ifdef _3
 
-
 /*********************************************************************************/
 /*********************************************************************************/
 /*                                                                               */
@@ -1003,31 +947,9 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::createHexaDomain(UGGrid<3,3>& gr
 /*                                                                               */
 /*********************************************************************************/
 /*********************************************************************************/
-namespace Dune {
-    
-    template<>
-    class AmiraMeshReader<UGGrid<2,2> > {
-        
-    public:
-        
-        static void read(UGGrid<2,2>& grid, 
-                          const std::string& filename);
-
-    protected:
-        static void CreateDomain(UGGrid<2,2>& grid,
-                                const std::string& domainName, 
-                                const std::string& filename);
-
-        static void detectBoundarySegments(int* elemData, 
-                                           int numElems, 
-                                           std::vector<FieldVector<int, 2> >& face_list,
-                                           bool containsOnlyTriangles);
-
-    };
-
-}
 
 #ifdef _2
+
 /** This method implements a linear function in order to be able to
  *  work with straight line boundaries.  
  *  We interpret data as a DOUBLE* to the world coordinates of the
@@ -1435,6 +1357,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
   grid.createend();
 
 }
+
 
 #endif // #ifdef _2
 
