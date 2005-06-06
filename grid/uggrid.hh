@@ -136,20 +136,14 @@ class UGGrid : public GridDefault  <dim, dimworld,UGCtype, UGGrid<dim,dimworld> 
 
     friend class UGGridHierarchicIndexSet<UGGrid<dim,dimworld> >;
 
-    /** \brief UGGrid is only implemented for 2 and 3 dimension
-     * for 1d use SGrid or OneDGrid  */
+    /** \brief UGGrid is only implemented for 2 and 3 dimension */
     CompileTimeChecker< (dimworld==dim) && ((dim==2) || (dim==3)) >   Use_UGGrid_only_for_2d_and_3d;   
-    // #ifdef _2
-    //   CompileTimeChecker< (dimworld==dim) && (dim==2) >   Use_UGGrid_only_for_2d_when_built_for_2d;   
-    // #endif
-    // #ifdef _3
-    //   CompileTimeChecker< (dimworld==dim) && (dim==3) >   Use_UGGrid_only_for_3d_when_built_for_3d;   
-    // #endif
     
     //**********************************************************
       // The Interface Methods
       //**********************************************************
 public:  
+        /** \brief The standard Dune grid traits */
       typedef GridTraits<dim,
                          dimworld,
                          Dune::UGGrid<dim,dimworld> ,
@@ -161,7 +155,10 @@ public:
                          UGGridIntersectionIterator,
                          UGGridHierarchicIterator> Traits;
     
+    /** \brief The type of a UGGrid hierarchic index set */
     typedef UGGridHierarchicIndexSet<Dune::UGGrid<dim,dimworld> > HierarchicIndexSetType;
+
+    /** \brief The type of a UGGrid level index set */
     typedef DefaultLevelIndexSet<Dune::UGGrid<dim,dimworld> >      LevelIndexSetType;
 
     //! The type used to store coordinates
@@ -183,8 +180,8 @@ public:
      */
     UGGrid();
 
-  //! Desctructor 
-  ~UGGrid();
+    //! Desctructor 
+    ~UGGrid();
    
      //! Return maximum level defined in this grid. Levels are numbered
      //! 0 ... maxlevel with 0 the coarsest level.  
@@ -267,7 +264,7 @@ public:
     */
     void loadBalance(int strategy, int minlevel, int depth, int maxlevel, int minelement);
 
-    /*! The communication interface
+    /** \brief The communication interface
       @param T: array class holding data associated with the entities
       @param P: type used to gather/scatter data in and out of the message buffer
       @param codim: communicate entites of given codim
@@ -297,12 +294,27 @@ public:
     }
 #endif
 
+    /** \brief Start the coarse grid creation process */
     void createbegin();
 
+    /** \brief End the coarse grid creation process */
     void createend();
 
+    /** \brief Adapt the grid without constructing the green closure
+
+    WARNING: This is a very special method.  Omitting the green closure does
+    not mean that UG creates correct nonconforming meshes.  For internal
+    reasons (bugs?) though, it allows you to do uniform refinement with
+    a few anisotropic refinement rules such as UG3d::PRISM_QUADSECT or
+    UG3d::HEX_QUADSECT_0.
+    */
     void adaptWithoutClosure();
 
+    /** \brief Rudimentary substitute for a hierarchic iterator on faces
+        \param e, elementSide Grid face specified by an element and one of its sides
+        \param maxl The finest level that should be traversed by the iterator
+        \param children For each subface: element index, elementSide, and level
+    */
     void getChildrenOfSubface(typename Traits::template codim<0>::EntityPointer & e,
                               int elementSide,
                               int maxl, 
@@ -329,7 +341,7 @@ public:
     /** \brief Read access to the UG-internal grid name */
     const std::string& name() const {return name_;}
 
-
+    /** \brief Calls a few interal methods to properly set up a UG grid */
     void makeNewUGMultigrid();
 
     /** \brief Does uniform refinement
@@ -348,18 +360,22 @@ public:
 
 private:
 
+    // Access to entity implementations through the interface wrappers
     template <int cd>
     UGGridEntity<cd,dim,const UGGrid>& getRealEntity(typename Traits::template codim<cd>::Entity& entity) {
         return entity.realEntity;
     }
 
+    // Const access to entity implementations through the interface wrappers
     template <int cd>
     const UGGridEntity<cd,dim,const UGGrid>& getRealEntity(const typename Traits::template codim<cd>::Entity& entity) const {
         return entity.realEntity;
     }
 
+    // Start up the UG system
     void init(unsigned int heapSize, unsigned int envHeapSize);
 
+    // Recomputes entity indices after the grid was changed
     void setLocalIndices();
 
     // Each UGGrid object has a unique name to identify it in the
@@ -375,10 +391,6 @@ private:
     // Our set of level indices
     mutable LevelIndexSetType* levelIndexSet_;
     
-
-  // true if grid was refined
-  //bool wasChanged_; 
-  
   // number of entitys of each level an codim 
   Array<int> size_;
 
