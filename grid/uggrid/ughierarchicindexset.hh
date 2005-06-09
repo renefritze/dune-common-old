@@ -1,6 +1,8 @@
 #ifndef DUNE_UG_HIERARCHIC_INDEX_SET_HH
 #define DUNE_UG_HIERARCHIC_INDEX_SET_HH
 
+namespace Dune {
+
 //! Hierarchic index set of UGGrid 
 template <class GridType> 
 class UGGridHierarchicIndexSet
@@ -74,5 +76,7 @@ private:
   // size of indexset, managed by grid  
     //const int (& size_)[numCodim];
 };
+
+}  // end namespace Dune
 
 #endif
