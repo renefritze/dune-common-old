@@ -5,6 +5,10 @@ namespace Dune {
 
   //! An interface class for cloneable objects
   struct Cloneable {
+
+      /** \brief ???
+       \todo Please doc me!!!
+      */
     virtual Cloneable* clone() const = 0;
   };
 
