@@ -161,8 +161,9 @@ namespace Dune {
 
 /**
  \brief [<em> provides \ref Dune::Grid </em>]
- \brief onedimensional adaptive grid
+ Onedimensional adaptive grid
  \ingroup GridInterface
+ 
  This implementation of the grid interface provides one-dimensional
  grids only.  No matter what the values of dim and dimworld may be,
  you'll always get a 1D-grid in a 1D-world.  Unlike SGrid, however,
@@ -192,6 +193,8 @@ class OneDGrid : public GridDefault  < dim, dimworld,OneDCType,OneDGrid<dim,dimw
     // **********************************************************
 
 public:  
+
+    /** \brief Provides the standard grid types */
     typedef GridTraits<dim,dimworld,
                        Dune::OneDGrid<dim,dimworld>,
                        OneDGridGeometry, 
@@ -208,13 +211,16 @@ public:
     /** \brief Constructor for a uniform grid */
     OneDGrid(int numElements, double leftBoundary, double rightBoundary);
 
+    /** \brief Default constructor */
     OneDGrid();
 
-  //! Desctructor 
+  //! Destructor 
     ~OneDGrid();
    
-  //! Return maximum level defined in this grid. Levels are numbered
-  //! 0 ... maxlevel with 0 the coarsest level.  
+    /** \brief Return maximum level defined in this grid. 
+
+    Levels are numbered 0 ... maxlevel with 0 the coarsest level.  
+    */
     int maxlevel() const {return vertices.size()-1;}
 
   //! Iterator to first entity of given codim on level
