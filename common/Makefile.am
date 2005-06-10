@@ -5,7 +5,7 @@ SUBDIRS = . test
 # the standard debug streams are put into the libdune
 noinst_LTLIBRARIES = libcommon.la
 
-libcommon_la_SOURCES = stdstreams.cc
+libcommon_la_SOURCES = stdstreams.cc 
 
 AM_CPPFLAGS = -I$(top_srcdir)/..
 
@@ -17,6 +17,7 @@ commoninclude_HEADERS = dlist.cc mapping.cc stdstreams.cc alignment.hh \
   helpertemplates.hh interfaces.hh iteratorfacades.hh logictraits.hh \
   mapping.hh matrix.hh misc.hh operator.hh poolallocator.hh simplevector.hh \
   sllist.hh smartpointer.hh stack.hh stdstreams.hh timer.hh tuples.hh \
-  typeinfo.hh typetraits.hh vectorspace.hh precision.hh bigunsignedint.hh
+  typeinfo.hh typetraits.hh vectorspace.hh precision.hh bigunsignedint.hh \
+  autoptr.hh
 
 include $(top_srcdir)/am/sourcescheck
