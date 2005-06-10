@@ -186,7 +186,6 @@ public:
 
 };
 
-//! ALU3dGridGeometry 
 // calculates m^p at compile-time
 template <int m, int p> 
 struct POWER_M_P
@@ -203,6 +202,7 @@ struct POWER_M_P< m , 0>
   enum { power = 1 };
 };
 
+//! ALU3dGridGeometry 
 //! Empty definition, needs to be specialized for element type
 template <int mydim, int cdim, class GridImp>
 class ALU3dGridGeometry : 
@@ -1207,7 +1207,7 @@ private:
   
   // the wrapper for the original iterator of the ALU3dGrid  
   typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper<cd> IteratorType; 
-  ALU3DSPACE AutoPointer< IteratorType > iter_;
+  AutoPointer< IteratorType > iter_;
 };
 
 //********************************************************************
@@ -1254,7 +1254,7 @@ private:
 
   // the wrapper for the original iterator of the ALU3dGrid  
   typedef typename ALU3DSPACE ALU3dGridLeafIteratorWrapper<codim> IteratorType; 
-  ALU3DSPACE AutoPointer < IteratorType > iter_;
+  AutoPointer < IteratorType > iter_;
   
   //! my partition tpye 
   const PartitionIteratorType pitype_; 
@@ -1537,13 +1537,13 @@ private:
 
   // the entity codim 0 
   typedef ALU3dGridMakeableEntity<0,dim,const MyType> EntityImp;
-  typedef ALU3DSPACE ALUMemoryProvider< EntityImp > EntityProvider;
+  typedef ALUMemoryProvider< EntityImp > EntityProvider;
   
   typedef ALU3dGridMakeableGeometry<dim-1,dimworld,const MyType> LGeometryImp;
-  typedef ALU3DSPACE ALUMemoryProvider< LGeometryImp > GeometryProvider;
+  typedef ALUMemoryProvider< LGeometryImp > GeometryProvider;
   
   typedef ALU3dGridMakeableBoundaryEntity<const MyType> BndGeometryImp;
-  typedef ALU3DSPACE ALUMemoryProvider< BndGeometryImp > BndProvider;
+  typedef ALUMemoryProvider< BndGeometryImp > BndProvider;
   
   //typedef ALU3dGridMakeableEntity<3,dim,const MyType> VertexImp;
   //typedef ALU3DSPACE MemoryProvider< VertexImp > VertexProvider;
