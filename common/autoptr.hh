@@ -2,6 +2,15 @@
 #define DUNE_AUTOPTR_HH
 
 namespace Dune {
+
+/** @addtogroup Common
+    @{
+*/
+
+/** \file
+  Class implementing automatic reference counting
+*/
+  
 /** \brief An auto pointer class */
 template <class Pointer> 
 class AutoPointer
@@ -88,5 +97,8 @@ private:
     return (*this);
   }
 };
+
+/** @} */
+
 } // end namespace Dune
 #endif
