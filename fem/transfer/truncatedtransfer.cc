@@ -6,7 +6,11 @@ void Dune::TruncatedMGTransfer<DiscFuncType>::prolong(const DiscFuncType& f, Dis
 {
     if (f.size() != this->matrix_.M())
         DUNE_THROW(Dune::Exception, "Number of entries in the coarse grid vector is not equal "
-                   << "to the number of columns of the interpolation matrix!");
+                   << "to the number of columns of the prolongation matrix!");
+
+    if (this->matrix_.N()*blocksize != critical.size())
+        DUNE_THROW(Dune::Exception, "Number of entries in the critical is not equal "
+                   << "to the number of rows of the prolongation matrix!");
 
     t.resize(this->matrix_.N());
 
@@ -58,7 +62,11 @@ void Dune::TruncatedMGTransfer<DiscFuncType>::restrict(const DiscFuncType& f, Di
     if (f.size() != this->matrix_.N())
         DUNE_THROW(Dune::Exception, "Fine grid vector has " << f.size() << " entries "
                    << "but the interpolation matrix has " << this->matrix_.N() << " rows!");
-    
+
+    if (this->matrix_.N()*blocksize != critical.size())
+        DUNE_THROW(Dune::Exception, "Number of entries in the critical is not equal "
+                   << "to the number of rows of the prolongation matrix!");
+
     t.resize(this->matrix_.M());
     t = 0;
 
