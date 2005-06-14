@@ -1,5 +1,5 @@
-#ifndef __DUNE_ALU3DINCLUDE_ORIGINAL_HH__
-#define __DUNE_ALU3DINCLUDE_ORIGINAL_HH__
+#ifndef DUNE_ALU3DINCLUDE_HH
+#define DUNE_ALU3DINCLUDE_HH
 
 #ifndef _ANSI_HEADER
 #define _ANSI_HEADER
@@ -26,9 +26,6 @@
 
 namespace ALU3dGridSpace {
   
-  // definition of AutoPointer class 
-#include "myautoptr.hh"
-#include "alumemory.hh"
 
 #ifdef _ALU3DGRID_PARALLEL_
 
@@ -72,6 +69,8 @@ namespace ALU3dGridSpace {
   typedef GitterType::Geometric::hexa_GEO GEOHexaElementType;
   typedef GitterType::Geometric::hasFace3 HasFace3Type;    // has Face with 3 polygons
   typedef GitterType::Geometric::hasFace4 HasFace4Type;
+  typedef GitterType::Geometric::Hface3Rule Hface3RuleType;
+  typedef GitterType::Geometric::Hface4Rule Hface4RuleType;
   
   typedef GitterImplType::Objects::Hbnd3Default BNDFace3Type;    // boundary segment 
   typedef GitterImplType::Objects::Hbnd4Default BNDFace4Type;
