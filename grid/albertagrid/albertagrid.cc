@@ -1242,12 +1242,11 @@ template <class GridImp, int dim, int cd> struct SubEntity;
 template <class GridImp, int dim>
 struct SubEntity<GridImp,dim,0>
 {
-  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<0>::EntityPointer EntityPointer;
-  static EntityPointer entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
+  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<0>::EntityPointer EntityPointerType;
+  static EntityPointerType entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
       int level, ALBERTA EL_INFO * elInfo, int i )
   {
-    return AlbertaGridLevelIterator<0,All_Partition,GridImp> 
-       (grid, stack , level ,elInfo, 0,0,0);
+    return AlbertaGridEntityPointer<0,GridImp> (grid, stack , level ,elInfo, 0,0,0);
   }
 };
 
@@ -1255,8 +1254,8 @@ struct SubEntity<GridImp,dim,0>
 template <class GridImp, int dim>
 struct SubEntity<GridImp,dim,1>
 {
-  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<1>::EntityPointer EntityPointer;
-  static EntityPointer entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
+  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<1>::EntityPointer EntityPointerType;
+  static EntityPointerType entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
       int level, ALBERTA EL_INFO * elInfo, int i )
   {
     return AlbertaGridEntityPointer<1,GridImp> (grid, stack , level ,elInfo, i,0,0);
@@ -1268,8 +1267,8 @@ template <class GridImp>
 struct SubEntity<GridImp,3,2>
 {
   enum { dim = 3 };
-  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<2>::EntityPointer EntityPointer;
-  static EntityPointer entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
+  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<2>::EntityPointer EntityPointerType;
+  static EntityPointerType entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
       int level, ALBERTA EL_INFO * elInfo, int i )
   {
     return AlbertaGridEntityPointer<2,GridImp> (grid, stack , level ,elInfo, 0,i,0);
@@ -1280,8 +1279,8 @@ struct SubEntity<GridImp,3,2>
 template <class GridImp, int dim>
 struct SubEntity<GridImp,dim,dim>
 {
-  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<dim>::EntityPointer EntityPointer;
-  static EntityPointer entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
+  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<dim>::EntityPointer EntityPointerType;
+  static EntityPointerType entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
       int level, ALBERTA EL_INFO * elInfo, int i )
   {
     return AlbertaGridEntityPointer<dim,GridImp> (grid, stack , level ,elInfo, 0,0,i);
@@ -2034,6 +2033,7 @@ inline void AlbertaGridIntersectionIterator<GridImp>::setupVirtEn() const
 //*******************************************************
 // 
 // --AlbertaGridTreeIterator
+// --TreeIterator
 // --LevelIterator
 // 
 //*******************************************************
@@ -2080,11 +2080,11 @@ AlbertaGridTreeIterator(const GridImp & grid, int travLevel,int proc, bool leafI
   , level_   (travLevel)
   , enLevel_ (travLevel)
   , virtualEntity_(*(this->entity_))
-  , leafIt_(leafIt) , proc_(proc)
-  , vertexMarker_(0) 
-  , vertex_ (0)
   , face_(0)
   , edge_ (0)
+  , vertex_ (0)
+  , vertexMarker_(0) 
+  , leafIt_(leafIt) , proc_(proc)
 {
   makeIterator();
 }
@@ -2097,12 +2097,12 @@ AlbertaGridTreeIterator(const AlbertaGridTreeIterator<codim,pitype,GridImp> & or
   , level_   (org.level_)
   , enLevel_ (org.enLevel_)
   , virtualEntity_(*(this->entity_))
-  , leafIt_(org.leafIt_) , proc_(org.proc_)
-  , vertexMarker_(org.vertexMarker_) 
-  , vertex_ ( org.vertex_)
+  , manageStack_ ( org.manageStack_ )
   , face_(org.face_)
   , edge_ (org.edge_)
-  , manageStack_ ( org.manageStack_ )
+  , vertex_ ( org.vertex_)
+  , vertexMarker_(org.vertexMarker_) 
+  , leafIt_(org.leafIt_) , proc_(org.proc_)
 {
   if(vertexMarker_) 
   { 
@@ -2146,11 +2146,11 @@ AlbertaGridTreeIterator(const GridImp & grid,
   : AlbertaGridEntityPointer<codim,GridImp> (grid,travLevel,false)
   , level_ (travLevel) , enLevel_(travLevel) 
   , virtualEntity_(*(this->entity_)) 
-  , leafIt_(leafIt), proc_(proc)
-  , vertexMarker_(0) 
-  , vertex_ (0)
   , face_(0)
   , edge_ (0)
+  , vertex_ (0)
+  , vertexMarker_(0) 
+  , leafIt_(leafIt), proc_(proc)
 {
   ALBERTA MESH * mesh = this->grid_.getMesh();
 
