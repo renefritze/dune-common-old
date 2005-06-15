@@ -2167,7 +2167,6 @@ AlbertaGridTreeIterator(const GridImp & grid,
     manageStack_.makeItNew(true);
     
     virtualEntity_.setTraverseStack(manageStack_.getStack());
-    std::cout << manageStack_.getStack() << " TStack is \n";
 
     // diese Methode muss neu geschrieben werden, da man 
     // die ParentElement explizit speichern moechte. 
@@ -2852,7 +2851,6 @@ AlbertaGridEntity <0,dim,GridImp>::hbegin(int maxlevel) const
   // sich deshalb die Werte anedern koennen, der elinfo_stack bleibt jedoch
   // der gleiche, deshalb kann man auch nur nach unten, d.h. zu den Kindern
   // laufen
-  std::cout << travStack_ << "Traverse Stack \n";
   return AlbertaGridHierarchicIterator<GridImp> (grid_,travStack_,level(),maxlevel);  
 }
 
@@ -3514,7 +3512,7 @@ packBorder ( ObjectStreamType & os, EntityType & en  )
 
 template<int dim, int dimworld>
 inline bool AlbertaGrid < dim, dimworld >:: 
-mark( int refCount , typename Traits::template codim<0>::EntityPointer & ep ) 
+mark( int refCount , typename Traits::template codim<0>::EntityPointer & ep ) const
 {
   return this->mark(refCount,*ep);
 }
@@ -3529,9 +3527,11 @@ getMark( const EntityType & ep ) const
 
 template<int dim, int dimworld>
 inline bool AlbertaGrid < dim, dimworld >:: 
-mark( int refCount , typename Traits::template codim<0>::Entity & ep ) 
+mark( int refCount , const typename Traits::template codim<0>::Entity & ep ) const
 {
   ALBERTA EL_INFO * elInfo = (this->template getRealEntity<0>(ep)).getElInfo();
+  if(!elInfo) return false;
+  //std::cout << elInfo << "\n";
   assert(elInfo);
   if( ep.isLeaf() )
   {
@@ -3554,12 +3554,15 @@ mark( int refCount , typename Traits::template codim<0>::Entity & ep )
       return true;
     }
   }
+  /*
   // only for debugging 
   else 
   {
-    fprintf(stderr,"ERROR in AlbertaGridEntity<0,%d,%d>::mark(%d) : called on non LeafEntity! in: %s line: %d \n",dim,dimworld,refCount,__FILE__,__LINE__);
+    derr << "ERROR in AlbertaGridEntity<0,"<<dim<<","<<dimworld<<">::mark("<<refCount<<") : called on non LeafEntity! in: " << __FILE__ << " line: "<< __LINE__ << "\n"; 
+    assert(false);
     abort();
   }
+  */
   elInfo->el->mark = 0;
   return false;
 }
