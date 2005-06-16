@@ -3530,7 +3530,11 @@ inline bool AlbertaGrid < dim, dimworld >::
 mark( int refCount , const typename Traits::template codim<0>::Entity & ep ) const
 {
   ALBERTA EL_INFO * elInfo = (this->template getRealEntity<0>(ep)).getElInfo();
-  if(!elInfo) return false;
+  if(!elInfo) 
+  {
+    derr << "ERROR in mark: elinfo NULL! \n";
+    return false;
+  }
   //std::cout << elInfo << "\n";
   assert(elInfo);
   if( ep.isLeaf() )
@@ -3563,6 +3567,7 @@ mark( int refCount , const typename Traits::template codim<0>::Entity & ep ) con
     abort();
   }
   */
+  derr << "ERROR in AlbertaGridEntity<0,"<<dim<<","<<dimworld<<">::mark("<<refCount<<") : called on non LeafEntity! in: " << __FILE__ << " line: "<< __LINE__ << "\n"; 
   elInfo->el->mark = 0;
   return false;
 }
