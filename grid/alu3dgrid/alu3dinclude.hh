@@ -5,8 +5,6 @@
 #define _ANSI_HEADER
 #endif
 
-//#define _ALU3DGRID_PARALLEL_
-
 // all methods and classes of the ALU3d-Grid are defined in the namespace 
 #define ALU3DSPACE ALU3dGridSpace ::
 
@@ -26,7 +24,6 @@
 
 namespace ALU3dGridSpace {
   
-
 #ifdef _ALU3DGRID_PARALLEL_
 
   typedef GatherScatter GatherScatterType;
