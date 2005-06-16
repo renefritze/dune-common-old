@@ -4,6 +4,7 @@
 //#include "alu3dmappings.hh"
 
 namespace Dune {
+  
   //- Trilinear mapping (from alu3dmappings.hh)
   inline TrilinearMapping :: 
   TrilinearMapping (const coord_t& x0, const coord_t& x1,
@@ -320,8 +321,8 @@ inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const char* macroTriangFilena
 #else 
   ,  myRank_(-1) 
 #endif
-  , hIndexSet_ (*this,globalSize_)
-  , levelIndexSet_(0)
+  , hIndexSet_ (*this)
+  , levelIndexSet_(0) , leafIndexSet_(0)
 {
   if( myRank_ <= 0 )
   {
@@ -347,8 +348,11 @@ inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const char* macroTriangFilena
   
   mygrid_->printsize();
 
+
   postAdapt();
   calcExtras();
+  leafIndexSet_ = new LeafIndexSetType ( *this );
+  std::cout << "Constructor of Grid finished!\n";
 }
 
 #ifdef _ALU3DGRID_PARALLEL_
@@ -357,8 +361,8 @@ inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(MPI_Comm mpiComm)
   : mygrid_ (0) , maxlevel_(0) 
   , coarsenMarked_(0) , refineMarked_(0) 
   , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
-  , hIndexSet_ (*this,globalSize_)
-  , levelIndexSet_(0)
+  , hIndexSet_ (*this)
+  , levelIndexSet_(0) , leafIndexSet_(0)
 {
 }
 #else 
@@ -367,10 +371,9 @@ inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(int myrank)
   : mygrid_ (0) , maxlevel_(0) 
   , coarsenMarked_(0) , refineMarked_(0) 
   , myRank_(myrank) 
-  , hIndexSet_ (*this,globalSize_)
-  , levelIndexSet_(0)
+  , hIndexSet_ (*this)
+  , levelIndexSet_(0) , leafIndexSet_(0)
 {
-  for(int i=0; i<dim+1; i++) globalSize_[i] = 0;
 }
 #endif
 
@@ -379,7 +382,7 @@ inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const ALU3dGrid<dim, dimworld
   : mygrid_ (0) , maxlevel_(0) 
   , coarsenMarked_(0) , refineMarked_(0) 
   , myRank_(-1) 
-  , hIndexSet_(*this,globalSize_) , levelIndexSet_(0)
+  , hIndexSet_(*this) , levelIndexSet_(0), leafIndexSet_(0)
 {
   DUNE_THROW(ALU3dGridError,"Do not use copy constructor of ALU3dGrid! \n");
 }
@@ -395,6 +398,7 @@ template <int dim, int dimworld, ALU3dGridElementType elType>
 inline ALU3dGrid<dim, dimworld, elType>::~ALU3dGrid()
 {
   if(levelIndexSet_) delete levelIndexSet_;
+  if(leafIndexSet_) delete leafIndexSet_;
   if(mygrid_) delete mygrid_;
 }
 
@@ -426,13 +430,6 @@ inline void ALU3dGrid<dim, dimworld, elType>::calcMaxlevel()
 template <int dim, int dimworld, ALU3dGridElementType elType>
 inline void ALU3dGrid<dim, dimworld, elType>::calcExtras()  
 {
-  // set max index of grid 
-  for(int i=0; i<dim+1; i++)
-  {
-    globalSize_[i] = (*mygrid_).indexManager(i).getMaxIndex();
-  }
-
-  //dverb << "proc " << mpAccess_.myrank() << " num el = " << globalSize_[0] << "\n";
   if(levelIndexSet_) (*levelIndexSet_).calcNewIndex();
 
   coarsenMarked_ = 0;
@@ -442,9 +439,10 @@ inline void ALU3dGrid<dim, dimworld, elType>::calcExtras()
 template <int dim, int dimworld, ALU3dGridElementType elType>
 inline int ALU3dGrid<dim, dimworld, elType>::global_size(int codim) const 
 {
-  assert(globalSize_[codim] >= 0);
-  //dverb << globalSize_[codim] << " Size of cd " << codim << "\n";
-  return globalSize_[codim];
+  // return actual size of hierarchical index set 
+  // this is always up to date 
+  // maxIndex is the largest index used + 1 
+  return (*mygrid_).indexManager(codim).getMaxIndex();
 }
 
 template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -579,22 +577,31 @@ inline bool ALU3dGrid<dim, dimworld, elType>::adapt()
 }
 
 // adapt grid  
+// --adapt
 template <int dim, int dimworld, ALU3dGridElementType elType>
 template <class DofManagerType, class RestrictProlongOperatorType> 
 inline bool ALU3dGrid<dim, dimworld, elType>::
 adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo, bool verbose ) 
 {
   assert( ((verbose) ? (dverb << "ALU3dGrid :: adapt() new method called!\n", 1) : 1 ) );
+
   EntityImp f ( *this, this->maxlevel() );    
   EntityImp s ( *this, this->maxlevel() );    
+
+  typedef AdaptiveLeafIdSetRestrictProlong < LeafIndexSetType > AdLeafIndexRPOpType;
+  AdLeafIndexRPOpType adlfop ( *leafIndexSet_ );
+
+  typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
+  typedef CombinedAdaptProlongRestrict < IndexSetRPType,RestrictProlongOperatorType > COType;
+  COType tmprpop ( dm.indexSetRPop() , rpo );
 
   int defaultChunk = newElementsChunk_;
   int actChunk     = refineEstimate_ * refineMarked_; 
   
   // guess how many new elements we get 
   int newElements = std::max( actChunk , defaultChunk ); 
-  ALU3DSPACE AdaptRestrictProlongImpl<ALU3dGrid<dim, dimworld, elType>, EntityImp, DofManagerType, RestrictProlongOperatorType > 
-        rp(*this,f,s,dm,rpo, newElements);
+  ALU3DSPACE AdaptRestrictProlongImpl<ALU3dGrid<dim, dimworld, elType>, EntityImp, COType > 
+        rp(*this,f,s,tmprpop);
 
   dm.resizeMem( newElements );
   bool ref = myGrid().duneAdapt(rp); // adapt grid 
