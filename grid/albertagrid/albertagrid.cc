@@ -1566,6 +1566,7 @@ AlbertaGridHierarchicIterator(const AlbertaGridHierarchicIterator<GridImp> & org
   , virtualEntity_( *(this->entity_) )
   , manageStack_ ( org.manageStack_ )
 {
+  if(!virtualEntity_.getElInfo()) this->done(); 
 }
 
 template< class GridImp >
@@ -3532,6 +3533,7 @@ mark( int refCount , const typename Traits::template codim<0>::Entity & ep ) con
   ALBERTA EL_INFO * elInfo = (this->template getRealEntity<0>(ep)).getElInfo();
   if(!elInfo) 
   {
+    assert(false);
     derr << "ERROR in mark: elinfo NULL! \n";
     return false;
   }
@@ -3558,16 +3560,7 @@ mark( int refCount , const typename Traits::template codim<0>::Entity & ep ) con
       return true;
     }
   }
-  /*
-  // only for debugging 
-  else 
-  {
-    derr << "ERROR in AlbertaGridEntity<0,"<<dim<<","<<dimworld<<">::mark("<<refCount<<") : called on non LeafEntity! in: " << __FILE__ << " line: "<< __LINE__ << "\n"; 
-    assert(false);
-    abort();
-  }
-  */
-  derr << "ERROR in AlbertaGridEntity<0,"<<dim<<","<<dimworld<<">::mark("<<refCount<<") : called on non LeafEntity! in: " << __FILE__ << " line: "<< __LINE__ << "\n"; 
+  //dwarn << "WARNING: in AlbertaGrid<"<<dim<<","<<dimworld<<">::mark("<<refCount<<",EP &) : called on non LeafEntity! in: " << __FILE__ << " line: "<< __LINE__ << "\n"; 
   elInfo->el->mark = 0;
   return false;
 }
