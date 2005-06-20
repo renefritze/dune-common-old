@@ -322,12 +322,13 @@ inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const char* macroTriangFilena
   ,  myRank_(-1) 
 #endif
   , hIndexSet_ (*this)
-  , levelIndexSet_(0) , leafIndexSet_(0)
+  , levelIndexVec_(MAXL) , leafIndexSet_(0)
 {
   if( myRank_ <= 0 )
   {
     checkMacroGrid ( elType , macroTriangFilename );
   }
+  for(unsigned int i=0; i<levelIndexVec_.size(); i++) levelIndexVec_[i] = 0; 
   
   mygrid_ = new ALU3DSPACE GitterImplType (macroTriangFilename
 #ifdef _ALU3DGRID_PARALLEL_
@@ -351,7 +352,6 @@ inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const char* macroTriangFilena
 
   postAdapt();
   calcExtras();
-  leafIndexSet_ = new LeafIndexSetType ( *this );
   std::cout << "Constructor of Grid finished!\n";
 }
 
@@ -362,8 +362,9 @@ inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(MPI_Comm mpiComm)
   , coarsenMarked_(0) , refineMarked_(0) 
   , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
   , hIndexSet_ (*this)
-  , levelIndexSet_(0) , leafIndexSet_(0)
+  , levelIndexVec_(MAXL) , leafIndexSet_(0)
 {
+  for(unsigned int i=0; i<levelIndexVec_.size(); i++) levelIndexVec_[i] = 0; 
 }
 #else 
 template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -372,8 +373,9 @@ inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(int myrank)
   , coarsenMarked_(0) , refineMarked_(0) 
   , myRank_(myrank) 
   , hIndexSet_ (*this)
-  , levelIndexSet_(0) , leafIndexSet_(0)
+  , levelIndexVec_(MAXL) , leafIndexSet_(0)
 {
+  for(unsigned int i=0; i<levelIndexVec_.size(); i++) levelIndexVec_[i] = 0; 
 }
 #endif
 
@@ -382,8 +384,10 @@ inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const ALU3dGrid<dim, dimworld
   : mygrid_ (0) , maxlevel_(0) 
   , coarsenMarked_(0) , refineMarked_(0) 
   , myRank_(-1) 
-  , hIndexSet_(*this) , levelIndexSet_(0), leafIndexSet_(0)
+  , hIndexSet_(*this) 
+  , levelIndexVec_(MAXL) , leafIndexSet_(0)
 {
+  for(unsigned int i=0; i<levelIndexVec_.size(); i++) levelIndexVec_[i] = 0; 
   DUNE_THROW(ALU3dGridError,"Do not use copy constructor of ALU3dGrid! \n");
 }
 
@@ -397,7 +401,10 @@ inline ALU3dGrid<dim, dimworld, elType> & ALU3dGrid<dim, dimworld, elType>::oper
 template <int dim, int dimworld, ALU3dGridElementType elType>
 inline ALU3dGrid<dim, dimworld, elType>::~ALU3dGrid()
 {
-  if(levelIndexSet_) delete levelIndexSet_;
+  for(unsigned int i=0; i<levelIndexVec_.size(); i++)
+  {
+    if(levelIndexVec_[i]) delete levelIndexVec_[i];
+  }
   if(leafIndexSet_) delete leafIndexSet_;
   if(mygrid_) delete mygrid_;
 }
@@ -405,7 +412,7 @@ inline ALU3dGrid<dim, dimworld, elType>::~ALU3dGrid()
 template <int dim, int dimworld, ALU3dGridElementType elType>
 inline int ALU3dGrid<dim, dimworld, elType>::size(int level, int codim) const 
 {
-  return levelIndexSet().size(level,codim);
+  return levelIndexSet(level).size(codim);
 }
 
 template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -430,7 +437,10 @@ inline void ALU3dGrid<dim, dimworld, elType>::calcMaxlevel()
 template <int dim, int dimworld, ALU3dGridElementType elType>
 inline void ALU3dGrid<dim, dimworld, elType>::calcExtras()  
 {
-  if(levelIndexSet_) (*levelIndexSet_).calcNewIndex();
+  for(unsigned int i=0; i<levelIndexVec_.size(); i++)
+  {
+    if(levelIndexVec_[i]) (*(levelIndexVec_[i])).calcNewIndex();
+  }
 
   coarsenMarked_ = 0;
   refineMarked_  = 0;
@@ -443,6 +453,35 @@ inline int ALU3dGrid<dim, dimworld, elType>::global_size(int codim) const
   // this is always up to date 
   // maxIndex is the largest index used + 1 
   return (*mygrid_).indexManager(codim).getMaxIndex();
+}
+
+template <int dim, int dimworld, ALU3dGridElementType elType>
+inline const typename ALU3dGrid<dim, dimworld, elType>::LeafIndexSetType & 
+ALU3dGrid<dim, dimworld, elType>::leafIndexSet() const 
+{
+  if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSetType ( *this );
+  return *leafIndexSet_;
+}
+
+template <int dim, int dimworld, ALU3dGridElementType elType>
+inline typename ALU3dGrid<dim, dimworld, elType>::LeafIndexSetType & 
+ALU3dGrid<dim, dimworld, elType>::leafIndexSet() 
+{
+  if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSetType ( *this );
+  return *leafIndexSet_;
+}
+
+
+template <int dim, int dimworld, ALU3dGridElementType elType>
+inline const typename ALU3dGrid<dim, dimworld, elType>::LevelIndexSetType & 
+ALU3dGrid<dim, dimworld, elType>::levelIndexSet( int level ) const 
+{
+  if( (level < 0) && (level >= MAXL) ) 
+    DUNE_THROW(ALU3dGridError,"Only " << MAXL << "levels allowed for this grid!\n");
+
+  if( levelIndexVec_[level] == 0 )
+    levelIndexVec_[level] = new LevelIndexSetType ( *this , level );
+  return *(levelIndexVec_[level]);
 }
 
 template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -588,9 +627,15 @@ adapt(DofManagerType & dm, RestrictProlongOperatorType & rpo, bool verbose )
   EntityImp f ( *this, this->maxlevel() );    
   EntityImp s ( *this, this->maxlevel() );    
 
-  typedef AdaptiveLeafIdSetRestrictProlong < LeafIndexSetType > AdLeafIndexRPOpType;
-  AdLeafIndexRPOpType adlfop ( *leafIndexSet_ );
-
+  if(leafIndexSet_) 
+  {
+    if( ! dm.checkIndexSetExists( *leafIndexSet_ ))
+    {
+      std::cout << "Add LeafIndexSet to DofManager! \n";
+      dm.addIndexSet( *this , *leafIndexSet_ ); 
+    }
+  }
+  
   typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
   typedef CombinedAdaptProlongRestrict < IndexSetRPType,RestrictProlongOperatorType > COType;
   COType tmprpop ( dm.indexSetRPop() , rpo );
@@ -2003,7 +2048,7 @@ template<int dim, class GridImp>
 inline int ALU3dGridEntity<0,dim,GridImp> :: index() const
 {
   const Entity en (*this);
-  return grid_.levelIndexSet().index(en);
+  return grid_.levelIndexSet(level()).index(en);
 }
 
 template<int dim, class GridImp>
@@ -2412,21 +2457,27 @@ ALU3dGridGeometry(bool makeRefElement)
 }
 
 //   B U I L T G E O M   - - -
-
+//
 template<int mydim, int cdim>
 inline void ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> >:: 
 calcElMatrix () const
 {
   if(!builtA_)
   {
-    // creat Matrix A (=Df)               INDIZES: col/row
-    // Mapping: R^dim -> R^3,  F(x) = A x + p_0
+    // create Matrix A,  vec<cdim> = A * vec<mydim> 
+    // Matrix A is a cdim x mydim Matrix 
+    // Mapping: R^mydim -> R^cdim,  F(x) = A x + p_0
     // columns:    p_1 - p_0  |  p_2 - p_0  |  p_3 - p_0
-      
+     
     for (int i=0; i<mydim; i++) 
     {
-      //FieldVector<alu3d_ctype,cdim> & row = const_cast<FieldMatrix<alu3d_ctype,matdim,matdim> &> (A_)[i];
-      //row = coord_[i+1] - coord_[0];
+      for(int j=0; j<cdim; j++)
+      {
+        // note that A is a cdim x matdim matrix therefore i and j are
+        // permuted in the matrix operator [] 
+        // coord on the other hand is a mydim+1 x cdim matrix 
+        A_[j][i] = coord_[i+1][j] - coord_[0][j];
+      }
     }
     builtA_ = true;
   }
@@ -2741,7 +2792,40 @@ global(const FieldVector<alu3d_ctype, mydim>& local) const
   
   globalCoord_ = coord_[0];
   A_.umv(local,globalCoord_);
+  
   return globalCoord_;
+#if 0
+  // simple test to check wether this method works correct or not 
+  
+  FieldVector<alu3d_ctype, cdim> tmp(0.0);
+  // we calculate interal in barycentric coordinates  
+  // fake the third local coordinate via localFake
+  alu3d_ctype c = local[0];
+  alu3d_ctype localFake=1.0-c;
+ 
+  // the initialize 
+  // note that we have to swap the j and i 
+  for(int j=0; j<cdim; j++)
+    tmp[j] = c * coord_[1][j];
+      
+  // for all local coords 
+  for (int i = 1; i < mydim; i++)
+  {
+    c = local[i];
+    localFake -= c;
+    for(int j=0; j<cdim; j++)
+      tmp[j] += c * coord_[i+1][j];
+  }
+
+  // for the last barycentric coord 
+  for(int j=0; j<cdim; j++)
+    tmp[j] += localFake * coord_[0][j];
+
+  FieldVector<alu3d_ctype, cdim> diff = tmp - globalCoord_;
+  assert( diff.two_norm() < 1.0e-10 );
+  
+  return globalCoord_;
+#endif
 }
 
 template<>
