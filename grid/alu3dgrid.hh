@@ -9,6 +9,7 @@
 
 #include "common/grid.hh"
 #include "common/defaultindexsets.hh"
+#include "common/leafindexset.hh"
 #include "common/adleafidset.hh"
 
 #include "alu3dgrid/alu3dinclude.hh"
@@ -314,7 +315,10 @@ private:
   enum { matdim = (mydim > 0) ? mydim : 1 };
   mutable FieldMatrix<alu3d_ctype,matdim,matdim> Jinv_; //!< storage for inverse of jacobian
   mutable alu3d_ctype detDF_;                           //!< storage of integration_element
-  mutable FieldMatrix<alu3d_ctype,matdim,matdim> A_;    //!< transformation matrix 
+
+  //! transformation matrix which consits of cdim rows and matdim columns 
+  //! which means that vec<cdim> =  A_ * vec<mydim> (see method global)
+  mutable FieldMatrix<alu3d_ctype,cdim,matdim> A_;  
 
   mutable FieldVector<alu3d_ctype, mydim> localCoord_;
   mutable FieldVector<alu3d_ctype, cdim>  globalCoord_;
@@ -1346,7 +1350,7 @@ public:
   
   typedef ALU3dGridHierarchicIndexSet<dim,dimworld,elType> HierarchicIndexSetType;
   typedef DefaultLevelIndexSet<MyType>           LevelIndexSetType; 
-  typedef AdaptiveLeafIdSet<MyType>          LeafIndexSetType; 
+  typedef AdaptiveLeafIndexSet<MyType>           LeafIndexSetType; 
  
   typedef typename Traits::LeafIterator LeafIterator;
   
@@ -1420,16 +1424,9 @@ public:
   int global_size (int cd) const ;
 
   const HierarchicIndexSetType & hierarchicIndexSet () const { return hIndexSet_; }
-  const LeafIndexSetType & leafIndexSet () const { return *leafIndexSet_; }
-  LeafIndexSetType & leafIndexSet () { return *leafIndexSet_; }
-  const LevelIndexSetType & levelIndexSet () const
-  {
-    // * This is pure evil when adapting
-    std::cout << "WARNING: LevelIndexSet is being used! \n";
-    if(!levelIndexSet_) levelIndexSet_ = new LevelIndexSetType (*this);
-    return *levelIndexSet_;
-  }
-
+  const LeafIndexSetType & leafIndexSet () const; 
+  LeafIndexSetType & leafIndexSet (); 
+  const LevelIndexSetType & levelIndexSet (int level) const;
 
   //! calculate load of each proc and repartition if neccessary 
   bool loadBalance ();
@@ -1540,10 +1537,10 @@ private:
   HierarchicIndexSetType hIndexSet_;
 
   // the level index set ( default type )
-  mutable LevelIndexSetType * levelIndexSet_;
+  mutable std::vector < LevelIndexSetType * > levelIndexVec_;
 
   // the leaf index set
-  LeafIndexSetType * leafIndexSet_;
+  mutable LeafIndexSetType * leafIndexSet_;
  
   // the entity codim 0 
   typedef ALU3dGridMakeableEntity<0,dim,const MyType> EntityImp;
@@ -1599,13 +1596,11 @@ public:
   {
     assert(cd == dim);
     const ALU3dGridEntity<0,dim,const GridType> & en = (grid_.template getRealEntity<0>(ep));
-    int idx = en.template getSubIndex<cd>(i);
-    std::cout << idx << " index \n";
-    return idx;
+    return en.template getSubIndex<cd>(i);
   }
 
   //! return size of indexset, i.e. maxindex+1
-  int size ( int level, int codim ) const
+  int size ( int codim ) const
   {
     // return maxIndex of hierarchic index set
     return grid_.global_size(codim);
