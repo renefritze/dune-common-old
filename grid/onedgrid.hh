@@ -211,10 +211,7 @@ public:
     /** \brief Constructor for a uniform grid */
     OneDGrid(int numElements, double leftBoundary, double rightBoundary);
 
-    /** \brief Default constructor */
-    OneDGrid();
-
-  //! Destructor 
+    //! Destructor 
     ~OneDGrid();
    
     /** \brief Return maximum level defined in this grid. 
