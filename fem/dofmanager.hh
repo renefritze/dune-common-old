@@ -22,6 +22,10 @@ template <class GridType,
           class DataCollectorType = DataCollectorInterface<GridType> > 
 class DofManager;
 
+template <class GridType, 
+          class DataCollectorType = DataCollectorInterface<GridType> > 
+class DofManagerFactory;
+
 // forward declaration 
 
 // type of pointer to memory, for easy replacements
@@ -298,7 +302,7 @@ public:
   virtual void resize () = 0; 
   virtual bool compress () = 0;
   virtual void unsetCompressed() = 0;
-  virtual bool operator == (const IndexSetInterface & iset) = 0;
+  virtual bool operator == (const IndexSetInterface & iset) const = 0;
 
   virtual void read_xdr(const char * filename, int timestep) = 0;
   virtual void write_xdr(const char * filename, int timestep) const = 0;
@@ -344,14 +348,14 @@ public:
 
   void unsetCompressed() { compressed_ = false; }
 
-  bool operator == ( const IndexSetInterface & iset )
+  bool operator == ( const IndexSetInterface & iset ) const
   {
     return &indexSet_ == &iset;
   }
 
   void apply ( EntityType & en )
   {
-    indexSet_.createFatherIndex ( en );
+    indexSet_.insertNewIndex ( en );
   }
   
   virtual void read_xdr(const char * filename, int timestep)
@@ -451,7 +455,7 @@ public:
 
   int elementMemory () const 
   {
-    return mapper_.elementDofs();
+    return mapper_.numberOfDofs();
   }
 
   //! return number of entities  
@@ -593,6 +597,12 @@ public:
   IndexSetRestrictProlong ( DofManagerType & dm , RestrictProlongIndexSetType & is, RestrictProlongIndexSetType & rm ) 
     : dm_(dm) , insert_(is), remove_(rm) {}
 
+  // just for interface reasons 
+  template <class EntityType>
+  void calcFatherChildWeight (EntityType &father, EntityType &son) const
+  {
+  }
+
   //! restrict data to father 
   template <class EntityType>
   void restrictLocal ( EntityType & father, EntityType & son , bool initialize ) const
@@ -612,6 +622,7 @@ public:
     insert_.apply( son );
     dm_.checkMemorySize();
   }
+  
 };
 
 
@@ -637,6 +648,7 @@ template <class GridType , class DataCollectorType >
 class DofManager 
 {
   typedef DofManager<GridType,DataCollectorType> MyType;
+  friend class DofManagerFactory<GridType,DataCollectorType>;
 public:
   // all things for one discrete function are put together in a MemObject
   typedef MemPointerType MemoryPointerType; 
@@ -684,31 +696,36 @@ public:
   typedef IndexSetRestrictProlong< MyType , LocalIndexSetObjectsType > IndexSetRestrictProlongType;
 private:
   IndexSetRestrictProlongType indexRPop_; 
+  //**********************************************************
+  //**********************************************************
+  //! Constructor 
+  DofManager (const GridType & grid) : grid_(grid) , chunkSize_ (100)
+     , indexRPop_( *this, insertIndices_ , removeIndices_ ) {}
+  
+  //! Desctructor, removes all MemObjects and IndexSetObjects 
+  ~DofManager (); 
+
 public:
-  //**********************************************************
-  //**********************************************************
   template <class MapperType , class DofStorageType >
   struct Traits 
   {
     typedef MemObject< MapperType, DofStorageType > MemObjectType;
   };
   
-  //! Constructor 
-  DofManager (const GridType & grid) : grid_(grid) , chunkSize_ (0)
-     , indexRPop_( *this, insertIndices_ , removeIndices_ ) {}
-  
-  //! Desctructor, removes all MemObjects and IndexSetObjects 
-  ~DofManager (); 
+public:
+  //! add new index set to the list of the indexsets of this dofmanager
+  template <class IndexSetType>
+  inline void addIndexSet (const GridType &grid, IndexSetType &iset); 
 
   //! add new index set to the list of the indexsets of this dofmanager
   template <class IndexSetType>
-  void addIndexSet (const GridType &grid, IndexSetType &iset); 
+  inline bool checkIndexSetExists (const IndexSetType &iset) const; 
 
   //! add dofset to dof manager 
   //! this method should be called at signIn of DiscreteFucntion, and there
   //! we know our DofStorage which is the actual DofArray  
   template <class DofStorageType, class IndexSetType, class MapperType >
-  MemObject<MapperType,DofStorageType> & 
+  inline MemObject<MapperType,DofStorageType> & 
   addDofSet(DofStorageType & ds, const GridType &grid, IndexSetType &iset, 
             MapperType & mapper, const char * name );
 
@@ -736,13 +753,6 @@ public:
     return removed;
   }
 
-  template <class EntityType> 
-  void createFatherIndex ( EntityType & en )
-  {
-    indexSets_.apply ( en );
-  }
-
-
   // returns the index set restrinction and prolongation operator
   IndexSetRestrictProlongType & indexSetRPop () 
   {
@@ -757,7 +767,9 @@ public:
 
     for( ; it != endit ; ++it)
     {
-      (*it)->realloc ( (*it)->size() + (*it)->additionalSizeEstimate() );
+      int addSize = (*it)->additionalSizeEstimate();
+      chunkSize_ = std::max( addSize , chunkSize_ );
+      (*it)->realloc ( (*it)->size() + addSize );
     }
   }
   
@@ -770,48 +782,6 @@ public:
     int check = 0;
     checkResize_.apply( check );
     if( check ) resizeMemObjs_.apply ( chunkSize_ );
-   
-    /*
-    bool resizeNeeded = false;
-    {
-      ListIteratorType it    = memList_.begin();
-      ListIteratorType endit = memList_.end();
-
-
-      for( ; it != endit ; ++it)
-      {
-        if ( (*it)->resizeNeeded() )
-          resizeNeeded = true;
-      }
-    }
-    
-    if( resizeNeeded )
-    {
-      ListIteratorType it    = memList_.begin();
-      ListIteratorType endit = memList_.end();
-      for( ; it != endit ; ++it)
-      {
-        (*it)->realloc ( (*it)->size() + (chunkSize_ * (*it)->elementMemory()) );
-      }
-    }
-    */
-
-    /*
-#ifndef NDEBUG
-    {
-      resizeNeeded = false;    
-      ListIteratorType it    = memList_.begin();
-      ListIteratorType endit = memList_.end();
-
-      for( ; it != endit ; ++it)
-      {
-        if ( (*it)->resizeNeeded() )
-          resizeNeeded = true;
-      }
-      assert( !resizeNeeded );
-    }
-#endif
-    */
   }
  
   // resize the memory 
@@ -823,6 +793,7 @@ public:
     resizeMemObjs_.apply ( chunkSize_ );
   }
 
+  // resize indexsets memory due to what the mapper has as new size 
   void resize()
   {
     IndexListIteratorType endit = indexList_.end();
@@ -830,7 +801,6 @@ public:
     {
       (*it)->resize(); 
     }
-    
     resizeDofMem();
   }
  
@@ -843,7 +813,9 @@ private:
 
     for( ; it != endit ; ++it)
     {
+      int size  = (*it)->size();
       int nSize = (*it)->newSize();
+      chunkSize_ = std::max( std::abs(nSize - size) , chunkSize_ );
       (*it)->realloc ( nSize );
     }
   }
@@ -1012,11 +984,30 @@ addIndexSet (const GridType &grid, IndexSetType &iset)
 }
 
 template <class GridType, class DataCollectorType>
+template <class IndexSetType>
+inline bool DofManager<GridType,DataCollectorType>::
+checkIndexSetExists (const IndexSetType &iset) const
+{
+  const IndexSetInterface & set = iset; 
+
+  IndexListIteratorType endit = indexList_.end();
+  for(IndexListIteratorType it = indexList_.begin(); it != endit; ++it)
+  {
+    if( (* (*it) ) == set ) 
+    {
+      return true; 
+    }
+  }
+  return false;
+}
+
+
+template <class GridType, class DataCollectorType>
 template <class DofStorageType, class IndexSetType, class MapperType >
 inline MemObject<MapperType,DofStorageType> & 
 DofManager<GridType,DataCollectorType>::
 addDofSet(DofStorageType & ds, const GridType &grid, IndexSetType &iset, 
-          MapperType & mapper, const char * name );
+          MapperType & mapper, const char * name )
 {
   if(&grid_ != &grid)
     DUNE_THROW(DofManError,"DofManager can only be used for one grid! \n");
@@ -1110,6 +1101,64 @@ read_xdr(const char * filename , int timestep)
   }
   return true;
 }
+
+//! DofManagerFactory guarantees that only one instance of a dofmanager 
+//! per grid is generated. If getDofManager is called with a grid for which
+//! already a mamager exists, then the reference to this manager is returned. 
+template <class GridType, class DataCollectorType>
+class DofManagerFactory 
+{
+  typedef DofManager<GridType,DataCollectorType> DofManagerType;
+  typedef DoubleLinkedList < std::pair < GridType * , DofManagerType * > > ListType;
+  typedef typename ListType::Iterator ListIteratorType;
+
+  //! list that store pairs of grid/dofmanager pointers 
+  static ListType gridList_; 
+public:  
+  //! return reference to the DofManager for the given grid. 
+  //! If the object does not exist, then it is created first.
+  inline static DofManagerType & getDofManager (GridType & grid) 
+  {
+    ListIteratorType endit = gridList_.end();
+    for(ListIteratorType it = gridList_.begin(); it!=endit; ++it)
+    {
+      if( (*it).first == & grid )
+      {
+        return * ((*it).second);
+      }
+    }
+    
+    DofManagerType * dm = new DofManagerType ( grid );
+    std::pair < GridType * , DofManagerType * > tmp ( & grid , dm );
+    gridList_.insert_after( gridList_.rbegin() , tmp ); 
+    return *dm; 
+  } 
+
+  //! delete the dof manager that belong to the given grid 
+  inline static void deleteDofManager (DofManagerType & dm ) 
+  {
+    ListIteratorType endit = gridList_.end();
+    for(ListIteratorType it = gridList_.begin(); it!=endit; ++it)
+    {
+      if( (*it).second == (& dm ))
+      {
+        gridList_.erase( it );
+        DofManagerType * tmp = & dm ;
+        std::cout << "Deleting dm = " << tmp << "\n";
+        if( tmp ) delete tmp;
+        return;
+      }
+    }
+    std::cerr << "DofManager could not deleted, because is not in list anymore! \n";
+  }
+private: 
+  DofManagerFactory () {};  
+};
+
+//! singelton 
+template <class GridType, class DataCollectorType> 
+DoubleLinkedList < std::pair < GridType * , DofManager<GridType,DataCollectorType> * > > 
+DofManagerFactory<GridType,DataCollectorType>::gridList_;
 
 } // end namespace Dune 
 
