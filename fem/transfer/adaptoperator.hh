@@ -62,9 +62,11 @@ private:
 };
 
 
-    /** \brief ???
-     * \todo Please doc me!
-     */
+/*! \brief This class manages the adaptation process. 
+ If the method adapt is called, then the grid is adapted and also 
+ all the data belonging to the given dof manager will be rearranged 
+ for data set where it is necessary to keep the data.
+ */
 template <class GridType, class RestProlOperatorImp, class DofManagerType >
 class AdaptOperator
 : 
@@ -125,17 +127,21 @@ public:
       if(!calcedWeight_) calcWeight();
       
       dm_.resizeForRestrict();
+      
+      typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
+      typedef CombinedRestProl <IndexSetRPType,RestProlOperatorImp> COType;
+      COType tmpop ( dm_.indexSetRPop() , rpOp_ );
 
       typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
 
       // make run through grid 
       for(int l=0; l<grid_.maxlevel(); l++)
       {
-        LevelIterator it    = grid_.template lbegin<0> ( l );
         LevelIterator endit = grid_.template lend<0>   ( l );
-        for( ; it != endit; ++it )
+        for(LevelIterator it    = grid_.template lbegin<0> ( l );
+              it != endit; ++it )
         {
-          hierarchicRestrict( *it );
+          hierarchicRestrict( *it , tmpop );
         }
       }
     }
@@ -145,16 +151,18 @@ public:
     if(ref)
     {
       dm_.resize();
+      typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
+      typedef CombinedRestProl <IndexSetRPType,RestProlOperatorImp> COType;
+      COType tmpop ( dm_.indexSetRPop() , rpOp_ );
       
       typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
 
       // make run through grid 
-      LevelIterator it    = grid_.template lbegin<0> ( 0 );
       LevelIterator endit = grid_.template lend<0>   ( 0 );
-
-      for( ; it != endit; ++it )
+      for(LevelIterator it    = grid_.template lbegin<0> ( 0 );
+            it != endit; ++it )
       {
-        hierarchicProlong( *it );
+        hierarchicProlong( *it , tmpop );
       }
     }
 
@@ -173,8 +181,8 @@ public:
   
 private:
   // make hierarchic walk trough 
-  template <class EntityType>
-  void hierarchicRestrict ( EntityType &en) const 
+  template <class EntityType, class RestrictOperatorType  >
+  void hierarchicRestrict ( EntityType &en, RestrictOperatorType & restop ) const 
   {
     if(!en.isLeaf())
     {
@@ -194,18 +202,15 @@ private:
       {
         if((*it).state() == COARSEN)
         {
-          // create index for fatty, here set indices equal
-          if(initialize) dm_.createFatherIndex( en );
-
-          rpOp_.restrictLocal( en , *it, initialize);     
+          restop.restrictLocal( en , *it, initialize);     
           initialize = false;
         }
       }
     }
   }
 
-  template <class EntityType>
-  void hierarchicProlong ( EntityType &en) const 
+  template <class EntityType, class ProlongOperatorType >
+  void hierarchicProlong ( EntityType &en, ProlongOperatorType & prolop ) const 
   {
     typedef typename EntityType::HierarchicIterator HierarchicIterator; 
     //typedef typename GridType::template codim<EntityType::codimension>::EntityPointer;
@@ -218,7 +223,7 @@ private:
     {
       if((*it).state() == REFINED)
       {
-        rpOp_.prolongLocal( *(it->father()), *it , initialize );     
+        prolop.prolongLocal( *(it->father()), *it , initialize );     
         initialize = false;
       }
     }
@@ -246,11 +251,10 @@ private:
   {
     typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
     // make run through grid 
-    LevelIterator it    = grid_.template lbegin<0> ( 0 );
-    LevelIterator endit = grid_.template lend<0>   ( 0 );
-  
     bool done = false;  
-    for( ; it != endit; ++it )
+    
+    LevelIterator endit  = grid_.template lend<0>   ( 0 );
+    for(LevelIterator it = grid_.template lbegin<0> ( 0 ); it != endit; ++it )
     {
       done = hierarchicCalcWeight( *it );
       if(done) break;
@@ -277,9 +281,9 @@ private:
 
 //***********************************************************************
 
-    /** \brief I suppose it does the restriction/prolongation for FV
-     * 
-     */
+/** \brief This is a simple restriction/prolongation operator for
+ piecewise constant data stored on elements. 
+*/
 template <class DiscreteFunctionType>
 class RestProlOperatorFV
 {
@@ -295,6 +299,7 @@ public:
   {
   }
 
+  //! calculates the weight, i.e. (volume son)/(volume father)
   template <class EntityType>
   void calcFatherChildWeight (EntityType &father, EntityType &son) const
   {
@@ -304,34 +309,37 @@ public:
         father.geometry().integrationElement(quad_.point(0));
   }
   
+  //! the weight can also be seted
+  void setFatherChildWeight (const RangeFieldType val) const
+  {
+    // volume of son / volume of father  
+    const_cast<RangeFieldType &> (weight_) = val; 
+  }
+  
   //! restrict data to father 
   template <class EntityType>
   void restrictLocal ( EntityType &father, EntityType &son, bool initialize ) const
   {
-    if(!father.isLeaf())
-    {
-      if(son.state() == COARSEN)
-      {
-        // if weight < 0.0 , weight has not been calced
-        assert(weight_ > 0.0);
-        
-        df_.localFunction( father, vati_ );
-        df_.localFunction( son   , sohn_ );
+    assert( !father.isLeaf() );
 
-        if(initialize)
-        {
-          for(int i=0; i<vati_.numberOfDofs(); i++)
-          {
-            vati_[i] = weight_ * sohn_[i];
-          }
-        }
-        else 
-        {
-          for(int i=0; i<vati_.numberOfDofs(); i++)
-          {
-            vati_[i] += weight_ * sohn_[i];
-          }
-        }
+    // if weight < 0.0 , weight has not been calculated
+    assert(weight_ > 0.0);
+    
+    df_.localFunction( father, vati_ );
+    df_.localFunction( son   , sohn_ );
+
+    if(initialize)
+    {
+      for(int i=0; i<vati_.numberOfDofs(); i++)
+      {
+        vati_[i] = weight_ * sohn_[i];
+      }
+    }
+    else 
+    {
+      for(int i=0; i<vati_.numberOfDofs(); i++)
+      {
+        vati_[i] += weight_ * sohn_[i];
       }
     }
   }
@@ -340,14 +348,13 @@ public:
   template <class EntityType>
   void prolongLocal ( EntityType &father, EntityType &son, bool initialize ) const
   {
-    if(son.state() == REFINED)
+    assert( son.state() == REFINED );
+
+    df_.localFunction( father, vati_ );
+    df_.localFunction( son   , sohn_ );
+    for(int i=0; i<vati_.numberOfDofs(); i++)
     {
-      df_.localFunction( father, vati_ );
-      df_.localFunction( son   , sohn_ );
-      for(int i=0; i<vati_.numberOfDofs(); i++)
-      {
-        sohn_[i] = vati_[i];
-      }
+      sohn_[i] = vati_[i];
     }
   }
 
