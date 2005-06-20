@@ -2,18 +2,6 @@
 
 #include "../onedgrid.hh"
 
-// Explicitly instantiate the OnedGrid for dim == dimworld == 1,
-// which is the only valid instantiation
-template class Dune::OneDGrid<1,1>;
-
-// Explicitly instantiate the necessary member templates contained in OneDGrid<1,1>
-template Dune::OneDGrid<1,1>::Traits::codim<0>::LevelIterator Dune::OneDGrid<1,1>::lbegin<0>(int level) const;
-template Dune::OneDGrid<1,1>::Traits::codim<1>::LevelIterator Dune::OneDGrid<1,1>::lbegin<1>(int level) const;
-
-template Dune::OneDGrid<1,1>::Traits::codim<0>::LevelIterator Dune::OneDGrid<1,1>::lend<0>(int level) const;
-template Dune::OneDGrid<1,1>::Traits::codim<1>::LevelIterator Dune::OneDGrid<1,1>::lend<1>(int level) const;
-
-
 // ///////////////////////////////////////////////////////////////
 //
 //    OneDGridLevelIteratorFactory, a class used to simulate
@@ -557,3 +545,19 @@ bool Dune::OneDGrid < dim, dimworld >::mark(int refCount,
         getRealEntity<0>(*e).target_->adaptationState = NONE;
     return false;
 }
+
+// /////////////////////////////////////////////////////////////////////////
+//   Explicitly instantiate the OnedGrid for dim == dimworld == 1,
+//   which is the only valid instantiation
+//   gcc-4.0 wants these instantiations after the method implementations
+// /////////////////////////////////////////////////////////////////////////
+template class Dune::OneDGrid<1,1>;
+
+// Explicitly instantiate the necessary member templates contained in OneDGrid<1,1>
+template Dune::OneDGrid<1,1>::Traits::codim<0>::LevelIterator Dune::OneDGrid<1,1>::lbegin<0>(int level) const;
+template Dune::OneDGrid<1,1>::Traits::codim<1>::LevelIterator Dune::OneDGrid<1,1>::lbegin<1>(int level) const;
+
+template Dune::OneDGrid<1,1>::Traits::codim<0>::LevelIterator Dune::OneDGrid<1,1>::lend<0>(int level) const;
+template Dune::OneDGrid<1,1>::Traits::codim<1>::LevelIterator Dune::OneDGrid<1,1>::lend<1>(int level) const;
+
+
