@@ -63,7 +63,7 @@ public:
     int s = 0;
     for(int i=0; i<numCodims; i++)
     {
-      (indexSet_.size( level_ , numCodims - 1 ));
+      (indexSet_.size( numCodims - 1 ));
     }
     return s;
   }
@@ -107,7 +107,7 @@ public:
   int oldSize () const
   {   
     // this index set works only for codim = 0 at the moment
-    return indexSet_.oldSize(level_,2);
+    return indexSet_.oldSize(2);
   }
 
   // is called once and calcs the insertion points too
@@ -161,7 +161,7 @@ public:
   //! return size, i.e. size of functions space == number of vertices 
   int size () const
   {
-    return (indexSet_.size( level_ , numCodims - 1 ));
+    return (indexSet_.size( numCodims - 1 ));
   }
 
   //! map Entity an local Dof number to global Dof number 
@@ -199,7 +199,7 @@ public:
   int oldSize () const
   {   
     // this index set works only for codim = 0 at the moment
-    return indexSet_.oldSize(level_, numCodims - 1);
+    return indexSet_.oldSize(numCodims - 1);
   }
 
   // is called once and calcs the insertion points too
@@ -218,11 +218,6 @@ public:
   int newSize() const 
   {
     return this->size();
-  }
-
-  int elementDofs () const 
-  {
-    return numCodims;
   }
 };
 
@@ -250,7 +245,7 @@ public:
   //! return size of function space, here number of elements 
   int size () const
   {
-    return dimrange * indexSet_.size(level_,0);
+    return dimrange * indexSet_.size(0);
   }
   
   //! map Entity an local Dof number to global Dof number 
@@ -288,18 +283,13 @@ public:
   int oldSize () const
   {   
     // this index set works only for codim = 0 at the moment
-    return dimrange * indexSet_.oldSize(level_,0);
+    return dimrange * indexSet_.oldSize(0);
   }
   
   // is called once and calcs the insertion points too
   int newSize() const 
   {
     return this->size();
-  }
-
-  int elementDofs () const 
-  {
-    return dimrange;
   }
 
   // is called once and calcs the insertion points too
@@ -339,7 +329,7 @@ public:
   //! return size of function space, here number of elements 
   int size () const
   {
-    return indexSet_.size(level_,0);
+    return indexSet_.size(0);
   }
   
   //! map Entity an local Dof number to global Dof number 
@@ -373,18 +363,13 @@ public:
   int oldSize () const
   {   
     // this index set works only for codim = 0 at the moment
-    return indexSet_.oldSize(level_,0);
+    return indexSet_.oldSize(0);
   }
   
   // is called once and calcs the insertion points too
   int newSize() const 
   {
     return this->size();
-  }
-
-  int elementDofs () const 
-  {
-    return 1;
   }
 
   // is called once and calcs the insertion points too
