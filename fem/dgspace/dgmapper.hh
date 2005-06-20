@@ -32,7 +32,7 @@ public:
   int size () const
   {
     // return number of dofs * number of elements 
-    return (numberOfDofs_ * indexSet_.size( level_ , 0 ));
+    return (numberOfDofs_ * indexSet_.size( 0 ));
   }
 
   //! return boundary type for given boundary id 
@@ -97,7 +97,7 @@ public:
   int oldSize () const
   {
     // this index set works only for codim = 0 at the moment
-    return numberOfDofs_ * indexSet_.oldSize(level_,0);
+    return numberOfDofs_ * indexSet_.oldSize(0);
   }
 
   // is called once and calcs the insertion points too
@@ -105,8 +105,6 @@ public:
   {
     return numberOfDofs_ * indexSet_.additionalSizeEstimate();
   }
-
-  
 };
 
 
@@ -132,7 +130,7 @@ public:
   int size () const
   {
     // return number of dofs * number of elements 
-    return (numberOfDofs_ * indexSet_.size( level_ , 0 ));
+    return (numberOfDofs_ * indexSet_.size( 0 ));
   }
 
   //! return boundary type for given boundary id 
@@ -197,7 +195,7 @@ public:
   int oldSize () const
   {
     // this index set works only for codim = 0 at the moment
-    return numberOfDofs_ * indexSet_.oldSize(level_,0);
+    return numberOfDofs_ * indexSet_.oldSize(0);
   }
 
   // is called once and calcs the insertion points too
