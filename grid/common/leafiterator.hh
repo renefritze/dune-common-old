@@ -26,10 +26,11 @@ public:
     }
   
   /** @brief Postincrement operator. */
-  LeafIterator& operator++(int)
+  LeafIterator operator++(int)
     {
-      this->realIterator.operator++();
-      return *this;
+      const LeafIterator tmp(*this);
+      this->realIterator.increment();
+      return tmp;
     }
   
   /** @brief copy constructor from LevelIteratorImp */

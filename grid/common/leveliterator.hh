@@ -36,10 +36,11 @@ public:
 
      @note Forwarded to LevelIteratorImp.increment()
   */
-  LevelIterator& operator++(int)
+  LevelIterator operator++(int)
     {
-      this->realIterator.operator++();
-      return *this;
+      const LevelIterator tmp(*this);
+      this->realIterator.increment();
+      return tmp;
     }
   
   /**

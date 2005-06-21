@@ -40,10 +40,11 @@ public:
 
      @note Forwarded to LevelIteratorImp.increment()
   */
-  HierarchicIterator& operator++(int)
+  HierarchicIterator operator++(int)
     {
-      this->realIterator.operator++();
-      return *this;
+      const HierarchicIterator tmp(*this);
+      this->realIterator.increment();
+      return tmp;
     }
 
   /**
