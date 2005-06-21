@@ -20,6 +20,9 @@ public:
 
   //! Make undefined identifier
   DynamicType () : identifier_ (undefined) {};
+
+    /** \brief Virtual destructor*/
+    virtual ~DynamicType() {};
   
   //! ???
   virtual bool operator == ( const DynamicType &) {return true;};

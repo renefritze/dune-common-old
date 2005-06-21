@@ -208,6 +208,9 @@ public:
   
   DataCollectorInterface () : dc_ (0) {}
   
+    /** \brief Virtual desctructor */
+    virtual ~DataCollectorInterface() {}
+
   //! all adaptation operators have this method which adapts the
   //! corresponding grid and organizes the restriction prolongation process
   //! of the underlying function spaces
