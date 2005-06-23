@@ -6,7 +6,7 @@
 #include <assert.h>
 
 
-using namespace dune;
+using namespace Dune;
 using namespace std;
 
 ConfigParser::ConfigParser()

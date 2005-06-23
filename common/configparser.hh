@@ -6,7 +6,7 @@
 #include <string>
 #include <iostream>
 
-namespace dune {
+namespace Dune {
 	
 	  /** \brief Parser for hierarchical parameter files
 	   * \ingroup Common
