@@ -3,8 +3,8 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <assert.h>
 
+#include <dune/common/exceptions.hh>
 
 using namespace Dune;
 using namespace std;
@@ -16,7 +16,9 @@ ConfigParser::ConfigParser()
 void ConfigParser::parseFile(string file)
 {
 	ifstream in(file.c_str());
-	assert(in);
+
+        if (!in)
+            DUNE_THROW(IOError, "Could open configuration file " << file);
 	
 	string prefix;
 	while(!in.eof())
