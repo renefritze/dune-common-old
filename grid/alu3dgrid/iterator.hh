@@ -183,9 +183,9 @@ namespace ALU3dGridSpace {
   typedef Dune::PartitionIteratorType PartitionIteratorType;
   
   template <int codim, PartitionIteratorType pitype> class ALU3dGridLeafIteratorWrapper;
-  //  typedef pair <ALUHElementType<0>::ElementType * , BNDFace3Type * > LeafValType;
   typedef pair <ALUHElementType<0>::ElementType * , HBndSegType * > LeafValType;
   typedef IteratorWrapperInterface<LeafValType> IteratorWrapperInterfaceType;
+
   //**********************************************************
   //  LeafIterator Wrapper 
   //**********************************************************
@@ -197,8 +197,8 @@ namespace ALU3dGridSpace {
     typedef Insert < AccessIterator < ElType >::Handle,
                      TreeIterator < ElType , leaf_or_has_level < ElType > > > IteratorType;
 
+    // the ALU3dGrid Iterator 
     IteratorType it_;
-    //typedef IteratorType :: val_t val_t;
 
     typedef LeafValType val_t;
     val_t elem_;
@@ -222,70 +222,94 @@ namespace ALU3dGridSpace {
     }
   };
 
-  /*
-  template <>
-  class ALU3dGridLeafIteratorWrapper<1> : public IteratorWrapperInterface
+  template <int codim>
+  struct IteratorElType
+  {
+    typedef ALUHElementType<codim>::ElementType ElType; 
+    typedef pair < ElType * , ElType * > val_t;
+  };
+  
+  template <PartitionIteratorType pitype>
+  class ALU3dGridLeafIteratorWrapper<1,pitype> 
+    : public IteratorWrapperInterface < typename IteratorElType<1>::val_t > 
   {
     typedef ALUHElementType<1>::ElementType ElType; 
     typedef Insert < AccessIterator < ElType >::Handle,
                      TreeIterator < ElType , leaf_or_has_level < ElType > > > IteratorType;
 
+    // the face iterator 
     IteratorType it_;
-    typedef IteratorType :: val_t val_t;
+
+    typedef IteratorElType<1>::val_t val_t;
+    val_t elem_;
   public:
     template <class GridImp> 
     ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level ) 
-      : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
+      : it_(const_cast<GridImp &> (grid).myGrid().container(),level) , elem_(0,0) {}
 
     int size  ()    { return it_.size(); }
     void next ()    { it_.next(); }
     void first()    { it_.first(); }
     int done ()     { return it_.done(); }
-    val_t & item () { return it_.item(); }
-
+    val_t & item () 
+    { 
+      elem_.first  = & it_.item(); 
+      return elem_; 
+    }
   };
 
-  template <>
-  class ALU3dGridLeafIteratorWrapper<2> : public IteratorWrapperInterface
+  template <PartitionIteratorType pitype>
+  class ALU3dGridLeafIteratorWrapper<2,pitype> 
+    : public IteratorWrapperInterface < typename IteratorElType<2>::val_t > 
   {
     typedef ALUHElementType<2>::ElementType ElType; 
     typedef Insert < AccessIterator < ElType >::Handle,
                      TreeIterator < ElType , leaf_or_has_level < ElType > > > IteratorType;
 
+    // the edge iterator 
     IteratorType it_;
-    typedef IteratorType :: val_t val_t;
+    
+    typedef IteratorElType<2>::val_t val_t;
+    val_t elem_;
   public:
     template <class GridImp> 
     ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level ) 
-      : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
+      : it_(const_cast<GridImp &> (grid).myGrid().container(),level), elem_(0,0) {}
 
     int size  ()    { return it_.size(); }
     void next ()    { it_.next(); }
     void first()    { it_.first(); }
     int done ()     { return it_.done(); }
-    val_t & item () { return it_.item(); }
-
+    val_t & item () 
+    { 
+      elem_.first  = & it_.item(); 
+      return elem_; 
+    }
   };
 
-  template <>
-  class ALU3dGridLeafIteratorWrapper<3> : public IteratorWrapperInterface
+  template <PartitionIteratorType pitype>
+  class ALU3dGridLeafIteratorWrapper<3,pitype> 
+    : public IteratorWrapperInterface < typename IteratorElType<3>::val_t > 
   {
     typedef LeafIterator < GitterType::vertex_STI > IteratorType;
-    IteratorType it_;
-    typedef IteratorType :: val_t val_t;
+    
+    typedef IteratorElType<3>::val_t val_t;
+    val_t elem_;
   public:
     template <class GridImp> 
     ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level ) 
-      : it_(const_cast<GridImp &> (grid).myGrid()) {}
+      : it_(const_cast<GridImp &> (grid).myGrid()), elem_(0,0) {}
 
     int size  ()    { return it_->size(); }
     void next ()    { it_->next(); }
     void first()    { it_->first(); }
     int done ()     { return it_->done(); }
-    val_t & item () { return it_->item(); }
-
+    val_t & item () 
+    { 
+      elem_.first  = & it_.item(); 
+      return elem_; 
+    }
   };
-  */
 
 #ifdef _ALU3DGRID_PARALLEL_
 
