@@ -221,7 +221,7 @@ public:
 
   //! restrict data , elem is always the father 
   //! this method is for ghost elements 
-  int preCoarsening ( HBndsegType & el )
+  int preCoarsening ( HBndSegType & el )
   {
     // hier nur die Indices einfügen 
     // da wir nur 4 ghost kenn macht das prolong keinen Sinn 
@@ -244,7 +244,7 @@ public:
 
 
   //! prolong data, elem is the father  
-  int postRefinement ( HBndsegType & el )
+  int postRefinement ( HBndSegType & el )
   {
     // for ghost only indices are inserted, because we only know 4 of 8
     // elements and therefore no prolongation can be done    
@@ -338,7 +338,7 @@ public:
 
   //! restrict data , elem is always the father 
   //! this method is for ghost elements 
-  int preCoarsening ( HBndsegType & el )
+  int preCoarsening ( HBndSegType & el )
   {
     //cout << "remove ghost durin ldb , el = " << el.getIndex() << "\n";
     PLLBndFaceType & elem = static_cast<PLLBndFaceType &> (el);
@@ -359,7 +359,7 @@ public:
 
   //! restrict data , elem is always the father 
   //! this method is for ghost elements 
-  int postRefinement ( HBndsegType & el )
+  int postRefinement ( HBndSegType & el )
   {
     //cout << "create ghost durin ldb , el = " << el.getIndex() << "\n";
     PLLBndFaceType & elem = static_cast<PLLBndFaceType &> (el);
