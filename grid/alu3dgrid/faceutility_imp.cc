@@ -48,11 +48,6 @@ namespace Dune {
       }
     }
 #endif
-    //if( innerTwist != innerEntity().twist(innerFaceNumber_) )
-    //{
-    //  std::cout << "inner item = " << & innerEntity() << "\n";
-    //  std::cout << innerTwist << " itw | en->itw " << innerEntity().twist(innerFaceNumber_) << "\n";
-    //}
     assert(innerTwist == innerEntity().twist(innerFaceNumber_));
   }
 
@@ -102,7 +97,7 @@ namespace Dune {
   template <ALU3dGridElementType type> 
   const typename ALU3dGridFaceInfo<type>::GEOElementType& 
   ALU3dGridFaceInfo<type>::outerEntity() const {
-    assert(!outerBoundary());
+    assert(!outerBoundary() && !isGhostBnd());
     return static_cast<const GEOElementType&>(*outerElement_);
   }
 
@@ -120,7 +115,7 @@ namespace Dune {
 
   template <ALU3dGridElementType type>
   int ALU3dGridFaceInfo<type>::outerTwist() const {
-    if (!outerBoundary()) {
+    if (!outerBoundary() && !isGhostBnd() ) {
       return outerEntity().twist(outerALUFaceIndex());
     } else {
       return boundaryFace().twist(outerALUFaceIndex());
@@ -144,7 +139,12 @@ namespace Dune {
 
     // A boundary is always unrefined
     if (!outerBoundary()) {
-      int levelDifference = innerEntity().level() - outerEntity().level();
+      int levelDifference = 0 ;
+      if ( isGhostBnd() )
+        levelDifference = innerEntity().level() - boundaryFace().level();
+      else 
+        levelDifference = innerEntity().level() - outerEntity().level();
+
       if (levelDifference < 0) {
         result = REFINED_OUTER;
       } else if (levelDifference > 0) {
