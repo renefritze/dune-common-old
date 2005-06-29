@@ -55,8 +55,6 @@ public:
   virtual void sendData ( ObjectStreamType & str , const HElementType & elem )
   {
     realEntity_.setElement( const_cast<HElementType &> (elem) );
-
-    //if(realEntity_.isLeaf())
     dc_.scatter(str, en_);
   }
  
@@ -70,8 +68,6 @@ public:
     realEntity_.setGhost( gh );
     dc_.insertNewIndex( en_ );
     dc_.checkMemorySize();
-
-    //if(realEntity_.isLeaf())
     dc_.gather(str, en_);
   }
 
@@ -119,8 +115,6 @@ public:
   virtual void sendData ( ObjectStreamType & str , const HElementType & elem )
   {
     realEntity_.setElement( const_cast<HElementType &> (elem) );
-
-    //if(realEntity_.isLeaf())
     dc_.scatter(str, en_);
   }
  
@@ -132,9 +126,6 @@ public:
     //realEntity_.setGhost( *(gh.getGhost()) );
     // old set ghost method
     realEntity_.setGhost( gh );
-
-    // is leaf Abfrage darf hier nicht sein 
-    //if(realEntity_.isLeaf())
     dc_.gather(str, en_);
   }
 
