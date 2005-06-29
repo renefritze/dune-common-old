@@ -547,6 +547,8 @@ namespace Dune {
 	switch(coerceTo) {
 	case tetrahedron:
 	  return VirtualRefinementImp<tetrahedron, CoordType, tetrahedron>::instance();
+        default:
+          break;
 	}
 	break;
       case hexahedron:
@@ -555,6 +557,8 @@ namespace Dune {
 	  return VirtualRefinementImp<hexahedron, CoordType, tetrahedron>::instance();
 	case hexahedron:
 	  return VirtualRefinementImp<hexahedron, CoordType, hexahedron>::instance();
+        default:
+          break;
 	}
 	break;
       case hypercube:
@@ -565,8 +569,12 @@ namespace Dune {
 	  return VirtualRefinementImp<hexahedron, CoordType, hexahedron>::instance();
 	case hypercube:
 	  return VirtualRefinementImp<hexahedron, CoordType, hexahedron>::instance();
+        default:
+          break;
 	}
 	break;
+        default:
+          break;
       }
       DUNE_THROW(NotImplemented,
 		 "No Refinement<" << geometryType << ", CoordType, "
