@@ -348,7 +348,7 @@ public:
   template <class EntityType>
   void prolongLocal ( EntityType &father, EntityType &son, bool initialize ) const
   {
-    assert( son.state() == REFINED );
+    //assert( son.state() == REFINED );
 
     df_.localFunction( father, vati_ );
     df_.localFunction( son   , sohn_ );

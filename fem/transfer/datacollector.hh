@@ -509,7 +509,14 @@ private:
   void goDown (ObjectStreamType & str, EntityType & en, int mxlvl) const 
   {
     ParamType p( &str , &en );
-    
+
+    if(!read_) 
+      dm_.removeOldIndex( en );
+    else 
+    {
+      dm_.insertNewIndex( en );
+      dm_.resizeMem ( mxlvl * 10 ); 
+    }
     ldc_.apply( p );
     {
       typedef typename EntityType::HierarchicIterator HierItType;
@@ -517,11 +524,18 @@ private:
       for(HierItType it = en.hbegin(mxlvl); 
           it != endit; ++it )
       {
-        //if((*it).isLeaf())
+        if(!read_) 
         {
-          p.second = it.operator -> ();
-          ldc_.apply( p );
+          dm_.removeOldIndex( *it );
         }
+        else 
+        {
+          dm_.insertNewIndex( *it );
+          dm_.checkMemorySize();
+        }
+        
+        p.second = it.operator -> ();
+        ldc_.apply( p );
       }
     }
   }
@@ -573,13 +587,12 @@ public:
     : df_ (df) , lf_ (df.newLocalFunction() ) , leaf_(leaf) {}
 
   //! store data to stream  
-  //template <class ObjectStreamType, class EntityType>
   void apply ( ParamType & p ) const 
   {
     assert( p.first && p.second );
     EntityType & en = const_cast<EntityType &> (*(p.second));
     
-    if(leaf_) if(!en.isLeaf()) return; 
+    if(leaf_ && (!en.isLeaf())) return; 
     
     df_.localFunction( en ,  lf_ );
     for(int l=0; l<lf_.numberOfDofs(); l++)
@@ -596,22 +609,6 @@ private:
   bool leaf_;
 };
 
-
-/*
-template <class ObjectStreamType , class LocalFunctionType> 
-struct GatherScatterCopy 
-{
-  static void gather ( ObjectStreamType & os, LocalFunctionType & lf )
-  {
-    std::cout << "Gather data \n";
-    for(int l=0; l<lf.numberOfDofs(); l++)
-    {
-      os.readObject( lf[l] );
-    }
-  }
-};
-
-*/
 
 template <class DiscreteFunctionType>
 class DataXtractor : 
@@ -636,40 +633,25 @@ public:
   typedef typename DiscreteFunctionType::RangeFieldType RangeFieldType;
   typedef typename DiscreteFunctionType::DomainType DomainType;
 
-  //typedef void GatherFunctionType( ObjectStreamType & , LocalFunctionType & );
-  //typedef void ScatterFunctionType( ObjectStreamType & , LocalFunctionType & );
-  
 public:  
   DataXtractor ( DiscreteFunctionType & df , bool leaf = true) 
     : df_ (df) , lf_ (df.newLocalFunction() ) , leaf_(leaf) {}
 
   //! store data to stream  
-  //template <class ObjectStreamType, class EntityType>
   void apply ( ParamType & p ) const 
   {
     assert( p.first && p.second );
     EntityType & en = const_cast<EntityType &> (*(p.second));
 
-    if(leaf_) if(!en.isLeaf()) return;
+    if(leaf_ && (!en.isLeaf())) return;
     
     df_.localFunction( en , lf_ );
-      //assert( gatherFunc_ );
-      //gatherFunc_( (*(p.first)) , lf_ ) ;
     for(int l=0; l<lf_.numberOfDofs(); l++)
     {
       (*(p.first)).readObject( lf_[l] );
     }
   }
 
-  /*
-  template <template <class,class> class GatherScatterType>
-  void setGatherScatter ()
-  { 
-    gatherFunc_ = GatherScatterType<ObjectStreamType,LocalFunctionType>::gather;
-    std::cout << "Set gather Function " << gatherFunc_ << "\n";
-  }
-  */
-  
 private:
   mutable DiscreteFunctionType & df_;
   mutable LocalFunctionType lf_;
