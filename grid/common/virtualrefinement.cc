@@ -197,6 +197,10 @@ namespace Dune {
     typedef typename Refinement::CoordVector CoordVector;
     
     virtual CoordVector coords() const = 0;
+
+    virtual ~VirtualRefinementSubEntityIteratorBackSpecial()
+    {}
+    
   };
 
   // The iterator backend for elements
@@ -209,6 +213,10 @@ namespace Dune {
     typedef typename Refinement::IndexVector IndexVector;
     
     virtual IndexVector vertexIndices() const = 0;
+
+    virtual ~VirtualRefinementSubEntityIteratorBackSpecial()
+    {}
+    
   };
 
   // The iterator backend common stuff
