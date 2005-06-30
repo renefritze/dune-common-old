@@ -805,6 +805,18 @@ public:
     }
     resizeDofMem();
   }
+
+  template <class EntityType>
+  void insertNewIndex (EntityType & en )
+  {
+    insertIndices_.apply( en );
+  }
+          
+  template <class EntityType>
+  void removeOldIndex (EntityType & en )
+  {
+    removeIndices_.apply( en );
+  }
  
 private:
   //! resize the MemObject if necessary 
@@ -881,7 +893,6 @@ public:
   template <class ObjectStreamType, class EntityType>
   void scatter ( ObjectStreamType & str, EntityType & en )
   {
-    //resize();
     std::pair < ObjectStreamType * , const EntityType * > p (&str,&en);
     dataWriter_.apply( p );
   }
@@ -889,7 +900,6 @@ public:
   template <class ObjectStreamType, class EntityType>
   void gather ( ObjectStreamType & str, EntityType & en )
   {
-    resize();
     std::pair < ObjectStreamType * , const EntityType * > p (&str,&en);
     dataReader_.apply( p );
   }
@@ -899,7 +909,7 @@ public:
   {
     // here the elements already have been created that means we can 
     // all resize and the memory is adapted
-    resize();
+    //resize();
     dataXtractor_.apply(str,en);
   }
 
