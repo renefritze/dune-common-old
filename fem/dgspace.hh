@@ -27,10 +27,14 @@ class DGDiscreteFunctionSpace
                                polOrd, BaseFunctionSet, DofManagerType >, 
      BaseFunctionSet < FunctionSpaceType > >
 {
+
+  typedef DofManagerFactory<GridType,
+          typename DofManagerType::DataCollectorType> DofManagerFactoryType;
+    
   enum { DGFSpaceId = 123456789 };
   
   // to be revised, see LagrangeDiscreteFunctionSpace 
-  DofManagerType dm_;
+  DofManagerType & dm_;
 
   // corresponding IndexSet, here LevelIndexSet 
   typedef typename DofManagerType::IndexSetType IndexSetType;
@@ -58,7 +62,7 @@ public:
   /** \todo Please doc me! */
   DGDiscreteFunctionSpace ( GridType & g , int level ) : 
     DiscreteFunctionSpaceType (g, DGFSpaceId, level),
-    dm_ ( g ), base_(*this, polOrd),
+    dm_ ( DofManagerFactoryType::getDofManager(g) ), base_(*this, polOrd),
     mapper_(dm_.indexSet(), base_.getNumberOfBaseFunctions(), level)
   {}
  
