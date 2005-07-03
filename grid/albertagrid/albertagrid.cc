@@ -893,7 +893,8 @@ template<int codim, int dim, class GridImp>
 inline void AlbertaGridEntity<codim,dim,GridImp>::
 makeDescription()
 {
-  elInfo_ = 0;
+  elInfo_  = 0;
+  element_ = 0;
   builtgeometry_ = false;
 }
 
@@ -937,6 +938,13 @@ getElInfo() const
 }
 
 template<int codim, int dim, class GridImp>
+inline ALBERTA EL * AlbertaGridEntity<codim,dim,GridImp>::
+getElement() const
+{
+  return element_;
+}
+
+template<int codim, int dim, class GridImp>
 inline void AlbertaGridEntity<codim,dim,GridImp>::
 setElInfo(ALBERTA EL_INFO * elInfo, int face,
           int edge, int vertex )
@@ -945,6 +953,10 @@ setElInfo(ALBERTA EL_INFO * elInfo, int face,
   edge_ = edge;
   vertex_ = vertex;
   elInfo_ = elInfo;
+  if(elInfo_) 
+    element_ = elInfo_->el;
+  else 
+    element_ = 0;
   builtgeometry_ = geo_.builtGeom(elInfo_,face,edge,vertex);
   localFCoordCalced_ = false;
 }
@@ -1155,11 +1167,13 @@ template<int dim, class GridImp>
 inline AdaptationState AlbertaGridEntity <0,dim,GridImp>::
 state() const
 {
-  if( elInfo_->el->mark < 0 )
+  assert( element_ && elInfo_ );
+  assert( element_ == elInfo_->el );
+  if( element_->mark < 0 )
   {
     return COARSEN; 
   }
-  if( grid_.checkElNew( elInfo_->el ) )
+  if( grid_.checkElNew( element_ ) )
   {
     return REFINED;   
   }
@@ -1177,9 +1191,10 @@ partitionType () const
 template<int dim, class GridImp>
 inline bool AlbertaGridEntity <0,dim,GridImp>::isLeaf() const
 {
-  assert(elInfo_);
+  assert( element_ && elInfo_ );
+  assert( element_ == elInfo_->el );
   // if no child exists, then this element is leaf element 
-  return (elInfo_->el->child[0] == 0); 
+  return (element_->child[0] == 0); 
 }
   
 //***************************
@@ -1188,7 +1203,8 @@ template<int dim, class GridImp>
 inline void AlbertaGridEntity <0,dim,GridImp>::
 makeDescription()
 {
-  elInfo_ = 0;
+  elInfo_  = 0;
+  element_ = 0;
   builtgeometry_ = false;
 }
 
@@ -1305,6 +1321,13 @@ getElInfo() const
 }
 
 template<int dim, class GridImp>
+inline ALBERTA EL * AlbertaGridEntity <0,dim,GridImp>::
+getElement() const
+{
+  return element_;
+}
+
+template<int dim, class GridImp>
 inline int AlbertaGridEntity <0,dim,GridImp>::
 level() const
 {
@@ -1341,6 +1364,10 @@ setElInfo(ALBERTA EL_INFO * elInfo, int face, int edge, int vertex )
   // in this case the face, edge and vertex information is not used,
   // because we are in the element case
   elInfo_ = elInfo;
+  if(elInfo_) 
+    element_ = elInfo_->el;
+  else 
+    element_ = 0;
   builtgeometry_ = geo_.builtGeom(elInfo_,face,edge,vertex);
 }
 
@@ -1423,11 +1450,12 @@ inline AlbertaGridEntityPointer<codim,GridImp> ::
 
 template<int codim, class GridImp >
 inline AlbertaGridEntityPointer<codim,GridImp> ::
-  AlbertaGridEntityPointer(const GridImp & grid, int level , bool done )
+  AlbertaGridEntityPointer(const GridImp & grid, int level , bool end )
   : grid_(grid) 
   , entity_ ( grid_.template getNewEntity<codim> (level) )
-  , done_ (done) 
+  , done_ (end) 
 {
+  if(done_) this->done();
 }
 
 template<int codim, class GridImp >
@@ -1457,9 +1485,8 @@ template<int codim, class GridImp >
 inline bool AlbertaGridEntityPointer<codim,GridImp>::
 equals (const AlbertaGridEntityPointer<codim,GridImp>& i) const
 {
-  //return (((*entity_).getElInfo() == (*(i.entity_).getElInfo()) && (done_ == i.done_)));
-  ALBERTA EL_INFO * e1 = (*entity_).getElInfo();
-  ALBERTA EL_INFO * e2 = (*(i.entity_)).getElInfo();
+  ALBERTA EL * e1 = (*entity_).getElement();
+  ALBERTA EL * e2 = (*(i.entity_)).getElement();
   return ((e1 == e2 ) && (done_ == i.done_));
 }
 
@@ -2080,7 +2107,7 @@ makeIterator()
 template<int codim, PartitionIteratorType pitype, class GridImp>   
 inline AlbertaGridTreeIterator<codim,pitype,GridImp>::
 AlbertaGridTreeIterator(const GridImp & grid, int travLevel,int proc, bool leafIt ) 
-  : AlbertaGridEntityPointer<codim,GridImp> (grid,travLevel,true)
+  : AlbertaGridEntityPointer<codim,GridImp> (grid,travLevel,true) // true means end iterator 
   , level_   (travLevel)
   , enLevel_ (travLevel)
   , virtualEntity_(*(this->entity_))
@@ -2101,8 +2128,8 @@ AlbertaGridTreeIterator(const AlbertaGridTreeIterator<codim,pitype,GridImp> & or
   , level_   (org.level_)
   , enLevel_ (org.enLevel_)
   , virtualEntity_(*(this->entity_))
-//  , manageStack_ ()
-  , manageStack_ ( org.manageStack_ )
+  , manageStack_ ()
+  //, manageStack_ ( org.manageStack_ )
   , face_(org.face_)
   , edge_ (org.edge_)
   , vertex_ ( org.vertex_)
@@ -2111,19 +2138,22 @@ AlbertaGridTreeIterator(const AlbertaGridTreeIterator<codim,pitype,GridImp> & or
 {
   if(vertexMarker_) 
   { 
-    /*
+    // if vertexMarker is not NULL then we have a real iterator 
     manageStack_.makeItNew(true);
     ALBERTA TRAVERSE_STACK * stack = manageStack_.getStack();
     ALBERTA copyTraverseStack( stack , org.manageStack_.getStack() );
         
     virtualEntity_.setTraverseStack( stack );
+    /// get the actual used enInfo 
     ALBERTA EL_INFO * elInfo = stack->elinfo_stack+stack->stack_used;
+    
     virtualEntity_.setElInfo( elInfo,face_,edge_,vertex_ );
     virtualEntity_.setLevel( enLevel_ );
-    */
+
+    assert( virtualEntity_.globalIndex() == org.virtualEntity_.globalIndex());
     
-    virtualEntity_.setTraverseStack(manageStack_.getStack());
-    virtualEntity_.setEntity( *(org.entity_) );
+   // virtualEntity_.setTraverseStack(manageStack_.getStack());
+   // virtualEntity_.setEntity( *(org.entity_) );
   }
 }
 
@@ -2204,9 +2234,16 @@ template<int codim, PartitionIteratorType pitype, class GridImp>
 inline void AlbertaGridTreeIterator<codim,pitype,GridImp>::increment()
 {
   ALBERTA EL_INFO * nextinfo = goNextEntity(manageStack_.getStack(),virtualEntity_.getElInfo());
+  
+  if(!nextinfo) 
+  {
+    this->done();
+    return ;
+  }
+  
   virtualEntity_.setElInfo( nextinfo , face_, edge_, vertex_); 
   virtualEntity_.setLevel( enLevel_ );
-  if(!nextinfo) this->done();
+
   return ;
 }
 
@@ -2390,6 +2427,8 @@ goNextElInfo(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elinfo_old)
     {
       // overloaded traverse_leaf_el_level, is not implemened in ALBERTA yet
       elinfo = traverseElLevel(stack);
+
+      //std::cout << elinfo << " elf | leaf " << leafIt_ << "\n";
 
       // if leafIt_ == false go to elements only on desired level 
       if((elinfo) && (!leafIt_))
