@@ -24,13 +24,24 @@ ALU3dGridIntersectionIterator(const GridImp & grid,
   ALU3dGridEntityPointer<0,GridImp> ( grid , wLevel, end ),
   connector_(),
   geoProvider_(0),
+  intersectionGlobal_(0),
+  intersectionSelfLocal_(0),
+  intersectionNeighborLocal_(0),
   item_(0),
   bndEntity_(0),
   nFaces_(el? el->nFaces() : 0),
   walkLevel_(wLevel),
-  index_(0)
+  index_(0),
+  generatedGlobalGeometry_(false),
+  generatedLocalGeometries_(false)
 {
   if (!end) {
+    intersectionGlobal_ = 
+      this->grid_.geometryProvider_.getNewObjectEntity(this->grid_,walkLevel_);
+    intersectionSelfLocal_ =
+      this->grid_.geometryProvider_.getNewObjectEntity(this->grid_,walkLevel_);
+    intersectionNeighborLocal_ =
+      this->grid_.geometryProvider_.getNewObjectEntity(this->grid_,walkLevel_);
     bndEntity_ = 
       this->grid_.bndProvider_.getNewObjectEntity( this->grid_ , walkLevel_ );
     first(*el,wLevel);
@@ -63,9 +74,7 @@ template <class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp>::
 initGeometryProvider() const {
   if (!geoProvider_) {
-    geoProvider_ = new GeometryInfoType(*connector_, 
-                                        this->grid_, 
-                                        walkLevel_);
+    geoProvider_ = new GeometryInfoType(*connector_);
   }
 }
 
@@ -79,23 +88,60 @@ ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org
   connector_(),
   geoProvider_(org.geoProvider_ ? 
                new GeometryInfoType(*org.geoProvider_) : 0),
+  intersectionGlobal_(0),
+  intersectionSelfLocal_(0),
+  intersectionNeighborLocal_(0),
   item_(org.item_),
   bndEntity_(0), // this is only set if this is not an end iterator
   nFaces_(org.nFaces_),
-  walkLevel_(org.walkLevel_)
+  walkLevel_(org.walkLevel_),
+  generatedGlobalGeometry_(false),
+  generatedLocalGeometries_(false)
 {
   if(org.item_) { // else it's a end iterator 
     connector_      = FaceInfoPointer(new FaceInfoType(*org.connector_)),
     item_           = org.item_;
-    index_          = org.index_;   
-    bndEntity_      = (org.bndEntity_) ? this->grid_.bndProvider_.getNewObjectEntity( this->grid_ , walkLevel_ ) : 0;
+    index_          = org.index_;
+    intersectionGlobal_ = 
+      org.intersectionGlobal_ ? 
+      this->grid_.geometryProvider_.getNewObjectEntity(this->grid_, walkLevel_)
+      : 0;
+    intersectionSelfLocal_ = 
+      org.intersectionSelfLocal_ ? 
+      this->grid_.geometryProvider_.getNewObjectEntity(this->grid_, walkLevel_)
+      : 0;
+    intersectionNeighborLocal_ = 
+      org.intersectionNeighborLocal_ ? 
+      this->grid_.geometryProvider_.getNewObjectEntity(this->grid_, walkLevel_)
+      : 0;
+    bndEntity_ = 
+      (org.bndEntity_) ? 
+      this->grid_.bndProvider_.getNewObjectEntity( this->grid_ , walkLevel_ ) 
+      : 0;
+    
   } else {
     this->done();
   }
 }
 
 template<class GridImp>
-inline ALU3dGridIntersectionIterator<GridImp> :: ~ALU3dGridIntersectionIterator() {
+inline ALU3dGridIntersectionIterator<GridImp> :: 
+~ALU3dGridIntersectionIterator() {
+  if (intersectionGlobal_) {
+    this->grid_.geometryProvider_.freeObjectEntity(intersectionGlobal_);
+    intersectionGlobal_ = 0;
+  }
+  
+  if (intersectionSelfLocal_) {
+    this->grid_.geometryProvider_.freeObjectEntity(intersectionSelfLocal_);
+    intersectionSelfLocal_ = 0;
+  }
+  
+  if (intersectionNeighborLocal_) {
+    this->grid_.geometryProvider_.freeObjectEntity(intersectionNeighborLocal_);
+    intersectionNeighborLocal_ = 0;
+  }
+
   if(bndEntity_) {
     this->grid_.bndProvider_.freeObjectEntity( bndEntity_ );
     bndEntity_ = 0;
@@ -115,7 +161,7 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
   const GEOFaceType * nextFace = 0;
   
   // When neighbour element is refined, try to get the next child on the face
-  if (connector_->refinementState() == FaceInfoType::REFINED_OUTER) {
+  if (connector_->conformanceState() == FaceInfoType::REFINED_OUTER) {
     nextFace = connector_->face().next();
       
     // There was a next child face...
@@ -202,8 +248,8 @@ inline int ALU3dGridIntersectionIterator<GridImp>::numberInSelf () const
 template <class GridImp>
 inline const typename ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
 ALU3dGridIntersectionIterator<GridImp>::intersectionSelfLocal() const {
-  initGeometryProvider();
-  return geoProvider_->intersectionSelfLocal();
+  buildLocalGeometries();
+  return *intersectionSelfLocal_;
 }
 
 template<class GridImp>
@@ -216,8 +262,8 @@ template <class GridImp>
 inline const typename ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
 ALU3dGridIntersectionIterator<GridImp>::intersectionNeighborLocal() const {
   assert(!boundary());
-  initGeometryProvider();
-  return geoProvider_->intersectionNeighborLocal();
+  buildLocalGeometries();
+  return *intersectionNeighborLocal_;
 }
 
 template<class GridImp>
@@ -252,8 +298,8 @@ template<class GridImp>
 inline const typename ALU3dGridIntersectionIterator<GridImp>::Geometry &
 ALU3dGridIntersectionIterator<GridImp>::intersectionGlobal () const
 {
-  initGeometryProvider();
-  return geoProvider_->intersectionGlobal();
+  buildGlobalGeometry();
+  return *intersectionGlobal_;
 }
 
 template<class GridImp>
@@ -263,9 +309,26 @@ ALU3dGridIntersectionIterator<GridImp>::boundaryEntity () const
   assert(boundary());
   assert(item_); // make sure that this is not an end iterator
   const BNDFaceType& bnd = connector_->boundaryFace();
-  int id = bnd.bndtype(); // id's are positive
+  int id = bnd.bndtype(); // ids are positive
   bndEntity_->setId( -id );
   return *bndEntity_;
+}
+
+template <class GridImp>
+void ALU3dGridIntersectionIterator<GridImp>::buildGlobalGeometry() const {
+  initGeometryProvider();
+  intersectionGlobal_->buildGeom(geoProvider_->intersectionGlobal());
+  generatedGlobalGeometry_ = true;
+}
+
+template <class GridImp>
+void ALU3dGridIntersectionIterator<GridImp>::buildLocalGeometries() const {
+  initGeometryProvider();
+  intersectionSelfLocal_->buildGeom(geoProvider_->intersectionSelfLocal());
+  if (!connector_->outerBoundary()) {
+    intersectionNeighborLocal_->buildGeom(geoProvider_->intersectionNeighborLocal());
+  }
+  generatedLocalGeometries_ = true;
 }
 
 template <class GridImp>
@@ -291,9 +354,6 @@ setNewFace(const GEOFaceType& newFace) {
     FaceInfoPointer(new FaceInfoType(newFace, 
                                      item_->twist(ElementTopo::dune2aluFace(index_))));
  
-  //std::cout << " Item = " << item_ << "\n";
-  //std::cout << "Face " << index_ << ": twist = " << connector_->innerTwist() << std::endl;
-
   if (geoProvider_) {
     delete geoProvider_;
     geoProvider_ = 0;

@@ -156,7 +156,7 @@ inline bool ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> > :: buildGhost(co
   GEOFaceType & face = dynamic_cast<GEOFaceType &> (*(ghost.myhface3(0)));
 
   // here apply the negative twist, because the twist is from the
-  // neighbouring elements point of view which is outside of the ghost
+  // neighbouring element's point of view which is outside of the ghost
   // element
   const int map[3] = { (ghost.twist(0) < 0) ? 2 : 0 , 1 , (ghost.twist(0) < 0) ? 0 : 2 }; 
   

@@ -623,7 +623,7 @@ namespace Dune {
   template <ALU3dGridElementType type>
   class ALU3dGridFaceInfo;
   template <class GridImp>
-  class ALU3dGridFaceGeometryInfo;
+  class ALU3dGridGeometricFaceInfo;
 
 //**********************************************************************
 //
@@ -654,7 +654,7 @@ public IntersectionIteratorDefault <GridImp,ALU3dGridIntersectionIterator>
   typedef ALU3dGridFaceInfo<GridImp::elementType> FaceInfoType;
   typedef typename std::auto_ptr<FaceInfoType> FaceInfoPointer;
 
-  typedef ALU3dGridFaceGeometryInfo<GridImp> GeometryInfoType;
+  typedef ALU3dGridGeometricFaceInfo<GridImp> GeometryInfoType;
   typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
   typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
 
@@ -766,8 +766,11 @@ private:
   // is there a refined element at the outer side of the face which needs to be considered when incrementing the iterator?
   bool canGoDown(const GEOFaceType& nextFace) const;
 
-  // init the geometry provider
   void initGeometryProvider() const;
+
+  void buildLocalGeometries() const;
+  
+  void buildGlobalGeometry() const;
 
   // get the face corresponding to the index
   const typename ALU3dImplTraits<tetra>::GEOFaceType*
@@ -781,14 +784,21 @@ private:
   mutable FaceInfoPointer connector_;
   mutable GeometryInfoType* geoProvider_; // need to initialise
 
+  mutable GeometryImp* intersectionGlobal_;
+  mutable GeometryImp* intersectionSelfLocal_;
+  mutable GeometryImp* intersectionNeighborLocal_;
+
   //! current element from which we started the intersection iterator
   mutable GEOElementType* item_;  
   mutable MakeableBndEntityImp* bndEntity_;
 
   const int nFaces_;
   const int walkLevel_;
-  mutable int index_;  
-};
+  mutable int index_;
+
+  mutable bool generatedGlobalGeometry_;
+  mutable bool generatedLocalGeometries_;
+ };
 
 
 //**********************************************************************

@@ -5,7 +5,7 @@ namespace Dune {
 
   template <>
   ALU3DSPACE LinearSurfaceMapping* 
-  ALU3dGridFaceGeometryInfo<const ALU3dGrid<3, 3, tetra> >::
+  ALU3dGridGeometricFaceInfo<const ALU3dGrid<3, 3, tetra> >::
   buildSurfaceMapping(const CoordinateType& coords) const {
     alu3d_ctype tmp[3][3];
     convert2CArray(coords[0], tmp[0]);
@@ -18,7 +18,7 @@ namespace Dune {
 
   template <>
   BilinearSurfaceMapping*
-  ALU3dGridFaceGeometryInfo<const ALU3dGrid<3, 3, hexa> >::
+  ALU3dGridGeometricFaceInfo<const ALU3dGrid<3, 3, hexa> >::
   buildSurfaceMapping(const CoordinateType& coords) const {
     return new BilinearSurfaceMapping(coords[0],
                                       coords[1], 
@@ -27,8 +27,8 @@ namespace Dune {
   }
 
   template <>
-  ALU3dGridFaceGeometryInfo<const ALU3dGrid<3, 3, tetra> >::NormalType
-  ALU3dGridFaceGeometryInfo<const ALU3dGrid<3, 3, tetra> >::
+  ALU3dGridGeometricFaceInfo<const ALU3dGrid<3, 3, tetra> >::NormalType
+  ALU3dGridGeometricFaceInfo<const ALU3dGrid<3, 3, tetra> >::
   calculateNormal(const SurfaceMappingType& mapping,
                   const FieldVector<alu3d_ctype, 2>& local) const {
     enum { dimworld = 3 };
@@ -43,8 +43,8 @@ namespace Dune {
   }
 
   template <>
-  ALU3dGridFaceGeometryInfo<const ALU3dGrid<3, 3, hexa> >::NormalType
-  ALU3dGridFaceGeometryInfo<const ALU3dGrid<3, 3, hexa> >::
+  ALU3dGridGeometricFaceInfo<const ALU3dGrid<3, 3, hexa> >::NormalType
+  ALU3dGridGeometricFaceInfo<const ALU3dGrid<3, 3, hexa> >::
   calculateNormal(const SurfaceMappingType& mapping,
                   const FieldVector<alu3d_ctype, 2>& local) const {
     NormalType result;
@@ -53,7 +53,7 @@ namespace Dune {
   }
 
   template <>
-  int ALU3dGridFaceGeometryInfo<const ALU3dGrid<3, 3, tetra> >::
+  int ALU3dGridGeometricFaceInfo<const ALU3dGrid<3, 3, tetra> >::
   referenceElementCornerIndex(int duneFaceIndex, 
                               int faceTwist, 
                               int duneFaceVertexIndex) const {
@@ -78,7 +78,7 @@ namespace Dune {
   }
   
   template <>
-  int ALU3dGridFaceGeometryInfo<const ALU3dGrid<3, 3, hexa> >::
+  int ALU3dGridGeometricFaceInfo<const ALU3dGrid<3, 3, hexa> >::
   referenceElementCornerIndex(int duneFaceIndex, 
                               int faceTwist, 
                               int duneFaceVertexIndex) const {
@@ -103,7 +103,7 @@ namespace Dune {
   }
 
   template <>
-  void ALU3dGridFaceGeometryInfo<const ALU3dGrid<3, 3, tetra> >::
+  void ALU3dGridGeometricFaceInfo<const ALU3dGrid<3, 3, tetra> >::
   referenceElementCoordinatesUnrefined(SideIdentifier side,
                                        CoordinateType& result) const {
     enum { numCorners = 3 };
@@ -146,7 +146,7 @@ namespace Dune {
   }
 
   template <>
-  void ALU3dGridFaceGeometryInfo<const ALU3dGrid<3, 3, hexa> >::
+  void ALU3dGridGeometricFaceInfo<const ALU3dGrid<3, 3, hexa> >::
   referenceElementCoordinatesUnrefined(SideIdentifier side,
                                        CoordinateType& result) const {
     enum { numCorners = 4 };

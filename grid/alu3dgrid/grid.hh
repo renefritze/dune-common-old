@@ -97,7 +97,6 @@ namespace Dune {
     friend class ALU3dGridIntersectionIterator<const MyType>;
     friend class ALU3dGridHierarchicIterator<const MyType>;
 
-    friend class ALU3dGridFaceGeometryInfo<const MyType>;
 
     //**********************************************************
     // The Interface Methods
