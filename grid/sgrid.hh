@@ -1052,7 +1052,7 @@ namespace Capabilities
   };
   
   template<int dim, int dimw, int cdim>
-  struct hasEntity< SGrid<dim,dimw>, SEntity<cdim,dim,SGrid<dim,dimw> > >
+  struct hasEntity< SGrid<dim,dimw>, cdim>
   {
     static const bool v = true;
   };
@@ -1063,12 +1063,6 @@ namespace Capabilities
     static const bool v = true;
   };
   
-  template<int dim, int dimw, int cdim>
-  struct hasEntity< const SGrid<dim,dimw>, SEntity<cdim,dim,SGrid<dim,dimw> > >
-  {
-    static const bool v = true;
-  };
-
 } // end namespace Capabilities
 
 } // end namespace Dune

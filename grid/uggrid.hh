@@ -419,13 +419,13 @@ namespace Capabilities
   };
   
   template<int dim, int dimw>
-  struct hasEntity< UGGrid<dim,dimw>, UGGridEntity<0,dim, UGGrid<dim, dimw> > >
+  struct hasEntity< UGGrid<dim,dimw>, 0>
   {
     static const bool v = true;
   };
 
   template<int dim, int dimw>
-  struct hasEntity< UGGrid<dim,dimw>, UGGridEntity<dim,dim, UGGrid<dim, dimw> > >
+  struct hasEntity< UGGrid<dim,dimw>, dim>
   {
     static const bool v = true;
   };
