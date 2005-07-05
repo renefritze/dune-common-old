@@ -3672,6 +3672,9 @@ adapt(DofManagerType &, RestrictProlongOperatorType &, bool verbose)
   unsigned char flag;
   bool refined = false;
   wasChanged_ = false;
+
+  std::cerr << "Method adapt 2 not implemented! in: " << __FILE__ << " line: " << __LINE__ << "\n";
+  abort();
  /* 
  
   // set global pointer to index manager in elmem.cc
@@ -3966,7 +3969,10 @@ readGridXdr (const std::basic_string<char> filename, albertCtype & time )
   
   // set el_index of index manager to max element index 
   for(int i=0; i<ALBERTA AlbertHelp::numOfElNumVec; i++)
-    indexStack_[i].setMaxIndex(maxHierIndex_[i]);
+  {
+    int maxIdx = ALBERTA AlbertHelp::calcMaxIndex( dofvecs_.elNumbers[i] );
+    indexStack_[i].setMaxIndex(maxIdx);
+  }
   
   return true;
 }
