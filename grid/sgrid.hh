@@ -863,7 +863,8 @@ public:
   typedef GridTraits<dim,dimworld,Dune::SGrid<dim,dimworld>,
                      SGeometry,SEntity,SBoundaryEntity,
                      SEntityPointer,SLevelIterator,
-                     SIntersectionIterator,SHierarchicIterator> Traits;
+                     SIntersectionIterator,SHierarchicIterator,
+                     SLevelIterator> Traits;
 
   typedef sgrid_persistentindextype PersistentIndexType;
 
@@ -897,6 +898,28 @@ public:
   typename Traits::template Codim<cd>::template partition<All_Partition>::LevelIterator lend (int level) const
     {
       return lend<cd,All_Partition>(level);
+    }
+
+  //! return LeafIterator which points to the first entity
+  template<int cd, PartitionIteratorType pitype>
+  typename Traits::template Codim<cd>::template partition<pitype>::LeafIterator leafbegin () const;
+
+  //! one past the end on the leaf level
+  template<int cd, PartitionIteratorType pitype>
+  typename Traits::template Codim<cd>::template partition<pitype>::LeafIterator leafend () const;
+
+  //! return LeafIterator which points to the first entity
+  template<int cd>
+  typename Traits::template Codim<cd>::template partition<All_Partition>::LeafIterator leafbegin () const
+    {
+      return leafbegin<cd,All_Partition>();
+    };
+
+  //! return LeafIterator which points behind the last entity
+  template<int cd>
+  typename Traits::template Codim<cd>::template partition<All_Partition>::LeafIterator leafend () const
+    {
+      return leafend<cd,All_Partition>();
     }
 
   /*! The communication interface
