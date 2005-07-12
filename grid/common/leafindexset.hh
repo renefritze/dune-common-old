@@ -165,7 +165,7 @@ public:
 
   virtual ~AdaptiveLeafIndexSet () {};
 
-  void insertNewIndex (const typename GridType::template codim<0>::Entity & en )
+  void insertNewIndex (const typename GridType::template Codim<0>::Entity & en )
   {
     // here we have to add the support of higher codims 
     
@@ -178,7 +178,7 @@ public:
     marked_ = false;
   }
 
-  void removeOldIndex (const typename GridType::template codim<0>::Entity & en )
+  void removeOldIndex (const typename GridType::template Codim<0>::Entity & en )
   {
     // here we have to add the support of higher codims 
     state_[ hIndexSet_.index(en) ] = UNUSED;
@@ -453,7 +453,7 @@ private:
   //! give all entities that lie below the old entities new numbers 
   void markAllBelowOld () 
   {
-    typedef typename GridType::template codim<0>::LevelIterator LevelIteratorType; 
+    typedef typename GridType::template Codim<0>::LevelIterator LevelIteratorType; 
 
     int maxlevel = this->grid_.maxlevel();
     
@@ -468,7 +468,7 @@ private:
       for(LevelIteratorType levelit = this->grid_.template lbegin<0> (level);
           levelit != levelend; ++levelit )
       {
-        typedef typename GridType::template codim<0>::
+        typedef typename GridType::template Codim<0>::
               Entity::HierarchicIterator HierarchicIteratorType; 
        
         // if we have index all entities below need new numbers 
@@ -587,12 +587,12 @@ public:
 
   virtual ~DefaultLeafIndexSet () {};
 
-  void insertNewIndex (const typename GridType::template codim<0>::Entity & en )
+  void insertNewIndex (const typename GridType::template Codim<0>::Entity & en )
   {
     leafIndexSet_.insertNewIndex(en);
   }
 
-  void removeOldIndex (const typename GridType::template codim<0>::Entity & en )
+  void removeOldIndex (const typename GridType::template Codim<0>::Entity & en )
   {
     leafIndexSet_.removeOldIndex(en);
   }
