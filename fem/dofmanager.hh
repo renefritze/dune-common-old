@@ -684,7 +684,7 @@ private:
   mutable LocalDataCollectorType dataReader_;
 
   typedef LocalInterface<typename GridType::
-        template codim<0>::Entity> LocalIndexSetObjectsType;
+        template Codim<0>::Entity> LocalIndexSetObjectsType;
 
   mutable LocalIndexSetObjectsType indexSets_; 
 
@@ -968,9 +968,9 @@ addIndexSet (const GridType &grid, IndexSetType &iset)
 
   IndexSetInterface & set = iset; 
   typedef IndexSetObject< IndexSetType, 
-        typename GridType::template codim<0>::Entity > IndexSetObjectType;
+        typename GridType::template Codim<0>::Entity > IndexSetObjectType;
 
-  typedef typename GridType::template codim<0>::Entity EntityType;
+  typedef typename GridType::template Codim<0>::Entity EntityType;
   
   IndexSetObjectType * indexSet = 0;
   
@@ -1029,7 +1029,7 @@ addDofSet(DofStorageType & ds, const GridType &grid, IndexSetType &iset,
 
   IndexSetInterface & set = iset; 
   typedef IndexSetObject< IndexSetType, 
-        typename GridType::template codim<0>::Entity > IndexSetObjectType;
+        typename GridType::template Codim<0>::Entity > IndexSetObjectType;
   
   IndexSetObjectType * indexSet = 0;
   
