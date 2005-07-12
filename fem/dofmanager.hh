@@ -353,10 +353,12 @@ public:
     return &indexSet_ == &iset;
   }
 
+  /*
   void apply ( EntityType & en )
   {
     indexSet_.insertNewIndex ( en );
   }
+  */
   
   virtual void read_xdr(const char * filename, int timestep)
   {
@@ -1086,11 +1088,14 @@ write_xdr(const char * filename , int timestep)
   IndexListIteratorType endit = indexList_.end();
   for(IndexListIteratorType it = indexList_.begin(); it != endit; ++it)
   {
-    char * newFilename = new char [strlen(filename) + 10];
-    sprintf(newFilename,"%s_%d_",filename,count);
-    (*it)->write_xdr(newFilename,timestep); 
+    std::string newFilename (filename);
+    newFilename += "_"; 
+    char tmp[256]; 
+    sprintf(tmp,"%d",count);
+    newFilename += tmp;
+    newFilename += "_"; 
+    (*it)->write_xdr(newFilename.c_str(),timestep); 
     count ++;
-    if(newFilename) delete [] newFilename;
   }
   return true;
 }
@@ -1105,11 +1110,24 @@ read_xdr(const char * filename , int timestep)
   IndexListIteratorType endit = indexList_.end();
   for(IndexListIteratorType it = indexList_.begin(); it != endit; ++it)
   {
-    char * newFilename = new char [strlen(filename) + 10];
-    sprintf(newFilename,"%s_%d_",filename,count);
-    (*it)->read_xdr(newFilename,timestep); 
-    count ++;
-    if(newFilename) delete [] newFilename;
+    std::string newFilename (filename);
+    newFilename += "_"; 
+    char tmp[256]; 
+    sprintf(tmp,"%d",count);
+    newFilename += tmp;
+    newFilename += "_"; 
+    std::string fnstr = genFilename("",newFilename.c_str(), timestep);
+    FILE * testfile = fopen(fnstr.c_str(),"r");
+    if( testfile )
+    {
+      fclose( testfile );
+      (*it)->read_xdr(newFilename.c_str(),timestep); 
+      count ++;
+    }
+    else 
+    {
+      std::cout << "WARNING: Skipping " << fnstr << " in DofManager::read_xdr! \n";
+    }
   }
   return true;
 }
