@@ -30,7 +30,7 @@ public:
     friend class OneDGridEntity<codim,dim,GridImp>;
     friend class OneDGridEntity<0,dim,GridImp>;
 
-    typedef typename GridImp::template codim<codim>::Entity Entity;
+    typedef typename GridImp::template Codim<codim>::Entity Entity;
 
 protected:
 

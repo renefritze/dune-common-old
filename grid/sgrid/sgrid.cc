@@ -297,7 +297,7 @@ inline int SEntityBase<codim,dim,GridImp>::globalIndex () const
 }
 
 template<int codim, int dim, class GridImp> 
-inline const typename GridImp::template codim<codim>::Geometry& SEntityBase<codim,dim,GridImp>::geometry () const
+inline const typename GridImp::template Codim<codim>::Geometry& SEntityBase<codim,dim,GridImp>::geometry () const
 {
         if (builtgeometry) return geo;
 
@@ -382,7 +382,7 @@ inline int SEntity<0,dim,GridImp>::subCompressedIndex (int i) const
 }
 
 template<int dim, class GridImp> template<int cc> 
-inline typename SEntity<0,dim,GridImp>::template codim<cc>::EntityPointer SEntity<0,dim,GridImp>::entity (int i) const
+inline typename SEntity<0,dim,GridImp>::template Codim<cc>::EntityPointer SEntity<0,dim,GridImp>::entity (int i) const
 {
         // find expanded coordinates of entity in reference cube
         // has components in {0,1,2}
@@ -492,7 +492,7 @@ inline typename SEntity<0,dim,GridImp>::EntityPointer SEntity<0,dim,GridImp>::fa
 
 template<int dim, class GridImp>
 inline
-const typename GridImp::template codim<0>::Geometry&
+const typename GridImp::template Codim<0>::Geometry&
 SEntity<0,dim,GridImp>::geometryInFather () const
 {
         if (!built_father) make_father();
@@ -975,14 +975,14 @@ inline int SGrid<dim,dimworld>::maxlevel () const
 }
 
 template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
-inline typename SGrid<dim,dimworld>::Traits::template codim<cd>::template partition<pitype>::LevelIterator
+inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template partition<pitype>::LevelIterator
 SGrid<dim,dimworld>::lbegin (int level) const
 {
         return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,level,0);
 }
 
 template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
-inline typename SGrid<dim,dimworld>::Traits::template codim<cd>::template partition<pitype>::LevelIterator
+inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template partition<pitype>::LevelIterator
 SGrid<dim,dimworld>::lend (int level) const
 {
         return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,level,size(level,cd));

@@ -208,7 +208,7 @@ class SBoundaryEntity
   enum { dim = GridImp::dimension };
   enum { dimworld = GridImp::dimensionworld };
 public: 
-  typedef typename GridImp::template codim<0>::Geometry Geometry;
+  typedef typename GridImp::template Codim<0>::Geometry Geometry;
 
   SBoundaryEntity() : elem_(SGeometry<dim,dimworld,const GridImp>(true)) {} 
 
@@ -248,7 +248,7 @@ class SEntityBase {
   friend class SIntersectionIterator<GridImp>;
   enum { dimworld = GridImp::dimensionworld };
 public:
-  typedef typename GridImp::template codim<codim>::Geometry Geometry;
+  typedef typename GridImp::template Codim<codim>::Geometry Geometry;
   typedef SMakeableGeometry<dim-codim, dimworld, const GridImp> MakeableGeometry;
   //! level of this element
   int level () const;
@@ -293,10 +293,10 @@ class SEntity : public SEntityBase<codim,dim,GridImp>,
 {
   enum { dimworld = GridImp::dimensionworld };
 public:
-  typedef typename GridImp::template codim<codim>::Geometry Geometry;
-  typedef typename GridImp::template codim<codim>::LevelIterator LevelIterator;
-  typedef typename GridImp::template codim<0>::IntersectionIterator IntersectionIterator;
-  typedef typename GridImp::template codim<0>::HierarchicIterator HierarchicIterator;
+  typedef typename GridImp::template Codim<codim>::Geometry Geometry;
+  typedef typename GridImp::template Codim<codim>::LevelIterator LevelIterator;
+  typedef typename GridImp::template Codim<0>::IntersectionIterator IntersectionIterator;
+  typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
 
   
   // disambiguate member functions with the same name in both bases
@@ -358,16 +358,16 @@ class SEntity<0,dim,GridImp> : public SEntityBase<0,dim,GridImp>,
 {
   enum { dimworld = GridImp::dimensionworld };
 public:
-  typedef typename GridImp::template codim<0>::Geometry Geometry;
+  typedef typename GridImp::template Codim<0>::Geometry Geometry;
   typedef SMakeableGeometry<dim, dimworld, const GridImp> MakeableGeometry;
   template <int cd>
-  struct codim
+  struct Codim
   {
-    typedef typename GridImp::template codim<cd>::EntityPointer EntityPointer;
+    typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
   };
-  typedef typename GridImp::template codim<0>::EntityPointer EntityPointer;
-  typedef typename GridImp::template codim<0>::IntersectionIterator IntersectionIterator;
-  typedef typename GridImp::template codim<0>::HierarchicIterator HierarchicIterator;
+  typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+  typedef typename GridImp::template Codim<0>::IntersectionIterator IntersectionIterator;
+  typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
 
   //! make HierarchicIterator a friend
   friend class SHierarchicIterator<GridImp>;
@@ -393,7 +393,7 @@ public:
   /*! Provide access to mesh entity i of given codimension. Entities
     are numbered 0 ... count<cc>()-1
   */ 
-  template<int cc> typename codim<cc>::EntityPointer entity (int i) const;
+  template<int cc> typename Codim<cc>::EntityPointer entity (int i) const;
 
   //! return global index of entity<cc> number i 
   template <int cc> int subIndex ( int i ) const;
@@ -514,8 +514,8 @@ class SEntity<dim,dim,GridImp> : public SEntityBase<dim,dim,GridImp>,
 {
   enum { dimworld = GridImp::dimensionworld };
 public:
-  typedef typename GridImp::template codim<dim>::Geometry Geometry;
-  typedef typename GridImp::template codim<0>::EntityPointer EntityPointer;
+  typedef typename GridImp::template Codim<dim>::Geometry Geometry;
+  typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
   // disambiguate member functions with the same name in both bases
   //! level of this element
@@ -578,14 +578,14 @@ private:
 
 template<int codim, int dim, class GridImp>
 class SMakeableEntity :
-  public GridImp::template codim<codim>::Entity
+  public GridImp::template Codim<codim>::Entity
 {
 public:
   SMakeableEntity(GridImp* _grid, int _l, int _id) :
-    GridImp::template codim<codim>::Entity (SEntity<codim, dim, GridImp>(_grid,_l,_id))
+    GridImp::template Codim<codim>::Entity (SEntity<codim, dim, GridImp>(_grid,_l,_id))
     {};
   SMakeableEntity(const SEntity<codim, dim, GridImp>& e) :
-    GridImp::template codim<codim>::Entity (e)
+    GridImp::template Codim<codim>::Entity (e)
     {};
   void make (int _l, int _id) { this->realEntity.make(_l, _id); }
 };
@@ -616,7 +616,7 @@ class SHierarchicIterator :
   enum { dim = GridImp::dimension };
   enum { dimworld = GridImp::dimensionworld };
 public:
-  typedef typename GridImp::template codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::Entity Entity;
   typedef typename GridImp::ctype ctype;
 
   //! increment
@@ -665,10 +665,10 @@ class SIntersectionIterator :
   enum { dim=GridImp::dimension };
   enum { dimworld=GridImp::dimensionworld };
 public:
-  typedef typename GridImp::template codim<0>::Entity Entity;
-  typedef typename GridImp::template codim<0>::BoundaryEntity BoundaryEntity;
-  typedef typename GridImp::template codim<1>::Geometry Geometry;
-  typedef typename GridImp::template codim<1>::LocalGeometry LocalGeometry;
+  typedef typename GridImp::template Codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::BoundaryEntity BoundaryEntity;
+  typedef typename GridImp::template Codim<1>::Geometry Geometry;
+  typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
   //! know your own dimension
   enum { dimension=dim };
   //! know your own dimension of world
@@ -740,7 +740,7 @@ class SEntityPointer :
 {
   enum { dim = GridImp::dimension };
 public:
-  typedef typename GridImp::template codim<codim>::Entity Entity;
+  typedef typename GridImp::template Codim<codim>::Entity Entity;
 
   //! equality
   bool equals(const SEntityPointer<codim,GridImp>& i) const;
@@ -772,7 +772,7 @@ class SLevelIterator :
   friend class SLevelIterator<codim, pitype,const GridImp>;
   enum { dim = GridImp::dimension };
 public:
-  typedef typename GridImp::template codim<codim>::Entity Entity;
+  typedef typename GridImp::template Codim<codim>::Entity Entity;
 
   //! increment
   void increment();
@@ -855,22 +855,22 @@ public:
 
   //! Iterator to first entity of given codim on level
   template<int cd, PartitionIteratorType pitype>
-  typename Traits::template codim<cd>::template partition<pitype>::LevelIterator lbegin (int level) const;
+  typename Traits::template Codim<cd>::template partition<pitype>::LevelIterator lbegin (int level) const;
 
   //! one past the end on this level
   template<int cd, PartitionIteratorType pitype>
-  typename Traits::template codim<cd>::template partition<pitype>::LevelIterator lend (int level) const;
+  typename Traits::template Codim<cd>::template partition<pitype>::LevelIterator lend (int level) const;
 
   //! Iterator to first entity of given codim on level
   template<int cd>
-  typename Traits::template codim<cd>::template partition<All_Partition>::LevelIterator lbegin (int level) const
+  typename Traits::template Codim<cd>::template partition<All_Partition>::LevelIterator lbegin (int level) const
     {
       return lbegin<cd,All_Partition>(level);
     }
 
   //! one past the end on this level
   template<int cd>
-  typename Traits::template codim<cd>::template partition<All_Partition>::LevelIterator lend (int level) const
+  typename Traits::template Codim<cd>::template partition<All_Partition>::LevelIterator lend (int level) const
     {
       return lend<cd,All_Partition>(level);
     }
@@ -1014,10 +1014,10 @@ public:
 private:
 
   template<int codim>
-  SEntity<codim,dim,const SGrid<dim,dimworld> >& getRealEntity(typename Traits::template codim<codim>::Entity& e );
+  SEntity<codim,dim,const SGrid<dim,dimworld> >& getRealEntity(typename Traits::template Codim<codim>::Entity& e );
   
   template<int codim>
-  const SEntity<codim,dim,const SGrid<dim,dimworld> >& getRealEntity(const typename Traits::template codim<codim>::Entity& e ) const;
+  const SEntity<codim,dim,const SGrid<dim,dimworld> >& getRealEntity(const typename Traits::template Codim<codim>::Entity& e ) const;
 
   template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
   friend class Entity;

@@ -666,11 +666,11 @@ public IntersectionIteratorDefault <GridImp,ALU3dGridIntersectionIterator>
   friend class ALU3dGridEntity<0,dim,GridImp>;
 
 public:
-  typedef typename GridImp::template codim<0>::Entity Entity;
-  typedef typename GridImp::template codim<0>::BoundaryEntity BoundaryEntity;
+  typedef typename GridImp::template Codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::BoundaryEntity BoundaryEntity;
   typedef ALU3dGridMakeableBoundaryEntity<GridImp> MakeableBndEntityImp;
-  typedef typename GridImp::template codim<1>::Geometry Geometry;
-  typedef typename GridImp::template codim<1>::LocalGeometry LocalGeometry;
+  typedef typename GridImp::template Codim<1>::Geometry Geometry;
+  typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
   typedef ALU3dGridMakeableEntity<0,dim,GridImp> EntityImp;
   typedef ALU3dGridMakeableGeometry<dim-1,dimworld,GridImp> GeometryImp;
   typedef ALU3dGridMakeableGeometry<dim-1,dimworld,GridImp> LocalGeometryImp;
@@ -823,7 +823,7 @@ public LevelIteratorDefault <cd,pitype,GridImp,ALU3dGridLevelIterator>
   friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
   
 public:
-  typedef typename GridImp::template codim<cd>::Entity Entity;
+  typedef typename GridImp::template Codim<cd>::Entity Entity;
 
   typedef ALU3dGridMakeableEntity<cd,dim,GridImp> EntityImp;
   
@@ -871,7 +871,7 @@ public ALU3dGridEntityPointer<0,GridImp>
   enum { codim = 0 }; 
   
 public:
-  typedef typename GridImp::template codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::Entity Entity;
   typedef ALU3dGridMakeableEntity<0,dim,GridImp> EntityImp;
   
   typedef ALU3dGridLeafIterator<GridImp> ALU3dGridLeafIteratorType;
@@ -914,7 +914,7 @@ public HierarchicIteratorDefault <GridImp,ALU3dGridHierarchicIterator>
 {
   enum { dim = GridImp::dimension };
 public:
-  typedef typename GridImp::template codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::Entity Entity;
   typedef typename GridImp::ctype ctype;
   typedef ALU3dGridMakeableEntity<0,dim,GridImp> EntityImp;
 

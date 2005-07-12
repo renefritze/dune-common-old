@@ -1258,7 +1258,7 @@ template <class GridImp, int dim, int cd> struct SubEntity;
 template <class GridImp, int dim>
 struct SubEntity<GridImp,dim,0>
 {
-  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<0>::EntityPointer EntityPointerType;
+  typedef typename AlbertaGridEntity <0,dim,GridImp>::template Codim<0>::EntityPointer EntityPointerType;
   static EntityPointerType entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
       int level, ALBERTA EL_INFO * elInfo, int i )
   {
@@ -1270,7 +1270,7 @@ struct SubEntity<GridImp,dim,0>
 template <class GridImp, int dim>
 struct SubEntity<GridImp,dim,1>
 {
-  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<1>::EntityPointer EntityPointerType;
+  typedef typename AlbertaGridEntity <0,dim,GridImp>::template Codim<1>::EntityPointer EntityPointerType;
   static EntityPointerType entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
       int level, ALBERTA EL_INFO * elInfo, int i )
   {
@@ -1283,7 +1283,7 @@ template <class GridImp>
 struct SubEntity<GridImp,3,2>
 {
   enum { dim = 3 };
-  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<2>::EntityPointer EntityPointerType;
+  typedef typename AlbertaGridEntity <0,dim,GridImp>::template Codim<2>::EntityPointer EntityPointerType;
   static EntityPointerType entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
       int level, ALBERTA EL_INFO * elInfo, int i )
   {
@@ -1295,7 +1295,7 @@ struct SubEntity<GridImp,3,2>
 template <class GridImp, int dim>
 struct SubEntity<GridImp,dim,dim>
 {
-  typedef typename AlbertaGridEntity <0,dim,GridImp>::template codim<dim>::EntityPointer EntityPointerType;
+  typedef typename AlbertaGridEntity <0,dim,GridImp>::template Codim<dim>::EntityPointer EntityPointerType;
   static EntityPointerType entity(GridImp & grid, ALBERTA TRAVERSE_STACK * stack, 
       int level, ALBERTA EL_INFO * elInfo, int i )
   {
@@ -1307,7 +1307,7 @@ struct SubEntity<GridImp,dim,dim>
 // default is faces 
 template <int dim, class GridImp>
 template <int cc>
-inline typename AlbertaGridEntity <0,dim,GridImp>::template codim<cc>::EntityPointer
+inline typename AlbertaGridEntity <0,dim,GridImp>::template Codim<cc>::EntityPointer
 AlbertaGridEntity <0,dim,GridImp>::entity ( int i ) const
 {
   return SubEntity<GridImp,dim,cc> :: entity(grid_,travStack_,level(),elInfo_,i);
@@ -2996,7 +2996,7 @@ inline void AlbertaMarkerVector::markNewVertices(GridType &grid)
     for(int i=0; i<vec.size(); i++) vec[i] = -1;
 
     //typedef AlbertaGridMakeableEntity<0,dim,const GridType> MakeableEntityImp;
-    typedef typename GridType::template codim<0>::LevelIterator LevelIteratorType;
+    typedef typename GridType::template Codim<0>::LevelIterator LevelIteratorType;
     LevelIteratorType endit = grid.template lend<0> (level);
     for(LevelIteratorType it = grid.template lbegin<0> (level); it != endit; ++it)
     {
@@ -3182,7 +3182,7 @@ inline AlbertaGrid < dim, dimworld >::~AlbertaGrid()
 
 template < int dim, int dimworld > 
 template<int codim, PartitionIteratorType pitype>
-inline typename AlbertaGrid<dim, dimworld>::Traits::template codim<codim>::template partition<pitype>::LevelIterator
+inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template partition<pitype>::LevelIterator
 AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 {
   if((dim == codim) || ((dim == 3) && (codim == 2)) ) 
@@ -3193,14 +3193,14 @@ AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 }
 
 template < int dim, int dimworld > template<int codim, PartitionIteratorType pitype>
-inline typename AlbertaGrid<dim, dimworld>::Traits::template codim<codim>::template partition<pitype>::LevelIterator
+inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template partition<pitype>::LevelIterator
 AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
 {
   return AlbertaGridLevelIterator<codim,pitype,const MyType> ((*this),level,proc);
 }
 
 template < int dim, int dimworld > template<int codim>
-inline typename AlbertaGrid<dim, dimworld>::Traits::template codim<codim>::template partition<All_Partition>::LevelIterator
+inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template partition<All_Partition>::LevelIterator
 AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 {
   if((dim == codim) || ((dim == 3) && (codim == 2)) ) 
@@ -3211,7 +3211,7 @@ AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 }
 
 template < int dim, int dimworld > template<int codim>
-inline typename AlbertaGrid<dim, dimworld>::Traits::template codim<codim>::template partition<All_Partition>::LevelIterator
+inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template partition<All_Partition>::LevelIterator
 AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
 {
   return AlbertaGridLevelIterator<codim,All_Partition,const MyType> ((*this),level,proc);
@@ -3414,7 +3414,7 @@ unpackAll( ObjectStreamType & os )
   {
     {
       // now refine grid 
-      typedef typename Traits::template codim<0>::LevelIterator LevelIteratorType;
+      typedef typename Traits::template Codim<0>::LevelIterator LevelIteratorType;
       LevelIteratorType endit = this->template lend<0> (0);
       for(LevelIteratorType it = this->template lbegin<0> (0);
           it != endit ; ++it )
@@ -3439,7 +3439,7 @@ unpackAll( ObjectStreamType & os )
     {
       //std::cout << "Begin on Level l = " << l << "\n";
       // now refine grid 
-      typedef typename Traits::template codim<0>::LevelIterator LevelIteratorType;
+      typedef typename Traits::template Codim<0>::LevelIterator LevelIteratorType;
       LevelIteratorType endit  = this->template lend<0>   (0);
       for(LevelIteratorType it = this->template lbegin<0> (0);
           it != endit ; ++it )
@@ -3462,12 +3462,12 @@ unpackAll( ObjectStreamType & os )
           assert( std::abs( buff ) == l );
 
           HierMap  & hiertree = elmap2[id];
-          typedef typename Traits:: template codim<0> :: Entity :: HierarchicIterator HierIt;
+          typedef typename Traits:: template Codim<0> :: Entity :: HierarchicIterator HierIt;
 
           // Hier muss eine ineinandergeschateltes HierarchiIt kommen.
 
-          typedef typename Traits:: template codim<0> :: Entity EntityType;
-          typedef typename Traits:: template codim<0> :: EntityPointer EntityPointer;
+          typedef typename Traits:: template Codim<0> :: Entity EntityType;
+          typedef typename Traits:: template Codim<0> :: EntityPointer EntityPointer;
 
           hiertree[id] = 1;
 
@@ -3578,7 +3578,7 @@ packBorder ( ObjectStreamType & os, EntityType & en  )
 
 template<int dim, int dimworld>
 inline bool AlbertaGrid < dim, dimworld >:: 
-mark( int refCount , typename Traits::template codim<0>::EntityPointer & ep ) const
+mark( int refCount , typename Traits::template Codim<0>::EntityPointer & ep ) const
 {
   return this->mark(refCount,*ep);
 }
@@ -3593,7 +3593,7 @@ getMark( const EntityType & ep ) const
 
 template<int dim, int dimworld>
 inline bool AlbertaGrid < dim, dimworld >:: 
-mark( int refCount , const typename Traits::template codim<0>::Entity & ep ) const
+mark( int refCount , const typename Traits::template Codim<0>::Entity & ep ) const
 {
   ALBERTA EL_INFO * elInfo = (this->template getRealEntity<0>(ep)).getElInfo();
   if(!elInfo) return false;

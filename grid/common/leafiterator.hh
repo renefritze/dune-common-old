@@ -16,7 +16,7 @@ class LeafIterator :
     public EntityPointer<GridImp, LeafIteratorImp<GridImp> >
 {
 public:
-  typedef typename GridImp::template codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::Entity Entity;
 
   /** @brief Preincrement operator. */
   LeafIterator& operator++()
@@ -48,7 +48,7 @@ template<class GridImp, template<class> class LeafIteratorImp>
 class LeafIteratorInterface
 {
 public:
-  typedef typename GridImp::template codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::Entity Entity;
 
   //! increment
   void increment()
@@ -90,15 +90,15 @@ private:
 */
 template<class GridImp>
 class GenericLeafIterator :
-  public GridImp::template codim<0>::EntityPointer::base,
+  public GridImp::template Codim<0>::EntityPointer::base,
   public LeafIteratorDefault<GridImp, GenericLeafIterator>
 {
   friend class GenericLeafIterator<const GridImp>;
-  typedef typename GridImp::template codim<0>::EntityPointer::base EntityPointerImp;
+  typedef typename GridImp::template Codim<0>::EntityPointer::base EntityPointerImp;
 public:
-  typedef typename GridImp::template codim<0>::Entity Entity;
-  typedef typename GridImp::template codim<0>::LevelIterator LevelIterator;
-  typedef typename GridImp::template codim<0>::HierarchicIterator HierarchicIterator;
+  typedef typename GridImp::template Codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
+  typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
   //! increment
   void increment()
     {

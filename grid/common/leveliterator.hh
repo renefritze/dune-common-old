@@ -19,7 +19,7 @@ class LevelIterator :
     public EntityPointer<GridImp, LevelIteratorImp<codim,pitype,GridImp> >
 {
 public:
-  typedef typename GridImp::template codim<codim>::Entity Entity;
+  typedef typename GridImp::template Codim<codim>::Entity Entity;
   /**
      @brief Preincrement operator.
 
@@ -62,7 +62,7 @@ template<int codim, PartitionIteratorType pitype, class GridImp,
 class LevelIteratorInterface
 {
 public:
-  typedef typename GridImp::template codim<codim>::Entity Entity;
+  typedef typename GridImp::template Codim<codim>::Entity Entity;
 
   /**
      @brief coordinate type of this Grid

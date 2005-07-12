@@ -13,7 +13,7 @@ class UGGridEntityPointer :
 {
   enum { dim = GridImp::dimension };
 public:
-  typedef typename GridImp::template codim<codim>::Entity Entity;
+  typedef typename GridImp::template Codim<codim>::Entity Entity;
 
   //! constructor
     UGGridEntityPointer () : virtualEntity_(-1) { 

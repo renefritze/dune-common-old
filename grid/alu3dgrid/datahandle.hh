@@ -15,7 +15,7 @@ template <class GridType, class EntityType, class DataCollectorType >
 class GatherScatterImpl : public GatherScatter
 {
   GridType & grid_;
-  typedef typename GridType::template codim<0>::Entity Entity;
+  typedef typename GridType::template Codim<0>::Entity Entity;
   typedef typename Dune::ALU3dImplTraits<GridType::elementType>::PLLBndFaceType PLLBndFaceType;
   Entity & en_;
   EntityType & realEntity_;
@@ -79,7 +79,7 @@ template <class GridType, class EntityType, class DataCollectorType >
 class GatherScatterExchange : public GatherScatter
 {
   GridType & grid_;
-  typedef typename GridType::template codim<0>::Entity Entity;
+  typedef typename GridType::template Codim<0>::Entity Entity;
   typedef typename Dune::ALU3dImplTraits<GridType::elementType>::PLLBndFaceType PLLBndFaceType;
   Entity & en_;
   EntityType & realEntity_;
@@ -135,7 +135,7 @@ template <class GridType, class EntityType, class DofManagerType, class Restrict
 class AdaptRestrictProlongImpl : public AdaptRestrictProlongType
 {
   GridType & grid_;
-  typedef typename GridType::template codim<0>::Entity Entity;
+  typedef typename GridType::template Codim<0>::Entity Entity;
   typedef typename GridType::LeafIndexSetType LeafIndexSetType; 
 
   Entity & reFather_;
@@ -270,7 +270,7 @@ template <class GridType, class EntityType, class DofManagerType >
 class LoadBalanceRestrictProlongImpl : public AdaptRestrictProlongType
 {
   GridType & grid_;
-  typedef typename GridType::template codim<0>::Entity Entity;
+  typedef typename GridType::template Codim<0>::Entity Entity;
 
   Entity & reFather_;
   Entity & reSon_;

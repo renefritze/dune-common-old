@@ -284,14 +284,14 @@ private:
 // --Mentity
 template<int codim, int dim, class GridImp>
 class AlbertaGridMakeableEntity :
-  public GridImp::template codim<codim>::Entity
+  public GridImp::template Codim<codim>::Entity
 {
-   typedef typename GridImp::template codim<codim>::Entity EntityType;
+   typedef typename GridImp::template Codim<codim>::Entity EntityType;
    friend class AlbertaGridEntity<codim, dim, GridImp>;
 public:
 
   AlbertaGridMakeableEntity(const GridImp & grid, int level) :
-    GridImp::template codim<codim>::Entity (AlbertaGridEntity<codim, dim, GridImp>(grid,level)) {}
+    GridImp::template Codim<codim>::Entity (AlbertaGridEntity<codim, dim, GridImp>(grid,level)) {}
 
   // passing through mehtods  
   void setTraverseStack (ALBERTA TRAVERSE_STACK *travStack) 
@@ -359,10 +359,10 @@ public EntityDefault <cd,dim,GridImp,AlbertaGridEntity>
 
   typedef AlbertaGridMakeableGeometry<dim-cd,dimworld,GridImp> GeometryImp;
 public:
-  typedef typename GridImp::template codim<cd>::Entity Entity;
-  typedef typename GridImp::template codim<0>::EntityPointer EntityPointer;
-  typedef typename GridImp::template codim<cd>::Geometry Geometry;
-  typedef typename GridImp::template codim<cd>::LevelIterator LevelIterator;
+  typedef typename GridImp::template Codim<cd>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+  typedef typename GridImp::template Codim<cd>::Geometry Geometry;
+  typedef typename GridImp::template Codim<cd>::LevelIterator LevelIterator;
 
   //! level of this element
   int level () const;
@@ -486,21 +486,21 @@ public EntityDefault <0,dim,GridImp,AlbertaGridEntity>
   friend class AlbertaGridMakeableEntity<0,dim,GridImp>;
 public:
   template <int cd>
-  struct codim
+  struct Codim
   {
-    typedef typename GridImp::template codim<cd>::EntityPointer EntityPointer;
+    typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
   };
 
   typedef AlbertaGridMakeableEntity<0,GridImp::dimension,GridImp> EntityImp;
 
-  typedef typename GridImp::template codim<0>::Entity Entity;
-  typedef typename GridImp::template codim<0>::Geometry Geometry;
+  typedef typename GridImp::template Codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::Geometry Geometry;
   typedef AlbertaGridMakeableGeometry<dim,dimworld,GridImp> GeometryImp;
 
-  typedef typename GridImp::template codim<0>::LevelIterator LevelIterator;
-  typedef typename GridImp::template codim<0>::IntersectionIterator IntersectionIterator;
-  typedef typename GridImp::template codim<0>::HierarchicIterator HierarchicIterator;
-  typedef typename GridImp::template codim<0>::EntityPointer EntityPointer;
+  typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
+  typedef typename GridImp::template Codim<0>::IntersectionIterator IntersectionIterator;
+  typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
+  typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
   enum { dimension = dim };
   
@@ -539,7 +539,7 @@ public:
 
   //! Provide access to mesh entity i of given codimension. Entities
   //!  are numbered 0 ... count<cc>()-1
-  template<int cc> typename codim<cc>::EntityPointer entity (int i) const;
+  template<int cc> typename Codim<cc>::EntityPointer entity (int i) const;
 
   //! Provide access to mesh entity i of given codimension. Entities
   //!  are numbered 0 ... count<cc>()-1
@@ -636,7 +636,7 @@ private:
   int level_;
 
   //! for vertex access, to be revised, filled on demand
-  //mutable typename codim<dim>::EntityPointer vxEntity_;
+  //mutable typename Codim<dim>::EntityPointer vxEntity_;
 
   //! pointer to the Albert TRAVERSE_STACK data
   ALBERTA TRAVERSE_STACK * travStack_;
@@ -679,7 +679,7 @@ public EntityPointerDefault <cd, GridImp, AlbertaGridEntityPointer<cd,GridImp> >
 
 public:
 
-  typedef typename GridImp::template codim<cd>::Entity Entity;
+  typedef typename GridImp::template Codim<cd>::Entity Entity;
   typedef AlbertaGridMakeableEntity<cd,dim,GridImp> EntityImp;
 
   //! typedef of my type 
@@ -745,7 +745,7 @@ public AlbertaGridEntityPointer<0,GridImp> ,
 public HierarchicIteratorDefault <GridImp,AlbertaGridHierarchicIterator>
 {
 public:
-  typedef typename GridImp::template codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::Entity Entity;
   typedef typename GridImp::ctype ctype;
   typedef AlbertaGridMakeableEntity<0,GridImp::dimension,GridImp> EntityImp;
 
@@ -795,11 +795,11 @@ private:
 //********************************************************************
 template<class GridImp>  
 class AlbertaGridMakeableBoundaryEntity :
-  public GridImp::template codim<0>::BoundaryEntity
+  public GridImp::template Codim<0>::BoundaryEntity
 {
 public:
   AlbertaGridMakeableBoundaryEntity () : 
-    GridImp::template codim<0>::BoundaryEntity 
+    GridImp::template Codim<0>::BoundaryEntity 
       (AlbertaGridBoundaryEntity<GridImp>()) {};
   // set elInfo
   void setElInfo(ALBERTA EL_INFO * elInfo, int nb)
@@ -817,7 +817,7 @@ public BoundaryEntityDefault <GridImp,AlbertaGridBoundaryEntity>
   friend class AlbertaGridMakeableBoundaryEntity<GridImp>;
   typedef AlbertaGridMakeableGeometry<GridImp::dimension,GridImp::dimensionworld,GridImp> GeometryImp;
 public:
-  typedef typename GridImp:: template codim<0>:: Geometry Geometry;
+  typedef typename GridImp:: template Codim<0>:: Geometry Geometry;
 
   //! Constructor   
   AlbertaGridBoundaryEntity ();
@@ -866,11 +866,11 @@ public IntersectionIteratorDefault <GridImp,AlbertaGridIntersectionIterator>
 
   friend class AlbertaGridEntity<0,dim,GridImp>;
 public:
-  typedef typename GridImp::template codim<0>::Entity Entity;
-  typedef typename GridImp::template codim<0>::BoundaryEntity BoundaryEntity;
+  typedef typename GridImp::template Codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::BoundaryEntity BoundaryEntity;
   typedef AlbertaGridMakeableBoundaryEntity<GridImp> MakeableBndEntityType;
-  typedef typename GridImp::template codim<1>::Geometry Geometry;
-  typedef typename GridImp::template codim<1>::LocalGeometry LocalGeometry;
+  typedef typename GridImp::template Codim<1>::Geometry Geometry;
+  typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
   typedef AlbertaGridMakeableEntity<0,dim,GridImp> EntityImp;
   typedef AlbertaGridMakeableGeometry<dim-1,dimworld,GridImp> LocalGeometryImp;
 
@@ -1044,7 +1044,7 @@ public AlbertaGridEntityPointer<cd,GridImp>
   typedef AlbertaGridTreeIterator<cd,pitype,GridImp>  AlbertaGridTreeIteratorType;
 public:
   
-  typedef typename GridImp::template codim<cd>::Entity Entity;
+  typedef typename GridImp::template Codim<cd>::Entity Entity;
   typedef AlbertaGridMakeableEntity<cd,dim,GridImp> EntityImp;
   
   //! Constructor making end iterator
@@ -1141,7 +1141,7 @@ public AlbertaGridTreeIterator<cd,pitype,GridImp> ,
 public LevelIteratorDefault <cd,pitype,GridImp,AlbertaGridLevelIterator>
 {
 public:  
-  typedef typename GridImp::template codim<cd>::Entity Entity;
+  typedef typename GridImp::template Codim<cd>::Entity Entity;
 
   //! Constructor making end iterator 
   AlbertaGridLevelIterator(const GridImp & grid, int level, int proc) :
@@ -1175,7 +1175,7 @@ public AlbertaGridTreeIterator<0,All_Partition,GridImp> ,
 public LeafIteratorDefault <GridImp,AlbertaGridLeafIterator>
 {
 public:  
-  typedef typename GridImp::template codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::Entity Entity;
 
   //! Constructor making end iterator 
   AlbertaGridLeafIterator(const GridImp & grid, int level, int proc) :
@@ -1320,21 +1320,21 @@ public:
 
   //! Iterator to first entity of given codim on level
   template<int cd, PartitionIteratorType pitype>
-  typename Traits::template codim<cd>::template partition<pitype>::LevelIterator 
+  typename Traits::template Codim<cd>::template partition<pitype>::LevelIterator 
   lbegin (int level, int proc=-1) const;
 
   //! one past the end on this level
   template<int cd, PartitionIteratorType pitype>
-  typename Traits::template codim<cd>::template partition<pitype>::LevelIterator 
+  typename Traits::template Codim<cd>::template partition<pitype>::LevelIterator 
   lend (int level, int proc=-1) const;
 
   //! Iterator to first entity of given codim on level
-  template<int cd>  typename Traits::template codim<cd>::
+  template<int cd>  typename Traits::template Codim<cd>::
   template partition<All_Partition>::LevelIterator 
   lbegin (int level, int proc=-1) const;
 
   //! one past the end on this level
-  template<int cd>  typename Traits::template codim<cd>::
+  template<int cd>  typename Traits::template Codim<cd>::
   template partition<All_Partition>::LevelIterator 
   lend (int level, int proc=-1) const;
 
@@ -1373,8 +1373,8 @@ public:
    *  happens if element is again marked for coarsen, refinement alsway
    *  counts more then coarsening 
    *  mark returns true if element was marked, otherwise false */
-  bool mark( int refCount , typename Traits::template codim<0>::EntityPointer & en ) const; 
-  bool mark( int refCount , const typename Traits::template codim<0>::Entity & en ) const; 
+  bool mark( int refCount , typename Traits::template Codim<0>::EntityPointer & en ) const; 
+  bool mark( int refCount , const typename Traits::template Codim<0>::Entity & en ) const; 
 
   //! uses the interface, mark on entity and refineLocal 
   bool globalRefine(int refCount);
@@ -1443,7 +1443,7 @@ public:
 
   template <int cd>
   AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& 
-  getRealEntity(typename Traits::template codim<cd>::Entity& entity) 
+  getRealEntity(typename Traits::template Codim<cd>::Entity& entity) 
   {
       return entity.realEntity;
   }
@@ -1451,7 +1451,7 @@ public:
 private:
   template <int cd>
   const AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& 
-  getRealEntity(const typename Traits::template codim<cd>::Entity& entity) const 
+  getRealEntity(const typename Traits::template Codim<cd>::Entity& entity) const 
   {
       return entity.realEntity;
   }
@@ -1665,12 +1665,12 @@ template <int dim, int dimworld>
 class AlbertaGridHierarchicIndexSet
 {
   typedef AlbertaGrid<dim,dimworld> GridType;
-  typedef typename GridType :: Traits :: template codim<0>::Entity EntityCodim0Type;
+  typedef typename GridType :: Traits :: template Codim<0>::Entity EntityCodim0Type;
   enum { numVecs  = AlbertHelp::numOfElNumVec };
   enum { numCodim = dim + 1 };
 
   template <int cd> 
-  struct codim 
+  struct Codim 
   { 
     typedef AlbertaGridEntity<cd,dim,const GridType> RealEntityType; 
     typedef typename Dune::Entity<cd,dim,const GridType,AlbertaGridEntity> EntityType;

@@ -168,19 +168,19 @@ public:
      
     //! Iterator to first entity of given codim on level
     template<int codim>
-    typename Traits::template codim<codim>::LevelIterator lbegin (int level) const;
+    typename Traits::template Codim<codim>::LevelIterator lbegin (int level) const;
 
     //! one past the end on this level
     template<int codim>
-    typename Traits::template codim<codim>::LevelIterator lend (int level) const;
+    typename Traits::template Codim<codim>::LevelIterator lend (int level) const;
 
     //! Iterator to first entity of given codim on level
     template<int codim, PartitionIteratorType PiType>
-    typename Traits::template codim<codim>::template partition<PiType>::LevelIterator lbegin (int level) const;
+    typename Traits::template Codim<codim>::template partition<PiType>::LevelIterator lbegin (int level) const;
 
     //! one past the end on this level
     template<int codim, PartitionIteratorType PiType>
-    typename Traits::template codim<codim>::template partition<PiType>::LevelIterator lend (int level) const;
+    typename Traits::template Codim<codim>::template partition<PiType>::LevelIterator lend (int level) const;
 
     /** \brief Number of grid entities per level and codim
      */
@@ -217,14 +217,14 @@ public:
      * <li> false, if nothing changed </li>
      * </ul>
      */
-    bool mark(int refCount, typename Traits::template codim<0>::EntityPointer & e );
+    bool mark(int refCount, typename Traits::template Codim<0>::EntityPointer & e );
 
     /** \brief Mark method accepting a UG refinement rule
      */
 #ifdef _3
-    bool mark(typename Traits::template codim<0>::EntityPointer & e, UG3d::RefinementRule rule);
+    bool mark(typename Traits::template Codim<0>::EntityPointer & e, UG3d::RefinementRule rule);
 #else
-    bool mark(typename Traits::template codim<0>::EntityPointer & e, UG2d::RefinementRule rule);
+    bool mark(typename Traits::template Codim<0>::EntityPointer & e, UG2d::RefinementRule rule);
 #endif
 
     //! Triggers the grid refinement process
@@ -294,7 +294,7 @@ public:
         \param maxl The finest level that should be traversed by the iterator
         \param children For each subface: element index, elementSide, and level
     */
-    void getChildrenOfSubface(typename Traits::template codim<0>::EntityPointer & e,
+    void getChildrenOfSubface(typename Traits::template Codim<0>::EntityPointer & e,
                               int elementSide,
                               int maxl, 
                               Array<typename Dune::UGGridEntityPointer<0,UGGrid> >& childElements,
@@ -342,13 +342,13 @@ private:
 
     // Access to entity implementations through the interface wrappers
     template <int cd>
-    UGGridEntity<cd,dim,const UGGrid>& getRealEntity(typename Traits::template codim<cd>::Entity& entity) {
+    UGGridEntity<cd,dim,const UGGrid>& getRealEntity(typename Traits::template Codim<cd>::Entity& entity) {
         return entity.realEntity;
     }
 
     // Const access to entity implementations through the interface wrappers
     template <int cd>
-    const UGGridEntity<cd,dim,const UGGrid>& getRealEntity(const typename Traits::template codim<cd>::Entity& entity) const {
+    const UGGridEntity<cd,dim,const UGGrid>& getRealEntity(const typename Traits::template Codim<cd>::Entity& entity) const {
         return entity.realEntity;
     }
 

@@ -90,12 +90,12 @@ namespace Dune {
 
 template<int cd, int dim, class GridImp>
 class OneDEntityWrapper :
-  public GridImp::template codim<cd>::Entity
+  public GridImp::template Codim<cd>::Entity
 {
 public:
 
     OneDEntityWrapper() :
-        GridImp::template codim<cd>::Entity (OneDGridEntity<cd, dim, GridImp>())
+        GridImp::template Codim<cd>::Entity (OneDGridEntity<cd, dim, GridImp>())
     {}
 
     void setToTarget(OneDEntityImp<dim-cd>* target) {
@@ -135,10 +135,10 @@ public:
     //! Constructor with a given grid level
     OneDGridEntity() : target_(NULL) {}
 
-  typedef typename GridImp::template codim<cd>::Geometry Geometry;
-  typedef typename GridImp::template codim<cd>::LevelIterator LevelIterator;
-  typedef typename GridImp::template codim<0>::IntersectionIterator IntersectionIterator;
-  typedef typename GridImp::template codim<0>::HierarchicIterator HierarchicIterator;
+  typedef typename GridImp::template Codim<cd>::Geometry Geometry;
+  typedef typename GridImp::template Codim<cd>::LevelIterator LevelIterator;
+  typedef typename GridImp::template Codim<0>::IntersectionIterator IntersectionIterator;
+  typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
 
   //! level of this element
     int level () const {return target_->level_;}
@@ -227,10 +227,10 @@ class OneDGridEntity<0,dim, GridImp> :
 
 
 public:
-    typedef typename GridImp::template codim<0>::Geometry Geometry;
-    typedef typename GridImp::template codim<0>::LevelIterator LevelIterator;
-    typedef typename GridImp::template codim<0>::IntersectionIterator IntersectionIterator;
-    typedef typename GridImp::template codim<0>::HierarchicIterator HierarchicIterator;
+    typedef typename GridImp::template Codim<0>::Geometry Geometry;
+    typedef typename GridImp::template Codim<0>::LevelIterator LevelIterator;
+    typedef typename GridImp::template Codim<0>::IntersectionIterator IntersectionIterator;
+    typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
     
     //! Default Constructor
     OneDGridEntity() {};
@@ -271,7 +271,7 @@ public:
      *  are numbered 0 ... count<cc>()-1
      */
     template<int cc> 
-    typename GridImp::template codim<cc>::EntityPointer entity (int i) const;
+    typename GridImp::template Codim<cc>::EntityPointer entity (int i) const;
 
     /*! Intra-level access to neighboring elements. A neighbor is an entity of codimension 0
       which has an entity of codimension 1 in commen with this entity. Access to neighbors
