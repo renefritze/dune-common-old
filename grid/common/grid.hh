@@ -533,8 +533,6 @@ inline std::string transformToGridName(GridIdentifier type)
 #include "hierarchiciterator.hh"
 #include "leafiterator.hh"
 
-#include "grid.cc"
-
 inline std::ostream& operator<< (std::ostream& s, Dune::GeometryType t)
 {
   s << Dune::GeometryName(t);
