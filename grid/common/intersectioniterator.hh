@@ -17,14 +17,16 @@ namespace Dune
    @ingroup GridInterface
  */
 template<class GridImp, template<class> class IntersectionIteratorImp>
-class IntersectionIterator :
-    public EntityPointer<GridImp, IntersectionIteratorImp<GridImp> >
+class IntersectionIterator
 {
+  IntersectionIteratorImp<const GridImp> realIterator;
+
   enum { dim=GridImp::dimension };
   enum { dimworld=GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
 public:
   typedef typename GridImp::template Codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
   typedef typename GridImp::template Codim<0>::BoundaryEntity BoundaryEntity;
   typedef typename GridImp::template Codim<1>::Geometry Geometry;
   typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
@@ -34,6 +36,12 @@ public:
   enum { dimensionworld=dimworld };
   //! define type used for coordinates in grid module
   typedef ct ctype;
+
+  /** ask for level of entity */
+  int level () const
+    {
+      return realIterator.level();
+    }
 
   /** @brief Preincrement operator. */
   IntersectionIterator& operator++()
@@ -64,6 +72,21 @@ public:
     {
       return this->realIterator.neighbor();
     }
+
+  //! return EntityPointer to the Entity on the inside of this intersection
+  //! (that is the Entity where we started this Iterator)
+  EntityPointer inside() const
+    {
+      return this->realIterator.inside();
+    }
+
+  //! return EntityPointer to the Entity on the outside of this intersection
+  //! (that is the neighboring Entity)
+  EntityPointer outside() const
+    {
+      return this->realIterator.outside();
+    }
+  
   /*! return an outer normal (length not necessarily 1)
 
     The returned Vector is copied to take advantage from the return type
@@ -123,9 +146,43 @@ public:
       return this->realIterator.unitOuterNormal(local);
     }
 
-  // copy constructor from IntersectionIteratorImp
-  IntersectionIterator (const IntersectionIteratorImp<const GridImp> & i) :
-    EntityPointer<GridImp, IntersectionIteratorImp<GridImp> >(i) {};
+  /** @brief Checks for equality.
+      
+      Only Iterators pointing same intersection from the same Entity
+      are equal. Pointing to the same intersection from neighbor is
+      unequal as inside and outside are permuted.
+   */
+  bool operator==(const IntersectionIterator& rhs) const
+    {
+      return rhs.equals(*this);
+    }
+
+  /** @brief Checks for inequality.
+      
+      Only Iterators pointing same intersection from the same Entity
+      are equal. Pointing to the same intersection from neighbor is
+      unequal as inside and outside are permuted.
+  */
+  bool operator!=(const IntersectionIterator& rhs) const
+    {
+      return ! rhs.equals(*this);
+    }
+
+  /** @brief forward equality check to realIterator */
+  bool equals(const IntersectionIterator& rhs) const
+    {
+      return this->realIterator.equals(rhs.realIterator);
+    }
+
+
+  /** Copy Constructor from IntersectionIteratorImp */
+  IntersectionIterator(const IntersectionIteratorImp<const GridImp> & i) :
+    realIterator(i) {};
+
+  /** Copy constructor */
+  IntersectionIterator(const IntersectionIterator& i) :
+    realIterator(i.realIterator) {}
+
 };
 
 /**********************************************************************/
@@ -142,6 +199,7 @@ class IntersectionIteratorInterface
   typedef typename GridImp::ctype ct;
 public:
   typedef typename GridImp::template Codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
   typedef typename GridImp::template Codim<0>::BoundaryEntity BoundaryEntity;
   typedef typename GridImp::template Codim<1>::Geometry Geometry;
   typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
@@ -174,6 +232,20 @@ public:
       return asImp().neighbor();
     }
 
+  //! return EntityPointer to the Entity on the inside of this intersection
+  //! (that is the Entity where we started this Iterator)
+  EntityPointer inside() const
+    {
+      return asImp().inside();
+    }
+
+  //! return EntityPointer to the Entity on the outside of this intersection
+  //! (that is the neighboring Entity)
+  EntityPointer outside() const
+    {
+      return asImp().outside();
+    }
+  
   /*! return an outer normal (length not necessarily 1)
 
     The returned Vector is copied to take advantage from the return type
