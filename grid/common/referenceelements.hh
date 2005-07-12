@@ -217,7 +217,7 @@ namespace Dune
 	//! type of (i,c) 
 	GeometryType type (int i, int c) const
 	{
-	  return hypercube;	  
+	  return cube;	  
 	}
 
 	//! volume of the reference element
@@ -392,10 +392,10 @@ namespace Dune
 	//! return element of the container via geometry type
 	const value_type& operator() (GeometryType type) const
 	{
-	  if ( (type==hypercube) || (type==line) || (type==quadrilateral) ||
+	  if ( (type==cube) || (type==line) || (type==quadrilateral) ||
 		   (type==hexahedron) )
 		return cube;
-	  DUNE_THROW(RangeError, "expected a hypercube!");
+	  DUNE_THROW(RangeError, "expected a cube!");
 	}
 
   private:
@@ -748,9 +748,9 @@ linear tetrahedron
 	//! return element of the container via geometry type
 	const ReferenceElement<ctype,dim>& operator() (GeometryType type) const
 	{
-	  if ( (type==hypercube) || (type==line) || (type==quadrilateral) ||
+	  if ( (type==cube) || (type==line) || (type==quadrilateral) ||
 		   (type==hexahedron) )
-		return cube;
+		return hcube;
 	  else	if( (type==simplex ) || (type==triangle ) || (type==tetrahedron))
 	    return simplices;
 	  else
@@ -758,7 +758,7 @@ linear tetrahedron
 	}
 
   private:
-    ReferenceElementWrapper<ReferenceCube<ctype,dim> > cube;
+    ReferenceElementWrapper<ReferenceCube<ctype,dim> > hcube;
     ReferenceElementWrapper<ReferenceSimplex<ctype,dim> > simplices;
   };
 

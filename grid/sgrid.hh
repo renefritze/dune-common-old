@@ -905,7 +905,7 @@ public:
   //! number of entities per level, codim and geometry type in this process
   int size (int level, int codim, GeometryType type) const
   {
-	if (type==hypercube) return size(level,codim);
+	if (type==cube) return size(level,codim);
 	switch (dim-codim)
 	  {
 	  case 0:
