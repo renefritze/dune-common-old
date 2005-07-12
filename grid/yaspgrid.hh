@@ -1745,14 +1745,14 @@ public:
 
   //! get index of an entity
   template<int cd>
-  int index (const typename GridImp::Traits::template codim<cd>::Entity& e) const 
+  int index (const typename GridImp::Traits::template Codim<cd>::Entity& e) const 
   {
 	return grid.template getRealEntity<cd>(e).compressedIndex(); 
   }
 
   //! get index of subentity of a codim 0 entity
   template<int cc>
-  int subindex (const typename GridImp::Traits::template codim<0>::Entity& e, int i) const
+  int subindex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
   {
 	return grid.template getRealEntity<0>(e).template subCompressedIndex<cc>(i);
   }
@@ -1795,14 +1795,14 @@ public:
 
   //! get id of an entity
   template<int cd>
-  GlobalIdType id (const typename GridImp::Traits::template codim<cd>::Entity& e) const 
+  GlobalIdType id (const typename GridImp::Traits::template Codim<cd>::Entity& e) const 
   {
 	return grid.template getRealEntity<cd>(e).persistentIndex();
   }
 
   //! get id of subentity
   template<int cc>
-  GlobalIdType subid (const typename GridImp::Traits::template codim<0>::Entity& e, int i) const
+  GlobalIdType subid (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
   {
 	return grid.template getRealEntity<0>(e).template subPersistentIndex<cc>(i);
   }
