@@ -53,10 +53,10 @@ public:
   virtual bool compress () { return false; }
 
   //! do nothing here, because fathers index should already exist 
-  void insertNewIndex(const typename GridType::template codim<0>::Entity & en ) {}
+  void insertNewIndex(const typename GridType::template Codim<0>::Entity & en ) {}
 
   //! do nothing here, because fathers index should already exist 
-  void removeOldIndex(const typename GridType::template codim<0>::Entity & en ) {}
+  void removeOldIndex(const typename GridType::template Codim<0>::Entity & en ) {}
 
   //! nothing to do here 
   virtual void resize () {}
