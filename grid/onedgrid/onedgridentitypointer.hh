@@ -11,6 +11,7 @@ class OneDGridEntityPointer
   : public EntityPointerDefault <codim, GridImp, Dune::OneDGridEntityPointer<codim,GridImp> >
 {
   enum { dim = GridImp::dimension };
+  friend class OneDGridIntersectionIterator<GridImp>;
 public:
   typedef typename GridImp::template Codim<codim>::Entity Entity;
 
