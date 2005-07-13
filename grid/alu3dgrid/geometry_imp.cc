@@ -629,6 +629,7 @@ buildGeom(const IMPLElementType& item) {
     }
   } 
 
+  if(triMap_) delete triMap_;
   triMap_ = new TrilinearMapping(coord_[0], coord_[1], coord_[2], coord_[3],
                                  coord_[4], coord_[5], coord_[6], coord_[7]);
 
@@ -708,7 +709,8 @@ buildGeom(const ALU3DSPACE HFaceType & item) {
       coord_[i][j] = p[j];
     }
   }
-  
+ 
+  if(biMap_) delete biMap_; 
   biMap_ = new BilinearSurfaceMapping(coord_[0], coord_[1],
                                       coord_[2], coord_[3]);
 
@@ -726,6 +728,7 @@ buildGeom(const FaceCoordinatesType& coords) {
     coord_[i] = coords[i];
   }
 
+  if(biMap_) delete biMap_;
   biMap_ = new BilinearSurfaceMapping(coord_[0], coord_[1],
                                       coord_[2], coord_[3]);
 
