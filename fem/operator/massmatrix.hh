@@ -147,7 +147,7 @@ namespace Dune {
         //! The grid
         typedef typename FunctionSpaceType::GridType GridType;
 
-        typedef typename GridType::template codim<0>::Entity EntityType;
+        typedef typename GridType::template Codim<0>::Entity EntityType;
 
         //!
         typedef FieldMatrix<double, blocksize, blocksize> MatrixBlock;
@@ -193,7 +193,7 @@ public:
 
             nb.resize(n, n);
 
-            typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
+            typedef typename GridType::template Codim<0>::LevelIterator LevelIterator;
             LevelIterator it = grid->template lbegin<0>( grid->maxlevel() );
             LevelIterator endit = grid->template lend<0> ( grid->maxlevel() );
 
@@ -218,7 +218,7 @@ public:
 
         void assembleMatrix() {
             
-            typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
+            typedef typename GridType::template Codim<0>::LevelIterator LevelIterator;
             typedef typename FunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
             
             int n = functionSpace_.size();
