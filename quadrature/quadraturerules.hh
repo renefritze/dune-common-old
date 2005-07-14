@@ -868,13 +868,13 @@ private:
 			return *(rules[cube_order_to_index[p]]);
 		}
 
-	else  if(type==triangle)
+          else  if(type==triangle || (type==simplex && dim==2))
 	    {
 	      if(p>=1 && p<=triangle_maxorder)
 		return *(rules[triangle_order_to_index[p]]);
 	    }
 
-	else  if(type==tetrahedron)
+          else  if(type==tetrahedron || (type==simplex && dim==3))
 	    {
 	      if(p>=1 && p<=tetrahedron_maxorder)
 		return *(rules[tetrahedron_order_to_index[p]]);
