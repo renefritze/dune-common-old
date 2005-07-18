@@ -525,7 +525,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid,
     // If we are in a parallel setting and we are _not_ the master
     // process we can exit here.
 #ifdef ModelP
-    if (me!=0) {
+    if (PPIF::me!=0) {
         delete(am);
         grid.createend();
         return;
@@ -1267,7 +1267,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
     // If we are in a parallel setting and we are _not_ the master
     // process we can exit here.
 #ifdef ModelP
-    if (me!=0) {
+    if (PPIF::me!=0) {
         delete(am);
         grid.createend();
         return;
