@@ -129,8 +129,9 @@ template<> bool Dune::UGGrid < 3, 3 >::useExistingDefaultsFile = false;
 
 template < int dim, int dimworld >
 inline Dune::UGGrid < dim, dimworld >::UGGrid() : multigrid_(NULL), 
-                                                  hierarchicIndexSet_(*this),
-                                                  levelIndexSet_(NULL),
+                                                  leafIndexSet_(*this),
+                                                  globalIdSet_(*this),
+                                                  localIdSet_(*this),
                                                   refinementType_(COPY), 
                                                   omitGreenClosure_(false)
 {
@@ -140,8 +141,9 @@ inline Dune::UGGrid < dim, dimworld >::UGGrid() : multigrid_(NULL),
 template < int dim, int dimworld >
 inline Dune::UGGrid < dim, dimworld >::UGGrid(unsigned int heapSize, unsigned envHeapSize)
     : multigrid_(NULL), 
-      hierarchicIndexSet_(*this) ,
-      levelIndexSet_(NULL),
+      leafIndexSet_(*this),
+      globalIdSet_(*this),
+      localIdSet_(*this),
       refinementType_(COPY),
       omitGreenClosure_(false)
 {
@@ -231,9 +233,6 @@ inline Dune::UGGrid < dim, dimworld >::~UGGrid()
 {
     if (extra_boundary_data_)
         free(extra_boundary_data_);
-
-    if (levelIndexSet_)
-        delete(levelIndexSet_);
 
     if (multigrid_) {
         // Set UG's currBVP variable to the BVP corresponding to this
