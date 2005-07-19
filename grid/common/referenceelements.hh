@@ -6,6 +6,7 @@
 #include<iostream>
 #include"dune/common/fvector.hh"
 #include"dune/common/exceptions.hh"
+#include"dune/common/helpertemplates.hh"
 #include"dune/grid/common/grid.hh"
 
 /**
@@ -537,7 +538,7 @@ linear tetrahedron
 	// vertex is codim=dim entity
 	for (int n=0;n<dim;n++)
 	  {
-	    pos[0][dim][n]=x[n]; 
+	    pos[0][dim][n]=x[n];
 	    
 	  }
 	for(int k=1;k<=dim;++k)
@@ -817,7 +818,9 @@ linear tetrahedron
 
     void prism_entities(int c)
     {
-      // hard coding the size of entities
+      // compile time error if dim is not equal to 3
+      IsTrue<dim == 3>::yes(); 
+     // hard coding the size of entities
       sizes[0]=1; // element
       sizes[1]=5; // face
       sizes[2]=9; // edge
@@ -1121,6 +1124,8 @@ private:
   void pyramid_entities(int c)
   
  {
+   // compile time error if dim is not 3
+      IsTrue<dim == 3>::yes(); 
       // hard coding the size of entities
       sizes[0]=1; // element
       sizes[1]=5; // face
