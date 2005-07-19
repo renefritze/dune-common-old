@@ -617,7 +617,7 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
     // //////////////////////////////////////////////////////////////////////
     
     switch (e->geometry().type()) {
-    case cube: {
+    case cube: 
 
         if (dim==3) {
             // Dune numbers the faces of a hexahedron differently than UG.
@@ -626,8 +626,8 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
             elementSide = renumbering[elementSide];
         }
         break; 
-    }
-    case simplex: {
+    
+    case simplex: 
 
         if (dim==3) {  // Tetrahedron
 
@@ -646,12 +646,16 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
         }
 
         break;
-    }
-#if 0
-        default: 
-            DUNE_THROW(NotImplemented, "Unknown element type '" 
-                       << e->geometry().type() << "'found!");
-#endif
+    
+    case vertex:
+    case prism:
+    case pyramid:
+        // Do nothing
+        break;
+
+    default: 
+        DUNE_THROW(NotImplemented, "Unknown element type '" 
+                   << e->geometry().type() << "'found!");
     }
 
     // ///////////////
@@ -752,13 +756,17 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
             }
             break;
             
-#if 0
+        case vertex:
+        case prism:
+        case pyramid:
+            // Do nothing
+            break;
+            
         default: 
             DUNE_THROW(NotImplemented, "Unknown element type '" 
                        << e->geometry().type() << "'found!");
-#endif
         }
-
+        
         childElements[i].setToTarget(Element<0>::get(*f), Element<2>::get(*f));
         childElementSides[i] = side;
 
