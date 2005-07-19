@@ -1420,6 +1420,7 @@ public:
   void setNewCoords(const FieldVector<albertCtype, dimworld> & trans, const albertCtype scalar);
 
   const HierarchicIndexSetType & hierarchicIndexSet () const { return hIndexSet_; }
+
   const LevelIndexSetType & levelIndexSet (int level= 0) const
   {
     if(!levelIndexVec_[level]) levelIndexVec_[level] = new LevelIndexSetType (*this,level);
@@ -1427,13 +1428,6 @@ public:
   }
 
   const LeafIndexSetType & leafIndexSet () const 
-  {
-    if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSetType (*this);
-    return *leafIndexSet_; 
-  }
-
-  LeafIndexSetType & leafIndexSet () 
-  {
     if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSetType (*this);
     return *leafIndexSet_; 
   }
@@ -1701,7 +1695,7 @@ public:
                         ,i,Int2Type<dim-cd>());
   }
 
-  int size ( int codim ) const
+  int size (int codim) const
   {
     assert(size_[codim] >= 0);
     return size_[codim];
