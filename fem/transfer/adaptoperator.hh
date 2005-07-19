@@ -43,6 +43,7 @@ public:
   //! of the underlying function spaces
   virtual void adapt () const 
   {
+    std::cout << "called AdaptMapping::adapt()" << std::endl;
     if(am_) am_->adapt();  
     else 
     {
@@ -132,7 +133,7 @@ public:
       typedef CombinedRestProl <IndexSetRPType,RestProlOperatorImp> COType;
       COType tmpop ( dm_.indexSetRPop() , rpOp_ );
 
-      typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
+      typedef typename GridType::template Codim<0>::LevelIterator LevelIterator;
 
       // make run through grid 
       for(int l=0; l<grid_.maxlevel(); l++)
@@ -155,7 +156,7 @@ public:
       typedef CombinedRestProl <IndexSetRPType,RestProlOperatorImp> COType;
       COType tmpop ( dm_.indexSetRPop() , rpOp_ );
       
-      typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
+      typedef typename GridType::template Codim<0>::LevelIterator LevelIterator;
 
       // make run through grid 
       LevelIterator endit = grid_.template lend<0>   ( 0 );
@@ -213,7 +214,7 @@ private:
   void hierarchicProlong ( EntityType &en, ProlongOperatorType & prolop ) const 
   {
     typedef typename EntityType::HierarchicIterator HierarchicIterator; 
-    //typedef typename GridType::template codim<EntityType::codimension>::EntityPointer;
+    //typedef typename GridType::template Codim<EntityType::codimension>::EntityPointer;
     HierarchicIterator it    = en.hbegin( grid_.maxlevel() );
     HierarchicIterator endit = en.hend  ( grid_.maxlevel() );
 
@@ -249,7 +250,7 @@ private:
   // calc ratio between volume of father and volume of child 
   void calcWeight() const
   {
-    typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
+    typedef typename GridType::template Codim<0>::LevelIterator LevelIterator;
     // make run through grid 
     bool done = false;  
     

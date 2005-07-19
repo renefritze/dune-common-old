@@ -192,7 +192,7 @@ public:
   //! return reference to const entry i
   const T& operator [] ( int i ) const 
   { 
-    assert( ((i<0) || (i>=size()) ? (std::cout << std::endl << i << " i|size " << size() << std::endl, 0) : 1));
+    //assert( ((i<0) || (i>=size()) ? (std::cout << std::endl << i << " i|size " << size() << std::endl, 0) : 1));
     return vec_[i]; 
   }
 
