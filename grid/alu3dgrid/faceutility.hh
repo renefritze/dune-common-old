@@ -108,7 +108,7 @@ namespace Dune {
   private:
     //- private typedefs
     typedef GridImp GridType;
-    typedef typename GridType::template codim<0>::Geometry ElementGeometryType;
+    typedef typename GridType::template Codim<0>::Geometry ElementGeometryType;
     typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
     typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
     typedef NonConformingFaceMapping<GridImp::elementType> NonConformingMappingType;
