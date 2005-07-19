@@ -63,7 +63,7 @@ class AlbertaMarkerVector;
 
 template<int codim, int dim, class GridImp> class AlbertaGridEntity;
 template<int codim, PartitionIteratorType pitype, class GridImp> class AlbertaGridTreeIterator;
-template<class GridImp> class AlbertaGridLeafIterator;
+template<int codim, PartitionIteratorType pitype, class GridImp> class AlbertaGridLeafIterator;
 template<int cd, class GridImp> class AlbertaGridEntityPointer;
 
 template <int mydim, int cdim, class GridImp> class AlbertaGridGeometry;
@@ -858,8 +858,8 @@ private:
  */
 template<class GridImp>
 class AlbertaGridIntersectionIterator : 
-public AlbertaGridEntityPointer<0,GridImp> ,
-public IntersectionIteratorDefault <GridImp,AlbertaGridIntersectionIterator>
+  public AlbertaGridEntityPointer<0,GridImp> ,
+  public IntersectionIteratorDefault <GridImp,AlbertaGridIntersectionIterator>
 {
   enum { dim      = GridImp::dimension };
   enum { dimworld = GridImp::dimensionworld };
@@ -873,6 +873,7 @@ public:
   typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
   typedef AlbertaGridMakeableEntity<0,dim,GridImp> EntityImp;
   typedef AlbertaGridMakeableGeometry<dim-1,dimworld,GridImp> LocalGeometryImp;
+  typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
   //! know your own dimension
   enum { dimension=dim };
@@ -885,10 +886,13 @@ public:
   void increment();
 
   //! equality
-  bool equals (const AlbertaGridIntersectionIterator<GridImp>& i) const;
+  bool operator==(const AlbertaGridIntersectionIterator<GridImp>& i) const;
 
-  //! access neighbor, dereferencing 
-  Entity & dereference() const;
+  //! access neighbor
+  EntityPointer outside() const;
+
+  //! access element where IntersectionIterator started
+  EntityPointer inside() const;
 
   //! The default Constructor 
   AlbertaGridIntersectionIterator(const GridImp & grid,
@@ -972,10 +976,8 @@ private:
   //! calculate normal to current face 
   void calcOuterNormal () const;
 
-  /*
-  //! know the grid were im comming from
-  const GridImp *grid_;
-  */
+  //! know the grid were im coming from
+  //const GridImp& grid_;
 
   //! the actual level
   mutable int level_;
@@ -987,6 +989,7 @@ private:
   //! Most of the information can be generated from the ALBERTA EL_INFO 
   //! therefore this element is only created on demand. 
   mutable bool builtNeigh_;
+
   EntityImp & virtualEntity_;
  
   //! pointer to the EL_INFO struct storing the real element information
@@ -1169,30 +1172,31 @@ public:
 //
 //**********************************************************************
 //! LeafIterator which is just a hull for the LevelIterator 
-template<class GridImp>
+template<int codim, PartitionIteratorType pitype, class GridImp>
 class AlbertaGridLeafIterator : 
-public AlbertaGridTreeIterator<0,All_Partition,GridImp> , 
-public LeafIteratorDefault <GridImp,AlbertaGridLeafIterator>
+public AlbertaGridTreeIterator<codim, pitype, GridImp>, 
+public LeafIteratorDefault<codim, pitype, GridImp, AlbertaGridLeafIterator>
+//public LeafIteratorDefault <GridImp,AlbertaGridLeafIterator>
 {
 public:  
-  typedef typename GridImp::template Codim<0>::Entity Entity;
+  typedef typename GridImp::template Codim<codim>::Entity Entity;
 
   //! Constructor making end iterator 
   AlbertaGridLeafIterator(const GridImp & grid, int level, int proc) :
-    AlbertaGridTreeIterator<0,All_Partition,GridImp> (grid,level,proc,true) 
+    AlbertaGridTreeIterator<codim,pitype,GridImp> (grid,level,proc,true) 
   {
   }
 
   //! Constructor making begin iterator 
   AlbertaGridLeafIterator(const GridImp & grid, 
     AlbertaMarkerVector * vec, int level, int proc) : 
-  AlbertaGridTreeIterator<0,All_Partition,GridImp> (grid,vec,level,proc,true) 
+  AlbertaGridTreeIterator<codim, pitype, GridImp> (grid,vec,level,proc,true) 
   {
   }
 
   void increment () 
   {
-    AlbertaGridTreeIterator<0,All_Partition,GridImp>::increment();
+    AlbertaGridTreeIterator<codim, pitype, GridImp>::increment();
   }
 };
 
@@ -1251,6 +1255,7 @@ class AlbertaGrid
   friend class AlbertaGridTreeIterator<1,All_Partition,AlbertaGrid<dim,dimworld> >;
   friend class AlbertaGridTreeIterator<2,All_Partition,AlbertaGrid<dim,dimworld> >;
   friend class AlbertaGridTreeIterator<3,All_Partition,AlbertaGrid<dim,dimworld> >;
+
   friend class AlbertaGridHierarchicIterator<AlbertaGrid<dim,dimworld> >;
   
   friend class AlbertaGridIntersectionIterator<AlbertaGrid<dim,dimworld> >;
@@ -1269,14 +1274,15 @@ class AlbertaGrid
 //**********************************************************
 public: 
   typedef GridTraits<dim,dimworld,Dune::AlbertaGrid<dim,dimworld> ,
-              AlbertaGridGeometry,AlbertaGridEntity,
-              AlbertaGridBoundaryEntity,
-              AlbertaGridEntityPointer,
-              AlbertaGridLevelIterator,
-              AlbertaGridIntersectionIterator,AlbertaGridHierarchicIterator,
-              AlbertaGridLeafIterator>  Traits;
+                     AlbertaGridGeometry,AlbertaGridEntity,
+                     AlbertaGridBoundaryEntity,
+                     AlbertaGridEntityPointer,
+                     AlbertaGridLevelIterator,
+                     AlbertaGridIntersectionIterator,
+                     AlbertaGridHierarchicIterator,
+                     AlbertaGridLeafIterator>  Traits;
 
-  typedef typename Traits::LeafIterator LeafIterator;            
+  typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
 
   typedef AlbertaGridReferenceGeometry<dim,AlbertaGrid<dim,dimworld> > ReferenceGeometry;
   typedef AlbertaGridHierarchicIndexSet<dim,dimworld> HierarchicIndexSetType;
@@ -1339,12 +1345,14 @@ public:
   lend (int level, int proc=-1) const;
 
   //! return LeafIterator which points to first leaf entity 
-  template <PartitionIteratorType pitype>
-  LeafIterator leafbegin ( int maxlevel, int proc = -1 ) const;
+  template <int codim, PartitionIteratorType pitype>
+  Traits::template Codim<codim>::template partition<pitype>::LeafIterator 
+  leafbegin ( int maxlevel, int proc = -1 ) const;
   
   //! return LeafIterator which points behind last leaf entity 
-  template <PartitionIteratorType pitype>
-  LeafIterator leafend   ( int maxlevel, int proc = -1 ) const;
+  template <int codim, PartitionIteratorType pitype>
+  Traits::template Codim<codim>::template partition<pitype>::LeafIterator 
+  leafend   ( int maxlevel, int proc = -1 ) const;
 
   //! return LeafIterator which points to first leaf entity 
   LeafIterator leafbegin ( int maxlevel, int proc = -1 ) const;
@@ -1427,7 +1435,7 @@ public:
     return *(levelIndexVec_[level]); 
   }
 
-  const LeafIndexSetType & leafIndexSet () const 
+  const LeafIndexSetType & leafIndexSet () const {
     if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSetType (*this);
     return *leafIndexSet_; 
   }
@@ -1651,7 +1659,7 @@ private:
   // is generated, when accessed 
   mutable LeafIndexSetType * leafIndexSet_;
 
-}; // end Class AlbertaGridGrid
+}; // end class AlbertaGrid
 
 template <class GridType, int dim> struct MarkEdges;
 
@@ -1783,7 +1791,7 @@ private:
     return -1;
   }
   
-};
+}; // end class AlbertaGridHierarchicIndexSet
 
 
 // Class to mark the Vertices on the leaf level
@@ -1831,13 +1839,13 @@ namespace Capabilities
   };
   
   template<int dim, int dimw, int cdim>
-  struct hasEntity< AlbertaGrid<dim,dimw>, cdim>
+  struct hasEntity< AlbertaGrid<dim,dimw>, AlbertaGridEntity<cdim, dim, const AlbertaGrid<dim, dimw> > >
   {
     static const bool v = true;
   };
-}
+} // end namespace Capabilities
 
-}; // namespace Dune
+} // namespace Dune
 
 #include "albertagrid/agmemory.hh"
 #include <dune/io/file/asciiparser.hh>

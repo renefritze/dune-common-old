@@ -1,5 +1,5 @@
-#ifndef __DUNE_ALBERTAHEADER_HH__
-#define __DUNE_ALBERTAHEADER_HH__
+#ifndef DUNE_ALBERTAHEADER_HH
+#define DUNE_ALBERTAHEADER_HH
 
 // if we have ALBERTA C++ lib define namespace for ALBERTA
 #ifdef __ALBERTApp__

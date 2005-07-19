@@ -1,5 +1,5 @@
-#ifndef DUNE_ALBERTGRID_COMMUNICATOR_HH
-#define DUNE_ALBERTGRID_COMMUNICATOR_HH
+#ifndef DUNE_AGCOMMUNICATOR_HH
+#define DUNE_AGCOMMUNICATOR_HH
 
 // use this define to control if Albert should use the found MPI
 

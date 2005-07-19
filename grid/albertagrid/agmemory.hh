@@ -1,5 +1,5 @@
-#ifndef __DUNE_AGMEMORY_HH__
-#define __DUNE_AGMEMORY_HH__
+#ifndef DUNE_AGMEMORY_HH
+#define DUNE_AGMEMORY_HH
 
 #include <stack>
 

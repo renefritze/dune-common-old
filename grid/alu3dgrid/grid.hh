@@ -35,7 +35,7 @@ namespace Dune {
   class ALU3dGridHierarchicIterator;
   template<class GridImp>
   class ALU3dGridIntersectionIterator;
-  template<class GridImp>
+  template<int codim, PartitionIteratorType pitype, class GridImp>
   class ALU3dGridLeafIterator;
   template <int mydim, int coorddim, class GridImp>
   class ALU3dGridMakeableEntity;
@@ -113,12 +113,11 @@ namespace Dune {
                        ALU3dGridHierarchicIterator,
                        ALU3dGridLeafIterator>  Traits;
 
-  
-    typedef ALU3dGridLeafIterator<MyType>       LeafIteratorImp;
-    typedef ALU3dGridHierarchicIterator<MyType> HierarchicIteratorImp;
+    // a standard leaf iterator  
+    typedef ALU3dGridLeafIterator<0, All_Partition, MyType> LeafIteratorImp;
+    typedef typename Traits::template Codim<0>::LeafIterator LeafIteratorType;
 
-    typedef typename Traits::LeafIterator LeafIteratorType;  
-    //typedef ALU3dGridReferenceGeometry<dim> ReferenceGeometry;
+    typedef ALU3dGridHierarchicIterator<MyType> HierarchicIteratorImp;
 
     typedef ALU3DSPACE ObjectStream ObjectStreamType;
 
@@ -129,9 +128,7 @@ namespace Dune {
     typedef DefaultLevelIndexSet<MyType>           LevelIndexSetType; 
     typedef AdaptiveLeafIndexSet<MyType>           LeafIndexSetType; 
  
-    typedef typename Traits::LeafIterator LeafIterator;
-  
-    /** \todo Please doc me! */
+     /** \todo Please doc me! */
 
     //! maximal number of levels 
     enum { MAXL = 64 };
@@ -186,13 +183,21 @@ namespace Dune {
     template partition<All_Partition>::LevelIterator 
     lend (int level) const;
 
-    //! Iterator to first entity of given codim on leaf level
-    LeafIteratorType leafbegin (int level, 
-                                PartitionIteratorType pitype=InteriorBorder_Partition ) const;
+    //! General definiton for a leaf iterator
+    template <int codim, PartitionIteratorType pitype>
+    Traits::template Codim<codim>::template partition<pitype>::LeafIterator
+    leafbegin(int level) const;
 
-    //! one past the end on this leaf level 
-    LeafIteratorType leafend (int level,
-                              PartitionIteratorType pitype=InteriorBorder_Partition ) const;
+    //! General definition for an end iterator on leaf level
+    template <int codim, PartitionIteratorType pitype>
+    Traits::template Codim<codim>::template partition<pitype>::LeafIterator
+    leafend(int level) const;
+
+    //! Iterator to first entity of codim 0 on leaf level (All_Partition)
+    LeafIteratorType leafbegin (int level) const;
+
+    //! one past the end on this leaf level (codim 0 and All_Partition)
+    LeafIteratorType leafend (int level) const;
 
     //! number of grid entities per level and codim
     int size (int level, int cd) const;
