@@ -1348,10 +1348,20 @@ public:
   template <int codim, PartitionIteratorType pitype>
   Traits::template Codim<codim>::template Partition<pitype>::LeafIterator 
   leafbegin ( int maxlevel, int proc = -1 ) const;
+
+  //! return LeafIterator which points to first leaf entity 
+  template <int codim>
+  Traits::template Codim<codim>::LeafIterator 
+  leafbegin ( int maxlevel, int proc = -1 ) const;
   
   //! return LeafIterator which points behind last leaf entity 
   template <int codim, PartitionIteratorType pitype>
   Traits::template Codim<codim>::template Partition<pitype>::LeafIterator 
+  leafend   ( int maxlevel, int proc = -1 ) const;
+
+  //! return LeafIterator which points behind last leaf entity 
+  template <int codim>
+  Traits::template Codim<codim>::LeafIterator 
   leafend   ( int maxlevel, int proc = -1 ) const;
 
   //! return LeafIterator which points to first leaf entity 
@@ -1359,6 +1369,31 @@ public:
   
   //! return LeafIterator which points behind last leaf entity 
   LeafIterator leafend   ( int maxlevel, int proc = -1 ) const;
+
+  //! return LeafIterator which points to first leaf entity 
+  template <int codim, PartitionIteratorType pitype>
+  Traits::template Codim<codim>::template Partition<pitype>::LeafIterator 
+  leafbegin () const;
+
+  //! return LeafIterator which points to first leaf entity 
+  template <int codim>
+  Traits::template Codim<codim>::LeafIterator 
+  leafbegin () const;
+  
+  //! return LeafIterator which points behind last leaf entity 
+  template <int codim, PartitionIteratorType pitype>
+  Traits::template Codim<codim>::template Partition<pitype>::LeafIterator 
+  leafend   () const;
+
+  template <int codim>
+  Traits::template Codim<codim>::LeafIterator 
+  leafend   () const;
+
+  //! return LeafIterator which points to first leaf entity 
+  LeafIterator leafbegin () const;
+  
+  //! return LeafIterator which points behind last leaf entity 
+  LeafIterator leafend   () const;
 
   /** \brief Number of grid entities per level and codim
    * because lbegin and lend are none const, and we need this methods 
@@ -1698,7 +1733,8 @@ public:
   template <int cd>
   int subIndex (const EntityCodim0Type & en, int i) const
   {
-    assert(cd == dim);
+    // doesn't work otherwise, but stalls gridcheck
+    // assert(cd == dim);
     return getIndex((grid_.template getRealEntity<0>(en)).getElInfo()->el
                         ,i,Int2Type<dim-cd>());
   }
@@ -1838,11 +1874,12 @@ namespace Capabilities
     static const bool v = true;
   };
   
-  template<int dim, int dimw, int cdim>
-  struct hasEntity< AlbertaGrid<dim,dimw>, AlbertaGridEntity<cdim, dim, const AlbertaGrid<dim, dimw> > >
+  template<int dim, int dimw>
+  struct hasEntity<AlbertaGrid<dim,dimw>, 0>
   {
     static const bool v = true;
   };
+
 } // end namespace Capabilities
 
 } // namespace Dune

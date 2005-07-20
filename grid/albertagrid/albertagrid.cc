@@ -988,7 +988,7 @@ inline int AlbertaGridEntity<codim,dim,GridImp>::
 index() const
 {
   const Entity en (*this);
-  return grid_.levelIndexSet().index(en);
+  return grid_.levelIndexSet(en.level()).index(en);
 }
 
 // default 
@@ -1249,7 +1249,7 @@ inline int AlbertaGridEntity <0,dim,GridImp>::subIndex ( int i ) const
 {
   const Entity en (*this);
   return grid_.hierarchicIndexSet().template subIndex<cc> (en,i);
-  //return grid_.levelIndexSet().template subIndex<cc> (en,i);
+  //return grid_.levelIndexSet(en.level()).template subIndex<cc> (en,i);
 }
 
 template <class GridImp, int dim, int cd> struct SubEntity;
@@ -3241,11 +3241,55 @@ AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const
 }
 
 template < int dim, int dimworld >
+template<int codim>
+inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::LeafIterator  
+AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const {
+  return leafbegin<codim, All_Partition>(level, proc);
+}
+
+
+template < int dim, int dimworld >
+template<int codim, PartitionIteratorType pitype>
+inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator  
+AlbertaGrid < dim, dimworld >::leafbegin () const {
+  return leafbegin<codim, pitype>(maxlevel_, -1);
+}
+
+template < int dim, int dimworld >
+template<int codim>
+inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::LeafIterator  
+AlbertaGrid < dim, dimworld >::leafbegin () const {
+  return leafbegin<codim, All_Partition>(maxlevel_, -1);
+}
+
+
+template < int dim, int dimworld >
 template<int codim, PartitionIteratorType pitype>
 inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator 
 AlbertaGrid < dim, dimworld >::leafend (int level, int proc ) const
 {
   return AlbertaGridLeafIterator<codim, pitype, const MyType> (*this,level,proc);
+}
+
+template < int dim, int dimworld >
+template<int codim>
+inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::LeafIterator 
+AlbertaGrid < dim, dimworld >::leafend (int level, int proc ) const {
+  return leafend<codim, All_Partition>(level, proc);
+}
+
+template < int dim, int dimworld >
+template<int codim, PartitionIteratorType pitype>
+inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator 
+AlbertaGrid < dim, dimworld >::leafend () const {
+  return leafend<codim, pitype>(maxlevel_, -1);
+}
+
+template < int dim, int dimworld >
+template<int codim>
+inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::LeafIterator 
+AlbertaGrid < dim, dimworld >::leafend () const {
+  return leafend<codim, All_Partition>(maxlevel_, -1);
 }
 
 template < int dim, int dimworld >
@@ -3256,10 +3300,22 @@ AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const
 }
 
 template < int dim, int dimworld >
+inline typename AlbertaGrid<dim,dimworld>::LeafIterator  
+AlbertaGrid < dim, dimworld >::leafbegin () const {
+  return leafbegin<0, All_Partition>(maxlevel_, -1);
+}
+
+template < int dim, int dimworld >
 inline typename AlbertaGrid<dim,dimworld>::LeafIterator 
 AlbertaGrid < dim, dimworld >::leafend (int level, int proc ) const
 {
   return AlbertaGridLeafIterator<0, All_Partition, const MyType> (*this,level,proc);
+}
+
+template < int dim, int dimworld >
+inline typename AlbertaGrid<dim,dimworld>::LeafIterator 
+AlbertaGrid < dim, dimworld >::leafend () const {
+  return leafend<0, All_Partition>(maxlevel_, -1);
 }
 
 //**************************************
