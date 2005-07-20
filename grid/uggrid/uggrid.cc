@@ -301,7 +301,7 @@ Dune::UGGrid<dim, dimworld>::lbegin (int level) const
 
 template<int dim, int dimworld> 
 template<int codim, Dune::PartitionIteratorType PiType>
-inline typename Dune::UGGrid<dim,dimworld>::Traits::template Codim<codim>::template partition<PiType>::LevelIterator
+inline typename Dune::UGGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
 Dune::UGGrid<dim, dimworld>::lbegin (int level) const
 {
     assert(multigrid_);
@@ -323,7 +323,7 @@ Dune::UGGrid < dim, dimworld >::lend (int level) const
 
 template < int dim, int dimworld > 
 template<int codim, Dune::PartitionIteratorType PiType>
-inline typename Dune::UGGrid<dim,dimworld>::Traits::template Codim<codim>::template partition<PiType>::LevelIterator
+inline typename Dune::UGGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
 Dune::UGGrid < dim, dimworld >::lend (int level) const
 {
     return UGGridLevelIterator<codim,PiType, const UGGrid<dim,dimworld> >(level);

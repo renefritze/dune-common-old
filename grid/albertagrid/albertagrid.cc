@@ -3197,7 +3197,7 @@ inline AlbertaGrid < dim, dimworld >::~AlbertaGrid()
 
 template < int dim, int dimworld > 
 template<int codim, PartitionIteratorType pitype>
-inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template partition<pitype>::LevelIterator
+inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LevelIterator
 AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 {
   if((dim == codim) || ((dim == 3) && (codim == 2)) ) 
@@ -3208,14 +3208,14 @@ AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 }
 
 template < int dim, int dimworld > template<int codim, PartitionIteratorType pitype>
-inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template partition<pitype>::LevelIterator
+inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LevelIterator
 AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
 {
   return AlbertaGridLevelIterator<codim,pitype,const MyType> ((*this),level,proc);
 }
 
 template < int dim, int dimworld > template<int codim>
-inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template partition<All_Partition>::LevelIterator
+inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
 AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 {
   if((dim == codim) || ((dim == 3) && (codim == 2)) ) 
@@ -3226,7 +3226,7 @@ AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 }
 
 template < int dim, int dimworld > template<int codim>
-inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template partition<All_Partition>::LevelIterator
+inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
 AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
 {
   return AlbertaGridLevelIterator<codim,All_Partition,const MyType> ((*this),level,proc);
@@ -3234,7 +3234,7 @@ AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
 
 template < int dim, int dimworld >
 template<int codim, PartitionIteratorType pitype>
-inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::template partition<pitype>::LeafIterator  
+inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator  
 AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const
 {
   return AlbertaGridLeafIterator<codim, pitype, const MyType> (*this,vertexMarker_,level,proc);
@@ -3242,7 +3242,7 @@ AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const
 
 template < int dim, int dimworld >
 template<int codim, PartitionIteratorType pitype>
-inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::template partition<pitype>::LeafIterator 
+inline typename AlbertaGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LeafIterator 
 AlbertaGrid < dim, dimworld >::leafend (int level, int proc ) const
 {
   return AlbertaGridLeafIterator<codim, pitype, const MyType> (*this,level,proc);

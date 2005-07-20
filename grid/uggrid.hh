@@ -176,11 +176,11 @@ public:
 
     //! Iterator to first entity of given codim on level
     template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template partition<PiType>::LevelIterator lbegin (int level) const;
+    typename Traits::template Codim<codim>::template Partition<PiType>::LevelIterator lbegin (int level) const;
 
     //! one past the end on this level
     template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template partition<PiType>::LevelIterator lend (int level) const;
+    typename Traits::template Codim<codim>::template Partition<PiType>::LevelIterator lend (int level) const;
 
     //! Iterator to first entity of given codim on level
     template<int codim>
@@ -196,12 +196,13 @@ public:
 
     //! Iterator to first entity of given codim on level
     template<int codim, PartitionIteratorType PiType>
-    typename Traits::template Codim<codim>::template partition<PiType>::LeafIterator leafbegin() const {
+    typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafbegin() const {
         DUNE_THROW(NotImplemented, "leafbegin not implemented");
     }
 
     //! one past the end on this level
     template<int codim, PartitionIteratorType PiType>
+    typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const {
     typename Traits::template Codim<codim>::template partition<PiType>::LeafIterator leafend() const {
         DUNE_THROW(NotImplemented, "leafend not implemented");
     }

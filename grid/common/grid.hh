@@ -187,10 +187,10 @@ public:
     typedef typename GridImp::Traits::template Codim<cd>::EntityPointer EntityPointer;
 
     template <PartitionIteratorType pitype>
-    struct partition
+    struct Partition
     {
-      typedef typename GridImp::Traits::template Codim<cd>::template partition<pitype>::LevelIterator LevelIterator;
-      typedef typename GridImp::Traits::template Codim<cd>::template partition<pitype>::LeafIterator LeafIterator;
+      typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator LevelIterator;
+      typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator LeafIterator;
     };
   
     typedef typename GridImp::Traits::HierarchicIterator HierarchicIterator;
@@ -254,28 +254,28 @@ public:
 
   //! Iterator to first entity of given codim on level
   template<int cd, PartitionIteratorType pitype>
-  typename Codim<cd>::template partition<pitype>::LevelIterator lbegin (int level) const
+  typename Codim<cd>::template Partition<pitype>::LevelIterator lbegin (int level) const
     {
       return asImp().template lbegin<cd,pitype>(level);
     }
 
   //! one past the end on this level
   template<int cd, PartitionIteratorType pitype>
-  typename Codim<cd>::template partition<pitype>::LevelIterator lend (int level) const
+  typename Codim<cd>::template Partition<pitype>::LevelIterator lend (int level) const
     {
       return asImp().template lend<cd,pitype>(level);
     }
 
   //! Iterator to first entity of given codim on level
   template<int cd>
-  typename Codim<cd>::template partition<All_Partition>::LevelIterator lbegin (int level) const
+  typename Codim<cd>::template Partition<All_Partition>::LevelIterator lbegin (int level) const
     {
       return asImp().template lbegin<cd,All_Partition>(level);
     }
 
   //! one past the end on this level
   template<int cd>
-  typename Codim<cd>::template partition<All_Partition>::LevelIterator lend (int level) const
+  typename Codim<cd>::template Partition<All_Partition>::LevelIterator lend (int level) const
     {
       return asImp().template lend<cd,All_Partition>(level);
     }
@@ -431,7 +431,7 @@ struct GridTraits
     typedef Dune::EntityPointer<const GridImp,EntityPointerImp<cd,const GridImp> > EntityPointer;
     
     template <PartitionIteratorType pitype>
-    struct partition
+    struct Partition
     {
       typedef Dune::LevelIterator<cd,pitype,const GridImp,LevelIteratorImp> LevelIterator;
       typedef Dune::LeafIterator<cd,pitype,const GridImp,LeafIteratorImp> LeafIterator;

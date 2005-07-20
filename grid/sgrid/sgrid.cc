@@ -1003,28 +1003,28 @@ inline int SGrid<dim,dimworld>::maxlevel () const
 }
 
 template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
-inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template partition<pitype>::LevelIterator
+inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
 SGrid<dim,dimworld>::lbegin (int level) const
 {
         return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,level,0);
 }
 
 template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
-inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template partition<pitype>::LevelIterator
+inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
 SGrid<dim,dimworld>::lend (int level) const
 {
         return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,level,size(level,cd));
 }
 
 template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
-inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template partition<pitype>::LeafIterator
+inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator
 SGrid<dim,dimworld>::leafbegin () const
 {
         return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,maxlevel(),0);
 }
 
 template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
-inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template partition<pitype>::LeafIterator
+inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator
 SGrid<dim,dimworld>::leafend () const
 {
         return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,maxlevel(),size(maxlevel(),cd));
