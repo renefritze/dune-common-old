@@ -249,9 +249,9 @@ namespace Dune {
 #ifdef _ALU3DGRID_PARALLEL_
                                                                mpAccess_.nlinks(),
 #else 
-                                                               1,
+                                                               1
 #endif
-                                                               pitype);
+                                                               );
   }
   
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -266,9 +266,9 @@ namespace Dune {
 #ifdef _ALU3DGRID_PARALLEL_
                                                                mpAccess_.nlinks(),
 #else 
-                                                               1,
+                                                               1
 #endif
-                                                               pitype);
+                                                               );
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
