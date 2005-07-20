@@ -203,7 +203,6 @@ public:
     //! one past the end on this level
     template<int codim, PartitionIteratorType PiType>
     typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const {
-    typename Traits::template Codim<codim>::template partition<PiType>::LeafIterator leafend() const {
         DUNE_THROW(NotImplemented, "leafend not implemented");
     }
 
@@ -473,8 +472,5 @@ namespace Capabilities
 }
 
 } // namespace Dune
-
-// Include the method definitions
-//#include "uggrid/uggrid.cc"
 
 #endif
