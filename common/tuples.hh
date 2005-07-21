@@ -66,7 +66,15 @@ namespace Dune
     Pair(const Type1& t1, const T2& t2, const T3& t3,
 	 const T4& t4, const T5& t5, const T6& t6, const T7& t7,
 	 const T8& t8, const T9& t9);
-    
+
+    /**
+     * @brief Constructor
+     *
+     * @param t1 The value of the first field.
+     * @param t2 The value of the second field.
+     */
+    Pair(const Type1& t1, const TT& t2);
+
     /**
      * @brief Copy Constructor for implicit type conversion
      * @param other The tuple to copy.
@@ -134,6 +142,13 @@ namespace Dune
     Pair(const Type1& first, const Nil&, const Nil&, const Nil&, const Nil&,
 	 const Nil&, const Nil&, const Nil&, const Nil&);
     
+    /**
+     * @brief Constructor.
+     * @param t1 The values for the first field.
+     * @param t2 The value for the second field.
+     */
+    Pair(const Type1& first, const Nil&);
+
     /**
      * @brief Copy constructor for type conversion.
      */
@@ -206,6 +221,9 @@ namespace Dune
   class Tuple : public TupleToPairs<T1,T2,T3,T4,T5,T6,T7,T8,T9>::Type
   {
   public:
+    //! Type of the first Pair defining the Tuple
+    typedef typename TupleToPairs<T1,T2,T3,T4,T5,T6,T7,T8,T9>::Type FirstPair;
+
     Tuple(const T1& t1=T1(), const T2& t2=T2(), const T3& t3=T3(), 
 	  const T4& t4=T4(), const T5& t5=T5(), const T6& t6=T6(), 
 	  const T7& t7=T7(), const T8& t8=T8(), const T9& t9=T8())
@@ -433,6 +451,11 @@ namespace Dune
 			   const T7& t7, const T8& t8, const T9& t9)
     : first_(first), second_(t2,t3,t4,t5,t6,t7,t8,t9,Nil())
   {}
+
+  template <typename T1, typename TT>
+  inline Pair<T1, TT>::Pair(const Type1& first, const TT& second) 
+    : first_(first), second_(second)
+  {}
   
   template<typename T1, typename T2>
   template<typename U1, typename U2>
@@ -477,6 +500,11 @@ namespace Dune
   template<typename T1>
   inline Pair<T1,Nil>::Pair(const Type1& first, const Nil&, const Nil&, const Nil&, const Nil&,
 	 const Nil&, const Nil&, const Nil&, const Nil&)
+    : first_(first)
+  {}
+
+  template <typename T1>
+  inline Pair<T1, Nil>::Pair(const Type1& first, const Nil&)
     : first_(first)
   {}
 
