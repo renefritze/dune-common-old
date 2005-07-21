@@ -1099,7 +1099,7 @@ namespace Capabilities
   };
   
   template<int dim, int dimw, int cdim>
-  struct hasEntity< SGrid<dim,dimw>, SEntity<cdim, dim, const SGrid<dim,dimw> > >
+  struct hasEntity< SGrid<dim,dimw>, cdim>
   {
     static const bool v = true;
   };
