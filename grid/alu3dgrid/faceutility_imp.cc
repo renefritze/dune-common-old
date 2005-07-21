@@ -1,6 +1,3 @@
-#include "grid.hh"
-#include "geometry.hh"
-
 namespace Dune {
 
   template <ALU3dGridElementType type> 
