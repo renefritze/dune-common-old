@@ -622,7 +622,7 @@ namespace Dune {
   class ALU3dGrid;
   template <ALU3dGridElementType type>
   class ALU3dGridFaceInfo;
-  template <class GridImp>
+  template <ALU3dGridElementType elType>
   class ALU3dGridGeometricFaceInfo;
 
 //**********************************************************************
@@ -654,7 +654,7 @@ public IntersectionIteratorDefault <GridImp,ALU3dGridIntersectionIterator>
   typedef ALU3dGridFaceInfo<GridImp::elementType> FaceInfoType;
   typedef typename std::auto_ptr<FaceInfoType> FaceInfoPointer;
 
-  typedef ALU3dGridGeometricFaceInfo<GridImp> GeometryInfoType;
+  typedef ALU3dGridGeometricFaceInfo<GridImp::elementType> GeometryInfoType;
   typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
   typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
 

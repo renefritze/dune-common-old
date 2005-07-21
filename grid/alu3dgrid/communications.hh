@@ -14,6 +14,7 @@
 
 namespace Dune {
 
+  /* Not used here
 template <class DofManagerType>
 class CommunicatorInterface
 {
@@ -31,7 +32,7 @@ public:
   virtual bool communicate (DofManagerType & dm) = 0;
   virtual bool consistencyGhosts () = 0;
 };
-
+*/
   
 /*!
  ALU3dGridCommunicator organizes the communication of ALU3dGrid on
