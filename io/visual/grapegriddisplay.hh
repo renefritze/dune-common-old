@@ -17,8 +17,8 @@ class GrapeGridDisplay
   typedef typename GrapeInterface<dim,dimworld>::DUNE_ELEM DUNE_ELEM;
   
 public:
-  typedef typename GridType::Traits::template codim<0>::LevelIterator LevelIteratorType ;
-  typedef typename GridType::LeafIterator LeafIteratorType ;
+  typedef typename GridType::Traits::template Codim<0>::LevelIterator LevelIteratorType ;
+  typedef typename GridType::Traits::template Codim<0>::LeafIterator LeafIteratorType ;
   //typedef typename GridType::template LeafIteratorDef<Interior_Partition>::LeafIteratorType LeafIteratorType ;
 protected:
   //! the grid we want to display 
