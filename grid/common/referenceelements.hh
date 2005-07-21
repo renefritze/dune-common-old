@@ -35,126 +35,127 @@ namespace Dune
   {
   public:
 
-	// compile time sizes
-	enum { d=dim };    // maps from R^d
+    // compile time sizes
+    enum { d=dim };    // maps from R^d
 
-	// export types
-	typedef ctype CoordType;
+    // export types
+    typedef ctype CoordType;
 
-	//! number of entities of codim c
-	virtual int size (int c) const = 0;
+    //! number of entities of codim c
+    virtual int size (int c) const = 0;
 	
-	//! number of subentities of codim cc of entitity (i,c)
-	virtual int size (int i, int c, int cc) const = 0;
+    //! number of subentities of codim cc of entitity (i,c)
+    virtual int size (int i, int c, int cc) const = 0;
 	
-	//! number of ii'th subentity with codim cc>c of (i,c)
-	virtual int subentity (int i, int c, int ii, int cc) const = 0;
+    //! number of ii'th subentity with codim cc>c of (i,c)
+    virtual int subentity (int i, int c, int ii, int cc) const = 0;
 
-	//! position of entity (i,c) 
-	virtual const FieldVector<ctype,dim>& position (int i, int c) const = 0;
+    //! position of entity (i,c) 
+    virtual const FieldVector<ctype,dim>& position (int i, int c) const = 0;
 
-	//! type of (i,c) 
-	virtual GeometryType type (int i, int c) const = 0;
+    //! type of (i,c) 
+    virtual GeometryType type (int i, int c) const = 0;
 
-	//! volume of the reference element
-	virtual double volume () const = 0;
+    //! volume of the reference element
+    virtual double volume () const = 0;
 
-	//! virtual destructor
-	virtual ~ReferenceElement ()
-	{}
+    //! virtual destructor
+    virtual ~ReferenceElement ()
+    {}
   };
 
   //! The wrapper allows Imp to be used as a reference element without making methods of Imp virtual
   template<typename Imp>
-  class ReferenceElementWrapper : public ReferenceElement<typename Imp::CoordType,Imp::d>,
-								  private Imp
+  class ReferenceElementWrapper : 
+    public ReferenceElement<typename Imp::CoordType,Imp::d>,
+    private Imp
   {
   public:
 
-	// compile time sizes
-	enum { d=Imp::d };    // maps from R^d
+    // compile time sizes
+    enum { d=Imp::d };    // maps from R^d
 
-	// export types
-	typedef typename Imp::CoordType CoordType;
+    // export types
+    typedef typename Imp::CoordType CoordType;
 
-	//! number of entities of codim c
-	int size (int c) const
-	{
-	  return Imp::size(c);
-	}
+    //! number of entities of codim c
+    int size (int c) const
+    {
+      return Imp::size(c);
+    }
 	
-	//! number of subentities of codim cc of entitity (i,c)
-	int size (int i, int c, int cc) const
-	{
-	  return Imp::size(i,c,cc);
-	}
+    //! number of subentities of codim cc of entitity (i,c)
+    int size (int i, int c, int cc) const
+    {
+      return Imp::size(i,c,cc);
+    }
 	
-	//! number of ii'th subentity with codim cc of (i,c)
-	int subentity (int i, int c, int ii, int cc) const
-	{
-	  return Imp::subentity(i,c,ii,cc);
-	}
+    //! number of ii'th subentity with codim cc of (i,c)
+    int subentity (int i, int c, int ii, int cc) const
+    {
+      return Imp::subentity(i,c,ii,cc);
+    }
 
-	//! position of entity (i,c) 
-	const FieldVector<CoordType,d>& position (int i, int c) const
-	{
-	  return Imp::position(i,c);
-	}
+    //! position of entity (i,c) 
+    const FieldVector<CoordType,d>& position (int i, int c) const
+    {
+      return Imp::position(i,c);
+    }
 
- 	//! type of (i,c) 
-	GeometryType type (int i, int c) const
-	{
-   	  return Imp::type(i,c);
-	}
+    //! type of (i,c) 
+    GeometryType type (int i, int c) const
+    {
+      return Imp::type(i,c);
+    }
 
-	//! volume of the reference element
-	double volume () const
-	{
-   	  return Imp::volume();
-	}
- };
+    //! volume of the reference element
+    double volume () const
+    {
+      return Imp::volume();
+    }
+  };
 
   // output operator for wrapped reference elements
   template<typename T>
   inline std::ostream& operator<< (std::ostream& s, 
-								   const ReferenceElementWrapper<T>& r)
+                                   const ReferenceElementWrapper<T>& r)
   {
-	enum {dim=T::d};
+    enum {dim=T::d};
 
-	std::cout << "REFERENCE ELEMENT " << GeometryName(r.type(0,0))
-			  << " dimension=" << dim 
-			  << " volume=" << r.volume()
-			  << std::endl;
+    std::cout << "REFERENCE ELEMENT " << GeometryName(r.type(0,0))
+              << " dimension=" << dim 
+              << " volume=" << r.volume()
+              << std::endl;
 
-	for (int c=0; c<=dim; c++)
-	  {
-		std::cout << r.size(c) << " codim " << c << " entitie(s)" << std::endl;
-		for (int i=0; i<r.size(c); i++)
-		  {
-			std::cout << "  entity=" << i
-					  << " codim=" << c
-					  << " type=" << GeometryName(r.type(i,c))
-					  << " position=(" << r.position(i,c) << ")"
-					  << std::endl;
+    for (int c=0; c<=dim; c++)
+      {
+        std::cout << r.size(c) << " codim " << c << " entitie(s)" << std::endl;
+        for (int i=0; i<r.size(c); i++)
+          {
+            std::cout << "  entity=" << i
+                      << " codim=" << c
+                      << " type=" << GeometryName(r.type(i,c))
+                      << " position=(" << r.position(i,c) << ")"
+                      << std::endl;
 
-			for (int cc=c+1; cc<=dim; cc++)
-			  {
-				std::cout << "    " << r.size(i,c,cc) 
-						  << " subentities of codim " << cc
-						  << std::endl;
+            for (int cc=c+1; cc<=dim; cc++)
+              {
+                std::cout << "    " << r.size(i,c,cc) 
+                          << " subentities of codim " << cc
+                          << std::endl;
 
-				for (int ii=0; ii<r.size(i,c,cc); ii++)
-				  {
-					std::cout << "    index=" << ii
-							  << " subentity=" << r.subentity(i,c,ii,cc)
-							  << " position=(" << r.position(r.subentity(i,c,ii,cc),cc) << ")"
-							  << std::endl;
-				  }
-			  }
-		  }
-	  }
+                for (int ii=0; ii<r.size(i,c,cc); ii++)
+                  {
+                    std::cout << "    index=" << ii
+                              << " subentity=" << r.subentity(i,c,ii,cc)
+                              << " position=(" << r.position(r.subentity(i,c,ii,cc),cc) << ")"
+                              << std::endl;
+                  }
+              }
+          }
+      }
 
-	return s;
+    return s;
   }
 
 
@@ -168,215 +169,215 @@ namespace Dune
   class ReferenceCube
   {
   public:
-	enum { MAXE = Power_m_p<3,dim>::power }; // maximum number of entities per codim
+    enum { MAXE = Power_m_p<3,dim>::power }; // maximum number of entities per codim
 
-	// compile time sizes
-	enum { d=dim };    // maps from R^d
+    // compile time sizes
+    enum { d=dim };    // maps from R^d
 
-	// export types
-	typedef ctype CoordType;
+    // export types
+    typedef ctype CoordType;
 
-	//! build up the reference cube
-	ReferenceCube ()
-	{
-	  for (int i=0; i<=dim; ++i)
-		sizes[i] = 0;
-	  for (int i=0; i<MAXE; ++i) 
-		for (int j=0; j<=dim; ++j) 
-		  for (int k=0; k<=dim; ++k)
-			subsizes[i][j][k] = 0;
-	  FieldVector<int,dim> direction;
-	  for (int c=dim; c>=0; --c)
-		generate(0,c,direction);
-	}
+    //! build up the reference cube
+    ReferenceCube ()
+    {
+      for (int i=0; i<=dim; ++i)
+        sizes[i] = 0;
+      for (int i=0; i<MAXE; ++i) 
+        for (int j=0; j<=dim; ++j) 
+          for (int k=0; k<=dim; ++k)
+            subsizes[i][j][k] = 0;
+      FieldVector<int,dim> direction;
+      for (int c=dim; c>=0; --c)
+        generate(0,c,direction);
+    }
 	
-	//! number of entities of codim c
-	int size (int c) const
-	{
-	  return sizes[c];
-	}
+    //! number of entities of codim c
+    int size (int c) const
+    {
+      return sizes[c];
+    }
 	
-	//! number of subentities of codim cc of entitity (i,c)
-	int size (int i, int c, int cc) const
-	{
-	  return subsizes[i][c][cc];
-	}
+    //! number of subentities of codim cc of entitity (i,c)
+    int size (int i, int c, int cc) const
+    {
+      return subsizes[i][c][cc];
+    }
 	
-	//! number of ii'th subentity with codim cc of (i,c)
-	int subentity (int i, int c, int ii, int cc) const
-	{
-	  return hierarchy[i][c][ii][cc];
-	}
+    //! number of ii'th subentity with codim cc of (i,c)
+    int subentity (int i, int c, int ii, int cc) const
+    {
+      return hierarchy[i][c][ii][cc];
+    }
 
-	//! position of entity (i,c) 
-	const FieldVector<ctype,dim>& position (int i, int c) const
-	{
-	  return pos[i][c];	  
-	}
+    //! position of entity (i,c) 
+    const FieldVector<ctype,dim>& position (int i, int c) const
+    {
+      return pos[i][c];	  
+    }
 
-	//! type of (i,c) 
-	GeometryType type (int i, int c) const
-	{
-	  return cube;	  
-	}
+    //! type of (i,c) 
+    GeometryType type (int i, int c) const
+    {
+      return cube;	  
+    }
 
-	//! volume of the reference element
-	double volume () const
-	{
-	  return 1.0;
-	}
+    //! volume of the reference element
+    double volume () const
+    {
+      return 1.0;
+    }
 
-	//! position of entity (i,c) 
-	const FieldVector<int,dim>& iposition (int i, int c) const
-	{
-	  return ipos[i][c];	  
-	}
+    //! position of entity (i,c) 
+    const FieldVector<int,dim>& iposition (int i, int c) const
+    {
+      return ipos[i][c];	  
+    }
 
   private:
 
-	class IdMapper {
-	public:
-	  int& operator() (const FieldVector<int,dim>& x)
-	  {
-		int index=x[dim-1];
-		for (int i=dim-2; i>=0; --i) index = 3*index+x[i];
-		return id[index];
-	  }
-	private:
-	  int id[1<<(2*dim)];
-	};
+    class IdMapper {
+    public:
+      int& operator() (const FieldVector<int,dim>& x)
+      {
+        int index=x[dim-1];
+        for (int i=dim-2; i>=0; --i) index = 3*index+x[i];
+        return id[index];
+      }
+    private:
+      int id[1<<(2*dim)];
+    };
 
-	void generate (int k, int c, FieldVector<int,dim>& direction)
-	{
-	  if (k<c) 
-		{ 
-		  // select kth direction
-		  for (int i=0; i<dim; ++i)
-			{
-			  bool done=false;
-			  for (int j=0; j<k; ++j)
-				if (i<=direction[j]) {
-				  done = true;
-				  break;
-				}
-			  if (done) continue;
-			  direction[k] = i; // new direction selected
-			  generate(k+1,c,direction);
-			}
-		}
-	  else
-		{
-//  		  std::cout << "c=" << c 
-//  					<< " directions=(" << direction << ")"
-//  					<< std::endl;
+    void generate (int k, int c, FieldVector<int,dim>& direction)
+    {
+      if (k<c) 
+        { 
+          // select kth direction
+          for (int i=0; i<dim; ++i)
+            {
+              bool done=false;
+              for (int j=0; j<k; ++j)
+                if (i<=direction[j]) {
+                  done = true;
+                  break;
+                }
+              if (done) continue;
+              direction[k] = i; // new direction selected
+              generate(k+1,c,direction);
+            }
+        }
+      else
+        {
+          //  		  std::cout << "c=" << c 
+          //  					<< " directions=(" << direction << ")"
+          //  					<< std::endl;
 				
-		  // c directions have been selected
-		  // for each there are 2 choices, ie 2^c possibilities in total
-		  for (int b=0; b<(1<<c); ++b)
-			{
-			  // make coordinate in dim-cube
-			  FieldVector<int,dim> x; 
-			  for (int i=0; i<dim; ++i) x[i] = 1;
-			  for (int i=0; i<c; i++)
-				if (((1<<i)&b)==0)
-				  x[direction[i]] = 0;
-				else
-				  x[direction[i]] = 2;
+          // c directions have been selected
+          // for each there are 2 choices, ie 2^c possibilities in total
+          for (int b=0; b<(1<<c); ++b)
+            {
+              // make coordinate in dim-cube
+              FieldVector<int,dim> x; 
+              for (int i=0; i<dim; ++i) x[i] = 1;
+              for (int i=0; i<c; i++)
+                if (((1<<i)&b)==0)
+                  x[direction[i]] = 0;
+                else
+                  x[direction[i]] = 2;
 
-			  int entity = sizes[c];
-			  (sizes[c])++;
-			  if (sizes[c]>MAXE)
-				DUNE_THROW(GridError, "MAXE in ReferenceCube exceeded");
+              int entity = sizes[c];
+              (sizes[c])++;
+              if (sizes[c]>MAXE)
+                DUNE_THROW(GridError, "MAXE in ReferenceCube exceeded");
 
-			  // print info
-// 			  std::cout << " x=(" << x << ")->"
-//  						<< "id=" << entity
-//  						<< std::endl;
+              // print info
+              // 			  std::cout << " x=(" << x << ")->"
+              //  						<< "id=" << entity
+              //  						<< std::endl;
 
-			  // store id in map
-			  idmap(x) = entity;
+              // store id in map
+              idmap(x) = entity;
 
-			  // assign position
-			  for (int i=0; i<dim; i++)
-				pos[entity][c][i] = x[i]*0.5;
+              // assign position
+              for (int i=0; i<dim; i++)
+                pos[entity][c][i] = x[i]*0.5;
 
-			  // assign integer position
-			  ipos[entity][c] = x;
+              // assign integer position
+              ipos[entity][c] = x;
 
-			  // generate subentities
-			  for (int cc=c+1; cc<=dim; ++cc)
-				generatesub(k,cc,direction,x,c);
-			}
-		}
-	}
+              // generate subentities
+              for (int cc=c+1; cc<=dim; ++cc)
+                generatesub(k,cc,direction,x,c);
+            }
+        }
+    }
 
-	void generatesub (int k, int cc, FieldVector<int,dim>& direction,
-					  FieldVector<int,dim>& e, int c)
-	{
-	  if (k<cc) 
-		{ 
-		  // select kth direction
-		  for (int i=0; i<dim; ++i)
-			{
-			  bool done=false;
-			  for (int j=0; j<c; ++j)
-				if (i==direction[j]) {
-				  done = true;
-				  break;
-				}
-			  for (int j=c; j<k; ++j)
-				if (i<=direction[j]) {
-				  done = true;
-				  break;
-				}
-			  if (done) continue;
-			  direction[k] = i; // new direction selected
-			  generatesub(k+1,cc,direction,e,c);
-			}
-		}
-	  else
-		{
-//  		  std::cout << "  cc=" << cc 
-//  					<< " directions=(" << direction << ")"
-//  					<< std::endl;
+    void generatesub (int k, int cc, FieldVector<int,dim>& direction,
+                      FieldVector<int,dim>& e, int c)
+    {
+      if (k<cc) 
+        { 
+          // select kth direction
+          for (int i=0; i<dim; ++i)
+            {
+              bool done=false;
+              for (int j=0; j<c; ++j)
+                if (i==direction[j]) {
+                  done = true;
+                  break;
+                }
+              for (int j=c; j<k; ++j)
+                if (i<=direction[j]) {
+                  done = true;
+                  break;
+                }
+              if (done) continue;
+              direction[k] = i; // new direction selected
+              generatesub(k+1,cc,direction,e,c);
+            }
+        }
+      else
+        {
+          //  		  std::cout << "  cc=" << cc 
+          //  					<< " directions=(" << direction << ")"
+          //  					<< std::endl;
 				
-		  // cc-c additional directions have been selected
-		  // for each there are 2 choices, ie 2^(cc-c) possibilities in total
-		  for (int b=0; b<(1<<(cc-c)); ++b)
-			{
-			  // make coordinate in dim-cube
-			  FieldVector<int,dim> x(e); 
-			  for (int i=0; i<(cc-c); i++)
-				if (((1<<i)&b)==0)
-				  x[direction[i+c]] = 0;
-				else
-				  x[direction[i+c]] = 2;
+          // cc-c additional directions have been selected
+          // for each there are 2 choices, ie 2^(cc-c) possibilities in total
+          for (int b=0; b<(1<<(cc-c)); ++b)
+            {
+              // make coordinate in dim-cube
+              FieldVector<int,dim> x(e); 
+              for (int i=0; i<(cc-c); i++)
+                if (((1<<i)&b)==0)
+                  x[direction[i+c]] = 0;
+                else
+                  x[direction[i+c]] = 2;
 
-			  int entity = idmap(e);
-			  int subentity = idmap(x);
-			  int index = subsizes[entity][c][cc];
-			  (subsizes[entity][c][cc])++;
-			  if (subsizes[entity][c][cc]>MAXE)
-				DUNE_THROW(GridError, "MAXE in ReferenceCube exceeded");
+              int entity = idmap(e);
+              int subentity = idmap(x);
+              int index = subsizes[entity][c][cc];
+              (subsizes[entity][c][cc])++;
+              if (subsizes[entity][c][cc]>MAXE)
+                DUNE_THROW(GridError, "MAXE in ReferenceCube exceeded");
 
-			  // print info
-//  			  std::cout << "  (" << e << ")," << entity
-//  						<< " has subentity (" << x << ")," << subentity
-//  						<< " at index=" << index
-//  						<< std::endl;
+              // print info
+              //  			  std::cout << "  (" << e << ")," << entity
+              //  						<< " has subentity (" << x << ")," << subentity
+              //  						<< " at index=" << index
+              //  						<< std::endl;
 
-			  // store id
-			  hierarchy[entity][c][index][cc] = subentity;
-			}
-		}
-	}
+              // store id
+              hierarchy[entity][c][index][cc] = subentity;
+            }
+        }
+    }
 
-	IdMapper idmap;
-	int sizes[dim+1];
-	int subsizes[MAXE][dim+1][dim+1];
-	int hierarchy[MAXE][dim+1][MAXE][dim+1];
-	FieldVector<ctype,dim> pos[MAXE][dim+1];
-	FieldVector<int,dim> ipos[MAXE][dim+1];
+    IdMapper idmap;
+    int sizes[dim+1];
+    int subsizes[MAXE][dim+1][dim+1];
+    int hierarchy[MAXE][dim+1][MAXE][dim+1];
+    FieldVector<ctype,dim> pos[MAXE][dim+1];
+    FieldVector<int,dim> ipos[MAXE][dim+1];
   };
 
 
@@ -386,74 +387,74 @@ namespace Dune
   {
   public:
 
-	//! export type elements in the container
-	typedef ReferenceCube<ctype,dim> value_type;
+    //! export type elements in the container
+    typedef ReferenceCube<ctype,dim> value_type;
 
-	//! return element of the container via geometry type
-	const value_type& operator() (GeometryType type) const
-	{
-	  if ( (type==cube) || (type==line) || (type==quadrilateral) ||
-		   (type==hexahedron) )
-		return cube;
-	  DUNE_THROW(RangeError, "expected a cube!");
-	}
+    //! return element of the container via geometry type
+    const value_type& operator() (GeometryType type) const
+    {
+      if ( (type==cube) || (type==line) || (type==quadrilateral) ||
+           (type==hexahedron) )
+        return cube_;
+      DUNE_THROW(RangeError, "expected a cube!");
+    }
 
   private:
-	ReferenceCube<ctype,dim> cube;
+    ReferenceCube<ctype,dim> cube_;
   };
 
  
 
  
- /***********************************************************
-  * the simplex in any dimension (line,triangle,tetrahedron)
-  ***********************************************************/
+  /***********************************************************
+   * the simplex in any dimension (line,triangle,tetrahedron)
+   ***********************************************************/
 
 
-/*
+  /*
 
-see the reference elements:
+  see the reference elements:
 
-y
-| 2(0,1)
-| |\
-| | \
-| |  \
-| |   \
-| |    \ 
-| |_ _ _\  
-|  0(0,0)  1(1,0)
-|_ _ _ _ _ _ _ _ 
-x
-
-
-linear triangular 
-area=1/2;
----------------------
+  y
+  | 2(0,1)
+  | |\
+  | | \
+  | |  \
+  | |   \
+  | |    \ 
+  | |_ _ _\  
+  |  0(0,0)  1(1,0)
+  |_ _ _ _ _ _ _ _ 
+  x
 
 
-3 (0,0,1)
+  linear triangular 
+  area=1/2;
+  ---------------------
 
-|`  
-|\ `
-| \  `
-|  \   `  
-|   \  .' 2 (0,1,0)
-|    .' |
-|  .' \ | 
-|.'_ _ \|  
+
+  3 (0,0,1)
+
+  |`  
+  |\ `
+  | \  `
+  |  \   `  
+  |   \  .' 2 (0,1,0)
+  |    .' |
+  |  .' \ | 
+  |.'_ _ \|  
   
-0       1
-(0,0,0,)  (1,0,0)
+  0       1
+  (0,0,0,)  (1,0,0)
 
-linear tetrahedron
+  linear tetrahedron
   volume = 1/6;
---------------------
-*/
+  --------------------
+  */
 
 
-//reference simplex without virtual functions
-
+  //reference simplex without virtual functions
+  //! Reference simplex
   template<typename ctype, int dim>
   class ReferenceSimplex
   {
@@ -471,7 +472,7 @@ linear tetrahedron
       for (int i=0; i<MAXE; ++i) 
 	for (int j=0; j<=dim; ++j) 
 	  for (int k=0; k<=dim; ++k)
-	    	      subsizes[i][j][k] = 0;
+            subsizes[i][j][k] = 0;
       
       for (int c=dim; c>=0; --c)
 	entity_details (c);
@@ -520,10 +521,10 @@ linear tetrahedron
       
     }
     //! position of entity (i,c) 
-  //   const FieldVector<int,dim>& iposition (int i, int c) const
-//     {
-//       //return ipos[i][c];	  
-//     }
+    //   const FieldVector<int,dim>& iposition (int i, int c) const
+    //     {
+    //       //return ipos[i][c];	  
+    //     }
   private:
     
     //details of entities and subentities
@@ -532,200 +533,200 @@ linear tetrahedron
      
       sizes[dim]=dim+1; // simplex definition 
          
-	// position of vertices, there are dim+1 vertices
-	FieldVector<int,dim> x;
-	x=0;
-	// vertex is codim=dim entity
-	for (int n=0;n<dim;n++)
-	  {
-	    pos[0][dim][n]=x[n];
+      // position of vertices, there are dim+1 vertices
+      FieldVector<int,dim> x;
+      x=0;
+      // vertex is codim=dim entity
+      for (int n=0;n<dim;n++)
+        {
+          pos[0][dim][n]=x[n];
 	    
-	  }
-	for(int k=1;k<=dim;++k)
-	  {
-	    for (int j=0;j<dim;++j)
-	      {
-		x[j]=0;
-		x[k-1]=1;
-		pos[k][dim][j]= x[j]; 
+        }
+      for(int k=1;k<=dim;++k)
+        {
+          for (int j=0;j<dim;++j)
+            {
+              x[j]=0;
+              x[k-1]=1;
+              pos[k][dim][j]= x[j]; 
 		
-	      }
-	  }
+            }
+        }
      
-	// position of centre of gravity of the element 
-	// codim=0 for element or cell
-	sizes[0]=1; // only 1 cell !!
-	int node;
-	for(int k=0;k<dim;++k)
-	  { node=0;
-	    pos[sizes[0]-1][0][k]=(pos[0][dim][k])/sizes[dim];
-	    subentityindex[sizes[0]-1][0][0][dim]=0;
-	    node+=1;
-	    for (int j=1;j<sizes[dim];++j)
-	      {
-		pos[sizes[0]-1][0][k]+=(pos[j][dim][k])/(sizes[dim]);
-		subentityindex[sizes[0]-1][0][j][dim]=j;
-		node+=1;
-	      }
-	  }
-	subsizes[sizes[0]-1][0][dim]=node;
+      // position of centre of gravity of the element 
+      // codim=0 for element or cell
+      sizes[0]=1; // only 1 cell !!
+      int node;
+      for(int k=0;k<dim;++k)
+        { node=0;
+        pos[sizes[0]-1][0][k]=(pos[0][dim][k])/sizes[dim];
+        subentityindex[sizes[0]-1][0][0][dim]=0;
+        node+=1;
+        for (int j=1;j<sizes[dim];++j)
+          {
+            pos[sizes[0]-1][0][k]+=(pos[j][dim][k])/(sizes[dim]);
+            subentityindex[sizes[0]-1][0][j][dim]=j;
+            node+=1;
+          }
+        }
+      subsizes[sizes[0]-1][0][dim]=node;
 
-//++++++++++++++++
-	if(dim==1)// line
-	  {
-	    // node indices on element
-	    for(int i=0;i<subsizes[0][0][3];++i)
-	      subentityindex[0][0][i][3]=i;
-	  }
-	else if(dim==2) // triangle
-	  {
-	    sizes[1]=3; // edge
+      //++++++++++++++++
+      if(dim==1)// line
+        {
+          // node indices on element
+          for(int i=0;i<subsizes[0][0][3];++i)
+            subentityindex[0][0][i][3]=i;
+        }
+      else if(dim==2) // triangle
+        {
+          sizes[1]=3; // edge
 	    
-	    // hard coding the number of subentities
-	    // triangle has 3 vertices, 3 edges 
-	    subsizes[0][0][2]=3; 
-	    subsizes[0][0][1]=3; 
-	    // triangle  has 2 vertices on each  edge
-	    for (int k=0;k<3;++k)
-	      subsizes[k][1][2]=2; 
-	    // subentity indices
-	    // node indices on element
-	    for(int i=0;i<subsizes[0][0][2];++i)
-	      subentityindex[0][0][i][2]=i;
-	    // edge indices on element
-	    for(int i=0;i<subsizes[0][0][1];++i)
-	      subentityindex[0][0][i][1]=i;
-	    // node indices on edge 0
-	    subentityindex[0][1][0][2]=1;
-	    subentityindex[0][1][1][2]=2;
-	    // node indices on edge 1
-	    subentityindex[1][1][0][2]=0;
-	    subentityindex[1][1][1][2]=2;
-	    // node indices on edge 2
-	    subentityindex[2][1][0][2]=0;
-	    subentityindex[2][1][1][2]=1;
-      for(int j=0;j<dim;++j)
-	{
-	    //edge 0 (nodes 1,2)
-	    pos[0][1][j]=(pos[1][2][j]+pos[2][2][j])/2.0;
-	    //edge 1 (nodes 0,2)
-	    pos[1][1][j]=(pos[0][2][j]+pos[2][2][j])/2.0;
-	    //edge 2 (nodes 0,1)
-	    pos[2][1][j]=(pos[0][2][j]+pos[1][2][j])/2.0;
-	}
-	  }
-	else if(dim==3)// tetrahedron
-	  {
-	    sizes[1]=4; // face
-	    sizes[2]=6; // edge
+          // hard coding the number of subentities
+          // triangle has 3 vertices, 3 edges 
+          subsizes[0][0][2]=3; 
+          subsizes[0][0][1]=3; 
+          // triangle  has 2 vertices on each  edge
+          for (int k=0;k<3;++k)
+            subsizes[k][1][2]=2; 
+          // subentity indices
+          // node indices on element
+          for(int i=0;i<subsizes[0][0][2];++i)
+            subentityindex[0][0][i][2]=i;
+          // edge indices on element
+          for(int i=0;i<subsizes[0][0][1];++i)
+            subentityindex[0][0][i][1]=i;
+          // node indices on edge 0
+          subentityindex[0][1][0][2]=1;
+          subentityindex[0][1][1][2]=2;
+          // node indices on edge 1
+          subentityindex[1][1][0][2]=0;
+          subentityindex[1][1][1][2]=2;
+          // node indices on edge 2
+          subentityindex[2][1][0][2]=0;
+          subentityindex[2][1][1][2]=1;
+          for(int j=0;j<dim;++j)
+            {
+              //edge 0 (nodes 1,2)
+              pos[0][1][j]=(pos[1][2][j]+pos[2][2][j])/2.0;
+              //edge 1 (nodes 0,2)
+              pos[1][1][j]=(pos[0][2][j]+pos[2][2][j])/2.0;
+              //edge 2 (nodes 0,1)
+              pos[2][1][j]=(pos[0][2][j]+pos[1][2][j])/2.0;
+            }
+        }
+      else if(dim==3)// tetrahedron
+        {
+          sizes[1]=4; // face
+          sizes[2]=6; // edge
 
-	    // hard coding the number of subentities
-	    // tetrahedron has 4 vertices, 6 edges and 4 facese on element 
-	    subsizes[0][0][3]=4; 
-	    subsizes[0][0][2]=6; 
-	    subsizes[0][0][1]=4; 
-	    //  tetrahedron has 3 vertices on each triang. face 
-	    for(int i=0;i<subsizes[0][0][1];++i)
-	      subsizes[i][1][3]=3;
-	    //  tetrahedron has 3 edges on each triang. face 
-	    for(int i=0;i<subsizes[0][0][1];++i)
-	      subsizes[i][1][2]=3; 
-	    //  tetrahedron has 3 vertices on each edge 
-	    for (int k=0;k<subsizes[0][0][2];++k)
-	      subsizes[k][2][3]=2; 
-	    // subentity indices
-	    // node indices on element
-	    for(int i=0;i<subsizes[0][0][3];++i)
-	      subentityindex[0][0][i][3]=i;
-	    // edge indices on element
-	    for(int i=0;i<subsizes[0][0][2];++i)
-	      subentityindex[0][0][i][2]=i; 
-	    // face indices on element
-	    for(int i=0;i<subsizes[0][0][1];++i)
-	      subentityindex[0][0][i][1]=i; 
+          // hard coding the number of subentities
+          // tetrahedron has 4 vertices, 6 edges and 4 facese on element 
+          subsizes[0][0][3]=4; 
+          subsizes[0][0][2]=6; 
+          subsizes[0][0][1]=4; 
+          //  tetrahedron has 3 vertices on each triang. face 
+          for(int i=0;i<subsizes[0][0][1];++i)
+            subsizes[i][1][3]=3;
+          //  tetrahedron has 3 edges on each triang. face 
+          for(int i=0;i<subsizes[0][0][1];++i)
+            subsizes[i][1][2]=3; 
+          //  tetrahedron has 3 vertices on each edge 
+          for (int k=0;k<subsizes[0][0][2];++k)
+            subsizes[k][2][3]=2; 
+          // subentity indices
+          // node indices on element
+          for(int i=0;i<subsizes[0][0][3];++i)
+            subentityindex[0][0][i][3]=i;
+          // edge indices on element
+          for(int i=0;i<subsizes[0][0][2];++i)
+            subentityindex[0][0][i][2]=i; 
+          // face indices on element
+          for(int i=0;i<subsizes[0][0][1];++i)
+            subentityindex[0][0][i][1]=i; 
 
-	    // node indices on face 0
-	    subentityindex[0][1][0][3]=1;
-	    subentityindex[0][1][1][3]=2;
-	    subentityindex[0][1][2][3]=3;
-	    // node indices on face 1
-	    subentityindex[1][1][0][3]=2;
-	    subentityindex[1][1][1][3]=0;
-	    subentityindex[1][1][2][3]=3;
-	    // node indices on face 2
-	    subentityindex[2][1][0][3]=0;
-	    subentityindex[2][1][1][3]=1;
-	    subentityindex[2][1][2][3]=3;
-	    // node indices on face 3
-	    subentityindex[3][1][0][3]=0;
-	    subentityindex[3][1][1][3]=1;
-	    subentityindex[3][1][2][3]=2;
+          // node indices on face 0
+          subentityindex[0][1][0][3]=1;
+          subentityindex[0][1][1][3]=2;
+          subentityindex[0][1][2][3]=3;
+          // node indices on face 1
+          subentityindex[1][1][0][3]=2;
+          subentityindex[1][1][1][3]=0;
+          subentityindex[1][1][2][3]=3;
+          // node indices on face 2
+          subentityindex[2][1][0][3]=0;
+          subentityindex[2][1][1][3]=1;
+          subentityindex[2][1][2][3]=3;
+          // node indices on face 3
+          subentityindex[3][1][0][3]=0;
+          subentityindex[3][1][1][3]=1;
+          subentityindex[3][1][2][3]=2;
 
-	    // edge indices on face 0
-	    subentityindex[0][1][0][2]=0;
-	    subentityindex[0][1][1][2]=1;
-	    subentityindex[0][1][2][2]=2;
-	    // edge indices on face 1
-	    subentityindex[1][1][0][2]=3;
-	    subentityindex[1][1][1][2]=2;
-	    subentityindex[1][1][2][2]=4;
-	    // edge indices on face 2
-	    subentityindex[2][1][0][2]=5;
-	    subentityindex[2][1][1][2]=4;
-	    subentityindex[2][1][2][2]=1;
-	    // edge indices on face 3
-	    subentityindex[3][1][0][2]=5;
-	    subentityindex[3][1][1][2]=3;
-	    subentityindex[3][1][2][2]=0;
-	   // node indices on edge 0
-	    subentityindex[0][2][0][3]=1;
-	    subentityindex[0][2][1][3]=2;
-	    // node indices on edge 1
-	    subentityindex[1][2][0][3]=1;
-	    subentityindex[1][2][1][3]=3;
-	    // node indices on edge 2
-	    subentityindex[2][2][0][3]=2;
-	    subentityindex[2][2][1][3]=3;
-	    // node indices on edge 3
-	    subentityindex[3][2][0][3]=0;
-	    subentityindex[3][2][1][3]=2;
-	    // node indices on edge 4
-	    subentityindex[4][2][0][3]=0;
-	    subentityindex[4][2][1][3]=3;
-	    // node indices on edge 5
-	    subentityindex[5][2][0][3]=0;
-	    subentityindex[5][2][1][3]=1;
+          // edge indices on face 0
+          subentityindex[0][1][0][2]=0;
+          subentityindex[0][1][1][2]=1;
+          subentityindex[0][1][2][2]=2;
+          // edge indices on face 1
+          subentityindex[1][1][0][2]=3;
+          subentityindex[1][1][1][2]=2;
+          subentityindex[1][1][2][2]=4;
+          // edge indices on face 2
+          subentityindex[2][1][0][2]=5;
+          subentityindex[2][1][1][2]=4;
+          subentityindex[2][1][2][2]=1;
+          // edge indices on face 3
+          subentityindex[3][1][0][2]=5;
+          subentityindex[3][1][1][2]=3;
+          subentityindex[3][1][2][2]=0;
+          // node indices on edge 0
+          subentityindex[0][2][0][3]=1;
+          subentityindex[0][2][1][3]=2;
+          // node indices on edge 1
+          subentityindex[1][2][0][3]=1;
+          subentityindex[1][2][1][3]=3;
+          // node indices on edge 2
+          subentityindex[2][2][0][3]=2;
+          subentityindex[2][2][1][3]=3;
+          // node indices on edge 3
+          subentityindex[3][2][0][3]=0;
+          subentityindex[3][2][1][3]=2;
+          // node indices on edge 4
+          subentityindex[4][2][0][3]=0;
+          subentityindex[4][2][1][3]=3;
+          // node indices on edge 5
+          subentityindex[5][2][0][3]=0;
+          subentityindex[5][2][1][3]=1;
 
- for(int j=0;j<dim;++j)
-	{
+          for(int j=0;j<dim;++j)
+            {
 
-	  //face 0 (nodes 1,2,3)
-	  pos[0][1][j]=(pos[1][3][j]+pos[2][3][j]+pos[3][3][j])/3.0;
-	  //face 1 (nodes 0,2,3)
-	  pos[1][1][j]=(pos[0][3][j]+pos[2][3][j]+pos[3][3][j])/3.0;
-	  //face 2 (nodes 0,1,3)
-	  pos[2][1][j]=(pos[0][3][j]+pos[1][3][j]+pos[3][3][j])/3.0;
-	  //face 3 (nodes 0,1,2)
-	  pos[3][1][j]=(pos[0][3][j]+pos[1][3][j]+pos[2][3][j])/3.0;
+              //face 0 (nodes 1,2,3)
+              pos[0][1][j]=(pos[1][3][j]+pos[2][3][j]+pos[3][3][j])/3.0;
+              //face 1 (nodes 0,2,3)
+              pos[1][1][j]=(pos[0][3][j]+pos[2][3][j]+pos[3][3][j])/3.0;
+              //face 2 (nodes 0,1,3)
+              pos[2][1][j]=(pos[0][3][j]+pos[1][3][j]+pos[3][3][j])/3.0;
+              //face 3 (nodes 0,1,2)
+              pos[3][1][j]=(pos[0][3][j]+pos[1][3][j]+pos[2][3][j])/3.0;
 
-	  //edge 0 (nodes 1,2)
-	  pos[0][2][j]=(pos[1][3][j]+pos[2][3][j])/2.0;
-	  //edge 1 (nodes 1,3)
-	  pos[1][2][j]=(pos[1][3][j]+pos[3][3][j])/2.0;
-	  //edge 2 (nodes 2,3)
-	  pos[2][2][j]=(pos[2][3][j]+pos[3][3][j])/2.0;
-	  //edge 3 (nodes 0,2)
-	  pos[3][2][j]=(pos[0][3][j]+pos[2][3][j])/2.0;
-	  //edge 4 (nodes 0,3)
-	  pos[4][2][j]=(pos[0][3][j]+pos[3][3][j])/2.0;
-	  //edge 5 (nodes 0,1)
-	  pos[5][2][j]=(pos[0][3][j]+pos[1][3][j])/2.0;
-	}
-	  }
-	else
-	  DUNE_THROW(NotImplemented, "dim not implemented yet");
+              //edge 0 (nodes 1,2)
+              pos[0][2][j]=(pos[1][3][j]+pos[2][3][j])/2.0;
+              //edge 1 (nodes 1,3)
+              pos[1][2][j]=(pos[1][3][j]+pos[3][3][j])/2.0;
+              //edge 2 (nodes 2,3)
+              pos[2][2][j]=(pos[2][3][j]+pos[3][3][j])/2.0;
+              //edge 3 (nodes 0,2)
+              pos[3][2][j]=(pos[0][3][j]+pos[2][3][j])/2.0;
+              //edge 4 (nodes 0,3)
+              pos[4][2][j]=(pos[0][3][j]+pos[3][3][j])/2.0;
+              //edge 5 (nodes 0,1)
+              pos[5][2][j]=(pos[0][3][j]+pos[1][3][j])/2.0;
+            }
+        }
+      else
+        DUNE_THROW(NotImplemented, "dim not implemented yet");
 
-//++++++++++++++++
+      //++++++++++++++++
 	   
     }
 
@@ -738,30 +739,30 @@ linear tetrahedron
     int enindex[dim+1][dim];
     int ceindex[MAXE][dim];
     FieldVector<ctype,dim> pos[MAXE][dim+1];
- };
+  };
 
 
 
 
-//! Make the reference simplex accessible as a container
+  //! Make the reference simplex accessible as a container
   template<typename ctype, int dim>
   class ReferenceSimplexContainer
   {
   public:
 
-	//! export type elements in the container
-	typedef ReferenceSimplex<ctype,dim> value_type;
+    //! export type elements in the container
+    typedef ReferenceSimplex<ctype,dim> value_type;
 
-	//! return element of the container via geometry type
-	const value_type& operator() (GeometryType type) const
-	{
-	  if ( (type==simplex) || (type==triangle) || (type==tetrahedron) )
-		return simplices;
-	  DUNE_THROW(RangeError, "expected a simplex!");
-	}
+    //! return element of the container via geometry type
+    const value_type& operator() (GeometryType type) const
+    {
+      if ( (type==simplex) || (type==triangle) || (type==tetrahedron) )
+        return simplices;
+      DUNE_THROW(RangeError, "expected a simplex!");
+    }
 
   private:
-	ReferenceSimplex<ctype,dim> simplices;
+    ReferenceSimplex<ctype,dim> simplices;
   };
 
 
@@ -858,7 +859,7 @@ linear tetrahedron
     {
       // compile time error if dim is not equal to 3
       IsTrue<dim == 3>::yes(); 
-     // hard coding the size of entities
+      // hard coding the size of entities
       sizes[0]=1; // element
       sizes[1]=5; // face
       sizes[2]=9; // edge
@@ -1089,56 +1090,56 @@ linear tetrahedron
   // Reference Pyramid
   //++++++++++++++++++++++++++++++++++++
 
-/*  
+  /*  
 
-http://hal.iwr.uni-heidelberg.de/dune/doc/appl/refelements.html
-     volume of pyramid = 1/3; 
-*/
-
-
-template<typename ctype, int dim>
-class ReferencePyramid
-{
- 
-public:
-  enum {MAXE=8}; // 8 edges
-  enum{d=dim};
-  typedef ctype CoordType;
+  http://hal.iwr.uni-heidelberg.de/dune/doc/appl/refelements.html
+  volume of pyramid = 1/3; 
+  */
 
 
-  ReferencePyramid()
+  template<typename ctype, int dim>
+  class ReferencePyramid
   {
-  for (int i=0; i<=3; ++i)
+ 
+  public:
+    enum {MAXE=8}; // 8 edges
+    enum{d=dim};
+    typedef ctype CoordType;
+
+
+    ReferencePyramid()
+    {
+      for (int i=0; i<=3; ++i)
 	sizes[i]=0;
 
-    for (int i=0; i<MAXE; ++i) 
-      for (int j=0; j<=dim; ++j) 
-	for (int k=0; k<=dim; ++k)
-	  subsizes[i][j][k] = 0;
+      for (int i=0; i<MAXE; ++i) 
+        for (int j=0; j<=dim; ++j) 
+          for (int k=0; k<=dim; ++k)
+            subsizes[i][j][k] = 0;
 
-    for (int c=3; c>=0; --c)
+      for (int c=3; c>=0; --c)
 	pyramid_entities (c);
-  }
-
-   //! number of entities of codim c	
-    int size (int c) const
-    {
-            return sizes[c];
     }
 
-  //! number of subentities of codim cc of entitity (i,c)	
+    //! number of entities of codim c	
+    int size (int c) const
+    {
+      return sizes[c];
+    }
+
+    //! number of subentities of codim cc of entitity (i,c)	
     int size (int i, int c, int cc) const
     {
       return subsizes[i][c][cc];
     }
 
-//! number of ii'th subentity with codim cc of (i,c)
+    //! number of ii'th subentity with codim cc of (i,c)
     int subentity (int i, int c, int ii, int cc) const
     {
       return subentityindex[i][c][ii][cc];
     }
 
-   //! position of entity (i,c) 
+    //! position of entity (i,c) 
     const FieldVector<ctype,dim>& position (int i, int c) const
     {
       return pos[i][c];	  
@@ -1157,12 +1158,12 @@ public:
       return vol;
       
     }
-private:
+  private:
 
-  void pyramid_entities(int c)
+    void pyramid_entities(int c)
   
- {
-   // compile time error if dim is not 3
+    {
+      // compile time error if dim is not 3
       IsTrue<dim == 3>::yes(); 
       // hard coding the size of entities
       sizes[0]=1; // element
@@ -1193,7 +1194,7 @@ private:
       subsizes[0][1][2]=4; 
       // pyramid has 3 edges on front,right,back and left triang. faces
       for(int i=1;i<5;++i)
-      subsizes[i][1][2]=3; 
+        subsizes[i][1][2]=3; 
      
       // pyramid has 2 vertices on each  edge
       for (int k=0;k<8;++k)
@@ -1205,7 +1206,7 @@ private:
       // -----------------------------------
      
      
-     FieldVector<int,3> x;
+      FieldVector<int,3> x;
       x=0;
       for (int n=0;n<3;n++)
 	{
@@ -1277,9 +1278,9 @@ private:
       subentityindex[3][1][2][3]=4;
       
       // node indices on face 4
-      	subentityindex[4][1][0][3]=3;
-	subentityindex[4][1][1][3]=0;
-	subentityindex[4][1][2][3]=4;
+      subentityindex[4][1][0][3]=3;
+      subentityindex[4][1][1][3]=0;
+      subentityindex[4][1][2][3]=4;
 
       // edge indices on face 0
       subentityindex[0][1][0][2]=0;
@@ -1412,24 +1413,24 @@ private:
   {
   public:
 
-	//! export type elements in the container
-	typedef ReferenceElement<ctype,dim> value_type;
+    //! export type elements in the container
+    typedef ReferenceElement<ctype,dim> value_type;
 
-	//! return element of the container via geometry type
-	const ReferenceElement<ctype,dim>& operator() (GeometryType type) const
-	{
-	  if ( (type==cube) || (type==line) || (type==quadrilateral) ||
-		   (type==hexahedron) )
-		return hcube;
-	  else	if( (type==simplex ) || (type==triangle ) || (type==tetrahedron))
-	    return simplices;
-	  else if (type==prism)
-	    return pris;
-	  else if(type==pyramid)
-	    return pyram;
-	  else
-	  DUNE_THROW(NotImplemented, "type not implemented yet");
-	}
+    //! return element of the container via geometry type
+    const ReferenceElement<ctype,dim>& operator() (GeometryType type) const
+    {
+      if ( (type==cube) || (type==line) || (type==quadrilateral) ||
+           (type==hexahedron) )
+        return hcube;
+      else	if( (type==simplex ) || (type==triangle ) || (type==tetrahedron))
+        return simplices;
+      else if (type==prism)
+        return pris;
+      else if(type==pyramid)
+        return pyram;
+      else
+        DUNE_THROW(NotImplemented, "type not implemented yet");
+    }
 
   private:
     ReferenceElementWrapper<ReferenceCube<ctype,dim> > hcube;
