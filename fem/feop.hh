@@ -297,8 +297,8 @@ protected:
   {
     typedef typename DiscFunctionType::FunctionSpace FunctionSpaceType;
     typedef typename FunctionSpaceType::GridType GridType; 
-    typedef typename GridType::template codim<0>::LevelIterator LevelIterator; 
-    typedef typename GridType::LeafIterator LeafIterator; 
+    typedef typename GridType::template Codim<0>::LevelIterator LevelIterator; 
+    typedef typename GridType::template Codim<0>::LeafIterator LeafIterator; 
    
 
     const GridType &grid = functionSpace_.getGrid();
@@ -375,7 +375,7 @@ protected:
     // eliminate the Dirichlet rows and columns 
     typedef typename DiscFunctionType::FunctionSpace FunctionSpaceType;
     typedef typename FunctionSpaceType::GridType GridType; 
-    typedef typename GridType::template codim<0>::Entity EntityType;
+    typedef typename GridType::template Codim<0>::Entity EntityType;
     typedef typename EntityType::IntersectionIterator NeighIt;
     typedef typename NeighIt::BoundaryEntity BoundaryEntityType;
         

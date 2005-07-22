@@ -137,7 +137,7 @@ public:
     if(leaf_)
     {
       //std::cout << "using  Leaf! \n";
-      typedef typename GridType::LeafIterator LeafIterator;
+      typedef typename GridType::template Codim<0>::LeafIterator LeafIterator;
  
       this->level_ = grid.maxlevel();  
       
@@ -148,7 +148,7 @@ public:
     }
     else 
     {
-      typedef typename GridType::template codim<0>::LevelIterator LevelIterator;
+      typedef typename GridType::template Codim<0>::LevelIterator LevelIterator;
 
       
       // make run through grid 
