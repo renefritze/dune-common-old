@@ -62,17 +62,6 @@ public:
       return realGeometry[i];
     }
 
-    /** \brief Return reference geometry corresponding to this geometry. 
-
-    If this is a reference geometry then self is returned. A reference to a reference
-    geometry is returned. Usually, the implementation will store the finite
-    set of reference geometries as global variables.
-  */
-  static const ReferenceGeometry& refelem ()
-    {
-      return GeometryImp<mydim,mydim,GridImp>::refelem();
-    }
-
   //! maps a local coordinate within reference geometry to global coordinate in geometry 
   FieldVector<ct, cdim> global (const FieldVector<ct, mydim>& local) const
     {
@@ -303,15 +292,6 @@ public:
       return asImp().operator[](i);
     }
 
-  /*! return reference geometry corresponding to this geometry. If this is
-    a reference geometry then self is returned. A reference to a reference
-    geometry is returned. Usually, the implementation will store the finite
-    set of reference geometries as global variables.
-  */
-  static const ReferenceGeometry& refelem ()
-    {
-      return GeometryImp<mydim,mydim,GridImp>::refelem();
-    }
 
   //! maps a local coordinate within reference geometry to global coordinate in geometry 
   FieldVector<ct, cdim> global (const FieldVector<ct, mydim>& local) const
