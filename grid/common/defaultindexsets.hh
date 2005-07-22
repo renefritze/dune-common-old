@@ -73,6 +73,8 @@ public:
     return 0; 
   }
   
+  int type() const { return myType; }
+
   //! return old index, for dof manager only 
   int oldIndex (int elNum, int codim ) const 
   { 
@@ -244,6 +246,8 @@ public:
   {
     return IndexWrapper<EntityType,EntityType::codimension,codim>::index(en,num);
   }
+
+  int type() const { return myType; }
 };
 
 template <class GridType>
@@ -304,6 +308,8 @@ public:
   {
     return IndexWrapper<EntityType,EntityType::codimension,codim>::index(en,num);
   }
+
+  int type() const { return myType; }
 };
 
 //*********************************************************************
