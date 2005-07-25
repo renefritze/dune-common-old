@@ -116,6 +116,33 @@ namespace Dune {
     typedef std::pair<HasFaceType*, int> NeighbourPairType;
     typedef std::pair<PLLBndFaceType*, int> GhostPairType;
 
+    template <int cdim>
+    struct Codim {};
+
+    template <>
+    struct Codim<0> {
+      typedef ALU3DSPACE GitterType::helement_STI InterfaceType;
+      typedef IMPLElementType ImplementationType;
+    };
+
+    template <>
+    struct Codim<1> {
+      typedef ALU3DSPACE GitterType::hface_STI InterfaceType;
+      typedef GEOFaceType ImplementationType;
+    };
+
+    template <>
+    struct Codim<2> {
+      typedef ALU3DSPACE GitterType::hedge_STI InterfaceType;
+      typedef GEOEdgeType ImplementationType;
+    };
+
+    template <>
+    struct Codim<3> {
+      typedef ALU3DSPACE GitterType::vertex_STI InterfaceType;
+      typedef ALU3DSPACE GitterType::Geometric::VertexGeo ImplementationType;
+    };
+
   };
 
   template <>
@@ -140,6 +167,33 @@ namespace Dune {
     typedef std::pair<HasFaceType*, int> NeighbourPairType;
     typedef std::pair<PLLBndFaceType*, int> GhostPairType;
   
+    template <int cdim>
+    struct Codim {};
+
+    template <>
+    struct Codim<0> {
+      typedef ALU3DSPACE GitterType::helement_STI InterfaceType;
+      typedef IMPLElementType ImplementationType;
+    };
+
+    template <>
+    struct Codim<1> {
+      typedef ALU3DSPACE GitterType::hface_STI InterfaceType;
+      typedef GEOFaceType ImplementationType;
+    };
+
+    template <>
+    struct Codim<2> {
+      typedef ALU3DSPACE GitterType::hedge_STI InterfaceType;
+      typedef GEOEdgeType ImplementationType;
+    };
+
+    template <>
+    struct Codim<3> {
+      typedef ALU3DSPACE GitterType::vertex_STI InterfaceType;
+      typedef ALU3DSPACE GitterType::Geometric::VertexGeo ImplementationType;
+    };
+
   };
 
 #ifdef _ALU3DGRID_PARALLEL_
