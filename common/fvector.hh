@@ -412,7 +412,7 @@ representing a field and a compile-time given size.
       }
     
     //! return index
-    DifferenceType index ()
+    DifferenceType index () const
       {
         return this->position_;
       }
@@ -465,14 +465,14 @@ representing a field and a compile-time given size.
       }
     bool equals (const FlatIterator & fit) const
       {
-        return fit.it == it;
+        return fit.it == it && fit.bit == bit;
       }
     field_type& dereference() const
       {
         return *bit;
       }
     //! return index
-    DifferenceType index ()
+    DifferenceType index () const
       {
         return bit.index();
       }
@@ -508,7 +508,7 @@ representing a field and a compile-time given size.
         return *it;
       }
     //! return index
-    DifferenceType index ()
+    DifferenceType index () const
       {
         return it.index();
       }
@@ -542,7 +542,7 @@ representing a field and a compile-time given size.
         return *it;
       }
     //! return index
-    DifferenceType index ()
+    DifferenceType index () const
       {
         return it.index();
       }
