@@ -16,6 +16,7 @@ namespace Dune {
                                                tmp[2]);
   }
 
+  //- class ALU3dGridGeometricFaceInfo
   template <>
   BilinearSurfaceMapping*
   ALU3dGridGeometricFaceInfo<hexa>::
