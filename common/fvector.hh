@@ -562,10 +562,10 @@ representing a field and a compile-time given size.
 
 	 Implementation of all members uses template meta programs where appropriate
   */
-#else
   template<class K, int SIZE>
   class FieldVector
     : public Dune::ExprTmpl::Vector< FieldVector<K,SIZE> >
+#else
   /** \brief Construct a vector space out of a tensor product of fields.
 
 	 K is the field type (use float, double, complex, etc) and n 
