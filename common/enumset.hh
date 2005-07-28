@@ -64,6 +64,23 @@ namespace Dune
     typedef T Type;
     static bool contains(const T& item);
   };
+
+  /**
+   * @brief The negation of a set.
+   * An item is contained in the set if and only if it is not
+   * contained in the negated set.
+   */
+  template<typename S>
+  class NegateSet
+  {
+  public:
+    typedef typename S::Type Type;
+  
+    static bool contains(const Type& item)
+    {
+      return !S::contains(item);
+    }
+  };
   
   /**
    * @brief A set combining two other sets.
