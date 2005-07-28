@@ -6,7 +6,7 @@
 #include <cassert>
 #include<config.h>
 #include"iteratorfacades.hh"
-#include<iostream>
+#include<ostream>
 
 namespace Dune
 {  
@@ -760,7 +760,6 @@ namespace Dune
 #ifdef NDEBUG
     size_=0;
 #endif
-    std::cout<<"size="<<size_<<std::endl;
     assert(size_==0);
     // update the tail!
     tail_ = &beforeHead_;
