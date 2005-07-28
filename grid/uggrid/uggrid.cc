@@ -1,17 +1,18 @@
 #include "config.h"
 #include <dune/grid/uggrid.hh>
 
+/** \todo Remove the following two includes once getAllSubfaces... is gone */
 #include <dune/common/tuples.hh>
 #include <dune/common/sllist.hh>
 #include <dune/common/stdstreams.hh>
 
-  // *********************************************************************
-  //
-  //  -- UGGridLevelIteratorFactory
-  //
-  // *********************************************************************
+// *********************************************************************
+//
+//  -- UGGridLevelIteratorFactory
+//
+// *********************************************************************
 
-  namespace Dune {
+namespace Dune {
 
   /** \brief Default implementation, just throws an exception */
 template <int codim, PartitionIteratorType PiType, class GridImp>
@@ -38,9 +39,7 @@ public:
     static inline
     UGGridLevelIterator<0,All_Partition,GridImp> getIterator(typename UGTypes<GridImp::dimension>::GridType* theGrid, int level) {
         
-        UGGridLevelIterator<0,All_Partition,GridImp> it(level);
-        it.setToTarget(UG_NS<GridImp::dimension>::PFirstElement(theGrid), level);
-        return it;
+        return UGGridLevelIterator<0,All_Partition,GridImp>(UG_NS<GridImp::dimension>::PFirstElement(theGrid), level);
     }
     
 };
@@ -83,9 +82,7 @@ public:
     static inline
     UGGridLevelIterator<2,All_Partition,GridImp> getIterator(typename UGTypes<GridImp::dimension>::GridType* theGrid, int level) {
         
-        UGGridLevelIterator<2,All_Partition,GridImp> it(level);
-        it.setToTarget(UG_NS<2>::PFirstNode(theGrid), level);
-        return it;
+        return UGGridLevelIterator<2,All_Partition,GridImp>(UG_NS<2>::PFirstNode(theGrid), level);
     }
     
 };
@@ -101,15 +98,13 @@ public:
         static inline
         UGGridLevelIterator<3,All_Partition,GridImp> getIterator(typename UGTypes<GridImp::dimension>::GridType* theGrid, int level) {
 
-            UGGridLevelIterator<3,All_Partition,GridImp> it(level);
-
-            it.setToTarget(UG_NS<3>::FirstNode(theGrid), level);
-            return it;
+            return UGGridLevelIterator<3,All_Partition,GridImp>(UG_NS<3>::FirstNode(theGrid), level);
         }
     };
 #endif
 
 }  // end namespace Dune
+
 
 using namespace Dune;
 
@@ -662,6 +657,7 @@ void Dune::UGGrid<dim,dimworld>::getChildrenOfSubface(typename Traits::template 
     if (level < maxl) {
 
         ElementType* theElement = getRealEntity<0>(*e).target_;
+        
         int Sons_of_Side = 0;
         ElementType* SonList[MAX_SONS];
         int SonSides[MAX_SONS];
@@ -957,6 +953,7 @@ void Dune::UGGrid < dim, dimworld >::setIndices()
     localIdSet_.update();
 
     globalIdSet_.update();
+
 }
 
 // /////////////////////////////////////////////////////////////////////////////////
