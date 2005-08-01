@@ -614,9 +614,9 @@ ALU3dGridLeafIterator(const GridImp &grid, int level,
     this->done();
 }
 
-template<int codim, PartitionIteratorType pitype, class GridImp>
-inline ALU3dGridLeafIterator<codim, pitype, GridImp> ::
-ALU3dGridLeafIterator(const ALU3dGridLeafIterator<codim, pitype, GridImp> &org)
+template<int cdim, PartitionIteratorType pitype, class GridImp>
+inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
+ALU3dGridLeafIterator(const ALU3dGridLeafIterator<cdim, pitype, GridImp> &org)
  : ALU3dGridEntityPointer <0,GridImp> ( org.grid_,org.level_,(org.index_ < 0) ? true : false )
  , index_(org.index_) 
  , level_(org.level_)
@@ -634,8 +634,8 @@ ALU3dGridLeafIterator(const ALU3dGridLeafIterator<codim, pitype, GridImp> &org)
   }
 }
 
-template<int codim, PartitionIteratorType pitype, class GridImp> 
-inline void ALU3dGridLeafIterator<codim, pitype, GridImp> :: increment () 
+template<int cdim, PartitionIteratorType pitype, class GridImp> 
+inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> :: increment () 
 {
   // if assertion is thrown then end iterator was forgotten or didnt stop 
   assert(index_  >= 0);

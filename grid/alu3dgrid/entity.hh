@@ -242,6 +242,12 @@ class ALU3dGridEntity<0,dim,GridImp>
 
   friend class ALU3dGridHierarchicIndexSet<dim,dimworld,GridImp::elementType>;
 
+  typedef typename SelectType<
+    SameType<GridImp,const ALU3dGrid<3, 3, tetra> >::value,
+    ReferenceSimplex<alu3d_ctype, 3>,
+    ReferenceCube<alu3d_ctype, 3>
+  >::Type ReferenceElementType;
+
 public:
   typedef typename GridImp::template Codim<0>::Geometry   Geometry;
   typedef  ALU3dGridMakeableGeometry<dim,dimworld,GridImp> GeometryImp;
@@ -394,6 +400,8 @@ private:
 
   // is true if entity is leaf entity 
   bool isLeaf_;
+
+  static const ReferenceElementType refElem_;
 }; // end of ALU3dGridEntity codim = 0
 
 //**********************************************************************
@@ -418,7 +426,7 @@ public EntityPointerDefault <cd, GridImp, ALU3dGridEntityPointer<cd,GridImp> >
   typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType MyHElementType;
   //typedef typename ALU3DSPACE ALUHElementType<cd>::ElementType  MyHElementType;
 public:
-  typedef ALU3dImplTraits<GridImp::elementType>::BNDFaceType BNDFaceType;
+  typedef typename ALU3dImplTraits<GridImp::elementType>::BNDFaceType BNDFaceType;
   typedef typename GridImp::template Codim<cd>::Entity Entity;
   typedef ALU3dGridMakeableEntity<cd,dim,GridImp> EntityImp;
   

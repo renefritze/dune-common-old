@@ -21,6 +21,7 @@ namespace Dune {
     enum {numVertices = 8};
     enum {numVerticesPerFace = 4};
   };
+  
 
   //! Maps indices of the Dune reference element onto the indices of the
   //! ALU3dGrid reference element and vice-versa.

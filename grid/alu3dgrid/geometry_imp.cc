@@ -128,7 +128,8 @@ buildGeom(const IMPLElementType & item)
   
   for (int i=0;i<(dim+1);i++) 
   {
-    const double (&p)[3] = item.myvertex(i)->Point();
+    const double (&p)[3] = 
+      item.myvertex(ElementTopo::dune2aluVertex(i))->Point();
     for (int j=0;j<dimworld;j++) 
     {
       coord_[i][j] = p[j];
@@ -138,7 +139,8 @@ buildGeom(const IMPLElementType & item)
 }
 
 template <> 
-inline bool ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> > :: buildGhost(const PLLBndFaceType & ghost) 
+inline bool ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> > :: 
+buildGhost(const PLLBndFaceType & ghost) 
 {
   enum { dim = 3 };
   enum { dimworld = 3};
@@ -183,7 +185,8 @@ buildGeom(const ALU3DSPACE HFaceType & item)
   
   for (int i=0;i<(dim+1);i++) 
   {
-    const double (&p)[3] = static_cast<const GEOFaceType &> (item).myvertex(i)->Point();
+    const double (&p)[3] = 
+      static_cast<const GEOFaceType &> (item).myvertex(FaceTopo::dune2aluVertex(i))->Point();
     for (int j=0;j<dimworld;j++) 
     {
       coord_[i][j] = p[j];
@@ -221,6 +224,8 @@ buildGeom(const ALU3DSPACE HEdgeType & item)
   
   for (int i=0;i<(dim+1);i++) 
   {
+    assert(false);
+    // * potentially wrong, since the edges are renumbered in dune
     const double (&p)[3] = static_cast<const GEOEdgeType &> (item).myvertex(i)->Point();
     for (int j=0;j<dimworld;j++) 
     {
