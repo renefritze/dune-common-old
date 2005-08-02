@@ -192,7 +192,11 @@ public:
 
     //! Return true if the node is a leaf node
     static bool isLeaf(const typename TargetType<dim,dim>::T* theNode) {
-        DUNE_THROW(NotImplemented, "isLeaf for nodes");
+#ifndef ModelP
+        return !theNode->son;
+#else
+        DUNE_THROW(NotImplemented, "isLeaf for nodes in a parallel grid");
+#endif
     }
 
     // /////////////////////////////////////////////
@@ -235,12 +239,12 @@ public:
 
     //! Gets the leaf index of a UG node
     static int& leafIndex(typename TargetType<dim,dim>::T* theNode) {
-        return theNode->myvertex.id;
+        return theNode->myvertex->iv.id;
     }
 
     //! Gets the leaf index of a UG node
     static const int& leafIndex(const typename TargetType<dim,dim>::T* theNode) {
-        return theNode->myvertex.id;
+        return theNode->myvertex->iv.id;
     }
 
 
