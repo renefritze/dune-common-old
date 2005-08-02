@@ -37,9 +37,9 @@ namespace Dune {
 
   template <>
   const int ElementTopologyMapping<tetra>::
-  dune2aluFaceVertex_[numFaces][numVerticesPerFace] = {{0, 1, 2},
-                                                       {0, 1, 2},
-                                                       {0, 1, 2},
+  dune2aluFaceVertex_[numFaces][numVerticesPerFace] = {{0, 2, 1},
+                                                       {1, 0, 2},
+                                                       {0, 2, 1},
                                                        {0, 1, 2}};
 
   template <>
@@ -53,9 +53,9 @@ namespace Dune {
 
   template <>
   const int ElementTopologyMapping<tetra>::
-  alu2duneFaceVertex_[numFaces][numVerticesPerFace] = {{0, 1, 2},
-                                                       {0, 1, 2},
-                                                       {0, 1, 2},
+  alu2duneFaceVertex_[numFaces][numVerticesPerFace] = {{0, 2, 1},
+                                                       {1, 0, 2},
+                                                       {0, 2, 1},
                                                        {0, 1, 2}};
 
   template <>
