@@ -4,6 +4,8 @@
 #include <dune/fem/feoperator.hh>
 #include <dune/fem/feop/spmatrix.hh>
 
+#include <dune/quadrature/quadraturerules.hh>
+
 namespace Dune {
   
   /** \brief The mass matrix
@@ -29,10 +31,6 @@ namespace Dune {
     typedef typename FunctionSpaceType::Range RangeType;
     
   public:
-    //! ???
-    FixedOrderQuad < typename FunctionSpaceType::RangeField, typename
-               FunctionSpaceType::Domain , polOrd > quad;
-        
 
     //! Returns the actual matrix if it is assembled
     /** \todo Should this be in a base class? */
@@ -45,9 +43,8 @@ namespace Dune {
     MassMatrixFEOp( const typename DiscFunctionType::FunctionSpace &f, OpMode opMode )://= ON_THE_FLY ) :
       FiniteElementOperator<DiscFunctionType,
                             SparseRowMatrix<double>,
-                            MassMatrixFEOp<DiscFunctionType, polOrd> >( f, opMode ) ,
-      quad ( *(f.getGrid().template lbegin<0> (0))) {
-    }
+                            MassMatrixFEOp<DiscFunctionType, polOrd> >( f, opMode ) 
+    {}
         
     //! ???
     SparseRowMatrix<double>* newEmptyMatrix( ) const {
@@ -61,25 +58,29 @@ namespace Dune {
     double getLocalMatrixEntry( EntityType &entity, const int i, const int j ) const 
     {
       typedef typename FunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
-      double val = 0.;
+      const int dim = GridType::dimension;
+      double val = 0;
       
-      FieldVector<double, GridType::dimension> tmp(1.0);
+      FieldVector<double, dim> tmp(1.0);
       
       const BaseFunctionSetType & baseSet 
         = this->functionSpace_.getBaseFunctionSet( entity );
       
       RangeType v1 (0.0);
       RangeType v2 (0.0);
+
+      // Get quadrature rule
+      const QuadratureRule<double, dim>& quad = QuadratureRules<double, dim>::rule(entity.geometry().type(), polOrd);
       
       const double vol = entity.geometry().integrationElement( tmp ); 
-      for ( int pt=0; pt < quad.nop(); pt++ ) 
+      for ( int pt=0; pt < quad.size(); pt++ ) 
         {      
           baseSet.eval(i,quad,pt,v1); 
           baseSet.eval(j,quad,pt,v2); 
-          val += ( v1 * v2 ) * quad.weight( pt );
+          val += ( v1 * v2 ) * quad[pt].weight();
         }
-      val *= vol;
-      return val;
+      
+      return val*vol;
     }
     
     //! ???
@@ -88,11 +89,12 @@ namespace Dune {
     {
       int i,j;
       typedef typename FunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
+      const int dim = GridType::dimension;
       const BaseFunctionSetType & baseSet 
         = this->functionSpace_.getBaseFunctionSet( entity );
       
       /** \todo What's the correct type here? */
-      static  FieldVector<double, GridType::dimension> tmp(1.0);
+      static FieldVector<double, dim> tmp(1.0);
       const double vol = entity.geometry().integrationElement(tmp);
       
       static RangeType v[4];
@@ -103,14 +105,17 @@ namespace Dune {
         for (j=0; j<=i; j++ ) 
           mat[j][i]=0.0;
       
-      for ( int pt=0; pt < quad.nop(); pt++ )
+      // Get quadrature rule
+      const QuadratureRule<double, dim>& quad = QuadratureRules<double, dim>::rule(entity.geometry().type(), polOrd);
+      
+      for ( int pt=0; pt < quad.size(); pt++ )
         {
           for(i=0; i<matSize; i++) 
             baseSet.eval(i,quad,pt,v[i]); 
           
           for(i=0; i<matSize; i++) 
             for (j=0; j<=i; j++ ) 
-              mat[j][i] += ( v[i] * v[j] ) * quad.weight( pt );
+              mat[j][i] += ( v[i] * v[j] ) * quad[pt].weight();
         }
       
       for(i=0; i<matSize; i++) 
@@ -268,6 +273,7 @@ public:
         void getLocalMatrix( EntityType &entity, const int matSize, MatrixType& mat) const 
         {
             int i,j;
+            const int dim = GridType::dimension;
             typedef typename FunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
             const BaseFunctionSetType & baseSet 
                 = this->functionSpace_.getBaseFunctionSet( entity );
@@ -278,19 +284,13 @@ public:
                 for (j=0; j<=i; j++ ) 
                     scalarMat[i][j]=0.0;
 
-            // Get UG quadrature rule
-            UG_Quadratures::QUADRATURE* quad =
-                UG_Quadratures::GetQuadrature(EntityType::dimension, entity.geometry().corners(), polOrd);
+            // Get quadrature rule
+            const QuadratureRule<double, dim>& quad = QuadratureRules<double, dim>::rule(entity.geometry().type(), polOrd);
             
-            if (!quad)
-                DUNE_THROW(Exception, "Creating a ug quadrature rule failed!");
-            
-            for ( int pt=0; pt < quad->nip; pt++ ) {
+            for ( int pt=0; pt < quad.size(); pt++ ) {
 
                 // Get position of the quadrature point
-                FieldVector<double,EntityType::dimension> quadPos;
-                for (int j=0; j<EntityType::dimension; j++)
-                    quadPos[j] = quad->local[pt][j];
+                const FieldVector<double,dim>& quadPos = quad[pt].position();
 
                 // The factor in the integral transformation formula
                 const double integrationElement = entity.geometry().integrationElement(quadPos);
@@ -301,7 +301,7 @@ public:
                 
                 for(i=0; i<matSize; i++) 
                     for (int j=0; j<=i; j++ ) 
-                        scalarMat[i][j] += ( v[i] * v[j] ) * quad->weight[pt] * integrationElement;
+                        scalarMat[i][j] += ( v[i] * v[j] ) * quad[pt].weight() * integrationElement;
             }
 
             // Clear local matrix
