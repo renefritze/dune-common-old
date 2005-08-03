@@ -2,7 +2,7 @@
 #include "../common/reftopology.hh"
 
 namespace Dune {
-
+  //- class ALU3dGridGeometricFaceInfo
   template <>
   ALU3DSPACE LinearSurfaceMapping* 
   ALU3dGridGeometricFaceInfo<tetra>::
@@ -16,7 +16,6 @@ namespace Dune {
                                                tmp[2]);
   }
 
-  //- class ALU3dGridGeometricFaceInfo
   template <>
   BilinearSurfaceMapping*
   ALU3dGridGeometricFaceInfo<hexa>::
@@ -63,7 +62,8 @@ namespace Dune {
 
     typedef FieldVector<alu3d_ctype, numComponents> LocalCoordinateType;
 
-    // get the parent's reference face coordinates
+    // get the parent's face coordinates on the reference element
+    // (Dune reference element)
     CoordinateType cornerCoords;
     referenceElementCoordinatesRefined(side, cornerCoords);
 
@@ -80,7 +80,8 @@ namespace Dune {
 
     // do the mappings
     for (int i = 0; i < numCorners; ++i) {
-      const FieldVector<alu3d_ctype, 2>& childLocal = refFace_.position(i, 2);
+      const FieldVector<alu3d_ctype, 2>& childLocal = 
+        refFace_.position(i, 2);
         
       LocalCoordinateType childLocalBary;
       childLocalBary[0] = 1.0 - childLocal[0] - childLocal[1];
