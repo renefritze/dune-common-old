@@ -18,37 +18,12 @@ calcElMatrix () const
 {
   if(!builtA_)
   {
-    // creat Matrix A (=Df)               INDIZES: col/row
+    // creat Matrix A (=Df)               INDIZES: row/col
     // Mapping: R^dim -> R^3,  F(x) = A x + p_0
     // columns:    p_1 - p_0  |  p_2 - p_0  |  p_3 - p_0
       
     for (int i=0; i<mydim; i++) {
-      for (int j = 0; j < cdim; ++j) {
-        A_[j][i] = coord_[i+1][j] - coord_[0][j];
-      }
-    }
-    builtA_ = true;
-  }
-}
-
-// matrix for mapping from reference element to current element 
-template<>
-inline void ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> >::
-calcElMatrix () const
-{
-  if(!builtA_)
-  {
-    enum { mydim = 3 };
-    // creat Matrix A (=Df)               INDIZES: col/row
-    // Mapping: R^dim -> R^3,  F(x) = A x + p_0
-    // columns:    p_1 - p_0  |  p_2 - p_0  |  p_3 - p_0
-      
-    const FieldVector<alu3d_ctype,mydim> & coord0 = coord_[0];
-    for (int i=0; i<mydim; i++) 
-    { 
-      A_[i][0] = coord_[1][i] - coord0[i];
-      A_[i][1] = coord_[2][i] - coord0[i];
-      A_[i][2] = coord_[3][i] - coord0[i];
+      AT_[i] = coord_[i+1] - coord_[0];
     }
     builtA_ = true;
   }
@@ -63,7 +38,7 @@ inline void ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > :: build
     calcElMatrix(); 
 
     // DetDf = integrationElement
-    detDF_ = std::abs( FMatrixHelp::invertMatrix(A_,Jinv_) );
+    detDF_ = std::abs( FMatrixHelp::invertMatrix(AT_,Jinv_) );
     builtinverse_ = builtDetDF_ = true;
   }
 }
@@ -225,7 +200,7 @@ buildGeom(const ALU3DSPACE HEdgeType & item)
   for (int i=0;i<(dim+1);i++) 
   {
     assert(false);
-    // * potentially wrong, since the edges are renumbered in dune
+    // * potentially wrong, since the edges may have a different orientation in ALU3dGrid
     const double (&p)[3] = static_cast<const GEOEdgeType &> (item).myvertex(i)->Point();
     for (int j=0;j<dimworld;j++) 
     {
@@ -315,19 +290,7 @@ global(const FieldVector<alu3d_ctype, mydim>& local) const
   calcElMatrix();
   
   globalCoord_ = coord_[0];
-  A_.umv(local,globalCoord_);
-  return globalCoord_;
-}
-
-template<>
-inline FieldVector<alu3d_ctype, 3> 
-ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> >::
-global(const FieldVector<alu3d_ctype, 3> & local) const
-{
-  calcElMatrix();
-  
-  globalCoord_ = coord_[0];
-  A_.umv(local,globalCoord_);
+  AT_.umtv(local,globalCoord_);
   return globalCoord_;
 }
 
@@ -337,11 +300,11 @@ ALU3dGridGeometry<3,3,const ALU3dGrid<3,3,tetra> > ::
 local(const FieldVector<alu3d_ctype, 3>& global) const
 {
   if (!builtinverse_) buildJacobianInverse();
-  enum { dim = 3 };
-  for(int i=0; i<dim; i++)
-    globalCoord_[i] = global[i] - coord_[0][i];
-  
-  FMatrixHelp::multAssign(Jinv_,globalCoord_,localCoord_);
+
+  globalCoord_ = global - coord_[0];
+  localCoord_ = 0.0;
+
+  Jinv_.umtv(globalCoord_, localCoord_);
   return localCoord_;
 }
 
@@ -381,7 +344,7 @@ ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::integrationElement
 
   calcElMatrix();
 
-  detDF_ = A_.determinant();
+  detDF_ = AT_.determinant();
 
   assert(detDF_ > 0.0);
 
@@ -393,7 +356,8 @@ ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::integrationElement
 
 template<>  // dim = dimworld = 3
 inline const FieldMatrix<alu3d_ctype,3,3> & 
-ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> >:: jacobianInverse (const FieldVector<alu3d_ctype, 3>& local) const
+ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> >:: 
+jacobianInverse (const FieldVector<alu3d_ctype, 3>& local) const
 {
   if (!builtinverse_) buildJacobianInverse();
   return Jinv_;
