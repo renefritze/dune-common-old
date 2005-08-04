@@ -484,7 +484,6 @@ struct SimplexQuadraturePointsSingleton<2> {
 	static SimplexQuadraturePoints<2> sqp;
   };
 
-template<>
 SimplexQuadraturePoints<2> SimplexQuadraturePointsSingleton<2>::sqp;
 
 
@@ -689,7 +688,6 @@ struct SimplexQuadraturePointsSingleton<3> {
 	static SimplexQuadraturePoints<3> sqp;
   };
 
-template<>
 SimplexQuadraturePoints<3> SimplexQuadraturePointsSingleton<3>::sqp;
 
 
@@ -891,7 +889,6 @@ struct PrismQuadraturePointsSingleton<3> {
 	static PrismQuadraturePoints<3> prqp;
   };
 
-template<>
 PrismQuadraturePoints<3> PrismQuadraturePointsSingleton<3>::prqp;
 
 template<typename ct, int dim>
@@ -1054,8 +1051,8 @@ template<>
   struct PyramidQuadraturePointsSingleton<3> {
 	static PyramidQuadraturePoints<3> pyqp;
   };
-template<>
-  PyramidQuadraturePoints<3> PyramidQuadraturePointsSingleton<3>::pyqp;
+
+PyramidQuadraturePoints<3> PyramidQuadraturePointsSingleton<3>::pyqp;
 
 template<typename ct, int dim>
 class PyramidQuadratureRule; 
