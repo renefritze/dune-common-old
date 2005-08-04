@@ -16,14 +16,6 @@ namespace Dune
 
 static ALBERTA EL_INFO statElInfo[DIM+1];  
 
-// singleton holding reference elements
-template<int dim, class GridImp>
-struct AlbertaGridReferenceGeometry
-{
-  AlbertaGridMakeableGeometry<dim,dim,GridImp> refelem;
-  AlbertaGridReferenceGeometry () : refelem (true) {};
-};
-
 //****************************************************************
 //
 // --AlbertaGridGeometry 
@@ -103,14 +95,10 @@ inline int AlbertaGridGeometry<mydim,cdim,GridImp>::mapVertices (int i) const
 
 template <int mydim, int cdim, class GridImp>
 inline AlbertaGridGeometry<mydim,cdim,GridImp>:: 
-AlbertaGridGeometry(bool makeRefGeometry)
+AlbertaGridGeometry()
 {
   // make empty element 
   initGeom();
-
-  // make coords for reference elements, spezial for different dim
-  if(makeRefGeometry)
-    makeRefElemCoords();
 }
 
 template <int mydim, int cdim, class GridImp>
@@ -139,96 +127,6 @@ makeEmptyElInfo()
     elInfo->bound[i] = 0;
   }
   return elInfo;
-}
-
-
-template <> 
-inline void AlbertaGridGeometry<2,2,const AlbertaGrid<2,2> >:: 
-makeRefElemCoords()
-{
-  // make empty elInfo 
-  elInfo_ = makeEmptyElInfo();
-
-//*****************************************************************
-//!   
-/*!
-   Dune reference element triangles (2d) 
-   
-    (0,1)
-     2|\    coordinates and local node numbers 
-      | \
-      |  \    
-     1|   \0
-      |    \
-      |     \
-     0|______\1
-    (0,0) 2  (1,0)
-*/           
-//*****************************************************************
- 
-  // set reference coordinates 
-  coord_ = 0.0;
-
-  // vertex 1 
-  coord_[1][0] = 1.0; 
-
-  // vertex 2
-  coord_[2][1] = 1.0;
-}
-
-template <>
-inline void AlbertaGridGeometry<3,3,const AlbertaGrid<3,3> >:: 
-makeRefElemCoords()
-{
-  //! make ReferenzGeometry as default 
-  elInfo_ = makeEmptyElInfo();
-//*****************************************************************
-//
-//! reference element 3d
-//!        z
-//!        |     y
-//        3|    /
-// (0,0,1) |   /2 (0,1,0)
-//         |  /
-//         | /  
-//         |/      (1,0,0)
-//       0 ------------x
-//      (0,0,0)     1
-//!  
-//
-//*****************************************************************
-
-  // set coordinates 
-  coord_ = 0.0;
-
-  // vertex 1 
-  coord_[1][0] = 1.0; 
-  
-  // vertex 2 
-  coord_[2][1] = 1.0;
-
-  // vertex 3 
-  coord_[3][2] = 1.0;
-}
-template <> 
-inline void AlbertaGridGeometry<1,1,const AlbertaGrid<1,1> >:: 
-makeRefElemCoords()
-{
-  //! make  Referenz Geometry as default
-  elInfo_ = makeEmptyElInfo();
-
-  // set reference coordinates 
-  coord_ = 0.0;
-
-  // vertex 1
-  coord_[1] = 1.0;
-}
-
-template <int mydim, int cdim, class GridImp>
-inline void AlbertaGridGeometry<mydim,cdim,GridImp>:: 
-makeRefElemCoords()
-{
-  DUNE_THROW(AlbertaError, "No default implementation for this AlbertaGridGeometry!");
 }
 
 template <int mydim, int cdim, class GridImp>
@@ -389,38 +287,6 @@ getCoordVec (int i)
 {
   return coord_[i];
 }
-
-template <class GridImp, int dim> struct AlbertaGridRefElem;
-template <class GridImp> struct AlbertaGridRefElem<GridImp,1> {
-  static const Dune::Geometry<1,1,GridImp,Dune::AlbertaGridGeometry> & refelem () 
-  { 
-    static AlbertaGridReferenceGeometry<1,GridImp> ref;
-    return ref.refelem; 
-  }
-};
-
-template <class GridImp> struct AlbertaGridRefElem<GridImp,2> {
-  static const Dune::Geometry<2,2,GridImp,Dune::AlbertaGridGeometry> & refelem () 
-  { 
-    static AlbertaGridReferenceGeometry<2,GridImp> ref;
-    return ref.refelem; 
-  }
-};
-template <class GridImp> struct AlbertaGridRefElem<GridImp,3> {
-  static const Dune::Geometry<3,3,GridImp,Dune::AlbertaGridGeometry> & refelem () 
-  { 
-    static AlbertaGridReferenceGeometry<3,GridImp> ref;
-    return ref.refelem; 
-  }
-};
-
-template <int mydim, int cdim, class GridImp>
-inline const Dune::Geometry<mydim,mydim,GridImp,Dune::AlbertaGridGeometry> & 
-AlbertaGridGeometry<mydim,cdim,GridImp>::refelem()
-{
-  return AlbertaGridRefElem<GridImp,mydim>::refelem();
-}
-
 
 template <class GridImp, int mydim, int cdim>
 struct CalcElementMatrix
@@ -745,7 +611,8 @@ inline bool AlbertaGridGeometry<2,2,const AlbertaGrid<2,2> >::checkInverseMappin
   enum { dim =2 };
   
   const FieldVector<albertCtype, dim> & coord    = coord_[loc];
-  const FieldVector<albertCtype, dim> & refcoord = refelem()[loc];
+  //const FieldVector<albertCtype, dim> & refcoord = refelem()[loc];
+  const FieldVector<albertCtype, dim> & refcoord = coord_[loc];
   buildJacobianInverse();
   
   FieldVector<albertCtype, dim> tmp3 = coord - coord_[0];     
@@ -769,7 +636,8 @@ inline bool AlbertaGridGeometry<3,3,const AlbertaGrid<3,3> >::checkInverseMappin
   enum { dim = 3 };
   
   const FieldVector<albertCtype, dim> & coord    = coord_[loc];
-  const FieldVector<albertCtype, dim> & refcoord = refelem()[loc];
+  //const FieldVector<albertCtype, dim> & refcoord = refelem()[loc];
+  const FieldVector<albertCtype, dim> & refcoord = coord_[loc];
   buildJacobianInverse();
   
   FieldVector<albertCtype, dim> tmp3 = coord - coord_[0];     
@@ -804,7 +672,8 @@ inline bool AlbertaGridGeometry<2,2,const AlbertaGrid<2,2> >::checkMapping (int 
   calcElMatrix ();
   
   const FieldVector<albertCtype, dim> & coord    = coord_[loc];
-  const FieldVector<albertCtype, dim> & refcoord = refelem()[loc];
+  //const FieldVector<albertCtype, dim> & refcoord = refelem()[loc];
+  const FieldVector<albertCtype, dim> & refcoord = coord_[loc];
   
   FieldVector<albertCtype, dim> tmp2 = coord_[0];
   elMat_.umv(refcoord,tmp2);     
@@ -830,7 +699,8 @@ inline bool AlbertaGridGeometry<3,3,const AlbertaGrid<3,3> >::checkMapping (int 
   calcElMatrix ();
   
   const FieldVector<albertCtype, dim> & coord    = coord_[loc];
-  const FieldVector<albertCtype, dim> & refcoord = refelem()[loc];
+  //const FieldVector<albertCtype, dim> & refcoord = refelem()[loc];
+  const FieldVector<albertCtype, dim> & refcoord = coord_[loc];
   
   FieldVector<albertCtype, dim> tmp2 = coord_[0];
   elMat_.umv(refcoord,tmp2);     
@@ -923,7 +793,7 @@ inline AlbertaGridEntity<codim,dim,GridImp>::
 AlbertaGridEntity(const GridImp &grid, int level) : 
   grid_(grid)
 , level_ (level)
-, geo_ ( false )
+, geo_ ( )
 , localFCoordCalced_(false)
 {
   travStack_ = 0;
@@ -1221,8 +1091,8 @@ AlbertaGridEntity(const GridImp &grid, int level)
   : grid_(grid) 
   , level_ (level)
   , travStack_ (0) , elInfo_ (0) 
-  , fatherReLocal_(false)
-  , geo_(false) 
+  , fatherReLocal_()
+  , geo_() 
   , builtgeometry_ (false)
 {
 }
@@ -1695,7 +1565,7 @@ recursiveTraverse(ALBERTA TRAVERSE_STACK * stack)
 
 template< class GridImp >
 inline AlbertaGridBoundaryEntity<GridImp>::
-AlbertaGridBoundaryEntity () : _geom (false) , _elInfo ( 0 ),
+AlbertaGridBoundaryEntity () : _geom () , _elInfo ( 0 ),
   _neigh (-1) {}
 
 template< class GridImp >
@@ -1743,14 +1613,14 @@ template< class GridImp >
 inline void AlbertaGridIntersectionIterator<GridImp>::freeObjects () const
 {
   if(fakeNeigh_) 
-    grid_.interSelfProvider_.freeObjectEntity(fakeNeigh_);
+    this->grid_.interSelfProvider_.freeObjectEntity(fakeNeigh_);
   
   if(neighGlob_) 
-    grid_.interNeighProvider_.freeObjectEntity(neighGlob_);
+    this->grid_.interNeighProvider_.freeObjectEntity(neighGlob_);
 
   if(boundaryEntity_) 
   {
-    grid_.interBndProvider_.freeObjectEntity(boundaryEntity_);
+    this->grid_.interBndProvider_.freeObjectEntity(boundaryEntity_);
     boundaryEntity_ = 0;
   }
 
