@@ -117,8 +117,8 @@ public:
       this->level_ = grid.maxlevel();  
       
       // make run through grid 
-      LeafIterator it     = grid.leafbegin ( this->level_ );
-      LeafIterator endit  = grid.leafend   ( this->level_ );
+      LeafIterator it     = grid.template leafbegin<0> ();
+      LeafIterator endit  = grid.template leafend<0>   ();
       applyOnGrid( it, endit , arg, dest );
     }
     else 
