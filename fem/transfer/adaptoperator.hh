@@ -311,10 +311,10 @@ public:
   }
   
   //! the weight can also be seted
-  void setFatherChildWeight (const RangeFieldType val) const
+  void setFatherChildWeight (const RangeFieldType& val) const
   {
     // volume of son / volume of father  
-    const_cast<RangeFieldType &> (weight_) = val; 
+    weight_ = val; 
   }
   
   //! restrict data to father 
@@ -366,7 +366,7 @@ private:
   mutable LocalFunctionType sohn_;
 
   const BaryQuadType quad_;
-  const RangeFieldType weight_;
+  mutable RangeFieldType weight_;
 };
 
 
