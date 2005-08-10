@@ -50,9 +50,10 @@ class ALU3dGridMakeableEntity :
 {
   // typedef typename GridImp::template Codim<codim>::Entity EntityType;
   friend class ALU3dGridEntity<cd, dim, GridImp>;
+  typedef typename ALU3dImplTraits<GridImp::elementType> ImplTraitsType;
 
-  typedef typename ALU3dImplTraits<GridImp::elementType>::PLLBndFaceType PLLBndFaceType;
-  typedef typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElementType;
+  typedef typename ImplTraitsType::PLLBndFaceType PLLBndFaceType;
+  typedef typename ImplTraitsType::IMPLElementType IMPLElementType;
  
 public:
    
@@ -64,9 +65,9 @@ public:
   //! set element as normal entity
   //! ItemTypes are HElementType, HFaceType, HEdgeType and VertexType 
   template <class ItemType>
-  void setElement(ItemType & item)
+  void setElement(ItemType & item, int twist = 0)
   {
-    this->realEntity.setElement(item);
+    this->realEntity.setElement(item, twist);
   }
   
   // set element as ghost 
@@ -158,7 +159,7 @@ public:
   FieldVector<alu3d_ctype, dim>& positionInOwnersFather () const;
  
   // set element as normal entity
-  void setElement(const BSElementType & item); 
+  void setElement(const BSElementType & item, int twist); 
   void setElement(const ALU3DSPACE HElementType & el, const ALU3DSPACE VertexType & vx);
 
   //! reset item pointer to NULL 
@@ -173,14 +174,15 @@ public:
   //! set item from other entity, mainly for copy constructor of entity pointer
   void setEntity ( const ALU3dGridEntity<cd,dim,GridImp> & org );
 private: 
-  //! index is unique within the grid hierachie and per codim
+  //! index is unique within the grid hierachy and per codim
   int getIndex () const;
 
   // the grid this entity belongs to
   const GridImp &grid_;
 
   int level_;  //! level of entity
-  int gIndex_; //! hierarchic index 
+  int gIndex_; //! hierarchic index
+  int twist_;  //! twist of the underlying ALU element (with regard to the element that asked for it)
 
   // corresponding ALU3dGridElement
   const BSIMPLElementType * item_;
@@ -346,7 +348,7 @@ public:
   /*! private methods, but public because of datahandle and template
       arguments of these methods
   */
-  void setElement(ALU3DSPACE HElementType &element);
+  void setElement(ALU3DSPACE HElementType &element, int twist);
   
   /*! private methods, but public because of datahandle and template
       arguments of these methods
@@ -434,7 +436,9 @@ public:
   typedef ALU3dGridEntityPointer<cd,GridImp> ALU3dGridEntityPointerType;
   
   //! Constructor for EntityPointer that points to an element 
-  ALU3dGridEntityPointer(const GridImp & grid, const MyHElementType & item);
+  ALU3dGridEntityPointer(const GridImp & grid, 
+                         const MyHElementType & item,
+                         int twist = 0);
 
   //! Constructor for EntityPointer that points to a ghost
   ALU3dGridEntityPointer(const GridImp& grid, const BNDFaceType& ghost);

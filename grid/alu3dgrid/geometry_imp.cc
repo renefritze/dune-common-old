@@ -159,7 +159,7 @@ buildGhost(const PLLBndFaceType & ghost)
 
 template <>
 inline bool ALU3dGridGeometry<2,3, const ALU3dGrid<3,3,tetra> > :: 
-buildGeom(const ALU3DSPACE HFaceType & item) 
+buildGeom(const ALU3DSPACE HFaceType & item, int twist) 
 {
   enum { dim = 2 };
   enum { dimworld = 3};
@@ -198,7 +198,7 @@ buildGeom(const FaceCoordinatesType& coords) {
 
 template <> // for edges 
 inline bool ALU3dGridGeometry<1,3, const ALU3dGrid<3,3,tetra> > :: 
-buildGeom(const ALU3DSPACE HEdgeType & item) 
+buildGeom(const ALU3DSPACE HEdgeType & item, int twist) 
 {
   enum { dim = 1 };
   enum { dimworld = 3};
@@ -220,9 +220,9 @@ buildGeom(const ALU3DSPACE HEdgeType & item)
   return true;
 }
 
-template <> // for Vertices ,i.e. Points 
+template <> // for Vertices ,i.e. Points (note that twist is a dummy parameter here, needed for consistency) 
 inline bool ALU3dGridGeometry<0,3, const ALU3dGrid<3,3,tetra> > :: 
-buildGeom(const ALU3DSPACE VertexType & item) 
+buildGeom(const ALU3DSPACE VertexType & item, int twist) 
 {
   enum { dim = 0 };
   enum { dimworld = 3};
@@ -614,7 +614,7 @@ buildGhost(const PLLBndFaceType & ghost) {
 template <>
 inline bool 
 ALU3dGridGeometry<2,3, const ALU3dGrid<3, 3, hexa> > :: 
-buildGeom(const ALU3DSPACE HFaceType & item) {
+buildGeom(const ALU3DSPACE HFaceType & item, int twist) {
   enum { dim = 2 };
   enum { dimworld = 3 };
 
@@ -655,7 +655,7 @@ buildGeom(const FaceCoordinatesType& coords) {
 template <> // for edges 
 inline bool 
 ALU3dGridGeometry<1,3, const ALU3dGrid<3, 3, hexa> >::
-buildGeom(const ALU3DSPACE HEdgeType & item) {
+buildGeom(const ALU3DSPACE HEdgeType & item, int twist) {
   enum { dim = 1 };
   enum { dimworld = 3 };
 
@@ -673,7 +673,7 @@ buildGeom(const ALU3DSPACE HEdgeType & item) {
 template <> // for Vertices ,i.e. Points 
 inline bool 
 ALU3dGridGeometry<0,3, const ALU3dGrid<3,3,hexa> >:: 
-buildGeom(const ALU3DSPACE VertexType & item) {
+buildGeom(const ALU3DSPACE VertexType & item, int twist) {
   enum { dim = 0 };
   enum { dimworld = 3};
   
