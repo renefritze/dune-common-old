@@ -13,9 +13,9 @@
 
 // using directives
 
-namespace ALU3dGridSpace {
+namespace ALUGridSpace {
   //*************************************************************
-  //  definition of original LeafIterators of ALU3dGrid 
+  //  definition of original LeafIterators of ALUGrid 
   //
   // default is element (codim = 0)
   template <int codim> 
@@ -855,7 +855,7 @@ private:
   
   // the wrapper for the original iterator of the ALU3dGrid  
   typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper<cd> IteratorType; 
-  ALU3dGridSpace::AutoPointer< IteratorType > iter_;
+  ALUGridSpace::AutoPointer< IteratorType > iter_;
 };
 
 //********************************************************************
