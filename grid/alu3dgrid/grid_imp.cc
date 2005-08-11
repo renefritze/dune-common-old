@@ -15,20 +15,22 @@ namespace Dune {
   //ALU3dGrid<dim, dimworld, elType>::elementType = elType;
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(const char* macroTriangFilename
+  inline ALU3dGrid<dim, dimworld, elType>::
+  ALU3dGrid(const char* macroTriangFilename
 #ifdef _ALU3DGRID_PARALLEL_
-                                                     , MPI_Comm mpiComm
+            , MPI_Comm mpiComm
 #endif
-                                                     ) 
+            ) 
     : mygrid_ (0) , maxlevel_(0) 
-    , coarsenMarked_(0) , refineMarked_(0) 
+      , coarsenMarked_(0) , refineMarked_(0) 
 #ifdef _ALU3DGRID_PARALLEL_
-    , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
+      , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
 #else 
-    ,  myRank_(-1) 
+      ,  myRank_(-1) 
 #endif
-    , hIndexSet_ (*this)
-    , levelIndexVec_(MAXL) , leafIndexSet_(0)
+      , hIndexSet_ (*this)
+      , globalIdSet_(*this), localIdSet_(*this)
+      , levelIndexVec_(MAXL) , leafIndexSet_(0)
   {
     if( myRank_ <= 0 )
       {
@@ -65,10 +67,11 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(MPI_Comm mpiComm) 
     : mygrid_ (0) , maxlevel_(0) 
-    , coarsenMarked_(0) , refineMarked_(0) 
-    , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
-    , hIndexSet_ (*this)
-    , levelIndexVec_(MAXL) , leafIndexSet_(0)
+      , coarsenMarked_(0) , refineMarked_(0) 
+      , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
+      , hIndexSet_ (*this)
+      , globalIdSet_(*this), localIdSet_(*this)
+      , levelIndexVec_(MAXL) , leafIndexSet_(0)
   {
     for(unsigned int i=0; i<levelIndexVec_.size(); i++) levelIndexVec_[i] = 0; 
   }

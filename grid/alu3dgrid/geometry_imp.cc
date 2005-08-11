@@ -102,7 +102,7 @@ inline void ALU3dGridGeometry<0,3, const ALU3dGrid<3,3,tetra> > :: buildJacobian
 
 template <> 
 inline bool ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> > :: 
-buildGeom(const IMPLElementType & item) 
+buildGeom(const IMPLElementType & item, int) 
 {
   enum { dim = 3 };
   enum { dimworld = 3};
@@ -168,8 +168,12 @@ buildGeom(const ALU3DSPACE HFaceType & item, int twist)
   
   for (int i=0;i<(dim+1);i++) 
   {
+    // Transform Dune index to ALU index and apply twist
+    int localALUIndex = FaceTopo::dune2aluVertex(i);
+    int rotatedALUIndex = FaceTopo::twist(localALUIndex, twist);
+
     const double (&p)[3] = 
-      static_cast<const GEOFaceType &> (item).myvertex(FaceTopo::dune2aluVertex(i))->Point();
+      static_cast<const GEOFaceType &>(item).myvertex(rotatedALUIndex)->Point();
     for (int j=0;j<dimworld;j++) 
     {
       coord_[i][j] = p[j];
@@ -207,9 +211,8 @@ buildGeom(const ALU3DSPACE HEdgeType & item, int twist)
   
   for (int i=0;i<(dim+1);i++) 
   {
-    assert(false);
-    // * potentially wrong, since the edges may have a different orientation in ALU3dGrid
-    const double (&p)[3] = static_cast<const GEOEdgeType &> (item).myvertex(i)->Point();
+    const double (&p)[3] = 
+      static_cast<const GEOEdgeType &> (item).myvertex((i+twist)%2)->Point();
     for (int j=0;j<dimworld;j++) 
     {
       coord_[i][j] = p[j];
@@ -222,7 +225,7 @@ buildGeom(const ALU3DSPACE HEdgeType & item, int twist)
 
 template <> // for Vertices ,i.e. Points (note that twist is a dummy parameter here, needed for consistency) 
 inline bool ALU3dGridGeometry<0,3, const ALU3dGrid<3,3,tetra> > :: 
-buildGeom(const ALU3DSPACE VertexType & item, int twist) 
+buildGeom(const ALU3DSPACE VertexType & item, int) 
 {
   enum { dim = 0 };
   enum { dimworld = 3};
@@ -534,7 +537,7 @@ print (std::ostream& ss) const {
 template <>
 inline bool
 ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
-buildGeom(const IMPLElementType& item) {
+buildGeom(const IMPLElementType& item, int) {
   enum { dim = 3 };
   enum { dimworld = 3 };
 
@@ -620,8 +623,12 @@ buildGeom(const ALU3DSPACE HFaceType & item, int twist) {
 
   const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
   for (int i = 0; i < 4; ++i) {
+    // Transform Dune index to ALU index and apply twist
+    int localALUIndex = FaceTopo::dune2aluVertex(i);
+    int rotatedALUIndex = FaceTopo::twist(localALUIndex, twist);
+
     const double (&p)[3] = 
-      face.myvertex(FaceTopo::dune2aluVertex(i))->Point();
+      face.myvertex(rotatedALUIndex)->Point();
     for (int j = 0; j < dimworld; ++j) {
       coord_[i][j] = p[j];
     }
@@ -659,9 +666,9 @@ buildGeom(const ALU3DSPACE HEdgeType & item, int twist) {
   enum { dim = 1 };
   enum { dimworld = 3 };
 
-  // * potentially wrong, since the edges are renumbered in dune.
   for (int i = 0; i < 2; ++i) {
-    const double (&p)[3] = static_cast<const GEOEdgeType &> (item).myvertex(i)->Point();
+    const double (&p)[3] = 
+      static_cast<const GEOEdgeType &> (item).myvertex((i+twist)%2)->Point();
     for (int j = 0;j < dimworld; ++j) { 
       coord_[i][j] = p[j];
     }
