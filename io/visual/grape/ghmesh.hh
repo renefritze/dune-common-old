@@ -26,6 +26,7 @@ typedef struct dune_elem
   void          * actElement;
 
   void          * display;
+  
   void          * mesh; 
 
   int isLeafIterator;
@@ -35,6 +36,9 @@ typedef struct dune_elem
 
 typedef struct dune_fdata 
 {
+  /* my number in the data vector */
+  int mynum; 
+  
   const char * name;
   
   /* pointer to object of discrete function */

@@ -305,6 +305,7 @@ addData(DiscFuncType &func , const char *name , double time )
     {
       vecFdata_[n] = new DUNE_FDATA ();
 
+      vecFdata_[n]->mynum = n; 
       vecFdata_[n]->name = name;
       vecFdata_[n]->allLevels = 0;
       vecFdata_[n]->discFunc = (void *) &func;
