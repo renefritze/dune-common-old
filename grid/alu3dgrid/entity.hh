@@ -44,7 +44,7 @@ class ALU3dGridMakeableEntity :
 {
   // typedef typename GridImp::template Codim<codim>::Entity EntityType;
   friend class ALU3dGridEntity<cd, dim, GridImp>;
-  typedef typename ALU3dImplTraits<GridImp::elementType> ImplTraitsType;
+  typedef ALU3dImplTraits<GridImp::elementType> ImplTraitsType;
 
   typedef typename ImplTraitsType::PLLBndFaceType PLLBndFaceType;
   typedef typename ImplTraitsType::IMPLElementType IMPLElementType;
