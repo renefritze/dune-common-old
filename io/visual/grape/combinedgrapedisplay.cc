@@ -315,10 +315,10 @@ inline void CombinedGrapeDisplay<DisplayType>::addDisplay(DisplayType & disp)
 
 template<class DisplayType>
 inline void CombinedGrapeDisplay<DisplayType>::
-addMyMeshToTimeScene(void * timescene, double time, int proc)
+addMyMeshToGlobalTimeScene(double time, int proc)
 { 
   if(!hmesh_) hmesh_ = setupHmesh();
-  GrapeInterface<dim,dimworld>::addHmeshToTimeScene(timescene,time,this->getHmesh(),proc);
+  GrapeInterface<dim,dimworld>::addHmeshToGlobalTimeScene(time,this->getHmesh(),proc);
 }
 
 template<class DisplayType>

@@ -56,7 +56,7 @@ public:
   //! return pointer to Grape Hmesh
   inline void * getHmesh();
 
-  inline void addMyMeshToTimeScene(void * timescene, double time, int proc);
+  inline void addMyMeshToGlobalTimeScene(double time, int proc);
  
 private:  
   // generate hmesh 

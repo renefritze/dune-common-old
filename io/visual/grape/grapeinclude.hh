@@ -84,6 +84,11 @@ struct GrapeInterface
   {
     GrapeInterface_two_two::addHmeshToTimeScene(timescene,time,hmesh,proc);
   }
+  
+  inline static void addHmeshToGlobalTimeScene(double time, void  *hmesh , int proc)
+  {
+    GrapeInterface_two_two::addHmeshToGlobalTimeScene(time,hmesh,proc);
+  }
 };
 
 // not tested yet 
@@ -173,7 +178,11 @@ struct GrapeInterface<3,3>
 
   inline static void addHmeshToTimeScene(void * timescene, double time, void  *hmesh , int proc)
   {
-    GrapeInterface_two_two::addHmeshToTimeScene(timescene,time,hmesh,proc);
+    GrapeInterface_three_three::addHmeshToTimeScene(timescene,time,hmesh,proc);
+  }
+  inline static void addHmeshToGlobalTimeScene(double time, void  *hmesh , int proc)
+  {
+    GrapeInterface_three_three::addHmeshToGlobalTimeScene(time,hmesh,proc);
   }
 };
 
