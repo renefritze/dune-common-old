@@ -21,10 +21,15 @@ public:
   
   typedef typename GridType::Traits::template Codim<0>::LevelIterator LevelIteratorType ;
   typedef typename GridType::Traits::template Codim<0>::LeafIterator LeafIteratorType ;
+  typedef typename GridType::LeafIndexSetType LeafIndexSetType; 
+    
   //typedef typename GridType::Traits::template Codim<0>::template Partition<Interior_Partition>:: LeafIterator LeafIteratorType;
 protected:
   //! the grid we want to display 
   GridType &grid_;
+
+  //! leaf index set of the grid 
+  const LeafIndexSetType & leafset_; 
 
   //! my process number 
   const int myRank_;
@@ -87,14 +92,14 @@ public:
 //****************************************************************  
   // update element from entity
   template <class GridIteratorType>
-  inline static int el_update (GridIteratorType *, DUNE_ELEM *) ;
+  inline int el_update (GridIteratorType *, DUNE_ELEM *) ;
 
   // update child element 
   template <class GridIteratorType>
-  inline static int child_update (GridIteratorType *, DUNE_ELEM *) ;
+  inline int child_update (GridIteratorType *, DUNE_ELEM *) ;
 
   template <class GridIteratorType>
-  inline static int child_n_update (GridIteratorType *, DUNE_ELEM *) ;
+  inline int child_n_update (GridIteratorType *, DUNE_ELEM *) ;
 
   // first and next macro element via LevelIterator level 0 
   inline int first_leaf (DUNE_ELEM * he) ;
@@ -105,9 +110,10 @@ public:
   inline int next_macro (DUNE_ELEM * he) ;
 
   // first and next child via HierarchicIterator with given maxlevel in Grape
-  inline static int first_child (DUNE_ELEM * he) ;
-  inline static int next_child (DUNE_ELEM * he) ;
+  inline int first_child (DUNE_ELEM * he) ;
+  inline int next_child (DUNE_ELEM * he) ;
 
+  // fake function for copy iterator 
   inline static void * copy_iterator (const void * i) ;
 
   // local to world 
@@ -119,6 +125,9 @@ public:
   // check inside reference element 
   inline int checkWhetherInside (DUNE_ELEM * he, const double * w);
 
+  //*********************************
+  //  wrapper functions 
+  //*********************************
   // local to world 
   inline static void ctow (DUNE_ELEM * he, const double * c, double * w);
 
@@ -147,6 +156,10 @@ public:
   // wrapper methods for first_child and next_child
   inline static int fst_leaf (DUNE_ELEM * he);
   inline static int nxt_leaf (DUNE_ELEM * he);
+  
+  // wrapper methods for first_child and next_child
+  inline static int fst_child (DUNE_ELEM * he);
+  inline static int nxt_child (DUNE_ELEM * he);
   
 }; // end class GrapeGridDisplay
 
