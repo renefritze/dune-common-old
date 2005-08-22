@@ -212,7 +212,7 @@ namespace ALUGridSpace {
     val_t elem_;
   public:
     template <class GridImp> 
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level)
+    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level, const int links )
       : it_(const_cast<GridImp &> (grid).myGrid().container(),level), elem_(0,0) {}
 
     int size  ()    { return it_.size(); }
@@ -242,7 +242,7 @@ namespace ALUGridSpace {
     val_t elem_;
   public:
     template <class GridImp> 
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level ) 
+    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level, const int links )
       : it_(const_cast<GridImp &> (grid).myGrid().container(),level) , elem_(0,0) {}
 
     int size  ()    { return it_.size(); }
@@ -271,7 +271,7 @@ namespace ALUGridSpace {
     val_t elem_;
   public:
     template <class GridImp> 
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level ) 
+    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level, const int links )
       : it_(const_cast<GridImp &> (grid).myGrid().container(),level), elem_(0,0) {}
 
     int size  ()    { return it_.size(); }
@@ -298,7 +298,7 @@ namespace ALUGridSpace {
     val_t elem_;
   public:
     template <class GridImp> 
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level ) 
+    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level, const int links )
       : it_(const_cast<GridImp &> (grid).myGrid()), elem_(0,0) {}
 
     int size  ()    { return it_->size(); }
@@ -548,7 +548,7 @@ namespace ALUGridSpace {
     
     template <class GridImp> 
     ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
-      : interior_ ( grid, level ) 
+      : interior_ ( grid, level , nlinks ) 
       , ghosts_ ( grid, level, nlinks ) , useInterior_(true) {}
     
     int size  ()    
