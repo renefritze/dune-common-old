@@ -419,6 +419,12 @@ public:
     size_[cd] = num;
   }
 
+  //! deliver all geometry types used in this grid
+  const std::vector<GeometryType>& geomTypes () const
+  {
+    return grid_.geomTypes();
+  }
+  
 private:
   // grid this level set belongs to 
   const GridType & grid_;
