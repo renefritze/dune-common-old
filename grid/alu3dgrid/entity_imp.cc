@@ -605,6 +605,9 @@ namespace Dune {
   inline ALU3dGridIntersectionIterator<GridImp> ALU3dGridEntity<0,dim,GridImp> :: ibegin () const 
   {
     assert(item_ != 0);
+
+    // one cannot call ibegin on a ghost entity
+    assert(isGhost_ == false);
     return ALU3dGridIntersectionIterator<GridImp> (grid_,item_,walkLevel_);
   }
 
@@ -612,6 +615,9 @@ namespace Dune {
   inline ALU3dGridIntersectionIterator<GridImp> ALU3dGridEntity<0,dim,GridImp> :: iend () const
   {
     assert(item_ != 0);
+    
+    // one cannot call iend on a ghost entity
+    assert(isGhost_ == false);
     return ALU3dGridIntersectionIterator<GridImp> (grid_, 0 ,walkLevel_,true);
   }
 
