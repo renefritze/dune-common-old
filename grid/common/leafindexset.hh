@@ -73,6 +73,8 @@ public:
   default grid index sets an can be generated for each grid implementation.
 
   Note that only codim = 0 is working at the moment. 
+
+  Future work. Index set for each codim.
 */
 template <class GridType>
 class AdaptiveLeafIndexSet : public DefaultGridIndexSetBase <GridType>
@@ -88,9 +90,13 @@ class AdaptiveLeafIndexSet : public DefaultGridIndexSetBase <GridType>
       // this index set works only for codim = 0 at the moment
       assert(codim == 0);
 
-      // check if we have index for given entity
-      assert(leafIndex[ set.index(en) ] >= 0);
+      //assert( en.isLeaf () );
 
+      // check if we have index for given entity
+      //assert(leafIndex[ set.index(en) ] >= 0);
+      //assert( (leafIndex[ set.index(en) ] < 0) ? (std::cout << set.index(en) << " idx, part = " << en.partitionType() << " on p = " << __MyRank__ << "\n",0 ): 1);
+      assert( leafIndex[ set.index(en) ] >= 0 ); 
+      //if(leafIndex[ set.index(en) ] < 0) return 0; 
       return leafIndex[ set.index(en) ];
     }
   };
@@ -159,45 +165,70 @@ public:
     nextFreeIndex_ (0), actSize_(0), marked_(false), markAllU_ (false) 
     , factor_(2) , hIndexSet_( grid.hierarchicIndexSet() ) 
   {
-    resize();
+    resizeVectors();
+
+    // give all entities that lie below the old entities new numbers 
+    markAllUsed ();
+    //resize();
     markAllU_ = false;
   }
 
+  int type () const { return myType; }
+
   virtual ~AdaptiveLeafIndexSet () {};
 
+  template <class EntityType>
+  void restrictLocal ( EntityType &father, EntityType &son, bool initialize ) 
+  {
+    removeOldIndex( son );
+    insertNewIndex( father );
+  }
+
+  template <class EntityType>
+  void prolongLocal ( EntityType &father, EntityType &son, bool initialize ) 
+  {
+    insertNewIndex( son );
+    removeOldIndex( father );
+  }
+  
   void insertNewIndex (const typename GridType::template Codim<0>::Entity & en )
   {
     // here we have to add the support of higher codims 
-    
-    if(leafIndex_.size() < this->grid_.global_size(0))
-    {
-      resizeVectors();
-    }
+    resizeVectors();
 
+    //std::cout << "Insert new Entity = " << en.globalIndex() << "\n";
+    //std::cout << leafIndex_.size() << " l|g " << this->grid_.global_size(0) << "\n";
+    
     this->insert( en );
     marked_ = false;
   }
 
   void removeOldIndex (const typename GridType::template Codim<0>::Entity & en )
   {
+    //std::cout << "remove old Entity = " << en.globalIndex() << "\n";
     // here we have to add the support of higher codims 
     state_[ hIndexSet_.index(en) ] = UNUSED;
   }
 
+  // reallocate the vector for new size 
   void resizeVectors()
   {
-    int oldSize = leafIndex_.size();
-
-    leafIndex_.realloc(this->grid_.global_size(0), factor_ );
-    state_.realloc(this->grid_.global_size(0), factor_ );
-
-    // here we dont need to copy 
-    oldLeafIndex_.realloc(this->grid_.global_size(0), factor_ );
-
-    for(int i=oldSize; i<leafIndex_.size(); i++)
+    if(leafIndex_.size() < this->grid_.global_size(0))
     {
-      leafIndex_[i] = -1;
-      state_[i] = UNUSED;
+      //std::cout << "Resize with max = " << this->grid_.global_size(0) << "\n";
+      int oldSize = leafIndex_.size();
+
+      leafIndex_.realloc(this->grid_.global_size(0), factor_ );
+      state_.realloc(this->grid_.global_size(0), factor_ );
+
+      // here we dont need to copy 
+      oldLeafIndex_.realloc(this->grid_.global_size(0), factor_ );
+
+      for(int i=oldSize; i<leafIndex_.size(); i++)
+      {
+        leafIndex_[i] = -1;
+        state_[i] = UNUSED;
+      }
     }
   }
 
@@ -216,7 +247,6 @@ public:
   bool indexNew (int num, int codim) const
   {
     if(codim > 0) return false;
-
     assert((num >= 0) && (num < state_.size()));
     return state_[num] == NEW;
   }
@@ -309,6 +339,14 @@ public:
     
     return haveToCopy;
   }
+  //! return subIndex of given entity
+  template <int cd, class EntityType>
+  int subIndex (const EntityType & en, int i) const
+  {
+    assert(cd == dim);
+    return en.template subIndex<cd>(i);
+  }
+
 
   // memorise index 
   template <class EntityType>
@@ -341,10 +379,11 @@ public:
   template <int codim, class EntityType>
   int index (EntityType & en, int num) const
   {
-    //return IndexWrapper<EntityType,HIndexSetType,EntityType::codimension,codim>::
-    //          index(en,hIndexSet_,leafIndex_,num);
-    assert( codim == 0 );
-    return leafIndex_[ hIndexSet_.index(en) ];
+    return IndexWrapper<EntityType,HIndexSetType,EntityType::codimension,codim>::
+              index(en,hIndexSet_,leafIndex_,num);
+    //std::cout << "return index \n";
+    //assert( codim == 0 );
+    //return leafIndex_[ hIndexSet_.index(en) ];
   }
   
   //! return global index 
@@ -353,6 +392,8 @@ public:
   int index (EntityType & en) const
   {
     assert( EntityType::codimension == 0 );
+    assert( en.isLeaf() );
+    assert( leafIndex_[ hIndexSet_.index(en) ] >= 0 );
     return leafIndex_[ hIndexSet_.index(en) ];
   }
   
@@ -437,13 +478,15 @@ private:
     
     int nSize = 0;
 
-    typedef typename GridType::template Codim<0>::LeafIterator LeafIteratorType; 
+    typedef typename GridType::LeafIterator LeafIteratorType; 
     // walk over leaf level on locate all needed entities  
-    LeafIteratorType endit  = this->grid_.leafend   ( this->grid_.maxlevel() );
-    for(LeafIteratorType it = this->grid_.leafbegin ( this->grid_.maxlevel() ); it != endit ; ++it )
+    {
+    LeafIteratorType endit  = this->grid_.template leafend<0>   ( this->grid_.maxlevel());
+    for(LeafIteratorType it = this->grid_.template leafbegin<0> ( this->grid_.maxlevel()); it != endit ; ++it )
     {
       this->insert( *it );
       nSize++;
+    }
     }
     
     marked_ = true;
@@ -587,12 +630,12 @@ public:
 
   virtual ~DefaultLeafIndexSet () {};
 
-  void insertNewIndex (const typename GridType::template Codim<0>::Entity & en )
+  void insertNewIndex (const typename GridType::template codim<0>::Entity & en )
   {
     leafIndexSet_.insertNewIndex(en);
   }
 
-  void removeOldIndex (const typename GridType::template Codim<0>::Entity & en )
+  void removeOldIndex (const typename GridType::template codim<0>::Entity & en )
   {
     leafIndexSet_.removeOldIndex(en);
   }
