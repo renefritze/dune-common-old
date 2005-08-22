@@ -344,7 +344,12 @@ namespace ALUGridSpace {
     IteratorType & inner () { return wi_; }
     IteratorType & outer () { return wo_; }
   };
-  
+ 
+  //****************************
+  //
+  //  --GhostIterator 
+  //
+  //****************************
   template <> 
   class ALU3dGridLeafIteratorWrapper<0,Dune::Ghost_Partition> 
     : public IteratorWrapperInterface< LeafValType >
@@ -525,7 +530,7 @@ namespace ALUGridSpace {
       pair < ElementPllXIF_t *, int > p = it_->item ().accessPllX ().accessOuterPllX () ;
       pair < HElementType  * , HBndSegType * > p2;
       p.first->getAttachedElement(p2);
-      assert(p2.second); 
+      assert(p2.second);
       elem_.second = p2.second;
       return elem_;
     }
