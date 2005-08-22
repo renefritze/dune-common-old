@@ -5,6 +5,7 @@
 
 //- Dune includes
 #include <dune/common/stdstreams.hh>
+#include <dune/grid/common/grid.hh>
 
 //- Local includes
 #include "alu3dinclude.hh"
@@ -55,6 +56,12 @@ namespace Dune {
     {
       // return maxIndex of hierarchic index set
       return grid_.global_size(codim);
+    }
+
+    //! deliver all geometry types used in this grid
+    const std::vector<GeometryType>& geomTypes () const
+    {
+      return grid_.geomTypes();
     }
 
   private:
