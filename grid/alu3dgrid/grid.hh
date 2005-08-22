@@ -115,6 +115,7 @@ namespace Dune {
     //! a standard leaf iterator  
     typedef ALU3dGridLeafIterator<0, All_Partition, MyType> LeafIteratorImp;
     typedef typename Traits::template Codim<0>::LeafIterator LeafIteratorType;
+    typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
 
     typedef ALU3dGridHierarchicIterator<MyType> HierarchicIteratorImp;
 
@@ -302,6 +303,9 @@ namespace Dune {
      */
     template <GrapeIOFileFormatType ftype>
     bool writeGrid( const std::string filename, alu3d_ctype time ) const ;
+
+    bool writeGrid_Xdr( const std::string filename, alu3d_ctype time ) const ;
+    bool writeGrid_Ascii( const std::string filename, alu3d_ctype time ) const ;
   
     /** \brief read Grid from file filename and store time of mesh in time 
      */
@@ -337,9 +341,15 @@ namespace Dune {
       return entity.realEntity;
     }
 
+    //! deliver all geometry types used in this grid
+    const std::vector<GeometryType>& geomTypes () const
+    {
+      return geomTypes_;
+    }
+    
   private:
     //! Copy constructor should not be used  
-    ALU3dGrid( const MyType & g);
+    ALU3dGrid( const MyType & g );
   
     //! assignment operator should not be used  
     ALU3dGrid<dim,dimworld,elType>& 
@@ -367,6 +377,10 @@ namespace Dune {
     mutable int refineMarked_;
 
     const int myRank_;
+
+    // at the moment the number of different geom types is 1 
+    enum { numberOfGeomTypes = 1 };
+    std::vector<GeometryType> geomTypes_; 
   
     // our hierarchic index set 
     HierarchicIndexSetType hIndexSet_;
