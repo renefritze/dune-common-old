@@ -63,9 +63,8 @@ public:
   {
     // set ghost as entity
     PLLBndFaceType & gh = static_cast <PLLBndFaceType &> (ghost);
-    //realEntity_.setGhost( *(gh.getGhost()) );
-    // old set ghost method
     realEntity_.setGhost( gh );
+
     dc_.insertNewIndex( en_ );
     dc_.checkMemorySize();
     dc_.gather(str, en_);
@@ -123,9 +122,9 @@ public:
   {
     // set ghost as entity
     PLLBndFaceType & gh = static_cast <PLLBndFaceType &> (ghost);
-    //realEntity_.setGhost( *(gh.getGhost()) );
-    // old set ghost method
     realEntity_.setGhost( gh );
+
+    // old set ghost method
     dc_.gather(str, en_);
   }
 
