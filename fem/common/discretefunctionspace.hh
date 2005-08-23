@@ -16,7 +16,7 @@ namespace Dune{
   class GeometryIdentifier {
   public:
     enum { numTypes = 9 };
-    enum IdentiferType { Vertex = 0, Line, Triangle, Quadrilateral,
+    enum IdentifierType { Vertex = 0, Line, Triangle, Quadrilateral,
                          Tetrahedron, Hexahedron, Pyramid, Prism, Unknown };
   public:
     GeometryIdentifier(IdentifierType idType) :
