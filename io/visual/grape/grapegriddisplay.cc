@@ -18,6 +18,7 @@ GrapeGridDisplay(GridType &grid, const int myrank ) :
 {   
   GrapeInterface<dim,dimworld>::init();
   if(!hmesh_) hmesh_ = setupHmesh();
+  std::cout << "Grid size = " << this->grid_.global_size(0) << "\n";
 }
 
 template<class GridType>
@@ -99,6 +100,7 @@ el_update (GridIteratorType *it, DUNE_ELEM * he)
     for(int i = 0; i< en.template count<dim>(); i++)
     {
       he->vindex[i] = leafset_. template subIndex<dim> (en,i);
+      //std::cout << he->vindex[i] << " Vertex is \n";
     } 
 
     {
@@ -157,12 +159,12 @@ first_leaf (DUNE_ELEM * he)
  
   //LeafIteratorType it    = grid_.template leafbegin<0,Interior_Partition> (levelOI);
   //LeafIteratorType endit = grid_.template leafend  <0,Interior_Partition> (levelOI);
-  
+
   //myLeafIt_    = new LeafIteratorType ( it );
   //myLeafEndIt_ = new LeafIteratorType ( endit );
 
-  myLeafIt_    = new LeafIteratorType ( grid_.leafbegin (levelOI) );
-  myLeafEndIt_ = new LeafIteratorType ( grid_.leafend   (levelOI) );
+  myLeafIt_    = new LeafIteratorType ( grid_.template leafbegin<0,Interior_Partition> (levelOI) );
+  myLeafEndIt_ = new LeafIteratorType ( grid_.template leafend  <0,Interior_Partition> (levelOI) );
 
   if(myLeafIt_[0] == myLeafEndIt_[0]) 
   {
@@ -179,7 +181,8 @@ template<class GridType>
 inline int GrapeGridDisplay<GridType>::
 next_leaf (DUNE_ELEM * he) 
 {
-  LeafIteratorType *it = ((LeafIteratorType *) he->liter);
+  LeafIteratorType * it = (LeafIteratorType *) he->liter;
+  assert (it );
   if( ++it[0] != myLeafEndIt_[0] )
   {
     return el_update(it,he); 
@@ -197,13 +200,12 @@ first_macro (DUNE_ELEM * he)
 
   int levelOI = he->level_of_interest;
   if(levelOI < 0) levelOI = grid_.maxlevel();
+
   // myIt ist Zeiger auf LevelIteratorType, definiert innerhalb der Klasse
   // rufe default CopyConstructor auf 
-  //myIt_ = new LevelIteratorType(grid_.template lbegin<0> (0, myRank_) );
-  //myEndIt_ = new LevelIteratorType(grid_.template lend<0>(0, myRank_) );
   
-  myIt_ = new LevelIteratorType(grid_.template lbegin<0> (levelOI) );
-  myEndIt_ = new LevelIteratorType(grid_.template lend<0>(levelOI) );
+  myIt_    = new LevelIteratorType(grid_.template lbegin<0> (levelOI) );
+  myEndIt_ = new LevelIteratorType(grid_.template lend<0>   (levelOI) );
   
   // funktioniert nur, wenn man im Macro 
   // HM_ALL_TEST_IF_PROCEED !tip_element->has_children entfernt 
@@ -224,7 +226,7 @@ inline int GrapeGridDisplay<GridType>::
 next_macro (DUNE_ELEM * he) 
 {
   LevelIteratorType *it = ((LevelIteratorType *) he->liter);
-
+  assert ( it );
   if( ++it[0] != myEndIt_[0] )
   {
     return el_update(it,he); 
