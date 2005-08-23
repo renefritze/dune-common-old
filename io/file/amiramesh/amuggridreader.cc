@@ -13,7 +13,7 @@
 #include <algorithm>
 
 #if defined HAVE_PSURFACE
-#include <parametrization/AmiraParamAccess.h>
+#include <psurface.h>
 #endif
 
 
