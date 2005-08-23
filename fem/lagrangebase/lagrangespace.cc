@@ -155,7 +155,7 @@ signIn (DiscFuncType & df) const
 {
   // only for gcc to pass type DofType
   assert(mapper_ != 0);
-  return dm_.addDofSet( df.getStorage() , grid_.grid() , grid_.indexSet() , *mapper_, df.name() );
+  return dm_.addDofSet( df.getStorageType() , grid_.grid() , grid_.indexSet() , *mapper_, df.name() );
 }
 
 template <
@@ -164,7 +164,7 @@ template <
 template< class DiscFuncType> 
 inline bool 
 LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd, DofManagerImp>::
-signOut (DiscFuncType & df) const  
+signOut (const DiscFuncType & df) const  
 {
   return dm_.removeDofSet( df.memObj() );
 }
