@@ -1,5 +1,4 @@
 #include "faceutility.hh"
-#include "../common/reftopology.hh"
 
 namespace Dune {
   //- class ALU3dGridGeometricFaceInfo
