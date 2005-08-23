@@ -170,8 +170,7 @@ public:
     }
 
     static int GetSons(const UG3d::element* element, UG3d::element* sonList[MAX_SONS]) {
-        /** \todo Remove the const_cast */
-        return UG3d::GetSons(const_cast<UG3d::element*>(element), sonList);
+        return UG3d::GetSons(element, sonList);
     }
 
     //! Encapsulates the GRID_ATTR macro
