@@ -13,10 +13,24 @@
 
 namespace Dune{
 
-template <class DiscreteFunctionSpaceType >    class LocalFunctionAdapt;
-template <class DofType, class DofArrayType >  class DofIteratorAdapt;
+  template <class DiscreteFunctionSpaceImp>    class LocalFunctionAdapt;
+  template <class DofType, class DofArrayType>  class DofIteratorAdapt;
+  template <class DiscreteFunctionSpaceImp> class DFAdapt;
 
 //! defined in dofmanager.hh
+
+template <class DiscreteFunctionSpaceImp>
+struct DFAdaptTraits {
+  typedef DiscreteFunctionSpaceImp DiscreteFunctionSpaceType;
+  typedef DFAdapt<DiscreteFunctionSpaceImp> DiscreteFunctionType;
+  typedef LocalFunctionAdapt<DiscreteFunctionSpaceImp> LocalFunctionType;
+  typedef typename DofArray<
+    typename DiscreteFunctionSpaceImp::RangeFieldType
+  >::DofIteratorType DofIteratorType;
+  typedef typename DofArray<
+    typename DiscreteFunctionSpaceImp::RangeFieldType
+  >::ConstDofIteratorType ConstDofIteratorType;
+};
 
 //**********************************************************************
 //
@@ -28,31 +42,31 @@ template <class DofType, class DofArrayType >  class DofIteratorAdapt;
 //**********************************************************************
 template<class DiscreteFunctionSpaceType>
 class DFAdapt 
-: public DiscreteFunctionDefault < DiscreteFunctionSpaceType, 
-           DofIteratorAdapt < typename DiscreteFunctionSpaceType::RangeField ,
-           DofArray< typename DiscreteFunctionSpaceType::RangeField > > , 
-           LocalFunctionAdapt< DiscreteFunctionSpaceType > ,
-           DFAdapt <DiscreteFunctionSpaceType> > 
+  : public DiscreteFunctionDefault<DFAdaptTraits<DiscreteFunctionSpaceType> >
 {
 public:
-  typedef typename DiscreteFunctionSpaceType::RangeField RangeFieldType;
+  typedef typename DiscreteFunctionSpaceType::RangeFieldType RangeFieldType;
   typedef DofArray< RangeFieldType > DofArrayType;
 
 private:
-  typedef DiscreteFunctionDefault < DiscreteFunctionSpaceType,
-            DofIteratorAdapt < typename DiscreteFunctionSpaceType::RangeField,DofArrayType  > ,
-            LocalFunctionAdapt<DiscreteFunctionSpaceType> ,
-            DFAdapt <DiscreteFunctionSpaceType > >
-  DiscreteFunctionDefaultType;
-
+  typedef DiscreteFunctionDefault<
+    DFAdaptTraits<DiscreteFunctionSpaceType> 
+  > DiscreteFunctionDefaultType;
+  
   enum { myId_ = 0};
   
 public:
-  typedef typename DiscreteFunctionSpaceType::RangeField DofType;
-  typedef DofIteratorAdapt<typename DiscreteFunctionSpaceType::RangeField,
-          DofArrayType > DofIteratorType;
-  typedef ConstDofIteratorDefault<DofIteratorType> ConstDofIteratorType;
-  
+  typedef typename DiscreteFunctionSpaceType::RangeFieldType DofType;
+  //typedef DofIteratorAdapt<typename DiscreteFunctionSpaceType::RangeField,
+  //        DofArrayType > DofIteratorType;
+  //typedef ConstDofIteratorDefault<DofIteratorType> ConstDofIteratorType;
+    typedef typename DofArray<
+    typename DiscreteFunctionSpaceType::RangeFieldType
+  >::DofIteratorType DofIteratorType;
+  typedef typename DofArray<
+    typename DiscreteFunctionSpaceType::RangeFieldType
+  >::ConstDofIteratorType ConstDofIteratorType;
+
   typedef DofArray<DofType> DofStorageType;
   typedef typename DiscreteFunctionSpaceType:: template DofTraits
       < DofArray<DofType> >::MemObjectType MemObjectType;
@@ -61,7 +75,8 @@ public:
   typedef LocalFunctionAdapt < DiscreteFunctionSpaceType > LocalFunctionType;
 
   typedef DiscreteFunctionSpaceType FunctionSpaceType;
-  
+  typedef DFAdaptTraits<DiscreteFunctionSpaceType> Traits;
+
   //! Constructor make Discrete Function
   DFAdapt(DiscreteFunctionSpaceType& f);
 
@@ -122,8 +137,8 @@ public:
   
   //! add g to this on local entity
   template <class EntityType>
-  void substractLocal (EntityType &it, 
-      const DFAdapt <DiscreteFunctionSpaceType> & g); 
+  void subtractLocal (EntityType &it, 
+                      const DFAdapt <DiscreteFunctionSpaceType> & g); 
 
   //! \todo Please do me!
   template <class EntityType>
@@ -198,16 +213,16 @@ class LocalFunctionAdapt
   enum { dimrange = DiscreteFunctionSpaceType::DimRange };
 
   friend class DFAdapt <DiscreteFunctionSpaceType>;
-  typedef typename DiscreteFunctionSpaceType::RangeField RangeFieldType;
-  typedef typename DiscreteFunctionSpaceType::Domain DomainType;
-  typedef typename DiscreteFunctionSpaceType::Range  RangeType;
-  typedef typename DiscreteFunctionSpaceType::JacobianRange JacobianRangeType;
+  typedef typename DiscreteFunctionSpaceType::RangeFieldType RangeFieldType;
+  typedef typename DiscreteFunctionSpaceType::DomainType DomainType;
+  typedef typename DiscreteFunctionSpaceType::RangeType RangeType;
+  typedef typename DiscreteFunctionSpaceType::JacobianRangeType JacobianRangeType;
 
   typedef typename DiscFuncType::DofArrayType DofArrayType;
 public:
   //! Constructor 
   LocalFunctionAdapt ( const DiscreteFunctionSpaceType &f , 
-           DofArrayType & dofVec );
+                       DofArrayType & dofVec );
 
   //! Destructor 
   ~LocalFunctionAdapt ();
@@ -225,6 +240,8 @@ public:
   template <class EntityType> 
   void evaluate (EntityType &en, const DomainType & x, RangeType & ret) const ;
   
+  template <class EntityType>
+  void evaluateLocal(EntityType &en, const DomainType & x, RangeType & ret) const ;
   //! sum over all local base functions evaluated on given quadrature point
   template <class EntityType, class QuadratureType> 
   void evaluate (EntityType &en, QuadratureType &quad, int quadPoint , RangeType & ret) const;
@@ -233,11 +250,17 @@ public:
   template <class EntityType, class QuadratureType> 
   void jacobian (EntityType &en, QuadratureType &quad, int quadPoint , JacobianRangeType & ret) const;
   
+  template <class EntityType>
+  void jacobianLocal(EntityType& en, const DomainType& x, JacobianRangeType& ret) const ;
+
+  template <class EntityType>
+  void jacobian(EntityType& en, const DomainType& x, JacobianRangeType& ret) const;
+
 protected:
   //! update local function for given Entity  
   template <class EntityType > bool init ( const EntityType &en ) const;
 
-  //! Forbidden! Would wreck havoc
+  //! Forbidden! Would wreak havoc
   MyType& operator= (const MyType& other);
 
   //! needed once 
@@ -279,8 +302,8 @@ protected:
 //***********************************************************************
 //
 //  --DofIteratorAdapt
-//! \todo Please doc me!
-//! I guess this is an iterator over an adaptive space.
+//! An iterator over the degrees of freedom of a discrete function
+//! of type DFAdapt
 //
 //***********************************************************************
 template < class DofImp, class DofArrayType >

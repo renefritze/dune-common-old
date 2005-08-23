@@ -23,7 +23,7 @@ namespace Dune{
     Note: Range has to have Vector structure as well.
 */
 template<typename DFieldType,typename RFieldType, class DType, class RType>
-class Mapping : public Vector < RFieldType > 
+class Mapping //: public Vector < RFieldType > 
 {
 public:
   //! domain vector space (for usage in derived classes)
@@ -50,39 +50,20 @@ public:
   virtual ~Mapping( ) {
   }
 
-  //! this method has to be overloaded by derived classes   
-  virtual void initLevel ( int level ) const 
-  {
-    std::cerr << "ERROR: Mapping::initLevel called. \n";
-  }
-
-  //! initialize all operators with this level 
-  virtual void initialize ( int level ) const 
-  {
-    for ( typename std::vector<term>::const_iterator it = lincomb_.begin(); it != lincomb_.end(); it++ )         
-      it->v_->initLevel( level );
-  }
-
   //! operators for linear combinations  
-  virtual MappingType operator + (const Vector<Field> &) const ;
-  virtual MappingType operator - (const Vector<Field> &) const ;
+  virtual MappingType operator + (const MappingType &) const ;
+  virtual MappingType operator - (const MappingType &) const ;
   virtual MappingType operator * (const Field &) const  ;
   virtual MappingType operator / (const Field &) const  ;
-  virtual Vector<Field>& operator  = (const Vector<Field> &) ;
-  virtual Vector<Field>& operator += (const Vector<Field> &) ;
-  virtual Vector<Field>& operator -= (const Vector<Field> &) ;
-  virtual Vector<Field>& operator *= (const Field &)  ;
-  virtual Vector<Field>& operator /= (const Field &)  ;
-
-  //! apply must not called here, because the apply method has 
-  //! to be overloaded by the implementation class 
-  virtual void apply( const DomainType &Arg, RangeType &Dest ) const {
-    std::cerr << "ERROR: Mapping::apply called. \n";
-  }
+  virtual MappingType& operator  = (const MappingType &) ;
+  virtual MappingType& operator += (const MappingType &) ;
+  virtual MappingType& operator -= (const MappingType &) ;
+  virtual MappingType& operator *= (const Field &)  ;
+  virtual MappingType& operator /= (const Field &)  ;
  
-  //! apply the hole linear combination which was created with the
+  //! apply the whole linear combination which was created with the
   //! operators above, using the apply method of the combined operators  
-  void operator()( const DomainType &Arg, RangeType &Dest ) const 
+  void operator() (const DomainType &Arg, RangeType &Dest ) const 
   {
     //Dest.clear();
     
@@ -110,6 +91,9 @@ public:
     }
   }
 private:
+  virtual void apply (const DomainType &Arg, RangeType &Dest) const {
+    operator()(Arg, Dest);
+  }
 
   struct term {
     term() : v_(NULL), scalar_(1.0), scaleIt_(false) { }

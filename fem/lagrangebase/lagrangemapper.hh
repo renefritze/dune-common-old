@@ -1,5 +1,5 @@
-#ifndef __DUNE_LAGRNAGEMAPPER_HH__
-#define __DUNE_LAGRANGEMAPPER_HH__
+#ifndef DUNE_LAGRNAGEMAPPER_HH
+#define DUNE_LAGRANGEMAPPER_HH
 
 #include <dune/fem/common/dofmapperinterface.hh>
 

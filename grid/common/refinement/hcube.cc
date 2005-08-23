@@ -90,10 +90,10 @@ namespace Dune {
 	typedef RefinementImp<dimension, CoordType> Refinement;
 
 	template<int codimension>
-	struct codim;
-	typedef typename codim<dimension>::SubEntityIterator VertexIterator;
+	struct Codim;
+	typedef typename Codim<dimension>::SubEntityIterator VertexIterator;
 	typedef FieldVector<CoordType, dimension> CoordVector;
-	typedef typename codim<0>::SubEntityIterator ElementIterator;
+	typedef typename Codim<0>::SubEntityIterator ElementIterator;
 	typedef FieldVector<int, (1<<dimension)> IndexVector;
 
 	static int nVertices(int level);
@@ -110,10 +110,10 @@ namespace Dune {
 
       template<int dimension, class CoordType>
       template<int codimension>
-      struct RefinementImp<dimension, CoordType>::codim
+      struct RefinementImp<dimension, CoordType>::Codim
       {
 	class SubEntityIterator;
-	typedef typename Grid::template codim<codimension>::Geometry Geometry;
+	typedef typename RefinementGrid<dimension>::BaseType::template Codim<codimension>::Geometry Geometry;
       };
 
       template<int dimension, class CoordType>
@@ -190,6 +190,8 @@ namespace Dune {
       public:
 	//! Know yourself
 	typedef RefinementGrid<dimension> This;
+        //! Know your base class
+        typedef SGrid<dimension, dimension> BaseType;
 
 	//! Make sure the grid as at least the given refinement level
 	void refineTo(int level);
@@ -261,7 +263,7 @@ namespace Dune {
       {
       public:
 	typedef RefinementImp<dimension, CoordType> Refinement;
-	typedef typename Refinement::template codim<dimension>::SubEntityIterator Common;
+	typedef typename Refinement::template Codim<dimension>::SubEntityIterator Common;
 	typedef typename Refinement::CoordVector CoordVector;
 
 	CoordVector coords() const;
@@ -284,7 +286,7 @@ namespace Dune {
       {
       public:
 	typedef RefinementImp<dimension, CoordType> Refinement;
-	typedef typename Refinement::template codim<0>::SubEntityIterator Common;
+	typedef typename Refinement::template Codim<0>::SubEntityIterator Common;
 	typedef typename Refinement::IndexVector IndexVector;
 
 	IndexVector vertexIndices() const;
@@ -308,14 +310,14 @@ namespace Dune {
 
       template<int dimension, class CoordType>
       template<int codimension>
-      class RefinementImp<dimension, CoordType>::codim<codimension>::SubEntityIterator
-	: public ForwardIteratorFacade<typename RefinementImp<dimension, CoordType>::template codim<codimension>::SubEntityIterator, int>,
+      class RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator
+	: public ForwardIteratorFacade<typename RefinementImp<dimension, CoordType>::template Codim<codimension>::SubEntityIterator, int>,
 	  public RefinementSubEntityIteratorSpecial<dimension, CoordType, codimension>
       {
       public:
 	typedef RefinementImp<dimension, CoordType> Refinement;
-	typedef typename Refinement::template codim<codimension>::SubEntityIterator This;
-	typedef typename RefinementGrid<dimension>::template codim<codimension>::LevelIterator
+	typedef typename Refinement::template Codim<codimension>::SubEntityIterator This;
+	typedef typename RefinementGrid<dimension>::template Codim<codimension>::LevelIterator
 	        BackendIterator;
 
 	SubEntityIterator(const BackendIterator &backend);
@@ -332,7 +334,7 @@ namespace Dune {
 
       template<int dimension, class CoordType>
       template<int codimension>
-      RefinementImp<dimension, CoordType>::codim<codimension>::SubEntityIterator::
+      RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       SubEntityIterator(const BackendIterator &backend_)
 	: backend(backend_)
       {}
@@ -340,28 +342,28 @@ namespace Dune {
       template<int dimension, class CoordType>
       template<int codimension>
       bool
-      RefinementImp<dimension, CoordType>::codim<codimension>::SubEntityIterator::
+      RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       equals(const This &other) const
       { return backend == other.backend; }
 
       template<int dimension, class CoordType>
       template<int codimension>
       void
-      RefinementImp<dimension, CoordType>::codim<codimension>::SubEntityIterator::
+      RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       increment()
       { ++backend; }
 
       template<int dimension, class CoordType>
       template<int codimension>
       int
-      RefinementImp<dimension, CoordType>::codim<codimension>::SubEntityIterator::
+      RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       index() const
       { return backend->index(); }
 
       template<int dimension, class CoordType>
       template<int codimension>
-      const typename RefinementImp<dimension, CoordType>::template codim<codimension>::Geometry &
-      RefinementImp<dimension, CoordType>::codim<codimension>::SubEntityIterator::
+      const typename RefinementImp<dimension, CoordType>::template Codim<codimension>::Geometry &
+      RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       geometry() const
       { return backend->geometry(); }
 

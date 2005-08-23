@@ -44,7 +44,7 @@ template <class LocalOperatorImp, class DFDomainType, class DFRangeType = DFDoma
 class DiscreteOperator 
 : public DiscreteOperatorDefault < LocalOperatorImp , DFDomainType, DFRangeType , DiscreteOperator >
 {  
-  typedef typename DFDomainType::FunctionSpaceType::RangeField RangeFieldType;
+  typedef typename DFDomainType::FunctionSpaceType::RangeFieldType RangeFieldType;
 
   typedef typename DFDomainType::DomainType DomainType;
   typedef typename DFDomainType::RangeType RangeType;
@@ -103,10 +103,13 @@ public:
     }
     
     // useful typedefs
-    typedef typename DFDomainType::FunctionSpace FunctionSpaceType;
+    typedef typename DFDomainType::DiscreteFunctionSpaceType FunctionSpaceType;
     typedef typename FunctionSpaceType::GridType GridType;
+    typedef typename FunctionSpaceType::IteratorType IteratorType;
     // the corresponding grid 
     const FunctionSpaceType & functionSpace_= dest.getFunctionSpace();
+    // * Old code
+    /*
     const GridType &grid = functionSpace_.getGrid();
     
     if(leaf_)
@@ -131,6 +134,11 @@ public:
       LevelIterator endit = grid.template lend<0>  ( this->level_ );
       applyOnGrid( it, endit , arg, dest );
     }
+    */
+    // * New code (isn't that somewhat nicer?)
+    IteratorType it = functionSpace_.begin();
+    IteratorType endit = functionSpace_.end();
+    applyOnGrid(it, endit, arg, dest);
 
     finalize( arg, dest );
   }

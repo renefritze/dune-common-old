@@ -1,5 +1,5 @@
-#ifndef __DUNE_DISCRETEFUNCTION_HH__
-#define __DUNE_DISCRETEFUNCTION_HH__
+#ifndef DUNE_DISCRETEFUNCTION_HH
+#define DUNE_DISCRETEFUNCTION_HH
 
 #include <dune/grid/common/grid.hh>
 #include <dune/common/function.hh>
@@ -9,198 +9,228 @@
 
 namespace Dune{
 
-/** @defgroup DiscreteFunction DiscreteFunction
-    @ingroup FunctionCommon
-    The DiscreteFunction is responsible for the dof storage. This can be
-    done in various ways an is left to the user. The user has to derive his
-    own implementation from the DiscreteFunctionDefault class. If some of
-    the implementations in the default class are for ineffecient for the
-    dof storage in the derived class these functions can be overloaded.
+  /** @defgroup DiscreteFunction DiscreteFunction
+      @ingroup FunctionCommon
+      The DiscreteFunction is responsible for the dof storage. This can be
+      done in various ways an is left to the user. The user has to derive his
+      own implementation from the DiscreteFunctionDefault class. If some of
+      the implementations in the default class are for ineffecient for the
+      dof storage in the derived class these functions can be overloaded.
   
-  @{
- */
+      @{
+  */
 
+  //************************************************************************
+  //
+  //  --DiscreteFunctionInterface
+  //
+  //! This is the minimal interface of a discrete function which has to be
+  //! implemented. It contains a local function and a dof iterator which can 
+  //! iterate over all dofs of one level. Via the method access the local
+  //! dofs and basis functions can be accessed for a given entity.
+  //! 
+  //************************************************************************
+  template<class DiscreteFunctionTraits>
+  class DiscreteFunctionInterface : 
+    public Function<typename DiscreteFunctionTraits::DiscreteFunctionSpaceType,
+                    DiscreteFunctionInterface<DiscreteFunctionTraits> > 
+  {
+  public:
+    //- Typedefs and enums
 
-//************************************************************************
-//
-//  --DiscreteFunctionInterface
-//
-//! This is the minimal interface of a discrete function which has to be
-//! implemented. It contains a local function and a dof iterator which can 
-//! iterate over all dofs of one level. Via the method access the local
-//! dofs and basis functions can be accessed for a given entity.
-//! 
-//************************************************************************
-template<class DiscreteFunctionSpaceType, 
-         class DofIteratorImp, 
-         class LocalFunctionImp , 
-         class DiscreteFunctionImp >
-class DiscreteFunctionInterface 
-: public Function < DiscreteFunctionSpaceType, 
-      DiscreteFunctionInterface <DiscreteFunctionSpaceType, 
-      DofIteratorImp , LocalFunctionImp , DiscreteFunctionImp > > 
-{
-public:
-  //! types that we sometimes need outside 
-  typedef Function < DiscreteFunctionSpaceType,  
-                     DiscreteFunctionInterface <DiscreteFunctionSpaceType,  
-                                                DofIteratorImp, 
-                                                LocalFunctionImp,  
-                                                DiscreteFunctionImp > > FunctionType;
+    //! types that we sometimes need outside 
+    typedef Function<
+      typename DiscreteFunctionTraits::DiscreteFunctionSpaceType,
+      DiscreteFunctionInterface<DiscreteFunctionTraits> 
+    > FunctionType;
 
-  //! Domain vector
-  typedef typename DiscreteFunctionSpaceType::Domain DomainType;
-  //! Range vector
-  typedef typename DiscreteFunctionSpaceType::Range RangeType;
+    typedef typename DiscreteFunctionTraits::DiscreteFunctionSpaceType DiscreteFunctionSpaceType;
+
+    typedef typename DiscreteFunctionTraits::DiscreteFunctionType DiscreteFunctionType;
+    //! Domain vector
+    typedef typename DiscreteFunctionSpaceType::DomainType DomainType;
+    //! Range vector
+    typedef typename DiscreteFunctionSpaceType::RangeType RangeType;
   
-  //! Domain field type (usually a float type)
-  typedef typename DiscreteFunctionSpaceType::DomainField DomainFieldType;
-  //! Range field type (usually a float type)
-  typedef typename DiscreteFunctionSpaceType::RangeField RangeFieldType;
+    //! Domain field type (usually a float type)
+    typedef typename DiscreteFunctionSpaceType::DomainFieldType DomainFieldType;
+    //! Range field type (usually a float type)
+    typedef typename DiscreteFunctionSpaceType::RangeFieldType RangeFieldType;
   
-  //! Type of the underlying grid
-  typedef typename DiscreteFunctionSpaceType::GridType GridType;
+    //! Type of the underlying grid
+    typedef typename DiscreteFunctionSpaceType::GridType GridType;
 
-  //! Type of the local function
-  typedef LocalFunctionImp LocalFunctionType;
+    //! Type of the discrete function implementation
+    typedef typename DiscreteFunctionTraits::DiscreteFunctionType DiscreteFunctionType;
 
-    //! Type of the Dof iterator
-  typedef DofIteratorImp DofIteratorType;
+    //! Type of the local function implementation
+    typedef typename DiscreteFunctionTraits::LocalFunctionType LocalFunctionType;
 
-  //* end of type declarations
+    //! Type of the dof iterator used in the discrete function implementation
+    typedef typename DiscreteFunctionTraits::DofIteratorType DofIteratorType;
 
-  //! Constructor
-  //! Needs to be called in derived classes
-  DiscreteFunctionInterface (const DiscreteFunctionSpaceType& f) 
-    : FunctionType ( f ) {}
+    //! Type of the constantdof iterator used in the discrete function implementation
+    typedef typename DiscreteFunctionTraits::ConstDofIteratorType ConstDofIteratorType;
 
-  //! the implementation of an iterator to iterate efficient 
-  //! over all dofs of a discrete function 
-  DofIteratorType dbegin () 
-  {
-    return asImp().dbegin ();
-  }
+  public:
+    //- Public Methods
 
-  //! the implementation of an iterator to iterate efficient 
-  //! over all dofs of a discrete function 
-  DofIteratorType dend () 
-  {
-    return asImp().dend ();
-  }
+    //! Constructor
+    //! Needs to be called in derived classes
+    DiscreteFunctionInterface (const DiscreteFunctionSpaceType& f) 
+      : FunctionType ( f ) {}
 
-  //! const version of dbegin 
-  ConstDofIteratorDefault<DofIteratorType> dbegin () const  
-  {
-    return asImp().dbegin ();
+    //! the implementation of an iterator to iterate efficient 
+    //! over all dofs of a discrete function 
+    DofIteratorType dbegin () 
+    {
+      return asImp().dbegin ();
+    }
+
+    //! the implementation of an iterator to iterate efficient 
+    //! over all dofs of a discrete function 
+    DofIteratorType dend () 
+    {
+      return asImp().dend ();
+    }
+
+
+    //! const version of dbegin 
+    ConstDofIteratorType dbegin () const  
+    {
+      return asImp().dbegin ();
+    };
+
+    //! const version of dend 
+    ConstDofIteratorType dend () const  
+    {
+      return asImp().dend ();
+    };
+
+    //! Get new local function
+    //! The local function is uninitialised and needs to be set to a specific
+    //! entity
+    LocalFunctionType newLocalFunction() {
+      return asImp().newLocalFunction();
+    }
+
+    //! Set local function to an entity
+    template<class EntityType>
+    void localFunction(const EntityType& en, LocalFunctionType& lf) {
+      asImp().localFunction(en, lf);
+    } 
+  
+  private:
+    // Barton-Nackman trick 
+    DiscreteFunctionType& asImp() 
+    { 
+      return static_cast<DiscreteFunctionType&>(*this); 
+    }
+
+    //! const version of asImp 
+    const DiscreteFunctionType &asImp() const 
+    { 
+      return static_cast<const DiscreteFunctionType&>(*this); 
+    }
   };
 
-  //! const version of dend 
-  ConstDofIteratorDefault<DofIteratorType> dend () const  
-  {
-    return asImp().dend ();
-  };
-
-private:
-  // Barton-Nackman trick 
-  DiscreteFunctionImp &asImp() 
+  //*************************************************************************
+  //
+  //  --DiscreteFunctionDefault
+  //  
+  //! Default implementation of the discrete function. This class provides 
+  //! is responsible for the dof storage. Different implementations of the
+  //! discrete function use different dof storage. 
+  //! The default implementation provides +=, -= ans so on operators and 
+  //! a DofIterator access, which can run over all dofs in an efficient way. 
+  //! Furthermore with an entity you can access an local function to evaluate
+  //! the discrete function by multiplying the dofs and the basefunctions. 
+  //! 
+  //*************************************************************************
+  template <class DiscreteFunctionTraits>
+  class DiscreteFunctionDefault : 
+    public DiscreteFunctionInterface<DiscreteFunctionTraits> 
   { 
-    return static_cast<DiscreteFunctionImp&>(*this); 
-  }
 
-  //! const version of asImp 
-  const DiscreteFunctionImp &asImp() const 
-  { 
-    return static_cast<const DiscreteFunctionImp&>(*this); 
-  }
-};
+    typedef DiscreteFunctionInterface< 
+      DiscreteFunctionTraits
+    > DiscreteFunctionInterfaceType;
 
-//*************************************************************************
-//
-//  --DiscreteFunctionDefault
-//  
-//! Default implementation of the discrete function. This class provides 
-//! is responsible for the dof storage. Different implementations of the
-//! discrete function use different dof storage. 
-//! The default implementation provides +=, -= ans so on operators and 
-//! a DofIterator access, which can run over all dofs in an efficient way. 
-//! Furthermore with an entity you can access an local function to evaluate
-//! the discrete function by multiplying the dofs and the basefunctions. 
-//! 
-//*************************************************************************
-template<class DiscreteFunctionSpaceType, 
-         class DofIteratorImp, 
-         class LocalFunctionImp, 
-         class DiscreteFunctionImp >
-class DiscreteFunctionDefault 
-: public DiscreteFunctionInterface  
-  <DiscreteFunctionSpaceType, DofIteratorImp, 
-  LocalFunctionImp, DiscreteFunctionImp > 
-{ 
+    typedef DiscreteFunctionDefault<
+      DiscreteFunctionTraits
+    > DiscreteFunctionDefaultType;
 
-  typedef DiscreteFunctionInterface <DiscreteFunctionSpaceType, 
-    DofIteratorImp, LocalFunctionImp, DiscreteFunctionImp >  DiscreteFunctionInterfaceType;
-
-  enum { myId_ = 0 };  
+    enum { myId_ = 0 };  
   
-public:
+  public:
+    typedef typename DiscreteFunctionTraits::DiscreteFunctionSpaceType DiscreteFunctionSpaceType;
     //! Type of domain vector
-  typedef typename DiscreteFunctionSpaceType::Domain DomainType;
+    typedef typename DiscreteFunctionSpaceType::DomainType DomainType;
     //! Type of range vector
-  typedef typename DiscreteFunctionSpaceType::Range RangeType;
+    typedef typename DiscreteFunctionSpaceType::RangeType RangeType;
   
     //! Type of domain field (usually a float type)
-  typedef typename DiscreteFunctionSpaceType::DomainField DomainFieldType;
+    typedef typename DiscreteFunctionSpaceType::DomainFieldType DomainFieldType;
     //! Type of range field (usually a float type)
-  typedef typename DiscreteFunctionSpaceType::RangeField RangeFieldType;
+    typedef typename DiscreteFunctionSpaceType::RangeFieldType RangeFieldType;
+
+    typedef Mapping<DomainFieldType, RangeFieldType,
+                    DomainType, RangeType> MappingType;
+
+    //! Type of the discrete function (Barton-Nackman parameter)
+    typedef typename DiscreteFunctionTraits::DiscreteFunctionType DiscreteFunctionType;
   
-  //! pass the function space to the interface class
-  DiscreteFunctionDefault (const DiscreteFunctionSpaceType & f ) :
-    DiscreteFunctionInterfaceType ( f ) {}
-
-  //! Evaluate a scalar product of the dofs of two DiscreteFunctions
-  //! on the top level of the underlying grid
-  RangeFieldType scalarProductDofs( const DiscreteFunctionDefault &g ) const;
-
-  //! Assignment on same as operator =  
-  Vector<RangeFieldType> & 
-  assign(const Vector<RangeFieldType> &g);
-
-  //! Assignment operator, this = g 
-  Vector<RangeFieldType> & operator = (const Vector<RangeFieldType> &g);
-
-  //! Addition of g to discrete function 
-  Vector<RangeFieldType> & operator += (const Vector<RangeFieldType> &g);
+    //! Type of the local function
+    typedef typename DiscreteFunctionTraits::LocalFunctionType LocalFunctionType;
   
-  //! substract g from discrete function 
-  Vector<RangeFieldType> & 
-  operator -= (const Vector<RangeFieldType> &g);
+    //! Type of the dof iterator
+    typedef typename DiscreteFunctionTraits::DofIteratorType DofIteratorType;
+  
+    //! Type of the const dof iterator
+    typedef typename DiscreteFunctionTraits::ConstDofIteratorType ConstDofIteratorType;
+
+  public:
+    //- Methods
+    //! pass the function space to the interface class
+    DiscreteFunctionDefault (const DiscreteFunctionSpaceType & f ) :
+      DiscreteFunctionInterfaceType ( f ) {}
+
+    //! Evaluate a scalar product of the dofs of two DiscreteFunctions
+    //! on the top level of the underlying grid
+    RangeFieldType scalarProductDofs(const DiscreteFunctionType& g) const;
+
+    //! Addition of g to discrete function 
+    virtual DiscreteFunctionDefaultType& operator+=(const MappingType& g);
+
+    //! subtract g from discrete function 
+    virtual DiscreteFunctionDefaultType& operator -= (const MappingType &g);
  
-  //! multiply with scalar 
-  Vector<RangeFieldType> & 
-  operator *= (const RangeFieldType &scalar);
+    //! multiply with scalar 
+    virtual DiscreteFunctionDefaultType& 
+    operator *=(const RangeFieldType &scalar);
 
-  //! Division by a scalar
-  Vector<RangeFieldType> & 
-  operator /= (const RangeFieldType &scalar);
+    //! Division by a scalar
+    virtual DiscreteFunctionDefaultType& operator /= 
+    (const RangeFieldType &scalar);
 
-  //! add scalar * g to discrete function 
-  Vector<RangeFieldType> & 
-  add(const Vector<RangeFieldType> &g , RangeFieldType scalar );
+    //! add scalar * g to discrete function 
+    DiscreteFunctionType& 
+    add(const DiscreteFunctionType &g , RangeFieldType scalar );
 
-private:
-  // Barton-Nackman trick 
-  DiscreteFunctionImp &asImp() 
-  { 
-    return static_cast<DiscreteFunctionImp&>(*this); 
-  }
-  const DiscreteFunctionImp &asImp() const 
-  { 
-    return static_cast<const DiscreteFunctionImp&>(*this); 
-  }
+  private:
+    // Barton-Nackman trick 
+    DiscreteFunctionType &asImp() 
+    { 
+      return static_cast<DiscreteFunctionType&>(*this); 
+    }
+    const DiscreteFunctionType &asImp() const 
+    { 
+      return static_cast<const DiscreteFunctionType&>(*this); 
+    }
 
-}; // end class DiscreteFunctionDefault 
+  }; // end class DiscreteFunctionDefault 
 
-/** @} end documentation group */
+  /** @} end documentation group */
 
 } // end namespace Dune
 

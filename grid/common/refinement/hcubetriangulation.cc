@@ -85,10 +85,10 @@ namespace Dune {
 	enum { dimensionworld = dimension };
 
 	template<int codimension>
-	struct codim;
-	typedef typename codim<dimension>::SubEntityIterator VertexIterator;
+	struct Codim;
+	typedef typename Codim<dimension>::SubEntityIterator VertexIterator;
 	typedef FieldVector<CoordType, dimension> CoordVector;
-	typedef typename codim<0>::SubEntityIterator ElementIterator;
+	typedef typename Codim<0>::SubEntityIterator ElementIterator;
 	typedef FieldVector<int, dimension+1> IndexVector;
 
 	static int nVertices(int level);
@@ -107,7 +107,7 @@ namespace Dune {
 
       template<int dimension, class CoordType>
       template<int codimension>
-      struct RefinementImp<dimension, CoordType>::codim
+      struct RefinementImp<dimension, CoordType>::Codim
       {
 	class SubEntityIterator;
 	typedef Dune::Geometry<dimension-codimension, dimension, RefinementImp<dimension, CoordType>, Geometry> Geometry;
@@ -183,7 +183,7 @@ namespace Dune {
 	int index() const;
       protected:
 	typedef typename Refinement::BackendRefinement BackendRefinement;
-	typedef typename BackendRefinement::template codim<dimension>::SubEntityIterator BackendIterator;
+	typedef typename BackendRefinement::template Codim<dimension>::SubEntityIterator BackendIterator;
 	enum { nKuhnSimplices = Factorial<dimension>::value };
 	
 	int level;
@@ -238,7 +238,7 @@ namespace Dune {
       public:
 	typedef RefinementImp<dimension, CoordType> RefinementImp;
 	typedef typename RefinementImp::IndexVector IndexVector;
-	typedef typename RefinementImp::template codim<0>::Geometry Geometry;
+	typedef typename RefinementImp::template Codim<0>::Geometry Geometry;
 	
 	RefinementIteratorSpecial(int level, bool end = false);
       
@@ -249,7 +249,7 @@ namespace Dune {
 	const Geometry &geometry() const;
       protected:
 	typedef typename RefinementImp::BackendRefinement BackendRefinement;
-	typedef typename BackendRefinement::template codim<0>::SubEntityIterator BackendIterator;
+	typedef typename BackendRefinement::template Codim<0>::SubEntityIterator BackendIterator;
 	enum { nKuhnSimplices = Factorial<dimension>::value };
 
 	int level;
@@ -323,8 +323,8 @@ namespace Dune {
 
       template<int dimension, class CoordType>
       template<int codimension>
-      class RefinementImp<dimension, CoordType>::codim<codimension>::SubEntityIterator
-	: public ForwardIteratorFacade<typename RefinementImp<dimension, CoordType>::template codim<codimension>::SubEntityIterator, int>,
+      class RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator
+	: public ForwardIteratorFacade<typename RefinementImp<dimension, CoordType>::template Codim<codimension>::SubEntityIterator, int>,
 	  public RefinementIteratorSpecial<dimension, CoordType, codimension>
       {
       public:
@@ -341,7 +341,7 @@ namespace Dune {
     
       template<int dimension, class CoordType>
       template<int codimension>
-      RefinementImp<dimension, CoordType>::codim<codimension>::SubEntityIterator::
+      RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       SubEntityIterator(int level, bool end)
 	: RefinementIteratorSpecial<dimension, CoordType, codimension>(level, end)
       {}
@@ -349,7 +349,7 @@ namespace Dune {
       template<int dimension, class CoordType>
       template<int codimension>
       bool
-      RefinementImp<dimension, CoordType>::codim<codimension>::SubEntityIterator::
+      RefinementImp<dimension, CoordType>::Codim<codimension>::SubEntityIterator::
       equals(const This &other) const
       { return kuhnIndex == other.kuhnIndex && backend == other.backend; }
     
@@ -365,7 +365,7 @@ namespace Dune {
 	enum { dimension = GridImp::dimension };
 
 	typedef typename GridImp::BackendRefinement BackendRefinement;
-	typedef typename BackendRefinement::template codim<dimension-mydimension>::SubEntityIterator BackendIterator;
+	typedef typename BackendRefinement::template Codim<dimension-mydimension>::SubEntityIterator BackendIterator;
       public:
 	GeometryType type() const
 	{ return SimplexTraits<mydimension>::geometryType; }
@@ -443,7 +443,7 @@ namespace Dune {
       template<int mydimension, class GridImp>
       class MakeableGeometry : public Dune::Geometry<mydimension, mydimension, GridImp, Geometry>
       {
-	typedef typename GridImp::BackendRefinement::template codim<GridImp::dimension-mydimension>::SubEntityIterator BackendIterator;
+	typedef typename GridImp::BackendRefinement::template Codim<GridImp::dimension-mydimension>::SubEntityIterator BackendIterator;
       public:
 	MakeableGeometry(const BackendIterator &backend)
 	  : Dune::Geometry<mydimension, mydimension, GridImp, Geometry>(Geometry<mydimension, mydimension, GridImp>(backend))

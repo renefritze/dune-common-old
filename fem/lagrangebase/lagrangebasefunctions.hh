@@ -20,32 +20,33 @@ class LagrangeBaseFunction < FunctionSpaceType , ElType , 0 >
   enum { DimRange = FunctionSpaceType::DimRange };
   int baseNum_;
 
-  typedef typename FunctionSpaceType::Domain Domain;
-  typedef typename FunctionSpaceType::Range Range;
-  typedef typename FunctionSpaceType::RangeField RangeField;
+  typedef typename FunctionSpaceType::DomainType DomainType;
+  typedef typename FunctionSpaceType::RangeType RangeType;
+  typedef typename FunctionSpaceType::RangeFieldType RangeFieldType;
   
 public:
-  LagrangeBaseFunction ( FunctionSpaceType & f , int baseNum  ) 
-    : BaseFunctionInterface<FunctionSpaceType> (f) , baseNum_ ( baseNum ) 
+  LagrangeBaseFunction (int baseNum) 
+    : BaseFunctionInterface<FunctionSpaceType> (),
+      baseNum_ ( baseNum ) 
     { 
       assert((baseNum_ >= 0) || (baseNum_ < DimRange));
     };
   
     virtual void evaluate ( const FieldVector<deriType, 0> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     phi = 0.0;
     phi[baseNum_] = 1.0;
   }
 
     virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     phi = 0.0;
   }
 
     virtual void evaluate ( const FieldVector<deriType, 2> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     phi = 0.0 ;
   }
@@ -63,10 +64,10 @@ template<class FunctionSpaceType>
 class LagrangeBaseFunction < FunctionSpaceType , line , 1 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
-  typedef typename FunctionSpaceType::Domain Domain;
-  typedef typename FunctionSpaceType::Range Range;
-  typedef typename FunctionSpaceType::RangeField RangeField;  
-  RangeField factor[2];
+  typedef typename FunctionSpaceType::DomainType DomainType;
+  typedef typename FunctionSpaceType::RangeType RangeType;
+  typedef typename FunctionSpaceType::RangeFieldType RangeFieldType;  
+  RangeFieldType factor[2];
   
 public:
   LagrangeBaseFunction ( FunctionSpaceType & f , int baseNum  ) 
@@ -86,7 +87,7 @@ public:
 
   //! evaluate the function
     virtual void evaluate ( const FieldVector<deriType, 0> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     phi = factor[1];
     phi += factor[0] * x[0];
@@ -94,7 +95,7 @@ public:
 
   //! evaluate first derivative 
     virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     int num = diffVariable[0];
     phi = factor[num];
@@ -102,7 +103,7 @@ public:
 
   //! evaluate second derivative 
     virtual void evaluate ( const FieldVector<deriType, 2> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     // function is linear, therefore 
     phi = 0.0 ;
@@ -132,10 +133,10 @@ template<class FunctionSpaceType>
 class LagrangeBaseFunction < FunctionSpaceType , triangle , 1 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
-  typedef typename FunctionSpaceType::Domain Domain;
-  typedef typename FunctionSpaceType::Range Range;
-  typedef typename FunctionSpaceType::RangeField RangeField;  
-  RangeField factor[3];
+  typedef typename FunctionSpaceType::DomainType DomainType;
+  typedef typename FunctionSpaceType::RangeType RangeType;
+  typedef typename FunctionSpaceType::RangeFieldType RangeFieldType;  
+  RangeFieldType factor[3];
   int baseNum_;
   
 public:
@@ -162,7 +163,7 @@ public:
   }  
   //! evaluate the function
     virtual void evaluate ( const FieldVector<deriType, 0> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     phi = factor[0];
     for(int i=1; i<3; i++)
@@ -171,7 +172,7 @@ public:
 
   //! \todo Please doc me!
     virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     // x or y ==> 1 or 2 
     int num = diffVariable[0];
@@ -181,7 +182,7 @@ public:
 
   //! \todo Please doc me!
   virtual void evaluate ( const DiffVariable<2>::Type &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     // function is linear, therefore 
     phi = 0.0 ;
@@ -199,10 +200,10 @@ template<class FunctionSpaceType>
 class LagrangeBaseFunction < FunctionSpaceType , tetrahedron , 1 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
-  typedef typename FunctionSpaceType::RangeField RangeField;  
-  typedef typename FunctionSpaceType::Domain Domain;
-  typedef typename FunctionSpaceType::Range Range;
-  RangeField factor[4];
+  typedef typename FunctionSpaceType::RangeFieldType RangeFieldType;  
+  typedef typename FunctionSpaceType::DomainType DomainType;
+  typedef typename FunctionSpaceType::RangeType RangeType;
+  RangeFieldType factor[4];
 public:
  
   //! \todo Please doc me!
@@ -227,7 +228,7 @@ public:
 
   //! evaluate function 
     virtual void evaluate ( const FieldVector<deriType, 0> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     phi = factor[0];
     for(int i=1; i<4; i++)
@@ -236,7 +237,7 @@ public:
 
   //! first Derivative 
     virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     // num = 0 ==> derivative respect to x 
     int num = diffVariable[0];
@@ -245,7 +246,7 @@ public:
 
   //! second Derivative 
   virtual void evaluate ( const DiffVariable<2>::Type &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     // function is linear, therfore 
     phi = 0.0 ;
@@ -263,12 +264,12 @@ template<class FunctionSpaceType>
 class LagrangeBaseFunction<FunctionSpaceType,quadrilateral,1> 
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
-  typedef typename FunctionSpaceType::RangeField RangeField;  
-  typedef typename FunctionSpaceType::Domain Domain;
-  typedef typename FunctionSpaceType::Range Range;
+  typedef typename FunctionSpaceType::RangeFieldType RangeFieldType;  
+  typedef typename FunctionSpaceType::DomainType DomainType;
+  typedef typename FunctionSpaceType::RangeType RangeType;
   enum { dim = 2 };
   //! phi(x,y) = (factor[0][0] + factor[0][1] * x) * ( factor[1][0] + factor[1][1] * y)   
-  RangeField factor[dim][2];
+  RangeFieldType factor[dim][2];
 public:
 
   //! Constructor making base function number baseNum
@@ -292,7 +293,7 @@ public:
 
   //! evaluate the basefunction on point x 
     virtual void evaluate ( const FieldVector<deriType, 0> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   { 
     // dim == 2, tested 
     phi = 1.0;
@@ -305,7 +306,7 @@ public:
   //! diffVariable(0) == 1   ==> y 
   //! diffVariable(0) == 2   ==> z,  and so on
     virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     int num = diffVariable[0];
     assert( (num >= 0) && ( num <= 1));
@@ -322,7 +323,7 @@ public:
 
   //! evaluate second derivative 
     virtual void evaluate ( const FieldVector<deriType, 2> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     // which means derivative xx or yy 
     if(diffVariable[0] == diffVariable[1])
@@ -349,15 +350,15 @@ template<class FunctionSpaceType>
 class LagrangeBaseFunction<FunctionSpaceType,pyramid,1> 
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
-  typedef typename FunctionSpaceType::RangeField RangeField;  
-  typedef typename FunctionSpaceType::Domain Domain;
-  typedef typename FunctionSpaceType::Range Range;
+  typedef typename FunctionSpaceType::RangeFieldType RangeFieldType;  
+  typedef typename FunctionSpaceType::DomainType DomainType;
+  typedef typename FunctionSpaceType::RangeType RangeType;
   enum { dim = 3 };
     /* phi(x,y,z) = (factor[0] + factor[1]*x)
      *            * (factor[2] + factor[3]*y)
      *            + factor[4] * z * (factor[5] + factor[6]* min(x,y))
      */
-  RangeField factor[7];
+  RangeFieldType factor[7];
 public:
 
   //! Constructor making base function number baseNum
@@ -419,7 +420,7 @@ public:
 
   //! evaluate the basefunction on point x 
     virtual void evaluate ( const FieldVector<deriType, 0> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   { 
       phi = (factor[0] + factor[1]*x[0])
           * (factor[2] + factor[3]*x[1])
@@ -432,7 +433,7 @@ public:
   //! diffVariable(0) == 1   ==> y 
   //! diffVariable(0) == 2   ==> z,  and so on
     virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     switch (diffVariable[0]) {
     case 0:
@@ -450,7 +451,7 @@ public:
 
   //! evaluate second derivative 
     virtual void evaluate ( const FieldVector<deriType, 2> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     std::cout << "BaseFunction for pyramid, evaluate 2nd derivative not implemented! \n";
     phi = 0.0;
@@ -469,14 +470,14 @@ template<class FunctionSpaceType>
 class LagrangeBaseFunction<FunctionSpaceType,prism,1> 
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
-  typedef typename FunctionSpaceType::RangeField RangeField;  
-  typedef typename FunctionSpaceType::Domain Domain;
-  typedef typename FunctionSpaceType::Range Range;
+  typedef typename FunctionSpaceType::RangeFieldType RangeFieldType;  
+  typedef typename FunctionSpaceType::DomainType DomainType;
+  typedef typename FunctionSpaceType::RangeType RangeType;
   enum { dim = 3 };
     /* phi(x,y,z) = (factor[0] + factor[1]*x + factor[2]*y)
      *            * (factor[3] + factor[4]*z)
      */
-  RangeField factor[5];
+  RangeFieldType factor[5];
 public:
 
   //! Constructor making base function number baseNum
@@ -535,7 +536,7 @@ public:
 
   //! evaluate the basefunction on point x 
     virtual void evaluate ( const FieldVector<deriType, 0> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   { 
       phi = (factor[0] + factor[1]*x[0] + factor[2]*x[1])
           * (factor[3] + factor[4]*x[2]);
@@ -546,7 +547,7 @@ public:
   //! diffVariable(0) == 1   ==> y 
   //! diffVariable(0) == 2   ==> z,  and so on
     virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     switch (diffVariable[0]) {
     case 0:
@@ -564,7 +565,7 @@ public:
 
   //! evaluate second derivative 
     virtual void evaluate ( const FieldVector<deriType, 2> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     std::cout << "BaseFunction for pyramid, evaluate 2nd derivative not implemented! \n";
     phi = 0.0;
@@ -601,14 +602,14 @@ template<class FunctionSpaceType>
 class LagrangeBaseFunction<FunctionSpaceType,hexahedron,1> 
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
-  typedef typename FunctionSpaceType::RangeField RangeField;  
-  typedef typename FunctionSpaceType::Domain Domain;
-  typedef typename FunctionSpaceType::Range Range;
+  typedef typename FunctionSpaceType::RangeFieldType RangeFieldType;  
+  typedef typename FunctionSpaceType::DomainType DomainType;
+  typedef typename FunctionSpaceType::RangeType RangeType;
   enum { dim = 3 };
   //! phi(x,y,z) = (factor[0][0] + factor[0][1] * x) 
   //!            = (factor[1][0] + factor[1][1] * y) 
   //!            = (factor[2][0] + factor[2][1] * z) 
-  RangeField factor[dim][2];
+  RangeFieldType factor[dim][2];
 public:
 
   //! Constructor making base function number baseNum
@@ -633,7 +634,7 @@ public:
 
   //! evaluate the basefunction on point x 
     virtual void evaluate ( const FieldVector<deriType, 0> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   { 
     // dim == 3, tested 
     phi = 1.0;
@@ -646,7 +647,7 @@ public:
   //! diffVariable(0) == 1   ==> y 
   //! diffVariable(0) == 2   ==> z,  and so on
     virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     int num = diffVariable[0];
     phi = 1.0;
@@ -661,7 +662,7 @@ public:
 
   //! evaluate second derivative 
     virtual void evaluate ( const FieldVector<deriType, 2> &diffVariable, 
-                          const Domain & x, Range & phi) const 
+                          const DomainType & x, RangeType & phi) const 
   {
     std::cout << "BaseFunction for hexahedron, evaluate 2nd derivative not implemented! \n";
     phi = 0.0;
@@ -765,7 +766,7 @@ public:
     {
       for(int k=0; k<dimrange; k++)
       {
-        baseFuncList_[i*dimrange + k] = new LagrangeBaseFunctionType ( fuSpace, i ) ;
+        baseFuncList_[i*dimrange + k] = new LagrangeBaseFunctionType ( i ) ;
         this->setBaseFunctionPointer ( i*dimrange + k , baseFuncList_[i*dimrange + k] );
       }
     }
