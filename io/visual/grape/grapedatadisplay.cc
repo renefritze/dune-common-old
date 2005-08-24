@@ -37,18 +37,28 @@ inline void GrapeDataDisplay<GridType,DiscFuncType>::createQuadrature ()
 //  
 //*******************************************************************
 template <class GridType, class DiscFuncType>
-template <class EntityType, class LocalFunctionType > 
+template <class EntityType>
 inline void GrapeDataDisplay<GridType,DiscFuncType>::
-evalCoord (EntityType &en, DiscFuncType &func , LocalFunctionType & lf , 
-    int comp, const double *coord, double * val)
+evalCoord(EntityType &en, DUNE_FDATA *df , const double *coord, double * val)
 {
   enum { dim = GridType::dimension };
+
+  assert( df );
+  assert( df->discFunc );
+  DiscFuncType & func = *((DiscFuncType *)  ( df->discFunc));
+
+  assert( df->lf );
+  typedef typename DiscFuncType::LocalFunctionType LocalFuncType;
+  LocalFuncType & lf = *((LocalFuncType *) (df->lf));
+ 
+  //int comp = df->component;
+  func.localFunction ( en , lf );
+  int dimVal = df->dimVal;
 
   if(coord)
   {
     func.localFunction ( en , lf );
 
-    int dimVal = func.getFunctionSpace().dimensionOfValue();
     for(int i=0; i<dim; i++) domTmp_[i] = coord[i];
 
     // evaluate local function on point coord == domTmp 
@@ -71,11 +81,6 @@ inline void GrapeDataDisplay<GridType,DiscFuncType>::
 evalCoord (DUNE_ELEM *he, DUNE_FDATA *df, const double *coord, double * val)
 {
   enum { dim = GridType::dimension };
-  typedef typename GridType::Traits::template Codim<0>::Entity EntityType;
-  DiscFuncType *func = (DiscFuncType *)  ( df->discFunc);
-  
-  typedef typename DiscFuncType::LocalFunctionType LocalFuncType;
-  LocalFuncType *lf = (LocalFuncType *) (df->lf);
   
   void *iter = he->actElement;
   if(iter == he->liter)
@@ -84,14 +89,14 @@ evalCoord (DUNE_ELEM *he, DUNE_FDATA *df, const double *coord, double * val)
     {
       typedef typename GridType::template Codim<0>::LeafIterator LeafIt;
       LeafIt *it = (LeafIt *) he->liter;
-      evalCoord(*it[0],*func,*lf,df->component,coord,val);
+      evalCoord(*it[0],df,coord,val);
       return;
     }
     else 
     {
       typedef typename GridType::Traits::template Codim<0>::LevelIterator LevIt;
       LevIt *it = (LevIt *) he->liter;
-      evalCoord(*it[0],*func,*lf,df->component,coord,val);
+      evalCoord(*it[0],df,coord,val);
       return;
     }
   }
@@ -99,7 +104,7 @@ evalCoord (DUNE_ELEM *he, DUNE_FDATA *df, const double *coord, double * val)
   {
     typedef typename GridType::Traits::template Codim<0>::Entity::HierarchicIterator HierIt;
     HierIt *it = (HierIt *) he->hiter;
-    evalCoord(*it[0],*func,*lf,df->component,coord,val);
+    evalCoord(*it[0],df,coord,val);
     return;
   }
   else 
@@ -182,9 +187,9 @@ template <class EntityType>
 inline void GrapeDataDisplay<GridType,DiscFuncType>::
 evalDof (EntityType &en, DUNE_FDATA *df , int localNum, double * val)
 {
-  //typedef typename GridType::Traits::template Codim<0>::Entity EntityType;
-
+  assert( df );
   assert( df->discFunc );
+
   DiscFuncType & func = *((DiscFuncType *)  ( df->discFunc));
 
   assert( df->lf );
@@ -305,7 +310,7 @@ addData(DiscFuncType &func , const char *name , double time , bool vector )
   // add function wether is exists or not 
   if(!already)
   {
-    int num = (int) DiscFuncType::FunctionSpace::DimRange;
+    int num = (int) DiscFuncType::FunctionSpaceType::DimRange;
     if(vector) num = 1;
     
     vecFdata_.resize(size+num);
@@ -318,8 +323,8 @@ addData(DiscFuncType &func , const char *name , double time , bool vector )
       vecFdata_[n]->allLevels = 0;
       
       vecFdata_[n]->discFunc = (void *) &func;
-      vecFdata_[n]->dimVal   = func.getFunctionSpace().dimensionOfValue();
-      if(vector) vecFdata_[n]->dimVal = DiscFuncType::FunctionSpace::DimRange;
+      vecFdata_[n]->dimVal   = 1;
+      if(vector) vecFdata_[n]->dimVal = DiscFuncType::FunctionSpaceType::DimRange;
       vecFdata_[n]->lf = (void *) new LocalFuncType ( func.newLocalFunction() );
       vecFdata_[n]->polyOrd = func.getFunctionSpace().polynomOrder();
       vecFdata_[n]->continuous = (func.getFunctionSpace().continuous() == true ) ? 1 : 0;
