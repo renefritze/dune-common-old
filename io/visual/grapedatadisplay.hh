@@ -36,13 +36,18 @@ public:
   
   //! Constructor, make a GrapeDataDisplay for given grid
   inline GrapeDataDisplay(GridType &grid, const int myrank);
+  
+  inline ~GrapeDataDisplay();
 
   //! Calls the display of the grid and draws the discrete function
   //! if discretefunction is NULL, then only the grid is displayed 
   inline void dataDisplay(DiscFuncType &func);
 
   //! add discrete function to display  
-  inline void addData(DiscFuncType &func, const char * name , double time , bool vector );
+  inline void addData(DiscFuncType &func, const DATAINFO * , double time );
+  
+  //! add discrete function to display  
+  inline void addData(DiscFuncType &func, const char * name , double time , bool vector = false );
 
   // retrun whether we have data or not 
   bool hasData () { return vecFdata_.size() > 0; }
@@ -61,7 +66,7 @@ private:
             typename FunctionSpaceType::DomainType , 1 > QuadType; 
   QuadType * quad_;
 
-  
+  // tmp variables 
   RangeType  tmp_;
   DomainType domTmp_;
 
@@ -75,12 +80,12 @@ private:
   // for the data visualization
   template <class EntityType, class LocalFuncType>
   inline void evalScalar (EntityType &en, DiscFuncType & func, LocalFuncType &lf, 
-                int comp , int localNum, double * val);
+                const int * comp , int localNum, double * val);
   
   // for the data visualization
   template <class EntityType, class LocalFuncType>
   inline void evalVector (EntityType &en, DiscFuncType & func,LocalFuncType &lf, 
-                int comp , int localNum, double * val);
+                const int * comp, int vend, int localNum, double * val);
 public:  
   inline void evalCoord (DUNE_ELEM *he, DUNE_FDATA *df, 
                   const double *coord, double * val);
