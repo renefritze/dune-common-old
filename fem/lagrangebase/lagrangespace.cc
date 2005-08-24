@@ -57,7 +57,7 @@ template <
 inline LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd, DofManagerImp>::
 ~LagrangeDiscreteFunctionSpace () 
 {
-  for(int i=0; i<baseFuncSet_.dim(); i++)
+  for(unsigned int i=0; i<baseFuncSet_.dim(); i++)
     if (baseFuncSet_[i] != 0)
       delete baseFuncSet_[i];
 
@@ -92,7 +92,7 @@ template <
   >
 template< class EntityType> 
 inline bool LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd, DofManagerImp>::
-evaluateLocal ( int baseFunc, EntityType &en, DomainType &local, RangeType & ret) const 
+evaluateLocal ( int baseFunc, EntityType &en, const DomainType &local, RangeType & ret) const 
 {
   const BaseFunctionSetType & baseSet = getBaseFunctionSet(en);
   baseSet.eval( baseFunc , local , ret);
@@ -142,7 +142,7 @@ signIn (DiscFuncType & df) const
 {
   // only for gcc to pass type DofType
   assert(mapper_ != 0);
-  return dm_.addDofSet( df.getStorageType() , grid_.grid() , grid_.indexSet() , *mapper_, df.name() );
+  return dm_.addDofSet( df.getStorageType() , grid_.grid() , *mapper_, df.name() );
 }
 
 template <
