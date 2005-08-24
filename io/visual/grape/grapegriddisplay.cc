@@ -104,32 +104,46 @@ el_update (GridIteratorType *it, DUNE_ELEM * he)
     } 
 
     {
-      IntersectionIterator endn = en.iend();
-      int i =0;
-      for( IntersectionIterator nei = en.ibegin(); nei !=endn; ++nei)
+      IntersectionIterator endnit = en.iend();
+      IntersectionIterator nit    = en.ibegin();
+      
+      int facecount = 0;
+
+      // value < zero otherwise first test fails 
+      int lastElNum = -1;
+    
+      // check all faces for boundary or not 
+      while ( nit != endnit )
       {
-        he->bnd[i] = ( nei.boundary() ) ? -1 : 0;
-        i++;
-      } 
-     
-      // for this type of element we have to swap the faces
-      if ( geometry.type() == hexahedron)
-      {
-        int  i, help_bnd [MAX_EL_FACE];
-  
-        for(i =0 ; i < MAX_EL_FACE ; i++)
+        assert( facecount >= 0 );
+        assert( facecount < MAX_EL_FACE ); 
+
+        int num = nit.numberInSelf(); 
+        if(num != lastElNum)
         {
-          help_bnd[i] = he->bnd[i] ;
+          he->bnd[facecount] = ( nit.boundary() ) ? -1 : 0;
+          facecount++ ;
+          lastElNum = num;
         }
+        ++nit;
+      }
+    }
+
+    {
+      // for this type of element we have to swap the faces
+      if ( ( geometry.type() == hexahedron) || 
+           ((geometry.type() == cube) && (dim == 3)) )
+      {
+        int  help_bnd [MAX_EL_FACE];
+        for(int i=0; i < MAX_EL_FACE; i++) help_bnd[i] = he->bnd[i] ;
    
-        // do the mapping
+        // do the mapping from dune to grape hexa
         he->bnd[0] = help_bnd[4];
         he->bnd[1] = help_bnd[5];
         he->bnd[3] = help_bnd[1];
         he->bnd[4] = help_bnd[3];
         he->bnd[5] = help_bnd[0];
       }
-     
     }
 
     // for data displaying 
