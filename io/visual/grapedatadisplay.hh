@@ -41,7 +41,7 @@ public:
 
   //! Calls the display of the grid and draws the discrete function
   //! if discretefunction is NULL, then only the grid is displayed 
-  inline void dataDisplay(DiscFuncType &func);
+  inline void dataDisplay(DiscFuncType &func, bool vector = false);
 
   //! add discrete function to display  
   inline void addData(DiscFuncType &func, const DATAINFO * , double time );

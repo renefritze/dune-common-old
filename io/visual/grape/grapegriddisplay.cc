@@ -18,7 +18,6 @@ GrapeGridDisplay(GridType &grid, const int myrank ) :
 {   
   GrapeInterface<dim,dimworld>::init();
   if(!hmesh_) hmesh_ = setupHmesh();
-  std::cout << "Grid size = " << this->grid_.global_size(0) << "\n";
 }
 
 template<class GridType>
