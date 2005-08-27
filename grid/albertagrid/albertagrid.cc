@@ -2855,7 +2855,8 @@ struct MarkEdges<GridType,3>
   {
     for(int i=0; i<count; i++)
     {
-      int num = grid.hierarchicIndexSet().getIndex(el ,i, Int2Type<2>() );  
+      // the 1 is the difference between dim=3 and codim=2
+      int num = grid.hierarchicIndexSet().getIndex(el ,i, Int2Type<1>() );  
       if( vec[num] == -1 ) vec[num] = elindex;
     }
   }
@@ -2933,20 +2934,17 @@ inline AlbertaGrid < dim, dimworld >::AlbertaGrid() :
  mesh_ (0), maxlevel_ (0) , wasChanged_ (false)
   , isMarked_ (false) 
   , nv_ (dim+1) , dof_ (0) , myRank_ (0)
-  , hIndexSet_(*this,maxHierIndex_)
-  , levelIndexVec_(MAXL) 
+  , hIndexSet_(*this)
+  , globalIdSet_(*this)
+  , levelIndexVec_(MAXL,0) 
   , leafIndexSet_ (0)
-  , geomTypes_(1) 
+  , geomTypes_(1,simplex) 
 {
-  for(unsigned int i=0; i<levelIndexVec_.size(); i++) levelIndexVec_[i] = 0;
   vertexMarker_ = new AlbertaMarkerVector ();
 
   for(int i=0; i<AlbertHelp::numOfElNumVec; i++) dofvecs_.elNumbers[i] = 0;
   dofvecs_.elNewCheck = 0;
   dofvecs_.owner      = 0;
-
-  // we only have simplices 
-  geomTypes_[0] = simplex;
 }
 
 template < int dim, int dimworld >
@@ -2955,10 +2953,8 @@ inline void AlbertaGrid < dim, dimworld >::initGrid(int proc)
   ALBERTA AlbertHelp::getDofVecs(&dofvecs_);
   ALBERTA AlbertHelp::setDofVec ( dofvecs_.owner, -1 );
 
-  // we only have simplices 
-  geomTypes_[0] = simplex;
-
   // dont delete dofs on higher levels 
+  // needed for element numbering 
   mesh_->preserve_coarse_dofs = 1;
   
   calcExtras();
@@ -2978,16 +2974,15 @@ inline AlbertaGrid < dim, dimworld >::AlbertaGrid(const char *MacroTriangFilenam
  mesh_ (0), maxlevel_ (0) , wasChanged_ (false)
   , isMarked_ (false) 
   , nv_ (dim+1) , dof_ (0) , myRank_ (-1) 
-  , hIndexSet_(*this,maxHierIndex_)
-  , levelIndexVec_(MAXL) 
+  , hIndexSet_(*this)
+  , globalIdSet_( *this )
+  , levelIndexVec_(MAXL,0) 
   , leafIndexSet_ (0)
-  , geomTypes_(1) 
+  , geomTypes_(1,simplex) 
 {
   assert(dimworld == DIM_OF_WORLD);
   assert(dim      == DIM);
 
-  for(unsigned int i=0; i<levelIndexVec_.size(); i++) levelIndexVec_[i] = 0;
-  
   bool makeNew = true;
   { 
     std::fstream file (MacroTriangFilename,std::ios::in);
@@ -3025,15 +3020,15 @@ AlbertaGrid(AlbertaGrid<dim,dimworld> & oldGrid, int proc) :
   mesh_ (0), maxlevel_ (0) , wasChanged_ (false)
   , isMarked_ (false) 
   , nv_ (dim+1) , dof_ (0), myRank_ (proc)  
-  , hIndexSet_(*this,maxHierIndex_)
-  , levelIndexVec_(MAXL) 
+  , hIndexSet_(*this)
+  , globalIdSet_( *this )
+  , levelIndexVec_(MAXL,0) 
   , leafIndexSet_ (0)
-  , geomTypes_(1) 
+  , geomTypes_(1,simplex) 
 {
   assert(dimworld == DIM_OF_WORLD);
   assert(dim      == DIM);
 
-  for(unsigned int i=0; i<levelIndexVec_.size(); i++) levelIndexVec_[i] = 0;
   assert(dim == 2);
   
   ALBERTA MESH * oldMesh = oldGrid.getMesh();
@@ -3739,7 +3734,7 @@ inline int AlbertaGrid < dim, dimworld >::global_size (int codim) const
     return mesh_->n_vertices;
   // at this moment only for codim=0 and codim=dim
   //assert((codim == dim) || (codim == 0));
-  return indexStack_[codim].getMaxIndex()+1;
+  return indexStack_[codim].size();
 }
 
 template < int dim, int dimworld >
@@ -3773,7 +3768,8 @@ template < int dim, int dimworld >
 inline int AlbertaGrid < dim, dimworld >::getEdgeNumber ( ALBERTA EL * el , int i ) const
 {
   assert(dim == 3);
-  return hIndexSet_.getIndex(el,i,Int2Type<dim-1>());
+  // codim of edges is 2 therefore dim-2 
+  return hIndexSet_.getIndex(el,i,Int2Type<dim-2>());
 };
 
 template < int dim, int dimworld > 
@@ -3790,12 +3786,6 @@ inline void AlbertaGrid < dim, dimworld >::calcExtras ()
  
   // determine new maxlevel and mark neighbours 
   maxlevel_ = ALBERTA AlbertHelp::calcMaxLevel(mesh_);
-
-  // calculate the new maximal index used, this value+1 is then used as size 
-  for(int i=0; i<ALBERTA AlbertHelp::numOfElNumVec; i++)
-    maxHierIndex_[i] = indexStack_[i].getMaxIndex();
-
-  maxHierIndex_[dim] = mesh_->n_vertices;
 
   // unset up2Dat status, if lbegin is called then this status is updated 
   vertexMarker_->unsetUp2Date();
