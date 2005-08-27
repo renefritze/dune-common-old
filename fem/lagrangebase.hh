@@ -195,12 +195,11 @@ namespace Dune {
     //! make base function set depending on GeometryType and polynomial order 
     template <GeometryType ElType, int pO > 
     BaseFunctionSetType* makeBaseSet (IndexSetType& iset);
-  
 
   protected:
     //! the corresponding vector of base function sets
     //! length is different element types 
-    FieldVector<BaseFunctionSetType*, GeometryIdentifier::numTypes> baseFuncSet_;
+    std::vector < BaseFunctionSetType * > baseFuncSet_;
 
     //! DofManager manages the memory 
     mutable DofManagerType & dm_;
