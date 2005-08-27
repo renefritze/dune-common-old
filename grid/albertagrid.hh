@@ -48,9 +48,12 @@ namespace Dune {
 // contains a simple memory management for some componds of this grid 
 #include "albertagrid/agmemory.hh"
 
+#include "albertagrid/indexsets.hh"
+
 // contains the communication for parallel computing for this grid
 #include "albertagrid/agcommunicator.hh"
 #include "common/leafindexset.hh"
+
 
 namespace Dune 
 {
@@ -1277,6 +1280,9 @@ public:
   typedef DefaultLevelIndexSet< AlbertaGrid<dim,dimworld> > LevelIndexSetType;
   typedef AdaptiveLeafIndexSet< AlbertaGrid<dim,dimworld> > LeafIndexSetType;
 
+  typedef AlbertaGridGlobalIdSet<dim,dimworld> GlobalIdSetType; 
+  typedef AlbertaGridGlobalIdSet<dim,dimworld> LocalIdSetType; 
+
   typedef ObjectStream ObjectStreamType;
   //typedef AlbertaObjectStream ObjectStreamType;
 
@@ -1467,6 +1473,14 @@ public:
     if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSetType (*this);
     return *leafIndexSet_; 
   }
+  
+  const GlobalIdSetType & globalIdSet () const {
+    return globalIdSet_; 
+  }
+  
+  const LocalIdSetType & localIdSet () const {
+    return globalIdSet_; 
+  }
 
   //! access to mesh pointer, needed by some methods
   ALBERTA MESH* getMesh () const { return mesh_; }; 
@@ -1475,7 +1489,7 @@ public:
   AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& 
   getRealEntity(typename Traits::template Codim<cd>::Entity& entity) 
   {
-      return entity.realEntity;
+    return entity.realEntity;
   }
 
 private:
@@ -1483,7 +1497,7 @@ private:
   const AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& 
   getRealEntity(const typename Traits::template Codim<cd>::Entity& entity) const 
   {
-      return entity.realEntity;
+    return entity.realEntity;
   }
 
 public:
@@ -1529,7 +1543,7 @@ private:
   void initGrid(int proc);
   
   // max global index in Grid 
-  int maxHierIndex_[dim+1];
+  //int maxHierIndex_[dim+1];
 
   // make the calculation of indexOnLevel and so on.
   // extra method because of Reihenfolge
@@ -1681,6 +1695,9 @@ private:
   // the hierarchical numbering of AlbertaGrid, unique per codim and processor 
   AlbertaGridHierarchicIndexSet<dim,dimworld> hIndexSet_;
 
+  // the id set of this grid 
+  GlobalIdSetType globalIdSet_; 
+
   // the level index set, is generated from the HierarchicIndexSet
   // is generated, when accessed 
   mutable std::vector < LevelIndexSetType * > levelIndexVec_;
@@ -1689,153 +1706,9 @@ private:
   // is generated, when accessed 
   mutable LeafIndexSetType * leafIndexSet_;
 
-  std::vector < GeometryType > geomTypes_;
+  const std::vector < GeometryType > geomTypes_;
 
 }; // end class AlbertaGrid
-
-template <class GridType, int dim> struct MarkEdges;
-
-template <int dim, int dimworld>
-class AlbertaGridHierarchicIndexSet
-{
-  typedef AlbertaGrid<dim,dimworld> GridType;
-  typedef typename GridType :: Traits :: template Codim<0>::Entity EntityCodim0Type;
-  enum { numVecs  = AlbertHelp::numOfElNumVec };
-  enum { numCodim = dim + 1 };
-
-  template <int cd> 
-  struct Codim 
-  { 
-    typedef AlbertaGridEntity<cd,dim,const GridType> RealEntityType; 
-    typedef typename Dune::Entity<cd,dim,const GridType,AlbertaGridEntity> EntityType;
-  };
-
-  // all classes that are allowed to call private functions 
-  friend class AlbertaGrid<dim,dimworld>;
-  friend class MarkEdges<GridType,3>; 
-  friend class MarkEdges<const GridType,3>; 
-
- 
-  // only  AlbertaGrid is allowed to create this class 
-  AlbertaGridHierarchicIndexSet(const GridType & grid , const int (& s)[numCodim])
-    : grid_( grid ), size_(s) {}
-public:
-  
-  //! return index of entity
-  template <class EntityType>
-  int index (const EntityType & ep) const
-  {
-    enum { cd = EntityType :: codimension };
-    const AlbertaGridEntity<cd,dim,const GridType> & en = (grid_.template getRealEntity<cd>(ep));
-    return getIndex(en.getElInfo()->el, en.getFEVnum(),Int2Type<dim-cd>());
-  }
-
-  //! return subIndex of given enitiy's sub entity with codim=cd and number i 
-  template <int cd>
-  int subIndex (const EntityCodim0Type & en, int i) const
-  {
-    // doesn't work otherwise, but stalls gridcheck
-    // assert(cd == dim);
-    return getIndex((grid_.template getRealEntity<0>(en)).getElInfo()->el
-                        ,i,Int2Type<dim-cd>());
-  }
-
-  //! return size of set 
-  int size (int codim) const
-  {
-    assert(size_[codim] >= 0);
-    return size_[codim];
-  }
-
-  //! return geometry types this set has indices for 
-  const std::vector< GeometryType > & geomTypes() const 
-  {
-    return grid_.geomTypes();
-  }
-
-private:
-  const GridType & grid_;
-  const int * elNumVec_[numVecs];
-  const int (& size_)[numCodim];
-  int nv_[numVecs];
-  int dof_[numVecs];
-
-  // update vec pointer of the DOF_INT_VECs, which can change during resize 
-  void updatePointers(ALBERTA AlbertHelp::DOFVEC_STACK & dofvecs)
-  {
-    for(int i=0; i<numVecs; i++)
-    {
-      elNumVec_[i] = (dofvecs.elNumbers[i])->vec;   
-      assert(elNumVec_[i]);
-    }
-
-    setDofIdentifier<0> (dofvecs); 
-    if(numVecs > 1) setDofIdentifier<1> (dofvecs); 
-    if(numVecs > 2) setDofIdentifier<2> (dofvecs); 
-    if(numVecs > 3) setDofIdentifier<3> (dofvecs); 
-  }
-
-  template <int cd> 
-  void setDofIdentifier (ALBERTA AlbertHelp::DOFVEC_STACK & dofvecs) 
-  {
-    const ALBERTA DOF_ADMIN * elAdmin_ = dofvecs.elNumbers[cd]->fe_space->admin;
-    // see Albert Doc. , should stay the same 
-    
-    nv_ [cd] = elAdmin_->n0_dof    [ALBERTA AlbertHelp::AlbertaDofType<cd>::type];
-    dof_[cd] = elAdmin_->mesh->node[ALBERTA AlbertHelp::AlbertaDofType<cd>::type];
-  }
-
-  // codim = 0 means we get from dim-cd = dim 
-  int getIndex ( const ALBERTA EL * el, int i , Int2Type<dim> fake ) const
-  {
-    enum { cd = 0 }; 
-    assert(el);
-    return elNumVec_[cd][ el->dof[ dof_[cd] ][nv_[cd]] ];
-  }
-  
-  enum { cd1 = (dim > 1) ? 1 : 5 };
-  // codim = 0 means we get from dim-cd = dim 
-  int getIndex ( const ALBERTA EL * el, int i , Int2Type<cd1> fake ) const
-  {
-    enum { cd = 1 }; 
-    assert(el);
-    // dof_[cd] marks the insertion point form which this dofs start
-    // then i is the i-th dof
-    return elNumVec_[cd][ el->dof[ dof_[cd] + i ][ nv_[cd] ] ];
-
-    //int idx = elNumVec_[cd][ el->dof[ dof_[cd]+i ][nv_[cd]] ];
-    //return idx;
-  }
-  
-  enum { cd2 = (dim > 2) ? 2 : 6 };
-  // codim = 0 means we get from dim-cd = dim 
-  // this method we have only in 3d
-  int getIndex ( const ALBERTA EL * el, int i , Int2Type<cd2> fake ) const
-  {
-    enum { cd = 2 }; 
-    assert(el);
-    // dof_[cd] marks the insertion point form which this dofs start
-    // then i is the i-th dof
-    //return elNumVec_[cd][ el->dof[ dof_[cd] + i ][ nv_[cd] ] ];
-    return 0;
-  }
-
-  // codim = dim  means we get from dim-cd = 0 
-  int getIndex ( const ALBERTA EL * el, int i , Int2Type<0> fake ) const
-  {
-    assert(el);
-    return (el->dof[i][0]);
-  }
-  
-  // codim = dim  means we get from dim-cd = 0 
-  int getIndex ( const ALBERTA EL * el, int i , Int2Type<-1> fake ) const
-  {
-    assert(false);
-    DUNE_THROW(AlbertaError,"Error, wrong codimension!\n");
-    return -1;
-  }
-  
-}; // end class AlbertaGridHierarchicIndexSet
 
 
 // Class to mark the Vertices on the leaf level
