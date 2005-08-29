@@ -179,7 +179,6 @@ public:
     markAllU_ = false;
   }
 
-
   //! Destructor
   virtual ~AdaptiveLeafIndexSet () {};
 
@@ -219,7 +218,7 @@ public:
   }
 
   //! \TODO Please doc me
-  // reallocate the vector for new size 
+  // reallocate the vector for new size
   void resizeVectors()
   {
     if(leafIndex_.size() < this->grid_.global_size(0))
@@ -410,6 +409,11 @@ public:
     //return leafIndex_[ hIndexSet_.index(en) ];
   }
   
+  template <class EntityType, int cd>
+  int subIndex(EntityType& en, int num)  {
+    return IndexWrapper<EntityType, cd>::index(en, hIndexSet_, leafIndex_, num);
+  }
+
   //! return size of grid entities per level and codim 
   //! for dof mapper 
   int oldSize ( int codim ) const
