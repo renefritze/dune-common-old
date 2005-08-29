@@ -161,11 +161,12 @@ class AdaptiveLeafIndexSet : public DefaultGridIndexSetBase <GridType>
 
   const int factor_; 
 
-  typedef typename GridType :: HierarchicIndexSetType HIndexSetType;
+  typedef typename GridType :: HierarchicIndexSet HIndexSetType;
   const HIndexSetType & hIndexSet_; 
 
 public:
   enum { ncodim = GridType::dimension + 1 };
+  //! Constructor
   AdaptiveLeafIndexSet (const GridType & grid) : DefaultGridIndexSetBase <GridType> (grid) , 
     nextFreeIndex_ (0), actSize_(0), marked_(false), markAllU_ (false) 
     , factor_(2) , hIndexSet_( grid.hierarchicIndexSet() ) 
@@ -178,9 +179,11 @@ public:
     markAllU_ = false;
   }
 
-  int type () const { return myType; }
 
+  //! Destructor
   virtual ~AdaptiveLeafIndexSet () {};
+
+  int type () const { return myType; }
 
   template <class EntityType>
   void restrictLocal ( EntityType &father, EntityType &son, bool initialize ) 
@@ -196,8 +199,7 @@ public:
     removeOldIndex( father );
   }
   
-  void insertNewIndex (const typename GridType::template Codim<0>::Entity & en )
-  {
+  void insertNewIndex (const typename GridType::template Codim<0>::Entity & en )  {
     // here we have to add the support of higher codims 
     resizeVectors();
 
@@ -208,6 +210,7 @@ public:
     marked_ = false;
   }
 
+  //! Unregister entity which will be removed from the grid
   void removeOldIndex (const typename GridType::template Codim<0>::Entity & en )
   {
     //std::cout << "remove old Entity = " << en.globalIndex() << "\n";
@@ -215,6 +218,7 @@ public:
     state_[ hIndexSet_.index(en) ] = UNUSED;
   }
 
+  //! \TODO Please doc me
   // reallocate the vector for new size 
   void resizeVectors()
   {
@@ -626,7 +630,7 @@ private:
 template <class GridType>
 class DefaultLeafIndexSet : public DefaultGridIndexSetBase <GridType>
 {
-  typedef typename GridType :: LeafIndexSetType LeafIndexSetType;
+  typedef typename GridType :: LeafIndexSet LeafIndexSetType;
   LeafIndexSetType & leafIndexSet_; 
 
 public:
