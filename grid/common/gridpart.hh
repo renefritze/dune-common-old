@@ -129,7 +129,7 @@ namespace Dune {
   struct LevelGridPartTraits {
     typedef GridImp GridType;
     typedef LevelGridPart<GridImp,pitype> GridPartType;
-    typedef typename GridImp::LevelIndexSetType IndexSetType;
+    typedef typename GridImp::LevelIndexSet IndexSetType;
 
     template <int cd>
     struct Codim {
@@ -179,7 +179,7 @@ namespace Dune {
   struct LeafGridPartTraits {
     typedef GridImp GridType;
     typedef LeafGridPart<GridImp,pitype> GridPartType;
-    typedef typename GridImp::LeafIndexSetType IndexSetType;
+    typedef typename GridImp::LeafIndexSet IndexSetType;
 
     template <int cd>
     struct Codim {
