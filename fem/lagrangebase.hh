@@ -127,6 +127,10 @@ namespace Dune {
     //! Constructor generating for each different element type of the grid a 
     //! LagrangeBaseSet with polOrd 
     LagrangeDiscreteFunctionSpace(GridPartType & g, DofManagerType & dm);
+    
+    //! Constructor generating for each different element type of the grid a 
+    //! LagrangeBaseSet with polOrd 
+    LagrangeDiscreteFunctionSpace(GridPartType & g);
 
     //! Desctructor 
     virtual ~LagrangeDiscreteFunctionSpace (); 
