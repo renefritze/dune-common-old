@@ -88,6 +88,14 @@ inline void DFAdapt< DiscreteFunctionSpaceType >::print(std::ostream &s )
 //  Interface Methods 
 //*************************************************************************
 template<class DiscreteFunctionSpaceType > template <class EntityType>
+inline LocalFunctionAdapt<DiscreteFunctionSpaceType>
+DFAdapt< DiscreteFunctionSpaceType >::localFunction(EntityType& en) {
+  return LocalFunctionAdapt<DiscreteFunctionSpaceType> (this->functionSpace_, 
+                                                        dofVec_,
+                                                        en);
+}
+
+template<class DiscreteFunctionSpaceType > template <class EntityType>
 inline void
 DFAdapt< DiscreteFunctionSpaceType >::
 localFunction ( const EntityType &en , LocalFunctionAdapt < DiscreteFunctionSpaceType > &lf )
@@ -385,6 +393,7 @@ LocalFunctionAdapt( const DiscreteFunctionSpaceType &f ,
  : fSpace_ ( f ), dofVec_ ( dofVec ) 
  , uniform_(true), init_(false) {}
       
+
 template<class DiscreteFunctionSpaceType >
 inline LocalFunctionAdapt < DiscreteFunctionSpaceType >::~LocalFunctionAdapt() 
 {

@@ -1,5 +1,5 @@
-#ifndef __DUNE_DFADAPT_HH__
-#define __DUNE_DFADAPT_HH__
+#ifndef DUNE_DFADAPT_HH
+#define DUNE_DFADAPT_HH
 
 #include "dune/common/array.hh"
 #include "common/discretefunction.hh"
@@ -13,22 +13,23 @@
 
 namespace Dune{
 
+
   template <class DiscreteFunctionSpaceImp>    class LocalFunctionAdapt;
   template <class DofType, class DofArrayType>  class DofIteratorAdapt;
   template <class DiscreteFunctionSpaceImp> class DFAdapt;
 
-template <class DiscreteFunctionSpaceImp>
-struct DFAdaptTraits {
-  typedef DiscreteFunctionSpaceImp DiscreteFunctionSpaceType;
-  typedef DFAdapt<DiscreteFunctionSpaceImp> DiscreteFunctionType;
-  typedef LocalFunctionAdapt<DiscreteFunctionSpaceImp> LocalFunctionType;
-  typedef typename DofArray<
-    typename DiscreteFunctionSpaceImp::RangeFieldType
-  >::DofIteratorType DofIteratorType;
-  typedef typename DofArray<
-    typename DiscreteFunctionSpaceImp::RangeFieldType
-  >::ConstDofIteratorType ConstDofIteratorType;
-};
+  template <class DiscreteFunctionSpaceImp>
+  struct DFAdaptTraits {
+    typedef DiscreteFunctionSpaceImp DiscreteFunctionSpaceType;
+    typedef DFAdapt<DiscreteFunctionSpaceImp> DiscreteFunctionType;
+    typedef LocalFunctionAdapt<DiscreteFunctionSpaceImp> LocalFunctionType;
+    typedef typename DofArray<
+      typename DiscreteFunctionSpaceImp::RangeFieldType
+    >::DofIteratorType DofIteratorType;
+    typedef typename DofArray<
+      typename DiscreteFunctionSpaceImp::RangeFieldType
+    >::ConstDofIteratorType ConstDofIteratorType;
+  };
 
 //**********************************************************************
 //
@@ -78,6 +79,8 @@ public:
   /** \brief For ISTL-compatibility */
   typedef FieldVector<DofType,1> block_type;
 
+public:
+
   //! Constructor make Discrete Function
   DFAdapt(DiscreteFunctionSpaceType& f);
 
@@ -98,6 +101,9 @@ public:
   //! return object of type LocalFunctionType 
   LocalFunctionAdapt<DiscreteFunctionSpaceType> newLocalFunction ( );
  
+  template <class EntityType>
+  LocalFunctionAdapt<DiscreteFunctionSpaceType> localFunction(EntityType& en);
+
   //! update LocalFunction to given Entity en  
   template <class EntityType> 
   void localFunction ( const EntityType &en, 

@@ -1,5 +1,8 @@
+
 #ifndef DUNE_DISCRETEFUNCTION_HH
 #define DUNE_DISCRETEFUNCTION_HH
+
+#include <string>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/common/function.hh>
@@ -8,6 +11,7 @@
 #include "dofiterator.hh"
 
 namespace Dune{
+
 
   /** @defgroup DiscreteFunction DiscreteFunction
       @ingroup FunctionCommon
@@ -80,8 +84,13 @@ namespace Dune{
     DiscreteFunctionInterface (const DiscreteFunctionSpaceType& f) 
       : FunctionType ( f ) {}
 
-    //! Continuous data?
-    bool continuous() const { 
+    //! Name of the discrete function
+    std::string name() const {
+      return asImp().name();
+    }
+
+    //! Continuous data
+    bool continuous() const {
       return asImp().continuous();
     }
 
@@ -187,7 +196,6 @@ namespace Dune{
   
     //! Type of the local function
     typedef typename DiscreteFunctionTraits::LocalFunctionType LocalFunctionType;
-  
     //! Type of the dof iterator
     typedef typename DiscreteFunctionTraits::DofIteratorType DofIteratorType;
   

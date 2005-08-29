@@ -57,7 +57,7 @@ class FastBaseFunctionSet :
 public:
   typedef FastBaseFunctionSetTraits<FunctionSpaceType> BaseFunctionSetType;
   typedef FastBaseFunctionSetTraits<BaseFunctionSetType> Traits;
- 
+
   //! the BaseFunctionInterface type 
   typedef BaseFunctionInterface < FunctionSpaceType > BaseFunctionInterfaceType;
 
