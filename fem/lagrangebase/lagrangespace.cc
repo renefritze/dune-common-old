@@ -42,7 +42,8 @@ makeFunctionSpace (GridPartType& gridPart)
 {
   // add index set to list of indexset of dofmanager 
 
-  dm_.addIndexSet( gridPart.grid() , gridPart.indexSet() );
+  dm_.addIndexSet(gridPart.grid(), 
+                  const_cast<GridPartType::IndexSetType&>(gridPart.indexSet()));
   
   //std::cout << "Constructor of LagrangeDiscreteFunctionSpace! \n";
   // search the macro grid for diffrent element types 
@@ -180,7 +181,7 @@ inline typename
 LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd, DofManagerImp>::
 BaseFunctionSetType* 
 LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd, DofManagerImp>::
-setBaseFuncSetPointer ( EntityType &en, IndexSetType& iset )
+setBaseFuncSetPointer ( EntityType &en,const IndexSetType& iset )
 {
   switch (en.geometry().type())
       {
@@ -228,14 +229,14 @@ inline typename
 LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd, DofManagerImp>::
 BaseFunctionSetType * 
 LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd, DofManagerImp>::
-makeBaseSet (IndexSetType& iset)
+makeBaseSet (const IndexSetType& iset)
 {
   typedef LagrangeFastBaseFunctionSet < LagrangeDiscreteFunctionSpaceType,
         ElType, pO > BaseFuncSetType;
 
   BaseFuncSetType * baseFuncSet = new BaseFuncSetType ( *this );
 
-  mapper_ = new LagrangeMapperType (iset, 
+  mapper_ = new LagrangeMapperType (const_cast<IndexSetType&>(iset), 
                                     baseFuncSet->getNumberOfBaseFunctions(),
                                     0);
 

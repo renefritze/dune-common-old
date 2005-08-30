@@ -20,7 +20,7 @@ class LagrangeMapper
   enum { numCodims = IndexSetImp::ncodim };
   int numberOfDofs_;
   int level_;
-  IndexSetImp & indexSet_;
+  const IndexSetImp & indexSet_;
   
   int insertionPoint_ [numCodims];
   Array<int> codimOfDof_; 
@@ -32,7 +32,7 @@ public:
   typedef IndexSetImp IndexSetType;
   
   //! Constructor 
-  LagrangeMapper ( IndexSetType & is, int numLocalDofs , int level ) 
+  LagrangeMapper (IndexSetType & is, int numLocalDofs , int level ) 
     : numberOfDofs_ (numLocalDofs) , level_(level) , indexSet_ (is) 
   {
     codimOfDof_.resize(numberOfDofs_);
