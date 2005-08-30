@@ -1,7 +1,3 @@
-/** \file
-    \brief A few common exception classes
-*/
-
 // $Id$
 
 #ifndef DUNE_EXCEPTIONS_HH
@@ -63,6 +59,7 @@ int main () {
 */
 
 /*! \file
+  \brief A few common exception classes
   
 This file defines a common framework for generating exception
 subclasses and to throw them in a simple manner
