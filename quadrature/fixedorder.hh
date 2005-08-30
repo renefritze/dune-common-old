@@ -7,7 +7,6 @@
 
 // the specialisations 
 #include "fixedorder/quadlqh.hh"
-#include "fixedorder/quadtetratri.hh"
 
 namespace Dune{
 
