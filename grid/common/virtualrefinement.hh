@@ -15,7 +15,7 @@
   @endverbatim
 */
 
-/*! @defgroup VirtualRefinement
+/*! @defgroup VirtualRefinement Virtual Refinement
   \ingroup Refinement
     <!--WWWWWWWWWWWWWWWWWWWW-->
 
