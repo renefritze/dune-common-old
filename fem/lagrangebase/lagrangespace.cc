@@ -43,7 +43,7 @@ makeFunctionSpace (GridPartType& gridPart)
   // add index set to list of indexset of dofmanager 
 
   dm_.addIndexSet(gridPart.grid(), 
-                  const_cast<GridPartType::IndexSetType&>(gridPart.indexSet()));
+                  const_cast<typename GridPartType::IndexSetType&>(gridPart.indexSet()));
   
   //std::cout << "Constructor of LagrangeDiscreteFunctionSpace! \n";
   // search the macro grid for diffrent element types 
