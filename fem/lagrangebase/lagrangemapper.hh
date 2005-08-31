@@ -18,6 +18,7 @@ class LagrangeMapper
 : public DofMapperDefault < LagrangeMapper <IndexSetImp,polOrd,dimrange> > 
 {
   enum { numCodims = IndexSetImp::ncodim };
+  
   int numberOfDofs_;
   int level_;
   const IndexSetImp & indexSet_;
