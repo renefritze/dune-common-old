@@ -39,6 +39,9 @@ namespace Dune {
     typename GridPartTraits::template Codim<cd>::IteratorType
     end() const { return asImp().end(); }
 
+    //! Level of the grid part
+    int level() const { return asImp().end(); }
+
   private:
     GridPartType& asImp() { 
       return static_cast<GridPartType&>(*this); 
@@ -171,6 +174,9 @@ namespace Dune {
     typename Traits::template Codim<cd>::IteratorType end() const {
       return this->grid().template leafend<cd,pitype>();
     }
+
+    //! Returns maxlevel of the grid
+    int level() const { return this->grid().maxlevel(); }
   };
 
   //! Type definitions for the LeafGridPart class
@@ -186,7 +192,7 @@ namespace Dune {
     };
   };
 
-  //! quich hack, to be revised by me 
+  //! quick hack, to be revised by me 
   //! \brief Selects the leaf level of a grid
   template <class GridImp, class IndexSetImp , PartitionIteratorType pitype = Interior_Partition>
   class DefaultGridPart :
@@ -222,6 +228,9 @@ namespace Dune {
     typename Traits::template Codim<cd>::IteratorType end() const {
       return this->grid().template leafend<cd,pitype>();
     }
+
+    //! Level of the grid part
+    int level() const { return this->grid().maxlevel(); }
   };
 
   //! Type definitions for the LeafGridPart class
