@@ -148,6 +148,7 @@ mapToGlobal ( EntityType &en, int localNum ) const
   return mapper_->mapToGlobal ( en , localNum );
 }
 
+/*
 template <
   class FunctionSpaceImp, class GridPartImp, int polOrd, class DofManagerImp
   >
@@ -159,7 +160,7 @@ signIn (DiscFuncType & df) const
   // only for gcc to pass type DofType
   assert(mapper_ != 0);
 
-  return dm_.addDofSet( df.getStorageType() , grid_.grid() , *mapper_, df.name() );
+  return dm_.addDofSet( df.getStorageType() , *mapper_, df.name() );
 }
 
 template <
@@ -171,6 +172,16 @@ LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd, DofManagerI
 signOut (DiscFuncType & df) const  
 {
   return dm_.removeDofSet( df.memObj() );
+}
+*/
+
+template <
+  class FunctionSpaceImp, class GridPartImp, int polOrd, class DofManagerImp
+>
+const LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd, DofManagerImp>::MapperType&
+LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd, DofManagerImp>::mapper() const {
+  assert(mapper_);
+  return *mapper_;
 }
 
 template <
@@ -236,7 +247,7 @@ makeBaseSet (const IndexSetType& iset)
 
   BaseFuncSetType * baseFuncSet = new BaseFuncSetType ( *this );
 
-  mapper_ = new LagrangeMapperType (const_cast<IndexSetType&>(iset), 
+  mapper_ = new MapperType (const_cast<IndexSetType&>(iset), 
                                     baseFuncSet->getNumberOfBaseFunctions(),
                                     0);
 
