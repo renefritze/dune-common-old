@@ -1,5 +1,5 @@
-#ifndef __DUNE_ARRAY_HH
-#define __DUNE_ARRAY_HH
+#ifndef DUNE_ARRAY_HH
+#define DUNE_ARRAY_HH
 
 #include<iostream>
 #include<iomanip>
@@ -222,8 +222,7 @@ namespace Dune
           p = new T[n];
         }
         catch (std::bad_alloc) {
-          std::cerr << "nicht genug Speicher!" << std::endl;
-          throw;
+            DUNE_THROW(OutOfMemoryError, "Not enough memory!");
         }
   }
 
@@ -250,8 +249,7 @@ namespace Dune
                   p = new T[n];
                 }
                 catch (std::bad_alloc) {
-                  std::cerr << "nicht genug Speicher!" << std::endl;
-                  throw;
+                    DUNE_THROW(OutOfMemoryError, "Not enough memory!");
                 }
           }
      return;    
@@ -271,8 +269,7 @@ namespace Dune
                   p = new T[n];
                 }
                 catch (std::bad_alloc) {
-                  std::cerr << "nicht genug Speicher!" << std::endl;
-                  throw;
+                    DUNE_THROW(OutOfMemoryError, "Not enough memory!");
                 }
           }
 
@@ -298,8 +295,7 @@ namespace Dune
                                   p = new T[n];
                                 }
                                 catch (std::bad_alloc) {
-                                  std::cerr << "nicht genug Speicher!" << std::endl;
-                                  throw;
+                                    DUNE_THROW(OutOfMemoryError, "Not enough memory!");
                                 }
                           }
                   }
