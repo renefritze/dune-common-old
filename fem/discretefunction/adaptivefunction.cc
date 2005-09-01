@@ -14,7 +14,9 @@ namespace Dune {
                         DofStorageType& dofVec) :
     spc_(spc),
     dofVec_(dofVec),
-    values_()
+    values_(),
+    tmp_(0.0),
+    tmpGrad_(0.0)
   {}
   
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
@@ -22,7 +24,9 @@ namespace Dune {
   AdaptiveLocalFunction(const ThisType& other) :
     spc_(other.spc_),
     dofVec_(other.dofVec_),
-    values_()
+    values_(),
+    tmp_(0.0),
+    tmpGrad_(0.0)
   {}
 
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
@@ -62,7 +66,7 @@ namespace Dune {
     const BaseFunctionSetType& bSet = spc_.getBaseFunctionSet(en);
 
     for (int i = 0; i < bSet.getNumberOfBaseFunctions(); ++i) {
-      bSet.evaluate(i, x, tmp_);
+      bSet.eval(i, x, tmp_);
       for (int l = 0; l < dimRange; ++l) {
         ret[l] += (*values_[i]) * tmp_[l];
       }
@@ -77,7 +81,7 @@ namespace Dune {
            int quadPoint, 
            RangeType& ret) const 
   {
-    evaluatueLocal(en, quad.point(quadPoint), ret);
+    evaluateLocal(en, quad.point(quadPoint), ret);
   }
 
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
@@ -129,6 +133,7 @@ namespace Dune {
   }
 
   //- AdaptiveLocalFunction (Specialisation for CombinedSpace)
+  
   template <class ContainedFunctionSpaceImp, int N, 
             DofStoragePolicy p, class DofManagerImp>
   AdaptiveLocalFunction<
@@ -306,6 +311,5 @@ namespace Dune {
     } // end for i
 
   }
-
  
 } // end namespace Dune
