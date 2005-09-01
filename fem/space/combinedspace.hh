@@ -71,6 +71,10 @@ namespace Dune {
     DomainFieldType;
     typedef typename ContainedFunctionSpaceType::RangeFieldType 
     RangeFieldType;
+    typedef typename ContainedFunctionSpaceType::RangeType 
+    ContainedRangeType;
+    typedef typename ContainedFunctionSpaceType::JacobianRangeType
+    ContainedJacobianRangeType;
 
     // * Require contained space to have dimRange == 1? (ie to be scalar)
     // * yes, we do
@@ -78,6 +82,11 @@ namespace Dune {
       DomainFieldType, RangeFieldType,
       ContainedDimDomain, ContainedDimRange*N
       > FunctionSpaceType;
+    typedef CombinedBaseFunctionSet<
+      ContainedBaseFunctionSetType, N, policy
+      > BaseFunctionSetType;
+    typedef CombinedMapper<DiscreteFunctionSpaceImp, N, policy> MapperType;
+
     
     typedef typename FunctionSpaceType::RangeType RangeType;
     typedef typename FunctionSpaceType::DomainType DomainType;
@@ -90,10 +99,6 @@ namespace Dune {
     
     typedef typename ContainedTraits::GridType GridType;
     typedef typename ContainedTraits::IteratorType IteratorType;
-    typedef CombinedBaseFunctionSet<
-      ContainedBaseFunctionSetType, N, policy
-      > BaseFunctionSetType;
-    typedef CombinedMapper<DiscreteFunctionSpaceImp, N, policy> MapperType;
 
     friend class DiscreteFunctionSpaceType;
   };
@@ -122,6 +127,9 @@ namespace Dune {
     typedef typename Traits::DomainType DomainType;
     typedef typename Traits::RangeFieldType RangeFieldType;
     typedef typename Traits::DomainFieldType DomainFieldType;
+
+    typedef typename Traits::ContainedRangeType ContainedRangeType;
+    typedef typename Traits::ContainedJacobianRangeType ContainedJacobianRangeType;
 
     typedef typename Traits::BaseFunctionSetType BaseFunctionSetType;
     typedef typename Traits::MapperType MapperType;
@@ -204,13 +212,16 @@ namespace Dune {
     typedef CombinedSpace<ContainedFunctionSpaceType, N, policy> 
     DiscreteFunctionSpaceType;
     
-    typedef DiscreteFunctionSpaceType::RangeType RangeType;
-    typedef DiscreteFunctionSpaceType::DomainType DomainType;
+    typedef typename DiscreteFunctionSpaceType::RangeType RangeType;
+    typedef typename DiscreteFunctionSpaceType::DomainType DomainType;
     typedef typename DiscreteFunctionSpaceType::JacobianRangeType 
     JacobianRangeType;
-    
     typedef typename DiscreteFunctionSpaceType::HessianRangeType  
     HessianRangeType;
+    typedef typename DiscreteFunctionSpaceType::ContainedRangeType
+    ContainedRangeType;
+    typedef typename DiscreteFunctionSpaceType::ContainedJacobianRangeType
+    ContainedJacobianRangeType;
     
     enum { DimDomain = DiscreteFunctionSpaceType::DimDomain };
     enum { DimRange  = DiscreteFunctionSpaceType::DimRange  }; 
@@ -238,7 +249,8 @@ namespace Dune {
     typedef typename Traits::DiscreteFunctionSpaceType DiscreteFunctionSpaceType;
     typedef typename Traits::RangeType RangeType;
     typedef typename Traits::DomainType DomainType;
-
+    typedef typename Traits::ContainedRangeType ContainedRangeType;
+    typedef typename Traits::ContainedJacobianRangeType ContainedJacobianRangeType;
   public:
     //- Public methods
     //! Constructor
@@ -267,6 +279,22 @@ namespace Dune {
                    const FieldVector<deriType, diffOrd> &diffVariable, 
                    QuadratureType & quad, 
                    int quadPoint, RangeType & phi ) const;
+
+    //- Additional methods
+    int numContainedFunctions() const {
+      return baseFunctionSet_.getNumberOfBaseFunctions()*N;
+    }
+
+   //! evaluate base function
+    void evaluateContained(int baseFunct, 
+                           const DomainType& x, 
+                           ContainedRangeType& phi) const;
+    
+    //! evaluate base function at quadrature point
+    void jacobianContained (int baseFunct, 
+                            const DomainType& x,
+                            ContainedJacobianRangeType& phi) const;
+
 
   private:
     //- Private methods
@@ -389,7 +417,5 @@ namespace Dune {
 
   // include implementation
 #include "combinedspace.cc"
-
-
 
 #endif
