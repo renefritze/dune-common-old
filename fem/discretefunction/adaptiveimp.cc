@@ -16,59 +16,75 @@ namespace Dune {
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
   std::string
   AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
-  name() const {
+  name() const 
+  {
     return name_;
   }
 
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
   AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
-  ~AdaptiveFunctionImplementation() {
+  ~AdaptiveFunctionImplementation() 
+  {
     bool removed = dm_.removeDofSet(memObj_);
 
     assert(removed);
   }
 
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
-  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::DofIteratorType
-  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::dbegin() {
+  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
+  DofIteratorType
+  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
+  dbegin() 
+  {
     return dofVec_.begin();
   }
 
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
-  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::DofIteratorType
-  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::dend() {
+  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
+DofIteratorType
+  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
+  dend() 
+  {
     return dofVec_.end();
   }
 
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
-  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::ConstDofIteratorType
-  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::dbegin() const {
+  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
+  ConstDofIteratorType
+  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
+  dbegin() const 
+  {
     return dofVec_.begin();
   }
 
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
-  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::ConstDofIteratorType
-  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::dend() const{
+  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
+  ConstDofIteratorType
+  AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
+  dend() const
+  {
     return dofVec_.end();
   }
   
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
   AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::LocalFunctionType
   AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
-  newLocalFunction() {
+  newLocalFunction() 
+  {
     return LocalFunctionType(spc_, dofVec_);
   }
 
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
   template <class EntityType>
-  void AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
-  localFunction(const EntityType& en, LocalFunctionType& lf) {
+  void AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp,DofManagerImp>::
+  localFunction(const EntityType& en, LocalFunctionType& lf) 
+  {
     lf.init(en);
   }
 
   //- Read/write methods
   template<class DiscreteFunctionSpaceImp, class DofManagerImp>
-  bool AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
+  bool AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp,DofManagerImp>::
   write_xdr(std::string fn)
   {
     FILE  *file;
@@ -91,7 +107,7 @@ namespace Dune {
   }
 
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
-  inline bool AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
+  bool AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp,DofManagerImp>::
   read_xdr(std::string fn)
   {
     FILE   *file;
@@ -115,7 +131,7 @@ namespace Dune {
   }
 
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
-  inline bool AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
+  bool AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp,DofManagerImp>::
   write_ascii(std::string fn)
   {
     std::fstream outfile( fn.c_str() , std::ios::out );
@@ -143,7 +159,7 @@ namespace Dune {
 
 
   template<class DiscreteFunctionSpaceImp, class DofManagerImp>
-  inline bool AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp, DofManagerImp>::
+  bool AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp,DofManagerImp>::
   read_ascii(std::string fn)
   {
     FILE *infile=0;
@@ -164,4 +180,48 @@ namespace Dune {
     return true;
   }
 
+  template<class DiscreteFunctionSpaceImp, class DofManagerImp>
+  bool AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp,DofManagerImp>::
+  write_pgm(std::string fn)
+  {
+    std::ofstream out( fn.c_str() );
+    
+    enum { dim = GridType::dimension };
+    
+    if (out) {
+      int danz = 129; 
+      
+      out << "P2\n " << danz << " " << danz <<"\n255\n";
+      DofIteratorType enddof = dend ();
+      for(DofIteratorType itdof = dbegin (); itdof != enddof; ++itdof) {
+        out << (int)((*itdof)*255.) << "\n";
+      }
+      out.close();
+    }
+    else {
+      std::cerr << "Couldn't open file '"<<fn<<"' \n";
+    }
+    return true;
+  }
+  
+  template<class DiscreteFunctionSpaceImp, class DofManagerImp>
+  bool AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp,DofManagerImp>::
+  read_pgm(std::string fn)
+  {
+    FILE *in;
+    int v;
+    
+    in = fopen( fn.c_str(), "r" );
+    assert(in);
+    
+    fscanf( in, "P2\n%d %d\n%d\n", &v, &v, &v );
+    DofIteratorType enddof = dend ();
+    for(DofIteratorType itdof = dbegin (); itdof != enddof; ++itdof) {
+      fscanf( in, "%d", &v );
+      (*itdof) = ((double)v)/255.;
+    } 
+    fclose( in );
+    return true;
+  }
+  
 } // end namespace Dune
