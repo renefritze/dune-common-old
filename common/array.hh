@@ -6,6 +6,7 @@
 #include<string>
 #include<rpc/rpc.h>
 #include<assert.h>
+#include"exceptions.hh"
 
 namespace Dune 
 {
