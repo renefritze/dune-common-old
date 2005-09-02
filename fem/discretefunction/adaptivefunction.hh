@@ -8,6 +8,7 @@
 #include <dune/fem/common/discretefunction.hh>
 #include <dune/fem/common/localfunction.hh>
 #include <dune/fem/space/combinedspace.hh>
+//#include <dune/fem/space/subspace.hh>
 
 //- Local includes
 #include "adaptiveimp.hh"
@@ -224,7 +225,6 @@ namespace Dune {
   }; // end class AdaptiveLocalFunction
 
   //- Specialisations
-  /*
   template <class ContainedFunctionSpaceImp, int N, 
             DofStoragePolicy p, class DofManagerImp>
   class AdaptiveDiscreteFunction<
@@ -261,8 +261,12 @@ namespace Dune {
     typedef typename Traits::DofStorageType DofStorageType;
     typedef typename Traits::MemObjectType MemObjectType;
     
+    typedef typename Traits::DofIteratorType DofIteratorType;
+    typedef typename Traits::ConstDofIteratorType ConstDofIteratorType;
+
     //- Additional typedefs
-    typedef SubSpace<> SubSpaceType;
+    //typedef SubSpace<DiscreteFunctionSpaceType> SubSpaceType;
+    typedef DiscreteFunctionSpaceType SubSpaceType;
     typedef AdaptiveDiscreteFunction<
       SubSpaceType, DofManagerImp> SubDiscreteFunctionType;
    
@@ -280,7 +284,7 @@ namespace Dune {
     AdaptiveDiscreteFunction(const MyType& other) :
       BaseType(other.space()),
       Imp(other),
-      subSpaces(0) // Don't copy them
+      subSpaces_(0) // Don't copy them
     {}
     
     ~AdaptiveDiscreteFunction();
@@ -305,7 +309,6 @@ namespace Dune {
   private:
      std::vector<SubSpaceType*> subSpaces_;
   }; // end class AdaptiveDiscreteFunction (specialised for CombinedSpace)
-  */
 
   //- class AdaptiveLocalFunction (specialised)
   template <

@@ -5,7 +5,7 @@ namespace Dune {
   // nothing here, everything in adaptivefunction.hh
   
   //- AdaptiveDiscreteFunction (specialisation)
-  /*
+  
   template <class ContainedFunctionSpaceImp, int N, 
             DofStoragePolicy p, class DofManagerImp>
   AdaptiveDiscreteFunction<
@@ -34,7 +34,7 @@ namespace Dune {
                                    *subSpace,
                                    this->memObject());
   }
-  */
+  
   
   //- AdaptiveLocalFunction
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
