@@ -70,7 +70,6 @@ namespace Dune {
   inline int CombinedBaseFunctionSet<DiscreteFunctionSpaceImp, N, policy>::
   containedDof(int combinedBaseNumber) const 
   {
-    //return global%N;
     return combinedBaseNumber/N;
   }
 
@@ -78,7 +77,6 @@ namespace Dune {
   inline int CombinedBaseFunctionSet<DiscreteFunctionSpaceImp, N, policy>::
   component(int combinedBaseNumber) const 
   {
-    //return global%N;
     return combinedBaseNumber%N;
   }
 
