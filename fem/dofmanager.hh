@@ -5,6 +5,7 @@
 #include <cassert>
 #include <vector> 
 #include <string>
+#include <list>
 
 //- Dune includes 
 #include <dune/common/dlist.hh>
@@ -210,7 +211,7 @@ public:
   { 
     assert( ((i<0) || (i>=size()) ? (std::cout << std::endl << i << " i|size " << size() << 
 #ifdef _ALU3DGRID_PARALLEL_
-            " on p=" << __MyRank__ << 
+                                     //            " on p=" << __MyRank__ << 
 #endif
             std::endl, 0) : 1));
     return vec_[i]; 
@@ -236,6 +237,13 @@ public:
   {
     for(int i=0; i<size(); i++) this->operator [] (i) = t;
     return *this;
+  }
+
+  //! Comparison operator
+  //! The comparison operator checks for object identity, i.e. if this and
+  //! other are the same objects in memory rather than containing the same data
+  bool operator==(const DofArray<T>& other) const {
+    return vec_ == other.vec_;
   }
 
   T* vector() { return vec_; }
@@ -434,9 +442,9 @@ template <class MemObjectType> class ResizeMemoryObjects;
 
 /*! 
   A MemObject holds the memory for one DiscreteFunction and the
-  corrsponding DofArrayMemory. If a DiscreteFunction is signed in by a
+  corresponding DofArrayMemory. If a DiscreteFunction is signed in by a
   function space, then such a MemObject is created by the DofManager. 
-  The MemObject also know the DofMapper from the function space which the
+  The MemObject also knows the DofMapper from the function space which the
   discrete function belongs to. Here we dont know the exact type of the dof
   mapper therefore the methods newSize and calcInsertPoints of the mappers
   have to be virtual. This isnt a problem because this methods should only
@@ -656,17 +664,17 @@ class DofManError : public Exception {};
 
 
 /*! 
- The DofManager is responsable for managing memory allocation and freeing
+ The DofManager is responsible for managing memory allocation and freeing
  for all discrete functions living on the grid the manager belongs to. 
- The rule is: For a certain grid only one DofManager, but a least one.
- Each function space knows the dofmanager and can sign in the discrete
- functions that belong to that space. If the grid is adapted, then the
+ There is only one DofManager per grid.
+ Each discrete function knows its dofmanager and can sign in. 
+ If the grid is adapted, then the
  dofmanager reorganizes the memory if necessary. The DofManager holds a
- list or vector of MemObject which know the memory and the corresponding
+ list of MemObjects which manage the memory and the corresponding
  mapper so they can determine the size of new memory. 
- Furthermore the DofManager holds an IndexSet which the DofMapper need for
+ Furthermore the DofManager holds an IndexSet which the DofMapper needs for
  calculating the indices in the dof vector for a given entity and local dof
- number. This IndexSet is deliverd to the mapper, if a function space is
+ number. This IndexSet is delivered to the mapper when a function space is
  created. The default value for the IndexSet is the DefaultIndexSet class
  which is mostly a wrapper for the grid indices. 
 */
@@ -686,8 +694,10 @@ public:
   typedef MemPointerType MemoryPointerType; 
 
 private:  
-  typedef DoubleLinkedList < MemObjectInterface * > ListType;
-  typedef typename ListType::Iterator ListIteratorType;
+  //typedef DoubleLinkedList < MemObjectInterface * > ListType;
+  //typedef typename ListType::Iterator ListIteratorType;
+  typedef std::list<MemObjectInterface*> ListType;
+  typedef typename ListType::iterator ListIteratorType;
 
   typedef LocalInterface< int > MemObjectCheckType;
   
@@ -757,8 +767,9 @@ public:
   //! this method should be called at signIn of DiscreteFucntion, and there
   //! we know our DofStorage which is the actual DofArray  
   template <class DofStorageType, class MapperType >
-  inline MemObject<MapperType,DofStorageType> & 
-  addDofSet(const DofStorageType * ds, const GridType &grid, MapperType & mapper, const std::string name );
+  //inline MemObject<MapperType,DofStorageType> & 
+  std::pair<MemObjectInterface*, DofStorageType*>
+  addDofSet(const DofStorageType* ds, const MapperType& mapper, std::string name);
 
   //! remove MemObject, is called from DiscreteFucntionSpace at sign out of
   //! DiscreteFunction 
@@ -770,9 +781,9 @@ public:
     bool removed = false;
     for( ; it != endit ; ++it)
     {
-      if((*it) == &obj)
+      if(*it == &obj)
       {
-        // alloc new mem an copy old mem 
+        // alloc new mem and copy old mem 
         MemObjectInterface * mobj = (*it);
         memList_.erase( it );  
         dverb << "Removing '" << obj.name() << "' from DofManager!\n";
@@ -1046,48 +1057,19 @@ checkIndexSetExists (const IndexSetType &iset) const
 
 
 template <class GridType, class DataCollectorType>
-//template <class DofStorageType, class IndexSetType, class MapperType >
 template <class DofStorageType, class MapperType >
-inline MemObject<MapperType,DofStorageType> & 
+//inline MemObject<MapperType,DofStorageType> & 
+std::pair<MemObjectInterface*, DofStorageType*>
 DofManager<GridType,DataCollectorType>::
-addDofSet(const DofStorageType * ds, const GridType &grid, //, IndexSetType &iset, 
-          MapperType & mapper, const std::string name )
+addDofSet(const DofStorageType * ds, const MapperType & mapper, std::string name)
 {
-  if(&grid_ != &grid)
-    DUNE_THROW(DofManError,"DofManager can only be used for one grid! \n");
+  assert( name.c_str() != 0);
   dverb << "Adding '" << name << "' to DofManager! \n";
 
-  assert( name.c_str() != 0);
-
-  /*
-  IndexSetInterface & set = iset; 
-  typedef IndexSetObject< IndexSetType, 
-        typename GridType::template Codim<0>::Entity > IndexSetObjectType;
-  
-  IndexSetObjectType * indexSet = 0;
-  
-  IndexListIteratorType endit = indexList_.end();
-  for(IndexListIteratorType it = indexList_.begin(); it != endit; ++it)
-  {
-    if( (* (*it)) == set )
-    {
-      indexSet = static_cast<IndexSetObjectType *> ((*it));
-      break;
-    }
-  }
- 
-  // index was added when functions space is created, should be here
-  assert( indexSet ); 
-  if( !indexSet ) 
-    DUNE_THROW(DofManError,"No IndexSet for DofSet! \n");
-  */
-  
   typedef MemObject<MapperType,DofStorageType> MemObjectType; 
-  //MemObjectType * obj = new MemObjectType ( mapper, *indexSet , name ); 
   MemObjectType * obj = new MemObjectType ( mapper, name ); 
-
-  MemObjectInterface * saveObj = obj;
-  memList_.insert_after ( memList_.rbegin() , saveObj );    
+  //memList_.insert_after ( memList_.rbegin() , obj );    
+  memList_.push_back( obj );    
   
   // add the special object to the checkResize list object 
   checkResize_ += (*obj).checkResizeObj(); 
@@ -1095,7 +1077,8 @@ addDofSet(const DofStorageType * ds, const GridType &grid, //, IndexSetType &ise
   // the same for the resize call  
   resizeMemObjs_ += (*obj).resizeMemObject();
 
-  return *obj;
+  return std::pair<MemObjectInterface*, DofStorageType*>(obj, &obj.getArray());
+  //return *obj;
 }
 
 
@@ -1221,7 +1204,7 @@ private:
   DofManagerFactory () {};  
 };
 
-//! singelton 
+//! singleton (not quite...) 
 template <class DofManagerImp> 
 DoubleLinkedList < std::pair < const typename DofManagerImp :: GridType * , DofManagerImp * > > 
 DofManagerFactory<DofManagerImp>::gridList_;
