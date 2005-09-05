@@ -3,40 +3,40 @@
 
 #include <algorithm>
 
-namespace Dune 
-{
+namespace Dune {
 
-template<class DiscreteFunctionSpaceType >
-inline DFAdapt< DiscreteFunctionSpaceType >::
-DFAdapt(DiscreteFunctionSpaceType& f) :
-  DiscreteFunctionDefaultType ( f ) 
-  , name_ ("no name") 
-  , memObj_ ( f.signIn( const_cast <DFAdapt< DiscreteFunctionSpaceType > &> (*this) ) )
-  , dofVec_ ( memObj_.getArray() )
-  , localFunc_ ( f , dofVec_ )
-{
-}
+  template<class DiscreteFunctionSpaceType>
+  inline DFAdapt< DiscreteFunctionSpaceType>::
+  DFAdapt(DiscreteFunctionSpaceType& f) :
+    DiscreteFunctionDefaultType ( f ),
+    name_ ("no name"),
+    dm_(DofManagerFactoryType::getDofManager(f.grid())),
+    memPair_(dm_.addDofSet(&dofVec_, f.mapper(), name_)),
+    dofVec_ ( *memPair_.second ),
+    localFunc_ ( f , dofVec_ )
+{}
 
-// Constructor makeing discrete function  
-template<class DiscreteFunctionSpaceType >
-inline DFAdapt< DiscreteFunctionSpaceType >::
-DFAdapt(std::string name, DiscreteFunctionSpaceType & f)
-: DiscreteFunctionDefaultType ( f )
-  , name_ ((name.length() > 0) ? name : "no name")
-  , memObj_ ( f.signIn( const_cast <DFAdapt< DiscreteFunctionSpaceType > &> (*this) ) )
-  , dofVec_ ( memObj_.getArray() )
-  , localFunc_ ( f , dofVec_ )
-{
-}
+  // Constructor making discrete function  
+  template<class DiscreteFunctionSpaceType>
+  inline DFAdapt< DiscreteFunctionSpaceType>::
+  DFAdapt(std::string name, DiscreteFunctionSpaceType & f) : 
+    DiscreteFunctionDefaultType ( f ),
+    name_ ((name.length() > 0) ? name : "no name"),
+    dm_(DofManagerFactoryType::getDofManager(f.grid())),
+    memPair_(dm_.addDofSet(&dofVec_, f.mapper(), name_)),
+    dofVec_ ( *memPair_.second ),
+    localFunc_ ( f , dofVec_ )
+  {}
 
-template<class DiscreteFunctionSpaceType >
-inline DFAdapt< DiscreteFunctionSpaceType >::
+template<class DiscreteFunctionSpaceType>
+inline DFAdapt< DiscreteFunctionSpaceType>::
 DFAdapt(const DFAdapt <DiscreteFunctionSpaceType> & df ) :
- DiscreteFunctionDefaultType ( df.functionSpace_ ) 
-, name_ (std::string("copy of ") + df.name())
-, memObj_ ( df.functionSpace_.signIn( const_cast <DFAdapt< DiscreteFunctionSpaceType > &> (*this) ))
-, dofVec_ ( memObj_.getArray() )
-, localFunc_ ( df.localFunc_ )
+  DiscreteFunctionDefaultType ( df.functionSpace_ ),
+  name_ (std::string("copy of ") + df.name()),
+  dm_(df.dm_),
+  memPair_(dm_.addDofSet(&dofVec_, df.functionSpace_.mapper(), name_)),
+  dofVec_ ( *memPair_.second ),
+  localFunc_ ( df.localFunc_ )
 {
   // copy values of array 
   dofVec_ = df.dofVec_;
@@ -44,21 +44,24 @@ DFAdapt(const DFAdapt <DiscreteFunctionSpaceType> & df ) :
 
 
 // Desctructor 
-template<class DiscreteFunctionSpaceType >
-inline DFAdapt< DiscreteFunctionSpaceType >::
+template<class DiscreteFunctionSpaceType>
+inline DFAdapt< DiscreteFunctionSpaceType>::
 ~DFAdapt()
 {
-  bool removed = this->functionSpace_.signOut(const_cast<DFAdapt< DiscreteFunctionSpaceType > &> (*this)  );
+  dm_.removeDofSet(*memPair_.first);
+  /*
+  bool removed = this->functionSpace_.signOut(const_cast<DFAdapt< DiscreteFunctionSpaceType> &> (*this)  );
   if(!removed)
   {
     std::cerr << "ERROR: removal of DF '" << name_ << "' failed! in " << __FILE__ << " " << __LINE__ << "\n";
     abort(); 
   }
+  */
 }
 
 
-template<class DiscreteFunctionSpaceType >
-inline void DFAdapt< DiscreteFunctionSpaceType >::set ( RangeFieldType x )
+template<class DiscreteFunctionSpaceType>
+inline void DFAdapt< DiscreteFunctionSpaceType>::set ( RangeFieldType x )
 {
   int size = dofVec_.size();
   DofArrayType &vec = dofVec_;
@@ -66,14 +69,15 @@ inline void DFAdapt< DiscreteFunctionSpaceType >::set ( RangeFieldType x )
     vec[i] = x; 
 }  
 
-template<class DiscreteFunctionSpaceType >
-inline void DFAdapt< DiscreteFunctionSpaceType >::clear ()
+template<class DiscreteFunctionSpaceType>
+inline void DFAdapt< DiscreteFunctionSpaceType>::clear ()
 {
   set ( 0.0 ); 
 }
 
-template<class DiscreteFunctionSpaceType >
-inline void DFAdapt< DiscreteFunctionSpaceType >::print(std::ostream &s )
+template<class DiscreteFunctionSpaceType>
+inline void DFAdapt< DiscreteFunctionSpaceType>::
+print(std::ostream &s )
 {
   RangeFieldType sum = 0.;
   DofIteratorType enddof = dend ( );
@@ -87,51 +91,53 @@ inline void DFAdapt< DiscreteFunctionSpaceType >::print(std::ostream &s )
 //*************************************************************************
 //  Interface Methods 
 //*************************************************************************
-template<class DiscreteFunctionSpaceType > template <class EntityType>
+template<class DiscreteFunctionSpaceType> 
+template <class EntityType>
 inline LocalFunctionAdapt<DiscreteFunctionSpaceType>
-DFAdapt< DiscreteFunctionSpaceType >::localFunction(EntityType& en) {
+DFAdapt< DiscreteFunctionSpaceType>::localFunction(EntityType& en) {
   return LocalFunctionAdapt<DiscreteFunctionSpaceType> (this->functionSpace_, 
                                                         dofVec_,
                                                         en);
 }
 
-template<class DiscreteFunctionSpaceType > template <class EntityType>
+template<class DiscreteFunctionSpaceType> 
+template <class EntityType>
 inline void
-DFAdapt< DiscreteFunctionSpaceType >::
-localFunction ( const EntityType &en , LocalFunctionAdapt < DiscreteFunctionSpaceType > &lf )
+DFAdapt< DiscreteFunctionSpaceType>::
+localFunction ( const EntityType &en , LocalFunctionAdapt < DiscreteFunctionSpaceType> &lf )
 {
   lf.init ( en );
 }
 
-template<class DiscreteFunctionSpaceType > 
+template<class DiscreteFunctionSpaceType> 
 inline LocalFunctionAdapt<DiscreteFunctionSpaceType>  
-DFAdapt< DiscreteFunctionSpaceType >::
+DFAdapt< DiscreteFunctionSpaceType>::
 newLocalFunction ( )
 {
   return LocalFunctionAdapt<DiscreteFunctionSpaceType> ( this->functionSpace_ , dofVec_ );
 }
 
-template<class DiscreteFunctionSpaceType > 
+template<class DiscreteFunctionSpaceType> 
 inline typename DFAdapt<DiscreteFunctionSpaceType>::DofIteratorType 
-DFAdapt< DiscreteFunctionSpaceType >::dbegin ( )
+DFAdapt< DiscreteFunctionSpaceType>::dbegin ( )
 {
   //DofIteratorType tmp ( dofVec_ , 0 );     
   //return tmp;
   return dofVec_.begin();
 }
 
-template<class DiscreteFunctionSpaceType > 
+template<class DiscreteFunctionSpaceType> 
 inline typename DFAdapt<DiscreteFunctionSpaceType>::DofIteratorType 
-DFAdapt< DiscreteFunctionSpaceType >::dend ()
+DFAdapt< DiscreteFunctionSpaceType>::dend ()
 {
   //DofIteratorType tmp ( dofVec_ , dofVec_.size() );
   //return tmp;
   return dofVec_.end();
 }
 
-template<class DiscreteFunctionSpaceType > 
+template<class DiscreteFunctionSpaceType> 
 inline typename DFAdapt<DiscreteFunctionSpaceType>::ConstDofIteratorType 
-DFAdapt< DiscreteFunctionSpaceType >::dbegin ( ) const
+DFAdapt< DiscreteFunctionSpaceType>::dbegin ( ) const
 {
   //DofIteratorType tmp ( dofVec_ , 0 );     
   //ConstDofIteratorType tmp2(tmp);
@@ -139,9 +145,9 @@ DFAdapt< DiscreteFunctionSpaceType >::dbegin ( ) const
   return dofVec_.begin();
 }
 
-template<class DiscreteFunctionSpaceType > 
+template<class DiscreteFunctionSpaceType> 
 inline typename DFAdapt<DiscreteFunctionSpaceType>::ConstDofIteratorType 
-DFAdapt< DiscreteFunctionSpaceType >::dend () const 
+DFAdapt< DiscreteFunctionSpaceType>::dend () const 
 {
   //DofIteratorType tmp ( dofVec_ , dofVec_.size() );
   //ConstDofIteratorType tmp2(tmp);
@@ -151,9 +157,9 @@ DFAdapt< DiscreteFunctionSpaceType >::dend () const
 //**************************************************************************
 //  Read and Write Methods 
 //**************************************************************************
-template<class DiscreteFunctionSpaceType >
-inline bool DFAdapt< DiscreteFunctionSpaceType >::
-write_xdr( const std::string fn )
+template<class DiscreteFunctionSpaceType>
+inline bool DFAdapt< DiscreteFunctionSpaceType>::
+write_xdr(std::string fn)
 {
   FILE  *file;
   XDR   xdrs;
@@ -174,9 +180,9 @@ write_xdr( const std::string fn )
   return true;
 }
 
-template<class DiscreteFunctionSpaceType >
-inline bool DFAdapt< DiscreteFunctionSpaceType >::
-read_xdr( const std::string fn )
+template<class DiscreteFunctionSpaceType>
+inline bool DFAdapt< DiscreteFunctionSpaceType>::
+read_xdr(std::string fn)
 {
   FILE   *file;
   XDR     xdrs;
@@ -198,9 +204,9 @@ read_xdr( const std::string fn )
   return true;
 }
 
-template<class DiscreteFunctionSpaceType >
-inline bool DFAdapt< DiscreteFunctionSpaceType >::
-write_ascii( const std::string fn )
+template<class DiscreteFunctionSpaceType>
+inline bool DFAdapt< DiscreteFunctionSpaceType>::
+write_ascii(std::string fn)
 {
   std::fstream outfile( fn.c_str() , std::ios::out );
   if (!outfile)
@@ -226,9 +232,9 @@ write_ascii( const std::string fn )
 }
 
 
-template<class DiscreteFunctionSpaceType >
-inline bool DFAdapt< DiscreteFunctionSpaceType >::
-read_ascii( const std::string fn )
+template<class DiscreteFunctionSpaceType>
+inline bool DFAdapt< DiscreteFunctionSpaceType>::
+read_ascii(std::string fn)
 {
   FILE *infile=0;
   infile = fopen( fn.c_str(), "r" );
@@ -248,9 +254,9 @@ read_ascii( const std::string fn )
   return true;
 }
 
-template<class DiscreteFunctionSpaceType >
-inline bool DFAdapt< DiscreteFunctionSpaceType >::
-write_pgm( const std::string fn )
+template<class DiscreteFunctionSpaceType>
+inline bool DFAdapt< DiscreteFunctionSpaceType>::
+write_pgm(std::string fn)
 {
   std::ofstream out( fn.c_str() );
 
@@ -274,9 +280,9 @@ write_pgm( const std::string fn )
   return true;
 }
 
-template<class DiscreteFunctionSpaceType >
-inline bool DFAdapt< DiscreteFunctionSpaceType >::
-read_pgm( const std::string fn )
+template<class DiscreteFunctionSpaceType>
+inline bool DFAdapt< DiscreteFunctionSpaceType>::
+read_pgm(std::string fn)
 {
   FILE *in;
   int v;
@@ -294,8 +300,8 @@ read_pgm( const std::string fn )
   return true;
 }
 
-template<class DiscreteFunctionSpaceType >
-inline void DFAdapt< DiscreteFunctionSpaceType >::
+template<class DiscreteFunctionSpaceType>
+inline void DFAdapt< DiscreteFunctionSpaceType>::
 addScaled( const DFAdapt<DiscreteFunctionSpaceType> &g, 
            const RangeFieldType &scalar )
 {
@@ -308,9 +314,9 @@ addScaled( const DFAdapt<DiscreteFunctionSpaceType> &g,
     v[i] += scalar*gvec[i];
 }
 
-template<class DiscreteFunctionSpaceType >
+template<class DiscreteFunctionSpaceType>
 template<class EntityType>
-inline void DFAdapt< DiscreteFunctionSpaceType >::
+inline void DFAdapt< DiscreteFunctionSpaceType>::
 addScaledLocal( EntityType &en , 
     const DFAdapt<DiscreteFunctionSpaceType> &g, const RangeFieldType &scalar )
 {
@@ -338,9 +344,9 @@ addScaledLocal( EntityType &en ,
   }
 }
 
-template<class DiscreteFunctionSpaceType >
+template<class DiscreteFunctionSpaceType>
 template<class EntityType>
-inline void DFAdapt< DiscreteFunctionSpaceType >::
+inline void DFAdapt< DiscreteFunctionSpaceType>::
 addLocal( EntityType &en , 
  const DFAdapt<DiscreteFunctionSpaceType> &g)
 {
@@ -355,9 +361,9 @@ addLocal( EntityType &en ,
     localFunc_[i] += G.localFunc_[i];
 }
 
-template<class DiscreteFunctionSpaceType >
+template<class DiscreteFunctionSpaceType>
 template<class EntityType>
-inline void DFAdapt< DiscreteFunctionSpaceType >::
+inline void DFAdapt< DiscreteFunctionSpaceType>::
 subtractLocal( EntityType &en , 
                const DFAdapt<DiscreteFunctionSpaceType> &g)
 {
@@ -372,9 +378,9 @@ subtractLocal( EntityType &en ,
     localFunc_[i] -= G.localFunc_[i];
 }
 
-template<class DiscreteFunctionSpaceType >
+template<class DiscreteFunctionSpaceType>
 template<class EntityType>
-inline void DFAdapt< DiscreteFunctionSpaceType >::
+inline void DFAdapt< DiscreteFunctionSpaceType>::
 setLocal( EntityType &en , const RangeFieldType & scalar )
 {
   localFunction( en , localFunc_ );
@@ -386,51 +392,51 @@ setLocal( EntityType &en , const RangeFieldType & scalar )
 //**********************************************************************
 //  --LocalFunctionAdapt 
 //**********************************************************************
-template<class DiscreteFunctionSpaceType >
-inline LocalFunctionAdapt < DiscreteFunctionSpaceType >::
+template<class DiscreteFunctionSpaceType>
+inline LocalFunctionAdapt < DiscreteFunctionSpaceType>::
 LocalFunctionAdapt( const DiscreteFunctionSpaceType &f , 
               DofArrayType & dofVec )
  : fSpace_ ( f ), dofVec_ ( dofVec ) 
  , uniform_(true), init_(false) {}
       
 
-template<class DiscreteFunctionSpaceType >
-inline LocalFunctionAdapt < DiscreteFunctionSpaceType >::~LocalFunctionAdapt() 
+template<class DiscreteFunctionSpaceType>
+inline LocalFunctionAdapt < DiscreteFunctionSpaceType>::~LocalFunctionAdapt() 
 {
 }
 
-template<class DiscreteFunctionSpaceType >
-inline typename LocalFunctionAdapt < DiscreteFunctionSpaceType >::RangeFieldType & 
-LocalFunctionAdapt < DiscreteFunctionSpaceType >::operator [] (int num) 
+template<class DiscreteFunctionSpaceType>
+inline typename LocalFunctionAdapt < DiscreteFunctionSpaceType>::RangeFieldType & 
+LocalFunctionAdapt < DiscreteFunctionSpaceType>::operator [] (int num) 
 {
   return (* (values_[num]));
 }
 
-template<class DiscreteFunctionSpaceType >
-inline const typename LocalFunctionAdapt < DiscreteFunctionSpaceType >::RangeFieldType & 
-LocalFunctionAdapt < DiscreteFunctionSpaceType >::operator [] (int num) const
+template<class DiscreteFunctionSpaceType>
+inline const typename LocalFunctionAdapt < DiscreteFunctionSpaceType>::RangeFieldType & 
+LocalFunctionAdapt < DiscreteFunctionSpaceType>::operator [] (int num) const
 { 
   return (* (values_[num]));
 }
 
-template<class DiscreteFunctionSpaceType >
-inline int LocalFunctionAdapt < DiscreteFunctionSpaceType >::
+template<class DiscreteFunctionSpaceType>
+inline int LocalFunctionAdapt < DiscreteFunctionSpaceType>::
 numberOfDofs () const 
 {
   return numOfDof_;
 }
 
 // hier noch evaluate mit Quadrature Regel einbauen 
-template<class DiscreteFunctionSpaceType > template <class EntityType> 
-inline void LocalFunctionAdapt < DiscreteFunctionSpaceType >::
+template<class DiscreteFunctionSpaceType> template <class EntityType> 
+inline void LocalFunctionAdapt < DiscreteFunctionSpaceType>::
 evaluate (EntityType &en, const DomainType & x, RangeType & ret) const {
   ret = 0.0;
   xtmp_ = en.geometry().local(x);
   evaluateLocal(en, xtmp_, ret);
 }
 
-template<class DiscreteFunctionSpaceType > template <class EntityType> 
-inline void LocalFunctionAdapt < DiscreteFunctionSpaceType >::
+template<class DiscreteFunctionSpaceType> template <class EntityType> 
+inline void LocalFunctionAdapt < DiscreteFunctionSpaceType>::
 evaluateLocal (EntityType &en, const DomainType & x, RangeType & ret) const 
 {
   //  if(numOfDifferentDofs_ > 1) // i.e. polynom order > 0 
@@ -451,9 +457,9 @@ evaluateLocal (EntityType &en, const DomainType & x, RangeType & ret) const
 }
 
 // hier noch evaluate mit Quadrature Regel einbauen 
-template<class DiscreteFunctionSpaceType > 
+template<class DiscreteFunctionSpaceType> 
 template <class EntityType, class QuadratureType> 
-inline void LocalFunctionAdapt < DiscreteFunctionSpaceType >::
+inline void LocalFunctionAdapt < DiscreteFunctionSpaceType>::
 evaluate (EntityType &en, QuadratureType &quad, int quadPoint, RangeType & ret) const 
 {
   if(numOfDifferentDofs_ > 1) // i.e. polynom order > 0 
@@ -477,9 +483,9 @@ evaluate (EntityType &en, QuadratureType &quad, int quadPoint, RangeType & ret) 
 }
 
 // hier noch evaluate mit Quadrature Regel einbauen 
-template<class DiscreteFunctionSpaceType > 
+template<class DiscreteFunctionSpaceType> 
 template <class EntityType, class QuadratureType> 
-inline void LocalFunctionAdapt < DiscreteFunctionSpaceType >::
+inline void LocalFunctionAdapt < DiscreteFunctionSpaceType>::
 jacobian (EntityType &en, QuadratureType &quad, int quadPoint, JacobianRangeType & ret) const 
 {
   enum { dim = EntityType::dimension };
@@ -508,7 +514,8 @@ jacobian (EntityType &en, QuadratureType &quad, int quadPoint, JacobianRangeType
   //} 
 }
 
-template<class DiscreteFunctionSpaceType > template <class EntityType> 
+template<class DiscreteFunctionSpaceType> 
+template <class EntityType> 
 inline void LocalFunctionAdapt<DiscreteFunctionSpaceType>::
 jacobianLocal(EntityType& en, const DomainType& x,
               JacobianRangeType& ret) const 
@@ -528,7 +535,8 @@ jacobianLocal(EntityType& en, const DomainType& x,
   }
 }
 
-template<class DiscreteFunctionSpaceType > template <class EntityType> 
+template<class DiscreteFunctionSpaceType> 
+template <class EntityType> 
 inline void LocalFunctionAdapt<DiscreteFunctionSpaceType>::
 jacobian(EntityType& en, const DomainType& x, JacobianRangeType& ret) const {
   // only for dimrange == 1 so far
@@ -539,8 +547,9 @@ jacobian(EntityType& en, const DomainType& x, JacobianRangeType& ret) const {
   //en.geometry().jacobianInverse(xtmp_).umtv(tmp[0], ret[0]);
 }
 
-template<class DiscreteFunctionSpaceType > template <class EntityType> 
-inline bool LocalFunctionAdapt < DiscreteFunctionSpaceType >::
+template<class DiscreteFunctionSpaceType> 
+template <class EntityType> 
+inline bool LocalFunctionAdapt < DiscreteFunctionSpaceType>::
 init (const EntityType &en ) const
 {
   if(!uniform_ || !init_)
