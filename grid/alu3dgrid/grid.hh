@@ -6,6 +6,7 @@
 //- Dune includes
 #include <dune/io/file/grapedataio.hh>
 #include <dune/common/capabilities.hh>
+#include <dune/common/interfaces.hh>
 
 #include "../common/grid.hh"
 #include "../common/defaultindexsets.hh"
@@ -76,7 +77,9 @@ namespace Dune {
 
   */
   template <int dim, int dimworld, ALU3dGridElementType elType>
-  class ALU3dGrid : public GridDefault  < dim, dimworld, alu3d_ctype,ALU3dGrid<dim,dimworld, elType> >
+  class ALU3dGrid : 
+    public GridDefault<dim, dimworld, alu3d_ctype, ALU3dGrid<dim,dimworld, elType> >,
+    public HasObjectStream
   {
     //CompileTimeChecker<dim      == 3>   ALU3dGrid_only_implemented_for_3dp;   
     //CompileTimeChecker<dimworld == 3>   ALU3dGrid_only_implemented_for_3dw;   
@@ -109,7 +112,7 @@ namespace Dune {
                        ALU3dGridLevelIterator,
                        ALU3dGridIntersectionIterator,
                        ALU3dGridHierarchicIterator,
-                       ALU3dGridLeafIterator>  Traits;
+                       ALU3dGridLeafIterator> Traits;
 
     //! a standard leaf iterator  
     typedef ALU3dGridLeafIterator<0, All_Partition, MyType> LeafIteratorImp;
