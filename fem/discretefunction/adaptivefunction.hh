@@ -17,22 +17,21 @@
 namespace Dune {
   
   //- Forward declarations
-  template <class DiscreteFunctionSpaceImp, class DofManagerImp>
+  template <class DiscreteFunctionSpaceImp>
   class AdaptiveDiscreteFunction;
-  template <class DiscreteFunctionSpaceImp, class DofManagerImp>
+  template <class DiscreteFunctionSpaceImp>
   class AdaptiveLocalFunction;
   
   //- Class definitions
   //! Traits class for AdaptiveDiscreteFunction and AdaptiveLocalFunction
-  template <class DiscreteFunctionSpaceImp, class DofManagerImp>
+  template <class DiscreteFunctionSpaceImp>
   struct AdaptiveDiscreteFunctionTraits {
     typedef DiscreteFunctionSpaceImp DiscreteFunctionSpaceType;
-    typedef DofManagerImp DofManagerType;
-
-    typedef AdaptiveDiscreteFunction<DiscreteFunctionSpaceImp, DofManagerImp> 
-    DiscreteFunctionType;
-    typedef AdaptiveLocalFunction<DiscreteFunctionSpaceImp, DofManagerImp> 
-    LocalFunctionType;
+ 
+    typedef AdaptiveDiscreteFunction<
+      DiscreteFunctionSpaceImp> DiscreteFunctionType;
+    typedef AdaptiveLocalFunction<
+      DiscreteFunctionSpaceImp> LocalFunctionType;
 
     typedef typename DiscreteFunctionSpaceType::RangeFieldType DofType;
     typedef typename DiscreteFunctionSpaceType::RangeFieldType RangeFieldType;
@@ -40,13 +39,15 @@ namespace Dune {
     typedef typename DiscreteFunctionSpaceType::DomainType DomainType;
     typedef typename DiscreteFunctionSpaceType::JacobianRangeType JacobianRangeType;
     typedef typename DiscreteFunctionSpaceType::MapperType MapperType;
+    typedef typename DiscreteFunctionSpaceType::GridType GridType;
 
     typedef DofArray<DofType> DofStorageType;
-    typedef typename DofManagerType::template Traits<MapperType, DofStorageType>::MemObjectType MemObjectType;
      
     typedef typename DofStorageType::DofIteratorType DofIteratorType;
     typedef typename DofStorageType::ConstDofIteratorType ConstDofIteratorType;
-    
+ 
+    typedef DofManager<GridType> DofManagerType;
+   
   }; // end class AdaptiveDiscreteFunctionTraits
 
 
@@ -54,23 +55,23 @@ namespace Dune {
   //! This class is comparable to DFAdapt, except that it provides a 
   //! specialisation for CombinedSpace objects which provides enriched 
   //! functionality (access to subfunctions) and runtime optimisations
-  template <class DiscreteFunctionSpaceImp, class DofManagerImp>
+  template <class DiscreteFunctionSpaceImp>
   class AdaptiveDiscreteFunction : 
     public DiscreteFunctionDefault<
-    AdaptiveDiscreteFunctionTraits<DiscreteFunctionSpaceImp, DofManagerImp> >,
+    AdaptiveDiscreteFunctionTraits<DiscreteFunctionSpaceImp > >,
     private AdaptiveFunctionImplementation<
-    DiscreteFunctionSpaceImp, DofManagerImp> 
+    DiscreteFunctionSpaceImp > 
   {
   public:
     //- friends
     
   private:
     typedef AdaptiveDiscreteFunction<
-      DiscreteFunctionSpaceImp, DofManagerImp> MyType;
+      DiscreteFunctionSpaceImp > MyType;
     typedef AdaptiveFunctionImplementation<
-      DiscreteFunctionSpaceImp, DofManagerImp> Imp;
+      DiscreteFunctionSpaceImp > Imp;
     typedef AdaptiveDiscreteFunctionTraits<
-      DiscreteFunctionSpaceImp, DofManagerImp> MyTraits;
+      DiscreteFunctionSpaceImp > MyTraits;
     typedef DiscreteFunctionDefault<MyTraits> BaseType;
 
   public:
@@ -101,9 +102,7 @@ namespace Dune {
     
     //! Container class type for the dofs (managed by the DofManager)
     typedef typename Traits::DofStorageType DofStorageType;
-    //! Memory management class for DofStorageType (manager by the DofManager)
-    typedef typename Traits::MemObjectType MemObjectType;
-
+ 
     //! Iterator over dof container
     typedef typename Traits::DofIteratorType DofIteratorType;
     //! Read-only iterator over dof container
@@ -151,30 +150,30 @@ namespace Dune {
 
   // Note: could use Traits class for Barton-Nackman instead
   //! Local function belonging to AdaptiveDiscreteFunction
-  template <class DiscreteFunctionSpaceImp, class DofManagerImp>
+  template <class DiscreteFunctionSpaceImp>
   class AdaptiveLocalFunction : 
     public LocalFunctionDefault<
     DiscreteFunctionSpaceImp,
-    AdaptiveLocalFunction<DiscreteFunctionSpaceImp, DofManagerImp> >
+    AdaptiveLocalFunction<DiscreteFunctionSpaceImp > >
   {
   public:
     friend class AdaptiveFunctionImplementation<
-      DiscreteFunctionSpaceImp, DofManagerImp>;
+      DiscreteFunctionSpaceImp >;
 
   private:
     typedef AdaptiveLocalFunction<
-      DiscreteFunctionSpaceImp, DofManagerImp> ThisType;
+      DiscreteFunctionSpaceImp > ThisType;
   public:
     //- Public typedefs and enums
     //! The discrete function space this local function belongs to
     typedef DiscreteFunctionSpaceImp DiscreteFunctionSpaceType;
     //! The discrete function this local function belongs to
     typedef AdaptiveDiscreteFunction<
-      DiscreteFunctionSpaceImp, DofManagerImp> DiscreteFunctionType;
+      DiscreteFunctionSpaceImp > DiscreteFunctionType;
     //! Traits class with type definitions for AdaptiveDiscreteFunction and
     //! AdaptiveLocalFunction
     typedef AdaptiveDiscreteFunctionTraits<
-      DiscreteFunctionSpaceType, DofManagerImp> Traits;
+      DiscreteFunctionSpaceType > Traits;
     //! Traits class of DiscreteFunctionSpaceType
     typedef typename DiscreteFunctionSpaceType::Traits SpaceTraits;
 
@@ -271,22 +270,18 @@ namespace Dune {
 
   //- Specialisations
   //! Specialised version of AdaptiveDiscreteFunction for CombinedSpace
-  template <class ContainedFunctionSpaceImp, int N, 
-            DofStoragePolicy p, class DofManagerImp>
+  template <class ContainedFunctionSpaceImp, int N, DofStoragePolicy p>
   class AdaptiveDiscreteFunction<
-    CombinedSpace<ContainedFunctionSpaceImp, N, p>, DofManagerImp> : 
-    public DiscreteFunctionDefault<AdaptiveDiscreteFunctionTraits<CombinedSpace<ContainedFunctionSpaceImp, N, p>, DofManagerImp > >,
-    private AdaptiveFunctionImplementation<CombinedSpace<ContainedFunctionSpaceImp, N, p>, DofManagerImp>
+    CombinedSpace<ContainedFunctionSpaceImp, N, p> > : 
+    public DiscreteFunctionDefault<AdaptiveDiscreteFunctionTraits<CombinedSpace<ContainedFunctionSpaceImp, N, p> > >,
+    private AdaptiveFunctionImplementation<CombinedSpace<ContainedFunctionSpaceImp, N, p> >
   {
   private:
     typedef CombinedSpace<
       ContainedFunctionSpaceImp, N, p> DiscreteFunctionSpaceImp;
-    typedef AdaptiveDiscreteFunction<
-      DiscreteFunctionSpaceImp, DofManagerImp> MyType;
-    typedef AdaptiveFunctionImplementation<
-      DiscreteFunctionSpaceImp, DofManagerImp> Imp;
-    typedef AdaptiveDiscreteFunctionTraits<
-      DiscreteFunctionSpaceImp, DofManagerImp> MyTraits;
+    typedef AdaptiveDiscreteFunction<DiscreteFunctionSpaceImp> MyType;
+    typedef AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp> Imp;
+    typedef AdaptiveDiscreteFunctionTraits<DiscreteFunctionSpaceImp> MyTraits;
     typedef DiscreteFunctionDefault<MyTraits> BaseType;
 
   public:
@@ -305,15 +300,14 @@ namespace Dune {
     typedef typename Traits::MapperType MapperType;
     
     typedef typename Traits::DofStorageType DofStorageType;
-    typedef typename Traits::MemObjectType MemObjectType;
-    
+     
     typedef typename Traits::DofIteratorType DofIteratorType;
     typedef typename Traits::ConstDofIteratorType ConstDofIteratorType;
 
     //- Additional typedefs
     typedef SubSpace<DiscreteFunctionSpaceType> SubSpaceType;
     typedef AdaptiveDiscreteFunction<
-          SubSpaceType, DofManagerImp> SubDiscreteFunctionType;
+          SubSpaceType > SubDiscreteFunctionType;
    
   public:
     //- Public methods
@@ -367,33 +361,28 @@ namespace Dune {
 
   //- class AdaptiveLocalFunction (specialised)
   //! Specialised version of AdaptiveLocalFunction for CombinedSpace
-  template <
-    class ContainedFunctionSpaceImp, int N, 
-    DofStoragePolicy p, class DofManagerImp
-    >
+  template <class ContainedFunctionSpaceImp, int N, DofStoragePolicy p>
   class AdaptiveLocalFunction<
-    CombinedSpace<ContainedFunctionSpaceImp, N, p>, DofManagerImp>
+    CombinedSpace<ContainedFunctionSpaceImp, N, p> >
       : public LocalFunctionDefault<
     CombinedSpace<ContainedFunctionSpaceImp, N, p>,
-    AdaptiveLocalFunction<CombinedSpace<ContainedFunctionSpaceImp, N, p>, 
-                          DofManagerImp> 
-  >
+    AdaptiveLocalFunction<CombinedSpace<ContainedFunctionSpaceImp, N, p> >
   {
   public:
     //- Friends
     friend class AdaptiveFunctionImplementation<
-      CombinedSpace<ContainedFunctionSpaceImp, N, p>, DofManagerImp>;
+      CombinedSpace<ContainedFunctionSpaceImp, N, p> >;
     //friend class AdaptiveDiscreteFunction<
-    //  CombinedSpace<ContainedFunctionSpaceImp, N, p>, DofManagerImp>;
+    //  CombinedSpace<ContainedFunctionSpaceImp, N, p> >;
 
   public:
     //- Public typedefs and enums
     typedef CombinedSpace<
       ContainedFunctionSpaceImp, N, p> DiscreteFunctionSpaceType;
     typedef AdaptiveLocalFunction<
-      DiscreteFunctionSpaceType, DofManagerImp> ThisType;
+      DiscreteFunctionSpaceType > ThisType;
     typedef AdaptiveDiscreteFunctionTraits<
-      DiscreteFunctionSpaceType, DofManagerImp> Traits;
+      DiscreteFunctionSpaceType > Traits;
     typedef typename DiscreteFunctionSpaceType::Traits SpaceTraits;
 
     enum { dimRange = DiscreteFunctionSpaceType::DimRange };
