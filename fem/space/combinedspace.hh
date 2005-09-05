@@ -24,7 +24,6 @@ namespace Dune {
   //! approach all dofs belonging to one subspace are stored consecutively
   enum DofStoragePolicy { PointBased, VariableBased };
 
-
   //! Utility class that helps in the transformation between dofs in the
   //! combined space and its enclosed spaces
   template <DofStoragePolicy p>
@@ -49,6 +48,8 @@ namespace Dune {
       numComponents_(numComponents)
     {}
 
+    static DofStoragePolicy policy() { return PointBased; }
+
     void newSize(int size) {} // just do nothing
 
     int component(int combinedIndex) const { 
@@ -72,6 +73,8 @@ namespace Dune {
     DofConversionUtility(int size) :
       size_(size)
     {}
+
+    static DofStoragePolicy policy() { return VariableBased; }
 
     void newSize(int size) { size_ = size; }
 
@@ -181,6 +184,8 @@ namespace Dune {
 
     typedef typename Traits::BaseFunctionSetType BaseFunctionSetType;
     typedef typename Traits::MapperType MapperType;
+    typedef typename Traits::IteratorType IteratorType;
+    typedef typename Traits::GridType GridType;
 
     typedef typename Traits::DofConversionType DofConversionType;
 
@@ -197,7 +202,7 @@ namespace Dune {
     int type() const { return spaceId_; }
 
     //! continuous?
-    bool continuous() const { return spc_.continous(); }
+    bool continuous() const { return spc_.continuous(); }
 
     //! polynom order
     int polynomOrder() const { return spc_.polynomOrder(); }
@@ -242,7 +247,7 @@ namespace Dune {
     int numComponents() const { return N; }
 
     //! policy of this space
-    DofStoragePolicy policy() const { return policy; }
+    DofStoragePolicy policy() const { return DofConversionType::policy(); }
   private:
     //- Private typedefs
     typedef typename Traits::ContainedMapperType ContainedMapperType;
@@ -364,6 +369,7 @@ namespace Dune {
   public:
     //- Friends
     friend class CombinedSpace<DiscreteFunctionSpaceImp, N, policy>;
+    friend class SubSpace<CombinedSpace<DiscreteFunctionSpaceImp, N, policy> >;
 
   public:
     //- Typedefs and enums

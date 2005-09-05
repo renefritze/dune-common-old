@@ -43,7 +43,7 @@ namespace Dune {
 
     typedef DofArray<DofType> DofStorageType;
     typedef typename DofManagerType::template Traits<MapperType, DofStorageType>::MemObjectType MemObjectType;
-    
+     
     typedef typename DofStorageType::DofIteratorType DofIteratorType;
     typedef typename DofStorageType::ConstDofIteratorType ConstDofIteratorType;
     
@@ -121,9 +121,9 @@ namespace Dune {
     //! This constructor is only called internally
     AdaptiveDiscreteFunction(std::string name,
                              const DiscreteFunctionSpaceType& spc,
-                             MemObjectType& memObject) :
+                             DofStorageType& dofVec) :
       BaseType(spc),
-      Imp(name, spc, memObject)
+      Imp(name, spc, dofVec)
     {}
 
     //! Copy constructor
@@ -134,6 +134,7 @@ namespace Dune {
     {}
 
     using Imp::name;
+    using Imp::size;
     using Imp::dbegin;
     using Imp::dend;
     using Imp::newLocalFunction;
@@ -310,10 +311,9 @@ namespace Dune {
     typedef typename Traits::ConstDofIteratorType ConstDofIteratorType;
 
     //- Additional typedefs
-    //typedef SubSpace<DiscreteFunctionSpaceType> SubSpaceType;
-    typedef DiscreteFunctionSpaceType SubSpaceType;
+    typedef SubSpace<DiscreteFunctionSpaceType> SubSpaceType;
     typedef AdaptiveDiscreteFunction<
-      SubSpaceType, DofManagerImp> SubDiscreteFunctionType;
+          SubSpaceType, DofManagerImp> SubDiscreteFunctionType;
    
   public:
     //- Public methods
@@ -322,6 +322,15 @@ namespace Dune {
                              const DiscreteFunctionSpaceType& spc) :
       BaseType(spc),
       Imp(name, spc),
+      subSpaces_(0)
+    {}
+
+    //! Constructor
+    AdaptiveDiscreteFunction(std::string name,
+                             const DiscreteFunctionSpaceType& spc,
+                             DofStorageType& dofVec) :
+      BaseType(spc),
+      Imp(name, spc, memObj),
       subSpaces_(0)
     {}
 
@@ -335,6 +344,7 @@ namespace Dune {
     ~AdaptiveDiscreteFunction();
 
     using Imp::name;
+    using Imp::size;
     using Imp::dbegin;
     using Imp::dend;
     using Imp::newLocalFunction;

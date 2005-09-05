@@ -30,11 +30,11 @@ namespace Dune {
     SubSpaceType* subSpace = new SubSpaceType(this->space(), component);
     subSpaces_.push_back(subSpace);
     
+
     return SubDiscreteFunctionType(std::string("Subfunction of ") + name(),
                                    *subSpace,
-                                   this->memObject());
+                                   this->dofStorage());
   }
-  
   
   //- AdaptiveLocalFunction
   template <class DiscreteFunctionSpaceImp, class DofManagerImp>
@@ -67,6 +67,7 @@ namespace Dune {
   AdaptiveLocalFunction<DiscreteFunctionSpaceImp, DofManagerImp>::
   operator[] (int num) 
   {
+    assert(num >= 0 && num < numberOfDofs());
     return (* (values_[num]));
   }
   
@@ -76,6 +77,7 @@ namespace Dune {
   AdaptiveLocalFunction<DiscreteFunctionSpaceImp, DofManagerImp>::
   operator[] (int num) const 
   {
+    assert(num >= 0 && num < numberOfDofs());
     return (* (values_[num]));
   }
 

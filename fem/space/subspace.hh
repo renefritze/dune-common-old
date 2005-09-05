@@ -31,6 +31,8 @@ namespace Dune {
     typedef typename CombinedTraits::BaseFunctionSetType CombinedBaseFunctionSetType;
     typedef typename CombinedTraits::MapperType CombinedMapperType;
 
+    typedef typename CombinedTraits::ContainedMapperType ContainedMapperType;
+    
     enum { CombinedDimRange = CombinedTraits::DimRange };
 
   public:
@@ -71,6 +73,7 @@ namespace Dune {
     
     typedef SubSpace<CombinedSpaceType> ThisType;
     typedef SubSpaceTraits<CombinedSpaceType> Traits;
+    typedef DiscreteFunctionSpaceDefault<Traits> BaseType;
 
     typedef typename Traits::GridType GridType;
     typedef typename Traits::IteratorType IteratorType;
@@ -137,9 +140,10 @@ namespace Dune {
   private:
     //- Data members
     const CombinedSpaceType& spc_;
-    MapperType& mapper_;
+    MapperType mapper_;
     int component_;
 
+    std::vector<BaseFunctionSetType*> baseSetVec_;
     static const int spaceId_;
   };
 
@@ -161,9 +165,9 @@ namespace Dune {
     typedef typename Traits::RangeType RangeType;
     typedef typename Traits::DomainType DomainType;
     typedef typename Traits::JacobianRangeType JacobianRangeType;
-    typedef typename Traits::CombinedBaseFunctionSetType 
-    CombinedBaseFunctionSetType;
-
+    typedef typename Traits::CombinedBaseFunctionSetType CombinedBaseFunctionSetType;
+    typedef typename Traits::CombinedRangeType CombinedRangeType;
+ 
     typedef int deriType;
   public:
     //- Public methods
@@ -212,6 +216,7 @@ namespace Dune {
     typedef SubSpaceTraits<CombinedSpaceType> Traits;
 
     typedef typename Traits::CombinedMapperType CombinedMapperType;
+    typedef typename Traits::ContainedMapperType ContainedMapperType;
     typedef typename Traits::DofConversionType DofConversionType;
 
   public:
@@ -222,7 +227,7 @@ namespace Dune {
       spc_(spc),
       mapper_(mapper),
       component_(component),
-      utilGlobal_(policy == PointBased() ? 
+      utilGlobal_(spc.policy() == PointBased ? 
                    spc.numComponents() :
                    spc.size()/spc.numComponents())
     {}
