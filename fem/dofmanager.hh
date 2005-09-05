@@ -12,6 +12,7 @@
 #include <dune/common/stdstreams.hh>
 #include <dune/common/exceptions.hh>
 #include <dune/common/genericiterator.hh>
+#include <dune/common/interfaces.hh>
 
 #include <dune/fem/common/dofmapperinterface.hh>
 
@@ -24,8 +25,7 @@
 namespace Dune {
 
 // forward declaration 
-template <class GridType, 
-          class DataCollectorImp = DataCollectorInterface<GridType> > 
+template <class GridType>
 class DofManager;
 
 template <class DofManagerImp> class DofManagerFactory;
@@ -678,7 +678,7 @@ class DofManError : public Exception {};
  created. The default value for the IndexSet is the DefaultIndexSet class
  which is mostly a wrapper for the grid indices. 
 */
-template <class GridImp , class DataCollectorImp > 
+template <class GridImp> 
 class DofManager 
 {
 public:  
@@ -686,10 +686,15 @@ public:
   typedef GridImp GridType;
 
 private:  
-  typedef DofManager<GridType,DataCollectorImp> MyType;
+  typedef DofManager<GridType> MyType;
   friend class DofManagerFactory<MyType>;
 public:
-  typedef DataCollectorImp DataCollectorType;
+  typedef typename GridObjectStreamOrDefault<GridType, DummyObjectStream>::ObjectStreamType ObjectStreamType;
+
+  typedef DataCollector<
+    GridType, 
+    DataCollectorInterface<GridType, ObjectStreamType> > DataCollectorType;
+              
   // all things for one discrete function are put together in a MemObject
   typedef MemPointerType MemoryPointerType; 
 
@@ -970,8 +975,8 @@ public:
 //
 //***************************************************************************
 
-template <class GridType, class DataCollectorType>
-inline DofManager<GridType,DataCollectorType>::~DofManager () 
+template <class GridType>
+inline DofManager<GridType>::~DofManager () 
 {
   if(memList_.size() > 0)
   {
@@ -998,9 +1003,9 @@ inline DofManager<GridType,DataCollectorType>::~DofManager ()
 }
 
 
-template <class GridType, class DataCollectorType>
+template <class GridType>
 template <class IndexSetType>
-inline void DofManager<GridType,DataCollectorType>::
+inline void DofManager<GridType>::
 addIndexSet (const GridType &grid, IndexSetType &iset)
 {
   if(&grid_ != &grid)
@@ -1037,9 +1042,9 @@ addIndexSet (const GridType &grid, IndexSetType &iset)
   return ; 
 }
 
-template <class GridType, class DataCollectorType>
+template <class GridType>
 template <class IndexSetType>
-inline bool DofManager<GridType,DataCollectorType>::
+inline bool DofManager<GridType>::
 checkIndexSetExists (const IndexSetType &iset) const
 {
   const IndexSetInterface & set = iset; 
@@ -1056,11 +1061,11 @@ checkIndexSetExists (const IndexSetType &iset) const
 }
 
 
-template <class GridType, class DataCollectorType>
+template <class GridType>
 template <class DofStorageType, class MapperType >
 //inline MemObject<MapperType,DofStorageType> & 
 std::pair<MemObjectInterface*, DofStorageType*>
-DofManager<GridType,DataCollectorType>::
+DofManager<GridType>::
 addDofSet(const DofStorageType * ds, const MapperType & mapper, std::string name)
 {
   assert( name.c_str() != 0);
@@ -1082,22 +1087,22 @@ addDofSet(const DofStorageType * ds, const MapperType & mapper, std::string name
 }
 
 
-template <class GridType, class DataCollectorType>
-inline bool DofManager<GridType,DataCollectorType>::
+template <class GridType>
+inline bool DofManager<GridType>::
 write(const GrapeIOFileFormatType ftype, const std::string filename, int timestep)
 {
   assert(ftype == xdr);     
   return write_xdr(filename,timestep);
 }
-template <class GridType, class DataCollectorType>
-inline bool DofManager<GridType,DataCollectorType>::
+template <class GridType>
+inline bool DofManager<GridType>::
 read(const std::string filename , int timestep)
 {
   return read_xdr(filename,timestep);  
 }
 
-template <class GridType, class DataCollectorType>
-inline bool DofManager<GridType,DataCollectorType>::
+template <class GridType>
+inline bool DofManager<GridType>::
 write_xdr(const std::string filename , int timestep)
 {
   //assert( filename );
@@ -1118,8 +1123,8 @@ write_xdr(const std::string filename , int timestep)
   return true;
 }
 
-template <class GridType, class DataCollectorType>
-inline bool DofManager<GridType,DataCollectorType>::
+template <class GridType>
+inline bool DofManager<GridType>::
 read_xdr(const std::string filename , int timestep)
 {
   //assert( filename );
