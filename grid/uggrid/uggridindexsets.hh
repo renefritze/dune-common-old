@@ -5,12 +5,14 @@
     \brief The index and id sets for the UGGrid class
 */
 
+//#include <dune/grid/common/defaultindexsets.hh>
 #include <vector>
+
 
 namespace Dune {
 
 template<int dim>
-class UGGridLevelIndexSet
+class UGGridLevelIndexSet /*: public DefaultGridIndexSetBase < UGGrid<dim,dim> >*/
 {
     typedef UGGrid<dim,dim> GridImp;
 
@@ -18,6 +20,9 @@ class UGGridLevelIndexSet
 
 public:
 
+    /** \todo Temporary */
+    enum {ncodim = dim+1};
+    
     /** \brief Default constructor
 
     Unfortunately we can't force the user to init grid_ and level_, because
@@ -41,6 +46,12 @@ public:
   {
       return grid_->template getRealEntity<0>(e).template subIndex<cc>(i);
   }
+
+
+    //! get number of entities of given codim, type and on this level
+    int size (int codim) const {
+        return grid_->size(level_, codim);
+    }
 
   //! get number of entities of given codim, type and on this level
   int size (int codim, GeometryType type) const
@@ -70,6 +81,32 @@ public:
   {
 	return myTypes_;
   }
+#if 1
+    /** \todo Dummy method to please the fem stuff */
+    int oldIndex(int elNum) const {
+        DUNE_THROW(NotImplemented, "oldIndex");
+    }
+
+    /** \todo Dummy method to please the fem stuff */
+    int oldIndex(int elNum, int codim) const {
+        DUNE_THROW(NotImplemented, "oldIndex");
+    }
+
+    /** \todo Dummy method to please the fem stuff */
+    int newIndex(int elNum) const {
+        DUNE_THROW(NotImplemented, "oldIndex");
+    }
+
+    /** \todo Dummy method to please the fem stuff */
+    int newIndex(int elNum, int codim) const {
+        DUNE_THROW(NotImplemented, "oldIndex");
+    }
+
+    /** \todo Dummy method to please the fem stuff */
+    int additionalSizeEstimate() const {
+        DUNE_THROW(NotImplemented, "additionalSizeEstimate");
+    }
+#endif
 
 private:
 
