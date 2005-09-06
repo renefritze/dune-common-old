@@ -332,8 +332,8 @@ inline void * CombinedGrapeDisplay<DisplayType>::setupHmesh()
   {
     GridType & grid = (*grditer_)->getGrid();
     maxlevel = std::max( maxlevel, grid.maxlevel());
-    noe += grid.global_size(0);
-    nov += grid.global_size(dim);
+    noe += grid.leafIndexSet().size(0);
+    nov += grid.leafIndexSet().size(dim);
   }
 
   hel_.display = (void *) this;
