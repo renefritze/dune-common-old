@@ -9,7 +9,7 @@ namespace Dune
 
 template<class GridType>
 inline GrapeGridDisplay<GridType>::
-GrapeGridDisplay(GridType &grid, const int myrank ) : 
+GrapeGridDisplay(const GridType &grid, const int myrank ) : 
  grid_(grid) 
  , leafset_(grid.leafIndexSet()) 
  , myRank_(myrank) 
@@ -22,7 +22,7 @@ GrapeGridDisplay(GridType &grid, const int myrank ) :
 
 template<class GridType>
 inline GrapeGridDisplay<GridType>::
-GrapeGridDisplay(GridType &grid ) : 
+GrapeGridDisplay(const GridType &grid ) : 
  grid_(grid) 
  , leafset_(grid.leafIndexSet())  
  , myRank_(-1) ,
@@ -72,24 +72,23 @@ el_update (GridIteratorType *it, DUNE_ELEM * he)
   if(&en)
   {
     const DuneElement &geometry = en.geometry();
-    
-    he->eindex = leafset_.index(en);
+   
+    if( en.isLeaf() ) he->eindex = leafset_.index(en);
+    else he->eindex = -1;
     he->level  = en.level();
-
-    //std::cout << he->eindex << "\n";
 
     // if not true, only the macro level is drawn 
     he->has_children = 1;
     
     // know the type 
     he->type = geometry.type(); 
-    
+
     { 
       // set the vertex coordinates  
       double (* vpointer)[3] = he->vpointer;
       for(int i= 0 ; i<geometry.corners();i++)
       {
-        for(int j = 0; j < Entity::dimensionworld ;j++)
+        for(int j = 0; j < Entity::dimensionworld ; j++)
         {
           vpointer[i][j] = geometry[i][j] ;
         }
@@ -99,7 +98,6 @@ el_update (GridIteratorType *it, DUNE_ELEM * he)
     for(int i = 0; i< en.template count<dim>(); i++)
     {
       he->vindex[i] = leafset_. template subIndex<dim> (en,i);
-      //std::cout << he->vindex[i] << " Vertex is \n";
     } 
 
     {
@@ -600,7 +598,7 @@ addMyMeshToTimeScene(void * timescene, double time, int proc)
 }
 
 template<class GridType>
-inline GridType & GrapeGridDisplay<GridType>::getGrid()
+inline const GridType & GrapeGridDisplay<GridType>::getGrid() const
 { 
   return grid_;
 }
@@ -614,7 +612,9 @@ inline void * GrapeGridDisplay<GridType>::setupHmesh()
   // default set all coordinates to zero
   for(int i=0; i<MAX_EL_DOF; i++)
     for(int j=0; j<3; j++)
-    hel_.vpointer[i][j] = 0.0;
+    {
+      hel_.vpointer[i][j] = 0.0;
+    }
 
   maxlevel = grid_.maxlevel();
   noe = leafset_.size(0);
