@@ -126,10 +126,10 @@ public:
 
   //! index is unique and consecutive per level and codim 
   //! used for access to degrees of freedom
-  int index () const;
+  int index () const DUNE_DEPRECATED;
 
   //! index is unique within the grid hierachie and per codim
-  int globalIndex () const;
+  int globalIndex () const DUNE_DEPRECATED;
 
   //! Constructor 
   ALU3dGridEntity(const GridImp &grid, int level);
@@ -258,10 +258,10 @@ public:
   int level () const ;
 
   //! index is unique and consecutive per level and codim used for access to degrees of freedo
-  int index () const;
+  int index () const DUNE_DEPRECATED;
   
   //! index is unique within the grid hierachie and per codim
-  int globalIndex () const;
+  int globalIndex () const DUNE_DEPRECATED;
 
   //! geometry of this entity
   const Geometry & geometry () const;
@@ -276,7 +276,7 @@ public:
   
   //! return index of sub entity with codim = cc and local number i
   //! i.e. return global number of vertex i
-  template<int cc> int subIndex (int i) const;
+  template<int cc> int subIndex (int i) const DUNE_DEPRECATED;
 
   //! Provide access to mesh entity i of given codimension. Entities
   //!  are numbered 0 ... count<cc>()-1
@@ -357,6 +357,10 @@ private:
 
   //! index is unique within the grid hierachie and per codim
   int getIndex () const;
+
+  //! return index of sub entity with codim = cc and local number i
+  //! i.e. return global number of vertex i
+  template<int cc> int getSubIndex (int i) const;
 
   // corresponding grid 
   const GridImp  & grid_;
