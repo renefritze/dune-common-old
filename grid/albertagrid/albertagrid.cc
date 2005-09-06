@@ -2039,7 +2039,8 @@ AlbertaGridTreeIterator(const AlbertaGridTreeIterator<codim,pitype,GridImp> & or
     virtualEntity_.setElInfo( elInfo,face_,edge_,vertex_ );
     virtualEntity_.setLevel( enLevel_ );
 
-    assert( virtualEntity_.globalIndex() == org.virtualEntity_.globalIndex());
+    assert( this->grid_.hierarchicIndexSet().index ( virtualEntity_ ) 
+        == this->grid_.hierarchicIndexSet().index ( org.virtualEntity_ ) );
     
    // virtualEntity_.setTraverseStack(manageStack_.getStack());
    // virtualEntity_.setEntity( *(org.entity_) );
@@ -3029,14 +3030,19 @@ AlbertaGrid(AlbertaGrid<dim,dimworld> & oldGrid, int proc) :
   assert(dimworld == DIM_OF_WORLD);
   assert(dim      == DIM);
 
-  assert(dim == 2);
-  
   ALBERTA MESH * oldMesh = oldGrid.getMesh();
 
   vertexMarker_ = new AlbertaMarkerVector ();
   ALBERTA AlbertHelp::initIndexManager_elmem_cc(indexStack_);
 
   DUNE_THROW(AlbertaError,"To be revised!");
+}
+
+template < int dim, int dimworld >
+inline AlbertaGrid < dim, dimworld >:: 
+AlbertaGrid(const AlbertaGrid<dim,dimworld> & copy ) 
+{
+  DUNE_THROW(AlbertaError,"do not use grid copy constructor! ");
 }
 
 template < int dim, int dimworld >
@@ -3358,6 +3364,9 @@ unpackAll( ObjectStreamType & os )
       }
     }
   }
+
+  const HierarchicIndexSet & hset = this->hierarchicIndexSet();
+  
   std:: map < int , std::map < int , int > > elmap2;
   typedef std :: map < int , int > HierMap ;
   {
@@ -3368,7 +3377,7 @@ unpackAll( ObjectStreamType & os )
       for(LevelIteratorType it = this->template lbegin<0> (0);
           it != endit ; ++it )
       {
-        int id = it->globalIndex();
+        int id = hset.index (*it);
         if(elmap.find(id) != elmap.end())
         {
           std::map < int , int > hiertree;
@@ -3393,7 +3402,7 @@ unpackAll( ObjectStreamType & os )
       for(LevelIteratorType it = this->template lbegin<0> (0);
           it != endit ; ++it )
       {
-        int id = it->globalIndex();
+        int id = hset.index (*it);
         //std::cout << "Begin LevelIter it = " << id << "\n";
         if(elmap.find(id) != elmap.end())
         {
@@ -3426,7 +3435,8 @@ unpackAll( ObjectStreamType & os )
             if(hit->level() != l) continue;
             // if father isnt in tree then we dont do anything here
             EntityPointer vati = hit->father();
-            if( hiertree.find( vati->globalIndex() ) == hiertree.end()) continue;
+            
+            if( hiertree.find( hset.index (*vati) ) == hiertree.end()) continue;
 
             int mark;
             //try {
@@ -3435,7 +3445,7 @@ unpackAll( ObjectStreamType & os )
             //catch (ObjectStreamType :: EOFException) {}
             if(mark == 1)
             {
-              hiertree[hit->globalIndex()] = mark;
+              hiertree[ hset.index ( *hit ) ] = mark;
               if(hit->isLeaf()) this->mark(1,(*hit));
             }
           }
@@ -3459,9 +3469,11 @@ inline void AlbertaGrid < dim, dimworld >::
 packAll( ObjectStreamType & os, EntityType & en  )  
 {         
   assert( en.level() == 0 ); // call only on macro elements 
+  const HierarchicIndexSet & hset = hierarchicIndexSet();
+  
   os.writeObject( BEGINELEMENT );
-  os.writeObject( en.globalIndex ());
-  //std::cout << "Pack el = " << globalIndex () << "\n";
+  os.writeObject( hset.index ( en ) );
+  //std::cout << "Pack el = " << hset.index ( en ) << "\n";
   //std::cout << isLeaf() << " children? \n"; 
   
   if(! (en.isLeaf()) )
@@ -3496,8 +3508,10 @@ inline void AlbertaGrid < dim, dimworld >::
 packBorder ( ObjectStreamType & os, EntityType & en  ) 
 {         
   assert( en.level() == 0 ); // call only on macro elements 
+  const HierarchicIndexSet & hset = hierarchicIndexSet();
+  
   os.writeObject( BEGINELEMENT );
-  os.writeObject( en.globalIndex ());
+  os.writeObject( hset.index ( en ) );
 
   if(! (en.isLeaf()) )
   {
