@@ -616,7 +616,7 @@ ALU3dGridLeafIterator(const GridImp &grid, int level,
     }
     
     (*iter_).first();
-    if((!(*iter_).done()) && grid.global_size(0) > 0) // else iterator empty
+    if((!(*iter_).done()) && grid.hierSetSize(0) > 0) // else iterator empty
     {
       assert((*iter_).size() > 0);
       index_=0;
