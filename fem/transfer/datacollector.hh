@@ -1,8 +1,9 @@
-#ifndef __DUNE_DATACOLLECTOR_HH__
-#define __DUNE_DATACOLLECTOR_HH__
+#ifndef DUNE_DATACOLLECTOR_HH
+#define DUNE_DATACOLLECTOR_HH
 
 #include <vector>
 #include <dune/fem/common/objpointer.hh>
+#include <dune/fem/dofmanager.hh>
 
 namespace Dune{
 
@@ -349,14 +350,15 @@ public:
  * does the hierarhic walk and calls its local pack operators which know
  * the discrete functions to pack to the stream. 
  */
-template <class GridType, class LocalDataCollectImp, class DofManagerType >
+template <class GridType, class LocalDataCollectImp>
 class DataCollector
 : public DataCollectorInterface<GridType, typename GridType::ObjectStreamType>
 , public ObjPointerStorage 
 {  
   typedef typename GridType::template Codim<0>::Entity EntityType;
-  typedef DataCollector<EntityType,LocalDataCollectImp,DofManagerType> MyType;
+  typedef DataCollector<EntityType,LocalDataCollectImp> MyType;
   typedef typename GridType::ObjectStreamType ObjectStreamType;
+  typedef DofManager<GridType> DofManagerType;
 
   typedef typename std::pair < ObjectStreamType * , const EntityType * > ParamType;
   typedef LocalInterface<ParamType> LocalInterfaceType;
@@ -375,14 +377,14 @@ public:
   //! operator + (combine this operator) and return new Object 
   template <class LocalDataCollectType> 
   DataCollector<GridType,
-  CombinedLocalDataCollect <LocalDataCollectImp,LocalDataCollectType>, DofManagerType> & 
-  operator + (const DataCollector<GridType,LocalDataCollectType,DofManagerType> &op)
+  CombinedLocalDataCollect <LocalDataCollectImp,LocalDataCollectType> > & 
+  operator + (const DataCollector<GridType,LocalDataCollectType> &op)
   {
-    typedef DataCollector<GridType,LocalDataCollectType,DofManagerType> CopyType;
+    typedef DataCollector<GridType,LocalDataCollectType> CopyType;
     typedef CombinedLocalDataCollect <LocalDataCollectImp,LocalDataCollectType> COType;
      
     COType *newLDCOp = new COType ( ldc_  , const_cast<CopyType &> (op).getLocalOp() );
-    typedef DataCollector < GridType, COType, DofManagerType > OPType;
+    typedef DataCollector <GridType, COType> OPType;
    
     OPType *dcOp = new OPType ( grid_ , dm_ , *newLDCOp , read_ );    
 
@@ -395,14 +397,14 @@ public:
 
   //! oeprator += combine and return this Object 
   template <class LocalDataCollectType> 
-  DataCollector<GridType,LocalInterface<ParamType>, DofManagerType> & 
-  operator += (const DataCollector<GridType,LocalDataCollectType,DofManagerType> &op)
+  DataCollector<GridType,LocalInterface<ParamType> > & 
+  operator += (const DataCollector<GridType,LocalDataCollectType> &op)
   {
-    typedef DataCollector<GridType,LocalDataCollectType,DofManagerType> CopyType;
+    typedef DataCollector<GridType,LocalDataCollectType> CopyType;
     typedef LocalInterface<ParamType> COType;
      
     COType *newLDCOp = new COType ( ldc_ + op.getLocalOp() );
-    typedef DataCollector < GridType, COType, DofManagerType > OPType;
+    typedef DataCollector <GridType, COType> OPType;
    
     OPType *dcOp = new OPType ( grid_ , dm_ , *newLDCOp , read_ );    
 
@@ -419,10 +421,10 @@ public:
   {
     std::cout << "operator += with Interface Type \n";
     typedef LocalInterface<ParamType> COType;
-    typedef DataCollector<GridType,COType,DofManagerType> CopyType;
+    typedef DataCollector<GridType,COType> CopyType;
      
     COType *newLDCOp = new COType ( ldc_ + op.getLocalInterfaceOp() );
-    typedef DataCollector < GridType, COType, DofManagerType > OPType;
+    typedef DataCollector<GridType, COType> OPType;
    
     OPType *dcOp = new OPType ( grid_ , dm_ , *newLDCOp , read_ );    
 
@@ -490,12 +492,12 @@ public:
   }
   
 private:
-  DataCollector<GridType,LocalInterface<ParamType>, DofManagerType> * convert ()  
+  DataCollector<GridType,LocalInterface<ParamType> > * convert ()  
   {
     typedef LocalInterface<ParamType> COType;
      
     COType *newLDCOp = new COType ( ldc_ );
-    typedef DataCollector < GridType, COType, DofManagerType > OPType;
+    typedef DataCollector <GridType, COType> OPType;
    
     OPType *dcOp = new OPType ( grid_ , dm_ , *newLDCOp , read_ );    
 
