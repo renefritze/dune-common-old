@@ -94,9 +94,9 @@ public:
   //! The level of this entity
   int level () const { return realEntity.level(); }
   //! Unique and consecutive index per level and codim
-  int index () const { return realEntity.index(); } 
+  int index () const DUNE_DEPRECATED { return realEntity.index(); } 
   //! The global unique index
-  int globalIndex () const { return realEntity.globalIndex(); }
+  int globalIndex () const DUNE_DEPRECATED { return realEntity.globalIndex(); }
   //! Return partition type attribute
   PartitionType partitionType () const { return realEntity.partitionType(); }
   /**
@@ -228,9 +228,9 @@ public:
   //! Level of this entity
   int level () const { return realEntity.level(); }
   //! Unique and consecutive index per level and codim
-  int index () const { return realEntity.index(); } 
+  int index () const DUNE_DEPRECATED { return realEntity.index(); } 
   //! Global unique index per grid
-  int globalIndex () const { return realEntity.globalIndex(); }
+  int globalIndex () const DUNE_DEPRECATED { return realEntity.globalIndex(); }
   //! Partition type attribute
   PartitionType partitionType () const { return realEntity.partitionType(); }
   /** \brief Id of the boundary which is associated with 
@@ -437,9 +437,9 @@ public:
   //! Level of this entity
   int level () const { return realEntity.level(); }
   //! Unique and consecutive index per level and codim
-  int index () const { return realEntity.index(); }
+  int index () const DUNE_DEPRECATED { return realEntity.index(); }
   //! Global unique index per grid
-  int globalIndex () const { return realEntity.globalIndex(); }
+  int globalIndex () const DUNE_DEPRECATED { return realEntity.globalIndex(); }
   //! Partition type attribute
   PartitionType partitionType () const { return realEntity.partitionType(); }
   /** \brief Id of the boundary which is associated with 
@@ -750,7 +750,7 @@ public:
    * Default implementation for access to subIndex via interface method entity
    * default is to return the index of the sub entity, is very slow, but works
    */
-  template <int cc> int subIndex ( int i ) const
+  template <int cc> int subIndex ( int i ) const 
     {
       return (asImp().template entity<cc>(i))->index();
     }
