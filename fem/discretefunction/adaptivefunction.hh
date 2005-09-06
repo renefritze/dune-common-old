@@ -366,15 +366,13 @@ namespace Dune {
     CombinedSpace<ContainedFunctionSpaceImp, N, p> >
       : public LocalFunctionDefault<
     CombinedSpace<ContainedFunctionSpaceImp, N, p>,
-    AdaptiveLocalFunction<CombinedSpace<ContainedFunctionSpaceImp, N, p> >
+    AdaptiveLocalFunction<CombinedSpace<ContainedFunctionSpaceImp, N, p> > >
   {
   public:
     //- Friends
     friend class AdaptiveFunctionImplementation<
       CombinedSpace<ContainedFunctionSpaceImp, N, p> >;
-    //friend class AdaptiveDiscreteFunction<
-    //  CombinedSpace<ContainedFunctionSpaceImp, N, p> >;
-
+ 
   public:
     //- Public typedefs and enums
     typedef CombinedSpace<
