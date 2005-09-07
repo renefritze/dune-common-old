@@ -59,8 +59,7 @@ namespace Dune {
   class AdaptiveDiscreteFunction : 
     public DiscreteFunctionDefault<
     AdaptiveDiscreteFunctionTraits<DiscreteFunctionSpaceImp > >,
-    private AdaptiveFunctionImplementation<
-    DiscreteFunctionSpaceImp > 
+    private AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp > 
   {
   public:
     //- friends
@@ -222,7 +221,10 @@ namespace Dune {
 
     //- Methods
     //! Number of dofs on this element
-    int numberOfDofs() const;
+    int numberOfDofs() const DUNE_DEPRECATED;
+
+    //! Number of dofs on this element
+    int numDofs() const;
 
     //! Evaluation of the discrete function
     template <class EntityType>
@@ -423,7 +425,9 @@ namespace Dune {
     const DofType& operator[] (int num) const;
 
     //- Methods
-    int numberOfDofs() const;
+    int numberOfDofs() const DUNE_DEPRECATED;
+
+    int numDofs() const;
 
     template <class EntityType>
     void evaluateLocal(EntityType& en, 
@@ -464,10 +468,11 @@ namespace Dune {
     
     mutable std::vector<FieldVector<DofType*, N> > values_;
  
-    mutable RangeType tmp_;
     mutable ContainedRangeType cTmp_;
-    mutable ContainedJacobianRangeType cTmpGrad_;
-    mutable JacobianRangeType tmpGrad_;
+    mutable ContainedJacobianRangeType cTmpGradRef_;
+    mutable ContainedJacobianRangeType cTmpGradReal_;
+    mutable RangeType tmp_;
+
   }; // end class AdaptiveLocalFunction (specialised for CombinedSpace)
   
 } // end namespace Dune
