@@ -4,7 +4,7 @@
 #include <dune/fem/feoperator.hh>
 #include <dune/fem/feop/spmatrix.hh>
 
-#include <dune/quadrature/fixedorder.hh>
+#include <dune/quadrature/quadraturerules.hh>
 
 namespace Dune 
 {
@@ -45,10 +45,6 @@ namespace Dune
     public:
 
         //! ???
-        FixedOrderQuad < typename FunctionSpaceType::RangeFieldType, typename
-                   FunctionSpaceType::DomainType , polOrd > quad;
-        
-        //! ???
         DiscFunctionType *stiffFunktion_;
 
         //! ???
@@ -57,21 +53,21 @@ namespace Dune
         //! ???
         LaplaceFEOp( const typename DiscFunctionType::FunctionSpaceType &f, OpMode opMode ): 
             FiniteElementOperator<DiscFunctionType,SparseRowMatrix<double>,LaplaceFEOp<DiscFunctionType,TensorType, polOrd> >( f, opMode ) , 
-            quad ( *(f.getGrid().template lbegin<0> (0))), stiffFunktion_(NULL), stiffTensor_(NULL)
+            stiffFunktion_(NULL), stiffTensor_(NULL)
         {
         }
         
         //! ???
         LaplaceFEOp( const DiscFunctionType &stiff, const typename DiscFunctionType::FunctionSpaceType &f, OpMode opMode ): 
             FiniteElementOperator<DiscFunctionType,SparseRowMatrix<double>,LaplaceFEOp<DiscFunctionType,TensorType, polOrd> >( f, opMode ) ,
-            quad ( *(f.getGrid().template lbegin<0> (0))), stiffFunktion_(&stiff), stiffTensor_(NULL)
+            stiffFunktion_(&stiff), stiffTensor_(NULL)
         { 
         }
         
         //! ???
         LaplaceFEOp( TensorType &stiff, const typename DiscFunctionType::FunctionSpaceType &f, OpMode opMode ): 
             FiniteElementOperator<DiscFunctionType,SparseRowMatrix<double>,LaplaceFEOp<DiscFunctionType,TensorType, polOrd> >( f, opMode ) ,
-            quad ( *(f.grid().template lbegin<0> (0))), stiffFunktion_(NULL), stiffTensor_(&stiff)
+            stiffFunktion_(NULL), stiffTensor_(&stiff)
         { 
         }
         
@@ -106,15 +102,17 @@ namespace Dune
             typedef typename FunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
             
             const BaseFunctionSetType & baseSet = this->functionSpace_.getBaseFunctionSet( entity );
+            // Get quadrature rule
+            const QuadratureRule<double, dim>& quad = QuadratureRules<double, dim>::rule(entity.geometry().type(), polOrd);
             
             double val = 0.;
-            for ( int pt=0; pt < quad.nop(); pt++ ) 
+            for ( int pt=0; pt < quad.size(); pt++ ) 
                 {      
-                    baseSet.jacobian(i,quad,pt,grad); 
+                    baseSet.jacobian(i,quad[pt].position(),grad); 
                     
                     // calc Jacobian inverse before volume is evaluated 
-                    const FieldMatrix<double,dim,dim>& inv = entity.geometry().jacobianInverse(quad.point(pt));
-                    const double vol = entity.geometry().integrationElement(quad.point(pt)); 
+                    const FieldMatrix<double,dim,dim>& inv = entity.geometry().jacobianInverse(quad[pt].position());
+                    const double vol = entity.geometry().integrationElement(quad[pt].position()); 
             
                     // multiply with transpose of jacobian inverse 
                     JacobianRange tmp(0);
@@ -123,18 +121,18 @@ namespace Dune
                     
                     if( i != j ) 
                         {
-                            baseSet.jacobian(j,quad,pt,othGrad); 
+                            baseSet.jacobian(j,quad[pt].position(),othGrad); 
                             
                             // multiply with transpose of jacobian inverse 
                             JacobianRange tmp(0);
                             inv.umv(othGrad[0], tmp[0]);
                             othGrad[0] = tmp[0];
 
-                            val += ( grad[0] * othGrad[0] ) * quad.weight( pt ) * vol;
+                            val += ( grad[0] * othGrad[0] ) * quad[pt].weight() * vol;
                         }
                     else 
                         {
-                            val += ( grad[0] * grad[0] ) * quad.weight( pt ) * vol;
+                            val += ( grad[0] * grad[0] ) * quad[pt].weight() * vol;
                         }
                 }
 
@@ -155,16 +153,19 @@ namespace Dune
             for(i=0; i<matSize; i++) 
                 for (j=0; j<=i; j++ ) 
                     mat[j][i]=0.0;
+
+            // Get quadrature rule
+            const QuadratureRule<double, dim>& quad = QuadratureRules<double, dim>::rule(entity.geometry().type(), polOrd);
             
-            for ( int pt=0; pt < quad.nop(); pt++ ) {
+            for ( int pt=0; pt < quad.size(); pt++ ) {
 
                 // calc Jacobian inverse before volume is evaluated 
-                const FieldMatrix<double,dim,dim>& inv = entity.geometry().jacobianInverse(quad.point(pt));
-                const double vol = entity.geometry().integrationElement(quad.point(pt));
+                const FieldMatrix<double,dim,dim>& inv = entity.geometry().jacobianInverse(quad[pt].position());
+                const double vol = entity.geometry().integrationElement(quad[pt].position());
 
                 for(i=0; i<matSize; i++) {
       
-                    baseSet.jacobian(i,quad,pt,mygrad[i]); 
+                    baseSet.jacobian(i,quad[pt].position(),mygrad[i]); 
       
                     // multiply with transpose of jacobian inverse 
                     JacobianRange tmp(0);
@@ -175,8 +176,8 @@ namespace Dune
                 typename FunctionSpaceType::RangeType ret;
                     
                 if(stiffTensor_){
-                    stiffTensor_->evaluate(entity.geometry().global(quad.point(pt)),ret);
-                    ret[0] *= quad.weight( pt );
+                    stiffTensor_->evaluate(entity.geometry().global(quad[pt].position()),ret);
+                    ret[0] *= quad[pt].weight();
                     for(i=0; i<matSize; i++) 
                         for (j=0; j<=i; j++ ) 
                             mat[j][i] += ( mygrad[i][0] * mygrad[j][0] ) * ret[0] * vol;
@@ -184,7 +185,7 @@ namespace Dune
                 else{
                     for(i=0; i<matSize; i++) 
                         for (j=0; j<=i; j++ ) 
-                            mat[j][i] += ( mygrad[i][0] * mygrad[j][0] ) * quad.weight( pt ) * vol;
+                            mat[j][i] += ( mygrad[i][0] * mygrad[j][0] ) * quad[pt].weight() * vol;
                 }
                 
                 
