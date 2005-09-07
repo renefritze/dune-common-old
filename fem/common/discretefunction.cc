@@ -21,6 +21,7 @@ void DiscreteFunctionDefault<DiscreteFunctionTraits>::clear() {
 template <class DiscreteFunctionTraits>
 void DiscreteFunctionDefault<DiscreteFunctionTraits>::
 addScaled(const DiscreteFunctionType& g, const RangeFieldType& c) {
+  assert(this->size() == g.size());
   DofIteratorType endit = this->dend();
   ConstDofIteratorType oit = g.dbegin();
   for (DofIteratorType it = this->dbegin(); it != endit; ++it, ++oit) {
@@ -35,6 +36,8 @@ DiscreteFunctionDefault<DiscreteFunctionTraits>::
 scalarProductDofs(const DiscreteFunctionType& g) const
 {
   typedef typename DiscreteFunctionSpaceType::RangeFieldType RangeFieldType; 
+  assert(this->size() == g.size());
+
   RangeFieldType skp = 0.;
 
   ConstDofIteratorType endit = this->dend ();
@@ -61,6 +64,8 @@ scalarProductDofs(const DiscreteFunctionType& g) const
     
     const DiscreteFunctionDefaultType &gc = 
       static_cast<const DiscreteFunctionDefaultType &> ( g );
+    
+    assert(this->size() == gc.size());
 
     DofIteratorType endit = this->dend ();
     ConstDofIteratorType git = gc.dbegin ();
@@ -87,6 +92,8 @@ operator += (const MappingType& g)
   const DiscreteFunctionDefaultType &gc = 
     static_cast<const DiscreteFunctionDefaultType &> ( g );
 
+  assert(this->size() == gc.size());
+
   DofIteratorType endit = this->dend ();
   ConstDofIteratorType git = gc.dbegin ();
   for(DofIteratorType it = this->dbegin(); it != endit; ++it, ++git) 
@@ -110,6 +117,8 @@ operator -= ( const MappingType& g )
   // cast to class discrete functions     
   const DiscreteFunctionDefaultType &gc = 
     static_cast<const DiscreteFunctionDefaultType &> ( g );
+
+  assert(this->size() == gc.size());
 
   DofIteratorType endit = this->dend ();
   ConstDofIteratorType git = gc.dbegin ();
@@ -156,7 +165,8 @@ add(const DiscreteFunctionType& g, RangeFieldType scalar)
     
   const DiscreteFunctionDefaultType &gc = 
      static_cast<const DiscreteFunctionDefaultType &> ( g );
-  // we would need const_iterators.....
+
+  assert(this->size() == gc.size());
     
   DofIteratorType endit = this->dend ();
   ConstDofIteratorType git = gc.dbegin ();

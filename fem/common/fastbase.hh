@@ -65,16 +65,28 @@ public:
   FastBaseFunctionSet (FunctionSpaceType & fuspace , int numOfBaseFct);
 
   //! return the number of base fucntions for this BaseFunctionSet  
-  int getNumberOfBaseFunctions () const 
+  int getNumberOfBaseFunctions () const DUNE_DEPRECATED
   {
     return baseFunctionList_.size();
   };
     
   //! return the number of base fucntions for this BaseFunctionSet  
-  int getNumberOfDiffBaseFuncs () const 
+  int getNumberOfDiffBaseFuncs () const DUNE_DEPRECATED
   {
     return numOfDiffFct_; 
   };
+
+  //! return the number of base fucntions for this BaseFunctionSet  
+  int numBaseFunctions () const
+  {
+    return baseFunctionList_.size();
+  }
+    
+  //! return the number of base fucntions for this BaseFunctionSet  
+  int numDifferentBaseFunctions () const 
+  {
+    return numOfDiffFct_; 
+  }
   
   //! evaluate base function baseFunct with the given diffVariable and a
   //! point x and range phi 
