@@ -164,12 +164,12 @@ namespace Dune {
         typedef FieldMatrix<double, blocksize, blocksize> MatrixBlock;
 
         //! ???
-        typedef typename FunctionSpaceType::JacobianRange JacobianRange;
+        typedef typename FunctionSpaceType::JacobianRangeType JacobianRange;
 
         //! ???
-        typedef typename FunctionSpaceType::RangeField RangeFieldType;
+        typedef typename FunctionSpaceType::RangeFieldType RangeFieldType;
 
-        typedef typename FunctionSpaceType::Range RangeType;
+        typedef typename FunctionSpaceType::RangeType RangeType;
 
     
 public:
@@ -187,7 +187,7 @@ public:
         MassMatrix(const FunctionSpaceType &f) : 
             functionSpace_(f) 
         { 
-            grid = &f.getGrid();
+            grid = &f.grid();
         }
         
         //! Returns the actual matrix if it is assembled
@@ -293,7 +293,7 @@ public:
             // Get quadrature rule
             const QuadratureRule<double, dim>& quad = QuadratureRules<double, dim>::rule(entity.geometry().type(), polOrd);
             
-            for ( int pt=0; pt < quad.size(); pt++ ) {
+            for (unsigned int pt=0; pt < quad.size(); pt++ ) {
 
                 // Get position of the quadrature point
                 const FieldVector<double,dim>& quadPos = quad[pt].position();
