@@ -42,7 +42,7 @@ public:
 
   //! get index of subentity of a codim 0 entity
   template<int cc>
-  int subindex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
+  int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
   {
       return grid_->template getRealEntity<0>(e).template subIndex<cc>(i);
   }
@@ -207,7 +207,7 @@ public:
 
   //! get index of subentity of a codim 0 entity
   template<int cc>
-  int subindex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
+  int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
   {
       return grid_.template getRealEntity<0>(e).template subLeafIndex<cc>(i);
   }
