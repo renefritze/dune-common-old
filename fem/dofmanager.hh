@@ -688,9 +688,10 @@ private:
   typedef DofManager<GridType> MyType;
   friend class DofManagerFactory<MyType>;
 public:
-  typedef typename GridObjectStreamOrDefault<GridType, DummyObjectStream>::ObjectStreamType ObjectStreamType;
+  typedef typename GridObjectStreamOrDefault<
+    GridType, DummyObjectStream>::ObjectStreamType ObjectStreamType;
 
-  typedef DataCollectorInterface< GridType , ObjectStreamType > DataCollectorType;
+  typedef DataCollectorInterface<GridType, ObjectStreamType> DataCollectorType;
               
   // all things for one discrete function are put together in a MemObject
   typedef MemPointerType MemoryPointerType; 
@@ -1079,8 +1080,10 @@ addDofSet(const DofStorageType * ds, const MapperType & mapper, std::string name
   // the same for the resize call  
   resizeMemObjs_ += (*obj).resizeMemObject();
 
-  return std::pair<MemObjectInterface*, DofStorageType*>(obj, & (obj->getArray()) );
-  //return *obj;
+
+  return std::pair<
+    MemObjectInterface*, DofStorageType*>(obj, & (obj->getArray()) );
+
 }
 
 
