@@ -119,7 +119,12 @@ public:
   
   void calcInsertPoints () {}; 
 
-  int numberOfDofs () const 
+  int numberOfDofs () const DUNE_DEPRECATED
+  {
+    return numberOfDofs_;
+  }
+
+  int numDofs () const 
   {
     return numberOfDofs_;
   }
@@ -211,7 +216,13 @@ public:
   
   void calcInsertPoints () {}; 
 
-  int numberOfDofs () const 
+  //! use numDofs instead
+  int numberOfDofs () const DUNE_DEPRECATED
+  {
+    return numLocalDofs_;
+  }
+
+  int numDofs () const DUNE_DEPRECATED
   {
     return numLocalDofs_;
   }
@@ -307,7 +318,13 @@ public:
     return dimrange * indexSet_.additionalSizeEstimate();
   }
 
-  int numberOfDofs () const 
+  //! use numDofs instead
+  int numberOfDofs () const DUNE_DEPRECATED 
+  {
+    return numberOfDofs_;
+  }
+
+  int numDofs () const 
   {
     return numberOfDofs_;
   }
@@ -387,7 +404,13 @@ public:
     return indexSet_.additionalSizeEstimate();
   }
 
-  int numberOfDofs () const 
+  //! use numDofs instead
+  int numberOfDofs () const DUNE_DEPRECATED 
+  {
+    return 1;
+  }
+
+  int numDofs () const 
   {
     return 1;
   }
