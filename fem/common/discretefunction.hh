@@ -1,4 +1,3 @@
-
 #ifndef DUNE_DISCRETEFUNCTION_HH
 #define DUNE_DISCRETEFUNCTION_HH
 
@@ -86,6 +85,11 @@ namespace Dune{
     //! Name of the discrete function
     std::string name() const {
       return asImp().name();
+    }
+
+    //! The size of the discrete function
+    int size() const {
+      return asImp().size();
     }
 
     //! the implementation of an iterator to iterate efficient 
