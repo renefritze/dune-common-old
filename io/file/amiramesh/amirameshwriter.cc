@@ -107,7 +107,7 @@ void Dune::AmiraMeshWriter<GridType>::writeGrid(const GridType& grid,
            for (int i=0; eIt!=eEndIt; ++eIt, i++) {
                
                for (int j=0; j<4; j++) 
-                   dPtr[i*4+j] = leafIndexSet.template subindex<3>(*eIt,j)+1;
+                   dPtr[i*4+j] = leafIndexSet.template subIndex<3>(*eIt,j)+1;
 
            }
            
@@ -120,14 +120,14 @@ void Dune::AmiraMeshWriter<GridType>::writeGrid(const GridType& grid,
                    
                    const int hexaReordering[8] = {0, 1, 3, 2, 4, 5, 7, 6};
                    for (int j=0; j<8; j++)
-                       dPtr[8*i + j] = leafIndexSet.template subindex<3>(*eIt, hexaReordering[j])+1;
+                       dPtr[8*i + j] = leafIndexSet.template subIndex<3>(*eIt, hexaReordering[j])+1;
                    break;
                }
                    
                case prism: {
                    const int prismReordering[8] = {0, 1, 1, 2, 3, 4, 4, 5};
                    for (int j=0; j<8; j++)
-                       dPtr[8*i + j] = leafIndexSet.template subindex<3>(*eIt, prismReordering[j])+1;
+                       dPtr[8*i + j] = leafIndexSet.template subIndex<3>(*eIt, prismReordering[j])+1;
                    
                    break;
                }
@@ -135,7 +135,7 @@ void Dune::AmiraMeshWriter<GridType>::writeGrid(const GridType& grid,
                case pyramid: {
                    const int pyramidReordering[8] = {0, 1, 2, 3, 4, 4, 4, 4};
                    for (int j=0; j<8; j++)
-                       dPtr[8*i + j] = leafIndexSet.template subindex<3>(*eIt, pyramidReordering[j])+1;
+                       dPtr[8*i + j] = leafIndexSet.template subIndex<3>(*eIt, pyramidReordering[j])+1;
                    
                    break;
                }
@@ -144,7 +144,7 @@ void Dune::AmiraMeshWriter<GridType>::writeGrid(const GridType& grid,
                    
                    const int tetraReordering[8] = {0, 1, 2, 2, 3, 3, 3, 3};
                    for (int j=0; j<8; j++)
-                       dPtr[8*i + j] = leafIndexSet.template subindex<3>(*eIt, tetraReordering[j])+1;
+                       dPtr[8*i + j] = leafIndexSet.template subIndex<3>(*eIt, tetraReordering[j])+1;
                    
                    break;
                }
@@ -166,7 +166,7 @@ void Dune::AmiraMeshWriter<GridType>::writeGrid(const GridType& grid,
            default:
                
                for (int j=0; j<eIt->geometry().corners(); j++) 
-                   dPtr[i*maxVerticesPerElement+j] = leafIndexSet.template subindex<dim>(*eIt, j)+1;
+                   dPtr[i*maxVerticesPerElement+j] = leafIndexSet.template subIndex<dim>(*eIt, j)+1;
                
                // If the element has less than 4 vertices use the last value
                // to fill up the remaining slots

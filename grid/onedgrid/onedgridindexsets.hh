@@ -29,7 +29,7 @@ public:
 
   //! get index of subentity of a codim 0 entity
   template<int cc>
-  int subindex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
+  int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
   {
       return grid_->template getRealEntity<0>(e).template subIndex<cc>(i);
   }
@@ -38,6 +38,12 @@ public:
   int size (int codim, GeometryType type) const
   {
       return grid_->size(level_,codim, type);
+  }
+
+  //! get number of entities of given codim, type and on this level
+  int size (int codim) const
+  {
+      return grid_->size(level_,codim);
   }
 
     /** \brief Deliver all geometry types used in this grid */
@@ -136,7 +142,7 @@ public:
 
   //! get index of subentity of a codim 0 entity
   template<int cc>
-  int subindex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
+  int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
   {
       return grid_.template getRealEntity<0>(e).template subLeafIndex<cc>(i);
   }
