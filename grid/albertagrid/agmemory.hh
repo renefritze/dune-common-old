@@ -46,7 +46,7 @@ public:
 
 private:
   //! do not copy pointers  
-  AGMemoryProvider(const AGMemoryProvider<Object> & org) {}
+  AGMemoryProvider(const AGMemoryProvider<Object> & org);
 };
 
 
