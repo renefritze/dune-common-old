@@ -8,6 +8,9 @@
 #include <dune/fem/common/basefunctions.hh>
 #include <dune/fem/common/dofmapperinterface.hh>
 
+//- Local includes
+#include "dofstorage.hh"
+
 namespace Dune {
 
   //- Forward declarations
@@ -30,7 +33,6 @@ namespace Dune {
     
     typedef typename CombinedTraits::BaseFunctionSetType CombinedBaseFunctionSetType;
     typedef typename CombinedTraits::MapperType CombinedMapperType;
-
     typedef typename CombinedTraits::ContainedMapperType ContainedMapperType;
     
     enum { CombinedDimRange = CombinedTraits::DimRange };
@@ -58,9 +60,9 @@ namespace Dune {
 
   public:
     //- Friends
-    friend class DiscreteFunctionType;
-    friend class BaseFunctionSetType;
-    friend class MapperType;
+    friend class SubSpace<CombinedSpaceImp>;
+    friend class SubBaseFunctionSet<CombinedSpaceImp>;
+    friend class SubMapper<CombinedSpaceImp>;
   };
 
   template <class CombinedSpaceImp>
@@ -165,6 +167,8 @@ namespace Dune {
     typedef typename Traits::CombinedBaseFunctionSetType CombinedBaseFunctionSetType;
     typedef typename Traits::CombinedRangeType CombinedRangeType;
  
+    enum { CombinedDimRange = Traits::CombinedDimRange };
+
     typedef int deriType;
   public:
     //- Public methods
@@ -230,9 +234,9 @@ namespace Dune {
       spc_(spc),
       mapper_(mapper),
       component_(component),
-      utilGlobal_(spc.policy() == PointBased ? 
-                   spc.numComponents() :
-                   spc.size()/spc.numComponents())
+      utilGlobal_(spc.myPolicy() == PointBased ? 
+                  spc.numComponents() :
+                  spc.size()/spc.numComponents())
     {}
 
     //! Total number of degrees of freedom
@@ -247,11 +251,13 @@ namespace Dune {
     //! (to be called once per timestep, therefore virtual )
     int newSize() const { 
       assert(false); // should never get here
+      return -1;
     }
   
     //! old size
     int oldSize() const { 
       assert(false); // should never get here
+      return -1;
     }
 
     //! calc new insertion points for dof of different codim 
@@ -261,34 +267,40 @@ namespace Dune {
     }
   
     //! return max number of local dofs per entity 
-    int numberOfDofs () const DUNE_DEPRECATED { 
+    int numberOfDofs () const { 
       assert(false); // should never get here
+      return -1;
     }
 
     //! return max number of local dofs per entity 
-    int numDofs () const DUNE_DEPRECATED { 
+    int numDofs () const { 
       assert(false); // should never get here
+      return -1;
     }
 
     //! returns true if index is new ( for dof compress )
     bool indexNew (int num) const { 
       assert(false); // should never get here
+      return false;
     }
     
     //! return old index in dof array of given index ( for dof compress ) 
     int oldIndex (int num) const {
       assert(false); // should never get here
+      return -1;
     } 
     
     //! return new index in dof array 
     int newIndex (int num) const {
       assert(false); // should never get here
+      return -1;
     }
 
     //! return estimate for size that is addtional needed for restriction 
     //! of data
     int additionalSizeEstimate() const {
       assert(false); // should never get here
+      return -1;
     }
 
   private:
