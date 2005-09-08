@@ -12,6 +12,7 @@ struct PointsOnLine
 }; 
 
 // specialization for the given order 
+template <> struct PointsOnLine <2>  { enum { points = 2 }; };
 template <> struct PointsOnLine <3>  { enum { points = 2 }; };
 template <> struct PointsOnLine <4>  { enum { points = 3 }; };
 template <> struct PointsOnLine <5>  { enum { points = 3 }; };
