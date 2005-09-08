@@ -245,8 +245,10 @@ public:
     return vec_ == other.vec_;
   }
 
-  T* vector() { return vec_; }
-  const T* vector() const { return vec_; }
+  //! return leak pointer for usage in BLAS routines 
+  T* leakPointer() { return vec_; }
+  //! return leak pointer for usage in BLAS routines 
+  const T* leakPointer() const { return vec_; }
 
   //! read and write xdr 
   bool processXdr(XDR *xdrs)
@@ -311,7 +313,7 @@ inline bool DofArray<double>::processXdr(XDR *xdrs)
   {
     int len = size_;
     xdr_int( xdrs, &len );
-    assert(size_ <= len);
+    //assert( (size_ > len) ? (std::cout << size_ << " s|l " << len << "\n" ,0 ): 1);
 
     xdr_vector(xdrs,(char *) vec_,size_, sizeof(T) ,(xdrproc_t)xdr_double);
     return true;
