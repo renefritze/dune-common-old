@@ -7,6 +7,7 @@
 
 // the specialisations 
 #include "fixedorder/quadlqh.hh"
+#include "fixedorder/quadtetratri.hh"
 
 namespace Dune{
 
@@ -53,20 +54,16 @@ public:
   template <class EntityType>
   FixedOrderQuad ( EntityType &en ) 
   {
-    switch(en.geometry().type())
-    {
-      case line:          { makeQuadrature<line> (); break; }
-      case quadrilateral: { makeQuadrature<quadrilateral> (); break; }
-      case hexahedron:    { makeQuadrature<hexahedron> (); break; }
-      case triangle:      { makeQuadrature<triangle> (); break; }
-      case tetrahedron:   { makeQuadrature<tetrahedron> (); break; }
-      default :
-        DUNE_THROW(NotImplemented, "Unkown GeometryType in FixedOrderQuad::makeQuadrature()");
-    }
+    switchTheType(en.geometry().type());
   };
 
-  //! Constructor build the vec with the points and weights
   FixedOrderQuad ( GeometryType eltype ) 
+  {
+    switchTheType( eltype );
+  }
+    
+  //! Constructor build the vec with the points and weights
+  void makeTheQuad( GeometryType eltype ) 
   {
     switch(eltype)
     {
@@ -78,6 +75,25 @@ public:
       default:
 	DUNE_THROW(NotImplemented, "Unkown GeometryType in FixedOrderQuad::makeQuadrature()");
     }
+  };
+  
+  //! Constructor build the vec with the points and weights
+  void switchTheType ( GeometryType eltype ) 
+  {
+    GeometryType t = eltype;
+    if(eltype == simplex) 
+    {
+      if(dim == 1) t = line;
+      if(dim == 2) t = triangle;
+      if(dim == 3) t = tetrahedron;
+    }
+    if(eltype == cube) 
+    {
+      if(dim == 1) t = line;
+      if(dim == 2) t = quadrilateral;
+      if(dim == 3) t = hexahedron;
+    }
+    makeTheQuad(t);  
   };
 
   virtual ~FixedOrderQuad() {}
