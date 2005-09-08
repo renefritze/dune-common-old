@@ -1422,6 +1422,23 @@ static FieldVector<K,dim> mult(const FieldMatrix<K,dim,dim> &matrix, const Field
   return ret; 
 }
 
+//! calculates ret = matrix^T * x 
+template <typename K, int dim>
+static FieldVector<K,dim> multTransposed(const FieldMatrix<K,dim,dim> &matrix, const FieldVector<K,dim> & x) 
+{
+  FieldVector<K,dim> ret;
+  typedef typename FieldMatrix<K,dim,dim>::size_type size_type;
+  for(size_type i=0; i<dim; i++)
+  {
+    ret[i] = 0.0;
+    for(size_type j=0; j<dim; j++)
+    {
+      ret[i] += matrix[j][i]*x[j];
+    }
+  }
+  return ret; 
+}
+
 } // end namespace FMatrixHelp 
 
 #ifdef DUNE_EXPRESSIONTEMPLATES
