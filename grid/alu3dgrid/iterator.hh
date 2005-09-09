@@ -76,8 +76,8 @@ namespace ALUGridSpace {
                      TreeIterator  < ElType ,  any_has_level < ElType > > > IteratorType;
     
     IteratorType it_;
-    typedef IteratorType :: val_t val_t;
   public:
+    typedef IteratorType :: val_t val_t;
     template <class GridImp> 
     ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level ) 
       : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
@@ -98,8 +98,8 @@ namespace ALUGridSpace {
                      TreeIterator  < ElType ,  any_has_level < ElType > > > IteratorType;
     
     IteratorType it_;
-    typedef IteratorType :: val_t val_t;
   public:
+    typedef IteratorType :: val_t val_t;
     template <class GridImp> 
     ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level ) 
       : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
@@ -120,8 +120,8 @@ namespace ALUGridSpace {
                      TreeIterator  < ElType ,  any_has_level < ElType > > > IteratorType;
     
     IteratorType it_;
-    typedef IteratorType :: val_t val_t;
   public:
+    typedef IteratorType :: val_t val_t;
     template <class GridImp> 
     ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level ) 
       : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
@@ -140,11 +140,11 @@ namespace ALUGridSpace {
     typedef LeafIterator < GitterType::vertex_STI > IteratorType;
 
     IteratorType it_;
-    typedef IteratorType :: val_t val_t;
 
     // level to walk 
     int level_; 
   public:
+    typedef IteratorType :: val_t val_t;
     template <class GridImp> 
     ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level ) 
       : it_(const_cast<GridImp &> (grid).myGrid()),
@@ -208,7 +208,9 @@ namespace ALUGridSpace {
     // the ALU3dGrid Iterator 
     IteratorType it_;
 
+  public:
     typedef typename IteratorElType<0>::val_t val_t;
+  private:
     val_t elem_;
   public:
     template <class GridImp> 
@@ -238,9 +240,11 @@ namespace ALUGridSpace {
     // the face iterator 
     IteratorType it_;
 
-    typedef IteratorElType<1>::val_t val_t;
-    val_t elem_;
   public:
+    typedef IteratorElType<1>::val_t val_t;
+  private:
+    val_t elem_;
+  public:  
     template <class GridImp> 
     ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level, const int links )
       : it_(const_cast<GridImp &> (grid).myGrid().container(),level) , elem_(0,0) {}
@@ -267,7 +271,9 @@ namespace ALUGridSpace {
     // the edge iterator 
     IteratorType it_;
     
+  public:
     typedef IteratorElType<2>::val_t val_t;
+  private:
     val_t elem_;
   public:
     template <class GridImp> 
@@ -293,8 +299,10 @@ namespace ALUGridSpace {
 
     // the vertex iterator 
     IteratorType it_;
-    
+  
+  public:
     typedef IteratorElType<3>::val_t val_t;
+  private:  
     val_t elem_;
   public:
     template <class GridImp> 
@@ -369,7 +377,6 @@ namespace ALUGridSpace {
     
     //typedef InnerIteratorType :: val_t val_t;
 
-    typedef LeafValType val_t;
     
     // number of links 
     const int nl_;
@@ -378,7 +385,10 @@ namespace ALUGridSpace {
     int link_;
 
     const int levelMinusOne_;
-   
+  
+  public:   
+    typedef LeafValType val_t;
+  private:
     // the pair of elementand boundary face 
     val_t elem_;    
   public:
@@ -908,7 +918,9 @@ private:
   // the wrapper for the original iterator of the ALU3dGrid  
   typedef typename ALU3DSPACE ALU3dGridLeafIteratorWrapper<cdim, pitype> IteratorType; 
  
-  typedef ALU3DSPACE IteratorWrapperInterface<ALU3DSPACE LeafValType> IterInterface;
+  //typedef typename ALU3DSPACE IteratorType :: val_t val_t; 
+  typedef typename ALU3DSPACE IteratorElType<cdim>::val_t val_t;
+  typedef ALU3DSPACE IteratorWrapperInterface<val_t> IterInterface;
   ALU3DSPACE AutoPointer < IterInterface > iter_;
 };
 
