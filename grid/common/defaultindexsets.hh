@@ -23,44 +23,79 @@ namespace Dune {
   index set, so most of this methods do notin'.
 */
 
-/*! \brief Interface of IndexSet for DofManager, some functions that are only
- * called once per timestep are virtual for simplicity  
- */
-class IndexSetInterface 
-{
-public:
-
-  /** \brief Virtual destructor */
-  virtual ~IndexSetInterface() {};
-
-  /** compress the index set if holes exists. */
-  virtual bool compress () = 0;
-
-  /** resize the index set after adaptation. */
-  virtual void resize   () = 0;
-};
-  
-template <class GridType>
-class DefaultGridIndexSetBase : public IndexSetInterface
+class DefaultEmptyIndexSet
 {
   // dummy value 
   enum { myType = -1 };
 public:  
-  enum { ncodim = GridType::dimension + 1 };
-  
-  DefaultGridIndexSetBase (const GridType & grid ) : grid_ (grid) {}
+  template <class IndexSetType, class EntityType,int enCodim, int codim>
+  struct IndexWrapper 
+  {
+    static inline int index (const IndexSetType & set, const EntityType & en , int num )
+    {
+      return set.index(en);
+    }
+  };
+
+  // if codim and enCodim are equal, then return index 
+  template <class IndexSetType, class EntityType, int codim>
+  struct IndexWrapper<IndexSetType,EntityType,codim,codim>
+  {
+    static inline int index (const IndexSetType & set, const EntityType & en , int num )
+    {
+      return set.index(en);
+    }
+  };
+
+  // return number of vertex num
+  template <class IndexSetType, class EntityType>
+  struct IndexWrapper<IndexSetType,EntityType,0,3> 
+  {
+    static inline int index (const IndexSetType & set, const EntityType & en , int num )
+    {
+      return set.template subIndex<3> (en,num);
+    }
+  };
+ 
+  // return number of vertex num for dim == 2 
+  // return number of edge num for dim == 3
+  template <class IndexSetType, class EntityType>
+  struct IndexWrapper<IndexSetType,EntityType,0,2> 
+  {
+    static inline int index (const IndexSetType & set, const EntityType & en , int num )
+    {
+      return set.template subIndex<2> (en,num);
+    }
+  };
+
+  // return number of vertex for dim == 1
+  // return number of edge num for dim == 2 
+  // return number of face num for dim == 3
+  template <class IndexSetType, class EntityType>
+  struct IndexWrapper<IndexSetType,EntityType,0,1> 
+  {
+    static inline int index (const IndexSetType & set, const EntityType & en , int num )
+    {
+      return set.template subIndex<1> (en,num);
+    }
+  };
+
+  //! default constructor 
+  DefaultEmptyIndexSet () {}
 
   //! return false mean the no memory has to be allocated 
-  virtual bool compress () { return false; }
+  bool compress () { return false; }
 
   //! do nothing here, because fathers index should already exist 
-  void insertNewIndex(const typename GridType::template Codim<0>::Entity & en ) {}
+  template <class EntityType> 
+  void insertNewIndex(const EntityType & en ) {}
 
   //! do nothing here, because fathers index should already exist 
-  void removeOldIndex(const typename GridType::template Codim<0>::Entity & en ) {}
+  template <class EntityType> 
+  void removeOldIndex(const EntityType & en ) {}
 
   //! nothing to do here 
-  virtual void resize () {}
+  void resize () {}
 
   //! no extra memory for restriction is needed
   int additionalSizeEstimate () const { return 0; }
@@ -69,18 +104,12 @@ public:
   bool indexNew(int num, int codim ) const { return false; }
 
   //! we have no old size 
-  int oldSize ( int codim ) const 
-  { 
-    return 0; 
-  }
+  int oldSize ( int codim ) const { return 0; }
   
   int type() const { return myType; }
 
   //! return old index, for dof manager only 
-  int oldIndex (int elNum, int codim ) const 
-  { 
-    return 0; 
-  }
+  int oldIndex (int elNum, int codim ) const { return 0; }
   
   //! return new index, for dof manager only 
   int newIndex (int elNum, int codim ) const 
@@ -154,12 +183,68 @@ protected:
     }
     return true;
   }
+};
 
+//! Wraps the interface methods of indexsets and adds the addiotnal needed
+//! functions 
+template <class IndexSetImp> 
+class IndexSetWrapper : public DefaultEmptyIndexSet 
+{
+public:
+  //! store const reference to set 
+  IndexSetWrapper(const IndexSetImp & set) : set_(set) {}
+  
+  //! store const reference to set 
+  IndexSetWrapper(const IndexSetWrapper<IndexSetImp> & s) : set_(s.set_) {}
+  
+  //! return size of set for codim  
+  int size ( int codim ) const   
+  {
+    return set_.size(codim);
+  }
+
+  //! return index of en 
+  template <class EntityType> 
+  int index (const EntityType & en) const
+  {
+    return set_.index(en); 
+  }
+
+  //! return sub index of given entities sub entity with codim and number 
+  template <int codim,class EntityType> 
+  int subIndex (const EntityType & en, int num) const
+  {
+    return set_.template subIndex<codim> (en,num);
+  }
+
+  //! return index 
+  template <int codim, class EntityType> 
+  int index (const EntityType & en, int num) const
+  {
+    enum { enCodim = EntityType::codimension };
+    return IndexWrapper<IndexSetImp,EntityType,enCodim,codim>::index(set_,en,num);
+  }
+
+private: 
+  const IndexSetImp & set_; 
+};
+
+template <class GridType>
+class DefaultGridIndexSetBase : public DefaultEmptyIndexSet
+{
+  // dummy value 
+  enum { myType = -1 };
+public:  
+  enum { ncodim = GridType::dimension + 1 };
+
+  //! Conschdrugdor 
+  DefaultGridIndexSetBase (const GridType & grid ) : grid_ (grid) {}
+protected:
   // the corresponding grid 
   const GridType & grid_;
 };
 
-//! Default is the Identity
+//! Wraps LevelIndexSet for use with LagrangeFunctionSpace 
 template <class GridType, GridIndexType GridIndex = LevelIndex>
 class DefaultGridIndexSet : public DefaultGridIndexSetBase <GridType> 
 {
@@ -229,6 +314,7 @@ class DefaultGridIndexSet : public DefaultGridIndexSetBase <GridType>
   typedef typename GridType :: LevelIndexSet LevelIndexSetType;
   const LevelIndexSetType & set_; 
   
+  typedef typename GridType :: template Codim<0>:: Entity EntityCodim0Type; 
 public:
   enum { ncodim = GridType::dimension + 1 };
 
@@ -255,16 +341,32 @@ public:
     return IndexWrapper<LevelIndexSetType,EntityType,EntityType::codimension,codim>::index(set_,en,num);
   }
 
+  //! wrap index method of set
+  template <class EntityType> 
+  int index (const EntityType & en) const
+  {
+    return set_.index(en); 
+  }
+
+  //! wrap subIndex method of set
+  template <int codim> 
+  int subIndex (const EntityCodim0Type & en, int num) const
+  {
+    return set_.template subIndex<codim> (en,num); 
+  }
+
+  //! return type of index set (for input/output)
   int type() const { return myType; }
 };
 
+//! Wraps HierarchicIndex Sets of AlbertaGrid and ALUGrid 
 template <class GridType>
 class DefaultGridIndexSet<GridType,GlobalIndex> 
 : public DefaultGridIndexSetBase <GridType>
 {
   // my type, to be revised 
   enum { myType = 0 };
-  
+
   template <class IndexSetType, class EntityType,int enCodim, int codim>
   struct IndexWrapper 
   {
@@ -299,7 +401,7 @@ class DefaultGridIndexSet<GridType,GlobalIndex>
   template <class IndexSetType, class EntityType>
   struct IndexWrapper<IndexSetType,EntityType,0,2> 
   {
-    static inline int index (const IndexSetType & set, EntityType & en , int num )
+    static inline int index (const IndexSetType & set, const EntityType & en , int num )
     {
       return set.template subIndex<2> (en,num);
     }
@@ -316,26 +418,48 @@ class DefaultGridIndexSet<GridType,GlobalIndex>
       return set.template subIndex<1> (en,num);
     }
   };
-
+  
   typedef typename GridType :: HierarchicIndexSet HSetType;
+
+  // reference to hierarchical index set 
   const HSetType & set_;
 
+  typedef typename GridType :: template Codim<0> :: Entity EntityCodim0Type; 
 public:
   enum { ncodim = GridType::dimension + 1 };
   DefaultGridIndexSet ( const GridType & grid , const int level =-1 ) 
-    : DefaultGridIndexSetBase <GridType> (grid) , set_(grid.hierarchicIndexSet()) {}
-      
+    : DefaultGridIndexSetBase <GridType> (grid) 
+    , set_(grid.hierarchicIndexSet()) {}
+     
+  //! wrap method size of set 
   int size ( int codim ) const   
   {
     return set_.size(codim);
   }
 
+  //! index method for Lagrange Mapper 
   template <int codim, class EntityType> 
   int index (const EntityType & en, int num) const
   {
-    return IndexWrapper<HSetType,EntityType,EntityType::codimension,codim>::index(set_,en,num);
+    enum { enCodim = EntityType::codimension };
+    return IndexWrapper<HSetType,EntityType,enCodim,codim>::index(set_,en,num);
   }
 
+  //! wrap index method of set
+  template <class EntityType> 
+  int index (const EntityType & en) const
+  {
+    return set_.index(en); 
+  }
+
+  //! wrap subIndex method of set
+  template <int codim> 
+  int subIndex (const EntityCodim0Type & en, int num) const
+  {
+    return set_.template subIndex<codim> (en,num); 
+  }
+
+  //! return type (for Grape In/Output)
   int type() const { return myType; }
 };
 
@@ -381,6 +505,7 @@ class DefaultLevelIndexSet
   typedef DefaultLevelIndexSet<GridType> MyType;
 
 public:
+  enum { ncodim = GridType::dimension + 1 };
   //! create LevelIndex by using the HierarchicIndexSet of a grid 
   //! for the given level 
   DefaultLevelIndexSet(const GridType & grid , int level ) :
