@@ -26,13 +26,8 @@ namespace Dune {
 
 // forward declaration 
 template <class GridType> class DofManager;
-
 template <class DofManagerImp> class DofManagerFactory;
 
-// forward declaration 
-
-// type of pointer to memory, for easy replacements
-typedef char MemPointerType;
 
 //! oriented to the STL Allocator funtionality 
 template <class T>
@@ -313,7 +308,7 @@ inline bool DofArray<double>::processXdr(XDR *xdrs)
   {
     int len = size_;
     xdr_int( xdrs, &len );
-    //assert( (size_ > len) ? (std::cout << size_ << " s|l " << len << "\n" ,0 ): 1);
+    assert( (size_ > len) ? (std::cout << size_ << " s|l " << len << "\n" ,0 ): 1);
 
     xdr_vector(xdrs,(char *) vec_,size_, sizeof(T) ,(xdrproc_t)xdr_double);
     return true;
@@ -333,15 +328,23 @@ inline bool DofArray<double>::processXdr(XDR *xdrs)
  */
 //******************************************************************
 
+/*! this class is the virtual interface for the index sets added to the
+  dofmanager. The derived classed are of the type IndexSetObj<IndexSet>.
+  This means we don't have to inherit every index set we want to use with
+  this DofManager. 
+  */
 class IndexSetObjectInterface 
 {
 public:
   virtual ~IndexSetObjectInterface () {}
+  // resize of index set 
   virtual void resize () = 0; 
+  // compress of index set 
   virtual bool compress () = 0;
-  virtual void unsetCompressed() = 0;
-  virtual bool operator == (const IndexSetInterface & iset) const = 0;
+  // return address of index set 
+  virtual void * address () const = 0;
 
+  // read and write method of index sets 
   virtual void read_xdr(const char * filename, int timestep) = 0;
   virtual void write_xdr(const char * filename, int timestep) const = 0;
 };
@@ -357,59 +360,52 @@ private:
   // the dof set stores number of dofs on entity for each codim
   IndexSetType & indexSet_;
 
-  //! true if compress has been called 
-  bool compressed_; 
-
+  // insertion and removal of indices 
   InsertIndicesToSet   <IndexSetType,EntityType> insertIdxObj_;
   RemoveIndicesFromSet <IndexSetType,EntityType> removeIdxObj_;
 
 public:  
   // Constructor of MemObject, only to call from DofManager 
   IndexSetObject ( IndexSetType & iset ) : indexSet_ (iset) 
-   , compressed_(false), insertIdxObj_(indexSet_), removeIdxObj_(indexSet_) {} 
+   , insertIdxObj_(indexSet_), removeIdxObj_(indexSet_) {} 
 
+  //! wrap resize of index set 
   void resize () 
   {
     indexSet_.resize();
-    compressed_ = false;
   }
   
+  //! wrap compress of index set 
   bool compress () 
   { 
-    if(!compressed_) 
-    {
-      indexSet_.compress(); 
-      compressed_ = true;
-    }
-    return compressed_;
+    return indexSet_.compress(); 
   }
 
-  void unsetCompressed() { compressed_ = false; }
-
-  bool operator == ( const IndexSetInterface & iset ) const
+  //! return address of index set 
+  void * address() const 
   {
-    return &indexSet_ == &iset;
+    return (void *)&indexSet_;
   }
 
-  void apply ( EntityType & en )
-  {
-    indexSet_.insertNewIndex ( en );
-  }
-  
+  //! call read_xdr of index set 
   virtual void read_xdr(const char * filename, int timestep)
   {
     indexSet_.read_xdr(filename,timestep); 
   }
+  
+  //! call write_xdr of index set 
   virtual void write_xdr(const char * filename, int timestep) const
   {
     indexSet_.write_xdr(filename,timestep);
   }
-    
+   
+  //! return reference to insertObj
   InsertIndicesToSet<IndexSetType,EntityType> & insertIndexObj() 
   {
     return insertIdxObj_; 
   }
   
+  //! return reference to removeObj
   RemoveIndicesFromSet<IndexSetType,EntityType> & removeIndexObj() 
   {
     return removeIdxObj_;    
@@ -421,19 +417,28 @@ public:
 // MemObject 
 //
 //****************************************************************
-// interface to store for DofManager 
+//! interface of MemObjects to store for DofManager 
 class MemObjectInterface 
 {
 public:
   virtual ~MemObjectInterface() {};
+  
+  //! reallocate memory 
   virtual void realloc (int newSize) = 0;
+  //! size of space, i.e. mapper.size()
   virtual int size () const = 0;
+  //! additional size needed for restrict 
   virtual int additionalSizeEstimate () const = 0;
+  //! new size of space, i.e. after grid adaptation
   virtual int newSize () const = 0;
+  //! returns name of obj
   virtual const char * name () const  = 0;
+  //! compressed the underlying dof vector 
   virtual void dofCompress () = 0;
 
+  //! returns true if resize ids needed 
   virtual bool resizeNeeded () const = 0;
+  //! returns size of memory per element
   virtual int  elementMemory() const = 0;
 };
 
@@ -493,7 +498,7 @@ public:
   //! return number of dofs on one element 
   int elementMemory () const 
   {
-    return mapper_.numberOfDofs();
+    return mapper_.numDofs();
   }
 
   //! return number of entities  
@@ -511,10 +516,10 @@ public:
   //! copy the dof from the rear section of the vector to the holes 
   void dofCompress () 
   {
-    //indexObject_.compress();
-
+    // run over all indices of array and copy values  
     for(int i=0; i<mapper_.oldSize(); i++)
     {
+      // this can be made more cache efficient 
       if(mapper_.indexNew(i))
       {
         // copy value 
@@ -554,6 +559,7 @@ public:
   // Constructor of MemObject, only to call from DofManager 
   RemoveIndicesFromSet ( IndexSetType & iset ) : indexSet_ (iset) {} 
 
+  //! apply wraps the removeOldIndex Method of the index set 
   void apply ( EntityType & en )
   {
     indexSet_.removeOldIndex( en );
@@ -572,6 +578,7 @@ public:
   // Constructor of MemObject, only to call from DofManager 
   InsertIndicesToSet ( IndexSetType & iset ) : indexSet_ (iset) {} 
 
+  //! apply wraps the insertNewIndex method of the index set
   void apply ( EntityType & en )
   {
     indexSet_.insertNewIndex( en );
@@ -584,11 +591,11 @@ class CheckMemObjectResize
 {
 private:
   // the dof set stores number of dofs on entity for each codim
-  MemObjectType & memobj_;
+  const MemObjectType & memobj_;
 
 public:  
   // Constructor of MemObject, only to call from DofManager 
-  CheckMemObjectResize ( MemObjectType & mo ) : memobj_ (mo) {} 
+  CheckMemObjectResize ( const MemObjectType & mo ) : memobj_ (mo) {} 
 
   // if resize is needed the check is set to true 
   void apply ( int & check )
@@ -642,7 +649,6 @@ public:
   template <class EntityType>
   void restrictLocal ( EntityType & father, EntityType & son , bool initialize ) const
   {
-    //std::cout << "restrict for el=" << father.globalIndex() << "\n";
     insert_.apply( father );
     remove_.apply( son );
     dm_.checkMemorySize();
@@ -652,7 +658,6 @@ public:
   template <class EntityType>
   void prolongLocal ( EntityType & father, EntityType & son , bool initialize ) const
   {
-    //std::cout << "prolong for el=" << father.globalIndex() << "\n";
     remove_.apply( father );
     insert_.apply( son );
     dm_.checkMemorySize();
@@ -660,9 +665,7 @@ public:
   
 };
 
-
 class DofManError : public Exception {};
-
 
 /*! 
  The DofManager is responsible for managing memory allocation and freeing
@@ -694,20 +697,15 @@ public:
     GridType, DummyObjectStream>::ObjectStreamType ObjectStreamType;
 
   typedef DataCollectorInterface<GridType, ObjectStreamType> DataCollectorType;
-              
-  // all things for one discrete function are put together in a MemObject
-  typedef MemPointerType MemoryPointerType; 
 
 private:  
-  //typedef DoubleLinkedList < MemObjectInterface * > ListType;
-  //typedef typename ListType::Iterator ListIteratorType;
   typedef std::list<MemObjectInterface*> ListType;
   typedef typename ListType::iterator ListIteratorType;
 
   typedef LocalInterface< int > MemObjectCheckType;
   
-  typedef DoubleLinkedList < IndexSetObjectInterface * > IndexListType;
-  typedef typename IndexListType::Iterator IndexListIteratorType;
+  typedef std::list<IndexSetObjectInterface * > IndexListType;
+  typedef typename IndexListType::iterator IndexListIteratorType;
   
   // list with MemObjects, for each DiscreteFunction we have one MemObject
   ListType memList_;
@@ -739,7 +737,8 @@ private:
 
   int chunkSize_; 
   
-public:  
+public: 
+  typedef typename GridType :: LeafIndexSet LeafIndexSetType;
   typedef IndexSetRestrictProlong< MyType , LocalIndexSetObjectsType > IndexSetRestrictProlongType;
 private:
   IndexSetRestrictProlongType indexRPop_; 
@@ -772,7 +771,6 @@ public:
   //! this method should be called at signIn of DiscreteFucntion, and there
   //! we know our DofStorage which is the actual DofArray  
   template <class DofStorageType, class MapperType >
-  //inline MemObject<MapperType,DofStorageType> & 
   std::pair<MemObjectInterface*, DofStorageType*>
   addDofSet(const DofStorageType* ds, const MapperType& mapper, std::string name);
 
@@ -800,13 +798,13 @@ public:
     return removed;
   }
 
-  // returns the index set restrinction and prolongation operator
+  //! returns the index set restrinction and prolongation operator
   IndexSetRestrictProlongType & indexSetRPop () 
   {
     return indexRPop_;
   }
    
-  // this method resizes the memory before restriction is done 
+  //! this method resizes the memory before restriction is done 
   void resizeForRestrict () 
   {
     ListIteratorType it    = memList_.begin();
@@ -820,7 +818,7 @@ public:
     }
   }
   
-  // check if there is still enough memory 
+  //! check if there is still enough memory 
   void checkMemorySize () 
   {
     // here it is necessary that this is fast, therefore we use 
@@ -831,8 +829,8 @@ public:
     if( check ) resizeMemObjs_.apply ( chunkSize_ );
   }
  
-  // resize the memory 
-  void resizeMem (int nsize) 
+  //! resize the memory and set chunk size to nsize 
+  void reserveMemory (int nsize) 
   {
     // remember the chunksize 
     chunkSize_ = nsize;
@@ -840,7 +838,7 @@ public:
     resizeMemObjs_.apply ( chunkSize_ );
   }
 
-  // resize indexsets memory due to what the mapper has as new size 
+  //! resize indexsets memory due to what the mapper has as new size 
   void resize()
   {
     IndexListIteratorType endit = indexList_.end();
@@ -851,12 +849,14 @@ public:
     resizeDofMem();
   }
 
+  //! inserts index to all index sets added to dof manager
   template <class EntityType>
   void insertNewIndex (EntityType & en )
   {
     insertIndices_.apply( en );
   }
           
+  //! removes index to all index sets added to dof manager
   template <class EntityType>
   void removeOldIndex (EntityType & en )
   {
@@ -885,20 +885,18 @@ public:
   {
     // compress indexsets first 
     {
-      IndexListIteratorType endit = indexList_.end();
+      IndexListIteratorType endit  = indexList_.end();
       for(IndexListIteratorType it = indexList_.begin(); it != endit; ++it)
       {
         // reset compressed so the next time compress of index set is called 
         (*it)->compress(); 
       }
     }
-   
+
     // compress all data now 
     {
-      ListIteratorType it    = memList_.begin();
-      ListIteratorType endit = memList_.end();
-
-      for( ; it != endit ; ++it)
+      ListIteratorType endit  = memList_.end();
+      for(ListIteratorType it = memList_.begin(); it != endit ; ++it)
       {
         // if correponding index was not compressed yet, yhis is called in
         // the MemObject dofCompress, if index has not changes, nothing happens  
@@ -907,36 +905,42 @@ public:
     }
   }
 
+  //! add data handler for data inlining to dof manager
   template <class DataCollType>
   void addDataInliner ( DataCollType & d)
   {
     dataInliner_ += d;
   }
 
+  //! add data handler for data xtracting to dof manager
   template <class DataCollType>
   void addDataXtractor ( DataCollType & d)
   {
     dataXtractor_ += d;
   }
 
+  //! add data handler for data write to dof manager
   template <class DataCollType>
   void addDataWriter ( DataCollType & d)
   {
     dataWriter_ += d;
   }
 
+  //! add data handler for data read to dof manager
   template <class DataCollType>
   void addDataReader ( DataCollType & d)
   {
     dataReader_ += d;
   }
 
+  //! packs all data of this entity en and all child entities  
   template <class ObjectStreamType, class EntityType>
   void inlineData ( ObjectStreamType & str, EntityType & en )
   {
     dataInliner_.apply(str,en);
   }
 
+  //! unpacks all data of this entity en and all child entities  
   template <class ObjectStreamType, class EntityType>
   void scatter ( ObjectStreamType & str, EntityType & en )
   {
@@ -944,6 +948,7 @@ public:
     dataWriter_.apply( p );
   }
 
+  //! packs all data of this entity to message buffer 
   template <class ObjectStreamType, class EntityType>
   void gather ( ObjectStreamType & str, EntityType & en )
   {
@@ -951,6 +956,7 @@ public:
     dataReader_.apply( p );
   }
   
+  //! unpacks all data of this entity from message buffer 
   template <class ObjectStreamType, class EntityType>
   void xtractData ( ObjectStreamType & str, EntityType & en )
   {
@@ -1011,18 +1017,15 @@ addIndexSet (const GridType &grid, IndexSetType &iset)
   if(&grid_ != &grid)
     DUNE_THROW(DofManError,"DofManager can only be used for one grid! \n");
 
-  IndexSetInterface & set = iset; 
-  typedef IndexSetObject< IndexSetType, 
-        typename GridType::template Codim<0>::Entity > IndexSetObjectType;
-
   typedef typename GridType::template Codim<0>::Entity EntityType;
+  typedef IndexSetObject< IndexSetType, EntityType > IndexSetObjectType;
   
   IndexSetObjectType * indexSet = 0;
   
   IndexListIteratorType endit = indexList_.end();
   for(IndexListIteratorType it = indexList_.begin(); it != endit; ++it)
   {
-    if( (* (*it)) == set )
+    if( (*it)->address() == &iset )
     {
       indexSet = static_cast<IndexSetObjectType *> ((*it));
       break;
@@ -1032,8 +1035,9 @@ addIndexSet (const GridType &grid, IndexSetType &iset)
   if(!indexSet) 
   { 
     indexSet = new IndexSetObjectType ( iset );
+      
     IndexSetObjectInterface * iobj = indexSet;
-    indexList_.insert_after ( indexList_.rbegin() , iobj );
+    indexList_.push_back( iobj );
     indexSets_ += *indexSet;
 
     insertIndices_ += (*indexSet).insertIndexObj();
@@ -1047,12 +1051,10 @@ template <class IndexSetType>
 inline bool DofManager<GridType>::
 checkIndexSetExists (const IndexSetType &iset) const
 {
-  const IndexSetInterface & set = iset; 
-
-  IndexListIteratorType endit = indexList_.end();
+  IndexListIteratorType endit  = indexList_.end();
   for(IndexListIteratorType it = indexList_.begin(); it != endit; ++it)
   {
-    if( (* (*it) ) == set ) 
+    if( (*it)->address() == &iset ) 
     {
       return true; 
     }
@@ -1073,7 +1075,6 @@ addDofSet(const DofStorageType * ds, const MapperType & mapper, std::string name
 
   typedef MemObject<MapperType,DofStorageType> MemObjectType; 
   MemObjectType * obj = new MemObjectType ( mapper, name ); 
-  //memList_.insert_after ( memList_.rbegin() , obj );    
   memList_.push_back( obj );    
   
   // add the special object to the checkResize list object 
@@ -1082,10 +1083,8 @@ addDofSet(const DofStorageType * ds, const MapperType & mapper, std::string name
   // the same for the resize call  
   resizeMemObjs_ += (*obj).resizeMemObject();
 
-
   return std::pair<
     MemObjectInterface*, DofStorageType*>(obj, & (obj->getArray()) );
-
 }
 
 
@@ -1107,8 +1106,6 @@ template <class GridType>
 inline bool DofManager<GridType>::
 write_xdr(const std::string filename , int timestep)
 {
-  //assert( filename );
-
   int count = 0;
   IndexListIteratorType endit = indexList_.end();
   for(IndexListIteratorType it = indexList_.begin(); it != endit; ++it)
@@ -1129,8 +1126,6 @@ template <class GridType>
 inline bool DofManager<GridType>::
 read_xdr(const std::string filename , int timestep)
 {
-  //assert( filename );
-
   int count = 0;
   IndexListIteratorType endit = indexList_.end();
   for(IndexListIteratorType it = indexList_.begin(); it != endit; ++it)
