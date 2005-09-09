@@ -452,6 +452,7 @@ namespace Dune {
     EntityImp f ( *this, this->maxlevel() );    
     EntityImp s ( *this, this->maxlevel() );    
 
+    /*
     if(leafIndexSet_) 
       {
         if( ! dm.checkIndexSetExists( *leafIndexSet_ ))
@@ -460,6 +461,7 @@ namespace Dune {
             dm.addIndexSet( *this , *leafIndexSet_ ); 
           }
       }
+      */
   
     typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
     typedef CombinedAdaptProlongRestrict < IndexSetRPType,RestrictProlongOperatorType > COType;
@@ -474,7 +476,7 @@ namespace Dune {
                                         EntityImp, DofManagerType, COType >
        rp(*this,f,s,dm,tmprpop);
 
-    dm.resizeMem( newElements );
+    dm.reserveMemory( newElements );
     bool ref = myGrid().duneAdapt(rp); // adapt grid 
   
     // if new maxlevel was claculated 
@@ -482,10 +484,10 @@ namespace Dune {
     assert( ((verbose) ? (dverb << "maxlevel = " << maxlevel_ << "!\n", 1) : 1 ) );
   
     if(ref)
-      {
-        calcMaxlevel();
-        calcExtras();   // reset size and things  
-      }
+    {
+      calcMaxlevel();
+      calcExtras();   // reset size and things  
+    }
 
     // check whether we have balance 
     loadBalance(dm);
