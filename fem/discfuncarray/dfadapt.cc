@@ -326,7 +326,7 @@ addScaledLocal( EntityType &en ,
       const_cast<DFAdapt<DiscreteFunctionSpaceType> &> (g);
   G.localFunction(en,G.localFunc_);
 
-  int length = localFunc_.numberOfDofs();
+  int length = localFunc_.numDofs();
   if(scalar == 1.)
   {
     for(int i=0; i<length; i++)
@@ -356,7 +356,7 @@ addLocal( EntityType &en ,
       const_cast<DFAdapt<DiscreteFunctionSpaceType> &> (g);
   G.localFunction(en,G.localFunc_);
 
-  int length = localFunc_.numberOfDofs();
+  int length = localFunc_.numDofs();
   for(int i=0; i<length; i++)
     localFunc_[i] += G.localFunc_[i];
 }
@@ -373,7 +373,7 @@ subtractLocal( EntityType &en ,
       const_cast<DFAdapt<DiscreteFunctionSpaceType> &> (g);
   G.localFunction(en,G.localFunc_);
 
-  int length = localFunc_.numberOfDofs();
+  int length = localFunc_.numDofs();
   for(int i=0; i<length; i++)
     localFunc_[i] -= G.localFunc_[i];
 }
@@ -384,7 +384,7 @@ inline void DFAdapt< DiscreteFunctionSpaceType>::
 setLocal( EntityType &en , const RangeFieldType & scalar )
 {
   localFunction( en , localFunc_ );
-  int length = localFunc_.numberOfDofs();
+  int length = localFunc_.numDofs();
   for(int i=0; i<length; i++)
     localFunc_[i] = scalar;
 }
@@ -421,7 +421,14 @@ LocalFunctionAdapt < DiscreteFunctionSpaceType>::operator [] (int num) const
 
 template<class DiscreteFunctionSpaceType>
 inline int LocalFunctionAdapt < DiscreteFunctionSpaceType>::
-numberOfDofs () const 
+numberOfDofs () const
+{
+  return numOfDof_;
+}
+
+template<class DiscreteFunctionSpaceType>
+inline int LocalFunctionAdapt < DiscreteFunctionSpaceType>::
+numDofs () const 
 {
   return numOfDof_;
 }
@@ -555,9 +562,9 @@ init (const EntityType &en ) const
   if(!uniform_ || !init_)
   {
     numOfDof_ = 
-      fSpace_.getBaseFunctionSet(en).getNumberOfBaseFunctions();
+      fSpace_.getBaseFunctionSet(en).numBaseFunctions();
     numOfDifferentDofs_ = 
-      fSpace_.getBaseFunctionSet(en).getNumberOfDiffBaseFuncs();
+      fSpace_.getBaseFunctionSet(en).numDifferentBaseFunctions();
 
     if(numOfDof_ > this->values_.size())
       this->values_.resize( numOfDof_ );
