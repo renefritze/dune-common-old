@@ -31,13 +31,12 @@ namespace Dune {
       , geomTypes_ (numberOfGeomTypes) 
       , hIndexSet_ (*this)
       , globalIdSet_(*this), localIdSet_(*this)
-      , levelIndexVec_(MAXL) , leafIndexSet_(0)
+      , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
   {
     if( myRank_ <= 0 )
       {
         checkMacroGrid ( elType , macroTriangFilename );
       }
-    for(unsigned int i=0; i<levelIndexVec_.size(); i++) levelIndexVec_[i] = 0; 
     geomTypes_[0] = (elType == tetra) ? simplex : cube; 
   
     mygrid_ = new ALU3DSPACE GitterImplType (macroTriangFilename
@@ -74,9 +73,8 @@ namespace Dune {
       , geomTypes_ (numberOfGeomTypes) 
       , hIndexSet_ (*this)
       , globalIdSet_(*this), localIdSet_(*this)
-      , levelIndexVec_(MAXL) , leafIndexSet_(0)
+      , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
   {
-    for(unsigned int i=0; i<levelIndexVec_.size(); i++) levelIndexVec_[i] = 0; 
     geomTypes_[0] = (elType == tetra) ? simplex : cube; 
   }
 #else 
@@ -89,9 +87,8 @@ namespace Dune {
     , hIndexSet_ (*this)
     , globalIdSet_ (*this)
     , localIdSet_ (*this)
-    , levelIndexVec_(MAXL) , leafIndexSet_(0)
+    , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
   {
-    for(unsigned int i=0; i<levelIndexVec_.size(); i++) levelIndexVec_[i] = 0; 
     geomTypes_[0] = (elType == tetra) ? simplex : cube; 
   }
 #endif
@@ -105,10 +102,9 @@ namespace Dune {
     , hIndexSet_(*this) 
     , globalIdSet_ (*this)
     , localIdSet_ (*this)
-    , levelIndexVec_(MAXL) , leafIndexSet_(0)
+    , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
   {
     geomTypes_[0] = (elType == tetra) ? simplex : cube; 
-    for(unsigned int i=0; i<levelIndexVec_.size(); i++) levelIndexVec_[i] = 0; 
     DUNE_THROW(GridError,"Do not use copy constructor of ALU3dGrid! \n");
   }
 
@@ -185,22 +181,22 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline const typename ALU3dGrid<dim, dimworld, elType>::LeafIndexSet & 
+  inline const typename ALU3dGrid<dim, dimworld, elType>::Traits :: LeafIndexSet & 
   ALU3dGrid<dim, dimworld, elType>::leafIndexSet() const 
   {
-    if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSet ( *this );
+    if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSetImp ( *this );
     return *leafIndexSet_;
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline const typename ALU3dGrid<dim, dimworld, elType>::LevelIndexSet & 
+  inline const typename ALU3dGrid<dim, dimworld, elType>::Traits :: LevelIndexSet & 
   ALU3dGrid<dim, dimworld, elType>::levelIndexSet( int level ) const 
   {
     if( (level < 0) && (level >= MAXL) ) 
       DUNE_THROW(GridError,"Only " << MAXL << "levels allowed for this grid!\n");
 
     if( levelIndexVec_[level] == 0 )
-      levelIndexVec_[level] = new LevelIndexSet ( *this , level );
+      levelIndexVec_[level] = new LevelIndexSetImp ( *this , level );
     return *(levelIndexVec_[level]);
   }
 

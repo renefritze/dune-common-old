@@ -135,7 +135,7 @@ class AdaptRestrictProlongImpl : public AdaptRestrictProlongType
 {
   GridType & grid_;
   typedef typename GridType::template Codim<0>::Entity Entity;
-  typedef typename GridType::LeafIndexSet LeafIndexSetType; 
+  typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType; 
 
   Entity & reFather_;
   Entity & reSon_;
