@@ -198,9 +198,19 @@ public:
   IndexSetWrapper(const IndexSetWrapper<IndexSetImp> & s) : set_(s.set_) {}
   
   //! return size of set for codim  
+  int size ( int codim , GeometryType type ) const   
+  {
+    return set_.size(codim,type);
+  }
+
+  //! return size of grid entities per level and codim 
   int size ( int codim ) const   
   {
-    return set_.size(codim);
+    int s = 0; 
+    const std::vector< GeometryType > & types = set_.geomTypes();
+    for(unsigned int i=0; i<types.size(); i++)
+      s += set_.size(codim,types[i]);
+    return s;
   }
 
   //! return index of en 
@@ -215,6 +225,12 @@ public:
   int subIndex (const EntityType & en, int num) const
   {
     return set_.template subIndex<codim> (en,num);
+  }
+
+  //! wrap geomTypes method of set 
+  const std::vector< GeometryType > & geomTypes () const 
+  {
+    return set_.geomTypes(); 
   }
 
   //! return index 
@@ -311,7 +327,7 @@ class DefaultGridIndexSet : public DefaultGridIndexSetBase <GridType>
     }
   };
 
-  typedef typename GridType :: LevelIndexSet LevelIndexSetType;
+  typedef typename GridType :: Traits :: LevelIndexSet LevelIndexSetType;
   const LevelIndexSetType & set_; 
   
   typedef typename GridType :: template Codim<0>:: Entity EntityCodim0Type; 
@@ -327,9 +343,19 @@ public:
     : DefaultGridIndexSetBase <GridType> (grid) , set_(grid.levelIndexSet(grid.maxlevel())) {}
 
   //! return size of grid entities per level and codim 
+  int size ( int codim , GeometryType type ) const   
+  {
+    return set_.size(codim,type);
+  }
+
+  //! return size of grid entities per level and codim 
   int size ( int codim ) const   
   {
-    return set_.size(codim);
+    int s = 0; 
+    const std::vector< GeometryType > & types = set_.geomTypes();
+    for(unsigned int i=0; i<types.size(); i++)
+      s += set_.size(codim,types[i]);
+    return s;
   }
 
   //! return index of entity with codim codim belonging to entity en which
@@ -353,6 +379,12 @@ public:
   int subIndex (const EntityCodim0Type & en, int num) const
   {
     return set_.template subIndex<codim> (en,num); 
+  }
+
+  //! wrap geomTypes method of set 
+  const std::vector< GeometryType > & geomTypes () const 
+  {
+    return set_.geomTypes(); 
   }
 
   //! return type of index set (for input/output)
@@ -432,9 +464,19 @@ public:
     , set_(grid.hierarchicIndexSet()) {}
      
   //! wrap method size of set 
+  int size ( int codim , GeometryType type ) const   
+  {
+    return set_.size(codim,type);
+  }
+
+  //! return size of grid entities per level and codim 
   int size ( int codim ) const   
   {
-    return set_.size(codim);
+    int s = 0; 
+    const std::vector< GeometryType > & types = set_.geomTypes();
+    for(unsigned int i=0; i<types.size(); i++)
+      s += set_.size(codim,types[i]);
+    return s;
   }
 
   //! index method for Lagrange Mapper 
@@ -457,6 +499,12 @@ public:
   int subIndex (const EntityCodim0Type & en, int num) const
   {
     return set_.template subIndex<codim> (en,num); 
+  }
+
+  //! wrap geomTypes method of set 
+  const std::vector< GeometryType > & geomTypes () const 
+  {
+    return set_.geomTypes(); 
   }
 
   //! return type (for Grape In/Output)
