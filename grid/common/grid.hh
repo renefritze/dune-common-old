@@ -461,7 +461,7 @@ template <int dim, int dimw, class GridImp,
           template<class> class HierarchicIteratorImp,
           template<int,PartitionIteratorType,class> class LeafIteratorImp,
 		  class LevelIndexSetImp, class LeafIndexSetImp,
-		  class GlobalIdSetImp, class GlobaIdType, class LocalIdSetImp, class LocalIdType>
+		  class GlobalIdSetImp, class GlobalIdType, class LocalIdSetImp, class LocalIdType>
 struct GridTraits
 {
   typedef GridImp Grid;
@@ -498,7 +498,7 @@ struct GridTraits
 
   typedef IndexSet<GridImp,LevelIndexSetImp> LevelIndexSet;
   typedef IndexSet<GridImp,LeafIndexSetImp> LeafIndexSet;
-  typedef IdSet<GridImp,GlobalIdSetImp,GlobaIdType> GlobalIdSet;
+  typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
   typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
 };
 
@@ -541,6 +541,7 @@ inline std::string transformToGridName(GridIdentifier type)
 #include "intersectioniterator.hh"
 #include "hierarchiciterator.hh"
 #include "leafiterator.hh"
+#include "indexidset.hh"
 
 inline std::ostream& operator<< (std::ostream& s, Dune::GeometryType t)
 {
