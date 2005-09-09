@@ -263,6 +263,7 @@ protected:
 //! Wraps LevelIndexSet for use with LagrangeFunctionSpace 
 template <class GridType, GridIndexType GridIndex = LevelIndex>
 class DefaultGridIndexSet : public DefaultGridIndexSetBase <GridType> 
+                            
 {
   // my type, to be revised 
   enum { myType = 1 };
@@ -542,12 +543,14 @@ struct CalcLevelForCodim<DefaultLevelIndexSetType,0>
   DefaultLevelIndexSet creates a LevelIndexSet for a Grid by using its
   HierarchicIndexSet 
  */ 
-template <class GridType>
-class DefaultLevelIndexSet
+template <class GridImp>
+class DefaultLevelIndexSet :
+  public IndexSet< GridImp, DefaultLevelIndexSet <GridImp> > 
+
 {
+  typedef GridImp GridType;
   enum { dim = GridType :: dimension };
   enum { numCodim = dim + 1 };
-  
   typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
 
   typedef DefaultLevelIndexSet<GridType> MyType;
@@ -583,6 +586,13 @@ public:
 
   //! return size of IndexSet for a given level and codim 
   int size ( int codim ) const
+  {
+    return size_[codim];
+  }
+
+  //! return size of IndexSet for a given level and codim 
+  //! this method is to be revised 
+  int size ( int codim , GeometryType type ) const
   {
     return size_[codim];
   }
