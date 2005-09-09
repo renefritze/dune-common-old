@@ -88,56 +88,62 @@ class AdaptiveLeafIndexSet : public DefaultGridIndexSetBase <GridType>
 public:
   enum { ncodim = GridType::dimension + 1 };
 
+  enum INDEXSTATE { NEW, USED, UNUSED };
 private:
 
   // busines as usual 
    
-  template <class EntityType, class IndexSetType , int enCodim, int codim >
+  template <class HSetImp, class CodimLeafSet, class EntityType, int enCodim, int codim >
   struct IndexWrapper
   {
-    static inline int index (EntityType & en , const IndexSetType & set , 
-              const IndexArray<int> & leafIndex, int num )
+    static inline int index (const HSetImp & hset, const CodimLeafSet (&cls)[ncodim], 
+                             const EntityType & en , int num )
     {
-      return set.index(en);
+      assert(cls[codim].index ( hset.index( en ) ) >= 0 );
+      return cls[codim].index ( hset.index( en ) );
     }
   };
 
-  template <class EntityType, class IndexSetType>
-  struct IndexWrapper<EntityType,IndexSetType,0,0>
+  template <class HSetImp, class CodimLeafSet, class EntityType>
+  struct IndexWrapper<HSetImp,CodimLeafSet,EntityType,0,0>
   {
-    static inline int index (EntityType & en , const IndexSetType & set , 
-              const IndexArray<int> & leafIndex, int num )
+    static inline int index (const HSetImp & hset, const CodimLeafSet (&cls)[ncodim], 
+                             const EntityType & en , int num )
     {
+      enum { codim = 0 };
       // check if we have index for given entity
-      assert( en.isLeaf () );
-
-      // assert if index was not set yet 
-      assert( leafIndex[ set.index(en) ] >= 0 ); 
-      return leafIndex[ set.index(en) ];
+      assert(cls[codim].index ( hset.index( en ) ) >= 0 );
+      return cls[codim].index ( hset.index( en ) );
     }
   };
 
   //! if codim > codim of entity use subIndex 
-  template <class EntityType,class IndexSetType>
-  struct IndexWrapper<EntityType,IndexSetType,0,2>
+  template <class HSetImp, class CodimLeafSet, class EntityType>
+  struct IndexWrapper<HSetImp,CodimLeafSet,EntityType,0,2>
   {
-    static inline int index (EntityType & en , const IndexSetType & set ,
-        const IndexArray<int> & leafIndex, int num )
+    static inline int index (const HSetImp & hset, const CodimLeafSet (&cls)[ncodim], 
+                             const EntityType & en , int num )
     {
-      return en.template subIndex<2> (num);
+      enum { codim = 2 };
+      //assert(cls[codim].index ( hset.template subIndex<codim>( en , num ) ) >= 0 );
+      //return cls[codim].index ( hset.template subIndex<codim>( en , num ) );
+      return hset.template subIndex<codim>( en , num ) ;
     }
   };
 
-  template <class EntityType,class IndexSetType>
-  struct IndexWrapper<EntityType,IndexSetType,0,3>
+  //! if codim > codim of entity use subIndex 
+  template <class HSetImp, class CodimLeafSet, class EntityType>
+  struct IndexWrapper<HSetImp,CodimLeafSet,EntityType,0,3>
   {
-    static inline int index (EntityType & en , const IndexSetType & set ,
-        const IndexArray<int> & leafIndex, int num )
+    static inline int index (const HSetImp & hset, const CodimLeafSet (&cls)[ncodim], 
+                             const EntityType & en , int num )
     {
-      return en.template subIndex<3> (num);
+      enum { codim = 3 };
+      assert(cls[codim].index ( hset.template subIndex<codim>( en , num ) ) >= 0 );
+      return cls[codim].index ( hset.template subIndex<codim>( en , num ) );
     }
   };
-  
+
   //******************************************************************
   //  partial specialisation for the insertion of all sub entity indices 
   //******************************************************************
@@ -181,9 +187,9 @@ private:
   };
   
   // my type, to be revised 
-  enum { myType = 2 };
+  enum { myType = 5 };
 
-  CodimLeafIndexSet codimLeafSet_[ncodim];
+  mutable CodimLeafIndexSet codimLeafSet_[ncodim];
 
   typedef typename GridType :: HierarchicIndexSet HIndexSetType;
   typedef typename GridType :: template Codim<0> :: Entity EntityCodim0Type;
@@ -192,7 +198,7 @@ private:
   enum { dim = GridType :: dimension };
 
   // flag for codim is in use or not 
-  bool codimUsed_ [ncodim];
+  mutable bool codimUsed_ [ncodim];
   
   // true if all entities that we use are marked as USED 
   bool marked_;
@@ -200,7 +206,8 @@ private:
   // true if the used entities were marked by grid walkthrough 
   bool markAllU_;
 
-  bool higherCodims_;
+  // true if any of the higher codims is used 
+  mutable bool higherCodims_;
 
 public:
   //! Constructor
@@ -209,22 +216,23 @@ public:
     hIndexSet_( grid.hierarchicIndexSet() ) , 
     marked_ (false) , markAllU_ (false) , higherCodims_ (false) 
   {
-    for(int i=0; i<ncodim; i++) codimUsed_[i] = true;
+    codimUsed_[0] = true;
+    for(int i=1; i<ncodim; i++) codimUsed_[i] = false;
     for(int i=0; i<ncodim; i++) codimLeafSet_[i].setCodim( i );
+
     resizeVectors();
 
     // give all entities that lie below the old entities new numbers 
     markAllUsed ();
-    //resize();
-    markAllU_ = false;
-    for(int i=1; i<ncodim; i++) codimUsed_[i] = false;
   }
 
   //! Destructor
   virtual ~AdaptiveLeafIndexSet () {};
 
+  //! return type of index set, for GrapeDataIO
   int type () const { return myType; }
 
+  //! insert index for father, mark childs index for removal  
   template <class EntityType>
   void restrictLocal ( EntityType &father, EntityType &son, bool initialize ) 
   {
@@ -232,33 +240,41 @@ public:
     insertNewIndex( father );
   }
 
+  //! insert indices for children , mark fathers index for removal  
   template <class EntityType>
   void prolongLocal ( EntityType &father, EntityType &son, bool initialize ) 
   {
     insertNewIndex( son );
     removeOldIndex( father );
   }
-  
+ 
+  //! 
   void insertNewIndex (const typename GridType::template Codim<0>::Entity & en )  {
     // here we have to add the support of higher codims 
     resizeVectors();
-
-    //std::cout << "Insert new Entity = " << en.globalIndex() << "\n";
-    //std::cout << leafIndex_.size() << " l|g " << this->grid_.global_size(0) << "\n";
     
     this->insert( en );
-    marked_ = false;
+    marked_ = true;
   }
 
   //! Unregister entity which will be removed from the grid
   void removeOldIndex (const typename GridType::template Codim<0>::Entity & en )
   {
+    //std::cout << "Remvoe Index of el = " << hIndexSet_.index(en) << "\n";
+    codimLeafSet_[0].remove ( hIndexSet_.index(en) );
   }
 
   //! reallocate the vector for new size
   void resizeVectors()
   {
-    for(int i=0; i<ncodim; i++) codimLeafSet_[i].resize( hIndexSet_.size(i) );
+    codimLeafSet_[0].resize( hIndexSet_.size(0) );
+    if(higherCodims_)
+    {
+      for(int i=1; i<ncodim; i++) 
+      {  
+        if(codimUsed_[i]) codimLeafSet_[i].resize( hIndexSet_.size(i) );
+      }
+    }
   }
 
   //! if grid has changed, resize index vectors, and create 
@@ -286,9 +302,7 @@ public:
     if( (!marked_) && markAllU_ ) markAllUsed(); 
 
     // true if a least one dof must be copied 
-    bool haveToCopy = false;
-
-    haveToCopy = (codimLeafSet_[0].compress()) ? true : haveToCopy;
+    bool haveToCopy = codimLeafSet_[0].compress(); 
     if(higherCodims_)
     {
       for(int i=1; i<ncodim; i++) 
@@ -303,20 +317,23 @@ public:
   }
 
   //! return subIndex of given entity
-  template <int cd, class EntityType>
-  int subIndex (const EntityType & en, int i) const
+  template <int cd>
+  int subIndex (const EntityCodim0Type & en, int i) const
   {
-    assert(cd == dim);
-    return en.template subIndex<cd>(i);
+    assert( cd > 0 ); 
+    assert( cd < ncodim );
+    if(!codimUsed_[cd]) this->template setUpCodimSet<cd>();
+    return codimLeafSet_[cd].index ( hIndexSet_. template subIndex<cd> (en,i) );   
+    //return hIndexSet_. template subIndex<cd> (en,i) ;
   }
 
   //! returns vector with geometry tpyes this index set has indices for
-  const std::vector <GeometryType > & geomTypes () const 
+  const std::vector <GeometryType> & geomTypes () const 
   {
     return hIndexSet_.geomTypes();
   }
 
-  // memorise index 
+  //! memorise index 
   void insert (const EntityCodim0Type & en)
   {
     codimLeafSet_[0].insert ( hIndexSet_.index(en) );
@@ -327,6 +344,21 @@ public:
     }
   }
 
+  //! set indices to unsed  
+  void remove (const EntityCodim0Type & en)
+  {
+    std::cout << "Remove el = "<< hIndexSet_.index(en) << "\n";
+    codimLeafSet_[0].remove ( hIndexSet_.index(en) );
+    /*
+    if(higherCodims_)
+    {
+      PartialSpec<HIndexSetType,CodimLeafIndexSet,EntityCodim0Type,ncodim-1> :: 
+        iterateCodims ( hIndexSet_, codimLeafSet_, en , codimUsed_ ); 
+    }
+    */
+  }
+
+  //! return approximate size that is used during restriction 
   int additionalSizeEstimate () const 
   { 
     int addSize = 0; 
@@ -337,26 +369,26 @@ public:
   //! return size of grid entities per level and codim 
   int size ( int codim ) const
   {
-    return codimLeafSet_[codim].size();
+    if(codim == 0) return codimLeafSet_[codim].size();
+    return hIndexSet_.size(codim);
   }
-
+  
   //! return global index 
   //! for dof mapper 
   template <int codim, class EntityType>
-  int index (EntityType & en, int num) const
+  int index (const EntityType & en, int num) const
   {
-    //return IndexWrapper<EntityType,HIndexSetType,EntityType::codimension,codim>::
-    //          index(en,hIndexSet_,codimLeafSet_,num);
-    return codimLeafSet_[0].index( hIndexSet_.index( en ) );
+    return IndexWrapper<HIndexSetType,CodimLeafIndexSet,EntityType,EntityType::codimension,codim>::
+           index(hIndexSet_,codimLeafSet_,en,num);
   }
   
   //! return global index 
   //! for dof mapper 
   template <class EntityType>
-  int index (EntityType & en) const
+  int index (const EntityType & en) const
   {
     enum { codim = EntityType::codimension };
-    assert ( codimLeafSet_[codim].index( hIndexSet_.index(en) ) >= 0 );
+    assert(codimLeafSet_[codim].index( hIndexSet_.index(en) ) >= 0 );
     return codimLeafSet_[codim].index( hIndexSet_.index(en) );
   }
   
@@ -419,15 +451,33 @@ private:
   {
     typedef typename GridType:: template Codim<0> :: LeafIterator LeafIteratorType; 
     // walk over leaf level on locate all needed entities  
-
-    LeafIteratorType endit  = this->grid_.template leafend<0>   ( this->grid_.maxlevel());
-    for(LeafIteratorType it = this->grid_.template leafbegin<0> ( this->grid_.maxlevel()); 
+    LeafIteratorType endit  = this->grid_.template leafend<0>   ();
+    for(LeafIteratorType it = this->grid_.template leafbegin<0> (); 
         it != endit ; ++it )
     {
       this->insert( *it );
     }
-    
     marked_ = true;
+  }
+  
+  //! mark indices that are still used and give new indices to 
+  //! elements that need one 
+  template <int codim>
+  void setUpCodimSet () const
+  {
+    // resize if necessary 
+    codimLeafSet_[codim].resize( hIndexSet_.size(codim) );
+    
+    typedef typename GridType:: template Codim<codim> :: LeafIterator LeafIteratorType; 
+    // walk over leaf level on locate all needed entities  
+    LeafIteratorType endit  = this->grid_.template leafend<codim>  ();
+    for(LeafIteratorType it = this->grid_.template leafbegin<codim>(); 
+        it != endit ; ++it )
+    {
+      codimLeafSet_[codim].insert( hIndexSet_.index ( *it ) );
+    }
+    codimUsed_[codim] = true;
+    higherCodims_ = true;
   }
 
   //! give all entities that lie below the old entities new numbers 
@@ -541,15 +591,23 @@ public:
     
     int type = myType;
     xdr_int ( &xdrs, &type );
-    if(type != myType)
+    if( (type != 2) && (type != myType) )
     {
       std::cerr << "\nERROR: AdaptiveLeafIndexSet: wrong type choosen! \n\n";
       assert(type == myType);
     }
-    for(int i=0; i<ncodim; i++) codimLeafSet_[i].processXdr(&xdrs);
+
+    if(type == 2) 
+      codimLeafSet_[0].processXdr(&xdrs);
+    else 
+    {
+      for(int i=0; i<ncodim; i++) codimLeafSet_[i].processXdr(&xdrs);
+    }
 
     xdr_destroy(&xdrs);
     fclose(file);
+
+    print("read Index set ");
     return true;
   }
 
@@ -564,9 +622,6 @@ public:
 class CodimLeafIndexSet
 {
 private:
-  // my type, to be revised 
-  enum { myType = 2 };
-  
   enum INDEXSTATE { NEW, USED, UNUSED };
 
   // the mapping of the global to leaf index 
@@ -597,15 +652,10 @@ public:
   {
   }
 
+  // set codim, because we can't use constructor 
   void setCodim (int codim) 
   {
     myCodim_ = codim;
-  }
-
-  //! Unregister entity which will be removed from the grid
-  void removeOldIndex (int num)
-  {
-    state_[ num ] = UNUSED;
   }
 
   //! reallocate the vector for new size
@@ -677,6 +727,8 @@ public:
 
     // copy index, for copying in dof manager 
     oldLeafIndex_ = leafIndex_;
+
+    //std::cout << "Number of holes = " << actHole << "\n";
     
     // close holes 
     //
@@ -731,12 +783,25 @@ public:
   {
     return nextFreeIndex_;
   }
+  
+  //! return size of grid entities per level and codim 
+  int realSize () const
+  {
+    return leafIndex_.size();
+  }
 
   //! return leaf index for given hierarchic number  
   int index ( int num ) const
   {
     // assert if index was not set yet 
     return leafIndex_ [ num ];
+  }
+  
+  //! return state of index for given hierarchic number  
+  int state ( int num ) const
+  {
+    // assert if index was not set yet 
+    return state_ [ num ];
   }
   
   //! return size of grid entities per level and codim 
@@ -779,6 +844,17 @@ public:
     state_.processXdr(xdrs);
     return true;
   }
+  
+  // insert element and create index for element number  
+  void remove (int num )
+  {
+    //std::cout << "Remove Element " << num << "\n";
+    assert(num < leafIndex_.size() );
+    state_[num] = UNUSED;
+  }
+  
+  void print (const char * msg, bool oldtoo = false ) const;
+
 }; // end of class AdaptiveLeafIndexSet 
 
 
@@ -895,22 +971,23 @@ inline void AdaptiveLeafIndexSet<GridType>::
 print (const char * msg, bool oldtoo ) const 
 {
 #ifdef DEBUG_LEAFINDEXSET
-    std::cout << "Size " << leafIndex_.size() << "\n";
+    const CodimLeafIndexSet & cls = codimLeafSet_[0];
+    std::cout << "Size " << cls.size() << "\n";
     std::cout << "i    |   val    | state  \n";
     int actSize =0;
-    for(int i=0; i<leafIndex_.size(); i++)
+    
+    for(int i=0; i< cls.realSize(); i++)
     {
-      if(state_[i] != UNUSED) actSize++;
-      std::cout << i << " | " << leafIndex_[i] << " | " << state_[i];
+      if( cls.state( i ) != UNUSED ) actSize ++;
+      std::cout << i << " | " << cls.index(i) << " | " << cls.state( i );
       std::cout << "\n";
     }
     
-    std::cout << "Real Size " << nextFreeIndex_ << "\n";
+    std::cout << "Real Size " << cls.size() << "\n";
     std::cout << "ActSize   " << actSize << "\n";
-    std::cout << "Grid global Size " << hIndexSet_.size(myCodim_) << "\n";
+    std::cout << "Grid global Size " << hIndexSet_.size(0) << "\n";
 
     std::cout << msg;
-    return ;
 #endif
 }
 
