@@ -160,7 +160,7 @@ public:
     ConstDofIteratorType arg_it = arg.dbegin();
       
     const BaseFunctionSetType & baseSet = functionSpace_.getBaseFunctionSet( en );
-    int numOfBaseFct = baseSet.getNumberOfBaseFunctions();  
+    int numOfBaseFct = baseSet.numBaseFunctions();  
 
     assert( numOfBaseFct <= maxnumOfBaseFct );
 
@@ -332,7 +332,7 @@ protected:
     for( ; it != endit; ++it )
     {
       const BaseFunctionSetType & baseSet = functionSpace_.getBaseFunctionSet( *it );
-      const int numOfBaseFct = baseSet.getNumberOfBaseFunctions();  
+      const int numOfBaseFct = baseSet.numBaseFunctions();  
       
       // setup matrix 
       getLocalMatrix( *it, numOfBaseFct, mat);
