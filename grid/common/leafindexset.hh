@@ -83,7 +83,9 @@ public:
 class CodimLeafIndexSet;
 
 template <class GridType>
-class AdaptiveLeafIndexSet : public DefaultGridIndexSetBase <GridType>
+class AdaptiveLeafIndexSet : 
+  public IndexSet<GridType, AdaptiveLeafIndexSet<GridType> >,
+  public DefaultGridIndexSetBase <GridType>
 {
 public:
   enum { ncodim = GridType::dimension + 1 };
