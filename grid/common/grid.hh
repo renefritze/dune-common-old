@@ -175,6 +175,9 @@ template<class GridImp, template<class> class HierarchicIteratorImp> class Hiera
 template<int codim, PartitionIteratorType pitype, class GridImp,
          template<int,PartitionIteratorType,class> class LeafIteratorImp> class LeafIterator;
 template<class GridImp> class GenericLeafIterator;
+template<class GridImp, class IndexSetImp> class IndexSet;
+template<class GridImp, class IdSetImp, class IdTypeImp> class IdSet;
+
 
 /** @} */
   
@@ -185,35 +188,42 @@ template<class GridImp> class GenericLeafIterator;
 //! Grid interface class
 //! This class should actually be called GridInterface since it defines the
 //! basic interface for all grid classes
-template< int dim, int dimworld, class ct, class GridImp>  
+template< int dim, int dimworld, class ct, class GridFamily>  
 class Grid {
+  typedef typename GridFamily::Traits::Grid GridImp;
 public:
+
   template <int cd>
   struct Codim
   {
     // IMPORTANT: codim<codim>::Geometry == Geometry<dim-codim,dimworld>
-    typedef typename GridImp::Traits::template Codim<cd>::Geometry Geometry;
-    typedef typename GridImp::Traits::template Codim<cd>::LocalGeometry LocalGeometry;
+    typedef typename GridFamily::Traits::template Codim<cd>::Geometry Geometry;
+    typedef typename GridFamily::Traits::template Codim<cd>::LocalGeometry LocalGeometry;
 
-    typedef typename GridImp::Traits::template Codim<cd>::Entity Entity;
+    typedef typename GridFamily::Traits::template Codim<cd>::Entity Entity;
 
-    typedef typename GridImp::Traits::template Codim<cd>::LevelIterator LevelIterator;
+    typedef typename GridFamily::Traits::template Codim<cd>::LevelIterator LevelIterator;
 
-    typedef typename GridImp::Traits::template Codim<cd>::LeafIterator LeafIterator;
+    typedef typename GridFamily::Traits::template Codim<cd>::LeafIterator LeafIterator;
     
-    typedef typename GridImp::Traits::template Codim<cd>::EntityPointer EntityPointer;
+    typedef typename GridFamily::Traits::template Codim<cd>::EntityPointer EntityPointer;
 
     template <PartitionIteratorType pitype>
     struct Partition
     {
-      typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator LevelIterator;
-      typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator LeafIterator;
+      typedef typename GridFamily::Traits::template Codim<cd>::template Partition<pitype>::LevelIterator LevelIterator;
+      typedef typename GridFamily::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator LeafIterator;
     };
   
-    typedef typename GridImp::Traits::HierarchicIterator HierarchicIterator;
+    typedef typename GridFamily::Traits::HierarchicIterator HierarchicIterator;
 
-    typedef typename GridImp::Traits::IntersectionIterator IntersectionIterator;
-    typedef typename GridImp::Traits::BoundaryEntity BoundaryEntity;
+    typedef typename GridFamily::Traits::IntersectionIterator IntersectionIterator;
+    typedef typename GridFamily::Traits::BoundaryEntity BoundaryEntity;
+
+ 	typedef typename GridFamily::Traits::LevelIndexSet LevelIndexSet;
+ 	typedef typename GridFamily::Traits::LeafIndexSet LeafIndexSet;
+ 	typedef typename GridFamily::Traits::GlobalIdSet GlobalIdSet;
+ 	typedef typename GridFamily::Traits::LocalIdSet LocalIdSet;
   };
 
   //! A grid exports its dimension
@@ -227,7 +237,7 @@ public:
 
   /*! Return maximum level defined in this grid. Levels are numbered
     0 ... maxlevel with 0 the coarsest level.
-     */
+  */
   int maxlevel() const
     {
       return asImp().maxlevel();
@@ -304,6 +314,30 @@ public:
       asImp().template communicate<T,P,codim>(t,iftype,dir,level);
     }
 
+  // The new index sets from DDM 11.07.2005
+  const typename Codim<0>::GlobalIdSet& globalidset() const
+  {
+	return asImp().globalidset();
+  }
+  
+  const typename Codim<0>::LocalIdSet& localidset() const
+  {
+	return asImp().localidset();
+
+  }
+
+  const typename Codim<0>::LevelIndexSet& levelindexset(int level) const
+  {
+	return asImp().levelindexset();
+
+  }
+
+  const typename Codim<0>::LeafIndexSet& leafindexset() const
+  {
+	return asImp().leafindexset();
+  }
+
+
 private:
   //!  Barton-Nackman trick 
   GridImp& asImp () {return static_cast<GridImp &> (*this);}
@@ -357,9 +391,11 @@ private:
 template<int dim, 
          int dimworld, 
          class ct, 
-         class GridImp>  
-class GridDefault : public Grid <dim,dimworld,ct,GridImp> 
+         class GridFamily>  
+class GridDefault : public Grid <dim,dimworld,ct,GridFamily> 
 {
+  typedef typename GridFamily::Traits::Grid GridImp;
+
 public:
   //***************************************************************
   //  Interface for Adaptation
@@ -388,7 +424,7 @@ public:
   template <class T>
   bool mark( int refCount, T & e )
     {
-      IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridImp>::template Codim<0>::EntityPointer>::exists >::yes();
+      IsTrue<Conversion<T, typename Grid<dim,dimworld,ct,GridFamily>::template Codim<0>::EntityPointer>::exists >::yes();
       return false;
     }
 
@@ -423,9 +459,13 @@ template <int dim, int dimw, class GridImp,
           template<int,PartitionIteratorType,class> class LevelIteratorImp,
           template<class> class IntersectionIteratorImp,
           template<class> class HierarchicIteratorImp,
-          template<int,PartitionIteratorType,class> class LeafIteratorImp>
+          template<int,PartitionIteratorType,class> class LeafIteratorImp,
+		  class LevelIndexSetImp, class LeafIndexSetImp,
+		  class GlobalIdSetImp, class GlobaIdType, class LocalIdSetImp, class LocalIdType>
 struct GridTraits
 {
+  typedef GridImp Grid;
+
   typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorImp> IntersectionIterator;
 
   typedef Dune::HierarchicIterator<const GridImp, HierarchicIteratorImp> HierarchicIterator;
@@ -455,6 +495,11 @@ struct GridTraits
     };
 
   };
+
+  typedef IndexSet<GridImp,LevelIndexSetImp> LevelIndexSet;
+  typedef IndexSet<GridImp,LeafIndexSetImp> LeafIndexSet;
+  typedef IdSet<GridImp,GlobalIdSetImp,GlobaIdType> GlobalIdSet;
+  typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
 };
 
 /*! \internal

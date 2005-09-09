@@ -914,13 +914,13 @@ inline void SGrid<dim,dimworld>::makeSGrid (const int* N_,
     for (int i=0; i<dim; i++) 
         h[0][i] = (H[i]-low[i])/((sgrid_ctype)N[0][i]);
     
-    dinfo << "level=" << L-1 << " size=(" << N[L-1][0];
-    for (int i=1; i<dim; i++) dinfo << "," <<  N[L-1][i];
-    dinfo << ")" << std::endl;
+	dinfo << "level=" << L-1 << " size=(" << N[L-1][0];
+	for (int i=1; i<dim; i++) dinfo << "," <<  N[L-1][i];
+	dinfo << ")" << std::endl;
 }
 
 template<int dim, int dimworld>
-inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* H_)
+inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* H_) : theglobalidset(*this)
 {
     IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
   
@@ -929,18 +929,20 @@ inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* H_)
         L_[i] = 0;
 
     makeSGrid(N_,L_, H_);
+	indexsets.push_back( new SGridLevelIndexSet<SGrid<dim,dimworld> >(*this,0) );
 }
 
 template<int dim, int dimworld>
-inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_)
+inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_)  : theglobalidset(*this)
 {
   IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
 
   makeSGrid(N_, L_, H_);
+  indexsets.push_back( new SGridLevelIndexSet<SGrid<dim,dimworld> >(*this,0) );
 }
 
 template<int dim, int dimworld>
-inline SGrid<dim,dimworld>::SGrid ()
+inline SGrid<dim,dimworld>::SGrid ()  : theglobalidset(*this)
 {
   int N_[dim];
   sgrid_ctype L_[dim];
@@ -953,6 +955,7 @@ inline SGrid<dim,dimworld>::SGrid ()
   }
 
   makeSGrid(N_, L_, H_);
+  indexsets.push_back( new SGridLevelIndexSet<SGrid<dim,dimworld> >(*this,0) );
 }
 
 template<int dim, int dimworld>
@@ -973,6 +976,8 @@ inline void SGrid<dim,dimworld>::globalRefine (int refCount)
     std::cout << "level=" << L-1 << " size=(" << N[L-1][0];
     for (int i=1; i<dim; i++) std::cout << "," <<  N[L-1][i];
     std::cout << ")" << std::endl;
+
+	indexsets.push_back( new SGridLevelIndexSet<SGrid<dim,dimworld> >(*this,maxlevel()) );
   }
 }
 
