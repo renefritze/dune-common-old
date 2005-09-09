@@ -315,26 +315,26 @@ public:
     }
 
   // The new index sets from DDM 11.07.2005
-  const typename Codim<0>::GlobalIdSet& globalidset() const
+  const typename Codim<0>::GlobalIdSet& globalIdSet() const
   {
-	return asImp().globalidset();
+	return asImp().globalIdSet();
   }
   
-  const typename Codim<0>::LocalIdSet& localidset() const
+  const typename Codim<0>::LocalIdSet& localIdSet() const
   {
-	return asImp().localidset();
+	return asImp().localIdSet();
 
   }
 
-  const typename Codim<0>::LevelIndexSet& levelindexset(int level) const
+  const typename Codim<0>::LevelIndexSet& levelIndexSet(int level) const
   {
-	return asImp().levelindexset();
+	return asImp().levelIndexSet();
 
   }
 
-  const typename Codim<0>::LeafIndexSet& leafindexset() const
+  const typename Codim<0>::LeafIndexSet& leafIndexSet() const
   {
-	return asImp().leafindexset();
+	return asImp().leafIndexSet();
   }
 
 
