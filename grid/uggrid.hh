@@ -89,6 +89,27 @@
 
 namespace Dune {
 
+template<int dim, int dimworld>
+struct UGGridFamily
+{
+  typedef GridTraits<dim,dimworld,Dune::UGGrid<dim,dimworld>,
+                     UGGridGeometry,
+                     UGGridEntity,
+                     UGGridBoundaryEntity,
+                     UGGridEntityPointer,
+                     UGGridLevelIterator,
+                     UGGridIntersectionIterator,
+                     UGGridHierarchicIterator,
+                     UGGridLeafIterator,
+                     UGGridLevelIndexSet<dim>,
+                     UGGridLeafIndexSet<dim>,
+                     UGGridGlobalIdSet< UGGrid<dim,dimworld> >,
+                     typename UGGridGlobalIdSet< UGGrid<dim,dimworld> >::GlobalIdType,
+                     UGGridLocalIdSet<dim>,
+                     typename UGGridLocalIdSet<dim>::LocalIdType> Traits;
+};
+
+
 //**********************************************************************
 //
 // --UGGrid
@@ -152,7 +173,7 @@ namespace Dune {
   sander@math.fu-berlin.de
  */
 template <int dim, int dimworld>
-class UGGrid : public GridDefault  <dim, dimworld, double, UGGrid<dim,dimworld> >
+class UGGrid : public GridDefault  <dim, dimworld, double, UGGridFamily<dim,dimworld> >
 {
     
     friend class UGGridEntity <0,dim,UGGrid<dim,dimworld> >;
@@ -162,7 +183,7 @@ class UGGrid : public GridDefault  <dim, dimworld, double, UGGrid<dim,dimworld> 
 
     friend class UGGridLevelIndexSet<dim>;
     friend class UGGridLeafIndexSet<dim>;
-    friend class UGGridGlobalIdSet<dim>;
+    friend class UGGridGlobalIdSet< UGGrid<dim,dimworld> >;
     friend class UGGridLocalIdSet<dim>;
 
     template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
@@ -175,6 +196,7 @@ class UGGrid : public GridDefault  <dim, dimworld, double, UGGrid<dim,dimworld> 
       // The Interface Methods
       //**********************************************************
 public:  
+#if 0
         /** \brief The standard Dune grid traits */
       typedef GridTraits<dim,
                          dimworld,
@@ -188,10 +210,15 @@ public:
                          UGGridHierarchicIterator,
                          UGGridLeafIterator> Traits;
     
+
     typedef UGGridLevelIndexSet<dim> LevelIndexSet;
+
+#endif
     typedef UGGridLeafIndexSet<dim>  LeafIndexSet;
-    typedef UGGridGlobalIdSet<dim>   GlobalIdSet;
+    typedef UGGridGlobalIdSet< UGGrid<dim, dimworld> >   GlobalIdSet;
     typedef UGGridLocalIdSet<dim>    LocalIdSet;
+
+    typedef typename UGGridFamily<dim,dimworld>::Traits Traits;
 
     //! The type used to store coordinates
     typedef double ctype;
@@ -297,7 +324,8 @@ public:
     }
     
     /** \brief Access to the LevelIndexSets */
-    const LevelIndexSet& levelIndexSet(int level) const
+    //const LevelIndexSet& levelIndexSet(int level) const
+    const typename Traits::LevelIndexSet& levelIndexSet(int level) const
     {
 	return levelIndexSets_[level];
     }
@@ -478,7 +506,7 @@ private:
     std::string name_;
 
     // Our set of level indices
-    std::vector<LevelIndexSet> levelIndexSets_;
+    std::vector<typename Traits::LevelIndexSet> levelIndexSets_;
 
     LeafIndexSet leafIndexSet_;
 
