@@ -70,7 +70,10 @@ namespace Dune {
 
   //! hierarchic index set of ALU3dGrid 
   template <int dim, int dimworld, ALU3dGridElementType elType> 
-  class ALU3dGridGlobalIdSet
+  class ALU3dGridGlobalIdSet : 
+    public IdSet < ALU3dGrid<dim,dimworld,elType> , 
+                   ALU3dGridGlobalIdSet<dim,dimworld,elType> ,
+                   int > 
   {
     typedef ALU3dGrid<dim,dimworld,elType> GridType;
     typedef typename GridType :: HierarchicIndexSet  HierarchicIndexSetType;
@@ -101,6 +104,15 @@ namespace Dune {
       return codimStart_[cd] + hset_.index(ep);
     }
 
+    //! return global id of given entity
+    template <int codim>
+    int id (const typename GridType:: template Codim<codim> :: Entity & ep) const
+    {
+      //enum { cd = EntityType :: codimension };
+      assert( hset_.size(codim) < codimMultiplier );
+      return codimStart_[codim] + hset_.index(ep);
+    }
+
     //! return subId of given entity
     template <int cd>
     int subId (const EntityCodim0Type & ep, int i) const
@@ -120,7 +132,10 @@ namespace Dune {
 
   //! hierarchic index set of ALU3dGrid 
   template <int dim, int dimworld, ALU3dGridElementType elType> 
-  class ALU3dGridLocalIdSet
+  class ALU3dGridLocalIdSet : 
+    public IdSet < ALU3dGrid<dim,dimworld,elType> , 
+                   ALU3dGridLocalIdSet<dim,dimworld,elType> ,
+                   int > 
   {
     typedef ALU3dGrid<dim,dimworld,elType> GridType;
     typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
@@ -148,6 +163,15 @@ namespace Dune {
       enum { cd = EntityType :: codimension };
       assert( hset_.size(cd) < codimMultiplier );
       return codimStart_[cd] + hset_.index(ep);
+    }
+
+    //! return global id of given entity
+    template <int codim>
+    int id (const typename GridType:: template Codim<codim> :: Entity & ep) const
+    {
+      //enum { cd = EntityType :: codimension };
+      assert( hset_.size(codim) < codimMultiplier );
+      return codimStart_[codim] + hset_.index(ep);
     }
 
     //! return subId of given entity
