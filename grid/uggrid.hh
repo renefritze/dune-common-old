@@ -104,9 +104,9 @@ struct UGGridFamily
                      UGGridLevelIndexSet<dim>,
                      UGGridLeafIndexSet<dim>,
                      UGGridGlobalIdSet< UGGrid<dim,dimworld> >,
-                     typename UGGridGlobalIdSet< UGGrid<dim,dimworld> >::GlobalIdType,
+                     unsigned int,
                      UGGridLocalIdSet<dim>,
-                     typename UGGridLocalIdSet<dim>::LocalIdType> Traits;
+                     unsigned int> Traits;
 };
 
 
@@ -213,10 +213,10 @@ public:
 
     typedef UGGridLevelIndexSet<dim> LevelIndexSet;
 
-#endif
     typedef UGGridLeafIndexSet<dim>  LeafIndexSet;
     typedef UGGridGlobalIdSet< UGGrid<dim, dimworld> >   GlobalIdSet;
     typedef UGGridLocalIdSet<dim>    LocalIdSet;
+#endif
 
     typedef typename UGGridFamily<dim,dimworld>::Traits Traits;
 
@@ -312,13 +312,13 @@ public:
   }
 
     /** \brief Access to the GlobalIdSet */
-    const GlobalIdSet& globalIdSet() const
+    const typename Traits::GlobalIdSet& globalIdSet() const
     {
 	return globalIdSet_;
     }
     
     /** \brief Access to the LocalIdSet */
-    const LocalIdSet& localIdSet() const
+    const typename Traits::LocalIdSet& localIdSet() const
     {
 	return localIdSet_;
     }
@@ -331,7 +331,7 @@ public:
     }
     
     /** \brief Access to the LeafIndexSet */
-    const LeafIndexSet& leafIndexSet() const
+    const typename Traits::LeafIndexSet& leafIndexSet() const
     {
 	return leafIndexSet_;
     }
@@ -508,11 +508,11 @@ private:
     // Our set of level indices
     std::vector<typename Traits::LevelIndexSet> levelIndexSets_;
 
-    LeafIndexSet leafIndexSet_;
+    typename Traits::LeafIndexSet leafIndexSet_;
 
-    GlobalIdSet globalIdSet_;
+    typename Traits::GlobalIdSet globalIdSet_;
 
-    LocalIdSet localIdSet_;
+    typename Traits::LocalIdSet localIdSet_;
 
     //! Marks whether the UG environment heap size is taken from
     //! an existing defaults file or whether the values from
