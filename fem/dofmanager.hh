@@ -985,10 +985,10 @@ inline DofManager<GridType>::~DofManager ()
 {
   if(memList_.size() > 0)
   {
-    while( indexList_.rbegin() != indexList_.rend())
+    while( memList_.rbegin() != memList_.rend())
     {
       MemObjectInterface * mobj = (* memList_.rbegin() );
-      indexList_.erase( indexList_.rbegin() );
+      memList_.pop_back();
       
       // alloc new mem an copy old mem 
       dverb << "Removing '" << mobj->name() << "' from DofManager!\n";  
@@ -1001,7 +1001,7 @@ inline DofManager<GridType>::~DofManager ()
     while ( indexList_.rbegin() != indexList_.rend()) 
     {
       IndexSetObjectInterface * iobj = (* indexList_.rbegin() );
-      indexList_.erase( indexList_.rbegin() );
+      indexList_.pop_back();
       if(iobj) delete iobj;
     }
   }
