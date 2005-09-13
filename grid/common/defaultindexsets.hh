@@ -568,7 +568,7 @@ public:
 
   //! return LevelIndex of given entity 
   template<int cd>
-  int index (const typename GridImp::template Codim<cc>::Entity& en) const 
+  int index (const typename GridImp::template Codim<cd>::Entity& en) const 
   {
     assert( level_ == en.level() );
     return levelIndex_[cd][ hIndexSet_.index(en) ];
