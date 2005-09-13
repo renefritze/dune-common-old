@@ -3757,7 +3757,7 @@ inline int AlbertaGrid < dim, dimworld >::global_size (int codim) const
 template < int dim, int dimworld >
 inline int AlbertaGrid < dim, dimworld >::size (int level, int codim) const
 {
-  return this->levelIndexSet(level).size(codim); 
+  return this->levelIndexSet(level).size(codim,simplex); 
 }
 
 template < int dim, int dimworld > 
