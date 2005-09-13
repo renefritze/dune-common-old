@@ -124,8 +124,8 @@ namespace Dune
 	bool leading=false;
 
 	// print from left to right
-	for (unsigned int i=n-1; i>=0; i--)
-	  for (unsigned int d=hexdigits-1; d>=0; d--)
+	for (int i=n-1; i>=0; i--)
+	  for (int d=hexdigits-1; d>=0; d--)
 		{
 		  // extract one hex digit
 		  int current = (digit[i]>>(d*4))&0xF;
@@ -298,12 +298,12 @@ namespace Dune
 
 	// multiples of bits
 	int j=shift/bits;
-	for (unsigned int i=n-1-j; i>=0; i--)
+	for (int i=n-1-j; i>=0; i--)
 	  result.digit[i+j] = digit[i];
 
 	// remainder
 	j=shift%bits;
-	for (unsigned int i=n-1; i>=0; i--)
+	for (int i=n-1; i>=0; i--)
 	  {
 		unsigned int temp = result.digit[i];
 		temp = temp<<j;
@@ -357,7 +357,7 @@ namespace Dune
   template <int k>
   inline bool bigunsignedint<k>::operator< (const bigunsignedint<k>& x) const
   {
-	for (unsigned int i=n-1; i>=0; i--) 
+	for (int i=n-1; i>=0; i--) 
 	  if (digit[i]<x.digit[i]) return true;
 	  else if (digit[i]>x.digit[i]) return false;
 	return false;
@@ -366,7 +366,7 @@ namespace Dune
   template <int k>
   inline bool bigunsignedint<k>::operator<= (const bigunsignedint<k>& x) const
   {
-	for (unsigned int i=n-1; i>=0; i--) 
+	for (int i=n-1; i>=0; i--) 
 	  if (digit[i]<x.digit[i]) return true;
 	  else if (digit[i]>x.digit[i]) return false;
 	return true;

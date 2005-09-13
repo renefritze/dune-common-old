@@ -328,7 +328,7 @@ public:
      This does the same as <code>entity<cc>(i).index()</code>, but it is
      usually a lot faster.
    */
-  template <int cc> int subIndex ( int i ) const
+  template <int cc> int subIndex ( int i ) const DUNE_DEPRECATED
     {
       return realEntity.subIndex<cc>(i);
     }
@@ -750,7 +750,7 @@ public:
    * Default implementation for access to subIndex via interface method entity
    * default is to return the index of the sub entity, is very slow, but works
    */
-  template <int cc> int subIndex ( int i ) const 
+  template <int cc> int subIndex ( int i ) const DUNE_DEPRECATED
     {
       return (asImp().template entity<cc>(i))->index();
     }
