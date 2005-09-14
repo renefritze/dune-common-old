@@ -341,8 +341,7 @@ inline int SEntity<0,dim,GridImp>::count () const
 template<int dim, class GridImp> template<int cc>
 inline int SEntity<0,dim,GridImp>::subCompressedIndex (int i) const
 {
-  int cindex;
-  if(cc == 0) // the vertex case 
+  if(cc == dim) // the vertex case 
 	{
 	  // find expanded coordinates of entity in reference cube
 	  // has components in {0,1,2}
@@ -352,13 +351,12 @@ inline int SEntity<0,dim,GridImp>::subCompressedIndex (int i) const
 	  
 	  zref = SUnitCubeMapper<dim>::mapper.z(i,dim);
 	  for (int i=0; i<dim; i++) zentity[i] = this->z[i] + zref[i] - 1;
-	  cindex = this->grid->n(this->l,zentity);
+	  return this->grid->n(this->l,zentity);
 	}
   else
 	{
-	  cindex = entity<cc>(i)->index();
+	  return entity<cc>(i)->index();
 	}
-  return cindex;
 }
 
 template<int dim, class GridImp> template<int cc> 
