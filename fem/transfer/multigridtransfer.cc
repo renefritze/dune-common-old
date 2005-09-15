@@ -46,7 +46,8 @@ void Dune::MultiGridTransfer<DiscFuncType>::setup(const FunctionSpaceType& coars
     for (; cIt != cEndIt; ++cIt) {
 
         const BaseFunctionSetType& coarseBaseSet = coarseFSpace.getBaseFunctionSet( *cIt );
-        const int numCoarseBaseFct = coarseBaseSet.getNumberOfBaseFunctions(); 
+        //const int numCoarseBaseFct = coarseBaseSet.getNumberOfBaseFunctions(); 
+        const int numCoarseBaseFct = coarseBaseSet.numBaseFunctions(); 
 
         typedef typename GridType::template Codim<0>::Entity EntityType;
         typedef typename EntityType::HierarchicIterator HierarchicIterator;
@@ -60,7 +61,7 @@ void Dune::MultiGridTransfer<DiscFuncType>::setup(const FunctionSpaceType& coars
                 continue;
         
              const BaseFunctionSetType& fineBaseSet = fineFSpace.getBaseFunctionSet( *fIt );
-             const int numFineBaseFct = fineBaseSet.getNumberOfBaseFunctions(); 
+             const int numFineBaseFct = fineBaseSet.numBaseFunctions(); 
             
             for (int i=0; i<numCoarseBaseFct; i++) {
                 
@@ -97,10 +98,9 @@ void Dune::MultiGridTransfer<DiscFuncType>::setup(const FunctionSpaceType& coars
     // /////////////////////////////////////////////
     cIt    = grid.template lbegin<0>(cL);
     for (; cIt != cEndIt; ++cIt) {
-      //std::cout << "Coarse: " << cIt->index() << "\n";
 
         const BaseFunctionSetType& coarseBaseSet = coarseFSpace.getBaseFunctionSet( *cIt );
-        const int numCoarseBaseFct = coarseBaseSet.getNumberOfBaseFunctions(); 
+        const int numCoarseBaseFct = coarseBaseSet.numBaseFunctions(); 
 
 
         typedef typename GridType::template Codim<0>::Entity EntityType;
@@ -115,7 +115,7 @@ void Dune::MultiGridTransfer<DiscFuncType>::setup(const FunctionSpaceType& coars
                 continue;
 
             const BaseFunctionSetType& fineBaseSet = fineFSpace.getBaseFunctionSet( *fIt );
-            const int numFineBaseFct = fineBaseSet.getNumberOfBaseFunctions(); 
+            const int numFineBaseFct = fineBaseSet.numBaseFunctions(); 
             
             for (int i=0; i<numCoarseBaseFct; i++) {
                 
