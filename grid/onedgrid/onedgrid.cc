@@ -71,9 +71,8 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(int numElements, double leftBoundary, dou
         double newCoord = leftBoundary + i*(rightBoundary-leftBoundary) / numElements;
 
         OneDEntityImp<0>* newVertex = new OneDEntityImp<0>(0, newCoord);
-        newVertex->levelIndex_ = i;
-
         vertices[0].insert_after(vertices[0].rbegin, newVertex);
+
     }
 
     // Init element set
@@ -84,12 +83,12 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(int numElements, double leftBoundary, dou
         newElement->vertex_[0] = it;
         it = it->succ_;
         newElement->vertex_[1] = it;
-        newElement->levelIndex_ = i;
 
         elements[0].insert_after(elements[0].rbegin, newElement);
 
     }
 
+    setIndices();
 }
 
 template <int dim, int dimworld>
@@ -107,8 +106,6 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(const SimpleVector<OneDCType>& coords)
     // Init vertex set
     for (int i=0; i<coords.size(); i++) {
         OneDEntityImp<0>* newVertex = new OneDEntityImp<0>(0, coords[i]);
-        newVertex->levelIndex_ = i;
-
         vertices[0].insert_after(vertices[0].rbegin, newVertex);
     }
 
@@ -120,12 +117,12 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(const SimpleVector<OneDCType>& coords)
         newElement->vertex_[0] = it;
         it = it->succ_;
         newElement->vertex_[1] = it;
-        newElement->levelIndex_ = i;
 
         elements[0].insert_after(elements[0].rbegin, newElement);
 
     }
 
+    setIndices();
 }
 
 
@@ -547,6 +544,8 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
     // ////////////////////////////////////
     //   renumber vertices and elements
     // ////////////////////////////////////
+    setIndices();
+#if 0
     for (int i=1; i<=maxlevel(); i++) {
 
         int idx = 0;
@@ -559,11 +558,25 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
             eIt->levelIndex_ = idx++;
 
     }
+#endif
 
     return changedGrid;
 
 }
 
+template < int dim, int dimworld >
+void Dune::OneDGrid < dim, dimworld >::setIndices()
+{
+    levelIndexSets_.resize(maxlevel()+1);
+
+    for (int i=0; i<=maxlevel(); i++)
+        levelIndexSets_[i].update(*this, i);
+
+    leafIndexSet_.update();
+
+    idSet_.update();
+
+}
 
 template <int dim, int dimworld>
 void Dune::OneDGrid<dim,dimworld>::globalRefine(int refCount)
