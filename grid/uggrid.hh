@@ -196,27 +196,6 @@ class UGGrid : public GridDefault  <dim, dimworld, double, UGGridFamily<dim,dimw
       // The Interface Methods
       //**********************************************************
 public:  
-#if 0
-        /** \brief The standard Dune grid traits */
-      typedef GridTraits<dim,
-                         dimworld,
-                         Dune::UGGrid<dim,dimworld> ,
-                         UGGridGeometry,
-                         UGGridEntity,
-                         UGGridBoundaryEntity,
-                         UGGridEntityPointer,
-                         UGGridLevelIterator,
-                         UGGridIntersectionIterator,
-                         UGGridHierarchicIterator,
-                         UGGridLeafIterator> Traits;
-    
-
-    typedef UGGridLevelIndexSet<dim> LevelIndexSet;
-
-    typedef UGGridLeafIndexSet<dim>  LeafIndexSet;
-    typedef UGGridGlobalIdSet< UGGrid<dim, dimworld> >   GlobalIdSet;
-    typedef UGGridLocalIdSet<dim>    LocalIdSet;
-#endif
 
     typedef typename UGGridFamily<dim,dimworld>::Traits Traits;
 
