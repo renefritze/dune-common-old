@@ -251,7 +251,7 @@ public:
             for( ; it != endit; ++it ) {
                 
                 const BaseFunctionSetType & baseSet = functionSpace_.getBaseFunctionSet( *it );
-                const int numOfBaseFct = baseSet.getNumberOfBaseFunctions();  
+                const int numOfBaseFct = baseSet.numBaseFunctions();  
                 
                 //printf("%d base functions on element\n", numOfBaseFct);
                 mat.resize(numOfBaseFct, numOfBaseFct);
