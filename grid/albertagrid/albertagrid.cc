@@ -246,24 +246,9 @@ inline void AlbertaGridGeometry<mydim,cdim,GridImp>::print (std::ostream& ss, in
   ss << "} \n";
 }
 
-
-template <int dim> struct AlbertaGridGeomType {
-  static GeometryType type () { return unknown; }
-};
-template <> struct AlbertaGridGeomType<1> {
-  static GeometryType type () { return line; }
-};
-template <> struct AlbertaGridGeomType<2> {
-  static GeometryType type () { return triangle; }
-};
-template <> struct AlbertaGridGeomType<3> {
-  static GeometryType type () { return tetrahedron; }
-};
-
 template <int mydim, int cdim, class GridImp>
 inline GeometryType AlbertaGridGeometry<mydim,cdim,GridImp>::type() const
 {
-  //return AlbertaGridGeomType<mydim>::type ();
   return simplex;
 }
 
