@@ -160,7 +160,6 @@ inline static TRAVERSE_STACK *getTraverseStack(void)
   // if we use copyTraverseStack we should only create stacks with 
   // stack_size > 0 otherwise we get errors in TreeIterator 
   if(stack->stack_size <= 0) enlargeTraverseStack( stack ); 
-  //std::cout << stack << " stack \n";
   return stack; 
 }
 
@@ -409,7 +408,6 @@ static EL_INFO * getFatherInfo(TRAVERSE_STACK * stack, EL_INFO * elInfo, int lev
 
   return fatherInfo;
 }
-
 
 //****************************************************************
 //
