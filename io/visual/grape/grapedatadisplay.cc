@@ -236,19 +236,14 @@ evalDof (EntityType &en, DUNE_FDATA *df , int localNum, double * val)
 
       case dim:    
         {
-          evalVector(en,func,lf,df->comp,dimVal,localNum,val);
+          //evalVector(en,func,lf,df->comp,dimVal,localNum,val);
           return;
         }
       default :
         {
-          evalVector(en,func,lf,df->comp,dimVal,localNum,val);
+          //evalVector(en,func,lf,df->comp,dimVal,localNum,val);
           return;
         }
-        //{
-        //  std::cerr << "ERROR: No evalMethod for data set! file = " << __FILE__ << ", line = " << __LINE__ << "\n";
-        //  abort();
-        //}
-        
     }
     return;
   }
