@@ -81,8 +81,8 @@ el_update (GridIteratorType *it, DUNE_ELEM * he)
     he->has_children = 1;
     
     // know the type 
-    he->type = geometry.type(); 
-
+    he->type = geomTypeConvert( geometry.type() , dim ); 
+    
     { 
       // set the vertex coordinates  
       double (* vpointer)[3] = he->vpointer;
