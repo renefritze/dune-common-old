@@ -7,6 +7,23 @@
 
 namespace Dune { 
 
+//! LeafIterator tpyes for all codims and partition types
+template <class GridImp>
+struct LeafIteratorTypes
+{
+  //! The types of the iterator 
+  template<int cd>
+  struct Codim
+  {
+    template<PartitionIteratorType pitype>
+    struct Partition
+    {
+      typedef typename GridImp::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator Iterator;
+    };
+  };
+};
+
+  
 /*! 
  This class provides an Array which as an aditional resize and copy the old
  values functionality. 
@@ -325,7 +342,7 @@ public:
 
 template <class GridType>
 class AdaptiveLeafIndexSet : 
-  public IndexSet<GridType, AdaptiveLeafIndexSet<GridType> >,
+  public IndexSet<GridType, AdaptiveLeafIndexSet<GridType>, LeafIteratorTypes<GridType> >,
   public DefaultGridIndexSetBase <GridType>
 {
 public:
@@ -571,9 +588,9 @@ public:
   }
 
   //! returns vector with geometry tpyes this index set has indices for
-  const std::vector <GeometryType> & geomTypes () const 
+  const std::vector <GeometryType> & geomTypes (int codim) const 
   {
-    return hIndexSet_.geomTypes();
+    return hIndexSet_.geomTypes(codim);
   }
 
   //! memorise index 
