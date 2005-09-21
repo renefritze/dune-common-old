@@ -1711,7 +1711,7 @@ struct YaspLevelIndexSetTypes
 template<class GridImp>
 class YaspLevelIndexSet : public IndexSet<GridImp,YaspLevelIndexSet<GridImp>,YaspLevelIndexSetTypes<GridImp> >
 {
-  typedef IndexSet<GridImp,SGridLevelIndexSet<GridImp>,SGridLevelIndexSetTypes<GridImp> > Base;
+  typedef IndexSet<GridImp,YaspLevelIndexSet<GridImp>,YaspLevelIndexSetTypes<GridImp> > Base;
 public:
 
   //! constructor stores reference to a grid and level
