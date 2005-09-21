@@ -176,7 +176,7 @@ public:
   }
   
   //! pretty print this Quadrature to ostream s
-  void print (std::ostream& s, int indent) const 
+  void print (std::ostream& s) const 
   {
     double sum = 0.0;
     s << "quad (id = " << asImp().getIdentifier() <<") { \n" ;
@@ -202,7 +202,7 @@ template< class RangeFieldType , class DomainType , class QuadratureImp>
 inline std::ostream& operator<< (std::ostream& s, 
     QuadratureDefault<RangeFieldType,DomainType,QuadratureImp>& quad)
 {
-  quad.print(s,0);
+  quad.print(s);
   return s;
 }
 
