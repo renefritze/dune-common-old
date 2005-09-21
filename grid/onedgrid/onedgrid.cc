@@ -58,7 +58,9 @@ template <int dim, int dimworld>
 Dune::OneDGrid<dim,dimworld>::OneDGrid(int numElements, double leftBoundary, double rightBoundary)
     : refinementType_(LOCAL),
       leafIndexSet_(*this),
-      idSet_(*this)
+      idSet_(*this),
+      freeVertexIdCounter_(0),
+      freeElementIdCounter_(0)
 {
     typedef const OneDGrid<dim,dimworld> GridImp;
 
@@ -71,6 +73,7 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(int numElements, double leftBoundary, dou
         double newCoord = leftBoundary + i*(rightBoundary-leftBoundary) / numElements;
 
         OneDEntityImp<0>* newVertex = new OneDEntityImp<0>(0, newCoord);
+        newVertex->id_ = getNextFreeId(1);
         vertices[0].insert_after(vertices[0].rbegin, newVertex);
 
     }
@@ -79,7 +82,7 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(int numElements, double leftBoundary, dou
     OneDEntityImp<0>* it = vertices[0].begin;
     for (int i=0; i<numElements; i++) {
 
-        OneDEntityImp<1>* newElement = new OneDEntityImp<1>(0);
+        OneDEntityImp<1>* newElement = new OneDEntityImp<1>(0, getNextFreeId(0));
         newElement->vertex_[0] = it;
         it = it->succ_;
         newElement->vertex_[1] = it;
@@ -95,7 +98,9 @@ template <int dim, int dimworld>
 Dune::OneDGrid<dim,dimworld>::OneDGrid(const SimpleVector<OneDCType>& coords) 
     : refinementType_(LOCAL),
       leafIndexSet_(*this),
-      idSet_(*this)
+      idSet_(*this),
+      freeVertexIdCounter_(0),
+      freeElementIdCounter_(0)
 {
     // Init grid hierarchy
     vertices.resize(1);
@@ -103,7 +108,7 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(const SimpleVector<OneDCType>& coords)
 
     // Init vertex set
     for (int i=0; i<coords.size(); i++) {
-        OneDEntityImp<0>* newVertex = new OneDEntityImp<0>(0, coords[i]);
+        OneDEntityImp<0>* newVertex = new OneDEntityImp<0>(0, coords[i], getNextFreeId(1));
         vertices[0].insert_after(vertices[0].rbegin, newVertex);
     }
 
@@ -111,7 +116,7 @@ Dune::OneDGrid<dim,dimworld>::OneDGrid(const SimpleVector<OneDCType>& coords)
     OneDEntityImp<0>* it = vertices[0].begin;
     for (int i=0; i<coords.size()-1; i++) {
 
-        OneDEntityImp<1>* newElement = new OneDEntityImp<1>(0);
+        OneDEntityImp<1>* newElement = new OneDEntityImp<1>(0, getNextFreeId(0));
         newElement->vertex_[0] = it;
         it = it->succ_;
         newElement->vertex_[1] = it;
@@ -355,23 +360,17 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
     int oldMaxlevel = (toplevelRefinement) ? maxlevel()-1 : maxlevel();
     for (int i=0; i<=oldMaxlevel; i++) {
 
-        //std::cout << "level " << i << ", maxlevel " << maxlevel() << std::endl;
-
         for (eIt = elements[i].begin; eIt!=NULL; eIt = eIt->succ_) {
-
-            //std::cout << "element loop " << std::endl;
 
             if (eIt->adaptationState == REFINED
                 && eIt->isLeaf()) {
-
-                //std::cout << "Refining element " << eIt->index() << " on level " << i << std::endl;
 
                 // Does the left vertex exist on the next-higher level?
                 // If no create it
                 OneDEntityImp<0>* leftUpperVertex = getLeftUpperVertex(eIt);
 
                 if (leftUpperVertex==NULL)
-                    leftUpperVertex = new OneDEntityImp<0>(i+1, eIt->vertex_[0]->pos_);
+                    leftUpperVertex = new OneDEntityImp<0>(i+1, eIt->vertex_[0]->pos_, getNextFreeId(1));
 
                 eIt->vertex_[0]->son_ = leftUpperVertex;
 
@@ -380,7 +379,7 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
                 OneDEntityImp<0>* rightUpperVertex = getRightUpperVertex(eIt);
                 
                 if (rightUpperVertex==NULL) 
-                    rightUpperVertex = new OneDEntityImp<0>(i+1, eIt->vertex_[1]->pos_);
+                    rightUpperVertex = new OneDEntityImp<0>(i+1, eIt->vertex_[1]->pos_, getNextFreeId(1));
 
                 eIt->vertex_[1]->son_ = rightUpperVertex;
 
@@ -394,7 +393,7 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
 //                 std::cout << "left: " << eIt->geometry()[0][0] 
 //                           << " right: " << eIt->geometry()[1][0] << " p: " << p << std::endl;
 
-                OneDEntityImp<0>* centerVertex = new OneDEntityImp<0>(i+1, p);
+                OneDEntityImp<0>* centerVertex = new OneDEntityImp<0>(i+1, p, getNextFreeId(1));
 
                 // //////////////////////////////////////
                 // Insert new vertices into vertex list
@@ -425,12 +424,12 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
                 // ///////////////////////
                 // Create new elements
                 // ///////////////////////
-                OneDEntityImp<1>* newElement0 = new OneDEntityImp<1>(i+1);
+                OneDEntityImp<1>* newElement0 = new OneDEntityImp<1>(i+1, getNextFreeId(0));
                 newElement0->vertex_[0] = leftUpperVertex;
                 newElement0->vertex_[1] = centerVertex;
                 newElement0->father_ = eIt;
 
-                OneDEntityImp<1>* newElement1 = new OneDEntityImp<1>(i+1);
+                OneDEntityImp<1>* newElement1 = new OneDEntityImp<1>(i+1, getNextFreeId(0));
                 newElement1->vertex_[0] = centerVertex;
                 newElement1->vertex_[1] = rightUpperVertex;
                 newElement1->father_ = eIt;
@@ -478,14 +477,12 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
                 //printf("level %d, element %d \n", i, eIt->index());
                 if (eIt->isLeaf()) {
                     
-                    //printf("level %d, element %d is without children\n", i, eIt->index());
-
                     // Does the left vertex exist on the next-higher level?
                     // If no create it
                     OneDEntityImp<0>* leftUpperVertex = getLeftUpperVertex(eIt);
                     
                     if (leftUpperVertex==NULL)
-                        leftUpperVertex = new OneDEntityImp<0>(i+1, eIt->vertex_[0]->pos_);
+                        leftUpperVertex = new OneDEntityImp<0>(i+1, eIt->vertex_[0]->pos_, getNextFreeId(1));
  
                     eIt->vertex_[0]->son_ = leftUpperVertex;
                    
@@ -494,7 +491,7 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
                     OneDEntityImp<0>* rightUpperVertex = getRightUpperVertex(eIt);
                     
                     if (rightUpperVertex==NULL) 
-                        rightUpperVertex = new OneDEntityImp<0>(i+1, eIt->vertex_[1]->pos_);
+                        rightUpperVertex = new OneDEntityImp<0>(i+1, eIt->vertex_[1]->pos_, getNextFreeId(1));
 
                     eIt->vertex_[1]->son_ = rightUpperVertex;
 
@@ -525,7 +522,7 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
                     // /////////////////////////
                     //   Create new element
                     // /////////////////////////
-                    OneDEntityImp<1>* newElement = new OneDEntityImp<1>(i+1);
+                    OneDEntityImp<1>* newElement = new OneDEntityImp<1>(i+1, getNextFreeId(0));
                     newElement->vertex_[0] = leftUpperVertex;
                     newElement->vertex_[1] = rightUpperVertex;
                     newElement->father_ = eIt;
@@ -553,23 +550,8 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
     //   renumber vertices and elements
     // ////////////////////////////////////
     setIndices();
-#if 0
-    for (int i=1; i<=maxlevel(); i++) {
-
-        int idx = 0;
-        OneDEntityImp<0>* vIt;
-        for (vIt = vertices[i].begin; vIt!=NULL; vIt = vIt->succ_)
-            vIt->levelIndex_ = idx++;
-
-        idx = 0;
-        for (eIt = elements[i].begin; eIt!=NULL; eIt = eIt->succ_)
-            eIt->levelIndex_ = idx++;
-
-    }
-#endif
 
     return changedGrid;
-
 }
 
 template < int dim, int dimworld >

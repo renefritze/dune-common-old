@@ -222,24 +222,6 @@ class OneDGrid : public GridDefault <dim, dimworld,OneDCType,OneDGridFamily<dim,
 
 public:  
 
-#if 0
-    typedef GridTraits<dim,dimworld,
-                       Dune::OneDGrid<dim,dimworld>,
-                       OneDGridGeometry, 
-                       OneDGridEntity,
-                       OneDGridBoundaryEntity,
-                       OneDGridEntityPointer,
-                       OneDGridLevelIterator,
-                       OneDGridIntersectionIterator, 
-                       OneDGridHierarchicIterator,
-                       OneDGridLeafIterator> Traits;
-
-    typedef OneDGridLevelIndexSet<OneDGrid<dim,dimworld> > LevelIndexSet;
-    typedef OneDGridLeafIndexSet<OneDGrid<dim,dimworld> >  LeafIndexSet;
-    typedef OneDGridIdSet<OneDGrid<dim,dimworld> >   GlobalIdSet;
-    typedef OneDGridIdSet<OneDGrid<dim,dimworld> >    LocalIdSet;
-#endif
-
     /** \brief Provides the standard grid types */
     typedef typename OneDGridFamily<dim,dimworld>::Traits Traits;
 
@@ -404,6 +386,10 @@ private:
         return entity.realEntity;
     }
 
+    unsigned int getNextFreeId(int codim) {
+        return (codim==0) ? freeElementIdCounter_++ : freeVertexIdCounter_;
+    }
+        
    //! The type of grid refinement currently in use
     RefinementType refinementType_;
 
@@ -428,6 +414,10 @@ private:
     OneDGridLeafIndexSet<OneDGrid<dim,dimworld> > leafIndexSet_;
 
     OneDGridIdSet<OneDGrid<dim,dimworld> > idSet_;
+
+    unsigned int freeVertexIdCounter_;
+
+    unsigned int freeElementIdCounter_;
 
 }; // end Class OneDGrid
 
