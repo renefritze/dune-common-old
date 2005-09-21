@@ -115,7 +115,7 @@ namespace Dune {
 
   };
 
-  typedef IndexSet<GridImp,LevelIndexSetImp> LevelIndexSet;
+  typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;
   typedef LeafIndexSetImp LeafIndexSet;
   typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
   typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
@@ -426,7 +426,7 @@ namespace Dune {
     }
 
     //! deliver all geometry types used in this grid
-    const std::vector<GeometryType>& geomTypes () const
+    const std::vector<GeometryType>& geomTypes (int codim) const
     {
       return geomTypes_;
     }
