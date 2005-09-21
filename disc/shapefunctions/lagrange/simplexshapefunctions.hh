@@ -851,6 +851,7 @@ P2SimplexShapeFunction(int i,int en,int co)
 	  bb[0][2]=0.0;
 	  bb[1][2]=0.0;
 	  bb[2][2]=0.0;
+	  break;
 	case 3:
 	  //--interpolation point associated with shape fn
 	  pos[0]=0.0;
@@ -1178,7 +1179,7 @@ public:
   {
     ReferenceSimplex<C,3> tetrahed;
     int j=0;
- for (int c=3; c>=1; --c)
+ for (int c=3; c>=2; --c)
    for(int e=0;e<tetrahed.size(c);++e)
      {
       sf[j] = Imp(j,e,c);
