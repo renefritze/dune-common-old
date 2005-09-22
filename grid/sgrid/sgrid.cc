@@ -750,7 +750,7 @@ inline void SIntersectionIterator<GridImp>::makeintersections () const
         int c = count%2;
 
         // compute expanded coordinates of entity
-        FixedArray<int,dim> z1 = self.e->z;
+        FixedArray<int,dim> z1 = self.grid->template getRealEntity<0>(self.e).z;
         if (c==1)
                 z1[dir] += 1; // odd
         else
@@ -800,9 +800,9 @@ inline void SIntersectionIterator<GridImp>::makeintersections () const
                 {
                         // each i!=dir gives one direction vector
                         z1[i] += 1; // direction i => even
-                        p2 = ne.grid->pos(self->level(),z1);
+                        p2 = ne.grid->pos(self.level(),z1);
                         z1[i] -= 2; // direction i => even
-                        p1 = ne.grid->pos(self->level(),z1);
+                        p1 = ne.grid->pos(self.level(),z1);
                         z1[i] += 1; // revert t to original state
                         __As[t] = p2-p1;
                         ++t;
@@ -810,7 +810,7 @@ inline void SIntersectionIterator<GridImp>::makeintersections () const
         for (int i=0; i<dim; i++)
                 if (i!=dir)
                         z1[i] -= 1;
-        __As[t] = ne.grid->pos(self->level(),z1);
+        __As[t] = ne.grid->pos(self.level(),z1);
         is_global.make(__As); // build geometry
 
         built_intersections = true;
