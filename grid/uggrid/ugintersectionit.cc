@@ -59,7 +59,7 @@ UGGridIntersectionIterator <GridImp>::outerNormal (const FieldVector<UGCtype, Gr
 }
 
 template< class GridImp>
-inline typename UGGridIntersectionIterator<GridImp>::LocalGeometry& 
+inline const typename UGGridIntersectionIterator<GridImp>::LocalGeometry& 
 UGGridIntersectionIterator<GridImp>::
 intersectionSelfLocal() const
 {
@@ -68,7 +68,7 @@ intersectionSelfLocal() const
 }
 
 template< class GridImp>
-inline typename UGGridIntersectionIterator<GridImp>::Geometry& 
+inline const typename UGGridIntersectionIterator<GridImp>::Geometry& 
 UGGridIntersectionIterator<GridImp>::
 intersectionGlobal() const
 {
@@ -94,7 +94,7 @@ intersectionGlobal() const
 }
 
 template< class GridImp>
-inline typename UGGridIntersectionIterator<GridImp>::LocalGeometry& 
+inline const typename UGGridIntersectionIterator<GridImp>::LocalGeometry& 
 UGGridIntersectionIterator<GridImp>::
 intersectionNeighborLocal() const
 {
