@@ -12,6 +12,7 @@ namespace UG2d {
 
     union element;
     struct node;
+    struct edge;
 };
 
 namespace UG3d {
@@ -21,6 +22,7 @@ namespace UG3d {
 
     union element;
     struct node;
+    struct edge;
 };
 
 
@@ -81,6 +83,13 @@ public:
 };
 
 template <>
+class TargetType<2,3>
+{
+public:
+    typedef UG3d::edge T;
+};
+
+template <>
 class TargetType<3,3>
 {
 public:
@@ -92,6 +101,13 @@ class TargetType<0,2>
 {
 public:
     typedef UG2d::element T;
+};
+
+template <>
+class TargetType<1,2>
+{
+public:
+    typedef UG2d::edge T;
 };
 
 template <>

@@ -241,6 +241,16 @@ public:
         return theElement->ge.levelIndex;
     }
 
+    //! Gets the level index of a UG edge
+    static int& levelIndex(TargetType<2,3>::T* theEdge) {
+        return theEdge->levelIndex;
+    }
+
+    //! Gets the level index of a UG edge
+    static const int& levelIndex(const TargetType<2,3>::T* theEdge) {
+        return theEdge->levelIndex;
+    }
+
     //! Gets the level index of a UG node
     static int& levelIndex(TargetType<3,3>::T* theNode) {
         return theNode->levelIndex;
@@ -263,6 +273,16 @@ public:
     //! Gets the leaf index of a UG element
     static const int& leafIndex(const TargetType<0,3>::T* theElement) {
         return theElement->ge.leafIndex;
+    }
+
+    //! Gets the leaf index of a UG edge
+    static int& leafIndex(TargetType<2,3>::T* theEdge) {
+        return theEdge->leafIndex;
+    }
+
+    //! Gets the leaf index of a UG edge
+    static const int& leafIndex(const TargetType<2,3>::T* theEdge) {
+        return theEdge->leafIndex;
     }
 
     //! Gets the leaf index of a UG node
@@ -325,6 +345,12 @@ public:
         using UG3d::n_offset;
         return CORNER(theElement, i);
     }
+
+    //! get edge from node i to node j (in UG's numbering !
+    static TargetType<2,3>::T* GetEdge (TargetType<3,3>::T* nodei, TargetType<3,3>::T* nodej) {
+	  return UG3d::GetEdge(nodei,nodej);
+    }
+
   //! \todo Please doc me!
     static TargetType<0,3>::T* EFather(TargetType<0,3>::T* theElement) {
         using UG3d::ELEMENT;

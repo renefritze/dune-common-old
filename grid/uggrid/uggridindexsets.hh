@@ -62,7 +62,12 @@ public:
 
     //! get number of entities of given codim, type and on this level
     int size (int codim) const {
-        return grid_->size(level_, codim);
+	  if (codim==0)
+		return numSimplices_+numPyramids_+numPrisms_+numCubes_;
+	  if (codim==dim)
+		return numVertices_;
+	  if (codim==dim-1)
+		return numEdges_;
     }
 
   //! get number of entities of given codim, type and on this level
@@ -83,15 +88,17 @@ public:
               return 0;
           }
       } else if (codim==dim) {
-          return (type==vertex) ? grid_->size(level_,dim) : 0;
-      } else 
-          DUNE_THROW(NotImplemented, "Not yet implemented for this codim!");
+		return numVertices_;
+      } else if (codim==dim-1) {
+		return numEdges_;
+	  } else 
+		DUNE_THROW(NotImplemented, "Not yet implemented for this codim!");
   }
 
     /** \brief Deliver all geometry types used in this grid */
   const std::vector<GeometryType>& geomTypes (int codim) const
   {
-	return myTypes_;
+	return myTypes_[codim];
   }
 
   //! one past the end on this level
@@ -108,7 +115,20 @@ public:
 	return grid_.template lend<cd,pitype>(level_);
   }
 
-    //private:
+  //private:
+  int renumberVertex(GeometryType gt, int i) const 
+  {
+    if (gt==cube) {
+	  // Dune numbers the vertices of a hexahedron and quadrilaterals differently than UG.
+	  // The following two lines do the transformation
+	  // The renumbering scheme is {0,1,3,2} for quadrilaterals, therefore, the
+	  // following code works for 2d and 3d.
+	  // It also works in both directions UG->DUNE, DUNE->UG !
+	  const int renumbering[8] = {0, 1, 3, 2, 4, 5, 7, 6};
+	  return renumbering[i];
+    } else
+	  return i;
+  }
 
     void update(const GridImp& grid, int level) {
 
@@ -116,19 +136,44 @@ public:
         grid_ = &grid;
         level_ = level;	
 
+        // ///////////////////////////////////
+        //   clear index for codim dim-1 and 1
+        // ///////////////////////////////////
+
+        typename GridImp::Traits::template Codim<0>::LevelIterator eIt    = grid_->template lbegin<0>(level_);
+        typename GridImp::Traits::template Codim<0>::LevelIterator eEndIt = grid_->template lend<0>(level_);
+
+        for (; eIt!=eEndIt; ++eIt) {
+		  // codim dim-1
+		  for (int i=0; i<eIt->template count<dim-1>(); i++)
+			{
+			  GeometryType gt = eIt->geometry().type();
+			  typename TargetType<0,dim>::T* target_ = grid_->template getRealEntity<0>(*eIt).target_;
+			  int a=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,0,dim);	
+			  int b=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,1,dim);
+			  int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
+			  index = -1;
+			}
+		  // codim 1 (faces): todo
+#if (dim==3)
+#endif
+        }
+
         // ///////////////////////////////
-        //   Init the element indices
+        //   Init the codim<dim indices
         // ///////////////////////////////
         numSimplices_ = 0;
         numPyramids_  = 0;
         numPrisms_    = 0;
         numCubes_     = 0;
+		numEdges_     = 0;
 
-        typename GridImp::Traits::template Codim<0>::LevelIterator eIt    = grid_->template lbegin<0>(level_);
-        typename GridImp::Traits::template Codim<0>::LevelIterator eEndIt = grid_->template lend<0>(level_);
+        eIt    = grid_->template lbegin<0>(level_);
+        eEndIt = grid_->template lend<0>(level_);
         
         for (; eIt!=eEndIt; ++eIt) {
-         
+ 
+		    // codim 0 (elements)
             switch (eIt->geometry().type()) {
             case simplex:
                 UG_NS<dim>::levelIndex(grid_->template getRealEntity<0>(*eIt).target_) = numSimplices_++;
@@ -147,41 +192,67 @@ public:
                            << ", which should never occur in a UGGrid!");
             }
 
+			// codim dim-1 (edges)
+			for (int i=0; i<eIt->template count<dim-1>(); i++)
+			  {
+				GeometryType gt = eIt->geometry().type();
+				typename TargetType<0,dim>::T* target_ = grid_->template getRealEntity<0>(*eIt).target_;
+				int a=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,0,dim);	
+				int b=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,1,dim);
+				int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
+				if (index<0) index = numEdges_++;
+			  }
+
+			// codim 1 (faces): todo
+#if (dim==3)
+#endif
+
         }
 
         // Update the list of geometry types present
-        myTypes_.resize(0);
+        myTypes_[0].resize(0);
         if (numSimplices_ > 0)
-            myTypes_.push_back(simplex);
+            myTypes_[0].push_back(simplex);
         if (numPyramids_ > 0)
-            myTypes_.push_back(pyramid);
+            myTypes_[0].push_back(pyramid);
         if (numPrisms_ > 0)
-            myTypes_.push_back(prism);
+            myTypes_[0].push_back(prism);
         if (numCubes_ > 0)
-            myTypes_.push_back(cube);
+            myTypes_[0].push_back(cube);
 
-        // //////////////////////////////
+		myTypes_[dim-1].resize(0);
+		myTypes_[dim-1].push_back(cube);
+
+		// //////////////////////////////
         //   Init the vertex indices
         // //////////////////////////////
 
         typename GridImp::Traits::template Codim<dim>::LevelIterator vIt    = grid_->template lbegin<dim>(level_);
         typename GridImp::Traits::template Codim<dim>::LevelIterator vEndIt = grid_->template lend<dim>(level_);
         
-        int id = 0;
+        numVertices_ = 0;
         for (; vIt!=vEndIt; ++vIt)
-            UG_NS<dim>::levelIndex(grid_->template getRealEntity<dim>(*vIt).target_) = id++;
+            UG_NS<dim>::levelIndex(grid_->template getRealEntity<dim>(*vIt).target_) = numVertices_++;
 
+		myTypes_[dim].resize(0);
+		myTypes_[dim].push_back(cube);
     }
 
   const GridImp* grid_;
   int level_;
 
-    int numSimplices_;
-    int numPyramids_;
-    int numPrisms_;
-    int numCubes_;
+  int numSimplices_;
+  int numPyramids_;
+  int numPrisms_;
+  int numCubes_;
+  int numVertices_;
+  int numEdges_;
+#if (dim==3)
+  int numTriFaces_;
+  int numQuadFaces_;
+#endif
 
-  std::vector<GeometryType> myTypes_;
+  std::vector<GeometryType> myTypes_[dim+1];
 };
 
 template <class GridImp> 
@@ -232,11 +303,7 @@ public:
   //! get number of entities of given codim and type 
   int size (int codim, GeometryType type) const
   {
-      if (codim==dim) {
-
-          return numVertices_;
-
-      } else if (codim==0) {
+      if (codim==0) {
 
           switch (type) {
           case simplex:
@@ -250,16 +317,18 @@ public:
           default:
               return 0;
           }
-
-      } else {
+      } else if (codim==dim) {
+		return numVertices_;
+      } else if (codim==dim-1) {
+		return numEdges_;
+	  } else 
           DUNE_THROW(NotImplemented, "UGGridLeafIndexSet::size(codim,type) for codim neither 0 nor dim");
-      }
   }
 
     /** deliver all geometry types used in this grid */
   const std::vector<GeometryType>& geomTypes (int codim) const
   {
-	return myTypes_;
+	return myTypes_[codim];
   }
 
   //! one past the end on this level
@@ -277,9 +346,49 @@ public:
   }
 
     //private:
+  int renumberVertex(GeometryType gt, int i) const 
+  {
+    if (gt==cube) {
+	  // Dune numbers the vertices of a hexahedron and quadrilaterals differently than UG.
+	  // The following two lines do the transformation
+	  // The renumbering scheme is {0,1,3,2} for quadrilaterals, therefore, the
+	  // following code works for 2d and 3d.
+	  // It also works in both directions UG->DUNE, DUNE->UG !
+	  const int renumbering[8] = {0, 1, 3, 2, 4, 5, 7, 6};
+	  return renumbering[i];
+    } else
+	  return i;
+  }
     
     void update() {
 
+        // ///////////////////////////////////////////////////////////
+        // CAUTION! This does not yet work for locally refined meshes!
+        // ///////////////////////////////////////////////////////////
+
+        // ///////////////////////////////////
+        //   clear index for codim dim-1 and 1
+        // ///////////////////////////////////
+
+        typename GridImp::Traits::template Codim<0>::LeafIterator eIt    = grid_.template leafbegin<0>();
+        typename GridImp::Traits::template Codim<0>::LeafIterator eEndIt = grid_.template leafend<0>();
+
+        for (; eIt!=eEndIt; ++eIt) 
+		  {
+			// codim dim-1
+			for (int i=0; i<eIt->template count<dim-1>(); i++)
+			  {
+				GeometryType gt = eIt->geometry().type();
+				typename TargetType<0,dim>::T* target_ = grid_.template getRealEntity<0>(*eIt).target_;
+				int a=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,0,dim);	
+				int b=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,1,dim);
+				int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
+				index = -1;
+			  }
+			// codim 1 (faces): todo
+#if (dim==3)
+#endif
+		  }
         // ///////////////////////////////
         //   Init the element indices
         // ///////////////////////////////
@@ -287,9 +396,10 @@ public:
         numPyramids_  = 0;
         numPrisms_    = 0;
         numCubes_     = 0;
+		numEdges_     = 0;
 
-        typename GridImp::Traits::template Codim<0>::LeafIterator eIt    = grid_.template leafbegin<0>();
-        typename GridImp::Traits::template Codim<0>::LeafIterator eEndIt = grid_.template leafend<0>();
+        eIt    = grid_.template leafbegin<0>();
+        eEndIt = grid_.template leafend<0>();
         
         for (; eIt!=eEndIt; ++eIt) {
          
@@ -311,18 +421,36 @@ public:
                            << ", which should never occur in a UGGrid!");
             }
 
+			// codim dim-1 (edges)
+			for (int i=0; i<eIt->template count<dim-1>(); i++)
+			  {
+				GeometryType gt = eIt->geometry().type();
+				typename TargetType<0,dim>::T* target_ = grid_.template getRealEntity<0>(*eIt).target_;
+				int a=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,0,dim);	
+				int b=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,1,dim);
+				int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
+				if (index<0) index = numEdges_++;
+			  }
+
+			// codim 1 (faces): todo
+#if (dim==3)
+#endif
+
         }
 
         // Update the list of geometry types present
-        myTypes_.resize(0);
+        myTypes_[0].resize(0);
         if (numSimplices_ > 0)
-            myTypes_.push_back(simplex);
+            myTypes_[0].push_back(simplex);
         if (numPyramids_ > 0)
-            myTypes_.push_back(pyramid);
+            myTypes_[0].push_back(pyramid);
         if (numPrisms_ > 0)
-            myTypes_.push_back(prism);
+            myTypes_[0].push_back(prism);
         if (numCubes_ > 0)
-            myTypes_.push_back(cube);
+            myTypes_[0].push_back(cube);
+
+		myTypes_[dim-1].resize(0);
+		myTypes_[dim-1].push_back(cube);
 
         // //////////////////////////////
         //   Init the vertex indices
@@ -330,22 +458,31 @@ public:
         typename GridImp::Traits::template Codim<dim>::LeafIterator vIt    = grid_.template leafbegin<dim>();
         typename GridImp::Traits::template Codim<dim>::LeafIterator vEndIt = grid_.template leafend<dim>();
         
+		// leaf index in node writes through to vertex !
         numVertices_ = 0;
         for (; vIt!=vEndIt; ++vIt)
             UG_NS<dim>::leafIndex(grid_.template getRealEntity<dim>(*vIt).target_) = numVertices_++;
+
+		myTypes_[dim].resize(0);
+		myTypes_[dim].push_back(cube);
 
     }
         
 
     const GridImp& grid_;
 
-    int numSimplices_;
-    int numPyramids_;
-    int numPrisms_;
-    int numCubes_;
-    int numVertices_;
+  int numSimplices_;
+  int numPyramids_;
+  int numPrisms_;
+  int numCubes_;
+  int numVertices_;
+  int numEdges_;
+#if (dim==3)
+  int numTriFaces_;
+  int numQuadFaces_;
+#endif
 
-  std::vector<GeometryType> myTypes_;
+  std::vector<GeometryType> myTypes_[dim+1];
 };
 
 

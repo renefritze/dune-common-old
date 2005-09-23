@@ -239,6 +239,16 @@ public:
         return theElement->ge.levelIndex;
     }
 
+    //! Gets the level index of a UG edge
+    static int& levelIndex(TargetType<1,2>::T* theEdge) {
+        return theEdge->levelIndex;
+    }
+
+    //! Gets the level index of a UG edge
+    static const int& levelIndex(const TargetType<1,2>::T* theEdge) {
+        return theEdge->levelIndex;
+    }
+
     //! Gets the level index of a UG node
     static int& levelIndex(TargetType<2,2>::T* theNode) {
         return theNode->levelIndex;
@@ -261,6 +271,16 @@ public:
     //! Gets the leaf index of a UG element
     static const int& leafIndex(const TargetType<0,2>::T* theElement) {
         return theElement->ge.leafIndex;
+    }
+
+    //! Gets the leaf index of a UG edge
+    static int& leafIndex(TargetType<1,2>::T* theEdge) {
+        return theEdge->leafIndex;
+    }
+
+    //! Gets the leaf index of a UG edge
+    static const int& leafIndex(const TargetType<1,2>::T* theEdge) {
+        return theEdge->leafIndex;
     }
 
     //! Gets the leaf index of a UG node
@@ -323,6 +343,12 @@ public:
         using UG2d::n_offset;
         return CORNER(theElement, i);
     }
+
+    //! get edge from node i to node j (in UG's numbering !
+    static TargetType<1,2>::T* GetEdge (TargetType<2,2>::T* nodei, TargetType<2,2>::T* nodej) {
+	  return UG2d::GetEdge(nodei,nodej);
+    }
+
   //! \todo Please doc me!
     static TargetType<0,2>::T* EFather(TargetType<0,2>::T* theElement) {
         using UG2d::ELEMENT;
