@@ -552,41 +552,51 @@ namespace Dune {
     {
       switch(geometryType) {
       case tetrahedron:
-	switch(coerceTo) {
-	case tetrahedron:
-	  return VirtualRefinementImp<tetrahedron, CoordType, tetrahedron>::instance();
+		switch(coerceTo) {
+		case tetrahedron:
+		  return VirtualRefinementImp<tetrahedron, CoordType, tetrahedron>::instance();
         default:
           break;
-	}
-	break;
+		}
+		break;
+      case simplex:
+		switch(coerceTo) {
+		case tetrahedron:
+		  return VirtualRefinementImp<tetrahedron, CoordType, tetrahedron>::instance();
+		case simplex:
+		  return VirtualRefinementImp<tetrahedron, CoordType, tetrahedron>::instance();
+        default:
+          break;
+		}
+		break;
       case hexahedron:
-	switch(coerceTo) {
-	case tetrahedron:
-	  return VirtualRefinementImp<hexahedron, CoordType, tetrahedron>::instance();
-	case hexahedron:
-	  return VirtualRefinementImp<hexahedron, CoordType, hexahedron>::instance();
+		switch(coerceTo) {
+		case tetrahedron:
+		  return VirtualRefinementImp<hexahedron, CoordType, tetrahedron>::instance();
+		case hexahedron:
+		  return VirtualRefinementImp<hexahedron, CoordType, hexahedron>::instance();
         default:
           break;
-	}
-	break;
+		}
+		break;
       case cube:
-	switch(coerceTo) {
-	case tetrahedron:
-	  return VirtualRefinementImp<hexahedron, CoordType, tetrahedron>::instance();
-	case hexahedron:
-	  return VirtualRefinementImp<hexahedron, CoordType, hexahedron>::instance();
-	case cube:
-	  return VirtualRefinementImp<hexahedron, CoordType, hexahedron>::instance();
+		switch(coerceTo) {
+		case tetrahedron:
+		  return VirtualRefinementImp<hexahedron, CoordType, tetrahedron>::instance();
+		case hexahedron:
+		  return VirtualRefinementImp<hexahedron, CoordType, hexahedron>::instance();
+		case cube:
+		  return VirtualRefinementImp<hexahedron, CoordType, hexahedron>::instance();
         default:
           break;
-	}
-	break;
-        default:
-          break;
+		}
+		break;
+	  default:
+		break;
       }
       DUNE_THROW(NotImplemented,
-		 "No Refinement<" << geometryType << ", CoordType, "
-		 << coerceTo << " >.");
+				 "No Refinement<" << geometryType << ", CoordType, "
+				 << coerceTo << " >.");
     }
   };
 
