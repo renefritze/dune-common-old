@@ -239,6 +239,16 @@ public:
         return theElement->ge.levelIndex;
     }
 
+    //! Gets the level index of a UG sidevector
+    static int& levelIndex(UGVectorType<2>::T* theVector) {
+        return reinterpret_cast<int&>(theVector->index);
+    }
+
+    //! Gets the level index of a UG sidevector
+    static const int& levelIndex(const UGVectorType<2>::T* theVector) {
+        return reinterpret_cast<const int&>(theVector->index);
+    }
+
     //! Gets the level index of a UG edge
     static int& levelIndex(TargetType<1,2>::T* theEdge) {
         return theEdge->levelIndex;
@@ -271,6 +281,16 @@ public:
     //! Gets the leaf index of a UG element
     static const int& leafIndex(const TargetType<0,2>::T* theElement) {
         return theElement->ge.leafIndex;
+    }
+
+    //! Gets the level index of a UG sidevector
+    static int& leafIndex(UGVectorType<2>::T* theVector) {
+        return reinterpret_cast<int &>(theVector->skip);
+    }
+
+    //! Gets the level index of a UG sidevector
+    static const int& leafIndex(const UGVectorType<2>::T* theVector) {
+        return reinterpret_cast<const int &>(theVector->skip);
     }
 
     //! Gets the leaf index of a UG edge
@@ -347,6 +367,12 @@ public:
     //! get edge from node i to node j (in UG's numbering !
     static TargetType<1,2>::T* GetEdge (TargetType<2,2>::T* nodei, TargetType<2,2>::T* nodej) {
 	  return UG2d::GetEdge(nodei,nodej);
+    }
+
+    //! access side vector from element (this is just a dummy to compile code also in 2d)
+    static UGVectorType<2>::T* SideVector (TargetType<0,2>::T* theElement, int i)
+    {
+	  return NULL;
     }
 
   //! \todo Please doc me!

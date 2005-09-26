@@ -13,6 +13,7 @@ namespace UG2d {
     union element;
     struct node;
     struct edge;
+    struct vector; 
 };
 
 namespace UG3d {
@@ -23,6 +24,7 @@ namespace UG3d {
     union element;
     struct node;
     struct edge;
+    struct vector; 
 };
 
 
@@ -66,6 +68,27 @@ public:
     /*****************************************************************/
     /*****************************************************************/
 
+template <int dim>
+class UGVectorType
+{
+public:
+    typedef void T;
+
+};
+
+template <>
+class UGVectorType<3>
+{
+public:
+    typedef UG3d::vector T;
+};
+
+template <>
+class UGVectorType<2>
+{
+public:
+    typedef UG2d::vector T;
+};
 
 template <int codim, int dim>
 class TargetType

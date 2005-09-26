@@ -414,7 +414,7 @@ inline int Dune::UGGrid < dim, dimworld >::size (int level, int codim) const
         {
 		  return this->levelIndexSet(level).size(0,simplex)+this->levelIndexSet(level).size(0,cube)
 			+this->levelIndexSet(level).size(0,pyramid)+this->levelIndexSet(level).size(0,prism);
-        } else
+        }
     if(codim == dim)
         {
 		  return this->levelIndexSet(level).size(dim,cube);
@@ -423,12 +423,10 @@ inline int Dune::UGGrid < dim, dimworld >::size (int level, int codim) const
         {
 		  return this->levelIndexSet(level).size(dim-1,cube);
         } 
-#if (dim==3)
 	if (codim == 1)
         {
 		  return this->levelIndexSet(level).size(1,cube)+this->levelIndexSet(level).size(1,simplex);
         }
-#endif
 	DUNE_THROW(GridError, "UGGrid<" << dim << ", " << dimworld 
 			   << ">::size(int level, int codim) is only implemented"
 			   << " for codim==0 and codim==dim!");

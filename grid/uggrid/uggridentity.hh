@@ -343,6 +343,7 @@ public:
   
     //private: 
     int renumberVertex(int i) const;
+    int renumberFace(int i) const;
 
     void setToTarget(typename TargetType<0,dim>::T* target, int level);
 
