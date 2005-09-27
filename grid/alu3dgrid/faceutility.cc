@@ -1,3 +1,4 @@
+#include <config.h>
 #include "faceutility.hh"
 
 namespace Dune {
