@@ -34,8 +34,7 @@ namespace Dune {
 */
 
 /**
-  \ingroup GridInterface
-  @{
+  @ingroup GridInterface
 */
 
 /** 
@@ -179,8 +178,6 @@ template<class GridImp, class IndexSetIteratorImp, class IndexSetImp> class Inde
 template<class GridImp, class IdSetImp, class IdTypeImp> class IdSet;
 
 
-/** @} */
-  
 //************************************************************************
 // G R I D
 //************************************************************************
