@@ -216,7 +216,7 @@ public:
       asImp().increment();
     }
 
-  //! return true if intersection is with boundary. \todo connection with boundary information, processor/outer boundary
+  //! return true if this intersection is with boundary. \todo connection with boundary information, processor/outer boundary
   bool boundary () const
     {
       return asImp().boundary();
@@ -226,7 +226,7 @@ public:
       return asImp().boundaryEntity();
     }
 
-  //! return true if intersection is with neighbor on this level.
+  //! return true if intersection is with another element (might be on a lower level).
   bool neighbor () const
     {
       return asImp().neighbor();
