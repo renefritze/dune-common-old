@@ -116,6 +116,11 @@ public:
         return UG2d::UG_GlobalToLocal(n, cornerCoords, EvalPoint, localCoord);
     }
 
+    static int myLevel (TargetType<0,2>::T* theElement) {
+	  using UG2d::ELEMENT;
+	  return LEVEL(theElement);
+    }
+
     //! \todo Please doc me!
     static int Sides_Of_Elem(TargetType<0,2>::T* theElement) {
         using UG2d::element_descriptors;
@@ -186,7 +191,7 @@ public:
 
     //! Encapsulates the TAG macro
     static unsigned int Tag(const TargetType<0,2>::T* theElement) {
-        return TAG(theElement);
+	  return TAG(theElement);
     }
     
     //! Doesn't ever get called, but needs to be there to calm the compiler
@@ -194,6 +199,15 @@ public:
         DUNE_THROW(GridError, "Called method Tag() for a vertex.  This should never happen!");
         return 0;
     }
+
+  //! get corner in local coordinates, corner number in UG's numbering system
+  template<class T>
+  static void  getCornerLocal (const TargetType<0,2>::T* theElement, int corner, FieldVector<T, 2>& local)
+  {
+	using UG2d::element_descriptors;
+	local[0] = LOCAL_COORD_OF_TAG(TAG(theElement),corner)[0];
+	local[1] = LOCAL_COORD_OF_TAG(TAG(theElement),corner)[1];
+  }
 
     //! Next element in the UG element lists
     static TargetType<0,2>::T* succ(const TargetType<0,2>::T* theElement) {
@@ -241,11 +255,13 @@ public:
 
     //! Gets the level index of a UG sidevector
     static int& levelIndex(UGVectorType<2>::T* theVector) {
+        DUNE_THROW(GridError, "levelIndex in side vector only in 3D!");
         return reinterpret_cast<int&>(theVector->index);
     }
 
     //! Gets the level index of a UG sidevector
     static const int& levelIndex(const UGVectorType<2>::T* theVector) {
+        DUNE_THROW(GridError, "levelIndex in side vector only in 3D!");
         return reinterpret_cast<const int&>(theVector->index);
     }
 
@@ -283,12 +299,12 @@ public:
         return theElement->ge.leafIndex;
     }
 
-    //! Gets the level index of a UG sidevector
+    //! Gets the leaf index of a UG sidevector
     static int& leafIndex(UGVectorType<2>::T* theVector) {
         return reinterpret_cast<int &>(theVector->skip);
     }
 
-    //! Gets the level index of a UG sidevector
+    //! Gets the leaf index of a UG sidevector
     static const int& leafIndex(const UGVectorType<2>::T* theVector) {
         return reinterpret_cast<const int &>(theVector->skip);
     }
@@ -372,6 +388,7 @@ public:
     //! access side vector from element (this is just a dummy to compile code also in 2d)
     static UGVectorType<2>::T* SideVector (TargetType<0,2>::T* theElement, int i)
     {
+	  DUNE_THROW(GridError, "side vector only in 3D!");
 	  return NULL;
     }
 
