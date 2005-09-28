@@ -511,6 +511,16 @@ namespace Dune {
           break;
         }
         break;
+      case simplex:
+        switch(coerceTo) {
+        case triangle:
+          return VirtualRefinementImp<triangle, CoordType, triangle>::instance();
+        case simplex:
+          return VirtualRefinementImp<triangle, CoordType, triangle>::instance();
+        default:
+          break;
+        }
+        break;
       case cube:
         switch(coerceTo) {
         case triangle:
@@ -534,11 +544,11 @@ namespace Dune {
         }
         break;
       default:
-	break;
+		break;
       }
       DUNE_THROW(NotImplemented,
-		 "No Refinement<" << geometryType << ", CoordType, "
-		 << coerceTo << " >.");
+				 "No Refinement<" << geometryType << ", CoordType, "
+				 << coerceTo << " >.");
     }
   };
 
