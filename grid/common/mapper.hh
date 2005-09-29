@@ -68,7 +68,7 @@
   performance reasons it is usually not checked whether the entity is really in the 
   entity set.
 
-  The function Dune::Mapper::submap delivers the index for a subentity of a codim 0 entity.
+  The functions Dune::Mapper::map delivers the index for a (sub-)entity 
 
   The function Dune::Mapper::size returns the size of the entity set, i.e. \f$|E^\prime|\f$
 
@@ -114,7 +114,7 @@ namespace Dune
 		\param e Reference to codim cc entity. The codim is extracted from the entity.
 		\return An index in the range 0 ... Max number of entities in set - 1.
 	 */
-	template<class EntityType> // this is necessary for multiple codim mappers
+	template<class EntityType>
 	int map (const EntityType& e) const
     {
       return asImp().map(e);
@@ -127,9 +127,9 @@ namespace Dune
 	   \return An index in the range 0 ... Max number of entities in set - 1.
 	 */
 	template<int cc> // this is now the subentity's codim
-	int submap (const typename G::Traits::template Codim<0>::Entity& e, int i) const
+	int map (const typename G::Traits::template Codim<0>::Entity& e, int i) const
     {
-      return asImp().template submap<cc>(e,i);
+      return asImp().template map<cc>(e,i);
     }
 
 	/** @brief Return total number of entities in the entity set managed by the mapper.
@@ -143,6 +143,23 @@ namespace Dune
 	int size () const
     {
       return asImp().size();
+    }
+
+
+	/** @brief Returns true if the entity is contained in the index set
+	 */
+	template<class EntityType>
+	bool contains (const EntityType& e) const
+    {
+      return asImp().contains(e);
+    }
+
+	/** @brief Returns true if the entity is contained in the index set
+	 */
+	template<int cc> // this is now the subentity's codim
+	bool contains (const typename G::Traits::template Codim<0>::Entity& e, int i) const
+    {
+      return asImp().template contains<cc>(e,i);
     }
   
 private:
