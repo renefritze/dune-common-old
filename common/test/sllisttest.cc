@@ -1,3 +1,5 @@
+#include <config.h>
+
 #include<dune/common/sllist.hh>
 #include<dune/common/test/iteratortest.hh>
 #include<dune/common/poolallocator.hh>
