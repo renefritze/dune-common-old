@@ -7,6 +7,9 @@
 #include <assert.h>
 #include <algorithm>
 
+#define DIM DUNE_PROBLEM_DIM
+#define DIM_OF_WORLD DUNE_WORLD_DIM
+
 // Dune includes
 #include <dune/common/misc.hh>
 #include <dune/common/interfaces.hh>
@@ -1859,5 +1862,10 @@ namespace Dune
 #include "albertagrid/agmemory.hh"
 #include <dune/io/file/asciiparser.hh>
 #include "albertagrid/albertagrid.cc"
+
+// undef all dangerous defines
+#undef DIM
+#undef DIM_OF_WORLD
+#include "albertagrid/alberta_undefs.hh"
 
 #endif
