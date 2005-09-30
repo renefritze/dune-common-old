@@ -572,7 +572,7 @@ public:
 						typename TargetType<0,dim>::T* father_ = UG_NS<dim>::EFather(target_);
 						while (father_!=0)
 						  {
-							if (UG_NS<dim>::nSons(father_)!=1) break; // handle only copies
+							if (!UG_NS<dim>::hasCopy(father_)) break; // handle only copies
 							UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(father_,renumberVertex(gt,a)),UG_NS<dim>::Corner(father_,renumberVertex(gt,b)))) = index;
 							father_ = UG_NS<dim>::EFather(father_);
 						  }
@@ -603,7 +603,7 @@ public:
 						  typename TargetType<0,dim>::T* father_ = UG_NS<dim>::EFather(target_);
 						  while (father_!=0)
 							{
-							  if (UG_NS<dim>::nSons(father_)!=1) break; // handle only copies
+							  if (!UG_NS<dim>::hasCopy(father_)) break; // handle only copies
 							  UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(father_,renumberFace(gt,i))) = index;
 							  father_ = UG_NS<dim>::EFather(father_);
 							}
