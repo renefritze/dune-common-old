@@ -16,6 +16,8 @@ namespace Dune {
     class UGGridEntity;
     template<int dim, int dimworld>          
     class UGGrid;
+    template<int codim, class GridImp>
+    class UGGridEntityPointer;
     template<int codim, PartitionIteratorType pitype, class GridImp>
     class UGGridLevelIterator;
     template<class GridImp>                 
@@ -134,18 +136,35 @@ public:
   //! geometry of this entity
     const Geometry& geometry () const;
 
-    UGGridLevelIterator<0,All_Partition,GridImp> ownersFather() const {
-        DUNE_THROW(NotImplemented, "ownersFather");
-    }
+  UGGridEntityPointer<0,GridImp> ownersFather() const 
+  {
+	UGGridEntityPointer<0,GridImp> myfather;
+	if (UG_NS<dim>::NFather(target_)!=0)
+	  if (UG_NS<dim>::myLevel(UG_NS<dim>::NFather(target_)) == this->level()-1)
+		{
+		  myfather.setToTarget(UG_NS<dim>::NFather(target_), this->level()-1);
+		  return myfather;
+		}
+	DUNE_THROW(NotImplemented, "ownersFather for anything else than new vertices");
+	return myfather;
+  }
 
     /** \brief Location of this vertex within a mesh entity of codimension 0 on the coarse grid.
      *
     This can speed up on-the-fly interpolation for linear conforming elements
     Possibly this is sufficient for all applications we want on-the-fly.
   */
-    FieldVector<UGCtype, dim>& positionInOwnersFather() const {
-        DUNE_THROW(NotImplemented, "positionInOwnersFather");
-    }
+  FieldVector<UGCtype, dim>& positionInOwnersFather() const 
+  {
+	if (UG_NS<dim>::NFather(target_)!=0)
+	  if (UG_NS<dim>::myLevel(UG_NS<dim>::NFather(target_)) == this->level()-1)
+		{
+		  UG_NS<dim>::PositionInFather(target_,pos_);
+		  return pos_;
+		}
+	DUNE_THROW(NotImplemented, "positionInOwnersFather for anything else than new vertices");
+	return pos_;
+  }
 
 
     
@@ -165,6 +184,9 @@ private:
   int level_;
 
     typename TargetType<codim,dim>::T* target_;
+
+  mutable FieldVector<UGCtype, dim> pos_;
+
 };
 
 //***********************
