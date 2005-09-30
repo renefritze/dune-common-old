@@ -47,7 +47,11 @@ public:
 
     enum {COARSEN_CE = UG2d::COARSEN_CE};
 
+    enum {REFINECLASS_CE = UG2d::REFINECLASS_CE};
+
     enum {RED = UG2d::RED};
+
+    enum {YELLOW_CLASS = UG2d::YELLOW_CLASS};
 
     enum {COARSE = UG2d::COARSE};
 
@@ -121,7 +125,19 @@ public:
 	  return LEVEL(theElement);
     }
 
-    //! \todo Please doc me!
+    static int myLevel (TargetType<2,2>::T* theNode) {
+	  using UG2d::NODE;
+	  return LEVEL(theNode);
+    }
+
+    //! return true if element has an exact copy on the next level
+    static bool hasCopy (TargetType<0,2>::T* theElement) {
+	  using UG2d::ELEMENT;
+	  using UG2d::control_entries;
+	  return REFINECLASS(theElement) == YELLOW_CLASS;
+	}
+
+   //! \todo Please doc me!
     static int Sides_Of_Elem(TargetType<0,2>::T* theElement) {
         using UG2d::element_descriptors;
         return SIDES_OF_ELEM(theElement);
@@ -390,6 +406,17 @@ public:
         using UG2d::ELEMENT;
         using UG2d::father_offset;
         return EFATHER(theElement);
+    }
+
+  //! get father element of vertex
+    static TargetType<0,2>::T* NFather(TargetType<2,2>::T* theNode) {
+        return theNode->myvertex->iv.father;
+    }
+
+  //! get father element of vertex
+    static void PositionInFather(TargetType<2,2>::T* theNode, FieldVector<double, 2>& local) {
+	  local[0] = theNode->myvertex->iv.xi[0];
+	  local[1] = theNode->myvertex->iv.xi[1];
     }
 
     static unsigned int ReadCW(void* obj, int ce) {
