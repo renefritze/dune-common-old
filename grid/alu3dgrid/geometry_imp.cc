@@ -239,7 +239,7 @@ buildGeom(const ALU3DSPACE VertexType & item, int)
   return true;
 }
 
-
+/*
 template <GeometryType eltype , int dim> struct ALU3dGridElType {  
   static inline GeometryType type () { return unknown; }
 };
@@ -261,9 +261,10 @@ template <> struct ALU3dGridElType<hexahedron,3> {
 template <> struct ALU3dGridElType<hexahedron,2> {
   static inline GeometryType type () { return quadrilateral; }
 };
+*/
 
 
-/* Comment in for adaptation to new GeometryType
+/* Comment in for adaptation to new GeometryType */
 template <int mydim, int cdim>
 inline GeometryType 
 ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::type () const {
@@ -276,6 +277,7 @@ ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> > ::type () const {
   return cube;
 }
 
+/*
 template <>
 inline GeometryType
 ALU3dGridGeometry<0, 3, const ALU3dGrid<3, 3, tetra> > ::type () const {
@@ -289,11 +291,13 @@ ALU3dGridGeometry<0, 3, const ALU3dGrid<3, 3, hexa> > ::type () const {
 } 
 */
 
+/*
 template<int mydim, int cdim>
 inline GeometryType ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::type () const
 {
   return ALU3dGridElType<tetrahedron,mydim>::type(); 
 }
+*/
 
 
 template<int mydim, int cdim>
@@ -457,12 +461,13 @@ ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   delete biMap_;
 }
 
-
+/*
 template<int mydim, int cdim>
 inline GeometryType 
 ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::type() const {
   return ALU3dGridElType<hexahedron, mydim>::type();
 }
+*/
 
 
 template <int mydim, int cdim>
