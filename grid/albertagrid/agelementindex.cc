@@ -8,6 +8,7 @@ namespace AlbertHelp {
 enum { numOfElNumVec = DIM };
 
 // IndexManagerType defined in albertgrid.hh  
+// not thread save !!! 
 static IndexManagerType * tmpIndexStack[numOfElNumVec];
 
 inline static void initIndexManager_elmem_cc(IndexManagerType (&newIm)[numOfElNumVec])
@@ -19,9 +20,9 @@ inline static void initIndexManager_elmem_cc(IndexManagerType (&newIm)[numOfElNu
   }
 }
 
-inline static void removeIndexManager_elmem_cc()
+inline static void removeIndexManager_elmem_cc(int numOfVec)
 {
-  for(int i=0; i<numOfElNumVec; i++) tmpIndexStack[i] = 0;
+  for(int i=0; i<numOfVec; i++) tmpIndexStack[i] = 0;
 }
 
 template <int codim>
@@ -52,7 +53,7 @@ inline static void freeElementIndex(int idx)
 }
 
 // codim to ALBERTA Dof Type translator 
-template <int codim> struct AlbertaDofType { 
+template <int dim, int codim> struct AlbertaDofType { 
     enum { type  = VERTEX }; 
     enum { start_dof = 0 };
     enum { end_dof_plus_1 = 0 }; 
@@ -60,34 +61,39 @@ template <int codim> struct AlbertaDofType {
     enum { start_copy = 0 };
     enum { end_copy_plus_1 = 0 }; // means end dof = 2
 }; // dof located on vertices 
-template <> struct AlbertaDofType<0> 
+
+// element dofs 
+template <int dim> struct AlbertaDofType<dim,0> 
 { 
   enum { type  = CENTER }; 
 }; // dofs located inside an element
-#if DIM == 2
-template <> struct AlbertaDofType<1> 
+
+// dim = 2 here
+template <> struct AlbertaDofType<2,1> 
 { 
   enum { type  = EDGE }; 
   enum { start_dof = 2 };
   enum { end_dof_plus_1 = 3 }; // means end dof = 2
   enum { gochilds = 1 }; // visit only first child, because dof continuous 
 }; // dofs located on edges 
-#endif
-#if DIM == 3
-template <> struct AlbertaDofType<1> 
+
+// we have this only when dim == 3 
+#if DIM == 3 
+template <> struct AlbertaDofType<3,1> 
 { 
   enum { type  = FACE }; 
   enum { start_dof = 0 };
   enum { end_dof_plus_1 = 1 }; // means end dof = 0
   enum { gochilds = 1 }; // visit only first child, because dof continuous 
 }; // dofs located on faces 
-template <> struct AlbertaDofType<2> { 
+#endif
+
+template <> struct AlbertaDofType<3,2> { 
   enum { type  = EDGE }; 
   enum { start_dof = 4 };
   enum { end_dof_plus_1 = 6 }; // means end dof = 5
   enum { gochilds = 1 }; // visit only first child, because dof continuous 
 }; // dofs located on edges 
-#endif
 
 //****************************************************************************
 //
@@ -99,14 +105,15 @@ template <> struct AlbertaDofType<2> {
 
 // default is doing nothing 
 template <int codim> 
-void preserveDofs (int * vec, const int k, const int nv, const EL * father)
+void preserveDofs (int * vec, const int k, const int nv, const EL * father, int split_face )
 {
   assert(false);
+  abort();
 }
 
 // create new element numbers for children 
 template <>
-void preserveDofs<0> (int * vec, const int k, const int nv, const EL * el)
+void preserveDofs<0> (int * vec, const int k, const int nv, const EL * el, int split_face )
 {
   enum { codim = 0 };
   // create two new element numbers 
@@ -120,12 +127,10 @@ void preserveDofs<0> (int * vec, const int k, const int nv, const EL * el)
    
 // preserve dofs for faces  
 template <>
-void preserveDofs<1> (int * vec, const int k, const int nv, const EL * el)
+void preserveDofs<1> (int * vec, const int k, const int nv, const EL * el, int split_face )
 {
   enum { codim = 1 };
-  // in 3d the old face is face 3 in the new element 
-  // in 2d its the face 2 
-  enum { split_face = (DIM == 3) ? 3 : 2 };
+
   // face number stays the same 
   for(int i=0; i<2; i++) 
   {
@@ -154,7 +159,7 @@ void preserveDofs<1> (int * vec, const int k, const int nv, const EL * el)
 
 // preserve dofs for edges   
 template <>
-void preserveDofs<2> (int * vec, const int k, const int nv, const EL * el)
+void preserveDofs<2> (int * vec, const int k, const int nv, const EL * el, int split_face )
 {
   enum { codim = 2 };
  
@@ -182,7 +187,7 @@ void preserveDofs<2> (int * vec, const int k, const int nv, const EL * el)
   }
 }
     
-template <int codim>
+template <int dim , int codim>
 struct RefineNumbering
 {
   // get element index form stack or new number 
@@ -192,12 +197,13 @@ struct RefineNumbering
     // nv is the number of dofs at one dof locate , i.e. the number of dofs
     // strored at one face , here nv= is always 0 
     
-    assert( admin->n0_dof[AlbertaDofType<codim>::type] == 0 );
+    enum { dtype = AlbertaDofType<dim,codim>::type };
+    assert( admin->n0_dof[dtype] == 0 );
     const int nv = 0;
     
     // k is the off set for the dofs, for example at which point we have
     // face dofs, the offset of vertex dofs is always 0 
-    const int k  = admin->mesh->node[AlbertaDofType<codim>::type];
+    const int k  = admin->mesh->node[AlbertaDofType<dim,codim>::type];
 
     int *vec = 0;
 
@@ -209,7 +215,11 @@ struct RefineNumbering
     for(int i=0; i<ref; i++)
     {
       EL * el = list[i].el;
-      preserveDofs<codim> (vec,k,nv,el);
+      
+      // in 3d the old face is face 3 in the new element 
+      // in 2d its the face 2 
+      enum { split_face = (dim == 3) ? 3 : 2 };
+      preserveDofs<codim> (vec,k,nv,el, split_face );
     }
   }
 
@@ -217,8 +227,8 @@ struct RefineNumbering
   inline static void coarseNumbers ( DOF_INT_VEC * drv , RC_LIST_EL *list, int ref)
   {
     const DOF_ADMIN * admin = drv->fe_space->admin;
-    const int nv = admin->n0_dof    [AlbertaDofType<codim>::type];
-    const int k  = admin->mesh->node[AlbertaDofType<codim>::type];
+    const int nv = admin->n0_dof    [AlbertaDofType<dim,codim>::type];
+    const int k  = admin->mesh->node[AlbertaDofType<dim,codim>::type];
     int dof;
     int *vec = 0;
 
