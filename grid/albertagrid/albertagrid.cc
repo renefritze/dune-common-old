@@ -2177,7 +2177,7 @@ goNextEdge(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elInfo)
 
   // go next, if Vertex is not treated on this Element 
   if(vertexMarker_->edgeNotOnElement(elInfo->el,
-        this->grid_.getElementNumber(elInfo->el),level_,
+        this->grid_.getElementNumber(elInfo->el),(leafIt_) ? 0 : level_ ,
         this->grid_.getEdgeNumber(elInfo->el,edge_)))
   {
     elInfo = goNextEdge(stack,elInfo);
@@ -2827,15 +2827,13 @@ AlbertaGridEntity <0,dim,GridImp>::iend() const
 inline bool AlbertaMarkerVector::
 notOnThisElement(ALBERTA EL * el, int elIndex, int level, int vertex) 
 {
-  if(meLevel_) return (vec_[level][ vertex ] != elIndex);
-  return (vec_[0][ vertex ] != elIndex);
+  return (vec_[level][ vertex ] != elIndex);
 }
 
 inline bool AlbertaMarkerVector::
 edgeNotOnElement(ALBERTA EL * el, int elIndex, int level, int edgenum) 
 {
-  if(meLevel_) return (edgevec_[level][ edgenum ] != elIndex);
-  return (edgevec_[0][ edgenum ] != elIndex);
+  return (edgevec_[level][ edgenum ] != elIndex);
 }
 
 template <class GridType, int dim> 
