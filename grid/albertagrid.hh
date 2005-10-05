@@ -696,14 +696,14 @@ namespace Dune
     //! make empty entity pointer (to be revised)
     AlbertaGridEntityPointer(const AlbertaGridEntityPointerType & org);
 
-	//! assignment operator
+  //! assignment operator
     AlbertaGridEntityPointer& operator= (const AlbertaGridEntityPointer& org)
-	{
-	  if (grid_!=org.grid_)
-		DUNE_THROW(GridError,"entity pointer assignment with different grids");
-	  (*entity_).setEntity( *(org.entity_) );
-	  done_ = org.done_;
-	}
+  {
+    if (grid_!=org.grid_)
+    DUNE_THROW(GridError,"entity pointer assignment with different grids");
+    (*entity_).setEntity( *(org.entity_) );
+    done_ = org.done_;
+  }
 
     //! Destructor  
     ~AlbertaGridEntityPointer();
@@ -1451,6 +1451,7 @@ namespace Dune
     typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator 
     leafend   () const;
 
+    //! return LeafIterator which points behind last leaf entity 
     template <int codim>
     typename Traits::template Codim<codim>::LeafIterator 
     leafend   () const;
@@ -1502,6 +1503,7 @@ namespace Dune
      *  return true if a least one element was refined */
     bool adapt ( );
 
+    //! adapt method with DofManager 
     template <class DofManagerType, class RestrictProlongOperatorType>
     bool adapt (DofManagerType &, RestrictProlongOperatorType &, bool verbose=false );
   
@@ -1511,9 +1513,11 @@ namespace Dune
     //! clean up some markers 
     bool postAdapt();
 
+    //! fake implementation of load-balance 
     template <class DofManagerType>
     bool loadBalance (DofManagerType & dm) { return false; }
 
+    //! fake implementation of communicate 
     template <class DofManagerType>
     bool communicate (DofManagerType & dm) { return false; }
   
@@ -1543,23 +1547,28 @@ namespace Dune
     //! transform grid N = scalar * x + trans
     void setNewCoords(const FieldVector<albertCtype, dimworld> & trans, const albertCtype scalar);
 
+    //! return hierarchic index set 
     const HierarchicIndexSet & hierarchicIndexSet () const { return hIndexSet_; }
 
+    //! return level index set for given level  
     const typename Traits :: LevelIndexSet & levelIndexSet (int level= 0) const
     {
       if(!levelIndexVec_[level]) levelIndexVec_[level] = new LevelIndexSetImp (*this,level);
       return *(levelIndexVec_[level]); 
     }
 
+    //! return leaf index set  
     const typename Traits :: LeafIndexSet & leafIndexSet () const {
       if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSet (*this);
       return *leafIndexSet_; 
     }
   
+    //! return global IdSet 
     const GlobalIdSet & globalIdSet () const {
       return globalIdSet_; 
     }
-  
+ 
+    //! return local IdSet 
     const LocalIdSet & localIdSet () const {
       return globalIdSet_; 
     }
@@ -1567,6 +1576,7 @@ namespace Dune
     //! access to mesh pointer, needed by some methods
     ALBERTA MESH* getMesh () const { return mesh_; }; 
 
+    //! return real entity implementation 
     template <int cd>
     AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& 
     getRealEntity(typename Traits::template Codim<cd>::Entity& entity) 
@@ -1575,6 +1585,7 @@ namespace Dune
     }
 
   private:
+    //! return real entity implementation 
     template <int cd>
     const AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& 
     getRealEntity(const typename Traits::template Codim<cd>::Entity& entity) const 
@@ -1799,6 +1810,7 @@ namespace Dune
     // is generated, when accessed 
     mutable LeafIndexSet* leafIndexSet_;
 
+    //! stores geometry types of this grid 
     const std::vector < GeometryType > geomTypes_;
 
   }; // end class AlbertaGrid
@@ -1816,20 +1828,30 @@ namespace Dune
     enum { MAXL = 64 };
     enum { vxBufferSize_ = 10000 };
   public:
+    //! create AlbertaMarkerVector for Level or Leaf Iterator, true == LevelIterator 
     AlbertaMarkerVector (bool meLevel) : up2Date_(false), meLevel_(meLevel) {} ;
 
+    //! return true if vertex is not watched on this element 
     bool notOnThisElement(ALBERTA EL * el, int elIndex, int level , int vertex);
+
+    //! return true if edge is not watched on this element 
     bool edgeNotOnElement(ALBERTA EL * el, int elIndex, int level , int edgenum);
 
+    //! mark vertices for LevelIterator 
     template <class GridType>
     void markNewVertices(GridType &grid);
-    
+   
+    //! mark vertices for LeafIterator 
     template <class GridType>
     void markNewLeafVertices(GridType &grid);
-
-    bool up2Date () const { return up2Date_; }
-    void unsetUp2Date () { up2Date_ = false; }
   
+    //! return true if marking is up to date 
+    bool up2Date () const { return up2Date_; }
+
+    //! unset up2date flag 
+    void unsetUp2Date () { up2Date_ = false; }
+ 
+    //! print for debugin' only 
     void print();
 
   private:
