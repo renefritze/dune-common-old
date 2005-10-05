@@ -705,7 +705,7 @@ public:
   int index (const EntityType & en) const
   {
     enum { codim = EntityType::codimension };
-    assert(codimLeafSet_[codim].index( hIndexSet_.index(en) ) >= 0 );
+    assert( (codimLeafSet_[codim].index( hIndexSet_.index(en) ) < 0) ? (std::cout << "Test failed for codim = " << codim << "\n", 0) : 1);
     return codimLeafSet_[codim].index( hIndexSet_.index(en) );
   }
   
