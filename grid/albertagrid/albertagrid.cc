@@ -2203,7 +2203,7 @@ goNextVertex(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elInfo)
 
   // go next, if Vertex is not treated on this Element 
   if(vertexMarker_->notOnThisElement(elInfo->el,
-        this->grid_.getElementNumber(elInfo->el),level_,
+        this->grid_.getElementNumber(elInfo->el),(leafIt_) ? 0 : level_,
         this->grid_.getVertexNumber(elInfo->el,vertex_)))
   {
     elInfo = goNextVertex(stack,elInfo);
