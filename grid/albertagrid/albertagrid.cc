@@ -759,6 +759,13 @@ makeDescription()
 }
 
 template<int codim, int dim, class GridImp>
+inline PartitionType AlbertaGridEntity <codim,dim,GridImp>::
+partitionType () const 
+{
+  return InteriorEntity;
+}
+
+template<int codim, int dim, class GridImp>
 inline AlbertaGridEntity<codim,dim,GridImp>::
 AlbertaGridEntity(const GridImp &grid, int level, 
       ALBERTA TRAVERSE_STACK * travStack) 
