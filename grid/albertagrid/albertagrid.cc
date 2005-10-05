@@ -3892,9 +3892,8 @@ inline void AlbertaGrid < dim, dimworld >::calcExtras ()
   for(unsigned int i=0; i<levelIndexVec_.size(); i++)
     if(levelIndexVec_[i]) (*levelIndexVec_[i]).calcNewIndex();
 
-  if( leafIndexSet_ ) delete leafIndexSet_;
-  //if( leafIndexSet_ ) (*leafIndexSet_).resize();
-  //if( leafIndexSet_ ) (*leafIndexSet_).compress();
+  if( leafIndexSet_ ) (*leafIndexSet_).resize();
+  if( leafIndexSet_ ) (*leafIndexSet_).compress();
 
   // we have a new grid 
   wasChanged_ = true;
