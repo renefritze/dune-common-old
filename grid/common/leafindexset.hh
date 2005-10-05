@@ -428,6 +428,22 @@ private:
       PartialSpec<HSetImp,CodimLeafSet,EntityType,codim-1> :: 
         iterateCodims (hIndexSet, cls, en , cdUsed );
     }
+    
+    static inline void removeCodims (const HSetImp & hIndexSet , 
+        CodimLeafSet (&cls)[ncodim], const EntityType & en , bool (&cdUsed)[ncodim])
+    {
+      CodimLeafSet & lset = cls[codim];
+      if(cdUsed[codim])
+      {
+        for(int i=0; i<en.template count<codim> (); i++)
+        {
+          lset.remove( hIndexSet. template subIndex<codim> (en,i) );   
+        }
+      }
+      
+      PartialSpec<HSetImp,CodimLeafSet,EntityType,codim-1> :: 
+        removeCodims (hIndexSet, cls, en , cdUsed );
+    }
   };
   
   template <class HSetImp, class CodimLeafSet, class EntityType> 
@@ -445,6 +461,20 @@ private:
         for(int i=0; i<en.template count<codim> (); i++)
         {
           lset.insert( hIndexSet. template subIndex<codim> (en,i) );   
+        }
+      }
+    }
+    
+    static inline void removeCodims (const HSetImp & hIndexSet , 
+        CodimLeafSet (&cls)[ncodim], const EntityType & en , bool (&cdUsed)[ncodim])
+    {
+      enum { codim = 1 };
+      CodimLeafSet & lset = cls[codim];
+      if(cdUsed[codim])
+      {
+        for(int i=0; i<en.template count<codim> (); i++)
+        {
+          lset.remove( hIndexSet. template subIndex<codim> (en,i) );   
         }
       }
     }
@@ -637,13 +667,11 @@ public:
   {
     //std::cout << "Remove el = "<< hIndexSet_.index(en) << "\n";
     codimLeafSet_[0].remove ( hIndexSet_.index(en) );
-    /*
     if(higherCodims_)
     {
       PartialSpec<HIndexSetType,CodimLeafIndexSet,EntityCodim0Type,ncodim-1> :: 
-        iterateCodims ( hIndexSet_, codimLeafSet_, en , codimUsed_ ); 
+        removeCodims ( hIndexSet_, codimLeafSet_, en , codimUsed_ ); 
     }
-    */
   }
 
   //! return approximate size that is used during restriction 
@@ -728,6 +756,7 @@ private:
     else 
     {
       this->insert ( en );
+      this->remove ( en );
       // set unused here, because index is only needed for prolongation 
     }
    
