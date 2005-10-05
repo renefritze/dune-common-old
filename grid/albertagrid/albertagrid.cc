@@ -3779,7 +3779,7 @@ inline int AlbertaGrid < dim, dimworld >::size (int codim, GeometryType type) co
 template < int dim, int dimworld >
 inline int AlbertaGrid < dim, dimworld >::size (int codim) const
 {
-  return this->size(codim,simplex); 
+  return this->leafIndexSet().size(codim,simplex); 
 }
 
 template < int dim, int dimworld > 
