@@ -2827,13 +2827,15 @@ AlbertaGridEntity <0,dim,GridImp>::iend() const
 inline bool AlbertaMarkerVector::
 notOnThisElement(ALBERTA EL * el, int elIndex, int level, int vertex) 
 {
-  return (vec_[level][ vertex ] != elIndex);
+  if(meLevel_) return (vec_[level][ vertex ] != elIndex);
+  return (vec_[0][ vertex ] != elIndex);
 }
 
 inline bool AlbertaMarkerVector::
 edgeNotOnElement(ALBERTA EL * el, int elIndex, int level, int edgenum) 
 {
-  return (edgevec_[level][ edgenum ] != elIndex);
+  if(meLevel_) return (edgevec_[level][ edgenum ] != elIndex);
+  return (edgevec_[0][ edgenum ] != elIndex);
 }
 
 template <class GridType, int dim> 
@@ -2862,6 +2864,7 @@ struct MarkEdges<GridType,3>
 template <class GridType>
 inline void AlbertaMarkerVector::markNewVertices(GridType &grid)
 {
+  assert( meLevel_ == true );
   enum { dim      = GridType::dimension };
   enum { dimworld = GridType::dimensionworld };
   
@@ -2887,6 +2890,56 @@ inline void AlbertaMarkerVector::markNewVertices(GridType &grid)
     typedef typename GridType::template Codim<0>::LevelIterator LevelIteratorType;
     LevelIteratorType endit = grid.template lend<0> (level);
     for(LevelIteratorType it = grid.template lbegin<0> (level); it != endit; ++it)
+    {
+      const ALBERTA EL * el = 
+        (grid.template getRealEntity<0> (*it)).getElInfo()->el;
+      
+      int elindex = grid.hierarchicIndexSet().index(*it); 
+      for(int local=0; local<dim+1; local++)
+      { 
+        int num = el->dof[local][0]; // vertex num
+        if( vec[num] == -1 ) vec[num] = elindex;
+      }
+    
+#if DIM == 3  
+      // mark edges for this element 
+      MarkEdges<GridType,dim>::mark(grid,edgevec,
+        el,(grid.template getRealEntity<0> (*it)).template count<2> (), elindex );
+#endif
+    }
+    // remember the number of entity on level and codim = 0
+  }
+  up2Date_ = true;
+}
+template <class GridType>
+inline void AlbertaMarkerVector::markNewLeafVertices(GridType &grid)
+{
+  assert( meLevel_ == false );
+  enum { dim      = GridType::dimension };
+  enum { dimworld = GridType::dimensionworld };
+  
+  int nvx = grid.hierarchicIndexSet().size(dim);
+#if DIM == 3
+  int edg = grid.hierarchicIndexSet().size(dim-1);
+#endif
+  
+  int level=0;
+  {
+    Array<int> & vec     = vec_[level];
+    if(vec.size()     < nvx) vec.resize( nvx + vxBufferSize_ );
+
+#if DIM == 3
+    Array<int> & edgevec = edgevec_[level];
+    if(edgevec.size() < edg) edgevec.resize( edg + vxBufferSize_ );
+    for(int i=0; i<edgevec.size(); i++) edgevec[i] = -1;
+#endif
+  
+    for(int i=0; i<vec.size(); i++) vec[i] = -1;
+
+    //typedef AlbertaGridMakeableEntity<0,dim,const GridType> MakeableEntityImp;
+    typedef typename GridType::template Codim<0>::LeafIterator IteratorType;
+    IteratorType endit = grid.template leafend<0> ();
+    for(IteratorType it = grid.template leafbegin<0> (); it != endit; ++it)
     {
       const ALBERTA EL * el = 
         (grid.template getRealEntity<0> (*it)).getElInfo()->el;
@@ -2940,7 +2993,9 @@ inline AlbertaGrid < dim, dimworld >::AlbertaGrid() :
   , leafIndexSet_ (0)
   , geomTypes_(1,simplex) 
 {
-  vertexMarker_ = new AlbertaMarkerVector ();
+  // true created Level Marker 
+  vertexMarkerLevel_ = new AlbertaMarkerVector (true);
+  vertexMarkerLeaf_  = new AlbertaMarkerVector (false);
 
   for(int i=0; i<AlbertHelp::numOfElNumVec; i++) dofvecs_.elNumbers[i] = 0;
   dofvecs_.elNewCheck = 0;
@@ -2995,7 +3050,8 @@ inline AlbertaGrid < dim, dimworld >::AlbertaGrid(const char *MacroTriangFilenam
     file.close();
   }
 
-  vertexMarker_ = new AlbertaMarkerVector ();
+  vertexMarkerLevel_ = new AlbertaMarkerVector (true);
+  vertexMarkerLeaf_  = new AlbertaMarkerVector (false);
   ALBERTA AlbertHelp::initIndexManager_elmem_cc(indexStack_);
 
   if(makeNew)
@@ -3031,7 +3087,8 @@ AlbertaGrid(AlbertaGrid<dim,dimworld> & oldGrid, int proc) :
 
   ALBERTA MESH * oldMesh = oldGrid.getMesh();
 
-  vertexMarker_ = new AlbertaMarkerVector ();
+  vertexMarkerLevel_ = new AlbertaMarkerVector (true);
+  vertexMarkerLeaf_  = new AlbertaMarkerVector (false);
   ALBERTA AlbertHelp::initIndexManager_elmem_cc(indexStack_);
 
   DUNE_THROW(AlbertaError,"To be revised!");
@@ -3052,7 +3109,8 @@ inline void AlbertaGrid < dim, dimworld >::removeMesh()
 
   if(leafIndexSet_) delete leafIndexSet_;
 
-  if(vertexMarker_)  delete vertexMarker_;
+  if(vertexMarkerLevel_)  delete vertexMarkerLevel_;
+  if(vertexMarkerLeaf_ )  delete vertexMarkerLeaf_;
   
   for(int i=0; i<AlbertHelp::numOfElNumVec; i++)
     if(dofvecs_.elNumbers[i])  ALBERTA free_dof_int_vec(dofvecs_.elNumbers[i]);
@@ -3085,9 +3143,9 @@ AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 {
   if((dim == codim) || ((dim == 3) && (codim == 2)) ) 
   {
-    if( ! (*vertexMarker_).up2Date() ) vertexMarker_->markNewVertices(*this);
+    if( ! (*vertexMarkerLevel_).up2Date() ) vertexMarkerLevel_->markNewVertices(*this);
   }
-  return AlbertaGridLevelIterator<codim,pitype,const MyType> (*this,vertexMarker_,level,proc);
+  return AlbertaGridLevelIterator<codim,pitype,const MyType> (*this,vertexMarkerLevel_,level,proc);
 }
 
 template < int dim, int dimworld > template<int codim, PartitionIteratorType pitype>
@@ -3103,9 +3161,9 @@ AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 {
   if((dim == codim) || ((dim == 3) && (codim == 2)) ) 
   {
-    if( ! (*vertexMarker_).up2Date() ) vertexMarker_->markNewVertices(*this);
+    if( ! (*vertexMarkerLevel_).up2Date() ) vertexMarkerLevel_->markNewVertices(*this);
   }
-  return AlbertaGridLevelIterator<codim,All_Partition,const MyType> (*this,vertexMarker_,level,proc);
+  return AlbertaGridLevelIterator<codim,All_Partition,const MyType> (*this,vertexMarkerLevel_,level,proc);
 }
 
 template < int dim, int dimworld > template<int codim>
@@ -3122,9 +3180,9 @@ AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const
 {
   if((dim == codim) || ((dim == 3) && (codim == 2)) ) 
   {
-    if( ! (*vertexMarker_).up2Date() ) vertexMarker_->markNewVertices(*this);
+    if( ! (*vertexMarkerLeaf_).up2Date() ) vertexMarkerLeaf_->markNewLeafVertices(*this);
   }
-  return AlbertaGridLeafIterator<codim, pitype, const MyType> (*this,vertexMarker_,level,proc);
+  return AlbertaGridLeafIterator<codim, pitype, const MyType> (*this,vertexMarkerLeaf_,level,proc);
 }
 
 template < int dim, int dimworld >
@@ -3183,7 +3241,7 @@ template < int dim, int dimworld >
 inline typename AlbertaGrid<dim,dimworld>::LeafIterator  
 AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const
 {
-  return AlbertaGridLeafIterator<0, All_Partition, const MyType> (*this,vertexMarker_,level,proc);
+  return AlbertaGridLeafIterator<0, All_Partition, const MyType> (*this,vertexMarkerLeaf_,level,proc);
 }
 
 template < int dim, int dimworld >
@@ -3827,7 +3885,8 @@ inline void AlbertaGrid < dim, dimworld >::calcExtras ()
   maxlevel_ = ALBERTA AlbertHelp::calcMaxLevel(mesh_);
 
   // unset up2Dat status, if lbegin is called then this status is updated 
-  vertexMarker_->unsetUp2Date();
+  vertexMarkerLevel_->unsetUp2Date();
+  vertexMarkerLeaf_->unsetUp2Date();
 
   // if levelIndexSet exists, then update now 
   for(unsigned int i=0; i<levelIndexVec_.size(); i++)
@@ -3981,7 +4040,8 @@ inline bool AlbertaGrid < dim, dimworld >::readGridAscii
   if( !readParameter(filename,"Time",time) )
     time = 0.0;
     
-  vertexMarker_ = new AlbertaMarkerVector (); assert(vertexMarker_);
+  vertexMarkerLevel_ = new AlbertaMarkerVector (true);  assert(vertexMarkerLevel_);
+  vertexMarkerLeaf_  = new AlbertaMarkerVector (false); assert(vertexMarkerLeaf_);
   ALBERTA AlbertHelp::initIndexManager_elmem_cc(indexStack_);
 
   initGrid(myRank_);
