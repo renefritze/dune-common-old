@@ -165,7 +165,6 @@ template<int mydim, int cdim, class GridImp,template<int,int,class> class Geomet
 // dim is necessary because Entity will be specialized for codim==0 _and_ codim==dim
 // EntityImp gets GridImp as 3rd template parameter to distinguish between const and mutable grid
 template<int codim, int dim, class GridImp,template<int,int,class> class EntityImp> class Entity;
-template<class GridImp, template<class> class BoundaryEntityImp> class BoundaryEntity;
 template<class GridImp, class EntityPointerImp> class EntityPointer;
 template<int codim, PartitionIteratorType pitype, class GridImp,
          template<int,PartitionIteratorType,class> class LevelIteratorImp> class LevelIterator;
@@ -215,8 +214,7 @@ public:
     typedef typename GridFamily::Traits::HierarchicIterator HierarchicIterator;
 
     typedef typename GridFamily::Traits::IntersectionIterator IntersectionIterator;
-    typedef typename GridFamily::Traits::BoundaryEntity BoundaryEntity;
-
+ 
  	typedef typename GridFamily::Traits::LevelIndexSet LevelIndexSet;
  	typedef typename GridFamily::Traits::LeafIndexSet LeafIndexSet;
  	typedef typename GridFamily::Traits::GlobalIdSet GlobalIdSet;
@@ -451,7 +449,6 @@ protected:
 template <int dim, int dimw, class GridImp,
           template<int,int,class> class GeometryImp,
           template<int,int,class> class EntityImp,
-          template<class> class BoundaryEntityImp,
           template<int,class> class EntityPointerImp,
           template<int,PartitionIteratorType,class> class LevelIteratorImp,
           template<class> class IntersectionIteratorImp,
@@ -466,8 +463,6 @@ struct GridTraits
   typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorImp> IntersectionIterator;
 
   typedef Dune::HierarchicIterator<const GridImp, HierarchicIteratorImp> HierarchicIterator;
-
-  typedef Dune::BoundaryEntity<const GridImp, BoundaryEntityImp> BoundaryEntity;
 
   template <int cd>
   struct Codim
@@ -532,7 +527,6 @@ inline std::string transformToGridName(GridIdentifier type)
 
 #include "geometry.hh"
 #include "entity.hh"
-#include "boundary.hh"
 #include "entitypointer.hh"
 #include "leveliterator.hh"
 #include "intersectioniterator.hh"
