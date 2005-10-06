@@ -131,6 +131,9 @@ public:
   //! index is unique within the grid hierachie and per codim
   int globalIndex () const DUNE_DEPRECATED;
 
+  //! return partition type of this entity ( see grid.hh )
+  PartitionType partitionType() const;
+  
   //! Constructor 
   ALU3dGridEntity(const GridImp &grid, int level);
 

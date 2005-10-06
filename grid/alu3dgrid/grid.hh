@@ -81,63 +81,46 @@ namespace Dune {
 
   typedef ALU3dGrid<dim,dimworld,elType> GridImp;
 
-    struct Traits
-    {
-  typedef ALU3dGrid<dim,dimworld,elType> Grid;
-
-  typedef Dune::IntersectionIterator<const GridImp, ALU3dGridIntersectionIterator> IntersectionIterator;
-
-  typedef Dune::HierarchicIterator<const GridImp, ALU3dGridHierarchicIterator> HierarchicIterator;
-
-  typedef Dune::BoundaryEntity<const GridImp, ALU3dGridBoundaryEntity> BoundaryEntity;
-
-  template <int cd>
-  struct Codim
+  struct Traits
   {
-    // IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
-    typedef Dune::Geometry<dim-cd, dimworld, const GridImp, ALU3dGridGeometry> Geometry;
-    typedef Dune::Geometry<dim-cd, dim, const GridImp, ALU3dGridGeometry> LocalGeometry;
-    // we could - if needed - introduce an other struct for dimglobal of Geometry
-    typedef Dune::Entity<cd, dim, const GridImp, ALU3dGridEntity> Entity;
+    typedef ALU3dGrid<dim,dimworld,elType> Grid;
 
-    typedef Dune::LevelIterator<cd,All_Partition,const GridImp,ALU3dGridLevelIterator> LevelIterator;
+    typedef Dune::IntersectionIterator<const GridImp, ALU3dGridIntersectionIterator> IntersectionIterator;
 
-    typedef Dune::LeafIterator<cd,All_Partition,const GridImp,ALU3dGridLeafIterator> LeafIterator;
+    typedef Dune::HierarchicIterator<const GridImp, ALU3dGridHierarchicIterator> HierarchicIterator;
 
-    typedef Dune::EntityPointer<const GridImp,ALU3dGridEntityPointer<cd,const GridImp> > EntityPointer;
+    typedef Dune::BoundaryEntity<const GridImp, ALU3dGridBoundaryEntity> BoundaryEntity;
 
-    template <PartitionIteratorType pitype>
-    struct Partition
+    template <int cd>
+    struct Codim
     {
-      typedef Dune::LevelIterator<cd,pitype,const GridImp,ALU3dGridLevelIterator> LevelIterator;
-      typedef Dune::LeafIterator<cd,pitype,const GridImp,ALU3dGridLeafIterator> LeafIterator;
+      // IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
+      typedef Dune::Geometry<dim-cd, dimworld, const GridImp, ALU3dGridGeometry> Geometry;
+      typedef Dune::Geometry<dim-cd, dim, const GridImp, ALU3dGridGeometry> LocalGeometry;
+      // we could - if needed - introduce an other struct for dimglobal of Geometry
+      typedef Dune::Entity<cd, dim, const GridImp, ALU3dGridEntity> Entity;
+
+      typedef Dune::LevelIterator<cd,All_Partition,const GridImp,ALU3dGridLevelIterator> LevelIterator;
+
+      typedef Dune::LeafIterator<cd,All_Partition,const GridImp,ALU3dGridLeafIterator> LeafIterator;
+
+      typedef Dune::EntityPointer<const GridImp,ALU3dGridEntityPointer<cd,const GridImp> > EntityPointer;
+
+      template <PartitionIteratorType pitype>
+      struct Partition
+      {
+        typedef Dune::LevelIterator<cd,pitype,const GridImp,ALU3dGridLevelIterator> LevelIterator;
+        typedef Dune::LeafIterator<cd,pitype,const GridImp,ALU3dGridLeafIterator> LeafIterator;
+      };
+
     };
 
+    typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;
+    typedef LeafIndexSetImp LeafIndexSet;
+    typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
+    typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
   };
-
-  typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;
-  typedef LeafIndexSetImp LeafIndexSet;
-  typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
-  typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
-
-    };
-/*
-    typedef GridTraits<dim,dimworld, 
-                 ALU3dGrid < dim, dimworld, elType > ,
-                 ALU3dGridGeometry,ALU3dGridEntity,
-                 ALU3dGridBoundaryEntity,
-                 ALU3dGridEntityPointer, 
-                 ALU3dGridLevelIterator,
-                 ALU3dGridIntersectionIterator,
-                 ALU3dGridHierarchicIterator,
-                 ALU3dGridLeafIterator,
-                 LevelIndexSetImp,
-                 LeafIndexSetImp,
-                 GlobalIdSetImp, typename GlobalIdSetImp::IdType,
-                 LocalIdSetImp,  typename LocalIdSetImp ::IdType
-                   > Traits;
-*/
-  };
+};
 
 
   /**
@@ -332,23 +315,14 @@ namespace Dune {
     //! number of grid entities per level and codim
     int size (int level, int cd) const;
 
-	//! number of leaf entities per codim in this process
-	int size (int codim) const
-	{
-	  return size(codim,simplex);
-	}
+	  //! number of leaf entities per codim in this process
+	  int size (int codim) const;
 
-	//! number of entities per level, codim and geometry type in this process
-	int size (int level, int codim, GeometryType type) const
-	{
-	  return this->levelIndexSet(level).size(codim,type);
-	}
+	  //! number of entities per level, codim and geometry type in this process
+	  int size (int level, int codim, GeometryType type) const;
 
-	//! number of leaf entities per codim and geometry type in this process
-	int size (int codim, GeometryType type) const
-	{
-	  return this->leafIndexSet().size(codim,type);
-	}
+  	//! number of leaf entities per codim and geometry type in this process
+  	int size (int codim, GeometryType type) const;
 
     //! number of grid entities on all levels for given codim
     int global_size (int cd) const DUNE_DEPRECATED;
@@ -397,6 +371,7 @@ namespace Dune {
        return true if a least one entity was refined */
     bool adapt ( );
 
+    //! adapt with DofManager 
     template <class DofManagerType, class RestrictProlongOperatorType>
     bool adapt (DofManagerType &, RestrictProlongOperatorType &, bool verbose=false );
 

@@ -116,6 +116,13 @@ namespace Dune {
   }
 
   template<int cd, int dim, class GridImp>
+  inline PartitionType ALU3dGridEntity<cd,dim,GridImp> ::
+  partitionType () const
+  {
+    return InteriorEntity;
+  }
+
+  template<int cd, int dim, class GridImp>
   inline const typename ALU3dGridEntity<cd,dim,GridImp>::Geometry & 
   ALU3dGridEntity<cd,dim,GridImp>:: geometry() const
   {
@@ -434,7 +441,7 @@ namespace Dune {
   {
     //assert(false); // this method is to be removed soon
 
-    assert(cc == dim);
+    //assert(cc == dim);
     dwarn << "Test this shit in: " << __FILE__ << " line: " <<  __LINE__ << "\n"; 
     assert(item_ != 0);
     typedef typename  ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElType;
@@ -445,7 +452,7 @@ namespace Dune {
   template<int cc> 
   inline int ALU3dGridEntity<0,dim,GridImp> :: getSubIndex (int i) const
   {
-    assert(cc == dim);
+    //assert(cc == dim);
     dwarn << "Test this shit in: " << __FILE__ << " line: " <<  __LINE__ << "\n"; 
     assert(item_ != 0);
     typedef typename  ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElType;

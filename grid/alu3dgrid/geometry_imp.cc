@@ -37,16 +37,8 @@ inline void ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > :: build
   {
     calcElMatrix(); 
 
-    // DetDf = integrationElement
+    // DetDf = integrationElement, invert transposed Matrix
     detDF_ = std::abs( FMatrixHelp::invertMatrix(AT_,Jinv_) );
-    // transpose Jinv_
-    for (int i = 0; i < matdim; ++i) {
-      for (int j = i+1; j < matdim; ++j) {
-        alu3d_ctype tmp = Jinv_[i][j];
-        Jinv_[i][j] = Jinv_[j][i];
-        Jinv_[j][i] = tmp;
-      }
-    }
     builtinverse_ = builtDetDF_ = true;
   }
 }
