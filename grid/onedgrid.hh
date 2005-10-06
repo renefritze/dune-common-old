@@ -36,7 +36,6 @@ typedef double OneDCType;
 #include "onedgrid/onedgridentity.hh"
 #include "onedgrid/onedgridentitypointer.hh"
 #include "onedgrid/onedgridgeometry.hh"
-#include "onedgrid/onedgridboundent.hh"
 #include "onedgrid/onedintersectionit.hh"
 #include "onedgrid/onedgridleveliterator.hh"
 #include "onedgrid/onedgridleafiterator.hh"
@@ -158,7 +157,6 @@ struct OneDGridFamily
     typedef GridTraits<dim,dimworld,Dune::OneDGrid<dim,dimworld>,
                        OneDGridGeometry,
                        OneDGridEntity,
-                       OneDGridBoundaryEntity,
                        OneDGridEntityPointer,
                        OneDGridLevelIterator,
                        OneDGridIntersectionIterator,
@@ -324,7 +322,13 @@ public:
 
     const typename Traits::LevelIndexSet& levelIndexSet(int level) const
     {
-        return levelIndexSets_[level];
+        if (! levelIndexSets_[level]) {
+            levelIndexSets_[level] =
+                new OneDGridLevelIndexSet<OneDGrid<dim,dimworld> >;
+            levelIndexSets_[level]->update(*this, level);
+        }
+
+        return * levelIndexSets_[level];
     }
 
     const typename Traits::LeafIndexSet& leafIndexSet() const
@@ -408,8 +412,8 @@ private:
     // The elements of the grid hierarchy
     std::vector<List<OneDEntityImp<1> > > elements;
 
-     // Our set of level indices
-    std::vector<OneDGridLevelIndexSet<OneDGrid<dim,dimworld> > > levelIndexSets_;
+    // Our set of level indices
+    mutable std::vector<OneDGridLevelIndexSet<OneDGrid<dim,dimworld> >* > levelIndexSets_;
 
     OneDGridLeafIndexSet<OneDGrid<dim,dimworld> > leafIndexSet_;
 
