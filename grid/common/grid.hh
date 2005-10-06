@@ -231,11 +231,11 @@ public:
   typedef ct ctype;
 
   /*! Return maximum level defined in this grid. Levels are numbered
-    0 ... maxlevel with 0 the coarsest level.
+    0 ... maxLevel with 0 the coarsest level.
   */
-  int maxlevel() const
+  int maxLevel() const
     {
-      return asImp().maxlevel();
+      return asImp().maxLevel();
     }
 
   //! Return number of grid entities of a given codim on a given level
