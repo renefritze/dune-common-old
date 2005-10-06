@@ -77,7 +77,7 @@ namespace Dune
     virtual int size (int i, int c, int cc) const = 0;
 	
     //! number of ii'th subentity with codim cc>c of (i,c)
-    virtual int subentity (int i, int c, int ii, int cc) const = 0;
+    virtual int subEntity (int i, int c, int ii, int cc) const = 0;
 
     //! position of entity (i,c) 
     virtual const FieldVector<ctype,dim>& position (int i, int c) const = 0;
@@ -120,9 +120,9 @@ namespace Dune
     }
 	
     //! number of ii'th subentity with codim cc of (i,c)
-    int subentity (int i, int c, int ii, int cc) const
+    int subEntity (int i, int c, int ii, int cc) const
     {
-      return Imp::subentity(i,c,ii,cc);
+      return Imp::subEntity(i,c,ii,cc);
     }
 
     //! position of entity (i,c) 
@@ -176,8 +176,8 @@ namespace Dune
                 for (int ii=0; ii<r.size(i,c,cc); ii++)
                   {
                     std::cout << "    index=" << ii
-                              << " subentity=" << r.subentity(i,c,ii,cc)
-                              << " position=(" << r.position(r.subentity(i,c,ii,cc),cc) << ")"
+                              << " subentity=" << r.subEntity(i,c,ii,cc)
+                              << " position=(" << r.position(r.subEntity(i,c,ii,cc),cc) << ")"
                               << std::endl;
                   }
               }
@@ -233,7 +233,7 @@ namespace Dune
     }
 	
     //! number of ii'th subentity with codim cc of (i,c)
-    int subentity (int i, int c, int ii, int cc) const
+    int subEntity (int i, int c, int ii, int cc) const
     {
       return hierarchy[i][c][ii][cc];
     }
@@ -521,7 +521,7 @@ namespace Dune
       return subsizes[i][c][cc];
     }
     //! number of ii'th subentity with codim cc of (i,c)
-    int subentity (int i, int c, int ii, int cc) const
+    int subEntity (int i, int c, int ii, int cc) const
     {
       return subentityindex[i][c][ii][cc];
     }
@@ -868,7 +868,7 @@ namespace Dune
     }
 
     //! number of ii'th subentity with codim cc of (i,c)
-    int subentity (int i, int c, int ii, int cc) const
+    int subEntity (int i, int c, int ii, int cc) const
     {
       return subentityindex[i][c][ii][cc];
     }
@@ -1182,7 +1182,7 @@ namespace Dune
     }
 
     //! number of ii'th subentity with codim cc of (i,c)
-    int subentity (int i, int c, int ii, int cc) const
+    int subEntity (int i, int c, int ii, int cc) const
     {
       return subentityindex[i][c][ii][cc];
     }
