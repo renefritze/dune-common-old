@@ -82,6 +82,7 @@ namespace ALUGridSpace {
     ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level ) 
       : it_(const_cast<GridImp &> (grid).myGrid().container(),level) {}
 
+
     int size  ()    { return it_.size(); }
     void next ()    { it_.next(); }
     void first()    { it_.first(); }
@@ -623,8 +624,6 @@ namespace Dune {
   class ALU3dGridEntityPointer;
   template<int mydim, int coorddim, class GridImp>
   class ALU3dGridGeometry;
-  template<class GridImp>
-  class ALU3dGridBoundaryEntity;
   template<class GridImp> 
   class ALU3dGridHierarchicIterator;
   template<class GridImp>
@@ -680,8 +679,6 @@ public IntersectionIteratorDefault <GridImp,ALU3dGridIntersectionIterator>
 
 public:
   typedef typename GridImp::template Codim<0>::Entity Entity;
-  typedef typename GridImp::template Codim<0>::BoundaryEntity BoundaryEntity;
-  typedef ALU3dGridMakeableBoundaryEntity<GridImp> MakeableBndEntityImp;
   typedef typename GridImp::template Codim<1>::Geometry Geometry;
   typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
   typedef ALU3dGridMakeableEntity<0,dim,GridImp> EntityImp;
@@ -722,7 +719,7 @@ public:
   bool neighbor () const; 
 
   //! return information about the Boundary 
-  const BoundaryEntity & boundaryEntity () const; 
+  int boundaryId () const; 
       
   //! intersection of codimension 1 of this neighbor with element where
   //! iteration started. 
@@ -807,7 +804,6 @@ private:
 
   //! current element from which we started the intersection iterator
   mutable GEOElementType* item_;  
-  mutable MakeableBndEntityImp* bndEntity_;
 
   const int nFaces_;
   const int walkLevel_;

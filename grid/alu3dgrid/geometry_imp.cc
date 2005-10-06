@@ -31,7 +31,7 @@ calcElMatrix () const
 
 //dim = dimworld = 3
 template<int mydim, int cdim>
-inline void ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > :: buildJacobianInverse() const
+inline void ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > :: buildJacobianInverseTransposed() const
 {
   if(!builtinverse_)
   {
@@ -44,13 +44,13 @@ inline void ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > :: build
 }
 
 template<>  //dim = 2 , dimworld = 3
-inline void ALU3dGridGeometry<2,3, const ALU3dGrid<3,3,tetra> > :: buildJacobianInverse() const
+inline void ALU3dGridGeometry<2,3, const ALU3dGrid<3,3,tetra> > :: buildJacobianInverseTransposed() const
 {
   if(!builtinverse_)
   {
     enum { dim = 3 };
     
-    //derr << "WARNING: ALU3dGridGeometry::buildJacobianInverse not tested yet! " << __LINE__ <<"\n";
+    //derr << "WARNING: ALU3dGridGeometry::buildJacobianInverseTransposed not tested yet! " << __LINE__ <<"\n";
     // create vectors of face 
     tmpV_ = coord_[1] - coord_[0];
     tmpU_ = coord_[2] - coord_[1];
@@ -68,12 +68,12 @@ inline void ALU3dGridGeometry<2,3, const ALU3dGrid<3,3,tetra> > :: buildJacobian
 }
 
 template<>  //dim = 1 , dimworld = 3
-inline void ALU3dGridGeometry<1,3, const ALU3dGrid<3,3,tetra> > :: buildJacobianInverse() const
+inline void ALU3dGridGeometry<1,3, const ALU3dGrid<3,3,tetra> > :: buildJacobianInverseTransposed() const
 {
   if(!builtinverse_)
   {
     enum { dim = 3 };
-    //derr << "WARNING: ALU3dGridGeometry::buildJacobianInverse not tested yet! " << __LINE__ <<"\n";
+    //derr << "WARNING: ALU3dGridGeometry::buildJacobianInverseTransposed not tested yet! " << __LINE__ <<"\n";
     // create vectors of face 
     globalCoord_ = coord_[1] - coord_[0];
     detDF_ = std::abs ( globalCoord_.two_norm() );
@@ -82,7 +82,7 @@ inline void ALU3dGridGeometry<1,3, const ALU3dGrid<3,3,tetra> > :: buildJacobian
 }
 
 template<>  //dim = 1 , dimworld = 3
-inline void ALU3dGridGeometry<0,3, const ALU3dGrid<3,3,tetra> > :: buildJacobianInverse() const
+inline void ALU3dGridGeometry<0,3, const ALU3dGrid<3,3,tetra> > :: buildJacobianInverseTransposed() const
 {
   if(!builtinverse_)
   {
@@ -172,7 +172,7 @@ buildGeom(const ALU3DSPACE HFaceType & item, int twist)
     }
   } 
   
-  buildJacobianInverse();
+  buildJacobianInverseTransposed();
   return true;
 }
 
@@ -188,7 +188,7 @@ buildGeom(const FaceCoordinatesType& coords) {
     coord_[i] = coords[i];
   }
 
-  buildJacobianInverse();
+  buildJacobianInverseTransposed();
   return true;
 }
 
@@ -211,7 +211,7 @@ buildGeom(const ALU3DSPACE HEdgeType & item, int twist)
     }
   } 
   
-  buildJacobianInverse();
+  buildJacobianInverseTransposed();
   return true;
 }
 
@@ -227,7 +227,7 @@ buildGeom(const ALU3DSPACE VertexType & item, int)
   const double (&p)[3] = static_cast<const GEOVertexType &> (item).Point();
   for (int j=0; j<dimworld; j++) coord_[0][j] = p[j];
   
-  buildJacobianInverse();
+  buildJacobianInverseTransposed();
   return true;
 }
 
@@ -335,7 +335,7 @@ inline FieldVector<alu3d_ctype, 3>
 ALU3dGridGeometry<3,3,const ALU3dGrid<3,3,tetra> > :: 
 local(const FieldVector<alu3d_ctype, 3>& global) const
 {
-  if (!builtinverse_) buildJacobianInverse();
+  if (!builtinverse_) buildJacobianInverseTransposed();
 
   globalCoord_ = global - coord_[0];
   localCoord_ = 0.0;
@@ -393,9 +393,9 @@ ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::integrationElement
 template<>  // dim = dimworld = 3
 inline const FieldMatrix<alu3d_ctype,3,3> & 
 ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> >:: 
-jacobianInverse (const FieldVector<alu3d_ctype, 3>& local) const
+jacobianInverseTransposed (const FieldVector<alu3d_ctype, 3>& local) const
 {
-  if (!builtinverse_) buildJacobianInverse();
+  if (!builtinverse_) buildJacobianInverseTransposed();
   return Jinv_;
 }
 
@@ -543,7 +543,7 @@ integrationElement (const FieldVector<alu3d_ctype, 2>& local) const {
 template <>
 inline const FieldMatrix<alu3d_ctype, 3, 3>& 
 ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
-jacobianInverse (const FieldVector<alu3d_ctype, 3>& local) const {
+jacobianInverseTransposed (const FieldVector<alu3d_ctype, 3>& local) const {
   assert(triMap_);
   jInv_ = triMap_->jacobianInverse(local);
   return jInv_;
