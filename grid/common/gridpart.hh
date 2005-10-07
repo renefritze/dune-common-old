@@ -175,7 +175,7 @@ namespace Dune {
     }
 
     //! Returns maxlevel of the grid
-    int level() const { return this->grid().maxlevel(); }
+    int level() const { return this->grid().maxLevel(); }
   };
 
   //! Type definitions for the LeafGridPart class
@@ -229,7 +229,7 @@ namespace Dune {
     }
 
     //! Level of the grid part
-    int level() const { return this->grid().maxlevel(); }
+    int level() const { return this->grid().maxLevel(); }
   };
 
   //! Type definitions for the LeafGridPart class
