@@ -232,15 +232,51 @@ builtGeom(ALBERTA EL_INFO *elInfo, int face,
   return false;
 }
 
+// built Geometry 
+template <int mydim, int cdim, class GridImp>
+template <class GeometryType>
+inline bool AlbertaGridGeometry<mydim,cdim,GridImp>:: 
+builtLocalGeom(const GeometryType &geo,  ALBERTA EL_INFO *elInfo,int face)
+{
+  elInfo_ = elInfo;
+  face_ = face;
+  edge_   = 0;
+  vertex_ = 0;
+  elDet_ = 0.0;
+  builtinverse_ = false;
+  builtElMat_   = false;
+  calcedDet_    = false;
+
+  if(elInfo_)
+  {
+    for(int i=0; i<mydim+1; i++)
+    {
+      const ALBERTA REAL_D & elcoord = elInfo_->coord[mapVertices(i)];
+      FieldVector<albertCtype,cdim> tmp;
+      for(int j=0; j<cdim; j++) tmp[j] = elcoord[j];
+      coord_[i] = geo.local(tmp);
+    }
+
+    for(int i=0; i<mydim; i++)
+    {
+      if( ! geo.checkInside( coord_[i] ) )
+        std::cout << coord_[i] << "\n";
+    }
+    // geometry built 
+    return true;
+  }
+  // geometry not built 
+  return false;
+}
 
 // print the GeometryInformation
 template <int mydim, int cdim, class GridImp>
-inline void AlbertaGridGeometry<mydim,cdim,GridImp>::print (std::ostream& ss, int indent) const
+inline void AlbertaGridGeometry<mydim,cdim,GridImp>::print (std::ostream& ss) const
 {
-  ss << "AlbertaGridGeometry<" << mydim << "," << cdim << "> = {\n";
+  ss << "AlbertaGridGeometry<" << mydim << "," << cdim << "> = { \n";
   for(int i=0; i<corners(); i++)
   {
-    ss << " corner " << i; 
+    ss << " corner " << i << " = "; 
     ss << ((*this)[i]); ss << "\n";
   }
   ss << "} \n";
@@ -415,7 +451,7 @@ inline FieldVector<albertCtype, 2> AlbertaGridGeometry<2,2,const AlbertaGrid<2,2
 local(const FieldVector<albertCtype, 2>& global) const
 {
   if(!builtinverse_)
-    buildJacobianInverse();
+    buildJacobianInverseTransposed();
   
   enum { dim = 2 };
   
@@ -432,7 +468,7 @@ inline FieldVector<albertCtype, 3> AlbertaGridGeometry<3,3,const AlbertaGrid<3,3
 local(const FieldVector<albertCtype, 3>& global) const
 {
   if(!builtinverse_)
-    buildJacobianInverse();
+    buildJacobianInverseTransposed();
   enum { dim = 3 };
   
   for(int i=0; i<dim; i++) 
@@ -447,7 +483,7 @@ local(const FieldVector<albertCtype, 3>& global) const
 // this method is for (dim==dimworld) = 2 and 3 
 template <int mydim, int cdim, class GridImp>
 inline void AlbertaGridGeometry<mydim,cdim,GridImp>:: 
-buildJacobianInverse() const
+buildJacobianInverseTransposed() const
 {
   //******************************************************
   //
@@ -471,7 +507,9 @@ buildJacobianInverse() const
   // here the transposed jacobian inverse is calculated 
   elDet_ = std::abs( FMatrixHelp::invertMatrix_retTransposed(elMat_,Jinv_) );
 
-  assert(elDet_ > 1.0E-25);
+  if( elDet_  < 1.0e-12 ) print(std::cout);
+  assert(elDet_ > 1.0E-25 );
+  
   calcedDet_ = true;
   builtinverse_ = true;
   return;
@@ -480,13 +518,13 @@ buildJacobianInverse() const
 // calc volume of face of tetrahedron
 template <>
 inline void AlbertaGridGeometry<2,3,AlbertaGrid<2,3> >:: 
-buildJacobianInverse() const
+buildJacobianInverseTransposed() const
 {
   enum { dim = 2 };
   enum { dimworld = 3 };
   
   // is faster than the lower method 
-  DUNE_THROW(AlbertaError,"buildJacobianInverse<2,3> not correctly implemented!"); 
+  DUNE_THROW(AlbertaError,"buildJacobianInverseTransposed<2,3> not correctly implemented!"); 
   elDet_ = 0.1; 
   builtinverse_ = true;
   calcedDet_ = true;
@@ -494,7 +532,7 @@ buildJacobianInverse() const
 
 template <>
 inline void AlbertaGridGeometry<1,2,const AlbertaGrid<1,2> >:: 
-buildJacobianInverse() const
+buildJacobianInverseTransposed() const
 {
   DUNE_THROW(AlbertaError,"this method is not implemented!\n");
   
@@ -575,13 +613,13 @@ integrationElement (const FieldVector<albertCtype, mydim>& local) const
 
 template <int mydim, int cdim, class GridImp>
 inline const FieldMatrix<albertCtype,mydim,mydim>& AlbertaGridGeometry<mydim,cdim,GridImp>:: 
-jacobianInverse (const FieldVector<albertCtype, cdim>& global) const
+jacobianInverseTransposed (const FieldVector<albertCtype, cdim>& global) const
 {
   if(builtinverse_)
     return Jinv_;
 
   // builds the jacobian inverse and calculates the volume 
-  buildJacobianInverse();
+  buildJacobianInverseTransposed();
   return Jinv_;
 }
 
@@ -596,7 +634,7 @@ checkInside(const FieldVector<albertCtype, mydim> &local) const
     sum += local[i];
     if(local[i] < 0.0) 
     {
-      if(std::abs(local[i]) > 1e-15) 
+      if(std::abs(local[i]) > 1e-13) 
       {
         return false; 
       }
@@ -605,7 +643,7 @@ checkInside(const FieldVector<albertCtype, mydim> &local) const
   
   if( sum > 1.0 ) 
   {
-    if(sum > (1.0 + 1e-15))
+    if(sum > (1.0 + 1e-13))
       return false;
   }
    
@@ -860,7 +898,7 @@ static double fatherref [2][3][2] =
 */
 
 template<int codim, int dim, class GridImp>
-inline FieldVector<albertCtype, dim>&
+inline const FieldVector<albertCtype, dim>&
 AlbertaGridEntity<codim,dim,GridImp>::positionInOwnersFather() const
 {
   assert( codim == dim );
@@ -1199,6 +1237,7 @@ inline AlbertaGridEntityPointer<codim,GridImp> ::
   , entity_ ( grid_.template getNewEntity<codim> (level) )
   , done_ (end) 
 {
+  //std::cout << "EntityPointer done == " << done_ << std::endl;
   if(done_) this->done();
 }
 
@@ -1207,8 +1246,29 @@ inline AlbertaGridEntityPointer<codim,GridImp> ::
   AlbertaGridEntityPointer(const AlbertaGridEntityPointerType & org)
   : grid_(org.grid_)
   , entity_ ( grid_.template getNewEntity<codim> ( org.entity_->level() ) )
+  , done_ ( org.done_ ) 
 {
   (*entity_).setEntity( *(org.entity_) );
+}
+
+template<int codim, class GridImp >
+inline AlbertaGridEntityPointer<codim,GridImp>  & 
+AlbertaGridEntityPointer<codim,GridImp> ::
+  operator = (const AlbertaGridEntityPointerType & org)
+{
+  assert( & grid_ == & org.grid_ );
+  done_ = ( org.done_ );
+  //if( done_ ) this->done();
+  (*entity_).setEntity( *(org.entity_) );
+}
+
+template<int codim, class GridImp >
+inline AlbertaGridEntityPointer<codim,GridImp> ::
+  AlbertaGridEntityPointer(const GridImp & grid, const EntityImp  & en)
+  : grid_(grid)
+  , entity_ ( grid_.template getNewEntity<codim> ( en.level() ) )
+{
+  (*entity_).setEntity( en );
 }
 
 template<int codim, class GridImp >
@@ -1231,7 +1291,17 @@ equals (const AlbertaGridEntityPointer<codim,GridImp>& i) const
 {
   ALBERTA EL * e1 = (*entity_).getElement();
   ALBERTA EL * e2 = (*(i.entity_)).getElement();
-  return ((e1 == e2 ) && (done_ == i.done_));
+  //std::cout << e1 << " " << e2 << " element pointer \n";
+  //std::cout << done_ << " " << i.done_ << " element done \n";
+  //return ((e1 == e2 ) && (done_ == i.done_));
+  if( e1 && e2 )return ( e1 == e2 ); 
+  if( done_ || i.done_ ) {
+    //std::cout << "equals via done\n";
+    return done_ == i.done_;
+  }
+  assert( e1 );
+  assert( e2 );
+  return ( e1 == e2 );
 }
 
 template<int codim, class GridImp >
@@ -1307,7 +1377,7 @@ AlbertaGridHierarchicIterator(const GridImp & grid,
       // this means, we go until leaf level 
       stack->traverse_fill_flag = CALL_LEAF_EL | stack->traverse_fill_flag;
       // exact here has to stand Grid->maxlevel, but is ok anyway
-      maxlevel_ = this->grid_.maxlevel(); //123456789;
+      maxlevel_ = this->grid_.maxLevel(); //123456789;
     }
     // set new traverse level
     stack->traverse_level = maxlevel_;
@@ -1337,6 +1407,20 @@ AlbertaGridHierarchicIterator(const AlbertaGridHierarchicIterator<GridImp> & org
   , virtualEntity_( *(this->entity_) )
   , manageStack_ ( org.manageStack_ )
 {
+  if( org.virtualEntity_.getElInfo() )
+    virtualEntity_.setEntity( org.virtualEntity_ );
+  else 
+    this->done();
+}
+
+template< class GridImp >
+inline AlbertaGridHierarchicIterator<GridImp> &
+AlbertaGridHierarchicIterator<GridImp>::
+operator = (const AlbertaGridHierarchicIterator<GridImp> & org)
+{
+  level_ = ( org.level_ );
+  maxlevel_ = ( org.maxlevel_ );
+  manageStack_ = ( org.manageStack_ );
   if( org.virtualEntity_.getElInfo() )
     virtualEntity_.setEntity( org.virtualEntity_ );
   else 
@@ -1436,7 +1520,7 @@ recursiveTraverse(ALBERTA TRAVERSE_STACK * stack)
 //  --BoundaryEntity
 //
 //***************************************************************
-
+#if 0
 template< class GridImp >
 inline AlbertaGridBoundaryEntity<GridImp>::
 AlbertaGridBoundaryEntity () : _geom () , _elInfo ( 0 ),
@@ -1472,6 +1556,7 @@ setElInfo (ALBERTA EL_INFO * elInfo, int nb)
   else
     _elInfo = 0;
 }
+#endif
 
 //***************************************************************
 //
@@ -1489,14 +1574,11 @@ inline void AlbertaGridIntersectionIterator<GridImp>::freeObjects () const
   if(fakeNeigh_) 
     this->grid_.interSelfProvider_.freeObjectEntity(fakeNeigh_);
   
+  if(fakeSelf_) 
+    this->grid_.interSelfProvider_.freeObjectEntity(fakeSelf_);
+  
   if(neighGlob_) 
     this->grid_.interNeighProvider_.freeObjectEntity(neighGlob_);
-
-  if(boundaryEntity_) 
-  {
-    this->grid_.interBndProvider_.freeObjectEntity(boundaryEntity_);
-    boundaryEntity_ = 0;
-  }
 
   if(neighElInfo_) 
     elinfoProvider.freeObjectEntity(neighElInfo_);
@@ -1517,8 +1599,8 @@ AlbertaGridIntersectionIterator(const GridImp & grid,int level) :
   virtualEntity_ ( *(this->entity_) ),
   elInfo_ (0),
   fakeNeigh_ (0),
+  fakeSelf_ (0) ,
   neighGlob_ (0),
-  boundaryEntity_ (0),
   neighElInfo_ (0) 
 {
 }
@@ -1533,8 +1615,8 @@ inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator
   , virtualEntity_ ( *(this->entity_) ) 
   , elInfo_ ( elInfo ) 
   , fakeNeigh_ (0) 
+  , fakeSelf_ (0) 
   , neighGlob_ (0)  
-  , boundaryEntity_ (0) 
   , neighElInfo_ ( elinfoProvider.getNewObjectEntity() ) 
 {
 }
@@ -1550,8 +1632,8 @@ inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator
   , virtualEntity_ ( *(this->entity_) ) 
   , elInfo_ ( org.elInfo_ ) 
   , fakeNeigh_ (0) 
+  , fakeSelf_ (0) 
   , neighGlob_ (0)  
-  , boundaryEntity_ (0) 
   , neighElInfo_ ( (elInfo_) ? elinfoProvider.getNewObjectEntity() : 0 ) 
 {
 }
@@ -1561,8 +1643,6 @@ template< class GridImp >
 inline  AlbertaGridIntersectionIterator<GridImp> & 
 AlbertaGridIntersectionIterator<GridImp>::operator = (const AlbertaGridIntersectionIterator<GridImp> & org) 
 {
-  assert( false );
-  
   // only assign iterators from the same grid 
   assert( &this->grid_ == &(org.grid_));
   level_ =  org.level_;
@@ -1570,6 +1650,13 @@ AlbertaGridIntersectionIterator<GridImp>::operator = (const AlbertaGridIntersect
   elInfo_ = org.elInfo_; 
   builtNeigh_ = false;
   assert( elInfo_ );
+  if(fakeNeigh_) 
+    this->grid_.interSelfProvider_.freeObjectEntity(fakeNeigh_);
+  fakeNeigh_ = 0;
+  
+  if(fakeSelf_) 
+    this->grid_.interSelfProvider_.freeObjectEntity(fakeSelf_);
+  fakeSelf_ = 0;
 }
 
 template< class GridImp >
@@ -1602,11 +1689,7 @@ AlbertaGridIntersectionIterator<GridImp>::outside () const
     
     setupVirtEn();
   }
-  return AlbertaGridEntityPointer<0, GridImp>(this->grid_, 
-                                              (int) neighElInfo_->level,
-                                              neighElInfo_,
-                                              0, 0, 0);
-  //return virtualEntity_;
+  return AlbertaGridEntityPointer<0, GridImp>( this->grid_ , virtualEntity_ );
 }
 
 template< class GridImp >
@@ -1620,17 +1703,14 @@ AlbertaGridIntersectionIterator<GridImp>::inside () const {
 } 
 
 template< class GridImp >
-inline typename AlbertaGridIntersectionIterator<GridImp>::BoundaryEntity & 
-AlbertaGridIntersectionIterator<GridImp>::boundaryEntity () const
+inline int 
+AlbertaGridIntersectionIterator<GridImp>::boundaryId () const
 {
-  if(!boundaryEntity_) 
-  {
-    boundaryEntity_  = this->grid_.interBndProvider_.getNewObjectEntity();
-  } 
-
-  assert( boundaryEntity_ );
-  (*boundaryEntity_).setElInfo(elInfo_,neighborCount_);
-  return (*boundaryEntity_);
+  // id of interior intersections is 0
+  if(!boundary()) return 0;
+  assert(elInfo_);
+  assert(elInfo_->boundary[neighborCount_] != 0);
+  return elInfo_->boundary[neighborCount_]->bound;
 }
 
 template< class GridImp >
@@ -1730,20 +1810,37 @@ calcOuterNormal () const
 }
 
 template< class GridImp >
-inline typename AlbertaGridIntersectionIterator<GridImp>::LocalGeometry & 
+inline const typename AlbertaGridIntersectionIterator<GridImp>::LocalGeometry & 
 AlbertaGridIntersectionIterator<GridImp>::
 intersectionSelfLocal () const
 {
-  //std::cout << "\nintersection_self_local not checked until now! \n";
-  if(!fakeNeigh_)
-    fakeNeigh_ = this->grid_.interSelfProvider_.getNewObjectEntity();
+  if(!fakeSelf_)
+    fakeSelf_ = this->grid_.interSelfProvider_.getNewObjectEntity();
 
-  fakeNeigh_->builtGeom(elInfo_,neighborCount_,0,0);
-  return (*fakeNeigh_);
+  fakeSelf_->builtLocalGeom(inside()->geometry(),elInfo_,neighborCount_);
+  return (*fakeSelf_);
 }
 
 template< class GridImp >
-inline typename AlbertaGridIntersectionIterator<GridImp>::Geometry & 
+inline const typename AlbertaGridIntersectionIterator<GridImp>::LocalGeometry & 
+AlbertaGridIntersectionIterator<GridImp>::intersectionNeighborLocal () const
+{
+  assert(neighbor());
+  if(!fakeNeigh_)
+    fakeNeigh_ = this->grid_.interSelfProvider_.getNewObjectEntity();
+
+  if(fakeNeigh_->builtLocalGeom(outside()->geometry(),neighElInfo_,neighborCount_)) 
+    return (*fakeNeigh_);
+  else 
+  {
+    DUNE_THROW(AlbertaError, "intersection_neighbor_local: error occured!");
+  }
+  return (*fakeNeigh_);
+
+}
+
+template< class GridImp >
+inline const typename AlbertaGridIntersectionIterator<GridImp>::Geometry & 
 AlbertaGridIntersectionIterator<GridImp>::
 intersectionGlobal () const
 {
@@ -1759,23 +1856,6 @@ intersectionGlobal () const
   return (*neighGlob_);
 }
 
-template< class GridImp >
-inline typename AlbertaGridIntersectionIterator<GridImp>::LocalGeometry & 
-AlbertaGridIntersectionIterator<GridImp>::intersectionNeighborLocal () const
-{
-  std::cout << "intersection_neighbor_local not checked until now! \n";
-  if(!fakeNeigh_)
-    fakeNeigh_ = this->grid_.interSelfProvider_.getNewObjectEntity();
-
-  if(fakeNeigh_->builtGeom(neighElInfo_,neighborCount_,0,0)) 
-    return (*fakeNeigh_);
-  else 
-  {
-    DUNE_THROW(AlbertaError, "intersection_neighbor_local: error occured!");
-  }
-  return (*fakeNeigh_);
-
-}
 
 template< class GridImp >
 inline int AlbertaGridIntersectionIterator<GridImp>::
@@ -1795,6 +1875,8 @@ numberInNeighbor () const
 template< class GridImp >
 inline void AlbertaGridIntersectionIterator<GridImp>::setupVirtEn() const
 {
+  assert(neighbor());
+  assert( neighborCount_ < dim+1 );
   // set the neighbor element as element
   neighElInfo_->el = elInfo_->neigh[neighborCount_];
 #if DIM==3
@@ -1802,17 +1884,15 @@ inline void AlbertaGridIntersectionIterator<GridImp>::setupVirtEn() const
 #endif
 
   int vx = elInfo_->opp_vertex[neighborCount_];
-  
   for(int i=0; i<dimworld; i++) 
     neighElInfo_->coord[vx][i] = elInfo_->opp_coord[neighborCount_][i];
     
   for(int i=1; i<dim+1; i++)
   {
-    int nb = (((neighborCount_-i)%(dim+1)) +dim+1)%(dim+1);
+    int nb = (neighborCount_- i + dim+1)%(dim+1);
     for(int j=0; j<dimworld; j++)
       neighElInfo_->coord[(vx+i)%(dim+1)][j] = elInfo_->coord[nb][j];
   }
-  /* works, tested many times */
   
   virtualEntity_.setElInfo(neighElInfo_);
   builtNeigh_ = true;
@@ -1918,6 +1998,43 @@ AlbertaGridTreeIterator(const AlbertaGridTreeIterator<codim,pitype,GridImp> & or
 
 // Make LevelIterator with point to element from previous iterations
 template<int codim, PartitionIteratorType pitype, class GridImp>   
+inline AlbertaGridTreeIterator<codim,pitype,GridImp> & 
+AlbertaGridTreeIterator<codim,pitype,GridImp>::operator = 
+(const AlbertaGridTreeIterator<codim,pitype,GridImp> & org)
+{
+  //rtaGridEntityPointer<codim,GridImp> (org.grid_,org.level_, (org.vertexMarker_) ? false : true)
+  level_ = org.level_;
+  enLevel_ = org.enLevel_;
+  //, manageStack_ ( org.manageStack_ )
+  face_ = (org.face_);
+  edge_  = (org.edge_);
+  vertex_  = ( org.vertex_);
+  vertexMarker_ = (org.vertexMarker_);
+  okReturn_ = (org.okReturn_ );
+  leafIt_= (org.leafIt_) ;
+
+  assert( proc_ == org.proc_ );
+  if(vertexMarker_) 
+  { 
+    // if vertexMarker is not NULL then we have a real iterator 
+    manageStack_.makeItNew(true);
+    ALBERTA TRAVERSE_STACK * stack = manageStack_.getStack();
+    ALBERTA copyTraverseStack( stack , org.manageStack_.getStack() );
+        
+    virtualEntity_.setTraverseStack( stack );
+    /// get the actual used enInfo 
+    ALBERTA EL_INFO * elInfo = stack->elinfo_stack+stack->stack_used;
+    
+    virtualEntity_.setElInfo( elInfo,face_,edge_,vertex_ );
+    virtualEntity_.setLevel( enLevel_ );
+
+    assert( this->grid_.hierarchicIndexSet().index ( virtualEntity_ ) 
+        == this->grid_.hierarchicIndexSet().index ( org.virtualEntity_ ) );
+  }
+}
+
+// Make LevelIterator with point to element from previous iterations
+template<int codim, PartitionIteratorType pitype, class GridImp>   
 inline AlbertaGridTreeIterator<codim,pitype,GridImp>::
 AlbertaGridTreeIterator(const GridImp & grid, TRAVERSE_STACK * stack, 
     int level,  ALBERTA EL_INFO *elInfo,int face,int edge,int vertex) 
@@ -1962,7 +2079,7 @@ AlbertaGridTreeIterator(const GridImp & grid,
 {
   ALBERTA MESH * mesh = this->grid_.getMesh();
 
-  if( mesh && ((travLevel >= 0) && (travLevel <= this->grid_.maxlevel())) )
+  if( mesh && ((travLevel >= 0) && (travLevel <= this->grid_.maxLevel())) )
   {
     vertexMarker_ = vertexMark;
     
@@ -2747,7 +2864,7 @@ inline void AlbertaMarkerVector::markNewVertices(GridType &grid)
   int edg = grid.hierarchicIndexSet().size(dim-1);
 #endif
   
-  for(int level=0; level <= grid.maxlevel(); level++)
+  for(int level=0; level <= grid.maxLevel(); level++)
   {
     Array<int> & vec     = vec_[level];
     if(vec.size()     < nvx) vec.resize( nvx + vxBufferSize_ );
@@ -3146,19 +3263,19 @@ inline bool AlbertaGrid < dim, dimworld >::
 globalRefine(int refCount)
 {
   typedef LeafIterator LeafIt;
-  LeafIt endit = this->leafend(this->maxlevel());
+  LeafIt endit = this->leafend(this->maxLevel());
 
   assert(refCount >= 0);
   for(int i=0; i<refCount; i++)
   {
     // mark all interior elements 
-    for(LeafIt it = this->leafbegin(this->maxlevel()); it != endit; ++it)
+    for(LeafIt it = this->leafbegin(this->maxLevel()); it != endit; ++it)
     {
       this->mark(refCount,*it);
     }
 
     // mark all ghosts
-    for(LeafIt it = leafbegin(maxlevel(),Ghost_Partition); it != endit; ++it)
+    for(LeafIt it = leafbegin(maxLevel(),Ghost_Partition); it != endit; ++it)
     {
       this->mark(refCount,*it);
     }
@@ -3414,7 +3531,7 @@ packAll( ObjectStreamType & os, EntityType & en  )
   
   if(! (en.isLeaf()) )
   {
-    int mxl = this->maxlevel();
+    int mxl = this->maxLevel();
     os.writeObject( 1 ); // this element should be refined 
     
     for(int l=1;l<mxl; l++)
@@ -3451,7 +3568,7 @@ packBorder ( ObjectStreamType & os, EntityType & en  )
 
   if(! (en.isLeaf()) )
   {
-    int mxl = this->maxlevel();
+    int mxl = this->maxLevel();
     os.writeObject( 1 ); // this element should be refined 
 
     for(int l=1;l<mxl; l++)
@@ -3672,7 +3789,7 @@ partitionType (ALBERTA EL_INFO *elinfo) const
   return OverlapEntity;
 }
 template < int dim, int dimworld >
-inline int AlbertaGrid < dim, dimworld >::maxlevel() const
+inline int AlbertaGrid < dim, dimworld >::maxLevel() const
 {
   return maxlevel_;
 }
