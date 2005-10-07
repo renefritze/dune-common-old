@@ -1033,7 +1033,7 @@ public:
   }
 
   //! local coordinates within father
-  FieldVector<ctype, dim>& positionInOwnersFather () const
+  const FieldVector<ctype, dim>& positionInOwnersFather () const
   {
         // check if coarse level exists
         if (_g.level()<=0)
