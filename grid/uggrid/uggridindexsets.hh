@@ -52,7 +52,7 @@ public:
       return grid_->template getRealEntity<cd>(e).levelIndex(); 
   }
 
-  //! get index of subentity of a codim 0 entity
+  //! get index of subEntity of a codim 0 entity
   template<int cc>
   int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
   {
@@ -205,8 +205,8 @@ public:
 		  for (int i=0; i<eIt->template count<dim-1>(); i++)
 			{
 			  GeometryType gt = eIt->geometry().type();
-			  int a=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,0,dim);	
-			  int b=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,1,dim);
+			  int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
+			  int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
 			  int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
 			  index = -1;
 			}
@@ -262,8 +262,8 @@ public:
 			for (int i=0; i<eIt->template count<dim-1>(); i++)
 			  {
 				GeometryType gt = eIt->geometry().type();
-				int a=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,0,dim);	
-				int b=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,1,dim);
+				int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
+				int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
 				int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
 				if (index<0) index = numEdges_++;
 			  }
@@ -380,7 +380,7 @@ public:
       return grid_.template getRealEntity<cd>(e).leafIndex(); 
   }
 
-  //! get index of subentity of a codim 0 entity
+  //! get index of subEntity of a codim 0 entity
   template<int cc>
   int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
   {
@@ -521,8 +521,8 @@ public:
 				for (int i=0; i<eIt->template count<dim-1>(); i++)
 				  {
 					GeometryType gt = eIt->geometry().type();
-					int a=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,0,dim);	
-					int b=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,1,dim);
+					int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
+					int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
 					int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
 					index = -1;
 				  }
@@ -561,8 +561,8 @@ public:
 				for (int i=0; i<eIt->template count<dim-1>(); i++)
 				  {
 					GeometryType gt = eIt->geometry().type();
-					int a=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,0,dim);	
-					int b=ReferenceElements<double,dim>::general(gt).subentity(i,dim-1,1,dim);
+					int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
+					int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
 					int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
 					if (index<0)
 					  { 
@@ -718,7 +718,7 @@ public:
       return grid_.template getRealEntity<cd>(e).globalId();
   }
 
-  //! get id of subentity
+  //! get id of subEntity
   template<int cc>
   GlobalIdType subid (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
   {
@@ -754,7 +754,7 @@ public:
       return grid_.template getRealEntity<cd>(e).localId();
   }
 
-  //! get id of subentity
+  //! get id of subEntity
   template<int cc>
   LocalIdType subid (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
   {
