@@ -34,6 +34,12 @@ namespace Dune {
 */
 
 /**
+  @defgroup GridImplementations Implementations Overview
+  @ingroup Grid
+  \brief A List of the different Implementations of the Dune Grid Interface.
+*/
+  
+/**
   @ingroup GridInterface
 */
 
