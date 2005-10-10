@@ -506,7 +506,7 @@ private:
     std::string name_;
 
     // Our set of level indices
-    std::vector<UGGridLevelIndexSet<UGGrid<dim,dimworld> > > levelIndexSets_;
+    std::vector<UGGridLevelIndexSet<UGGrid<dim,dimworld> >*> levelIndexSets_;
 
     UGGridLeafIndexSet<UGGrid<dim,dimworld> > leafIndexSet_;
 
