@@ -48,6 +48,7 @@ namespace Dune {
 // contains a simple memory management for some componds of this grid 
 #include "agmemory.hh"
 
+#include "referencetopo.hh"
 #include "indexsets.hh"
 
 // contains the communication for parallel computing for this grid
