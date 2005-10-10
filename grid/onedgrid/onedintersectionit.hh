@@ -145,7 +145,7 @@ public:
   int level () const {return center_->level_;}
 
   //! return information about the Boundary 
-  int boundaryId () {
+  int boundaryId () const {
 #warning please implement a course grid boundary segment id
     return 0;
   }
