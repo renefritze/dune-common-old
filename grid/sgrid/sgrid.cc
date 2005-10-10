@@ -537,7 +537,7 @@ inline typename SEntity<dim,dim,GridImp>::EntityPointer SEntity<dim,dim,GridImp>
 }
 
 template<int dim, class GridImp>
-inline FieldVector<sgrid_ctype, dim>& SEntity<dim,dim,GridImp>::positionInOwnersFather () const
+inline const FieldVector<sgrid_ctype, dim>& SEntity<dim,dim,GridImp>::positionInOwnersFather () const
 {
         if (!built_father) make_father();
         return in_father_local;
