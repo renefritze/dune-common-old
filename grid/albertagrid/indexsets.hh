@@ -35,14 +35,9 @@ namespace Dune {
     friend class AlbertaGrid<dim,dimworld>;
     friend class MarkEdges<GridType,3>; 
     friend class MarkEdges<const GridType,3>; 
-   
+
     // only  AlbertaGrid is allowed to create this class 
-    AlbertaGridHierarchicIndexSet(const GridType & grid) : grid_( grid ) 
-    {
-      // the edgemap 
-      const int edgemap[6] = {0, 3 , 1 , 2 , 4, 5}; 
-      for(int i=0; i<6; i++) edgemap_[i] = edgemap[i];
-    }
+    AlbertaGridHierarchicIndexSet(const GridType & grid) : grid_( grid ) {}
   public:
     enum { ncodim = numCodim };
     
@@ -81,12 +76,13 @@ namespace Dune {
     }
 
   private:
+    // out grid 
     const GridType & grid_;
+    // constains the mapping from dune to alberta numbers  
+    const AlbertaGridReferenceTopology<dim> refTopo_;
+    // the vectors containing the numbers
     const int * elNumVec_[numVecs];
    
-    // stores edge mapping from Dune edge number to real Alberta edge number
-    int edgemap_[6];
-
     // stores offset of dof numbers on given elements 
     int nv_[numVecs];
     int dof_[numVecs];
@@ -153,7 +149,7 @@ namespace Dune {
       // dof_[cd] marks the insertion point form which this dofs start
       // then i is the i-th dof, here we addionally have to use the edge
       // mapping 
-      return elNumVec_[cd][ el->dof[ dof_[cd] + edgemap_[i] ][ nv_[cd] ] ];
+      return elNumVec_[cd][ el->dof[ dof_[cd] + refTopo_.dune2albertaEdge(i) ][ nv_[cd] ] ];
     }
 
     // codim = dim  means we get from dim-cd = 0 
