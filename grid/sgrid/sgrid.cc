@@ -129,7 +129,7 @@ inline sgrid_ctype SGeometry<mydim,cdim,GridImp>::integrationElement (const Fiel
 }
 
 template<int mydim, int cdim, class GridImp> 
-inline const FieldMatrix<sgrid_ctype,mydim,mydim>& SGeometry<mydim,cdim,GridImp>::jacobianInverse (const FieldVector<sgrid_ctype, mydim>& local) const
+inline const FieldMatrix<sgrid_ctype,mydim,mydim>& SGeometry<mydim,cdim,GridImp>::jacobianInverseTransposed (const FieldVector<sgrid_ctype, mydim>& local) const
 {
         for (int i=0; i<mydim; ++i)
                 for (int j=0; j<mydim; ++j)
@@ -464,15 +464,15 @@ SEntity<0,dim,GridImp>::geometryInFather () const
 }
 
 template<int dim, class GridImp>
-inline typename SEntity<0,dim,GridImp>::HierarchicIterator SEntity<0,dim,GridImp>::hbegin (int maxlevel) const
+inline typename SEntity<0,dim,GridImp>::HierarchicIterator SEntity<0,dim,GridImp>::hbegin (int maxLevel) const
 {
-  return HierarchicIterator(SHierarchicIterator<GridImp>(this->grid,*this,maxlevel,false));
+  return HierarchicIterator(SHierarchicIterator<GridImp>(this->grid,*this,maxLevel,false));
 }
 
 template<int dim, class GridImp>
-inline typename SEntity<0,dim,GridImp>::HierarchicIterator SEntity<0,dim,GridImp>::hend (int maxlevel) const
+inline typename SEntity<0,dim,GridImp>::HierarchicIterator SEntity<0,dim,GridImp>::hend (int maxLevel) const
 {
-  return HierarchicIterator(SHierarchicIterator<GridImp>(this->grid,*this,maxlevel,true));
+  return HierarchicIterator(SHierarchicIterator<GridImp>(this->grid,*this,maxLevel,true));
 }
 
 
@@ -550,7 +550,7 @@ template<class GridImp>
 inline void SHierarchicIterator<GridImp>::push_sons (int level, int fatherid)
 {
         // check level
-        if (level+1>maxlevel) return; // nothing to do
+        if (level+1>maxLevel) return; // nothing to do
 
         // compute reduced coordinates of element
         FixedArray<int,dim> z =
@@ -581,7 +581,7 @@ inline void SHierarchicIterator<GridImp>::push_sons (int level, int fatherid)
 template<class GridImp>
 inline SHierarchicIterator<GridImp>::SHierarchicIterator (GridImp* _grid, 
                                                           const SEntity<0,GridImp::dimension,GridImp>& _e,
-                                                          int _maxlevel, bool makeend) :
+                                                          int _maxLevel, bool makeend) :
   Dune::SEntityPointer<0,GridImp>(_grid,_e.level(),_e.index())
 {
         // without sons, we are done
@@ -596,8 +596,8 @@ inline SHierarchicIterator<GridImp>::SHierarchicIterator (GridImp* _grid,
         SHierarchicStackElem originalElement(orig_l, orig_id);
         stack.push(originalElement);
 
-        // compute maxlevel
-        maxlevel = std::min(_maxlevel,this->grid->maxlevel());
+        // compute maxLevel
+        maxLevel = std::min(_maxLevel,this->grid->maxLevel());
 
         // ok, push all the sons as well
         push_sons(orig_l,orig_id);
@@ -961,12 +961,12 @@ inline void SGrid<dim,dimworld>::globalRefine (int refCount)
 //     for (int i=1; i<dim; i++) std::cout << "," <<  N[L-1][i];
 //     std::cout << ")" << std::endl;
 
-	indexsets.push_back( new SGridLevelIndexSet<SGrid<dim,dimworld> >(*this,maxlevel()) );
+	indexsets.push_back( new SGridLevelIndexSet<SGrid<dim,dimworld> >(*this,maxLevel()) );
   }
 }
 
 template<int dim, int dimworld>
-inline int SGrid<dim,dimworld>::maxlevel () const
+inline int SGrid<dim,dimworld>::maxLevel () const
 {
         return L-1;
 }
@@ -989,14 +989,14 @@ template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
 inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator
 SGrid<dim,dimworld>::leafbegin () const
 {
-        return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,maxlevel(),0);
+        return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,maxLevel(),0);
 }
 
 template <int dim, int dimworld> template <int cd, PartitionIteratorType pitype>
 inline typename SGrid<dim,dimworld>::Traits::template Codim<cd>::template Partition<pitype>::LeafIterator
 SGrid<dim,dimworld>::leafend () const
 {
-        return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,maxlevel(),size(maxlevel(),cd));
+        return SLevelIterator<cd,pitype,const SGrid<dim,dimworld> > (this,maxLevel(),size(maxLevel(),cd));
 }
 
 template<int dim, int dimworld>
@@ -1009,7 +1009,7 @@ template<int dim, int dimworld>
 inline int SGrid<dim,dimworld>::global_size (int codim) const
 {
   int gSize = 0;
-  for(int i=0; i <= this->maxlevel(); i++)
+  for(int i=0; i <= this->maxLevel(); i++)
     gSize += this->size(i,codim);
   return gSize;
 }
