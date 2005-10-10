@@ -1372,6 +1372,8 @@ public:
       _pos_world = it._pos_world;
       _ext_local = it._ext_local;
       _normal = it._normal;
+
+      return *this;
   }
 
 private:
