@@ -1260,6 +1260,8 @@ AlbertaGridEntityPointer<codim,GridImp> ::
   done_ = ( org.done_ );
   //if( done_ ) this->done();
   (*entity_).setEntity( *(org.entity_) );
+
+  return *this;
 }
 
 template<int codim, class GridImp >
@@ -1425,6 +1427,8 @@ operator = (const AlbertaGridHierarchicIterator<GridImp> & org)
     virtualEntity_.setEntity( org.virtualEntity_ );
   else 
     this->done();
+
+  return *this;
 }
 
 template< class GridImp >
@@ -1657,6 +1661,8 @@ AlbertaGridIntersectionIterator<GridImp>::operator = (const AlbertaGridIntersect
   if(fakeSelf_) 
     this->grid_.interSelfProvider_.freeObjectEntity(fakeSelf_);
   fakeSelf_ = 0;
+
+  return *this;
 }
 
 template< class GridImp >
@@ -2031,6 +2037,8 @@ AlbertaGridTreeIterator<codim,pitype,GridImp>::operator =
     assert( this->grid_.hierarchicIndexSet().index ( virtualEntity_ ) 
         == this->grid_.hierarchicIndexSet().index ( org.virtualEntity_ ) );
   }
+
+  return *this;
 }
 
 // Make LevelIterator with point to element from previous iterations
