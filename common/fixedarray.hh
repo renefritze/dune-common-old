@@ -1,5 +1,5 @@
-#ifndef __DUNE_FIXEDARRAY_HH
-#define __DUNE_FIXEDARRAY_HH
+#ifndef DUNE_FIXEDARRAY_HH
+#define DUNE_FIXEDARRAY_HH
 
 
 //***********************************************************************

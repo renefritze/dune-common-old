@@ -1,5 +1,5 @@
-#ifndef __DUNE_LEAFINDEXSET_HH__
-#define __DUNE_LEAFINDEXSET_HH__
+#ifndef DUNE_LEAFINDEXSET_HH
+#define DUNE_LEAFINDEXSET_HH
 
 #include <dune/common/misc.hh>
 #include <dune/common/array.hh>

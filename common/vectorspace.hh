@@ -1,5 +1,5 @@
-#ifndef __DUNE_VECTORSPACE_HH__
-#define __DUNE_VECTORSPACE_HH__
+#ifndef DUNE_VECTORSPACE_HH
+#define DUNE_VECTORSPACE_HH
 
 namespace Dune{
 

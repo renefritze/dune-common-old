@@ -1,5 +1,5 @@
-#ifndef __DUNE_ASCIIPARSER_HH__
-#define __DUNE_ASCIIPARSER_HH__
+#ifndef DUNE_ASCIIPARSER_HH
+#define DUNE_ASCIIPARSER_HH
 
 #include <fstream>
 

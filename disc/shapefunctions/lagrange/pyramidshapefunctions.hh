@@ -1,5 +1,5 @@
-#ifndef __DUNE_PYRAMIDSHAPEFUNCTIONS_HH__
-#define __DUNE_PYRAMIDSHAPEFUNCTIONS_HH__
+#ifndef DUNE_PYRAMIDSHAPEFUNCTIONS_HH
+#define DUNE_PYRAMIDSHAPEFUNCTIONS_HH
 
 #include<iostream>
 #include"common/fvector.hh"

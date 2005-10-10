@@ -1,5 +1,5 @@
-#ifndef __DUNE_QUADTETRATRI_HH__
-#define __DUNE_QUADTETRATRI_HH__
+#ifndef DUNE_QUADTETRATRI_HH
+#define DUNE_QUADTETRATRI_HH
 
 // the UG Quadratures 
 #include "ugquadratures.hh"

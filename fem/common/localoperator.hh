@@ -1,5 +1,5 @@
-#ifndef __DUNE_LOCALOPERATORS_HH__
-#define __DUNE_LOCALOPERATORS_HH__
+#ifndef DUNE_LOCALOPERATORS_HH
+#define DUNE_LOCALOPERATORS_HH
 
 #include "objpointer.hh"
 

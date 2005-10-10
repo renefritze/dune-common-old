@@ -1,5 +1,5 @@
-#ifndef __DUNE_DEFAULTINDEXSETS_HH__
-#define __DUNE_DEFAULTINDEXSETS_HH__
+#ifndef DUNE_DEFAULTINDEXSETS_HH
+#define DUNE_DEFAULTINDEXSETS_HH
 
 #include <vector>
 #include <dune/common/misc.hh>

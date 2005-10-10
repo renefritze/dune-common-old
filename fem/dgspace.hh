@@ -1,5 +1,5 @@
-#ifndef __DUNE__DGSPACE_HH__
-#define __DUNE__DGSPACE_HH__
+#ifndef DUNE__DGSPACE_HH
+#define DUNE__DGSPACE_HH
 
 #include <dune/grid/common/grid.hh>
 

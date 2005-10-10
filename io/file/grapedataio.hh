@@ -1,5 +1,5 @@
-#ifndef __DUNE_GRAPEDATAIO_HH__
-#define __DUNE_GRAPEDATAIO_HH__
+#ifndef DUNE_GRAPEDATAIO_HH
+#define DUNE_GRAPEDATAIO_HH
 
 #include <dune/common/misc.hh>
 #include <dune/grid/common/grid.hh>

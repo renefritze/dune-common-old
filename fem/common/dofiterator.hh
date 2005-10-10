@@ -1,5 +1,5 @@
-#ifndef __DUNE_DOFITERATOR_HH__
-#define __DUNE_DOFITERATOR_HH__
+#ifndef DUNE_DOFITERATOR_HH
+#define DUNE_DOFITERATOR_HH
 
 namespace Dune {
 

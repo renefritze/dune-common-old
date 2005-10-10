@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef __DUNE_UNIVERSALMAPPER_HH__
-#define __DUNE_UNIVERSALMAPPER_HH__
+#ifndef DUNE_UNIVERSALMAPPER_HH
+#define DUNE_UNIVERSALMAPPER_HH
 
 #include <iostream>
 #include <map>

@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef __DUNE_P1OPERATOR_HH__
-#define __DUNE_P1OPERATOR_HH__
+#ifndef DUNE_P1OPERATOR_HH
+#define DUNE_P1OPERATOR_HH
 
 #include<iostream>
 #include<vector>

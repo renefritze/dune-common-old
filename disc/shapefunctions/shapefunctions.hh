@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef __DUNE_SHAPEFUNCTIONS_HH__
-#define __DUNE_SHAPEFUNCTIONS_HH__
+#ifndef DUNE_SHAPEFUNCTIONS_HH
+#define DUNE_SHAPEFUNCTIONS_HH
 
 #include<iostream>
 #include"common/fvector.hh"

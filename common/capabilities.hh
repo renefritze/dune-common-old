@@ -1,5 +1,5 @@
-#ifndef __DUNE_CAPABILITIES_HH__
-#define __DUNE_CAPABILITIES_HH__
+#ifndef DUNE_CAPABILITIES_HH
+#define DUNE_CAPABILITIES_HH
 
 namespace Dune
 {
@@ -54,4 +54,4 @@ struct isParallel<const Grid>
 
 }
 
-#endif // __DUNE_CAPABILITIES_HH__
+#endif // DUNE_CAPABILITIES_HH

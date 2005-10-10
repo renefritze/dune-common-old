@@ -1,5 +1,5 @@
-#ifndef __DUNE_OPERATOR_HH__
-#define __DUNE_OPERATOR_HH__
+#ifndef DUNE_OPERATOR_HH
+#define DUNE_OPERATOR_HH
 
 #include "mapping.hh"
 

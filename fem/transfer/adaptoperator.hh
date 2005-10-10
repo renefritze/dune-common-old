@@ -1,5 +1,5 @@
-#ifndef __DUNE_ADAPTOPERATORIMP_HH__
-#define __DUNE_ADAPTOPERATORIMP_HH__
+#ifndef DUNE_ADAPTOPERATORIMP_HH
+#define DUNE_ADAPTOPERATORIMP_HH
 
 #include <dune/common/array.hh>
 #include <dune/fem/common/objpointer.hh>

@@ -1,5 +1,5 @@
-#ifndef __DUNE_FEOPERATOR_HH__
-#define __DUNE_FEOPERATOR_HH__
+#ifndef DUNE_FEOPERATOR_HH
+#define DUNE_FEOPERATOR_HH
 
 #include <dune/common/operator.hh>
 #include <dune/common/fmatrix.hh>

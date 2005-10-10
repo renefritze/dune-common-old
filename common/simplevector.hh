@@ -1,5 +1,5 @@
-#ifndef __DUNE_SIMPLEVECTOR_HH__
-#define __DUNE_SIMPLEVECTOR_HH__
+#ifndef DUNE_SIMPLEVECTOR_HH
+#define DUNE_SIMPLEVECTOR_HH
 
 
 //***********************************************************************

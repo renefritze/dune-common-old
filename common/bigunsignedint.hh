@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef __DUNE_BIGUNSIGNEDINT_HH__
-#define __DUNE_BIGUNSIGNEDINT_HH__
+#ifndef DUNE_BIGUNSIGNEDINT_HH
+#define DUNE_BIGUNSIGNEDINT_HH
 
 #include<iostream>
 

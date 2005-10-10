@@ -1,5 +1,5 @@
-#ifndef __DUNE_DGMAPPER_HH__
-#define __DUNE_DGMAPPER_HH__
+#ifndef DUNE_DGMAPPER_HH
+#define DUNE_DGMAPPER_HH
 
 #include <dune/fem/common/dofmapperinterface.hh>
 

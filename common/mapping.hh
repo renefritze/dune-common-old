@@ -1,5 +1,5 @@
-#ifndef __DUNE_MAPPING_HH__
-#define __DUNE_MAPPING_HH__
+#ifndef DUNE_MAPPING_HH
+#define DUNE_MAPPING_HH
 
 #include "vectorspace.hh"
 

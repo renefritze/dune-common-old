@@ -1,5 +1,5 @@
-#ifndef __DUNE_FUNCTION_HH__
-#define __DUNE_FUNCTION_HH__
+#ifndef DUNE_FUNCTION_HH
+#define DUNE_FUNCTION_HH
 
 #include <dune/common/mapping.hh>
 #include <dune/common/fvector.hh>

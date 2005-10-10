@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef __DUNE_P0FUNCTION_HH__
-#define __DUNE_P0FUNCTION_HH__
+#ifndef DUNE_P0FUNCTION_HH
+#define DUNE_P0FUNCTION_HH
 
 //C++ includes
 #include<new>

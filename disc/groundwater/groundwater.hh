@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef __DUNE_GROUNDWATER_HH__
-#define __DUNE_GROUNDWATER_HH__
+#ifndef DUNE_GROUNDWATER_HH
+#define DUNE_GROUNDWATER_HH
 
 #include<iostream>
 #include<iomanip>

@@ -1,5 +1,5 @@
-#ifndef __DUNE_RAWDATAWRITER_HH__
-#define __DUNE_RAWDATAWRITER_HH__
+#ifndef DUNE_RAWDATAWRITER_HH
+#define DUNE_RAWDATAWRITER_HH
 
 #include <string>
 

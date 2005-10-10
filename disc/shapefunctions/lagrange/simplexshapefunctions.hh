@@ -1,5 +1,5 @@
-#ifndef __DUNE_SIMPLEXSHAPEFUNCTIONS_HH__
-#define __DUNE_SIMPLEXSHAPEFUNCTIONS_HH__
+#ifndef DUNE_SIMPLEXSHAPEFUNCTIONS_HH
+#define DUNE_SIMPLEXSHAPEFUNCTIONS_HH
 
 #include<iostream>
 #include"common/fvector.hh"

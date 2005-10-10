@@ -1,5 +1,5 @@
-#ifndef __DUNE_PRISMSHAPEFUNCTIONS_HH__
-#define __DUNE_PRISMSHAPEFUNCTIONS_HH__
+#ifndef DUNE_PRISMSHAPEFUNCTIONS_HH
+#define DUNE_PRISMSHAPEFUNCTIONS_HH
 
 #include<iostream>
 #include"common/fvector.hh"

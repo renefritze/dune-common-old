@@ -1,5 +1,5 @@
-#ifndef __DUNE_OBJPOINTER_HH__
-#define __DUNE_OBJPOINTER_HH__
+#ifndef DUNE_OBJPOINTER_HH
+#define DUNE_OBJPOINTER_HH
 
 namespace Dune {
 

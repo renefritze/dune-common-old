@@ -1,5 +1,5 @@
-#ifndef __DUNE_SPMATRIX_HH
-#define __DUNE_SPMATRIX_HH
+#ifndef DUNE_SPMATRIX_HH
+#define DUNE_SPMATRIX_HH
 
 #ifdef HAVE_SUPERLU
 #include <dsp_defs.h>

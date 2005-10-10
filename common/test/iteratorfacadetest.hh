@@ -1,5 +1,5 @@
-#ifndef __DUNE_ITERATORFACADETEST_HH__
-#define __DUNE_ITERATORFACADETEST_HH__
+#ifndef DUNE_ITERATORFACADETEST_HH
+#define DUNE_ITERATORFACADETEST_HH
 #include<dune/common/iteratorfacades.hh>
 #include<dune/common/genericiterator.hh>
 #include<dune/common/typetraits.hh>

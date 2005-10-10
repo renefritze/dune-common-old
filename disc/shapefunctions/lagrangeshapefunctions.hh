@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef __DUNE_LAGRANGESHAPEFUNCTIONS_HH__
-#define __DUNE_LAGRANGESHAPEFUNCTIONS_HH__
+#ifndef DUNE_LAGRANGESHAPEFUNCTIONS_HH
+#define DUNE_LAGRANGESHAPEFUNCTIONS_HH
 
 #include<iostream>
 #include"common/fvector.hh"

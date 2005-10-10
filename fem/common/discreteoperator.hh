@@ -1,5 +1,5 @@
-#ifndef __DUNE_DISCRETEOPERATOR_INTERFACE_HH__
-#define __DUNE_DISCRETEOPERATOR_INTERFACE_HH__
+#ifndef DUNE_DISCRETEOPERATOR_INTERFACE_HH
+#define DUNE_DISCRETEOPERATOR_INTERFACE_HH
 
 #include <dune/common/operator.hh>
 // object pointer management for combined discrete operators 

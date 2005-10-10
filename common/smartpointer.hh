@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef __DUNE_SMARTPOINTER_HH__
-#define __DUNE_SMARTPOINTER_HH__
+#ifndef DUNE_SMARTPOINTER_HH
+#define DUNE_SMARTPOINTER_HH
 #include<iostream>
 
 /**

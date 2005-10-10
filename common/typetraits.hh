@@ -1,5 +1,5 @@
-#ifndef __DUNE_TYPETRAITS_HH__
-#define __DUNE_TYPETRAITS_HH__
+#ifndef DUNE_TYPETRAITS_HH
+#define DUNE_TYPETRAITS_HH
 
 #include<dune/common/logictraits.hh>
 
