@@ -424,7 +424,11 @@ namespace Dune {
     ALU3DSPACE GitterImplType & myGrid();
     const ALU3DSPACE GitterImplType & myGrid() const;
 
+    //! return reference to Dune reference element according to elType 
     const ReferenceElementType & referenceElement() const { return referenceElement_; }
+
+    //! check whether macro grid has the right element type 
+    void checkMacroGrid ();
   private:
     //! Copy constructor should not be used  
     ALU3dGrid( const MyType & g );
