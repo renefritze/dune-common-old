@@ -231,30 +231,6 @@ buildGeom(const ALU3DSPACE VertexType & item, int, int)
   return true;
 }
 
-/*
-template <GeometryType eltype , int dim> struct ALU3dGridElType {  
-  static inline GeometryType type () { return unknown; }
-};
-template <> struct ALU3dGridElType<tetrahedron,3> {
-  static inline GeometryType type () { return tetrahedron; }
-};
-template <> struct ALU3dGridElType<tetrahedron,2> {
-  static inline GeometryType type () { return triangle; }
-};
-template <GeometryType eltype> struct ALU3dGridElType<eltype,1> {
-  static inline GeometryType type () { return line; }
-};
-template <GeometryType eltype> struct ALU3dGridElType<eltype,0> {
-  static inline GeometryType type () { return vertex; }
-};
-template <> struct ALU3dGridElType<hexahedron,3> {
-  static inline GeometryType type () { return hexahedron; }
-};
-template <> struct ALU3dGridElType<hexahedron,2> {
-  static inline GeometryType type () { return quadrilateral; }
-};
-*/
-
 
 /* Comment in for adaptation to new GeometryType */
 template <int mydim, int cdim>
@@ -268,29 +244,6 @@ inline GeometryType
 ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> > ::type () const {
   return cube;
 }
-
-/*
-template <>
-inline GeometryType
-ALU3dGridGeometry<0, 3, const ALU3dGrid<3, 3, tetra> > ::type () const {
-  return vertex;
-} 
-
-template <>
-inline GeometryType
-ALU3dGridGeometry<0, 3, const ALU3dGrid<3, 3, hexa> > ::type () const {
-  return vertex;
-} 
-*/
-
-/*
-template<int mydim, int cdim>
-inline GeometryType ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::type () const
-{
-  return ALU3dGridElType<tetrahedron,mydim>::type(); 
-}
-*/
-
 
 template<int mydim, int cdim>
 inline int ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::corners () const 
@@ -452,15 +405,6 @@ ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
   delete triMap_;
   delete biMap_;
 }
-
-/*
-template<int mydim, int cdim>
-inline GeometryType 
-ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::type() const {
-  return ALU3dGridElType<hexahedron, mydim>::type();
-}
-*/
-
 
 template <int mydim, int cdim>
 inline int 
@@ -650,45 +594,12 @@ buildGeom(const ALU3DSPACE HFaceType & item, int twist, int faceNum ) {
   enum { dimworld = 3 };
 
   const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
-
-  /*
-  for (int i = 0; i < 4; ++i) 
-  {
-    FieldVector<double,3> vx;
-    const double (&p)[3] =face.myvertex(i)->Point();
-    for(int j=0; j<3 ;j++) vx[j] = p[j];
-    std::cout << "FaceVx " << i << " = [" << vx << "]\n";
-  }
-  */
- 
-  //std::cout << " check face number " << faceNum << " \n";
-  /*
-  for(int k=0; k<8; k++) 
-  {
-    int testvx = ElementTopo::dune2aluVertex(k);
-    int check = ElementTopo::alu2duneVertex(testvx);
-    assert( check == k );
-  }
-  
-  for(int k=0; k<6; k++) 
-  {
-    int testvx = ElementTopo::dune2aluFace(k);
-    int check = ElementTopo::alu2duneFace(testvx);
-    assert( check == k );
-  }
-  */
   
   for (int i = 0; i < 4; ++i) 
   {
     // Transform Dune index to ALU index and apply twist
     int localALUIndex = ElementTopo::dune2aluFaceVertex(faceNum,i);
-
-    //int check = ElementTopo::alu2duneFaceVertex(faceNum,localALUIndex);
-    //assert( check == i );
-    //int localALUIndex = FaceTopo::dune2aluVertex(i);
     int rotatedALUIndex = FaceTopo::twist(localALUIndex, twist);
-    
-    //std::cout << "twist["<<localALUIndex<<"] = " << twist <<" " << FaceTopo::twist(localALUIndex, twist) << "\n"; 
     
     const double (&p)[3] = 
       face.myvertex(rotatedALUIndex)->Point();
