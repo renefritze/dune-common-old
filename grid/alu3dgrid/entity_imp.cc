@@ -242,7 +242,6 @@ namespace Dune {
     }
     std::cout << std::endl;
     */
-
   }
 
   template<int dim, class GridImp>
