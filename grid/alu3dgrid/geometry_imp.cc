@@ -279,6 +279,7 @@ global(const FieldVector<alu3d_ctype, mydim>& local) const
   calcElMatrix();
   
   globalCoord_ = coord_[0];
+  // multiply with transposed because AT is also transposed
   AT_.umtv(local,globalCoord_);
   return globalCoord_;
 }
@@ -291,9 +292,9 @@ local(const FieldVector<alu3d_ctype, 3>& global) const
   if (!builtinverse_) buildJacobianInverseTransposed();
 
   globalCoord_ = global - coord_[0];
-  localCoord_ = 0.0;
 
-  Jinv_.umv(globalCoord_, localCoord_);
+  // multiply with transposed because Jinv_ is already transposed  
+  localCoord_ = FMatrixHelp:: multTransposed(Jinv_,globalCoord_);
   return localCoord_;
 }
 
@@ -308,7 +309,7 @@ checkInside(const FieldVector<alu3d_ctype, mydim>& local) const
     sum += local[i];
     if(local[i] < 0.0)
     {
-      if(std::abs(local[i]) > 1e-15) 
+      if(std::abs(local[i]) > ALUnumericEpsilon) 
       {
         return false; 
       }
@@ -317,10 +318,9 @@ checkInside(const FieldVector<alu3d_ctype, mydim>& local) const
 
   if( sum > 1.0 )
   {
-    if(sum > (1.0 + 1e-15))
+    if(sum > (1.0 + ALUnumericEpsilon))
       return false;
   }
-
   return true;
 }
 
