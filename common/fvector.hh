@@ -16,6 +16,7 @@
 namespace Dune {
    
   /** @defgroup DenseMatVec Dense Matrix and Vector Template Library
+      @ingroup Common
 	  @{
   */
 
