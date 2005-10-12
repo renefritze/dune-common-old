@@ -9,6 +9,7 @@
 #include <dune/common/interfaces.hh>
 
 #include "../common/grid.hh"
+#include "../common/referenceelements.hh"
 #include "../common/defaultindexsets.hh"
 #include "../common/leafindexset.hh"
 
