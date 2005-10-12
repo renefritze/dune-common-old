@@ -707,6 +707,9 @@ public:
   //! The Destructor 
   ~ALU3dGridIntersectionIterator();
 
+  //! The copy constructor 
+  bool equals (const ALU3dGridIntersectionIterator<GridImp> & i) const;
+
   //! increment iterator 
   void increment ();
 

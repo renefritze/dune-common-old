@@ -141,6 +141,14 @@ inline ALU3dGridIntersectionIterator<GridImp> ::
   }
 }
 
+// check whether entities are the same or whether iterator is done 
+template<class GridImp>
+inline bool ALU3dGridIntersectionIterator<GridImp> :: 
+equals (const ALU3dGridIntersectionIterator<GridImp> & i ) const
+{
+  return ( ((*(this->entity_)).equals(*i.entity_)) && (this->done_ == i.done_));
+}
+
 template<class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp> :: increment () 
 {
