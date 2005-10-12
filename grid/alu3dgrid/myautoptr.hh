@@ -76,7 +76,7 @@ public:
   Pointer * operator -> () const
   {
     assert(ptr_ != 0);
-    assert(owner_);
+    assert(owner_); 
     return ptr_;
   }
   
