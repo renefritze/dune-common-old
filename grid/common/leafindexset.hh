@@ -639,11 +639,10 @@ public:
   template <int cd>
   int subIndex (const EntityCodim0Type & en, int i) const
   {
-    assert( cd > 0 ); 
+    assert( cd >= 0 ); 
     assert( cd < ncodim );
     if(!codimUsed_[cd]) this->template setUpCodimSet<cd>();
     return codimLeafSet_[cd].index ( hIndexSet_. template subIndex<cd> (en,i) );   
-    //return hIndexSet_. template subIndex<cd> (en,i) ;
   }
 
   //! returns vector with geometry tpyes this index set has indices for
@@ -667,7 +666,6 @@ public:
   //! set indices to unsed  
   void remove (const EntityCodim0Type & en)
   {
-    //std::cout << "Remove el = "<< hIndexSet_.index(en) << "\n";
     codimLeafSet_[0].remove ( hIndexSet_.index(en) );
     if(higherCodims_)
     {
@@ -687,8 +685,6 @@ public:
   //! return size of grid entities per level and codim 
   int size ( int codim , GeometryType type = unknown ) const
   {
-    //if(codim == 0) return codimLeafSet_[codim].size();
-    //return hIndexSet_.size(codim);
     return codimLeafSet_[codim].size();
   }
   
