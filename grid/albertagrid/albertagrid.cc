@@ -2950,7 +2950,7 @@ inline void AlbertaGrid < dim, dimworld >::initGrid(int proc)
 }
 
 template < int dim, int dimworld >
-inline AlbertaGrid < dim, dimworld >::AlbertaGrid(const char *MacroTriangFilename) : 
+inline AlbertaGrid < dim, dimworld >::AlbertaGrid(const std::string macroTriangFilename) : 
  mesh_ (0), maxlevel_ (0) , wasChanged_ (false)
   , isMarked_ (false) 
   , vertexMarkerLeaf_(false) // creates LeafMarkerVector
@@ -2963,6 +2963,9 @@ inline AlbertaGrid < dim, dimworld >::AlbertaGrid(const char *MacroTriangFilenam
 {
   assert(dimworld == DIM_OF_WORLD);
   assert(dim      == DIM);
+  
+  const char * MacroTriangFilename = macroTriangFilename.c_str();
+  assert( MacroTriangFilename );
 
   bool makeNew = true;
   { 
