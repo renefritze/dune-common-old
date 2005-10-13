@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include <dune/common/fvector.hh>
+#include <dune/common/capabilities.hh>
 #include <dune/grid/common/referenceelements.hh>
 
 
@@ -27,8 +28,9 @@ bool compareVec(const FieldVector<ctype,dim> & vx1 , const FieldVector<ctype,dim
   return comp; 
 }
 
-// check som functionality of grid 
-template <int codim, class GridType, class IndexSetType, class OutputStreamImp  >
+// check some functionality of grid 
+template <int codim, class GridType,
+          class IndexSetType, class OutputStreamImp >
 void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
     OutputStreamImp & sout )
 {
@@ -285,21 +287,36 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
 }
 
 
-template <class GridType, class IndexSetType, class OutputStreamImp , int codim>
+template <class GridType, class IndexSetType, class OutputStreamImp,
+          int codim, bool hasCodim>
 struct CheckIndexSet 
 {
   static void checkIndexSet( const GridType &grid , 
         const IndexSetType & iset, OutputStreamImp & sout )
   {
     checkIndexSetForCodim<codim> (grid,iset,sout);
-    CheckIndexSet<GridType,IndexSetType,OutputStreamImp,codim-1> :: 
+    CheckIndexSet<GridType,IndexSetType,OutputStreamImp,
+      codim-1, Dune::Capabilities::hasEntity<GridType, codim-1>::v > :: 
+      checkIndexSet( grid, iset, sout );
+  }
+};
+
+template <class GridType, class IndexSetType, class OutputStreamImp,
+          int codim>
+struct CheckIndexSet<GridType,IndexSetType,OutputStreamImp,codim,false>
+{
+  static void checkIndexSet( const GridType &grid , 
+        const IndexSetType & iset, OutputStreamImp & sout )
+  {
+    CheckIndexSet<GridType,IndexSetType,OutputStreamImp,
+      codim-1, Dune::Capabilities::hasEntity<GridType, codim-1>::v > :: 
       checkIndexSet( grid, iset, sout );
   }
 };
 
 // end loop over codim by specialisation 
 template <class GridType, class IndexSetType, class OutputStreamImp>
-struct CheckIndexSet<GridType,IndexSetType,OutputStreamImp,0>
+struct CheckIndexSet<GridType,IndexSetType,OutputStreamImp,0,true>
 {
   static void checkIndexSet( const GridType &grid , 
         const IndexSetType & iset, OutputStreamImp & sout )
@@ -312,7 +329,8 @@ template <class GridType, class IndexSetType, class OutputStreamImp>
 void checkIndexSet( const GridType &grid , const IndexSetType & iset,
     OutputStreamImp & sout )
 {
-  CheckIndexSet<GridType,IndexSetType,OutputStreamImp,GridType::dimension> :: 
+  CheckIndexSet<GridType,IndexSetType,OutputStreamImp,
+    GridType::dimension, true> :: 
     checkIndexSet (grid,iset,sout);
 }
 
