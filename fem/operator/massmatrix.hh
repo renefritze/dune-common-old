@@ -205,8 +205,8 @@ public:
             nb.resize(n, n);
 
             typedef typename GridType::template Codim<0>::LevelIterator LevelIterator;
-            LevelIterator it = grid->template lbegin<0>( grid->maxlevel() );
-            LevelIterator endit = grid->template lend<0> ( grid->maxlevel() );
+            LevelIterator it = grid->template lbegin<0>( grid->maxLevel() );
+            LevelIterator endit = grid->template lend<0> ( grid->maxLevel() );
 
             for (; it!=endit; ++it) {
 
@@ -242,8 +242,8 @@ public:
             neighborsPerVertex.exportIdx(*matrix_);
             (*matrix_) = 0;
             
-            LevelIterator it = grid->template lbegin<0>( grid->maxlevel() );
-            LevelIterator endit = grid->template lend<0> ( grid->maxlevel() );
+            LevelIterator it = grid->template lbegin<0>( grid->maxLevel() );
+            LevelIterator endit = grid->template lend<0> ( grid->maxLevel() );
             enum {maxnumOfBaseFct = 30};
             
             Matrix<MatrixBlock> mat;
