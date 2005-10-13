@@ -1680,7 +1680,8 @@ inline bool AlbertaGridIntersectionIterator<GridImp>::boundary() const
 template< class GridImp >
 inline bool AlbertaGridIntersectionIterator<GridImp>::neighbor() const
 {
-  return (elInfo_->neigh[neighborCount_] != 0);
+  // use ALBERTA macro to get neighbour 
+  return (NEIGH(elInfo_->el,elInfo_)[neighborCount_] != 0);
 }
 
 template<class GridImp>
@@ -1839,7 +1840,8 @@ inline void AlbertaGridIntersectionIterator<GridImp>::setupVirtEn() const
   
   assert( neighborCount_ < dim+1 );
   // set the neighbor element as element
-  neighElInfo_->el = elInfo_->neigh[neighborCount_];
+  // use ALBERTA macro to get neighbour 
+  neighElInfo_->el = NEIGH(elInfo_->el,elInfo_)[neighborCount_];
 #if DIM==3
   neighElInfo_->orientation = elInfo_->orientation;
 #endif
@@ -2110,7 +2112,8 @@ goNextFace(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elInfo)
   // check elInfo pointer before we start anything  
   assert(elInfo);
 
-  const ALBERTA EL * neighbour = (elInfo->neigh[face_]);
+  // get neighbour of this element 
+  const ALBERTA EL * neighbour = NEIGH(elInfo->el,elInfo)[face_];
   if( neighbour ) 
   {
     // get element 
@@ -2328,7 +2331,7 @@ goNextElInfo(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elinfo_old)
         // here we have the interior element, now check the neighbours
         for(int i=0; i<dim+1; i++)
         {
-          ALBERTA EL * neigh = NEIGH(elinfo->el,elinfo)[i];
+          const ALBERTA EL * neigh = NEIGH(elinfo->el,elinfo)[i];
           if(neigh)
           {
             if(this->grid_.getOwner(neigh) == this->grid_.myRank())
@@ -3253,6 +3256,9 @@ template < int dim, int dimworld >
 inline bool AlbertaGrid < dim, dimworld >::
 globalRefine(int refCount)
 {
+  // only MAXL level allowed 
+  assert( (refCount + maxlevel_) < MAXL );
+  
   typedef LeafIterator LeafIt;
   LeafIt endit = this->leafend(this->maxLevel());
 
@@ -3302,7 +3308,7 @@ inline int AlbertaGrid < dim, dimworld >::owner(const EntityType & en) const
 }
 
 template < int dim, int dimworld >
-inline int AlbertaGrid < dim, dimworld >::getOwner (ALBERTA EL *el) const
+inline int AlbertaGrid < dim, dimworld >::getOwner (const ALBERTA EL *el) const
 {
   // if element is new then entry in dofVec is 1 
   return ownerVec_ [el->dof[dof_][nv_]];
@@ -3710,7 +3716,7 @@ partition( int proc , EntityType & en )
 }
 
 template < int dim, int dimworld >
-inline bool AlbertaGrid < dim, dimworld >::setOwner (ALBERTA EL *el, int proc)  
+inline bool AlbertaGrid < dim, dimworld >::setOwner (const ALBERTA EL *el, int proc)  
 {
   // if element is new then entry in dofVec is 1 
   int dof = el->dof[dof_][nv_];
@@ -3733,7 +3739,7 @@ partitionType (ALBERTA EL_INFO *elinfo) const
   {
     for(int i=0; i<dim+1; i++)
     {
-      ALBERTA EL * neigh = NEIGH(elinfo->el,elinfo)[i];
+      const ALBERTA EL * neigh = NEIGH(elinfo->el,elinfo)[i];
       if(neigh) 
       {
         if(getOwner(neigh) != myRank())
@@ -3796,6 +3802,27 @@ inline int AlbertaGrid < dim, dimworld >::size (int codim) const
   return this->leafIndexSet().size(codim,simplex); 
 }
 
+template < int dim, int dimworld >
+inline const typename AlbertaGrid < dim, dimworld > :: Traits :: LevelIndexSet & 
+AlbertaGrid < dim, dimworld > :: levelIndexSet (int level) const
+{
+  // assert that given level is in range 
+  assert( level >= 0 );
+  assert( level < (int) levelIndexVec_.size() );
+
+  if(!levelIndexVec_[level]) levelIndexVec_[level] = new LevelIndexSetImp (*this,level);
+  return *(levelIndexVec_[level]);
+}
+
+template < int dim, int dimworld >
+inline const typename AlbertaGrid < dim, dimworld > :: Traits :: LeafIndexSet & 
+AlbertaGrid < dim, dimworld > :: leafIndexSet () const
+{
+  if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSet (*this);
+  return *leafIndexSet_;
+}
+
+
 template < int dim, int dimworld > 
 inline void AlbertaGrid < dim, dimworld >::arrangeDofVec()
 {
@@ -3856,6 +3883,8 @@ inline void AlbertaGrid < dim, dimworld >::calcExtras ()
  
   // determine new maxlevel  
   maxlevel_ = ALBERTA AlbertHelp::calcMaxAbsoluteValueOfVector( dofvecs_.elNewCheck );
+  assert( maxlevel_ >= 0);
+  assert( maxlevel_ < MAXL);
 #ifndef NDEBUG  
   int mlvl = ALBERTA AlbertHelp::calcMaxLevel(mesh_);
   assert( mlvl == maxlevel_ );
