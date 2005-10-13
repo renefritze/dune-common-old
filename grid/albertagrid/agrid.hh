@@ -361,6 +361,12 @@ namespace Dune
     {
       return this->realEntity.getElement(); 
     }
+    
+    // checks equality of 2 entities  
+    bool equals (const AlbertaGridMakeableEntity<codim,dim,GridImp> & i) const
+    {
+      return this->realEntity.equals(i.realEntity); 
+    }
   
     void removeElInfo () 
     {
@@ -449,6 +455,9 @@ namespace Dune
     //! return the current face/edge or vertex number 
     //! no interface method 
     int getFEVnum () const;
+
+    //! equality of entities  
+    bool equals ( const AlbertaGridEntity<cd,dim,GridImp> & i) const;
   private: 
     // methods for setting the infos from the albert mesh
     void setTraverseStack (ALBERTA TRAVERSE_STACK *travStack);
@@ -654,6 +663,9 @@ namespace Dune
 
     //! set elInfo and Element to nil
     void removeElInfo() { elInfo_ = 0; element_ = 0;} 
+    
+    //! equality of entities  
+    bool equals ( const AlbertaGridEntity<0,dim,GridImp> & i) const;
   private: 
     // called from HierarchicIterator, because only this 
     // class changes the level of the entity, otherwise level is set by
@@ -876,6 +888,9 @@ namespace Dune
     enum { dimensionworld=dimworld };
     //! define type used for coordinates in grid module
     typedef typename GridImp::ctype ctype;
+
+    //! equality   
+    bool equals (const AlbertaGridIntersectionIterator<GridImp> & i) const;
 
     //! increment
     void increment();
@@ -1296,10 +1311,7 @@ namespace Dune
     public HasObjectStream
   {
     friend class AlbertaGridEntity <0,dim,const AlbertaGrid<dim,dimworld> >;
-    //friend class AlbertaGridEntity <1,dim,dimworld>;
-    //friend class AlbertaGridEntity <1 << dim-1 ,dim,dimworld>;
     friend class AlbertaGridEntity <dim,dim,const AlbertaGrid<dim,dimworld> >;
-
 
     // friends because of fillElInfo
     friend class AlbertaGridTreeIterator<0,All_Partition,AlbertaGrid<dim,dimworld> >;
@@ -1751,11 +1763,17 @@ namespace Dune
     // return true if el is new 
     bool checkElNew ( const ALBERTA EL * el ) const;
   
+    // read level from elNewCehck vector   
+    int getLevelOfElement ( const ALBERTA EL * el ) const; 
+
     // read global element number from elNumbers_  
     int getElementNumber ( const ALBERTA EL * el ) const; 
 
     // read global element number from elNumbers_  
     int getEdgeNumber ( const ALBERTA EL * el, int edge ) const; 
+
+    // read global element number from elNumbers_  
+    int getFaceNumber ( const ALBERTA EL * el, int face ) const; 
 
     // read global element number from elNumbers_  
     int getVertexNumber ( const ALBERTA EL * el, int vx ) const; 
