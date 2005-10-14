@@ -77,7 +77,8 @@ namespace Dune {
   {
     item_   = static_cast<const BSIMPLElementType *> (&vx);
     gIndex_ = (*item_).getIndex();
-    father_ = static_cast<const ALU3DSPACE HElementType *> (&el);
+    level_  = (*item_).level();
+    father_ = (&el);
     builtgeometry_=false;
     localFCoordCalced_ = false;
   }
@@ -90,7 +91,7 @@ namespace Dune {
     item_   = static_cast<const BSIMPLElementType *> (&vx);
     gIndex_ = (*item_).getIndex();
     level_  = (*item_).level();
-    father_ = static_cast<const ALU3DSPACE HElementType *> (&el);
+    father_ = (&el);
     builtgeometry_=false;
     localFCoordCalced_ = false;
   }
@@ -140,8 +141,15 @@ namespace Dune {
   ALU3dGridEntity<cd,dim,GridImp>:: ownersFather() const
   {
     assert(cd == dim); // this method only exists for codim == dim 
-    assert(father_); // pointer to HElement father 
+
+    if( !father_ )
+    {
+      dwarn << "No Father for given Entity! \n";
+      return ALU3dGridEntityPointer<0,GridImp> (grid_,(*father_)); 
+    }
     return ALU3dGridEntityPointer<0,GridImp> (grid_,(*father_)); 
+    
+    //assert(father_); // pointer to HElement father 
   }
 
   template<int cd, int dim, class GridImp>
@@ -361,7 +369,7 @@ namespace Dune {
 
     static inline int subIndex(const IMPLElemType &elem, int i)
     {
-      return elem.myvertex( Topo::dune2aluVertex(i) )->getIndex();
+      return elem.myvertex( Topo::dune2aluVertex(i) )->getIndex(); // element topo
     }
   };
 
@@ -523,7 +531,7 @@ namespace Dune {
             int i)
     {
       return ALU3dGridEntityPointer<3,GridImp> 
-        (grid, *item.myvertex(Topo::dune2aluVertex(i)), 0);
+        (grid, *item.myvertex(Topo::dune2aluVertex(i)), 0); // element topo 
     }
   };
 
