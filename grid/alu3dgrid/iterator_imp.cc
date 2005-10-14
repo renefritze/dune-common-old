@@ -266,7 +266,7 @@ inline int ALU3dGridIntersectionIterator<GridImp>::numberInNeighbor () const
 template <class GridImp>
 inline const typename ALU3dGridIntersectionIterator<GridImp>::LocalGeometry &
 ALU3dGridIntersectionIterator<GridImp>::intersectionNeighborLocal() const {
-  assert(!boundary());
+  assert(neighbor());
   buildLocalGeometries();
   return *intersectionNeighborLocal_;
 }
