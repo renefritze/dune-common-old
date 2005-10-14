@@ -5,6 +5,8 @@
 
 #include<iostream>
 #include<vector>
+#include<stdio.h>
+#include<stdlib.h>
 #include"common/fvector.hh"
 #include"common/exceptions.hh"
 #include"grid/common/grid.hh"
@@ -131,9 +133,17 @@ namespace Dune
 	{
 	  int s = 0;
 	  s += g.size(n);   // vertices
+	  //	  std::cout << "nnz vertices " << g.size(n) << std::endl;
+	  
 	  s += 2*g.size(n-1); // edges
+	  //	  std::cout << "nnz edges " << g.size(n-1) << std::endl;
+
 	  for (int c=0; c<n-1; c++)
-		s += 2*g.size(c,cube)*(1<<(n-c-1));
+		{
+		  s += 2*g.size(c,cube)*(1<<(n-c-1));
+		  //		  std::cout << "nnz cubes codim " << c << " is " << g.size(c,cube) << std::endl;
+		}
+
 	  return s;
 	}
 
@@ -166,6 +176,7 @@ namespace Dune
 	AssembledP1FEOperator (const G& g, const IS& indexset) : grid(g),is(indexset),A(g.size(n),g.size(n),nnz(g),RepresentationType::random),
 									vertexmapper(g,indexset),allmapper(g,indexset)
 	{
+	  std::cout << "making " << g.size(n) << "x" << g.size(n) << " matrix with " << nnz(g) << " nonzeros" << std::endl;
 	  // set size of all rows to zero
 	  for (int i=0; i<g.size(n); i++)
 		A.setrowsize(i,0); 
@@ -191,6 +202,8 @@ namespace Dune
 				{
 				  A.incrementrowsize(alpha);
 				  visited[index] = true;
+				  //				  printf("increment row %04d\n",alpha);
+				  //				  std::cout << "increment row " << alpha << std::endl;
 				}
 			}
 
@@ -205,6 +218,10 @@ namespace Dune
 				  A.incrementrowsize(alpha);
 				  A.incrementrowsize(beta);
 				  visited[index] = true;
+				  //				  printf("increment row %04d\n",alpha);
+				  //				  printf("increment row %04d\n",beta);
+				  //				  std::cout << "increment row " << alpha << std::endl;
+				  //				  std::cout << "increment row " << beta << std::endl;
 				}
 			}
 
@@ -228,18 +245,19 @@ namespace Dune
 		  Dune::GeometryType gt = it->geometry().type();
 		  const typename Dune::ReferenceElementContainer<DT,n>::value_type&
 			refelem = ReferenceElements<DT,n>::general(gt);
-// 		  std::cout << "ELEM " << GeometryName(gt) << std::endl;
+		  // 		  std::cout << "ELEM " << GeometryName(gt) << std::endl;
 		  // vertices, c=n
 		  for (int i=0; i<refelem.size(n); i++)
 			{
 			  int index = allmapper.template map<n>(*it,i);
-// 			  std::cout << "vertex allindex " << index << std::endl; 
+			  // 			  std::cout << "vertex allindex " << index << std::endl; 
 			  if (!visited[index]) 
 				{
 				  int alpha = vertexmapper.template map<n>(*it,i);
 				  A.addindex(alpha,alpha);
 				  visited[index] = true;
-// 				  std::cout << "adding (" << alpha << "," << alpha << ")" << std::endl;
+				  //				  printf("adding (%04d,%04d) index=%04d\n",alpha,alpha,index);
+//				  std::cout << "adding (" << alpha << "," << alpha << ")" << std::endl;
 				}
 			}
 
@@ -247,7 +265,7 @@ namespace Dune
 		  for (int i=0; i<refelem.size(n-1); i++)
 			{
 			  int index = allmapper.template map<n-1>(*it,i);
-// 			  std::cout << "edge allindex " << index << std::endl; 
+			  // 			  std::cout << "edge allindex " << index << std::endl; 
 			  if (!visited[index]) 
 				{
 				  int alpha = vertexmapper.template map<n>(*it,refelem.subEntity(i,n-1,0,n));
@@ -255,6 +273,8 @@ namespace Dune
 				  A.addindex(alpha,beta);
 				  A.addindex(beta,alpha);
 				  visited[index] = true;
+				  //				  printf("adding (%04d,%04d) index=%04d\n",alpha,beta,index);
+				  //				  printf("adding (%04d,%04d) index=%04d\n",beta,alpha,index);
 // 				  std::cout << "adding (" << alpha << "," << beta << ")" << std::endl;
 // 				  std::cout << "adding (" << beta << "," << alpha << ")" << std::endl;
 				}
