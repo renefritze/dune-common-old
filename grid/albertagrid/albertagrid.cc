@@ -653,8 +653,10 @@ inline bool AlbertaGridEntity<codim,dim,GridImp>::
 equals (const AlbertaGridEntity<codim,dim,GridImp> & i) const
 {
   const ALBERTA EL * e2 = i.getElement();
+  
   // if both element null then they are equal 
   if( (!e2) && (!element_) ) return true;
+
   return ((element_ == e2) && (getFEVnum() == i.getFEVnum()));
 }
 
@@ -670,6 +672,15 @@ inline ALBERTA EL * AlbertaGridEntity<codim,dim,GridImp>::
 getElement() const
 {
   return element_;
+}
+
+template<int codim, int dim, class GridImp>
+inline void AlbertaGridEntity<codim,dim,GridImp>::
+removeElInfo()
+{
+  elInfo_  = 0; 
+  element_ = 0; 
+  builtgeometry_ = false; 
 }
 
 template<int codim, int dim, class GridImp>
@@ -1090,6 +1101,15 @@ setLevel(int actLevel)
 {
   level_ = actLevel;
   assert( level_ >= 0);
+}
+
+template<int dim, class GridImp>
+inline void AlbertaGridEntity<0,dim,GridImp>::
+removeElInfo()
+{
+  elInfo_  = 0; 
+  element_ = 0; 
+  builtgeometry_ = false; 
 }
 
 template<int dim, class GridImp>
@@ -3039,6 +3059,7 @@ inline AlbertaGrid < dim, dimworld >::AlbertaGrid(const std::string macroTriangF
     GrapeDataIO < AlbertaGrid <dim,dimworld> > dataIO;
     dataIO.readGrid ( *this, MacroTriangFilename,time,0);
   }
+  std::cout << "AlbertaGrid<"<<dim<<","<<dimworld<<"> created from macro grid file '" << macroTriangFilename << "'. \n";
 }
 
 template < int dim, int dimworld >
@@ -3116,9 +3137,9 @@ template<int codim, PartitionIteratorType pitype>
 inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LevelIterator
 AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 {
+  assert( level >= 0 );
   // if we dont have this level return empty iterator 
-  if((level > maxlevel_) || (level < 0) ) 
-    return this->template lend<codim,pitype> (level);
+  if(level > maxlevel_) return this->template lend<codim,pitype> (level);
   
   if((dim == codim) || ((dim == 3) && (codim == 2)) ) 
   {
@@ -3139,23 +3160,14 @@ template < int dim, int dimworld > template<int codim>
 inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
 AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
 {
-  // if we dont have this level return empty iterator 
-  if((level > maxlevel_) || (level < 0) ) 
-    return this->template lend<codim, All_Partition > (level);
-  
-  if((dim == codim) || ((dim == 3) && (codim == 2)) ) 
-  {
-    if( ! (vertexMarkerLevel_[level].up2Date()) ) 
-      vertexMarkerLevel_[level].markNewVertices(*this,level);
-  }
-  return AlbertaGridLevelIterator<codim,All_Partition,const MyType> (*this,&vertexMarkerLevel_[level],level,proc);
+  return this->template lbegin<codim,All_Partition> (level,proc);
 }
 
 template < int dim, int dimworld > template<int codim>
 inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
 AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
 {
-  return AlbertaGridLevelIterator<codim,All_Partition,const MyType> ((*this),level,proc);
+  return this->template lend<codim,All_Partition> (level,proc);
 }
 
 template < int dim, int dimworld >
@@ -3226,7 +3238,7 @@ template < int dim, int dimworld >
 inline typename AlbertaGrid<dim,dimworld>::LeafIterator  
 AlbertaGrid < dim, dimworld >::leafbegin (int level, int proc ) const
 {
-  return AlbertaGridLeafIterator<0, All_Partition, const MyType> (*this,&vertexMarkerLeaf_,level,proc);
+  return leafbegin<0, All_Partition> (level,proc);
 }
 
 template < int dim, int dimworld >
@@ -3239,7 +3251,7 @@ template < int dim, int dimworld >
 inline typename AlbertaGrid<dim,dimworld>::LeafIterator 
 AlbertaGrid < dim, dimworld >::leafend (int level, int proc ) const
 {
-  return AlbertaGridLeafIterator<0, All_Partition, const MyType> (*this,level,proc);
+  return leafend<0,All_Partition> (level,proc);
 }
 
 template < int dim, int dimworld >
