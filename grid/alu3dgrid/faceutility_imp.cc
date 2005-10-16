@@ -221,18 +221,6 @@ namespace Dune {
     
     // construct a mapping (either a linear or a bilinear one)
     if (!mappingGlobal_) {
-
-      /*
-      CoordinateType coords;
-      for (int i = 0; i < numVerticesPerFace; ++i) {
-        const double (&p)[3] = 
-          connector_.face().myvertex(FaceTopo::dune2aluVertex(i))->Point();
-        convert2FieldVector(p, coords[i] );
-      } // end for
-
-      mappingGlobal_ = buildSurfaceMapping(coords);
-      */
-
       mappingGlobal_ = buildSurfaceMapping(connector_.face());
     } // end if
 
@@ -302,12 +290,15 @@ namespace Dune {
   globalVertexIndex(int duneFaceIndex, 
                     int faceTwist,
                     int duneFaceVertexIndex) const {
-    // get local ALU vertex number on the element's face
+    
     int localALUIndex = FaceTopo::dune2aluVertex(duneFaceVertexIndex, 
                                                  faceTwist);
-    int localDuneIndex = 
-      ElementTopo::alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex),
-                                      localALUIndex);
+
+    // get local ALU vertex number on the element's face
+    int localDuneIndex = ElementTopo::
+        alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex),
+                           localALUIndex);
+
     return refElem_.subEntity(duneFaceIndex, 1, localDuneIndex, 3);
   }
 
@@ -325,7 +316,7 @@ namespace Dune {
       (side == INNER ?
        connector_.innerTwist() :
        connector_.outerTwist());
-  
+
     for (int i = 0; i < numVerticesPerFace; ++i) {
       int duneVertexIndex = globalVertexIndex(faceIndex, faceTwist, i); 
       result[i] = refElem_.position(duneVertexIndex, 3);
