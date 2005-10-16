@@ -14,7 +14,7 @@
 namespace Dune {
 
   static const alu3d_ctype ALUnumericEpsilon = 10.0 * std::numeric_limits< alu3d_ctype >::epsilon();
-  
+
   //! A trilinear mapping from the Dune reference hexahedron into the physical
   //! space (same as in mapp_cube_3d.h, but for a different reference hexahedron)
   class TrilinearMapping {
@@ -53,6 +53,10 @@ namespace Dune {
   };
 
   //! A bilinear surface mapping
+  // NOTE: this class is different to the BilinearSurfaceMapping in
+  // ALUGrid, for example the reference elements differ 
+  // here we have [0,1]^2 and in ALUGrid its [-1,1]^2
+  // also the point numbering is different 
   class BilinearSurfaceMapping {
     typedef FieldVector<double, 3> coord3_t;
     typedef FieldVector<double, 2> coord2_t;
