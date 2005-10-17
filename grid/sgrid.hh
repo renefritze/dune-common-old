@@ -1123,6 +1123,14 @@ public:
         return H;
     }
 
+  //! map adapt to global refine
+  bool adapt ()    
+  {
+	globalRefine(1);
+	return true; 
+  }
+  
+
   //! map expanded coordinates to position
   FieldVector<sgrid_ctype, dim> pos (int level, FixedArray<int,dim>& z) const;
  
