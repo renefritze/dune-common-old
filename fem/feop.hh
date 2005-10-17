@@ -246,7 +246,7 @@ public:
             for(int j=0; j<novx ; j++)
             {
               // get all local numbers located on the face 
-              int vx  = refElem.subentity(face, faceCodim , j , dim );
+              int vx  = refElem.subEntity(face, faceCodim , j , dim );
               // get global dof numbers of this vertices 
               int col = functionSpace_.mapToGlobal( en, vx);
               // set solution on dirichlet bnd 
@@ -261,7 +261,7 @@ public:
           for(int j=0; j<novx ; j++)
           {
             // get all local numbers located on the face 
-            int vx  = refElem.subentity(face, faceCodim , j , dim );
+            int vx  = refElem.subEntity(face, faceCodim , j , dim );
             // get global dof numbers of this vertices 
             int col = functionSpace_.mapToGlobal( en, vx );
             // set solution on dirichlet bnd 
@@ -358,7 +358,6 @@ protected:
     typedef typename FunctionSpaceType::GridType GridType; 
     typedef typename GridType::template Codim<0>::Entity EntityType;
     typedef typename EntityType::IntersectionIterator NeighIt;
-    typedef typename NeighIt::BoundaryEntity BoundaryEntityType;
         
     for( ; it != endit; ++it ) 
     {
@@ -377,8 +376,7 @@ protected:
 
           if( (t == simplex) || (t == triangle) || (t == tetrahedron ) )
           {
-            const BoundaryEntityType & bEl = nit.boundaryEntity();
-            if( bEl.id() != 0 )
+            if( nit.boundaryId() != 0 )
             {
               static ReferenceSimplex< coordType, dim > refElem;
               int novx = refElem.size( face, faceCodim , dim );
@@ -386,7 +384,7 @@ protected:
               for(int j=0; j<novx ; j++)
               {
                 // get all local numbers located on the face 
-                int vx  = refElem.subentity(face, faceCodim , j , dim );
+                int vx  = refElem.subEntity(face, faceCodim , j , dim );
                 // get global dof numbers of this vertices 
                 int col = functionSpace_.mapToGlobal( en, vx);
                 // set solution on dirichlet bnd 
@@ -403,7 +401,7 @@ protected:
             for(int j=0; j<novx ; j++)
             {
               // get all local numbers located on the face 
-              int vx  = refElem.subentity(face, faceCodim , j , dim );
+              int vx  = refElem.subEntity(face, faceCodim , j , dim );
               // get global dof numbers of this vertices 
               int col = functionSpace_.mapToGlobal( en, vx);
 
