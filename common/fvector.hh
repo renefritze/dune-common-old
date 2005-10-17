@@ -661,7 +661,7 @@ representing a field and a compile-time given size.
 	K& operator[] (size_type i)
 	{
 #ifdef DUNE_ISTL_WITH_CHECKING
-	  if (i<0 || i>=n) DUNE_THROW(MathError,"index out of range");
+	  if (i>=n) DUNE_THROW(MathError,"index out of range");
 #endif
 	  return p[i];
 	}
@@ -670,7 +670,7 @@ representing a field and a compile-time given size.
 	const K& operator[] (size_type i) const
 	{
 #ifdef DUNE_ISTL_WITH_CHECKING
-	  if (i<0 || i>=n) DUNE_THROW(MathError,"index out of range");
+	  if (i>=n) DUNE_THROW(MathError,"index out of range");
 #endif
 	  return p[i];
 	}
