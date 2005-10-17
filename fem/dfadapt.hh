@@ -217,6 +217,7 @@ class LocalFunctionAdapt
 : public LocalFunctionDefault <DiscreteFunctionSpaceType ,
   LocalFunctionAdapt <DiscreteFunctionSpaceType>  >
 {
+public:
   typedef typename DiscreteFunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
   typedef LocalFunctionAdapt<DiscreteFunctionSpaceType> MyType;
   typedef DFAdapt<DiscreteFunctionSpaceType> DiscFuncType;
