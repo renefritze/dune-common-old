@@ -72,7 +72,7 @@ inline void SGeometry<mydim,cdim,GridImp>::make(FieldMatrix<sgrid_ctype,mydim+1,
 template<int mydim, int cdim, class GridImp> 
 inline GeometryType SGeometry<mydim,cdim,GridImp>::type () const
 {
-    return (mydim==0) ? vertex : cube;
+    return cube;
 }
 
 template<int mydim, int cdim, class GridImp> 
@@ -186,7 +186,7 @@ inline void SGeometry<0,cdim,GridImp>::make (FieldMatrix<sgrid_ctype,1,cdim>& __
 template<int cdim, class GridImp> 
 inline GeometryType SGeometry<0,cdim,GridImp>::type () const
 {
-        return vertex;
+        return cube;
 }
 
 template<int cdim, class GridImp> 
@@ -323,28 +323,7 @@ inline int SEntity<0,dim,GridImp>::count () const
         return SUnitCubeMapper<dim>::mapper.elements(cc);
 }
 
-// subentity compressed index
-template<int dim, class GridImp> template<int cc>
-inline int SEntity<0,dim,GridImp>::subCompressedIndex (int i) const
-{
-  if(cc == dim) // the vertex case 
-	{
-	  // find expanded coordinates of entity in reference cube
-	  // has components in {0,1,2}
-	  // the grid hold the memory because its faster 
-	  FixedArray<int,dim>& zref = this->grid->zrefStatic;
-	  FixedArray<int,dim>& zentity = this->grid->zentityStatic;
-	  
-	  zref = SUnitCubeMapper<dim>::mapper.z(i,dim);
-	  for (int i=0; i<dim; i++) zentity[i] = this->z[i] + zref[i] - 1;
-	  return this->grid->n(this->l,zentity);
-	}
-  else
-	{
-	  return this->grid->template getRealEntity<cc>(*entity<cc>(i)).compressedIndex();
-	}
-}
-
+// subentity construction
 template<int dim, class GridImp> template<int cc> 
 inline typename SEntity<0,dim,GridImp>::template Codim<cc>::EntityPointer SEntity<0,dim,GridImp>::entity (int i) const
 {
@@ -904,7 +883,8 @@ inline void SGrid<dim,dimworld>::makeSGrid (const int* N_,
 }
 
 template<int dim, int dimworld>
-inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* H_) : theglobalidset(*this)
+inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* H_) 
+  : theglobalidset(*this), theleafindexset(*this)
 {
     IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
   
@@ -917,7 +897,8 @@ inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* H_) : thegl
 }
 
 template<int dim, int dimworld>
-inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_)  : theglobalidset(*this)
+inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_)  
+  : theglobalidset(*this), theleafindexset(*this)
 {
   IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
 
@@ -926,7 +907,8 @@ inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* L_, const s
 }
 
 template<int dim, int dimworld>
-inline SGrid<dim,dimworld>::SGrid ()  : theglobalidset(*this)
+inline SGrid<dim,dimworld>::SGrid ()  
+  : theglobalidset(*this), theleafindexset(*this)
 {
   int N_[dim];
   sgrid_ctype L_[dim];
