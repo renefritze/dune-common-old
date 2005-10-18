@@ -146,7 +146,7 @@ private:
     mutable UGMakeableGeometry<dim-1,dimworld,GridImp> neighGlob_;
 
     //! This points to the same UG element as center_ does
-    typename TargetType<0,GridImp::dimensionworld>::T* center_;
+    typename TargetType<0,GridImp::dimensionworld>::T *center_;
 
     //! The level we're on
     int level_;
