@@ -22,7 +22,9 @@ namespace Dune{
     typedef DiscreteFunctionSpaceImp DiscreteFunctionSpaceType;
   
     typedef DFAdapt<DiscreteFunctionSpaceImp> DiscreteFunctionType;
-    typedef LocalFunctionAdapt<DiscreteFunctionSpaceImp> LocalFunctionType;
+    typedef LocalFunctionAdapt<DiscreteFunctionSpaceImp> LocalFunctionImp;
+    typedef LocalFunctionWrapper< DiscreteFunctionType > LocalFunctionType;
+
     typedef typename DofArray<
       typename DiscreteFunctionSpaceImp::RangeFieldType
     >::DofIteratorType DofIteratorType;
@@ -53,6 +55,7 @@ private:
   typedef DiscreteFunctionDefault<
     DFAdaptTraits<DiscreteFunctionSpaceType> 
   > DiscreteFunctionDefaultType;
+  friend class DiscreteFunctionDefault< DFAdaptTraits<DiscreteFunctionSpaceType> >;
   
   typedef typename DiscreteFunctionSpaceType::GridType GridType;
 
@@ -70,14 +73,21 @@ public:
   typedef DofArrayType DofStorageType;
   typedef MemObjectInterface MemObjectInterfaceType;
     
+  //! type of this class 
   typedef DFAdapt <DiscreteFunctionSpaceType> DiscreteFunctionType;
-  typedef LocalFunctionAdapt < DiscreteFunctionSpaceType> LocalFunctionType;
+  //! LocalFunctionImp is the implementation 
+  typedef LocalFunctionAdapt < DiscreteFunctionSpaceType > LocalFunctionImp;
+
+  //! LocalFunctionType is the exported lf type 
+  typedef LocalFunctionWrapper < DiscreteFunctionType > LocalFunctionType;
 
   typedef DiscreteFunctionSpaceType FunctionSpaceType;
   typedef DFAdaptTraits<DiscreteFunctionSpaceType> Traits;
 
   /** \brief For ISTL-compatibility */
   typedef FieldVector<DofType,1> block_type;
+  
+  typedef LocalFunctionStorage< DiscreteFunctionType > LocalFunctionStorageType; 
 
 public:
 
@@ -96,18 +106,20 @@ public:
   DiscreteFunctionType & argument    () { return *this; }
   const DiscreteFunctionType & argument () const { return *this; }
   DiscreteFunctionType & destination () { return *this; }
-        
+       
   // ***********  Interface  *************************
-  //! return object of type LocalFunctionType 
-  LocalFunctionAdapt<DiscreteFunctionSpaceType> newLocalFunction ( );
- 
+  //! return empty object of a local fucntion 
+  //! old function, will be removed soon 
+  LocalFunctionType newLocalFunction () DUNE_DEPRECATED;
+
+  //! return local function for given entity
   template <class EntityType>
-  LocalFunctionAdapt<DiscreteFunctionSpaceType> localFunction(EntityType& en);
+  LocalFunctionType localFunction(const EntityType& en);
 
   //! update LocalFunction to given Entity en  
+  //! old function, will be removed soon 
   template <class EntityType> 
-  void localFunction ( const EntityType &en, 
-  LocalFunctionAdapt<DiscreteFunctionSpaceType> & lf); 
+  void localFunction ( const EntityType &en, LocalFunctionType & lf) DUNE_DEPRECATED; 
 
   //! points to the first dof of type cc
   DofIteratorType dbegin ( );
@@ -186,6 +198,9 @@ public:
   const DofType * leakPointer () const { return dofVec_.leakPointer(); };
 
 private:  
+  //! return object pointer of type LocalFunctionImp 
+  LocalFunctionImp * newLocalFunctionObject ();
+
   // name of this func
   std::string name_;
 
@@ -199,8 +214,8 @@ private:
   //! the array is stored within the mem object 
   DofArrayType & dofVec_;
 
-  //! hold one object for addLocal and setLocal and so on 
-  LocalFunctionType localFunc_;
+  // one local function 
+  LocalFunctionImp localFunc_;
   
 }; // end class DFAdapt 
 
@@ -221,6 +236,7 @@ public:
   typedef typename DiscreteFunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
   typedef LocalFunctionAdapt<DiscreteFunctionSpaceType> MyType;
   typedef DFAdapt<DiscreteFunctionSpaceType> DiscFuncType;
+  friend class LocalFunctionWrapper< DiscFuncType >; 
 
   enum { dimrange = DiscreteFunctionSpaceType::DimRange };
 
@@ -273,7 +289,8 @@ public:
 
 protected:
   //! update local function for given Entity  
-  template <class EntityType > bool init ( const EntityType &en ) const;
+  template <class EntityType > 
+  void init ( const EntityType &en ) const;
 
   //! Forbidden! Would wreak havoc
   MyType& operator= (const MyType& other);
