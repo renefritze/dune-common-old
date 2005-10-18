@@ -30,8 +30,12 @@ namespace Dune {
  
     typedef AdaptiveDiscreteFunction<
       DiscreteFunctionSpaceImp> DiscreteFunctionType;
+    // the local functions implementation 
     typedef AdaptiveLocalFunction<
-      DiscreteFunctionSpaceImp> LocalFunctionType;
+      DiscreteFunctionSpaceImp> LocalFunctionImp;
+    
+    // local function type 
+    typedef LocalFunctionWrapper< DiscreteFunctionType > LocalFunctionType;
 
     typedef typename DiscreteFunctionSpaceType::RangeFieldType DofType;
     typedef typename DiscreteFunctionSpaceType::RangeFieldType RangeFieldType;
@@ -82,8 +86,12 @@ namespace Dune {
     //! Discrete function space this discrete function belongs to
     typedef DiscreteFunctionSpaceImp DiscreteFunctionSpaceType;
 
+    //! Local function implementation 
+    typedef typename Traits::LocalFunctionImp LocalFunctionImp;
+    
     //! Local function type
     typedef typename Traits::LocalFunctionType LocalFunctionType;
+    
     //! Discrete function type (identical to this type, needed as 
     //! Barton-Nackman parameter
     typedef typename Traits::DiscreteFunctionType DiscreteFunctionType;
@@ -135,7 +143,12 @@ namespace Dune {
     using Imp::size;
     using Imp::dbegin;
     using Imp::dend;
-    using Imp::newLocalFunction;
+    using Imp::newLocalFunctionObject;
+    //! return empty local function 
+    LocalFunctionType newLocalFunction () DUNE_DEPRECATED { return LocalFunctionType(*this); }
+    //! return local function for given entity
+    template <class EntityType> 
+    LocalFunctionType localFunction (const EntityType &en) { return LocalFunctionType(en,*this); }
     using Imp::localFunction;
     using Imp::write_xdr;
     using Imp::read_xdr;
@@ -158,6 +171,7 @@ namespace Dune {
   public:
     friend class AdaptiveFunctionImplementation<
       DiscreteFunctionSpaceImp >;
+    friend class LocalFunctionWrapper < AdaptiveDiscreteFunction< DiscreteFunctionSpaceImp > > ;
 
   private:
     typedef AdaptiveLocalFunction<
@@ -228,6 +242,12 @@ namespace Dune {
 
     //! Evaluation of the discrete function
     template <class EntityType>
+    void evaluate(EntityType& en, 
+                  const DomainType& x, 
+                  RangeType & ret) const;
+
+    //! Evaluation of the discrete function
+    template <class EntityType>
     void evaluateLocal(EntityType& en, 
                        const DomainType& x, 
                        RangeType & ret) const;
@@ -258,7 +278,7 @@ namespace Dune {
     ThisType& operator=(const ThisType& other);
 
     template <class EntityType>
-    void init(EntityType& en);
+    void init(const EntityType& en);
   private:
     //- Data members
     const DiscreteFunctionSpaceType& spc_;
@@ -343,7 +363,12 @@ namespace Dune {
     using Imp::size;
     using Imp::dbegin;
     using Imp::dend;
-    using Imp::newLocalFunction;
+    using Imp::newLocalFunctionObject;
+    //! return empty local function 
+    LocalFunctionType newLocalFunction () DUNE_DEPRECATED { return LocalFunctionType(*this); }
+    //! return local function for given entity
+    template <class EntityType> 
+    LocalFunctionType localFunction (const EntityType &en) { return LocalFunctionType(en,*this); }
     using Imp::localFunction;
     using Imp::write_xdr;
     using Imp::read_xdr;
@@ -430,6 +455,11 @@ namespace Dune {
     int numDofs() const;
 
     template <class EntityType>
+    void evaluate(EntityType& en, 
+                  const DomainType& x, 
+                  RangeType & ret) const;
+
+    template <class EntityType>
     void evaluateLocal(EntityType& en, 
                        const DomainType& x, 
                        RangeType & ret) const;
@@ -459,7 +489,7 @@ namespace Dune {
   private:
     //- Private methods
     template <class EntityType>
-    void init(EntityType& en);
+    void init(const EntityType& en);
 
   private:
     //- Member data
