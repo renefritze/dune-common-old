@@ -22,7 +22,8 @@ template <class DiscreteFunctionSpaceImp>
 struct DiscFuncArrayTraits {
   typedef DiscreteFunctionSpaceImp DiscreteFunctionSpaceType;
   typedef DiscFuncArray<DiscreteFunctionSpaceImp> DiscreteFunctionType;
-  typedef LocalFunctionArray<DiscreteFunctionSpaceImp> LocalFunctionType;
+  typedef LocalFunctionArray<DiscreteFunctionSpaceImp> LocalFunctionImp;
+  typedef LocalFunctionWrapper<DiscreteFunctionType> LocalFunctionType;
   typedef DofIteratorArray<typename DiscreteFunctionSpaceImp::RangeFieldType> DofIteratorType;
   typedef ConstDofIteratorDefault<DofIteratorType> ConstDofIteratorType;
 };
@@ -43,10 +44,15 @@ class DiscFuncArray
   typedef DiscreteFunctionDefault<DiscFuncArrayTraits <DiscreteFunctionSpaceType > >
   DiscreteFunctionDefaultType;
 
+  friend class DiscreteFunctionDefault< DiscFuncArrayTraits <DiscreteFunctionSpaceType > > ;
+
   enum { myId_ = 0};
 public:
 
-    //! Type of the range field
+  //! my type 
+  typedef DiscFuncArray < DiscreteFunctionSpaceType > DiscreteFunctionType;
+
+  //! Type of the range field
   typedef typename DiscreteFunctionSpaceType::RangeFieldType RangeFieldType;
   
   /** \brief For ISTL-compatibility */
@@ -58,8 +64,14 @@ public:
   //! the MyType
   typedef DiscFuncArray <DiscreteFunctionSpaceType> DiscreteFunctionType;
   
-  //! the local function type 
-  typedef LocalFunctionArray<DiscreteFunctionSpaceType> LocalFunctionType;
+  //! the local function implementation e 
+  typedef LocalFunctionArray<DiscreteFunctionSpaceType> LocalFunctionImp;
+
+  //! LocalFunctionType is the exported lf type 
+  typedef LocalFunctionWrapper < DiscreteFunctionType > LocalFunctionType;
+
+  // the storage of the local functions 
+  typedef LocalFunctionStorage< DiscreteFunctionType > LocalFunctionStorageType;
   
   //! the dof iterator type of this function
   typedef DofIteratorArray <typename DiscreteFunctionSpaceType::RangeFieldType> DofIteratorType;
@@ -70,6 +82,9 @@ public:
 
   //! our traits, like DofIterator etc. 
   typedef DiscFuncArrayTraits <DiscreteFunctionSpaceType > Traits;
+
+  //! the type of the unknowns 
+  typedef RangeFieldType DofType;
   
   //! Constructor makes Discrete Function  
   DiscFuncArray ( const DiscreteFunctionSpaceType & f ) ;
@@ -86,7 +101,15 @@ public:
 
   // ***********  Interface  *************************
   //! return object of type LocalFunctionType 
-  LocalFunctionArray<DiscreteFunctionSpaceType> newLocalFunction ();
+  LocalFunctionType newLocalFunction () DUNE_DEPRECATED;
+
+  //! return local function for given entity
+  template <class EntityType>
+  LocalFunctionType localFunction(const EntityType& en);
+
+  //! update LocalFunction to given Entity en  
+  template <class EntityType> 
+  void localFunction ( const EntityType &en, LocalFunctionType & lf) DUNE_DEPRECATED; 
 
   //! return reference to this 
   //! this methods is only to fullfill the interface as parameter classes 
@@ -100,11 +123,6 @@ public:
   //! this methods is only to fullfill the interface as parameter classes 
   DiscreteFunctionType & destination () { return *this; }
  
-  //! update LocalFunction to given Entity en  
-  template <class EntityType> 
-  void localFunction ( const EntityType &en, 
-  LocalFunctionArray<DiscreteFunctionSpaceType> & lf); 
-
   //! we use the default implementation 
   DofIteratorType dbegin ();
   
@@ -120,6 +138,9 @@ public:
 
   //! Return the name of the discrete function
   const std::string& name() const {return name_;}
+
+  //! return size of this discrete function
+  int size() const { return dofVec_.size(); }
 
   //! set all dofs to zero  
   void clear( );
@@ -174,7 +195,15 @@ public:
   //! read function data from pgm fromat file
   bool read_pgm(const char *filename); 
 
+  //! return pointer to internal array for use of BLAS routines 
+  DofType * leakPointer () { return &(dofVec_[0]);  };
+  //! return pointer to internal array for use of BLAS routines 
+  const DofType * leakPointer () const { return &(dofVec_[0]); };
+
 private:  
+  //! return object pointer of type LocalFunctionImp 
+  LocalFunctionImp * newLocalFunctionObject ();
+
   // get memory for discrete function
   void getMemory(); 
 
@@ -184,13 +213,8 @@ private:
   //! true if memory was allocated
   bool built_;
 
-  //! pointer to next free local function object   
-  //! if this pointer is NULL, new object is created at the class of
-  //! localFunction 
-  LocalFunctionType * freeLocalFunc_;
-
   //! hold one object for addLocal and setLocal and so on 
-  LocalFunctionType localFunc_;
+  LocalFunctionImp localFunc_;
 
   //! the dofs stored in an array
   Array < RangeFieldType > dofVec_;
@@ -220,6 +244,7 @@ class LocalFunctionArray
   typedef typename DiscreteFunctionSpaceType::JacobianRangeType JacobianRangeType;
 
   friend class DiscFuncArray <DiscreteFunctionSpaceType>;
+  friend class LocalFunctionWrapper < DiscFuncArray <DiscreteFunctionSpaceType> >;
 public:
   //! Constructor 
   LocalFunctionArray ( const DiscreteFunctionSpaceType &f , Array < RangeFieldType >  & dofVec );
@@ -234,7 +259,10 @@ public:
   const RangeFieldType & operator [] (int num) const;
 
   //! return number of degrees of freedom 
-  int numberOfDofs () const;
+  int numberOfDofs () const DUNE_DEPRECATED;
+
+  //! return number of degrees of freedom 
+  int numDofs () const;
 
   //! sum over all local base functions 
   template <class EntityType> 
@@ -246,14 +274,9 @@ public:
   
 protected:
   //! update local function for given Entity  
-  template <class EntityType > bool init ( const EntityType &en ) const;
+  template <class EntityType > 
+  void init ( const EntityType &en ) const;
 
-  //! get pointer to next LocalFunction 
-  MyType * getNext() const;
-
-  //! set pointer to next LocalFunction 
-  void setNext (MyType * n);
-  
   //! the corresponding function space which provides the base function set
   const DiscreteFunctionSpaceType &fSpace_;
   
@@ -263,9 +286,6 @@ protected:
   //! Array holding pointers to the local dofs 
   mutable Array < RangeFieldType * > values_;
 
-  //! remember pointer to next LocalFunction 
-  MyType * next_;
-  
   //! diffVar for evaluate, is empty 
   const DiffVariable<0>::Type diffVar;
 
