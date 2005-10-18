@@ -267,13 +267,13 @@ protected:
   //this methods are used by the LocalFunctionStorage class 
 
   //! return pointer to local function implementation 
-  LocalFunctionImp * newLocalFunctionObject () 
+  LocalFunctionImp* newLocalFunctionObject () 
   {
     return asImp().newLocalFunctionObject ();
   }
 
   //! return reference for local function storage  
-  LocalFunctionStorageType & localFunctionStorage() { return lfStorage_; }
+  LocalFunctionStorageType* localFunctionStorage() { return &lfStorage_; }
 
   // the local function storage stack 
   LocalFunctionStorageType lfStorage_;
