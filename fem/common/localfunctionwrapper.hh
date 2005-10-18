@@ -1,6 +1,8 @@
 #ifndef DUNE_LOCALFUNCTIONWRAPPER_HH
 #define DUNE_LOCALFUNCTIONWRAPPER_HH
 
+#include <stack>
+
 #include "../common/discretefunction.hh"
 
 namespace Dune{
@@ -98,12 +100,16 @@ public:
 
   // real local function implementation 
   LocalFunctionImp & lf_;
+
+  // reference counter
+  int* refCount_;
 public:
   //! Constructor initializing the underlying local function 
   template < class EntityType > 
   LocalFunctionWrapper ( const EntityType & en , DiscreteFunctionImp & df ) 
-    : storage_( df.localFunctionStorage() ) , 
-      lf_( storage_.getObject() )
+    : storage_( df.localFunctionStorage() ), 
+      lf_( storage_.getObject() ),
+      refCount_(new int(0))
   {
     // init real local function with entity
     lf_.init(en);
@@ -112,10 +118,27 @@ public:
   //! Constructor creating empty local function 
   LocalFunctionWrapper ( DiscreteFunctionImp & df ) 
     : storage_( df.localFunctionStorage() ) , 
-      lf_( storage_.getObject() )  {}
+      lf_( storage_.getObject() ),
+      refCount_(new int(0)) DUNE_DEPRECATED
+  {}
+
+  //! Copy constructor
+  LocalFunctionWrapper(const LocalFunctionWrapper& org) :
+    storage_(org.storage_),
+    lf_(org.lf_),
+    refCount_(org.refCount_)
+  {
+    ++(*refCount_);
+  }
 
   //! Destructor , puch local function to stack 
-  ~LocalFunctionWrapper () { storage_.freeObject ( lf_ );  }
+  ~LocalFunctionWrapper () { 
+    --(*refCount_);
+    if (*refCount_ == 0) {
+      storage_.freeObject ( lf_ );
+      delete refCount_;
+    }  
+  }
 
   //! access to dof number num, all dofs of the dof entity
   RangeFieldType & operator [] (int num) { return lf_[num]; }
@@ -171,10 +194,10 @@ public:
 
   //! update local function for given Entity  
   template <class EntityType > 
-  void init ( const EntityType &en ) const
+  void init ( const EntityType &en ) const DUNE_DEPRECATED
   { 
     lf_.init(en);
-  }
+  } 
 
 }; // end LocalFunctionWrapper  
 
