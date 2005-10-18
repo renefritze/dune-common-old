@@ -65,7 +65,7 @@ public:
   template <class EntityType>
   void evaluate (EntityType &en, const DomainType & x, RangeType & ret)
   {
-    asImp().evaluate(en,x,ret);
+    asImp().evaluateLocal(en,en.geometry().local(x),ret);
   }
 
   //! evaluate the local function on reference element coordinate x
