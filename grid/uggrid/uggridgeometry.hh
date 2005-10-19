@@ -17,6 +17,7 @@ class UGGridGeometry;
 template<int mydim, int coorddim, class GridImp>
 class UGMakeableGeometry : public Geometry<mydim, coorddim, GridImp, UGGridGeometry>
 {
+    typedef typename GridImp::ctype UGCtype;
 public:
     UGMakeableGeometry() :
     Geometry<mydim, coorddim, GridImp, UGGridGeometry>(UGGridGeometry<mydim, coorddim, GridImp>())
@@ -26,6 +27,9 @@ public:
         this->realGeometry.setToTarget(target);
     }
 
+    void setCoords (int n, const FieldVector<UGCtype, coorddim>& pos) {
+	    this->realGeometry.setCoords(n,pos);
+    }
 };
 
 template<class GridImp>
@@ -95,6 +99,9 @@ public:
   dim=0 is a point.
 
   dimworld: Each corner is a point with dimworld coordinates.
+
+  This version is actually used only for mydim==coorddim. The manifold
+  versions are in specializations below.
 */
 template<int mydim, int coorddim, class GridImp>  
 class UGGridGeometry : 
@@ -109,10 +116,23 @@ class UGGridGeometry :
 
 public:
 
-    /** Default constructor. 
+    /** Default constructor. Puts geometry in element mode
      */
     UGGridGeometry()
-    {}
+    {
+	  mode_ = element_mode;
+	}
+
+  //! constructor for coord_mode
+  UGGridGeometry (bool fake)
+  {
+	// set the mode
+	mode_ = coord_mode;
+
+	// initialize pointers to data
+	for (int i=0; i<((mydim==2) ? 4 : 8); i++)
+	  cornerpointers_[i] = &(coord_[i][0]);
+  }
 
     /** \brief Return the element type identifier 
      *
@@ -165,25 +185,46 @@ public:
 
 
 private:
+  // mode that decides whether coordinates are taken from the element or given explicitely
+  enum SourceMode {element_mode, coord_mode};
 
-    /** \brief Init the element with a given UG element */
-    void setToTarget(typename TargetType<coorddim-mydim,coorddim>::T* target) {target_ = target;}
+  // mode is set by constructor
+  SourceMode mode_;
+
+  /** \brief Init the element with a given UG element */
+  void setToTarget(typename TargetType<coorddim-mydim,coorddim>::T* target) 
+  {
+	target_ = target;
+  }
+
+  //! \brief set a corner
+  void setCoords (int i, const FieldVector<UGCtype,coorddim>& pos) 
+  {
+	coord_[i] = pos;
+  }
 
   //! the vertex coordinates 
-    mutable FixedArray<FieldVector<UGCtype, coorddim>, (mydim==2) ? 4 : 8> coord_;
+  mutable FixedArray<FieldVector<UGCtype, coorddim>, (mydim==2) ? 4 : 8> coord_;
 
-    //! The jacobian inverse
-    mutable FieldMatrix<UGCtype,coorddim,coorddim> jac_inverse_;
+  //! The jacobian inverse
+  mutable FieldMatrix<UGCtype,coorddim,coorddim> jac_inverse_;
 
-   typename TargetType<coorddim-mydim,coorddim>::T* target_;
+  // in element mode this points to the element we map to
+  // in coord_mode this is the element whose reference element is mapped into the father's one
+  typename TargetType<coorddim-mydim,coorddim>::T* target_;
 
+  // in coord_mode we explicitely store an array of coordinates
+  // containing the position in the fathers reference element
+  mutable UGCtype* cornerpointers_[(mydim==2) ? 4 : 8];
 };
 
 
-    /****************************************************************/
-    /*       Specialization for faces in 3d                         */
-    /****************************************************************/
 
+/****************************************************************/
+/*                                                              */
+/*       Specialization for faces in 3d                         */
+/*                                                              */
+/****************************************************************/
 
     template<class GridImp>  
     class UGGridGeometry<2, 3, GridImp> : 
@@ -267,10 +308,11 @@ private:
 };
 
 
-    /****************************************************************/
-    /*       Specialization for faces in 2d                         */
-    /****************************************************************/
-
+/****************************************************************/
+/*                                                              */
+/*       Specialization for faces in 2d                         */
+/*                                                              */
+/****************************************************************/
 
 template<class GridImp>  
 class UGGridGeometry <1, 2, GridImp> : 
