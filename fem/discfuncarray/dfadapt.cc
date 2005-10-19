@@ -103,7 +103,7 @@ localFunction ( const EntityType &en , LocalFunctionType &lf )
 template<class DiscreteFunctionSpaceType> 
 inline LocalFunctionAdapt<DiscreteFunctionSpaceType> *
 DFAdapt< DiscreteFunctionSpaceType>::
-newLocalFunctionObject ( )
+newLocalFunctionObject ( ) const
 {
   return new LocalFunctionAdapt<DiscreteFunctionSpaceType> ( this->functionSpace_ , dofVec_ );
 }

@@ -102,7 +102,7 @@ namespace Dune {
   typename AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp>::
   LocalFunctionImp * 
   AdaptiveFunctionImplementation<DiscreteFunctionSpaceImp>::
-  newLocalFunctionObject() 
+  newLocalFunctionObject() const
   {
     return new LocalFunctionImp(spc_, dofVec_);
   }

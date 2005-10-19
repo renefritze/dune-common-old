@@ -199,7 +199,7 @@ public:
 
 private:  
   //! return object pointer of type LocalFunctionImp 
-  LocalFunctionImp * newLocalFunctionObject ();
+  LocalFunctionImp * newLocalFunctionObject () const;
 
   // name of this func
   std::string name_;
