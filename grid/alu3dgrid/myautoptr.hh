@@ -2,6 +2,7 @@
 #define DUNE_MYAUTOPTR_HH
 
 namespace ALUGridSpace {
+
 /** \brief An auto pointer class */
 template <class Pointer> 
 class AutoPointer
@@ -87,6 +88,7 @@ private:
     assert(false);
     return (*this);
   }
-};
+}; // end class AutoPointer 
+
 } // end namespace ALU3dGridSpace
 #endif
