@@ -30,6 +30,11 @@ public:
     void setCoords (int n, const FieldVector<UGCtype, coorddim>& pos) {
 	    this->realGeometry.setCoords(n,pos);
     }
+
+  void coordmode ()
+  {
+	this->realGeometry.coordmode();
+  }
 };
 
 template<class GridImp>
@@ -123,12 +128,12 @@ public:
 	  mode_ = element_mode;
 	}
 
-  //! constructor for coord_mode
-  UGGridGeometry (bool fake)
+  //! put object in coord_mode
+  void coordmode ()
   {
 	// set the mode
 	mode_ = coord_mode;
-
+	
 	// initialize pointers to data
 	for (int i=0; i<((mydim==2) ? 4 : 8); i++)
 	  cornerpointers_[i] = &(coord_[i][0]);
@@ -200,6 +205,8 @@ private:
   //! \brief set a corner
   void setCoords (int i, const FieldVector<UGCtype,coorddim>& pos) 
   {
+	if (mode_!=coord_mode)
+	  DUNE_THROW(GridError,"mode must be coord_mode!");
 	coord_[i] = pos;
   }
 
