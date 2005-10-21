@@ -394,7 +394,8 @@ private:
     static inline int index (const AdLeafSet & ls , const HSetImp & hset, const CodimLeafSet &cls, 
                              const EntityType & en, bool cdUsed )
     {
-      if(cdUsed) ls.template setUpCodimSet<enCodim> ();
+      // if not setup for codim yet, do setup.
+      if(!cdUsed) ls.template setUpCodimSet<enCodim> ();
       assert(cls.index ( hset.index( en ) ) >= 0 );
       return cls.index ( hset.index( en ) );
     }
@@ -494,9 +495,9 @@ private:
     static inline void iterateCodims (const HSetImp & hIndexSet , 
         CodimLeafSet (&cls)[ncodim], const EntityType & en , bool (&cdUsed)[ncodim])
     {
-      //std::cout << "insert for codim = " << codim << "\n";
       CodimLeafSet & lset = cls[codim];
-      cdUsed[codim] = true;
+
+      // if codim is used then insert all sub entities of this codim 
       if(cdUsed[codim])
       {
         for(int i=0; i<en.template count<codim> (); i++)
@@ -513,6 +514,8 @@ private:
         CodimLeafSet (&cls)[ncodim], const EntityType & en , bool (&cdUsed)[ncodim])
     {
       CodimLeafSet & lset = cls[codim];
+
+      // if codim is already used, then also remove entities of this codim
       if(cdUsed[codim])
       {
         for(int i=0; i<en.template count<codim> (); i++)
@@ -525,7 +528,8 @@ private:
         removeCodims (hIndexSet, cls, en , cdUsed );
     }
   };
-  
+ 
+  // specialisation for codim 1 is then end of the loop
   template <class HSetImp, class CodimLeafSet, class EntityType> 
   struct PartialSpec<HSetImp,CodimLeafSet,EntityType,1> 
   {
@@ -533,9 +537,8 @@ private:
         CodimLeafSet (&cls)[ncodim], const EntityType & en , bool (&cdUsed)[ncodim])
     {
       enum { codim = 1 };
-      //std::cout << "insert for codim = " << codim << "\n";
-      cdUsed[codim] = true;
       CodimLeafSet & lset = cls[codim];
+      // if codim is already used, then also insert entities of this codim
       if(cdUsed[codim])
       {
         for(int i=0; i<en.template count<codim> (); i++)
@@ -550,6 +553,7 @@ private:
     {
       enum { codim = 1 };
       CodimLeafSet & lset = cls[codim];
+      // if codim is already used, then also remove entities of this codim
       if(cdUsed[codim])
       {
         for(int i=0; i<en.template count<codim> (); i++)
@@ -595,13 +599,17 @@ public:
     : DefaultGridIndexSetBase <GridType> (grid) ,  
     hIndexSet_( grid.hierarchicIndexSet() ) , 
     marked_ (false) , markAllU_ (false) , higherCodims_ (false) 
+    //marked_ (false) , markAllU_ (false) , higherCodims_ (true) 
   {
+    // codim 0 is used by default
     codimUsed_[0] = true;
+    // all higher codims are not used by default
     for(int i=1; i<ncodim; i++) codimUsed_[i] = false;
+
+    // set the codim of each Codim Set. 
     for(int i=0; i<ncodim; i++) codimLeafSet_[i].setCodim( i );
 
     resizeVectors();
-
     // give all entities that lie below the old entities new numbers 
     markAllUsed ();
   }
