@@ -124,6 +124,12 @@ public:
     myCodim_ = codim;
   }
 
+  // set codim, because we can't use constructor 
+  int myCodim () const 
+  {
+    return myCodim_;
+  }
+
   //! reallocate the vector for new size
   void resize ( int newSize )
   {
@@ -465,7 +471,10 @@ private:
                              const EntityType & en , int num ,  bool (&cdUsed)[ncodim] )
     {
       enum { codim = 2 };
+      assert( cls[codim].myCodim () == codim );
+      
       if(!cdUsed[codim]) ls.template setUpCodimSet<codim> ();
+      assert( cdUsed[codim] );
       assert(cls[codim].index ( hset.template subIndex<codim>( en , num ) ) >= 0 );
       return cls[codim].index ( hset.template subIndex<codim>( en , num ) );
     }
@@ -598,12 +607,14 @@ public:
   AdaptiveLeafIndexSet (const GridType & grid) 
     : DefaultGridIndexSetBase <GridType> (grid) ,  
     hIndexSet_( grid.hierarchicIndexSet() ) , 
-    marked_ (false) , markAllU_ (false) , higherCodims_ (false) 
+    //marked_ (false) , markAllU_ (false) , higherCodims_ (false) 
+    marked_ (false) , markAllU_ (false) , higherCodims_ (true) 
   {
     // codim 0 is used by default
     codimUsed_[0] = true;
     // all higher codims are not used by default
-    for(int i=1; i<ncodim; i++) codimUsed_[i] = false;
+    //for(int i=1; i<ncodim; i++) codimUsed_[i] = false;
+    for(int i=1; i<ncodim; i++) codimUsed_[i] = true;
 
     // set the codim of each Codim Set. 
     for(int i=0; i<ncodim; i++) codimLeafSet_[i].setCodim( i );
@@ -645,8 +656,8 @@ public:
   {
     // this IndexWrapper provides specialisations for each codim 
     // see this class above 
-    return IndexWrapper<MyType,HIndexSetType,CodimLeafIndexSet,EntityCodim0Type,
-           EntityCodim0Type::codimension,cd>::
+    enum { enCodim = 0 }; // codim of entity is 0 
+    return IndexWrapper<MyType,HIndexSetType,CodimLeafIndexSet,EntityCodim0Type,enCodim, cd>::
              index(*this, hIndexSet_, codimLeafSet_, en , num , codimUsed_);
   }
 
@@ -899,6 +910,7 @@ private:
   template <int codim>
   void setUpCodimSet () const
   {
+    //std::cout << "Setting up codim " << codim << "\n";
     // resize if necessary 
     codimLeafSet_[codim].resize( hIndexSet_.size(codim) );
     
@@ -910,6 +922,8 @@ private:
     {
       codimLeafSet_[codim].insert( hIndexSet_.index ( *it ) );
     }
+
+    //codimLeafSet_[codim].print("setup codim");
     codimUsed_[codim] = true;
     higherCodims_ = true;
   }
