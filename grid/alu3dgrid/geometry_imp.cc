@@ -3,6 +3,7 @@
 
 namespace Dune {
 // --Geometry
+
 //- Tetra specialization
 template<int mydim, int cdim>
 inline ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> >:: 
@@ -267,7 +268,6 @@ ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > :: getCoordVec (int 
   return coord_[i]; 
 }
 
-
 //   G L O B A L   - - -
 
 // dim = 1,2,3 dimworld = 3
@@ -410,6 +410,14 @@ template <int mydim, int cdim>
 inline int 
 ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::corners() const {
   return Power_m_p<2,mydim>::power;
+}
+
+template<int mydim, int cdim>
+inline FieldVector<alu3d_ctype, cdim>& 
+ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> > :: getCoordVec (int i) 
+{
+  assert((i>=0) && (i < corners()));
+  return coord_[i]; 
 }
 
 template <int mydim, int cdim>
