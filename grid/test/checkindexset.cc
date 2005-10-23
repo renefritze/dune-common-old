@@ -238,7 +238,7 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
          
           // sort vector of global vertex number for storage in map 
           // the smallest entry is the first entry 
-          sort( global.begin(), global.end() );
+	  std::sort( global.begin(), global.end() );
 
           if(numSubEntities > 0)
           {
