@@ -1010,7 +1010,7 @@ namespace Dune
     //**********************************************************
     //  private methods 
     //**********************************************************
-     bool calculateOrientation ( const ALBERTA EL_INFO * myElf , 
+    bool calculateOrientation ( const ALBERTA EL_INFO * myElf , 
                                 const ALBERTA EL_INFO * neigh , int nb , int (&tw)[3] ) const;
     
     // calls EntityPointer done and sets done_ to true
