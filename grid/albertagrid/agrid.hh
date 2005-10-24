@@ -173,6 +173,13 @@ namespace Dune
     {
       return this->realGeometry.getCoordVec(i);
     }
+    
+    //! build geometry in father 
+    template <class GeometryType>
+    bool buildGeomInFather(const GeometryType & fatherGeom , const GeometryType & myGeom )
+    {
+      return this->realGeometry.buildGeomInFather(fatherGeom,myGeom);
+    }
 
   };
 
@@ -254,9 +261,16 @@ namespace Dune
     //! no interface method
     bool builtGeom(ALBERTA EL_INFO *elInfo, int face, int edge, int vertex);
 
+    //! build geometry for intersectionSelfLocal and
+    //! intersectionNeighborLocal
     template <class GeometryType, class LocalGeomType >
     bool builtLocalGeom(const GeometryType & geo , const LocalGeomType & lg, 
                         ALBERTA EL_INFO *elInfo, int face);
+
+    //! build geometry in father 
+    template <class GeometryType>
+    bool buildGeomInFather(const GeometryType & fatherGeom , const GeometryType & myGeom );
+
     // init geometry with zeros 
     //! no interface method
     void initGeom();
@@ -334,8 +348,8 @@ namespace Dune
     friend class AlbertaGridEntity<codim, dim, GridImp>;
   public:
 
-    AlbertaGridMakeableEntity(const GridImp & grid, int level) :
-      GridImp::template Codim<codim>::Entity (AlbertaGridEntity<codim, dim, GridImp>(grid,level)) {}
+    AlbertaGridMakeableEntity(const GridImp & grid, int level, bool leafIt ) :
+      GridImp::template Codim<codim>::Entity (AlbertaGridEntity<codim, dim, GridImp>(grid,level,leafIt)) {}
 
     // passing through mehtods  
     void setTraverseStack (ALBERTA TRAVERSE_STACK *travStack) 
@@ -379,11 +393,18 @@ namespace Dune
     {
       this->realEntity.setLevel(level);
     }
-  
+
+    void setNewLevel( int level , bool leafIt )
+    {
+      this->realEntity.setNewLevel( level , leafIt );
+    }
+    
     void setEntity ( const AlbertaGridMakeableEntity<codim,dim,GridImp> & org)
     {
       this->realEntity.setEntity(org.realEntity);
     }
+
+    bool leafIt () const { return this->realEntity.leafIt(); }
   };
 
   //**********************************************************************
@@ -430,7 +451,7 @@ namespace Dune
     AlbertaGridEntity(const GridImp &grid, int level, 
                       ALBERTA TRAVERSE_STACK * travStack);
   
-    AlbertaGridEntity(const GridImp &grid, int level);
+    AlbertaGridEntity(const GridImp &grid, int level, bool);
 
     //! return partition type of this entity ( see grid.hh )
     PartitionType partitionType() const; 
@@ -461,6 +482,9 @@ namespace Dune
     //! equality of entities  
     bool equals ( const AlbertaGridEntity<cd,dim,GridImp> & i) const;
   private: 
+    // dummy function, only needed for codim 0 
+    bool leafIt () const { return false; }
+    
     // methods for setting the infos from the albert mesh
     void setTraverseStack (ALBERTA TRAVERSE_STACK *travStack);
     void setElInfo (ALBERTA EL_INFO *elInfo, int face,
@@ -471,6 +495,7 @@ namespace Dune
 
     // set level of entity 
     void setLevel ( int newLevel ); 
+    void setNewLevel ( int newLevel , bool ) { setLevel(level); }
   
     // private Methods
     void makeDescription();
@@ -566,7 +591,7 @@ namespace Dune
     ~AlbertaGridEntity() {};
 
     //! Constructor, real information is set via setElInfo method
-    AlbertaGridEntity(const GridImp &grid, int level);
+    AlbertaGridEntity(const GridImp &grid, int level, bool leafIt );
 
     //! level of this element
     int level () const;
@@ -626,6 +651,7 @@ namespace Dune
       several times. If we store interpolation matrices, this is tolerable. 
       We assume that on-the-fly implementation of numerical algorithms 
       is only done for simple discretizations. Assumes that meshes are nested.
+      NOTE: the imeplementation at the moment is very inefficient. 
     */
     const Geometry & geometryInFather () const;
   
@@ -668,11 +694,16 @@ namespace Dune
     
     //! equality of entities  
     bool equals ( const AlbertaGridEntity<0,dim,GridImp> & i) const;
+
   private: 
+    // returns true if entity comes from LeafIterator 
+    bool leafIt () const { return leafIt_; }
+    
     // called from HierarchicIterator, because only this 
     // class changes the level of the entity, otherwise level is set by
     // Constructor 
     void setLevel ( int actLevel );  
+    void setNewLevel( int level, bool leafIt );
   
     // face, edge and vertex only for codim > 0, in this
     // case just to supply the same interface
@@ -712,6 +743,9 @@ namespace Dune
     //! the cuurent geometry
     mutable GeometryImp geo_;
     mutable bool builtgeometry_;  //!< true if geometry has been constructed
+
+    // is true if entity comes from leaf iterator 
+    bool leafIt_; 
   
   }; // end of AlbertaGridEntity codim = 0
 
@@ -753,7 +787,7 @@ namespace Dune
                              int level,  ALBERTA EL_INFO *elInfo,int face,int edge,int vertex);
 
     //! Constructor for EntityPointer init of Level- and LeafIterator
-    AlbertaGridEntityPointer(const GridImp & grid, int level , bool done);
+    AlbertaGridEntityPointer(const GridImp & grid, int level , bool isLeaf, bool done);
 
     //! make empty entity pointer (to be revised)
     AlbertaGridEntityPointer(const AlbertaGridEntityPointerType & org);
@@ -780,14 +814,17 @@ namespace Dune
     void done ();
 
   protected:
+    //! returns true if entity comes from LeafIterator 
+    bool leafIt () const { return isLeaf_; }
+    
     // reference to grid 
     const GridImp & grid_;
 
+    //! flag for leaf iterators 
+    bool isLeaf_;
+
     // entity that this EntityPointer points to 
     EntityImp * entity_;
-
-    //! flag for end iterators 
-    bool done_;
   };
 
 
@@ -816,7 +853,8 @@ namespace Dune
 
     //! the normal Constructor
     AlbertaGridHierarchicIterator(const GridImp &grid,
-                                  ALBERTA TRAVERSE_STACK *travStack, int actLevel, int maxLevel);
+                                  ALBERTA TRAVERSE_STACK *travStack, 
+                                  int actLevel, int maxLevel, bool leafIt );
 
     //! the default Constructor
     AlbertaGridHierarchicIterator(const GridImp &grid,
@@ -913,7 +951,8 @@ namespace Dune
     //! The Constructor 
     AlbertaGridIntersectionIterator(const GridImp & grid,
                                     int level,
-                                    ALBERTA EL_INFO *elInfo);
+                                    ALBERTA EL_INFO *elInfo,
+                                    bool leafIt );
     //! The copy constructor  
     AlbertaGridIntersectionIterator(const AlbertaGridIntersectionIterator<GridImp> & org);
 
@@ -971,6 +1010,15 @@ namespace Dune
     //**********************************************************
     //  private methods 
     //**********************************************************
+     bool calculateOrientation ( const ALBERTA EL_INFO * myElf , 
+                                const ALBERTA EL_INFO * neigh , int nb , int (&tw)[3] ) const;
+    
+    // calls EntityPointer done and sets done_ to true
+    void done (); 
+
+    // returns true if actual neighbor has same level 
+    bool neighborHasSameLevel () const;
+    
     //! make Iterator set to begin of actual entitys intersection Iterator
     void makeBegin (const GridImp & grid,
                     int level, 
@@ -1033,6 +1081,9 @@ namespace Dune
     // tmp memory for normal calculation 
     mutable FieldVector<albertCtype, dimworld> tmpU_;
     mutable FieldVector<albertCtype, dimworld> tmpV_;
+
+    //! is true when iterator finished
+    bool done_;
   };
 
 
@@ -1142,9 +1193,6 @@ namespace Dune
     // variable for operator++
     bool okReturn_;
 
-    // true if we use LeafIterator 
-    bool leafIt_;
-  
     // store processor number of elements
     // for ghost walktrough, i.e. walk over ghosts which belong
     // tp processor 2 
@@ -1716,17 +1764,10 @@ namespace Dune
     mutable IntersectionNeighProvider    interNeighProvider_;
 
     template <int codim> 
-    AlbertaGridMakeableEntity<codim,dim,const MyType> * getNewEntity (int level ) const
-    {
-      return new AlbertaGridMakeableEntity<codim,dim,const MyType> (*this,level);
-    }
+    AlbertaGridMakeableEntity<codim,dim,const MyType> * getNewEntity (int level, bool leafIt ) const;
 
     template <int codim>
-    void freeEntity (AlbertaGridMakeableEntity<codim,dim,const MyType> * en) const
-    {
-      if(en) delete en; 
-    }
-    
+    void freeEntity (AlbertaGridMakeableEntity<codim,dim,const MyType> * en) const;
 
   private:
     //*********************************************************************

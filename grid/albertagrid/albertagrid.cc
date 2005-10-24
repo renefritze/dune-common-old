@@ -202,6 +202,21 @@ builtLocalGeom(const GeometryType &geo, const LocalGeometryType & localGeom,
   return false;
 }
 
+// built Geometry 
+template <int mydim, int cdim, class GridImp>
+template <class GeometryType>
+inline bool AlbertaGridGeometry<mydim,cdim,GridImp>:: 
+buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom) 
+{
+  initGeom(); 
+
+  // compute the local coordinates in father refelem
+  for(int i=0; i < myGeom.corners() ; i++)
+    coord_[i] = fatherGeom.local( myGeom[i] );
+
+  return true;
+}
+
 // print the GeometryInformation
 template <int mydim, int cdim, class GridImp>
 inline void AlbertaGridGeometry<mydim,cdim,GridImp>::print (std::ostream& ss) const
@@ -245,7 +260,9 @@ getCoordVec (int i)
 
   // if global, or jacobianInverse is called then 
   // matrix has to be calculated again , because coord might have changed 
-  builtElMat_ = false; 
+  builtinverse_ = false;
+  builtElMat_   = false;
+  calcedDet_    = false;
   
   return coord_[i];
 }
@@ -641,7 +658,7 @@ setTraverseStack(ALBERTA TRAVERSE_STACK * travStack)
 
 template<int codim, int dim, class GridImp>
 inline AlbertaGridEntity<codim,dim,GridImp>::
-AlbertaGridEntity(const GridImp &grid, int level) : 
+AlbertaGridEntity(const GridImp &grid, int level, bool) : 
   grid_(grid)
 , level_ (level)
 , geo_ ( )
@@ -715,7 +732,7 @@ template<int codim, int dim, class GridImp>
 inline void AlbertaGridEntity<codim,dim,GridImp>::
 setLevel(int level) 
 {
-  level_ = level;
+  level_  = level;
 }
 
 template<int codim, int dim, class GridImp>
@@ -967,13 +984,14 @@ setTraverseStack(ALBERTA TRAVERSE_STACK * travStack)
 
 template<int dim, class GridImp>
 inline AlbertaGridEntity <0,dim,GridImp>::
-AlbertaGridEntity(const GridImp &grid, int level) 
+AlbertaGridEntity(const GridImp &grid, int level, bool leafIt ) 
   : grid_(grid) 
   , level_ (level)
   , travStack_ (0) , elInfo_ (0) 
   , fatherReLocal_()
   , geo_() 
   , builtgeometry_ (false)
+  , leafIt_ ( leafIt )
 {
 }
 
@@ -1102,8 +1120,18 @@ template<int dim, class GridImp>
 inline void AlbertaGridEntity <0,dim,GridImp>::
 setLevel(int actLevel)
 {
-  level_ = actLevel;
+  level_  = actLevel;
   assert( level_ >= 0);
+}
+
+template<int dim, class GridImp>
+inline void AlbertaGridEntity <0,dim,GridImp>::
+setNewLevel(int actLevel, bool leafIt )
+{
+  level_  = actLevel;
+  assert( level_ >= 0);
+
+  leafIt_ = leafIt;
 }
 
 template<int dim, class GridImp>
@@ -1164,14 +1192,10 @@ template< int dim, class GridImp >
 inline const typename AlbertaGridEntity <0,dim,GridImp>::Geometry & 
 AlbertaGridEntity <0,dim,GridImp>::geometryInFather() const
 {
-  //AlbertaGridLevelIterator<0,dim,dimworld> daddy = father();
-  const Geometry & daddy = (*father()).geometry();  
+  const typename GridImp::template Codim<0> :: EntityPointer ep = father();
 
-  fatherReLocal_.initGeom();
-  // compute the local coordinates in father refelem
-  for(int i=0; i<fatherReLocal_.corners(); i++)
-    fatherReLocal_.getCoordVec(i) = daddy.local(this->geometry()[i]);
-  
+  fatherReLocal_.buildGeomInFather( (*ep).geometry() , geometry() );
+    
   return fatherReLocal_;
 }
 // end AlbertaGridEntity
@@ -1187,12 +1211,11 @@ inline AlbertaGridEntityPointer<codim,GridImp> ::
   AlbertaGridEntityPointer(const GridImp & grid,
       int level,  ALBERTA EL_INFO *elInfo,int face,int edge,int vertex)
   : grid_(grid)
-  , entity_ ( grid_.template getNewEntity<codim> ( level ) )
-  , done_ (false)
+  , isLeaf_ (true)
+  , entity_ ( grid_.template getNewEntity<codim> ( level ), isLeaf_ )
 {
   assert( entity_ );
   (*entity_).setElInfo(elInfo,face,edge,vertex);
-  (*entity_).setLevel(level);
 }     
 
 template<int codim, class GridImp >
@@ -1200,31 +1223,30 @@ inline AlbertaGridEntityPointer<codim,GridImp> ::
  AlbertaGridEntityPointer(const GridImp & grid, ALBERTA TRAVERSE_STACK * stack ,
       int level,  ALBERTA EL_INFO *elInfo,int face,int edge,int vertex)
   : grid_(grid)
-  , entity_ ( grid_.template getNewEntity<codim> ( level ) )
-  , done_ (false)
+  , isLeaf_ (true)
+  , entity_ ( grid_.template getNewEntity<codim> ( level , isLeaf_ ))
 {
   assert( entity_ );
   (*entity_).setElInfo(elInfo,face,edge,vertex);
   (*entity_).setTraverseStack(stack);
-  (*entity_).setLevel(level);
 }     
 
 template<int codim, class GridImp >
 inline AlbertaGridEntityPointer<codim,GridImp> ::
-  AlbertaGridEntityPointer(const GridImp & grid, int level , bool end )
+  AlbertaGridEntityPointer(const GridImp & grid, int level , bool isLeaf, bool end )
   : grid_(grid) 
-  , entity_ ( grid_.template getNewEntity<codim> (level) )
-  , done_ (end) 
+  , isLeaf_ (isLeaf) 
+  , entity_ ( grid_.template getNewEntity<codim> (level, isLeaf_) )
 {
-  if(done_) this->done();
+  if(end) this->done();
 }
 
 template<int codim, class GridImp >
 inline AlbertaGridEntityPointer<codim,GridImp> ::
   AlbertaGridEntityPointer(const AlbertaGridEntityPointerType & org)
   : grid_(org.grid_)
-  , entity_ ( grid_.template getNewEntity<codim> ( org.entity_->level() ) )
-  , done_ ( org.done_ ) 
+  , isLeaf_ ( org.isLeaf_ ) 
+  , entity_ ( grid_.template getNewEntity<codim> ( org.entity_->level() , isLeaf_) )
 {
   (*entity_).setEntity( *(org.entity_) );
 }
@@ -1235,7 +1257,7 @@ AlbertaGridEntityPointer<codim,GridImp> ::
   operator = (const AlbertaGridEntityPointerType & org)
 {
   assert( & grid_ == & org.grid_ );
-  done_ = ( org.done_ );
+  isLeaf_ = ( org.isLeaf_ );
   (*entity_).setEntity( *(org.entity_) );
   return *this;
 }
@@ -1244,7 +1266,8 @@ template<int codim, class GridImp >
 inline AlbertaGridEntityPointer<codim,GridImp> ::
   AlbertaGridEntityPointer(const GridImp & grid, const EntityImp  & en)
   : grid_(grid)
-  , entity_ ( grid_.template getNewEntity<codim> ( en.level() ) )
+  , isLeaf_ ( en.leafIt() )
+  , entity_ ( grid_.template getNewEntity<codim> ( en.level(), isLeaf_ ) )
 {
   (*entity_).setEntity( en );
 }
@@ -1260,7 +1283,6 @@ inline void AlbertaGridEntityPointer<codim,GridImp>::done ()
 {
   // sets entity pointer in the status of an end iterator 
   (*entity_).removeElInfo();
-  done_ = true;
 }
 
 template<int codim, class GridImp >
@@ -1305,7 +1327,7 @@ inline AlbertaGridHierarchicIterator<GridImp>::
 AlbertaGridHierarchicIterator(const GridImp & grid,
                               int actLevel,
                               int maxLevel) 
-  : AlbertaGridEntityPointer<0,GridImp> (grid,actLevel,true)  
+  : AlbertaGridEntityPointer<0,GridImp> (grid,actLevel,true,true)  
   , level_ (actLevel) 
   , maxlevel_ (maxLevel) 
   , virtualEntity_(*(this->entity_))
@@ -1317,8 +1339,8 @@ AlbertaGridHierarchicIterator(const GridImp & grid,
 template< class GridImp >
 inline AlbertaGridHierarchicIterator<GridImp>::
 AlbertaGridHierarchicIterator(const GridImp & grid, 
-  ALBERTA TRAVERSE_STACK *travStack,int actLevel, int maxLevel) 
-  : AlbertaGridEntityPointer<0,GridImp> (grid,actLevel,false)  
+  ALBERTA TRAVERSE_STACK *travStack,int actLevel, int maxLevel, bool leafIt ) 
+  : AlbertaGridEntityPointer<0,GridImp> (grid,actLevel,leafIt,false)  
   , level_ (actLevel)
   , maxlevel_ ( maxLevel)
   , virtualEntity_( *(this->entity_) )
@@ -1365,7 +1387,7 @@ AlbertaGridHierarchicIterator(const GridImp & grid,
 template< class GridImp >
 inline AlbertaGridHierarchicIterator<GridImp>::
 AlbertaGridHierarchicIterator(const AlbertaGridHierarchicIterator<GridImp> & org)
-  : AlbertaGridEntityPointer<0,GridImp> (org.grid_,org.level(), org.end_ )
+  : AlbertaGridEntityPointer<0,GridImp> (org.grid_,org.level(),true, org.end_ )
   , level_ ( org.level_ )
   , maxlevel_ ( org.maxlevel_ )
   , virtualEntity_( *(this->entity_) )
@@ -1558,7 +1580,7 @@ inline AlbertaGridIntersectionIterator<GridImp>::~AlbertaGridIntersectionIterato
 template< class GridImp >
 inline AlbertaGridIntersectionIterator<GridImp>::
 AlbertaGridIntersectionIterator(const GridImp & grid,int level) : 
-  AlbertaGridEntityPointer<0,GridImp> (grid,level,false),
+  AlbertaGridEntityPointer<0,GridImp> (grid,level,true,false),
   level_ (level), 
   neighborCount_ (dim+1),
   virtualEntity_ ( *(this->entity_) ),
@@ -1566,15 +1588,16 @@ AlbertaGridIntersectionIterator(const GridImp & grid,int level) :
   fakeNeigh_ (0),
   fakeSelf_ (0) ,
   neighGlob_ (0),
-  neighElInfo_ (0) 
+  neighElInfo_ (0) ,
+  done_(true) 
 {
 }
 
 
 template< class GridImp >
 inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator
-(const GridImp & grid, int level, ALBERTA EL_INFO *elInfo )
-  : AlbertaGridEntityPointer<0,GridImp> (grid,level,false)
+(const GridImp & grid, int level, ALBERTA EL_INFO *elInfo , bool leafIt )
+  : AlbertaGridEntityPointer<0,GridImp> (grid,level,leafIt,false)
   , level_ (level), neighborCount_ (0) 
   , builtNeigh_ (false) 
   , virtualEntity_ ( *(this->entity_) ) 
@@ -1583,6 +1606,7 @@ inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator
   , fakeSelf_ (0) 
   , neighGlob_ (0)  
   , neighElInfo_ ( elinfoProvider.getNewObjectEntity() ) 
+  , done_( false )
 {
 }
 
@@ -1590,7 +1614,7 @@ inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator
 template< class GridImp >
 inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator 
 (const AlbertaGridIntersectionIterator<GridImp> & org) 
-  : AlbertaGridEntityPointer<0,GridImp> (org.grid_,org.level(), (org.elInfo_) ? false : true )
+  : AlbertaGridEntityPointer<0,GridImp> (org.grid_,org.level(), org.leafIt() , (org.elInfo_) ? false : true )
   , level_(org.level_) 
   , neighborCount_(org.neighborCount_)
   , builtNeigh_ (false) 
@@ -1600,6 +1624,7 @@ inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator
   , fakeSelf_ (0) 
   , neighGlob_ (0)  
   , neighElInfo_ ( (elInfo_) ? elinfoProvider.getNewObjectEntity() : 0 ) 
+  , done_ ( (org.elInfo_) ? false : true )                                                                   
 {
 }
 
@@ -1623,6 +1648,8 @@ AlbertaGridIntersectionIterator<GridImp>::operator = (const AlbertaGridIntersect
     this->grid_.interSelfProvider_.freeObjectEntity(fakeSelf_);
   fakeSelf_ = 0;
 
+  done_ = org.done_;
+
   return *this;
 }
 
@@ -1636,9 +1663,15 @@ equals (const AlbertaGridIntersectionIterator<GridImp> & i) const
 
   return 
       ( (e1 == e2) // check equality of entities which can be both zero 
-      && (this->done_ == i.done_)); /// and then also check done status 
+      && (done_ == i.done_)); /// and then also check done status 
 }
   
+template< class GridImp >
+inline void AlbertaGridIntersectionIterator<GridImp>::done()
+{
+  AlbertaGridEntityPointer<0,GridImp> :: done() ;
+  done_ = true;
+}
 
 template< class GridImp >
 inline void AlbertaGridIntersectionIterator<GridImp>::increment()
@@ -1651,7 +1684,16 @@ inline void AlbertaGridIntersectionIterator<GridImp>::increment()
   if(neighborCount_ > dim) 
   {
     this->done();
+    return ;
   }
+
+  // check whether neighbor has same level
+  if( (this->neighbor()) && (!this->leafIt()) )
+  {
+    // if levels are not equal go next 
+    if( !neighborHasSameLevel () ) increment (); 
+  }
+
   return ;
 }
 
@@ -1858,6 +1900,66 @@ numberInNeighbor () const
 
 // setup neighbor element with the information of elInfo_
 template< class GridImp >
+inline bool AlbertaGridIntersectionIterator<GridImp>::neighborHasSameLevel () const
+{
+  assert( neighbor() );
+  const ALBERTA EL * myEl    = elInfo_->el; 
+  const ALBERTA EL * neighEl = NEIGH(elInfo_->el,elInfo_)[neighborCount_];
+
+  return this->grid_.getLevelOfElement( myEl ) == 
+         this->grid_.getLevelOfElement( neighEl );
+}
+
+// setup neighbor element with the information of elInfo_
+template< class GridImp >
+inline bool AlbertaGridIntersectionIterator<GridImp>::
+calculateOrientation (const ALBERTA EL_INFO * elf, 
+                      const ALBERTA EL_INFO * neigh, int nb,
+                      int (&twist)[3] ) const
+{
+#if DIM == 3 
+  int myvx[3]; 
+  int neighvx[3];
+  int vx = elf->opp_vertex[nb];
+  
+  const int * vxmap = ALBERTA AlbertHelp :: localAlbertaFaceNumber[vx];
+  const int * nbmap = ALBERTA AlbertHelp :: localAlbertaFaceNumber[nb];
+
+  bool allRight = true;
+  for(int i=0; i<dim; i++)
+  {
+    myvx[i]    = this->grid_.getVertexNumber(elf->el  , nbmap[i] );
+    neighvx[i] = this->grid_.getVertexNumber(neigh->el, vxmap[i] );
+    if( myvx[i] != neighvx[i] ) allRight = false;
+  }
+
+
+  // note: if the vertices are equalm then the face in the neighbor 
+  // is not oriented right, because all face are oriented math. pos when
+  // one looks from the outside of the element. 
+  // if the vertices are the same, the face in the neighbor is therefore
+  // wrong oriented  
+  if( !allRight )
+  {
+    for(int i=0; i<dim; i++)
+    {
+      if(myvx[i] != neighvx[i])
+      { 
+        for(int k=1; k<dim; k++)
+        {
+          int newvx = (i+k) % dim; 
+          if( myvx[i] == neighvx[newvx] ) twist[i] = newvx;
+        }
+      }
+    }
+    return true;
+  }
+#endif
+  return false;
+}
+  
+// setup neighbor element with the information of elInfo_
+template< class GridImp >
 inline void AlbertaGridIntersectionIterator<GridImp>::setupVirtEn() const
 {
   // if this assertion fails then outside was called without checking
@@ -1868,20 +1970,71 @@ inline void AlbertaGridIntersectionIterator<GridImp>::setupVirtEn() const
   // set the neighbor element as element
   // use ALBERTA macro to get neighbour 
   neighElInfo_->el = NEIGH(elInfo_->el,elInfo_)[neighborCount_];
-#if DIM==3
-  neighElInfo_->orientation = elInfo_->orientation;
+
+  const int vx = elInfo_->opp_vertex[neighborCount_];
+  // copy the one opposite vertex 
+  // the same for 2d and 3d 
+  {
+    const ALBERTA REAL_D & coord = elInfo_->opp_coord[neighborCount_];
+    ALBERTA REAL_D & newcoord    = neighElInfo_->coord[vx]; 
+    for(int j=0; j<dimworld; j++) newcoord[j] = coord[j];
+  }
+  
+  // TODO here: specialisation for each dim, that we don't have to use 
+  // DIM anymore 
+  
+#if DIM == 3
+  //******************************************
+  //  setup for 3d 
+  //******************************************
+
+  // the face might be twisted when look from different elements 
+  int facemap[dim]   = {0,1,2};
+  bool rightOriented = calculateOrientation( elInfo_ , neighElInfo_ , neighborCount_ , facemap ); 
+
+  // TODO check infulence of orientation 
+  // is used when calculation the outerNormal 
+  neighElInfo_->orientation = ( rightOriented ) ? elInfo_->orientation : -elInfo_->orientation; 
+
+  // vx is the face number in the neighbour 
+  const int * neighmap = ALBERTA AlbertHelp :: localAlbertaFaceNumber[vx];
+  // neighborCount is the face number in the actual element 
+  const int * selfmap  = ALBERTA AlbertHelp :: localAlbertaFaceNumber[neighborCount_];
+  
+  // copy the three face vertices 
+  for(int i=0; i<dim; i++)
+  {
+    const ALBERTA REAL_D & coord = elInfo_->coord[selfmap[i]];
+    // here consider possible twist 
+    ALBERTA REAL_D & newcoord    = neighElInfo_->coord[neighmap[ facemap[i] ]]; 
+    for(int j=0; j<dimworld; j++) newcoord[j] = coord[j];
+  }
+  //****************************************
 #endif
 
-  int vx = elInfo_->opp_vertex[neighborCount_];
-  for(int i=0; i<dimworld; i++) 
-    neighElInfo_->coord[vx][i] = elInfo_->opp_coord[neighborCount_][i];
-    
-  for(int i=1; i<dim+1; i++)
+#if DIM == 2 
+  //*****************************************
+  //  setup for 2d 
+  //*****************************************
+  // vx is the face number in the neighbour 
+  const int (& neighmap)[dim] = ALBERTA AlbertHelp :: localTriangleFaceNumber[vx];
+  // neighborCount is the face number in the actual element 
+  const int (& selfmap) [dim] = ALBERTA AlbertHelp :: localTriangleFaceNumber[neighborCount_];
+  
+  // copy the two edge vertices 
+  for(int i=0; i<dim; i++)
   {
-    int nb = (neighborCount_- i + dim+1)%(dim+1);
-    for(int j=0; j<dimworld; j++)
-      neighElInfo_->coord[(vx+i)%(dim+1)][j] = elInfo_->coord[nb][j];
+    const ALBERTA REAL_D & coord = elInfo_->coord[ selfmap[i] ];
+    // here the twist is simple, just swap the vertices, and do this by hand 
+    ALBERTA REAL_D & newcoord    = neighElInfo_->coord[ neighmap[(dim-1) - i] ]; 
+    for(int j=0; j<dimworld; j++) newcoord[j] = coord[j];
   }
+  //****************************************
+#endif
+
+#if DIM < 2 || DIM > 3 
+#error "Wrong dimension choosen! \n"
+#endif
   
   virtualEntity_.setElInfo(neighElInfo_);
   builtNeigh_ = true;
@@ -1935,7 +2088,7 @@ makeIterator()
 template<int codim, PartitionIteratorType pitype, class GridImp>   
 inline AlbertaGridTreeIterator<codim,pitype,GridImp>::
 AlbertaGridTreeIterator(const GridImp & grid, int travLevel,int proc, bool leafIt ) 
-  : AlbertaGridEntityPointer<codim,GridImp> (grid,travLevel,true) // true means end iterator 
+  : AlbertaGridEntityPointer<codim,GridImp> (grid,travLevel,leafIt,true) // true means end iterator 
   , level_   (travLevel)
   , enLevel_ (travLevel)
   , virtualEntity_(*(this->entity_))
@@ -1944,7 +2097,7 @@ AlbertaGridTreeIterator(const GridImp & grid, int travLevel,int proc, bool leafI
   , vertex_ (0)
   , vertexMarker_(0) 
   , okReturn_(false)
-  , leafIt_(leafIt) , proc_(proc)
+  , proc_(proc)
 {
 }
 
@@ -1952,7 +2105,7 @@ AlbertaGridTreeIterator(const GridImp & grid, int travLevel,int proc, bool leafI
 template<int codim, PartitionIteratorType pitype, class GridImp>   
 inline AlbertaGridTreeIterator<codim,pitype,GridImp>::
 AlbertaGridTreeIterator(const AlbertaGridTreeIterator<codim,pitype,GridImp> & org)
-  : AlbertaGridEntityPointer<codim,GridImp> (org.grid_,org.level_, (org.vertexMarker_) ? false : true)
+  : AlbertaGridEntityPointer<codim,GridImp> (org.grid_,org.level_, org.leafIt() , (org.vertexMarker_) ? false : true)
   , level_   (org.level_)
   , enLevel_ (org.enLevel_)
   , virtualEntity_(*(this->entity_))
@@ -1963,7 +2116,6 @@ AlbertaGridTreeIterator(const AlbertaGridTreeIterator<codim,pitype,GridImp> & or
   , vertex_ ( org.vertex_)
   , vertexMarker_(org.vertexMarker_) 
   , okReturn_ (org.okReturn_ )
-  , leafIt_(org.leafIt_) 
   , proc_(org.proc_)
 {
   if(vertexMarker_) 
@@ -2000,7 +2152,6 @@ AlbertaGridTreeIterator<codim,pitype,GridImp>::operator =
   vertex_  = ( org.vertex_);
   vertexMarker_ = (org.vertexMarker_);
   okReturn_ = (org.okReturn_ );
-  leafIt_= (org.leafIt_) ;
 
   assert( proc_ == org.proc_ );
   if(vertexMarker_) 
@@ -2035,7 +2186,7 @@ AlbertaGridTreeIterator(const GridImp & grid, TRAVERSE_STACK * stack,
   , virtualEntity_(*(this->entity_)) 
   , face_ ( face ) ,  edge_ ( edge ), vertex_ ( vertex ) 
   , okReturn_ (false)
-  , leafIt_(false) ,  proc_(-1)
+  ,  proc_(-1)
   , vertexMarker_(0) 
   , vertex_ (0)
   , face_(0)
@@ -2060,7 +2211,7 @@ inline AlbertaGridTreeIterator<codim,pitype,GridImp>::
 AlbertaGridTreeIterator(const GridImp & grid, 
   const AlbertaMarkerVector * vertexMark, 
   int travLevel, int proc, bool leafIt) 
-  : AlbertaGridEntityPointer<codim,GridImp> (grid,travLevel,false)
+  : AlbertaGridEntityPointer<codim,GridImp> (grid,travLevel,leafIt,false)
   , level_ (travLevel) , enLevel_(travLevel) 
   , virtualEntity_(*(this->entity_)) 
   , face_(0)
@@ -2068,7 +2219,7 @@ AlbertaGridTreeIterator(const GridImp & grid,
   , vertex_ (0)
   , vertexMarker_(0) 
   , okReturn_ (false)
-  , leafIt_(leafIt), proc_(proc)
+  , proc_(proc)
 {
   ALBERTA MESH * mesh = this->grid_.getMesh();
 
@@ -2150,7 +2301,7 @@ goNextFace(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elInfo)
     bool goWeida = this->grid_.getElementNumber( el ) > this->grid_.getElementNumber( neighbour ) ;
 
     // additional check for level iterators 
-    if(goWeida && !leafIt_)
+    if(goWeida && ! this->leafIt() )
     {
       // if we should go weida then only go 
       // if neighbours are on the same level 
@@ -2286,7 +2437,7 @@ goNextElInfo(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elinfo_old)
       elinfo = traverseElLevelInteriorBorder(stack);
 
       // if leafIt_ == false go to elements only on desired level 
-      if((elinfo) && (!leafIt_))
+      if((elinfo) && (! this->leafIt()) )
       {
         if(elinfo->level == stack->traverse_level)
           okReturn_ = true;
@@ -2300,7 +2451,7 @@ goNextElInfo(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elinfo_old)
       }
       
       // set new level for Entity  
-      if((elinfo) && (leafIt_)) enLevel_ = elinfo->level;
+      if((elinfo) && (this->leafIt()) ) enLevel_ = elinfo->level;
       
       return(elinfo);
     }
@@ -2312,7 +2463,7 @@ goNextElInfo(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elinfo_old)
       elinfo = traverseElLevel(stack);
 
       // if leafIt_ == false go to elements only on desired level 
-      if((elinfo) && (!leafIt_))
+      if((elinfo) && (! this->leafIt()) )
       {
         if(elinfo->level == stack->traverse_level)
           okReturn_ = true;
@@ -2326,7 +2477,7 @@ goNextElInfo(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elinfo_old)
       }
       
       // set new level for Entity  
-      if((elinfo) && (leafIt_)) enLevel_ = elinfo->level;
+      if((elinfo) && (this->leafIt()) ) enLevel_ = elinfo->level;
       
       return(elinfo);
     }
@@ -2338,7 +2489,7 @@ goNextElInfo(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elinfo_old)
       elinfo = traverseElLevelGhosts(stack);
 
       // if leafIt_ == false go to elements only on desired level 
-      if((elinfo) && (!leafIt_))
+      if((elinfo) && (! this->leafIt()) )
       {
         if(elinfo->level == stack->traverse_level)
           okReturn_ = true;
@@ -2370,7 +2521,7 @@ goNextElInfo(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elinfo_old)
       }
 
       // set new level for Entity  
-      if((elinfo) && (leafIt_)) enLevel_ = elinfo->level;
+      if((elinfo) && (this->leafIt())) enLevel_ = elinfo->level;
       
       return(elinfo);
     }
@@ -2382,7 +2533,7 @@ goNextElInfo(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elinfo_old)
       elinfo = traverseElLevelInteriorBorder(stack);
 
       // if leafIt_ == false go to elements only on desired level 
-      if((elinfo) && (!leafIt_))
+      if((elinfo) && (! this->leafIt()) )
       {
         if(elinfo->level == stack->traverse_level)
           okReturn_ = true;
@@ -2415,7 +2566,7 @@ goNextElInfo(ALBERTA TRAVERSE_STACK *stack, ALBERTA EL_INFO *elinfo_old)
       }
 
       // set new level for Entity  
-      if((elinfo) && (leafIt_)) enLevel_ = elinfo->level;
+      if((elinfo) && (this->leafIt()) ) enLevel_ = elinfo->level;
       
       return elinfo;
     }
@@ -2525,7 +2676,7 @@ traverseElLevel(ALBERTA TRAVERSE_STACK *stack)
     stack->info_stack[stack->stack_used]++;
 
     this->grid_.fillElInfo(i, level_, stack->elinfo_stack+stack->stack_used,
-                     stack->elinfo_stack+stack->stack_used+1, false , leafIt_);
+                     stack->elinfo_stack+stack->stack_used+1, false , this->leafIt() );
 
     stack->stack_used++;
 
@@ -2632,7 +2783,7 @@ traverseElLevelInteriorBorder(ALBERTA TRAVERSE_STACK *stack)
     stack->info_stack[stack->stack_used]++;
 
     this->grid_.fillElInfo(i, level_, stack->elinfo_stack+stack->stack_used,
-                    stack->elinfo_stack+stack->stack_used+1, false, leafIt_);
+                    stack->elinfo_stack+stack->stack_used+1, false, this->leafIt() );
 
     stack->stack_used++;
 
@@ -2787,7 +2938,7 @@ AlbertaGridEntity <0,dim,GridImp>::hbegin(int maxlevel) const
   // sich deshalb die Werte anedern koennen, der elinfo_stack bleibt jedoch
   // der gleiche, deshalb kann man auch nur nach unten, d.h. zu den Kindern
   // laufen
-  return AlbertaGridHierarchicIterator<GridImp> (grid_,travStack_,level(),maxlevel);  
+  return AlbertaGridHierarchicIterator<GridImp> (grid_,travStack_,level(),maxlevel, this->leafIt() );  
 }
 
 template <int dim, class GridImp>
@@ -2802,7 +2953,7 @@ template <int dim, class GridImp>
 inline AlbertaGridIntersectionIterator<GridImp> 
 AlbertaGridEntity <0,dim,GridImp>::ibegin() const
 {
-  AlbertaGridIntersectionIterator<GridImp> it(grid_,level(),elInfo_);  
+  AlbertaGridIntersectionIterator<GridImp> it(grid_,level(),elInfo_, this->leafIt() );  
   return it;
 }
 
@@ -3264,6 +3415,59 @@ template < int dim, int dimworld >
 inline typename AlbertaGrid<dim,dimworld>::LeafIterator 
 AlbertaGrid < dim, dimworld >::leafend () const {
   return leafend<0, All_Partition>(maxlevel_, -1);
+}
+
+//****************************************
+// getNewEntity methods 
+//***************************************
+
+// default implementation used new and delete
+template <class GridImp, class EntityProvider, int dim , int codim >
+struct GetNewEntity 
+{
+  static AlbertaGridMakeableEntity<codim,dim,GridImp> * 
+  getNewEntity(GridImp & grid, EntityProvider &enp , int level, bool leafIt ) 
+  {
+    return new AlbertaGridMakeableEntity<codim,dim,GridImp> (grid,level,leafIt);
+  }
+  
+  static void freeEntity (EntityProvider &enp , AlbertaGridMakeableEntity<codim,dim,GridImp> * en)
+  {
+    if(en) delete en;
+  }
+};
+
+// specialisation for codim 0 uses stack 
+template <class GridImp, class EntityProvider, int dim>
+struct GetNewEntity<GridImp,EntityProvider,dim,0>
+{
+  static AlbertaGridMakeableEntity<0,dim,GridImp> * 
+  getNewEntity(GridImp & grid, EntityProvider &enp , int level, bool leafIt ) 
+  {
+    // return object from stack 
+    return enp.getNewObjectEntity(grid,level,leafIt);
+  }
+
+  static void freeEntity (EntityProvider &enp , AlbertaGridMakeableEntity<0,dim,GridImp> * en)
+  {
+    enp.freeObjectEntity(en);
+  }
+};
+
+template < int dim   , int dimworld >
+template < int codim > 
+inline AlbertaGridMakeableEntity<codim,dim,const AlbertaGrid<dim,dimworld> > * 
+AlbertaGrid < dim, dimworld >::getNewEntity (int level, bool leafIt ) const
+{
+  return GetNewEntity<const MyType, EntityProvider, dim, codim > :: getNewEntity(*this,entityProvider_,level,leafIt);
+}
+
+template < int dim   , int dimworld >
+template < int codim > 
+inline void AlbertaGrid < dim, dimworld >::
+freeEntity (AlbertaGridMakeableEntity<codim,dim,const MyType> * en) const
+{
+  GetNewEntity<const MyType, EntityProvider, dim, codim > :: freeEntity(entityProvider_,en);
 }
 
 //**************************************
