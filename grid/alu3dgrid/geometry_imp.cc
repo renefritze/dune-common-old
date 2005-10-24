@@ -93,6 +93,23 @@ inline void ALU3dGridGeometry<0,3, const ALU3dGrid<3,3,tetra> > :: buildJacobian
   }
 }
 
+// built Geometry 
+template <int mydim, int cdim>
+template <class GeometryType>
+inline bool 
+ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, tetra> >::
+buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
+{
+  // reset flags, because mappings need to be calculated again 
+  builtinverse_ = builtA_ = builtDetDF_ = false;
+
+  // compute the local coordinates in father refelem
+  for(int i=0; i < myGeom.corners() ; i++)
+    coord_[i] = fatherGeom.local( myGeom[i] );
+
+  return true;
+}
+
 template <> 
 inline bool ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> > :: 
 buildGeom(const IMPLElementType & item, int, int) 
@@ -260,14 +277,6 @@ ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > :: operator[] (int i
   return coord_[i]; 
 }
 
-template<int mydim, int cdim>
-inline FieldVector<alu3d_ctype, cdim>& 
-ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > :: getCoordVec (int i) 
-{
-  assert((i>=0) && (i < mydim+1));
-  return coord_[i]; 
-}
-
 //   G L O B A L   - - -
 
 // dim = 1,2,3 dimworld = 3
@@ -412,14 +421,6 @@ ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::corners() const {
   return Power_m_p<2,mydim>::power;
 }
 
-template<int mydim, int cdim>
-inline FieldVector<alu3d_ctype, cdim>& 
-ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> > :: getCoordVec (int i) 
-{
-  assert((i>=0) && (i < corners()));
-  return coord_[i]; 
-}
-
 template <int mydim, int cdim>
 const FieldVector<alu3d_ctype, cdim>& 
 ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
@@ -514,6 +515,48 @@ print (std::ostream& ss) const {
   ss << "} \n";
 }
 
+
+template <int mydim, int cdim>
+inline void   
+ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
+buildMapping() 
+{
+  assert( mydim == 3 );
+  assert( cdim  == 3 );
+  assert( triMap_ == 0 );
+  triMap_ = new TrilinearMapping(coord_[0], coord_[1], coord_[2], coord_[3],
+                                 coord_[4], coord_[5], coord_[6], coord_[7]);
+}
+
+template <int mydim, int cdim>
+inline void   
+ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
+removeMapping()
+{
+  if(triMap_) 
+  {
+    delete triMap_; 
+    triMap_ = 0;
+  }
+}
+
+// built Geometry 
+template <int mydim, int cdim>
+template <class GeometryType>
+inline bool 
+ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
+buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
+{
+  removeMapping();
+
+  // compute the local coordinates in father refelem
+  for(int i=0; i < myGeom.corners() ; i++)
+    coord_[i] = fatherGeom.local( myGeom[i] );
+
+  buildMapping();
+  return true;
+}
+
 template <>
 inline bool
 ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
@@ -528,11 +571,9 @@ buildGeom(const IMPLElementType& item, int , int ) {
       coord_[i][j] = p[j];
     }
   } 
-
-  if(triMap_) delete triMap_;
-  triMap_ = new TrilinearMapping(coord_[0], coord_[1], coord_[2], coord_[3],
-                                 coord_[4], coord_[5], coord_[6], coord_[7]);
-
+  // delete old mapping 
+  removeMapping();
+  buildMapping();
   return true;
 }
 
@@ -603,6 +644,9 @@ buildGeom(const ALU3DSPACE HFaceType & item, int twist, int faceNum ) {
 
   const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
   
+  if( faceNum >= 6 ) std::cout << "\n" << faceNum << " wrong face num (too big) \n";
+  if( faceNum < 0 ) std::cout << "\n" << faceNum << " wrong face num \n";
+  // for all vertices of this face 
   for (int i = 0; i < 4; ++i) 
   {
     // Transform Dune index to ALU index and apply twist
