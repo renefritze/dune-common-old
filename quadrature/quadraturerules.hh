@@ -443,8 +443,8 @@ private:
   
   {
   public:
-	enum { MAXP=7};
-	enum { highest_order=5 };
+	enum { MAXP=33};
+	enum { highest_order=12 };
 
 	//! initialize quadrature points on the interval for all orders
 	SimplexQuadraturePoints ()
