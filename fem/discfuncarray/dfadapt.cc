@@ -86,7 +86,7 @@ print(std::ostream &s )
 template<class DiscreteFunctionSpaceType> 
 template <class EntityType>
 inline typename DFAdapt< DiscreteFunctionSpaceType>:: LocalFunctionType 
-DFAdapt< DiscreteFunctionSpaceType>::localFunction(const EntityType& en) 
+DFAdapt< DiscreteFunctionSpaceType>::localFunction(const EntityType& en) const
 {
   return LocalFunctionType (en,*this);
 }

@@ -114,7 +114,7 @@ public:
 
   //! return local function for given entity
   template <class EntityType>
-  LocalFunctionType localFunction(const EntityType& en);
+  LocalFunctionType localFunction(const EntityType& en) const;
 
   //! update LocalFunction to given Entity en  
   //! old function, will be removed soon 

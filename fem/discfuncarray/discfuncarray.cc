@@ -93,7 +93,7 @@ localFunction ( const EntityType &en , LocalFunctionType &lf )
 
 template<class DiscreteFunctionSpaceType > template <class EntityType>
 inline typename DiscFuncArray< DiscreteFunctionSpaceType >:: LocalFunctionType 
-DiscFuncArray< DiscreteFunctionSpaceType >:: localFunction ( const EntityType &en )
+DiscFuncArray< DiscreteFunctionSpaceType >:: localFunction ( const EntityType &en ) const
 {
   return LocalFunctionType (en,*this);
 }
