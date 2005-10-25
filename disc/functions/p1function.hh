@@ -80,6 +80,8 @@ namespace Dune
 	  }
 	}; 
 
+    //! make copy construtor private
+  	P1FEFunction (const P1FEFunction&);
   public:
 	typedef BlockVector<FieldVector<RT,1> > RepresentationType;
 
