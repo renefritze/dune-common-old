@@ -493,30 +493,39 @@ convert2FV(const alu3d_ctype (&p)[3]) const {
  ######  ######    ##    ######  ######     #       #    ######  #    #
 *************************************************************************/
 //--LevelIterator 
+// Constructor for begin iterator 
 template<int codim, PartitionIteratorType pitype, class GridImp >
 inline ALU3dGridLevelIterator<codim,pitype,GridImp> :: 
-  ALU3dGridLevelIterator(const GridImp & grid, int level,bool end)
-  : ALU3dGridEntityPointer<codim,GridImp> ( grid ,level,end)
+  ALU3dGridLevelIterator(const GridImp & grid, 
+        VertexListType & vxList , int level)
+  : ALU3dGridEntityPointer<codim,GridImp> (grid,level,false)
   , index_(-1) 
   , level_(level)
   , isCopy_ (false)
 {
-  if(!end) 
+  IteratorType * it = new IteratorType ( this->grid_ , vxList , level_ );
+  iter_.store( it );
+    
+  (*iter_).first();
+  if(!(*iter_).done())
   {
-    IteratorType * it = new IteratorType ( this->grid_ , level_ );
-    iter_.store( it );
-      
-    (*iter_).first();
-    if(!(*iter_).done())
-    {
-      assert((*iter_).size() > 0);
-      index_=0;
-      myEntity().reset( level_ );
-      myEntity().setElement( (*iter_).item()); 
-    }
+    assert((*iter_).size() > 0);
+    index_=0;
+    myEntity().reset( level_ );
+    myEntity().setElement( (*iter_).item()); 
   }
-  else
-    this->done();
+}
+
+// Constructor for end iterator 
+template<int codim, PartitionIteratorType pitype, class GridImp >
+inline ALU3dGridLevelIterator<codim,pitype,GridImp> :: 
+  ALU3dGridLevelIterator(const GridImp & grid, int level)
+  : ALU3dGridEntityPointer<codim,GridImp> (grid ,level,true)
+  , index_(-1) 
+  , level_(level)
+  , isCopy_ (false)
+{
+  this->done();
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp >
