@@ -132,6 +132,7 @@ namespace Dune{
     typedef typename FunctionSpaceTraits::DiscreteFunctionSpaceType DiscreteFunctionSpaceType;
     typedef typename FunctionSpaceTraits::BaseFunctionSetType BaseFunctionSetType;
     typedef typename FunctionSpaceTraits::GridType GridType;
+    typedef typename FunctionSpaceTraits::IndexSetType IndexSetType;
     typedef typename FunctionSpaceTraits::IteratorType IteratorType;
     
   public:
@@ -156,6 +157,9 @@ namespace Dune{
 
     //! Return the corresponding Grid 
     GridType& grid() { return asImp().grid(); }
+
+    //! Return the index set corresponding to the iterator
+    const IndexSetType& indexSet() const { return asImp().indexSet(); }
 
     //! Return number of degrees of freedom for specified grid 
     //! which can also be the leaflevel and furthermore 
