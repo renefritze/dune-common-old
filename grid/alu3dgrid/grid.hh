@@ -13,6 +13,7 @@
 #include "../common/referenceelements.hh"
 #include "../common/defaultindexsets.hh"
 #include "../common/leafindexset.hh"
+#include "../common/sizecache.hh"
 
 //- Local includes
 #include "alu3dinclude.hh"
@@ -538,6 +539,10 @@ namespace Dune {
 
     typedef ALU3dGridVertexList VertexListType; 
     mutable VertexListType vertexList_[MAXL];   
+
+    // the type of our size cache 
+    typedef SingleTypeSizeCache<MyType, (elType == tetra) ? simplex : cube> SizeCacheType;
+    SizeCacheType * sizeCache_;
   }; // end class ALU3dGrid
 
     template <class GridImp, int codim>

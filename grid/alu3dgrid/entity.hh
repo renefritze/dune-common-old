@@ -122,13 +122,6 @@ public:
   //! level of this element
   int level () const;
 
-  //! index is unique and consecutive per level and codim 
-  //! used for access to degrees of freedom
-  int index () const DUNE_DEPRECATED;
-
-  //! index is unique within the grid hierachie and per codim
-  int globalIndex () const DUNE_DEPRECATED;
-
   //! return partition type of this entity ( see grid.hh )
   PartitionType partitionType() const;
   
@@ -259,12 +252,6 @@ public:
   //! level of this element
   int level () const ;
 
-  //! index is unique and consecutive per level and codim used for access to degrees of freedo
-  int index () const DUNE_DEPRECATED;
-  
-  //! index is unique within the grid hierachie and per codim
-  int globalIndex () const DUNE_DEPRECATED;
-
   //! geometry of this entity
   const Geometry & geometry () const;
 
@@ -276,14 +263,6 @@ public:
   */
   template<int cc> int count () const ; 
   
-  //! return index of sub entity with codim = cc and local number i
-  //! i.e. return global number of vertex i
-  template<int cc> int subIndex (int i) const DUNE_DEPRECATED;
-
-  //! return index of sub entity with codim = cc and local number i
-  //! i.e. return global number of vertex i
-  template<int cc> int getSubIndex (int i) const;
-
   //! Provide access to mesh entity i of given codimension. Entities
   //!  are numbered 0 ... count<cc>()-1
   template <int cc>
@@ -357,6 +336,11 @@ public:
   bool equals ( const ALU3dGridEntity<0,dim,GridImp> & org ) const;
   
   void setEntity ( const ALU3dGridEntity<0,dim,GridImp> & org );
+
+  //! return index of sub entity with codim = cc and local number i
+  //! i.e. return global number of vertex i
+  //! for use in hierarchical index set 
+  template<int cc> int getSubIndex (int i) const;
 
 private:
   typedef typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElementType;
