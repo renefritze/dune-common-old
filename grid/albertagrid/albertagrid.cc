@@ -742,14 +742,6 @@ level() const
   return level_;
 }
 
-template<int codim, int dim, class GridImp>
-inline int AlbertaGridEntity<codim,dim,GridImp>::
-index() const
-{
-  const Entity en (*this);
-  return grid_.levelIndexSet(en.level()).index(en);
-}
-
 // default 
 template <class GridImp, int codim, int cdim> 
 struct AlbertaGridBoundaryId
@@ -838,13 +830,6 @@ inline int AlbertaGridEntity<codim,dim,GridImp>::
 getFEVnum() const
 {
   return AlbertaGridFEVnum<GridImp,codim,GridImp::dimensionworld>::getFEVnum(face_,edge_,vertex_);
-}
-template<int codim, int dim, class GridImp>
-inline int AlbertaGridEntity<codim,dim,GridImp>::
-globalIndex() const
-{
-  const Entity en (*this);
-  return grid_.hierarchicIndexSet().index(en);
 }
 
 template<int cd, int dim, class GridImp>
@@ -1011,14 +996,6 @@ inline int AlbertaGridEntity <0,dim,GridImp>::count () const
 }
 
 //*****************************************************************
-// subIndex 
-template<int dim, class GridImp> template <int cc>
-inline int AlbertaGridEntity <0,dim,GridImp>::subIndex ( int i ) const
-{
-  const Entity en (*this);
-  return grid_.hierarchicIndexSet().template subIndex<cc> (en,i);
-}
-
 template <class GridImp, int dim, int cd> struct SubEntity;
 
 // specialisation for elements  
@@ -1099,21 +1076,6 @@ inline int AlbertaGridEntity <0,dim,GridImp>::
 level() const
 {
   return level_;
-}
-
-template<int dim, class GridImp>
-inline int AlbertaGridEntity <0,dim,GridImp>::
-index() const
-{
-  const Entity en (*this);
-  return grid_.levelIndexSet(level()).index(en);
-}
-
-template<int dim, class GridImp>
-inline int AlbertaGridEntity <0,dim,GridImp>::
-globalIndex() const
-{
-  return grid_.getElementNumber( elInfo_->el );
 }
 
 template<int dim, class GridImp>
@@ -3290,6 +3252,7 @@ inline void AlbertaGrid < dim, dimworld >::removeMesh()
   if(dofvecs_.elNewCheck) ALBERTA free_dof_int_vec(dofvecs_.elNewCheck);
   if(dofvecs_.owner )     ALBERTA free_dof_int_vec(dofvecs_.owner);
 
+  if(sizeCache_) delete sizeCache_; sizeCache_ = 0;
 #if DIM == 3
   if(mesh_) 
   {
