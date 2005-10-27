@@ -3253,6 +3253,7 @@ inline void AlbertaGrid < dim, dimworld >::removeMesh()
   if(dofvecs_.owner )     ALBERTA free_dof_int_vec(dofvecs_.owner);
 
   if(sizeCache_) delete sizeCache_; sizeCache_ = 0;
+
 #if DIM == 3
   if(mesh_) 
   {
@@ -4099,8 +4100,9 @@ inline void AlbertaGrid < dim, dimworld >::calcExtras ()
   maxlevel_ = ALBERTA AlbertHelp::calcMaxAbsoluteValueOfVector( dofvecs_.elNewCheck );
   assert( maxlevel_ >= 0);
   assert( maxlevel_ < MAXL);
+
 #ifndef NDEBUG  
-  int mlvl = ALBERTA AlbertHelp::calcMaxLevel(mesh_);
+  int mlvl = ALBERTA AlbertHelp::calcMaxLevel(mesh_,dofvecs_.elNewCheck);
   assert( mlvl == maxlevel_ );
 #endif
 
@@ -4239,6 +4241,9 @@ readGridXdr (const std::basic_string<char> filename, albertCtype & time )
   // make the rest of the dofvecs 
   ALBERTA AlbertHelp::makeTheRest(&dofvecs_);
 
+  // restore level information for each element by traversing the mesh 
+  ALBERTA AlbertHelp::restoreElNewCheck( mesh_ , dofvecs_.elNewCheck );
+  
   arrangeDofVec();
   
   // calc maxlevel and indexOnLevel and so on 
