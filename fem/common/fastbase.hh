@@ -64,6 +64,15 @@ public:
   //! Constructor 
   FastBaseFunctionSet (FunctionSpaceType & fuspace , int numOfBaseFct);
 
+  //! Destructor
+  virtual ~FastBaseFunctionSet() {
+    for (unsigned int i = 0; i < baseFunctionList_.size(); ++i) {
+      delete baseFunctionList_[i];
+      baseFunctionList_[i] = 0;
+    }
+    baseFunctionList_.resize(0);
+  }
+  /*
   //! return the number of base fucntions for this BaseFunctionSet  
   int getNumberOfBaseFunctions () const DUNE_DEPRECATED
   {
@@ -75,6 +84,7 @@ public:
   {
     return numOfDiffFct_; 
   };
+  */
 
   //! return the number of base fucntions for this BaseFunctionSet  
   int numBaseFunctions () const
