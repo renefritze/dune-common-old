@@ -591,7 +591,7 @@ public:
   
 public:  
   DataInliner ( DiscreteFunctionType & df , bool leaf = true ) 
-    : df_ (df) , lf_ (df.newLocalFunction() ) , leaf_(leaf) {}
+    : df_ (df) , leaf_(leaf) {}
 
   //! store data to stream  
   void apply ( ParamType & p ) const 
@@ -601,16 +601,15 @@ public:
     
     if(leaf_ && (!en.isLeaf())) return; 
     
-    df_.localFunction( en ,  lf_ );
-    for(int l=0; l<lf_.numDofs(); l++)
+    LocalFunctionType lf = df_.localFunction( en );
+    for(int l=0; l<lf.numDofs(); l++)
     {
-      (*p.first).writeObject( lf_[l] );
+      (*p.first).writeObject( lf[l] );
     }
   }
 
 private:
   mutable DiscreteFunctionType & df_;
-  mutable LocalFunctionType lf_;
   
   // true if only leaf data is transferd 
   bool leaf_;
@@ -642,7 +641,7 @@ public:
 
 public:  
   DataXtractor ( DiscreteFunctionType & df , bool leaf = true) 
-    : df_ (df) , lf_ (df.newLocalFunction() ) , leaf_(leaf) {}
+    : df_ (df) , leaf_(leaf) {}
 
   //! store data to stream  
   void apply ( ParamType & p ) const 
@@ -652,16 +651,15 @@ public:
 
     if(leaf_ && (!en.isLeaf())) return;
     
-    df_.localFunction( en , lf_ );
-    for(int l=0; l<lf_.numDofs(); l++)
+    LocalFunctionType lf = df_.localFunction( en );
+    for(int l=0; l<lf.numDofs(); l++)
     {
-      (*(p.first)).readObject( lf_[l] );
+      (*(p.first)).readObject( lf[l] );
     }
   }
 
 private:
   mutable DiscreteFunctionType & df_;
-  mutable LocalFunctionType lf_;
   
   // true if only leaf data is transferd 
   bool leaf_;
