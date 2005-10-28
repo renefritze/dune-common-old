@@ -28,27 +28,27 @@ class LagrangeBaseFunction < FunctionSpaceType , ElType , 0 >
   typedef typename FunctionSpaceType::RangeFieldType RangeFieldType;
   
 public:
-  LagrangeBaseFunction (int baseNum) 
-    : BaseFunctionInterface<FunctionSpaceType> (),
-      baseNum_ ( baseNum ) 
-    { 
-      assert((baseNum_ >= 0) || (baseNum_ < DimRange));
-    };
+  LagrangeBaseFunction (int baseNum) : 
+    BaseFunctionInterface<FunctionSpaceType> (),
+    baseNum_ ( baseNum ) 
+  { 
+    assert((baseNum_ >= 0) || (baseNum_ < DimRange));
+  }
   
-    virtual void evaluate ( const FieldVector<deriType, 0> &diffVariable, 
+  virtual void evaluate ( const FieldVector<deriType, 0> &diffVariable, 
                           const DomainType & x, RangeType & phi) const 
   {
     phi = 0.0;
     phi[baseNum_] = 1.0;
   }
 
-    virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
+  virtual void evaluate ( const FieldVector<deriType, 1> &diffVariable, 
                           const DomainType & x, RangeType & phi) const 
   {
     phi = 0.0;
   }
 
-    virtual void evaluate ( const FieldVector<deriType, 2> &diffVariable, 
+  virtual void evaluate ( const FieldVector<deriType, 2> &diffVariable, 
                           const DomainType & x, RangeType & phi) const 
   {
     phi = 0.0 ;
@@ -760,9 +760,8 @@ public:
 
   //! Constructor, calls Constructor of FastBaseFunctionSet, which is the
   //! InterfaceImplementation 
-  LagrangeFastBaseFunctionSet( FunctionSpaceType &fuSpace )
-    :  FastBaseFunctionSet<FunctionSpaceType >
-  ( fuSpace, numOfBaseFct ) , baseFuncList_(numOfBaseFct,0)
+  LagrangeFastBaseFunctionSet( FunctionSpaceType &fuSpace ) :  
+    FastBaseFunctionSet<FunctionSpaceType >( fuSpace, numOfBaseFct )
   {
     int numOfDifferentFuncs = (int) numOfBaseFct / dimrange;
     for(int i=0; i<numOfDifferentFuncs; i++)
@@ -771,19 +770,14 @@ public:
       {
         //baseFuncList_[ i*dimrange + k ] = new LagrangeBaseFunctionType ( i ) ;
         size_t idx = i*dimrange + k;
-        baseFuncList_[ idx ] = new LagrangeBaseFunctionType ( i ) ;
-        this->setBaseFunctionPointer ( idx , baseFuncList_[ idx ] );
+        this->setBaseFunctionPointer ( idx, new LagrangeBaseFunctionType(i) );
       }
     }
     this->setNumOfDiffFct ( numOfDifferentFuncs );
   };
 
   //! Destructor deleting the base functions 
-  ~LagrangeFastBaseFunctionSet( )
-  {
-    for(int i=0; i<numOfBaseFct; i++)
-      if( baseFuncList_[i] ) delete baseFuncList_[i];
-  };
+  ~LagrangeFastBaseFunctionSet( ) {}
 
   //! return number of base function for this base function set 
   int getNumberOfBaseFunctions() const { return numOfBaseFct; };
@@ -794,9 +788,7 @@ public:
   { 
     return (int) (numOfBaseFct / dimrange);
   }
-private:
-  //! Vector with all base functions corresponding to the base function set 
-  std::vector < LagrangeBaseFunctionType* > baseFuncList_; 
+
 };
 
 } // end namespace Dune

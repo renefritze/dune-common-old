@@ -166,25 +166,25 @@ setBaseFuncSetPointer ( EntityType &en,const IndexSetType& iset )
       case hexahedron   : return makeBaseSet<hexahedron,polOrd> (iset);
 
       case simplex :
-          switch (EntityType::dimension) {
-          case 1: return makeBaseSet<line,polOrd> (iset);
-          case 2: return makeBaseSet<triangle,polOrd> (iset);
-          case 3: return makeBaseSet<tetrahedron,polOrd> (iset);
-          default:
-              DUNE_THROW(NotImplemented, "No Lagrange function spaces for simplices of dimension " 
-                         << EntityType::dimension << "!");
-          }
-
+        switch (EntityType::dimension) {
+        case 1: return makeBaseSet<line,polOrd> (iset);
+        case 2: return makeBaseSet<triangle,polOrd> (iset);
+        case 3: return makeBaseSet<tetrahedron,polOrd> (iset);
+        default:
+          DUNE_THROW(NotImplemented, "No Lagrange function spaces for simplices of dimension " 
+                     << EntityType::dimension << "!");
+        }
+        
       case cube :
-          switch (EntityType::dimension) {
-          case 1: return makeBaseSet<line,polOrd> (iset);
-          case 2: return makeBaseSet<quadrilateral,polOrd> (iset);
-          case 3: return makeBaseSet<hexahedron,polOrd> (iset);
-          default:
-            DUNE_THROW(NotImplemented, 
-                       "No Lagrange function spaces for cubes of dimension " 
-                       << EntityType::dimension << "!");
-          }
+        switch (EntityType::dimension) {
+        case 1: return makeBaseSet<line,polOrd> (iset);
+        case 2: return makeBaseSet<quadrilateral,polOrd> (iset);
+        case 3: return makeBaseSet<hexahedron,polOrd> (iset);
+        default:
+          DUNE_THROW(NotImplemented, 
+                     "No Lagrange function spaces for cubes of dimension " 
+                     << EntityType::dimension << "!");
+        }
 
       default: {
           DUNE_THROW(NotImplemented, "Element type " 
