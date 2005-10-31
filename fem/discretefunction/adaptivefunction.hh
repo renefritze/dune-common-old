@@ -35,15 +35,16 @@ namespace Dune {
       DiscreteFunctionSpaceImp> LocalFunctionImp;
     
     // local function type 
-    typedef LocalFunctionWrapper< DiscreteFunctionType > LocalFunctionType;
+    typedef LocalFunctionWrapper<
+      DiscreteFunctionType> LocalFunctionType;
 
-    typedef typename DiscreteFunctionSpaceType::RangeFieldType DofType;
-    typedef typename DiscreteFunctionSpaceType::RangeFieldType RangeFieldType;
-    typedef typename DiscreteFunctionSpaceType::RangeType RangeType;
-    typedef typename DiscreteFunctionSpaceType::DomainType DomainType;
-    typedef typename DiscreteFunctionSpaceType::JacobianRangeType JacobianRangeType;
-    typedef typename DiscreteFunctionSpaceType::MapperType MapperType;
-    typedef typename DiscreteFunctionSpaceType::GridType GridType;
+    typedef typename DiscreteFunctionSpaceType::Traits::RangeFieldType DofType;
+    typedef typename DiscreteFunctionSpaceType::Traits::RangeFieldType RangeFieldType;
+    typedef typename DiscreteFunctionSpaceType::Traits::RangeType RangeType;
+    typedef typename DiscreteFunctionSpaceType::Traits::DomainType DomainType;
+    typedef typename DiscreteFunctionSpaceType::Traits::JacobianRangeType JacobianRangeType;
+    typedef typename DiscreteFunctionSpaceType::Traits::MapperType MapperType;
+    typedef typename DiscreteFunctionSpaceType::Traits::GridType GridType;
 
     typedef DofArray<DofType> DofStorageType;
      
@@ -158,6 +159,8 @@ namespace Dune {
     using Imp::read_pgm;
   private:
     //- Forbidden members
+
+    const MyType& interface() const { return *this; }
   }; // end class AdaptiveDiscreteFunction
 
   // Note: could use Traits class for Barton-Nackman instead
@@ -384,7 +387,9 @@ namespace Dune {
     int numComponents() const { return N; }
 
   private:
-     std::vector<SubSpaceType*> subSpaces_;
+    std::vector<SubSpaceType*> subSpaces_;
+
+    const MyType& interface() const { return *this; }
   }; // end class AdaptiveDiscreteFunction (specialised for CombinedSpace)
 
   //- class AdaptiveLocalFunction (specialised)

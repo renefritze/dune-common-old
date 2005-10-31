@@ -43,6 +43,7 @@ namespace Dune {
     typedef typename Traits::GridType GridType;
     typedef DofManager<GridType> DofManagerType;
 
+    typedef typename Traits::DiscreteFunctionType LeafType;
   public:
     std::string name() const;
     int size() const;
@@ -53,8 +54,6 @@ namespace Dune {
     ConstDofIteratorType dend() const;
     
     LocalFunctionType newLocalFunction() DUNE_DEPRECATED;
-
-
 
     //! update local function to given entity
     template <class EntityType>
@@ -94,10 +93,10 @@ namespace Dune {
                                    const DiscreteFunctionSpaceType& spc,
                                    DofStorageType& dofVec);
     AdaptiveFunctionImplementation(const ThisType& other);
-    ~AdaptiveFunctionImplementation();
-
+    virtual ~AdaptiveFunctionImplementation();
 
   private:
+    virtual const LeafType& interface() const = 0;
     const DiscreteFunctionSpaceType& spc_;
     std::string name_;
     DofManagerType& dm_;
