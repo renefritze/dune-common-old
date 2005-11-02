@@ -25,7 +25,7 @@ namespace Dune {
   class CombinedBaseFunctionSet;
 
   //! Traits class for CombinedSpace
-  template <class DiscreteFunctionSpaceImp, int N, DofStoragePolicy policy>
+  template <class DiscreteFunctionSpaceImp, int N, DofStoragePolicy policy = PointBased>
   struct CombinedSpaceTraits {
   private:
     typedef DiscreteFunctionSpaceImp ContainedDiscreteFunctionSpaceType;
@@ -65,6 +65,7 @@ namespace Dune {
     typedef typename FunctionSpaceType::JacobianRangeType JacobianRangeType;
 
     typedef typename ContainedSpaceTraits::GridType GridType;
+    typedef typename ContainedSpaceTraits::IndexSetType IndexSetType;
     typedef typename ContainedSpaceTraits::IteratorType IteratorType;
 
     typedef DofConversionUtility<policy> DofConversionType;
@@ -79,7 +80,7 @@ namespace Dune {
   };
 
   //! Class to combine N scalar spaces
-  template <class DiscreteFunctionSpaceImp, int N, DofStoragePolicy policy>
+  template <class DiscreteFunctionSpaceImp, int N, DofStoragePolicy policy = PointBased>
   class CombinedSpace :
     public DiscreteFunctionSpaceDefault<
     CombinedSpaceTraits<DiscreteFunctionSpaceImp, N, policy> 
@@ -110,6 +111,7 @@ namespace Dune {
     typedef typename Traits::MapperType MapperType;
     typedef typename Traits::IteratorType IteratorType;
     typedef typename Traits::GridType GridType;
+    typedef typename Traits::IndexSetType IndexSetType;
 
     typedef typename Traits::DofConversionType DofConversionType;
 
@@ -159,6 +161,8 @@ namespace Dune {
 
     //! access to grid
     const GridType& grid() const { return spc_.grid(); }
+
+    const IndexSetType& indexSet() const { return spc_.indexSet(); }
 
     //! access to mapper
     const MapperType& mapper() const { return mapper_; }
@@ -256,6 +260,7 @@ namespace Dune {
                    int quadPoint, RangeType & phi ) const;
 
     //- Additional methods
+    //! Number of distinct (scalar) base functions
     int numContainedFunctions() const {
       return baseFunctionSet_.numBaseFunctions();
     }
@@ -308,7 +313,7 @@ namespace Dune {
     typedef CombinedSpaceTraits<
       DiscreteFunctionSpaceImp, N, policy> SpaceTraits;
     typedef DiscreteFunctionSpaceImp ContainedDiscreteFunctionSpaceType;
-    typedef typename DiscreteFunctionSpaceImp::MapperType ContainedMapperType;
+    typedef typename DiscreteFunctionSpaceImp::Traits::MapperType ContainedMapperType;
   public:
     //- Public methods
     //! Constructor
