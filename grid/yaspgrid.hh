@@ -2072,7 +2072,7 @@ public:
   YaspGrid (MPI_Comm comm, Dune::FieldVector<ctype, dim> L, 
             Dune::FieldVector<int, dim> s, 
             Dune::FieldVector<bool, dim> periodic, int overlap) :
-    MultiYGrid<dim,ctype>(comm,L,s,periodic,overlap), theglobalidset(*this),theleafindexset(*this)
+    MultiYGrid<dim,ctype>(comm,L,s,periodic,overlap), theleafindexset(*this), theglobalidset(*this)
   {
 	setsizes();
 	indexsets.push_back( new YaspLevelIndexSet<YaspGrid<dim,dimworld> >(*this,0) );
