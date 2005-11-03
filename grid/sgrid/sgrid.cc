@@ -884,7 +884,7 @@ inline void SGrid<dim,dimworld>::makeSGrid (const int* N_,
 
 template<int dim, int dimworld>
 inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* H_) 
-  : theglobalidset(*this), theleafindexset(*this)
+  : theleafindexset(*this), theglobalidset(*this)
 {
     IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
   
@@ -898,7 +898,7 @@ inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* H_)
 
 template<int dim, int dimworld>
 inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_)  
-  : theglobalidset(*this), theleafindexset(*this)
+  : theleafindexset(*this), theglobalidset(*this)
 {
   IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
 
