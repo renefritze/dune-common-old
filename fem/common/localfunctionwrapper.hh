@@ -6,8 +6,6 @@
 
 #include "../common/discretefunction.hh"
 
-#include <dune/common/stack.hh>
-
 namespace Dune{
 
 //! Stores pointers of local functions in a stack 
@@ -23,7 +21,6 @@ public:
   typedef typename std::pair < LocalFunctionImp * , int * > StackStorageType;
 private:
   std::stack < StackStorageType , std::vector<StackStorageType> > lfStack_;
-  //FiniteStack< StackStorageType *, 10000 > lfStack_;
   const DiscreteFunctionType & df_;
 
   StackStorageType obj_;
