@@ -1770,7 +1770,7 @@ private:
 	 
 	
 	  // check if order can be achieved
-	   
+	  
 	  cube_maxorder = rules[cubeindex-1]->order();
 	  if (cube_maxorder<pmax)
               dverb << "Warning: Quadrature rule order " << pmax
