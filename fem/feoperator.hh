@@ -7,7 +7,6 @@
 
 namespace Dune {
 
-  static const int edge[4][2] = { {0,2}, {1,3} , {0,1} , {2,3}}; 
   
   /** \brief Base class for local Finite Element operators
    */
@@ -375,7 +374,7 @@ namespace Dune {
                         // funktioniert nur fuer Dreiecke 
                         // hier muss noch gearbeitet werden. Wie kommt man von den
                         // Intersections zu den localen Dof Nummern?
-                        int col = functionSpace_.mapToGlobal(en,(neigh+i)%numDof);
+                        int col = this->functionSpace_.mapToGlobal(en,(neigh+i)%numDof);
                         // unitRow unitCol for boundary
                         //matrix_->kroneckerKill(col,col);  
                         dest_it[col] = arg_it[col];
@@ -389,7 +388,8 @@ namespace Dune {
                         // funktioniert nur fuer Dreiecke 
                         // hier muss noch gearbeitet werden. Wie kommt man von den
                         // Intersections zu den localen Dof Nummern?
-                        int col = functionSpace_.mapToGlobal(en,edge[neigh][i]);
+                        const int edge[4][2] = { {0,2}, {1,3} , {0,1} , {2,3}}; 
+                        int col = this->functionSpace_.mapToGlobal(en, edge[neigh][i]);
                         // unitRow unitCol for boundary
                         //matrix_->kroneckerKill(col,col); 
                         dest_it[col] = arg_it[col];
