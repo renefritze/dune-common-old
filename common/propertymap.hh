@@ -3,6 +3,8 @@
 #define DUNE_PROPERTYMAP_HH
 
 #include<cstddef>
+#include"helpertemplates.hh"
+#include"typetraits.hh"
 
 namespace Dune
 {
@@ -87,6 +89,8 @@ namespace Dune
   put(const RAPropertyMapHelper<Reference,PropertyMap>& pmap,
       const Key& key, const Value& value)
   {
+    IsTrue<Conversion<typename PropertyMap::Category,WritablePropertyMapTag>
+      ::exists>::yes();
     static_cast<const PropertyMap&>(pmap)[key] = value;
   }
   
