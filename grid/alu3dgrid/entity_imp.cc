@@ -534,23 +534,27 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  inline ALU3dGridIntersectionIterator<GridImp> ALU3dGridEntity<0,dim,GridImp> :: ibegin () const 
+  inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridIntersectionIteratorType
+  ALU3dGridEntity<0,dim,GridImp> :: ibegin () const 
   {
     assert(item_ != 0);
 
     // one cannot call ibegin on a ghost entity
     assert(isGhost_ == false);
-    return ALU3dGridIntersectionIterator<GridImp> (grid_,item_,walkLevel_);
+    //return ALU3dGridIntersectionIteratorType (grid_,item_,walkLevel_);
+    return ALU3dGridIntersectionIteratorType (grid_,*this,walkLevel_, false);
   }
 
   template<int dim, class GridImp>
-  inline ALU3dGridIntersectionIterator<GridImp> ALU3dGridEntity<0,dim,GridImp> :: iend () const
+  inline typename ALU3dGridEntity<0,dim,GridImp> :: ALU3dGridIntersectionIteratorType
+  ALU3dGridEntity<0,dim,GridImp> :: iend () const
   {
     assert(item_ != 0);
     
     // one cannot call iend on a ghost entity
     assert(isGhost_ == false);
-    return ALU3dGridIntersectionIterator<GridImp> (grid_, 0 ,walkLevel_,true);
+    return ALU3dGridIntersectionIteratorType (grid_, *this ,walkLevel_,true);
+    //return ALU3dGridIntersectionIteratorType (grid_, 0 ,walkLevel_,true);
   }
 
   template<int dim, class GridImp>
@@ -641,7 +645,6 @@ namespace Dune {
                          int face )
     : grid_(grid)
     , entity_ ( grid_.template getNewEntity<codim> ( item.level() ) )
-    , done_ (false)
   {
     assert( entity_ );
     if( codim == 1 ) assert( face >= 0 );
@@ -653,7 +656,6 @@ namespace Dune {
   ALU3dGridEntityPointer(const GridImp & grid, const ALU3dGridMakeableEntity<codim,dim,GridImp> & e)
     : grid_(grid)  
     , entity_ ( grid_.template getNewEntity<codim> ( e.level() ) )
-    , done_ (false)
   {
     assert( entity_ );
     (*entity_).setEntity( e );
@@ -661,10 +663,9 @@ namespace Dune {
 
   template<int codim, class GridImp >
   inline ALU3dGridEntityPointer<codim,GridImp> :: 
-  ALU3dGridEntityPointer(const GridImp & grid, int level , bool done )
+  ALU3dGridEntityPointer(const GridImp & grid, int level )
     : grid_(grid) 
     , entity_ ( grid_.template getNewEntity<codim> (level) )
-    , done_ (done) 
   {
     (*entity_).reset( level );
   }
@@ -690,7 +691,6 @@ namespace Dune {
   {
     // sets entity pointer in the status of an end iterator 
     (*entity_).removeElement();
-    done_ = true;
   }
 
   template<int codim, class GridImp >
