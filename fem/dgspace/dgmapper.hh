@@ -20,11 +20,10 @@ class DGMapper
 
   // number of dofs on element 
   int numberOfDofs_;
-  int level_;
 public:
   //! Constructor 
-  DGMapper ( IndexSetType &iset , int numDof , int level) :
-    indexSet_ (iset), numberOfDofs_ (numDof*dimRange), level_(level)  {};
+  DGMapper(IndexSetType& iset , int numDof) :
+    indexSet_ (iset), numberOfDofs_ (numDof*dimRange)  {};
 
   //! return size of function space 
   //! see dofmanager.hh for definition of IndexSet, which 
@@ -52,7 +51,7 @@ public:
   void calcInsertPoints () {};
 
   //! default implementation if not overlaoded 
-  int numberOfDofs () const
+  int numDofs () const
   {
     return numberOfDofs_;
   }
@@ -64,7 +63,7 @@ public:
   }
 
   //! for dof manager, to check whether it has to copy dof or not 
-  bool indexNew (int num)
+  bool indexNew (int num) const
   {
     const int newn = static_cast<int> (num / numberOfDofs_);
     return indexSet_.template indexNew(newn,0);
@@ -116,11 +115,10 @@ class DGMapper<IndexSetType,polOrd,1>
 
   // number of dofs on element 
   int numberOfDofs_;
-  int level_;
 public:
   //! Constructor 
-  DGMapper ( IndexSetType &iset , int numDof , int level) :
-    indexSet_ (iset), numberOfDofs_ (numDof), level_(level)  {};
+  DGMapper ( IndexSetType &iset , int numDof) :
+    indexSet_ (iset), numberOfDofs_ (numDof) {}
 
   //! return size of function space 
   //! see dofmanager.hh for definition of IndexSet, which 
@@ -148,7 +146,7 @@ public:
   void calcInsertPoints () {};
 
   //! default implementation if not overlaoded 
-  int numberOfDofs () const
+  int numDofs () const
   {
     return numberOfDofs_;
   }
@@ -160,7 +158,7 @@ public:
   }
 
   //! for dof manager, to check whether it has to copy dof or not 
-  bool indexNew (int num)
+  bool indexNew (int num) const
   {
     const int newn = static_cast<int> ( num / numberOfDofs_ );
     return indexSet_.template indexNew(newn,0);
