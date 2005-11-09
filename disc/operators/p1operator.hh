@@ -58,29 +58,130 @@ namespace Dune
 							 const Refelem& refelem, Matrix& A, std::vector<bool>& visited, 
 							 int hangingnodes, std::set<P1FEOperatorLink>& links)
 	{
-	  for (int i=0; i<refelem.size(c); i++) // loop over subentities of codim c of e
+	  if (refelem.type(0,0)==Dune::cube)
 		{
-		  int index = allmapper.template map<c>(e,i);
+		  for (int i=0; i<refelem.size(c); i++) // loop over subentities of codim c of e
+			{
+			  int index = allmapper.template map<c>(e,i);
+			  if (!visited[index]) 
+				{
+				  int corners = refelem.size(i,c,n);
+				  for (int j=0; j<corners/2; j++) // uses fact that diagonals are (0,corners-1), (1,corners-2) ...
+					{
+					  int alpha = vertexmapper.template map<n>(e,refelem.subEntity(i,c,j,n));
+					  int beta = vertexmapper.template map<n>(e,refelem.subEntity(i,c,corners-1-j,n));
+					  A.incrementrowsize(alpha);
+					  A.incrementrowsize(beta);
+					  if (hangingnodes>0) // delete standard links
+						{
+						  links.erase(P1FEOperatorLink(alpha,beta));
+						  links.erase(P1FEOperatorLink(beta,alpha));
+						}
+					  // 				  printf("increment row %04d\n",alpha);
+					  // 				  printf("increment row %04d\n",beta);
+					}
+				  visited[index] = true;
+				}
+			}
+		}
+	  if (refelem.type(0,0)==Dune::pyramid && c==1)
+		{
+		  int index = allmapper.template map<c>(e,0);
 		  if (!visited[index]) 
 			{
-			  int corners = refelem.size(i,c,n);
-			  for (int j=0; j<corners/2; j++) // uses fact that diagonals are (0,corners-1), (1,corners-2) ...
+			  int alpha = vertexmapper.template map<n>(e,0);
+			  int beta = vertexmapper.template map<n>(e,2);
+			  A.incrementrowsize(alpha);
+			  A.incrementrowsize(beta);
+			  if (hangingnodes>0) // delete standard links
 				{
-				  int alpha = vertexmapper.template map<n>(e,refelem.subEntity(i,c,j,n));
-				  int beta = vertexmapper.template map<n>(e,refelem.subEntity(i,c,corners-1-j,n));
-				  A.incrementrowsize(alpha);
-				  A.incrementrowsize(beta);
-				  if (hangingnodes>0) // delete standard links
-					{
-					  links.erase(P1FEOperatorLink(alpha,beta));
-					  links.erase(P1FEOperatorLink(beta,alpha));
-					}
-// 				  printf("increment row %04d\n",alpha);
-// 				  printf("increment row %04d\n",beta);
+				  links.erase(P1FEOperatorLink(alpha,beta));
+				  links.erase(P1FEOperatorLink(beta,alpha));
+				}
+			  alpha = vertexmapper.template map<n>(e,1);
+			  beta = vertexmapper.template map<n>(e,3);
+			  A.incrementrowsize(alpha);
+			  A.incrementrowsize(beta);
+			  if (hangingnodes>0) // delete standard links
+				{
+				  links.erase(P1FEOperatorLink(alpha,beta));
+				  links.erase(P1FEOperatorLink(beta,alpha));
 				}
 			  visited[index] = true;
 			}
-		}
+		}	  
+	  if (refelem.type(0,0)==Dune::prism && c==1)
+		{
+		  int index = allmapper.template map<c>(e,1);
+		  if (!visited[index]) 
+			{
+			  int alpha = vertexmapper.template map<n>(e,0);
+			  int beta = vertexmapper.template map<n>(e,4);
+			  A.incrementrowsize(alpha);
+			  A.incrementrowsize(beta);
+			  if (hangingnodes>0) // delete standard links
+				{
+				  links.erase(P1FEOperatorLink(alpha,beta));
+				  links.erase(P1FEOperatorLink(beta,alpha));
+				}
+			  alpha = vertexmapper.template map<n>(e,1);
+			  beta = vertexmapper.template map<n>(e,3);
+			  A.incrementrowsize(alpha);
+			  A.incrementrowsize(beta);
+			  if (hangingnodes>0) // delete standard links
+				{
+				  links.erase(P1FEOperatorLink(alpha,beta));
+				  links.erase(P1FEOperatorLink(beta,alpha));
+				}
+			  visited[index] = true;
+			}
+		  index = allmapper.template map<c>(e,2);
+		  if (!visited[index]) 
+			{
+			  int alpha = vertexmapper.template map<n>(e,1);
+			  int beta = vertexmapper.template map<n>(e,5);
+			  A.incrementrowsize(alpha);
+			  A.incrementrowsize(beta);
+			  if (hangingnodes>0) // delete standard links
+				{
+				  links.erase(P1FEOperatorLink(alpha,beta));
+				  links.erase(P1FEOperatorLink(beta,alpha));
+				}
+			  alpha = vertexmapper.template map<n>(e,2);
+			  beta = vertexmapper.template map<n>(e,4);
+			  A.incrementrowsize(alpha);
+			  A.incrementrowsize(beta);
+			  if (hangingnodes>0) // delete standard links
+				{
+				  links.erase(P1FEOperatorLink(alpha,beta));
+				  links.erase(P1FEOperatorLink(beta,alpha));
+				}
+			  visited[index] = true;
+			}
+		  index = allmapper.template map<c>(e,3);
+		  if (!visited[index]) 
+			{
+			  int alpha = vertexmapper.template map<n>(e,0);
+			  int beta = vertexmapper.template map<n>(e,5);
+			  A.incrementrowsize(alpha);
+			  A.incrementrowsize(beta);
+			  if (hangingnodes>0) // delete standard links
+				{
+				  links.erase(P1FEOperatorLink(alpha,beta));
+				  links.erase(P1FEOperatorLink(beta,alpha));
+				}
+			  alpha = vertexmapper.template map<n>(e,2);
+			  beta = vertexmapper.template map<n>(e,3);
+			  A.incrementrowsize(alpha);
+			  A.incrementrowsize(beta);
+			  if (hangingnodes>0) // delete standard links
+				{
+				  links.erase(P1FEOperatorLink(alpha,beta));
+				  links.erase(P1FEOperatorLink(beta,alpha));
+				}
+			  visited[index] = true;
+			}
+		}	  
 	  P1FEOperator_meta<n,c-1>::addrowscube(e,vertexmapper,allmapper,refelem,A,visited,hangingnodes,links);
 	  return;
 	}
@@ -88,24 +189,85 @@ namespace Dune
 	static void addindicescube (const Entity& e, const VMapper& vertexmapper, const AMapper& allmapper, 
 				   const Refelem& refelem, Matrix& A, std::vector<bool>& visited)
 	{
-	  for (int i=0; i<refelem.size(c); i++)
+	  if (refelem.type(0,0)==Dune::cube)
 		{
-		  int index = allmapper.template map<c>(e,i);
-		  if (!visited[index]) 
+		  for (int i=0; i<refelem.size(c); i++)
 			{
-			  int corners = refelem.size(i,c,n);
-			  for (int j=0; j<corners/2; j++) // uses fact that diagonals are (0,corners-1), (1,corners-2) ...
+			  int index = allmapper.template map<c>(e,i);
+			  if (!visited[index]) 
 				{
-				  int alpha = vertexmapper.template map<n>(e,refelem.subEntity(i,c,j,n));
-				  int beta = vertexmapper.template map<n>(e,refelem.subEntity(i,c,corners-1-j,n));
-				  A.addindex(alpha,beta);
-				  A.addindex(beta,alpha);
-// 				  printf("adding (%04d,%04d) index=%04d\n",alpha,beta,index);
-// 				  printf("adding (%04d,%04d) index=%04d\n",beta,alpha,index);
+				  int corners = refelem.size(i,c,n);
+				  for (int j=0; j<corners/2; j++) // uses fact that diagonals are (0,corners-1), (1,corners-2) ...
+					{
+					  int alpha = vertexmapper.template map<n>(e,refelem.subEntity(i,c,j,n));
+					  int beta = vertexmapper.template map<n>(e,refelem.subEntity(i,c,corners-1-j,n));
+					  A.addindex(alpha,beta);
+					  A.addindex(beta,alpha);
+					  // 				  printf("adding (%04d,%04d) index=%04d\n",alpha,beta,index);
+					  // 				  printf("adding (%04d,%04d) index=%04d\n",beta,alpha,index);
+					}
+				  visited[index] = true;
 				}
-			  visited[index] = true;
 			}
 		}
+	  if (refelem.type(0,0)==Dune::pyramid && c==1)
+		{
+		  int index = allmapper.template map<c>(e,0);
+		  if (!visited[index]) 
+			{
+			  int alpha = vertexmapper.template map<n>(e,0);
+			  int beta = vertexmapper.template map<n>(e,2);
+			  A.addindex(alpha,beta);
+			  A.addindex(beta,alpha);
+			  alpha = vertexmapper.template map<n>(e,1);
+			  beta = vertexmapper.template map<n>(e,3);
+			  A.addindex(alpha,beta);
+			  A.addindex(beta,alpha);
+			  visited[index] = true;
+			}
+		}	  
+	  if (refelem.type(0,0)==Dune::prism && c==1)
+		{
+		  int index = allmapper.template map<c>(e,1);
+		  if (!visited[index]) 
+			{
+			  int alpha = vertexmapper.template map<n>(e,0);
+			  int beta = vertexmapper.template map<n>(e,4);
+			  A.addindex(alpha,beta);
+			  A.addindex(beta,alpha);
+			  alpha = vertexmapper.template map<n>(e,1);
+			  beta = vertexmapper.template map<n>(e,3);
+			  A.addindex(alpha,beta);
+			  A.addindex(beta,alpha);
+			  visited[index] = true;
+			}
+		  index = allmapper.template map<c>(e,2);
+		  if (!visited[index]) 
+			{
+			  int alpha = vertexmapper.template map<n>(e,1);
+			  int beta = vertexmapper.template map<n>(e,5);
+			  A.addindex(alpha,beta);
+			  A.addindex(beta,alpha);
+			  alpha = vertexmapper.template map<n>(e,2);
+			  beta = vertexmapper.template map<n>(e,4);
+			  A.addindex(alpha,beta);
+			  A.addindex(beta,alpha);
+			  visited[index] = true;
+			}
+		  index = allmapper.template map<c>(e,3);
+		  if (!visited[index]) 
+			{
+			  int alpha = vertexmapper.template map<n>(e,0);
+			  int beta = vertexmapper.template map<n>(e,5);
+			  A.addindex(alpha,beta);
+			  A.addindex(beta,alpha);
+			  alpha = vertexmapper.template map<n>(e,2);
+			  beta = vertexmapper.template map<n>(e,3);
+			  A.addindex(alpha,beta);
+			  A.addindex(beta,alpha);
+			  visited[index] = true;
+			}
+		}	  
 	  P1FEOperator_meta<n,c-1>::addindicescube(e,vertexmapper,allmapper,refelem,A,visited);
 	  return;
 	}
@@ -117,6 +279,7 @@ namespace Dune
 							 const Refelem& refelem, Matrix& A, std::vector<bool>& visited,
 							 int hangingnodes, std::set<P1FEOperatorLink>& links)
 	{
+	  if (refelem.type(0,0)!=Dune::cube) return;
 	  int corners = refelem.size(n);
 	  for (int j=0; j<corners/2; j++) // uses fact that diagonals are (0,corners-1), (1,corners-2) ...
 		{
@@ -138,6 +301,7 @@ namespace Dune
 	static void addindicescube (const Entity& e, const VMapper& vertexmapper, const AMapper& allmapper, 
 				  const Refelem& refelem, Matrix& A, std::vector<bool>& visited)
 	{
+	  if (refelem.type(0,0)!=Dune::cube) return;
 	  int corners = refelem.size(n);
 	  for (int j=0; j<corners/2; j++) // uses fact that diagonals are (0,corners-1), (1,corners-2) ...
 		{
@@ -391,7 +555,7 @@ namespace Dune
 			}
 
 		  // for codim n-2 to 0 we need a template metaprogram
-		  if (gt==Dune::cube)
+		  if (gt!=Dune::simplex)
 			P1FEOperator_meta<n,n-2>::addrowscube(*it,vertexmapper,allmapper,refelem,A,visited,hangingnodes,links);
 		}
 
@@ -446,7 +610,7 @@ namespace Dune
 			}
 
 		  // for codim n-2 to 0 we need a template metaprogram
-		  if (gt==Dune::cube)
+		  if (gt!=Dune::simplex)
 			P1FEOperator_meta<n,n-2>::addindicescube(*it,vertexmapper,allmapper,refelem,A,visited);
 		}
 
