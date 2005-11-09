@@ -284,6 +284,7 @@ public:
 						index = numQuadFaces_++;
 						break;
 					  default:
+						std::cout << "face geometry type is " << GeometryName(ReferenceElements<double,dim>::general(gt).type(i,1)) << std::endl;
 						DUNE_THROW(GridError, "wrong geometry type in face");
 					  }
 				}
@@ -597,6 +598,7 @@ public:
 							  index = numQuadFaces_++;
 							  break;
 							default:
+							  std::cout << "face geometry type is " << GeometryName(ReferenceElements<double,dim>::general(gt).type(i,1)) << std::endl;
 							  DUNE_THROW(GridError, "wrong geometry type in face");
 							}
 						  // write index through to coarser grid
