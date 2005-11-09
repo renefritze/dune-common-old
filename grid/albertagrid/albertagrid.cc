@@ -3822,6 +3822,7 @@ getMark( const EntityType & ep ) const
   return (this->template getRealEntity<0>(ep)).getElInfo()->el->mark;
 }
 
+//--mark
 template<int dim, int dimworld>
 inline bool AlbertaGrid < dim, dimworld >:: 
 mark( int refCount , const typename Traits::template Codim<0>::Entity & ep ) const
@@ -3841,13 +3842,13 @@ mark( int refCount , const typename Traits::template Codim<0>::Entity & ep ) con
 
     if( refCount > 0)
     {
-      elInfo->el->mark = 1;
+      elInfo->el->mark = refCount;
       return true;
     }
     if( refCount < 0)
     {
       this->setMark ( true );
-      elInfo->el->mark = -1;
+      elInfo->el->mark = refCount;
       return true;
     }
   }
