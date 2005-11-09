@@ -14,6 +14,7 @@
 #include "../common/defaultindexsets.hh"
 #include "../common/leafindexset.hh"
 #include "../common/sizecache.hh"
+#include "../common/intersectioniteratorwrapper.hh"
 
 //- Local includes
 #include "alu3dinclude.hh"
@@ -109,7 +110,7 @@ namespace Dune {
   {
     typedef ALU3dGrid<dim,dimworld,elType> Grid;
 
-    typedef Dune::IntersectionIterator<const GridImp, ALU3dGridIntersectionIterator> IntersectionIterator;
+    typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorWrapper> IntersectionIterator;
 
     typedef Dune::HierarchicIterator<const GridImp, ALU3dGridHierarchicIterator> HierarchicIterator;
 
@@ -521,18 +522,22 @@ namespace Dune {
     typedef ALU3dGridMakeableEntity<0,dim,const MyType> EntityImp;
     typedef ALUMemoryProvider< EntityImp > EntityProvider;
   
-    typedef ALU3dGridMakeableGeometry<dim-1,dimworld,const MyType> LGeometryImp;
-    typedef ALUMemoryProvider< LGeometryImp > GeometryProvider;
-  
+  public:    
+    typedef ALU3dGridIntersectionIterator<const MyType>
+      IntersectionIteratorImp;
+    typedef ALUMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
+  private:
+    friend class IntersectionIteratorWrapper< const MyType > ;
+    IntersectionIteratorProviderType & intersetionIteratorProvider() const { return interItProvider_; }
+    mutable IntersectionIteratorProviderType interItProvider_;
+    
     template <int codim> 
     ALU3dGridMakeableEntity<codim,dim,const MyType> * getNewEntity ( int level ) const;
 
     template <int codim>
     void freeEntity (ALU3dGridMakeableEntity<codim,dim,const MyType> * en) const;
   
-    mutable GeometryProvider geometryProvider_;
     mutable EntityProvider   entityProvider_;
-    //mutable VertexProvider vertexProvider_;
   
     // the reference element 
     ReferenceElementType referenceElement_;
@@ -571,13 +576,13 @@ namespace Dune {
       static ALU3dGridMakeableEntity<0,GridImp::dimension,const GridImp> * 
       getNewEntity (const GridImp & grid, EntityProviderType & ep, int level)
       {
-        return ep.getNewObjectEntity( grid, level);
+        return ep.getObject( grid, level);
       }
 
       template <class EntityProviderType>
       static void freeEntity( EntityProviderType & ep, EntityImp * e )
       {
-        ep.freeObjectEntity( e );
+        ep.freeObject( e );
       }
     };
 
