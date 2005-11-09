@@ -410,6 +410,8 @@ template<class DiscreteFunctionSpaceType>
 inline typename LocalFunctionAdapt < DiscreteFunctionSpaceType>::RangeFieldType & 
 LocalFunctionAdapt < DiscreteFunctionSpaceType>::operator [] (int num) 
 {
+  // check that storage (dofVec_) and mapper are in sync:
+  assert(dofVec_.size() == fSpace_.mapper().size());
   return (* (values_[num]));
 }
 
@@ -417,6 +419,8 @@ template<class DiscreteFunctionSpaceType>
 inline const typename LocalFunctionAdapt < DiscreteFunctionSpaceType>::RangeFieldType & 
 LocalFunctionAdapt < DiscreteFunctionSpaceType>::operator [] (int num) const
 { 
+  // check that storage (dofVec_) and mapper are in sync:
+  assert(dofVec_.size() == fSpace_.mapper().size());
   return (* (values_[num]));
 }
 
@@ -450,11 +454,12 @@ evaluateLocal (EntityType &en, const DomainType & x, RangeType & ret) const
   //  if(numOfDifferentDofs_ > 1) // i.e. polynom order > 0 
   // {
     ret = 0.0;
-    for(int i=0; i<numOfDifferentDofs_; i++)
+    for(int i=0; i<numOfDifferentDofs_; ++i)
     {
       fSpace_.evaluateLocal(i,en,x,tmp_);
-      for(int l=0; l<dimrange; l++)
+      for(int l=0; l<dimrange; ++l)
         ret[l] += (* (values_[i])) * tmp_[l];
+      //ret[l] += (* (values_[i*dimrange+l])) * tmp_[0];
     }
     //}
     //else 
@@ -578,6 +583,17 @@ init (const EntityType &en ) const
 
   return;
 } 
+
+template<class DiscreteFunctionSpaceType> 
+inline void LocalFunctionAdapt < DiscreteFunctionSpaceType>::
+assign(int numDof, const RangeType& dofs) 
+{
+  assert(numDof < numOfDifferentDofs_);
+  assert(false); // untested and most probably wrong
+  for (size_t i = 0; i < dimrange; ++i) {
+    *(values_[numDof + dimrange*i]) = dofs[i]; 
+  }
+}
 
 } // end namespace 
 
