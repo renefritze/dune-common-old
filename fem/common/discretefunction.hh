@@ -132,7 +132,7 @@ namespace Dune{
     void localFunction(const EntityType& en, LocalFunctionType& lf) const {
       asImp().localFunction(en, lf);
     } 
-  
+
   private:
     // Barton-Nackman trick 
     DiscreteFunctionType& asImp() 
