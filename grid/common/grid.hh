@@ -152,7 +152,8 @@ namespace Dune {
         should be used, i.e. globalIndex() or index() 
   */
   enum GridIndexType { GlobalIndex , //!< use globalIndex() of entity 
-                       LevelIndex    //!< use index() of entity 
+                       LevelIndex  ,  //!< use index() of entity 
+                       LeafIndex    //!< use index() of entity 
   };
         
 //************************************************************************
