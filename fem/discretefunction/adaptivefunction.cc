@@ -223,7 +223,7 @@ namespace Dune {
   operator[] (int num) 
   {
     assert(num >= 0 && num < numDofs());
-    return *values_[num/N][num%N];
+    return *values_[num/N][static_cast<size_t>(num%N)];
   }
 
   template <class ContainedFunctionSpaceImp, int N, DofStoragePolicy p>
@@ -233,7 +233,7 @@ namespace Dune {
   operator[] (int num) const 
   {
     assert(num >= 0 && num < numDofs());
-    return *values_[num/N][num%N];
+    return *values_[num/N][static_cast<size_t>(num%N)];
   }
 
   template <class ContainedFunctionSpaceImp, int N, DofStoragePolicy p>
@@ -274,7 +274,7 @@ namespace Dune {
     for (unsigned int i = 0; i < values_.size(); ++i) {
       // Assumption: scalar contained base functions
       bSet.evaluateScalar(i, x, cTmp_);
-      for (int j = 0; j < N; ++j) {
+      for (size_t j = 0; j < N; ++j) {
         result[j] += cTmp_[0]*(*values_[i][j]);
       }
     }
@@ -299,7 +299,8 @@ namespace Dune {
                 JacobianRangeType& result) const
   {
     enum { dim = EntityType::dimension };
-    typedef FieldMatrix<DofType, RangeType::size, RangeType::size> JacobianInverseType;
+    //typedef FieldMatrix<DofType, RangeType::size, RangeType::size> JacobianInverseType;
+    typedef FieldMatrix<DofType, dim, dim> JacobianInverseType;
     result *= 0.0;
 
     const BaseFunctionSetType& bSet = spc_.getBaseFunctionSet(en);
@@ -312,7 +313,7 @@ namespace Dune {
       bSet.jacobianScalar(i, x, cTmpGradRef_);
       jInv.umv(cTmpGradRef_[0], cTmpGradReal_[0]);
 
-      for (int j = 0; j < N; ++j) {
+      for (size_t j = 0; j < N; ++j) {
         // Assumption: ContainedDimRange == 1
         //cTmpGrad_[0] *= *values_[i][j];
         result[j].axpy(*values_[i][j], cTmpGradReal_[0]);
@@ -335,7 +336,7 @@ namespace Dune {
   template <class ContainedFunctionSpaceImp, int N, DofStoragePolicy p>
   void AdaptiveLocalFunction<CombinedSpace<ContainedFunctionSpaceImp, N, p> >::
   assign(int dofNum, const RangeType& dofs) {
-    for (int i = 0; i < N; ++i) {
+    for (size_t i = 0; i < N; ++i) {
       // Assumption: the local ordering is point based
       *values_[dofNum][i] = dofs[i];
     }
@@ -355,8 +356,8 @@ namespace Dune {
       spc_.getBaseFunctionSet(en).numDifferentBaseFunctions();
     values_.resize(numOfDof);
 
-    for (int i = 0; i < numOfDof; ++i) {
-      for (int j = 0; j < N; ++j) {
+    for (size_t i = 0; i < numOfDof; ++i) {
+      for (size_t j = 0; j < N; ++j) {
         values_[i][j] = &(dofVec_[spc_.mapToGlobal(en, i*N+j)]);
       } // end for j
     } // end for i
