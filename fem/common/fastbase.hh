@@ -50,8 +50,12 @@ template<class FunctionSpaceType>
 class FastBaseFunctionSet : 
    public BaseFunctionSetDefault<FastBaseFunctionSetTraits<FunctionSpaceType> >
 {
+public:
   typedef typename FunctionSpaceType::DomainType DomainType;
   typedef typename FunctionSpaceType::RangeType RangeType;
+  typedef typename FunctionSpaceType::RangeFieldType DofType;
+  typedef typename FunctionSpaceType::JacobianRangeType JacobianRangeType;
+  typedef std::vector<DofType> DofVectorType;
   enum { DimDomain = FunctionSpaceType::DimDomain }; 
   enum { DimRange  = FunctionSpaceType::DimRange  }; 
 
@@ -157,7 +161,14 @@ private:
   //! vector which holds the base function pointers 
   std::vector<BaseFunctionInterfaceType *> baseFunctionList_ ;
 
+  //! vector holding the cached evaluation of the base functions 
+  std::vector< std::vector< RangeType > > vecEvaluate_;
+  
+  //! for which waudrature are we holding precalculated values ;
+  IdentifierType evaluateQuad_[ numDiffOrd ];
+
   bool trulyVectorial_;
+
 private:
   //! method to navigate through the vector vecEvaluate, which holds
   //! precalculated values  
@@ -170,13 +181,7 @@ private:
       n = diffVariable[i] + i * DimDomain;
     
     return numQuadPoints*(numBaseFunctions()*n + baseFunct) + quadPt;   
-  };
-
-  //! vector holding the cached evaluation of the base functions 
-  std::vector< std::vector< RangeType > > vecEvaluate_;
-  
-  //! for which waudrature are we holding precalculated values ;
-  IdentifierType evaluateQuad_[ numDiffOrd ];
+  }
 
   //! init the vecEvaluate vector 
   template <int diffOrd, class QuadratureType >
