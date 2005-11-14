@@ -47,7 +47,6 @@ inline GrapeGridDisplay<GridType>::
   if(myLeafEndIt_) delete myLeafEndIt_;
 }
 
-
 //****************************************************************  
 //
 // --GridDisplay, Some Subroutines needed in display
@@ -84,7 +83,7 @@ el_update (GridIteratorType *it, DUNE_ELEM * he)
     he->has_children = 1;
     
     // know the type 
-    he->type = geomTypeConvert( geometry.type() , dim ); 
+    he->type = convertToGrapeType ( geometry.type() , dim ); 
     
     { 
       // set the vertex coordinates  
@@ -118,11 +117,14 @@ el_update (GridIteratorType *it, DUNE_ELEM * he)
       {
         assert( facecount >= 0 );
         assert( facecount < MAX_EL_FACE ); 
-
+        
         int num = nit.numberInSelf(); 
+        assert( num >= 0 );
+        assert( num < MAX_EL_FACE ); 
+
         if(num != lastElNum)
         {
-          he->bnd[facecount] = ( nit.boundary() ) ? -1 : 0;
+          he->bnd[num] = ( nit.boundary() ) ? -1 : 0;
           facecount++ ;
           lastElNum = num;
         }
@@ -132,8 +134,7 @@ el_update (GridIteratorType *it, DUNE_ELEM * he)
 
     {
       // for this type of element we have to swap the faces
-      if ( ( geometry.type() == hexahedron) || 
-           ((geometry.type() == cube) && (dim == 3)) )
+      if(he->type == g_hexahedron) 
       {
         int  help_bnd [MAX_EL_FACE];
         for(int i=0; i < MAX_EL_FACE; i++) help_bnd[i] = he->bnd[i] ;
