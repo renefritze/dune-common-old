@@ -40,7 +40,7 @@
 // Here: The 2d-version of the macros
 #include "uggrid/ugfunctions.hh"
 
-// UG defines a whole load of preprocessor macros.  ug_undef.hh undefines
+// UG defines a whole load of preprocessor macros.  ug_undefs.hh undefines
 // them all, so we don't get name clashes.
 #include "uggrid/ug_undefs.hh"
 #undef _2
@@ -49,8 +49,8 @@
 
 /* All macros set by UG have been unset.  This includes the macros that ensure
    single inclusion of headers.  We can thus include them again.  However, we
-   only want to include those headers that contain dimension-dependent stuff.
-   Therefore, we set a few single-inclusion defines manually before include
+   only want to include those headers again that contain dimension-dependent stuff.
+   Therefore, we set a few single-inclusion defines manually before including
    ugincludes.hh again.
 */
 //#define __COMPILER__
@@ -70,6 +70,7 @@
 // undef all macros defined by UG
 #include "uggrid/ug_undefs.hh"
 
+#undef _3
 #undef __PC__
 #undef FOR_DUNE
 
@@ -186,7 +187,9 @@ class UGGrid : public GridDefault  <dim, dimworld, double, UGGridFamily<dim,dimw
     friend class UGGridGlobalIdSet<UGGrid<dim,dimworld> >;
     friend class UGGridLocalIdSet<UGGrid<dim,dimworld> >;
 
-    template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
+    template <int codim_, PartitionIteratorType PiType_, class GridImp_>
+    friend class UGGridLeafIterator;
+    template <int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
     friend class Entity;
 
     /** \brief UGGrid is only implemented for 2 and 3 dimension */
@@ -262,7 +265,7 @@ public:
     //! one past the end on this level
     template<int codim, PartitionIteratorType PiType>
     typename Traits::template Codim<codim>::template Partition<PiType>::LeafIterator leafend() const {
-        return UGGridLeafIterator<codim,All_Partition, const UGGrid<dim,dimworld> >();
+        return UGGridLeafIterator<codim,PiType, const UGGrid<dim,dimworld> >();
     }
 
     /** \brief Number of grid entities per level and codim
@@ -299,16 +302,12 @@ public:
   int size (int level, int codim, GeometryType type) const
   {
 	return this->levelIndexSet(level).size(codim,type);
-	//DUNE_THROW(NotImplemented, "not implemented");
-	//return 0;
   }
 
   //! number of leaf entities per codim and geometry type in this process
   int size (int codim, GeometryType type) const
   {
 	return this->leafIndexSet().size(codim,type);
-	//DUNE_THROW(NotImplemented, "not implemented");
-	//return 0;
   }
 
     /** \brief Access to the GlobalIdSet */
@@ -422,6 +421,9 @@ public:
     void insertBoundarySegment(const std::vector<int> vertices,
                                const BoundarySegment<dimworld>* boundarySegment);
 
+    /** \brief Insert a vertex into the coarse grid */
+    void insertVertex(const FieldVector<double,dimworld>& pos);
+
     /** \brief Insert an element into the coarse grid
         \param type The GeometryType of the new element
         \param vertices The vertices of the new element, using the DUNE numbering
@@ -454,7 +456,7 @@ public:
     
     /** \brief The different forms of grid refinement that UG supports */
     enum RefinementType {
-        /** \brief New level consists only of the refined elements */
+        /** \brief New level consists only of the refined elements and the closure*/
         LOCAL, 
         /** \brief New level consists of the refined elements and the unrefined ones, too */
         COPY};
@@ -464,7 +466,7 @@ public:
         refinementType_ = type;
     }
 
-    /** \brief Collapses the grid hierarchy into a single grid */
+    /** \brief Collapses the grid hierarchy into a single grid level*/
     void collapse() {
         if (Collapse(multigrid_))
             DUNE_THROW(GridError, "UG" << dim << "d::Collapse() returned error code!");
@@ -476,10 +478,10 @@ public:
      */
     void globalRefine(int n);
   
+private:
     /** \brief UG multigrid, which contains the actual grid hierarchy structure */
     typename UGTypes<dimworld>::MultiGridType* multigrid_;
 
-private:
     /** \brief The classes implementing the geometry of the boundary segments */
     std::vector<const BoundarySegment<dimworld>*> boundarySegments_;
 
@@ -527,6 +529,11 @@ private:
 
     /** \brief A counter for producing a consecutive index for the boundary segments */
     int boundarySegmentCounter_;
+
+    /** \todo Can be removed once CreateDomain() is removed from the interface */
+public:
+    int numNodesOnBoundary_;
+private:
 
     /** \brief Number of UGGrids currently in use.
      *
