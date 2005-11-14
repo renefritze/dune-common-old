@@ -365,8 +365,7 @@ public:
         DUNE_THROW(NotImplemented, "local not implemented yet!");
     }
   
-  //! Returns true if the point is in the current element
-    /** \todo Not implemented yet! */
+    //! Returns true if the point is in the reference element
     bool checkInside(const FieldVector<UGCtype, 1>& local) const {
         return local[0]>=0 && local[0]<=1;  
 	}
