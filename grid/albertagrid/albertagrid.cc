@@ -3484,13 +3484,13 @@ globalRefine(int refCount)
     // mark all interior elements 
     for(LeafIt it = this->leafbegin(this->maxLevel()); it != endit; ++it)
     {
-      this->mark(refCount,*it);
+      this->mark(1,*it);
     }
 
     // mark all ghosts
     for(LeafIt it = leafbegin(maxLevel(),Ghost_Partition); it != endit; ++it)
     {
-      this->mark(refCount,*it);
+      this->mark(1,*it);
     }
 
     this->adapt();

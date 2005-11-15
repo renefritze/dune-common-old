@@ -445,3 +445,7 @@
   #undef INIT_GRD_UH
 #endif // INIT_GRD_UH
 
+#ifdef nil 
+  #undef nil 
+#endif
+
