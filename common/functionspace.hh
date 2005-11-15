@@ -43,6 +43,17 @@ public:
 
 };
 
+  template <class FunctionSpaceImp>
+  struct ToScalarFunctionSpace {};
+
+  template <
+    class DomainFieldImp, class RangeFieldImp, int dimDomain, int dimRange>
+  struct ToScalarFunctionSpace<
+    FunctionSpace<DomainFieldImp, RangeFieldImp, dimDomain, dimRange> >
+  {
+    typedef FunctionSpace<DomainFieldImp, RangeFieldImp, dimDomain, 1> Type;
+  };
+
 /** @} end documentation group */
 
 }
