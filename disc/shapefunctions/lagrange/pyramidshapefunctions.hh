@@ -223,7 +223,7 @@ namespace Dune
 		  pos[2]=1.0;
 		  break;
 		default:
-		  std::cout<<"wrong no of shape fns in Pyramid?"<<'\n';
+		  DUNE_THROW(RangeError, "wrong no of shape fns in Pyramid?");
 		  break;
 		}
 	   
@@ -297,7 +297,7 @@ namespace Dune
 	
 	      break;
 	    default:
-	      std::cout<<"wrong no of shape fns in Pyramid?"<<'\n';
+	      DUNE_THROW(RangeError, "wrong no of shape fns in Pyramid?");
 	      break;
 	    }
 	  return phi;
@@ -496,9 +496,10 @@ namespace Dune
 	      
 		  break;
 		default:
-		  std::cout<<"wrong no of shape fns in Pyramid?"<<'\n';
+          DUNE_THROW(RangeError, "wrong no of shape fns in Pyramid?");
 		  break;
 		}
+      return 0;
     }
 
 	//! consecutive number of associated dof within element
