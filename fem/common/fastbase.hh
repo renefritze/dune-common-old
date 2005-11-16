@@ -89,7 +89,7 @@ public:
   }
     
   //! return the number of base fucntions for this BaseFunctionSet  
-  int numDifferentBaseFunctions () const 
+  int numDifferentBaseFunctions () const DUNE_DEPRECATED 
   {
     return numOfDiffFct_; 
   }
