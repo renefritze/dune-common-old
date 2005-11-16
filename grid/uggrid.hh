@@ -472,6 +472,12 @@ public:
             DUNE_THROW(GridError, "UG" << dim << "d::Collapse() returned error code!");
     }
 
+    /** \brief Sets a vertex to a new position 
+
+    Changing a vertex' position changes its position on all grid levels!*/
+    void setPosition(typename Traits::template Codim<dim>::EntityPointer& e,
+                     const FieldVector<double, dimworld>& pos);
+
     /** \brief Does uniform refinement
      *
      * \param n Number of uniform refinement steps
