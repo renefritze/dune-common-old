@@ -1029,6 +1029,23 @@ private:
 };
 
 
+template<int dim, int dimworld>
+struct SGridFamily
+{
+  typedef GridTraits<dim,dimworld,Dune::SGrid<dim,dimworld>,
+                     SGeometry,SEntity,
+                     SEntityPointer,SLevelIterator,
+                     SIntersectionIterator,SHierarchicIterator,
+                     SLevelIterator,
+					 SGridLevelIndexSet<SGrid<dim,dimworld> >,
+					 SGridLevelIndexSetTypes<SGrid<dim,dimworld> >,
+					 SGridLeafIndexSet<SGrid<dim,dimworld> >,
+					 SGridLeafIndexSetTypes<SGrid<dim,dimworld> >,
+					 SGridGlobalIdSet<SGrid<dim,dimworld> >,
+					 bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits>,
+					 SGridGlobalIdSet<SGrid<dim,dimworld> >,
+					 bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits> > Traits;
+};
 
 
 //************************************************************************
@@ -1081,25 +1098,6 @@ private:
   All information is provided to allocate degrees of freedom in appropriate vector
   data structures (which are not part of this module).
  */
-
-template<int dim, int dimworld>
-struct SGridFamily
-{
-  typedef GridTraits<dim,dimworld,Dune::SGrid<dim,dimworld>,
-                     SGeometry,SEntity,
-                     SEntityPointer,SLevelIterator,
-                     SIntersectionIterator,SHierarchicIterator,
-                     SLevelIterator,
-					 SGridLevelIndexSet<SGrid<dim,dimworld> >,
-					 SGridLevelIndexSetTypes<SGrid<dim,dimworld> >,
-					 SGridLeafIndexSet<SGrid<dim,dimworld> >,
-					 SGridLeafIndexSetTypes<SGrid<dim,dimworld> >,
-					 SGridGlobalIdSet<SGrid<dim,dimworld> >,
-					 bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits>,
-					 SGridGlobalIdSet<SGrid<dim,dimworld> >,
-					 bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits> > Traits;
-};
-
 template<int dim, int dimworld>
 class SGrid : public GridDefault <dim,dimworld,sgrid_ctype,SGridFamily<dim,dimworld> >
 {
