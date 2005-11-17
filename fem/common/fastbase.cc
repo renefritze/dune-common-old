@@ -9,7 +9,8 @@ FastBaseFunctionSet(FunctionSpaceType& fuspace,
                     bool trulyVectorial) : 
   BaseFunctionSetDefault <FastBaseFunctionSetTraits<FunctionSpaceType> > (),
   vecEvaluate_( numDiffOrd ),
-  trulyVectorial_(trulyVectorial)
+  trulyVectorial_(trulyVectorial),
+  util_(DimRange)
 {
   for(int i=0; i<numDiffOrd; i++)
     evaluateQuad_[i] = DynamicType::undefined;
@@ -112,20 +113,6 @@ evaluateSingle(int baseFunct,
 
 template <class FunctionSpaceType>
 void FastBaseFunctionSet<FunctionSpaceType>::
-evaluateSet(const DomainType& xLocal,
-            const RangeType& factor,
-            DofVectorType& result) const 
-{
-  if (trulyVectorial_) {
-    BaseType::evaluateSet(xLocal, factor, result);
-  } else {
-    evaluateSetOptim(xLocal, factor, result);
-  }
-}  
-
-
-template <class FunctionSpaceType>
-void FastBaseFunctionSet<FunctionSpaceType>::
 evaluateGradientSingle(int baseFunct,
                        const DomainType& xLocal,
                        const JacobianRangeType& factor,
@@ -138,20 +125,6 @@ evaluateGradientSingle(int baseFunct,
   }
 }  
 
-
-template <class FunctionSpaceType>
-void FastBaseFunctionSet<FunctionSpaceType>::
-evaluateGradientSet(const DomainType& xLocal,
-                    const JacobianRangeType& factor,
-                    DofVectorType& result) const
-{
-  if (trulyVectorial_) {
-    BaseType::evaluateGradientSet(xLocal, factor, result);
-  } else {
-    evaluateGradientSetOptim(xLocal, factor, result);
-  }
-}  
-
 template <class FunctionSpaceType>
 void FastBaseFunctionSet<FunctionSpaceType>::
 evaluateSingleOptim(int baseFunct, 
@@ -159,16 +132,10 @@ evaluateSingleOptim(int baseFunct,
                     const RangeType& factor,
                     DofType& result) const 
 {
-
-}
-
-template <class FunctionSpaceType>
-void FastBaseFunctionSet<FunctionSpaceType>::
-evaluateSetOptim(const DomainType& xLocal,
-                 const RangeType& factor,
-                 DofVectorType& result) const 
-{
-
+  RangeType phi;
+  this->eval(util_.containedDof(baseFunct), xLocal, phi);
+  int comp = util_.component(baseFunct);
+  result = factor[comp]*phi[comp];
 }
 
 template <class FunctionSpaceType>
@@ -178,14 +145,10 @@ evaluateGradientSingleOptim(int baseFunct,
                             const JacobianRangeType& factor,
                             DofType& result) const
 {
+  JacobianRangeType gradPhi;
+  this->jacobian(util_.containedDof(baseFunct), xLocal, gradPhi);
+  int comp = util_.component(baseFunct);
 
+  result = gradPhi[comp]*factor[comp];
 }
 
-template <class FunctionSpaceType>
-void FastBaseFunctionSet<FunctionSpaceType>::
-evaluateGradientSetOptim(const DomainType& xLocal,
-                         const JacobianRangeType& factor,
-                         DofVectorType& result) const
-{
-
-}
