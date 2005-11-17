@@ -62,7 +62,12 @@ namespace Dune {
                   const DomainType& xLocal,
                   RangeType& phi) const;
 
-
+    template <int diffOrd, class QuadratureType>
+    void evaluate (int baseFunct, 
+                   const FieldVector<deriType, diffOrd> &diffVariable, 
+                   QuadratureType & quad, 
+                   int quadPoint, RangeType & phi ) const;
+      
   private:
     std::vector<BaseFunctionType*> baseFunctions_;
   };
@@ -123,6 +128,12 @@ namespace Dune {
                   const FieldVector<int, diffOrd>& diffVar,
                   const DomainType& xLocal,
                   RangeType& phi) const;
+
+    template <int diffOrd, class QuadratureType>
+    void evaluate (int baseFunct, 
+                   const FieldVector<deriType, diffOrd> &diffVariable, 
+                   QuadratureType & quad, 
+                   int quadPoint, RangeType & phi ) const;
 
     // * add those methods with quadratures as well
     DofType evaluateSingle(int baseFunct, 

@@ -19,6 +19,17 @@ namespace Dune {
     baseFunctions_[baseFunct]->evaluate(diffVar, xLocal, phi);
   }
 
+  template <class FunctionSpaceImp>
+  template <int diffOrd, class QuadratureType>
+  void StandardBaseFunctionSet<FunctionSpaceImp>::
+  evaluate(int baseFunct,
+           const FieldVector<int, diffOrd>& diffVar,
+           QuadratureType& quad, int quadPoint,
+           RangeType& phi) const 
+  {
+    evaluate(baseFunct, diffVar, quad.point(quadPoint), phi);
+  }
+
   //- class VectorialBaseFunctionSet
   template <class FunctionSpaceImp>
   int VectorialBaseFunctionSet<FunctionSpaceImp>::numBaseFunctions() const 
@@ -40,6 +51,17 @@ namespace Dune {
     
     phi *= 0.0;
     phi[util_.component(baseFunct)] = tmp[0];
+  }
+
+  template <class FunctionSpaceImp>
+  template <int diffOrd, class QuadratureType>
+  void VectorialBaseFunctionSet<FunctionSpaceImp>::
+  evaluate(int baseFunct,
+           const FieldVector<int, diffOrd>& diffVar,
+           QuadratureType& quad, int quadPoint,
+           RangeType& phi) const 
+  {
+    evaluate(baseFunct, diffVar, quad.point(quadPoint), phi);
   }
 
   template <class FunctionSpaceImp>
