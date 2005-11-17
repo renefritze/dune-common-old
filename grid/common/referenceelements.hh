@@ -607,6 +607,12 @@ namespace Dune
         }
       subsizes[sizes[0]-1][0][dim]=node;
 
+      // the simplex itself has one simplex ;)
+      subsizes[0][0][0]=1;
+      
+      // every vertex entity has one sub entity --> itself 
+      for (int k=0;k<MAXE;++k) subsizes[k][dim][dim]=1; 
+
       //++++++++++++++++
       if(dim==1)// line
         {
@@ -625,6 +631,7 @@ namespace Dune
           // triangle  has 2 vertices on each  edge
           for (int k=0;k<3;++k)
             subsizes[k][1][2]=2; 
+          
           // subentity indices
           // node indices on element
           for(int i=0;i<subsizes[0][0][2];++i)
@@ -935,6 +942,9 @@ namespace Dune
       subsizes[0][0][3]=6; 
       subsizes[0][0][2]=9; 
       subsizes[0][0][1]=5; 
+
+      // a prism itself  has one prism ;) 
+      subsizes[0][0][0]=1; 
  
       // face indices according to that given in 
       //http://hal.iwr.uni-heidelberg.de/dune/doc/appl/refelements.html
@@ -1268,6 +1278,9 @@ namespace Dune
       subsizes[0][0][3]=5; 
       subsizes[0][0][2]=8; 
       subsizes[0][0][1]=5; 
+      
+      // a pyramid itself has one pyramid ;) 
+      subsizes[0][0][0]=1; 
  
        // face indices according to that given in 
       //http://hal.iwr.uni-heidelberg.de/dune/doc/appl/refelements.html
