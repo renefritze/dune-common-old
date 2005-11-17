@@ -270,19 +270,6 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid,
 {
     bool isTetraGrid = am->findData("Tetrahedra", HxINT32, 4, "Nodes");
 
-    // call configureCommand and newCommand
-    grid.makeNewUGMultigrid();
-
-    // If we are in a parallel setting and we are _not_ the master
-    // process we can exit here.
-#ifdef ModelP
-    if (PPIF::me!=0) {
-        delete(am);
-        grid.createend();
-        return;
-    }
-#endif
-
     float* am_node_coordinates_float = NULL;
     double* am_node_coordinates_double = NULL;
     
@@ -693,19 +680,6 @@ void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
         
     }
 
-    // call configureCommand and newCommand
-    grid.makeNewUGMultigrid();
-
-    // If we are in a parallel setting and we are _not_ the master
-    // process we can exit here.
-#ifdef ModelP
-    if (PPIF::me!=0) {
-        delete(am);
-        grid.createend();
-        return;
-    }
-#endif
-    
   /* 
      All Boundary nodes are  assumed to be inserted already.
      We just have to insert the inner nodes and the elements 
