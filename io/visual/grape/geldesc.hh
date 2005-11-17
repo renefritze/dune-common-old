@@ -10,7 +10,8 @@ typedef ELEMENT3D   ELEMENT;
 typedef HMESH3D     HMESH;
 typedef MESH3D      GRAPEMESH;
 typedef GENMESH3D   GENMESHnD;
-typedef ELEMENT3D_DESCRIPTION ELEMENT_DESCRIPTION;
+typedef HELEMENT3D_DESCRIPTION H_ELEMENT_DESCRIPTION;
+typedef ELEMENT3D_DESCRIPTION  ELEMENT_DESCRIPTION;
 typedef F_HDATA3D    F_DATA;
 typedef F_HEL_INFO3D F_EL_INFO;
 #define HMesh       HMesh3d
@@ -22,7 +23,8 @@ typedef ELEMENT2D   ELEMENT;
 typedef HMESH2D     HMESH;
 typedef GENMESH2D   GENMESHnD;
 typedef MESH2D      GRAPEMESH;
-typedef ELEMENT2D_DESCRIPTION ELEMENT_DESCRIPTION;
+typedef HELEMENT2D_DESCRIPTION H_ELEMENT_DESCRIPTION;
+typedef ELEMENT2D_DESCRIPTION  ELEMENT_DESCRIPTION;
 typedef F_HDATA2D    F_DATA;
 typedef F_HEL_INFO2D F_EL_INFO;
 #define HMesh       HMesh2d
@@ -33,9 +35,14 @@ typedef F_HEL_INFO2D F_EL_INFO;
 /**************************************************************************/
 /*  element types, see dune/grid/common/grid.hh and grapegriddisplay.hh */
 enum GR_ElementType 
-    {gr_vertex=0,gr_line=1, gr_triangle=2, gr_quadrilateral=3,gr_tetrahedron=4,
-     gr_pyramid=5, gr_prism=6, gr_hexahedron=7,gr_iso_triangle=8, gr_iso_quadrilateral=9, 
+    {gr_vertex=6,gr_line=7, 
+     // here consecutive numbering from zero that this numbers can be used
+     // in an array starting from 0 
+     gr_triangle=0, gr_quadrilateral=1,gr_tetrahedron=2,
+     gr_pyramid=3, gr_prism=4, gr_hexahedron=5,
+     gr_iso_triangle=8, gr_iso_quadrilateral=9, 
      gr_unknown=127};
+enum { numberOfUsedGrapeElementTypes = 6 };
 
 /**************************************************************************/
 
@@ -83,9 +90,9 @@ struct dune_dat
 
 static HELEMENT2D_DESCRIPTION triangle_description;
 
-static double triangle_local_coordinate_vector_0[3] = {1.,0.,0.};
-static double triangle_local_coordinate_vector_1[3] = {0.,1.,0.};
-static double triangle_local_coordinate_vector_2[3] = {0.,0.,0.};
+static double triangle_local_coordinate_vector_0[3] = {0.,0.,0.};
+static double triangle_local_coordinate_vector_1[3] = {1.,0.,0.};
+static double triangle_local_coordinate_vector_2[3] = {0.,1.,0.};
 
 static G_CONST double *triangle_local_coordinate_system[3] = {triangle_local_coordinate_vector_0,
                triangle_local_coordinate_vector_1,
@@ -100,7 +107,7 @@ static G_CONST double *triangle_local_coordinate_system[3] = {triangle_local_coo
 0--------1                  1----2 2----0
 */
 
-
+// NOTE: To be revised 
 static VINHERIT inheritance_rule_in_child_0[3]; 
 static VINHERIT inheritance_rule_in_child_1[3];
 
@@ -207,7 +214,7 @@ inline static void coord2world_3d(HELEMENT3D * e, const double * coord,
 /*  Eckpunkte :             
  *
  *
- *   (0,1)  2---------3  (1,1)
+ *   (0,1)  3---------2  (1,1)
  *          |         |                
  *          |         |              
  *          |         |                
@@ -221,10 +228,10 @@ inline static void coord2world_3d(HELEMENT3D * e, const double * coord,
 
 static HELEMENT2D_DESCRIPTION quadrilateral_description;
 
-static double quadrilateral_local_coordinate_vector_0[2] = {0.,0.};
-static double quadrilateral_local_coordinate_vector_1[2] = {1.,0.};
-static double quadrilateral_local_coordinate_vector_2[2] = {0.,1.};
-static double quadrilateral_local_coordinate_vector_3[2] = {1.,1.};
+static double quadrilateral_local_coordinate_vector_0[3] = {0.,0.,0.};
+static double quadrilateral_local_coordinate_vector_1[3] = {1.,0.,0.};
+static double quadrilateral_local_coordinate_vector_2[3] = {1.,1.,0.};
+static double quadrilateral_local_coordinate_vector_3[3] = {0.,1.,0.};
 
 static G_CONST double *quadrilateral_local_coordinate_system[4] = {quadrilateral_local_coordinate_vector_0,
     quadrilateral_local_coordinate_vector_1,quadrilateral_local_coordinate_vector_2,
@@ -533,7 +540,7 @@ inline void setupReferenceElements()
 {
     /* fill the helement description in 2D*/
 
-    triangle_description.dindex             = 2; // index of description
+    triangle_description.dindex             = 0; // index of description
     triangle_description.number_of_vertices = 3;
     /* dimension of local coords */
     triangle_description.dimension_of_coord = GRAPE_DIM;
@@ -546,7 +553,7 @@ inline void setupReferenceElements()
     triangle_description.boundary           = triangle_boundary;
 
 
-    quadrilateral_description.dindex             = 3; // index of description
+    quadrilateral_description.dindex             = 1; // index of description
     quadrilateral_description.number_of_vertices = 4;
     quadrilateral_description.dimension_of_coord = GRAPE_DIM;
     quadrilateral_description.coord              = quadrilateral_local_coordinate_system;
@@ -559,7 +566,7 @@ inline void setupReferenceElements()
 
     /* fill the helement description in 3D*/
 
-    tetra_description.dindex             = 4; // index of description
+    tetra_description.dindex             = 2; // index of description
     tetra_description.number_of_vertices = 4;
     tetra_description.number_of_polygons = 4; // i.e. number of faces 
     tetra_description.polygon_length = tetra_polygon_length;
@@ -578,7 +585,7 @@ inline void setupReferenceElements()
     tetra_description.coord_of_parent              = NULL;
 
     /* pyramid */
-    pyra_description.dindex             = 5; // index of description , see element type 
+    pyra_description.dindex             = 3; // index of description , see element type 
     pyra_description.number_of_vertices = 5;
     pyra_description.number_of_polygons = 5; // i.e. number of faces 
     pyra_description.polygon_length     = pyra_polygon_length;   
@@ -598,7 +605,7 @@ inline void setupReferenceElements()
 
     
     /* prism */
-    prism_description.dindex             = 6; // index of description 
+    prism_description.dindex             = 4; // index of description 
     prism_description.number_of_vertices = 6; 
     prism_description.number_of_polygons = 5; // i.e. number of faces 
     prism_description.polygon_length     = prism_polygon_length;   
@@ -617,7 +624,7 @@ inline void setupReferenceElements()
     prism_description.coord_of_parent              = NULL;
 
     /* Hexahedrons */
-    cube_description.dindex             = 7; // index of description 
+    cube_description.dindex             = 5; // index of description 
     cube_description.number_of_vertices = 8;
     cube_description.number_of_polygons = 6; // i.e. number of faces 
     cube_description.polygon_length     = cube_polygon_length;   
@@ -647,14 +654,14 @@ inline void setupReferenceElements()
 }
 
 //vector holding the descriptions enumerated after it's index 
-static ELEMENT_DESCRIPTION * elementDescriptions[8] = { 
-  0,0,
-  (ELEMENT_DESCRIPTION *)&triangle_description,
-  (ELEMENT_DESCRIPTION *)&quadrilateral_description,
-  (ELEMENT_DESCRIPTION *)&tetra_description,
-  (ELEMENT_DESCRIPTION *)&pyra_description,
-  (ELEMENT_DESCRIPTION *)&prism_description,
-  (ELEMENT_DESCRIPTION *)&cube_description
+static H_ELEMENT_DESCRIPTION *
+elementDescriptions[numberOfUsedGrapeElementTypes] = { 
+  (H_ELEMENT_DESCRIPTION *)&triangle_description,
+  (H_ELEMENT_DESCRIPTION *)&quadrilateral_description,
+  (H_ELEMENT_DESCRIPTION *)&tetra_description,
+  (H_ELEMENT_DESCRIPTION *)&pyra_description,
+  (H_ELEMENT_DESCRIPTION *)&prism_description,
+  (H_ELEMENT_DESCRIPTION *)&cube_description
 };
 
 // the mapping of the reference elements 
@@ -670,7 +677,8 @@ static const int dune2GrapeQuadrilateral[MAX_EL_DOF] = {0,1,3,2,4,5,6,7};
 static const int dune2GrapeHexahedron[MAX_EL_DOF] = {0,1,3,2,4,5,7,6}; 
 
 // mapping from dune to grape 
-static const int * dune2GrapeVertex[8] = { 0 , 0 ,
+static const int * 
+dune2GrapeVertex[numberOfUsedGrapeElementTypes] = {
   dune2GrapeTriangle ,
   dune2GrapeQuadrilateral ,
   dune2GrapeTetrahedron,
@@ -679,4 +687,10 @@ static const int * dune2GrapeVertex[8] = { 0 , 0 ,
   dune2GrapeHexahedron 
 };
 
+static H_ELEMENT_DESCRIPTION * getElementDescription( int type ) 
+{
+  assert( type >= 0 );
+  assert( type <  numberOfUsedGrapeElementTypes );
+  return elementDescriptions[type];
+}
 #endif
