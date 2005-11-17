@@ -4,6 +4,11 @@
 //- system includes 
 #include <vector>
 
+//- dune includes
+#include <dune/grid/common/gridpart.hh>
+#include <dune/fem/lagrangebase.hh>
+#include <dune/fem/dfadapt.hh>
+
 //- local includes 
 #include "grapegriddisplay.hh"
 
@@ -41,16 +46,21 @@ public:
 
 public:
   //! Constructor, make a GrapeDataDisplay for given grid and myRank = -1
-  inline GrapeDataDisplay(GridType &grid); 
+  inline GrapeDataDisplay(const GridType &grid); 
   
   //! Constructor, make a GrapeDataDisplay for given grid
-  inline GrapeDataDisplay(GridType &grid, const int myrank);
+  inline GrapeDataDisplay(const GridType &grid, const int myrank);
   
   inline ~GrapeDataDisplay();
 
   //! Calls the display of the grid and draws the discrete function
   //! if discretefunction is NULL, then only the grid is displayed 
   inline void dataDisplay(DiscFuncType &func, bool vector = false);
+
+  //! Calls the display of the grid and draws the discrete function
+  //! if discretefunction is NULL, then only the grid is displayed 
+  template <class VectorPointerType>
+  inline void displayVector(const VectorPointerType * vector);
 
   //! add discrete function to display  
   inline void addData(DiscFuncType &func, const DATAINFO * , double time );
@@ -161,6 +171,28 @@ private:
   }
 };
 
+template <int polOrd>
+struct GrapeVectorDisplay 
+{
+  template <class GridType, class VectorPointerType> 
+  static void 
+  display(const GridType & grid, const VectorPointerType * vector )
+  {
+    enum { dim = GridType :: dimension };
+    typedef FunctionSpace <VectorPointerType ,
+      VectorPointerType, dim, 1 >  FuncSpaceType;
+
+    typedef typename GridType :: Traits:: LeafIndexSet LeafSet; 
+    typedef DefaultGridPart<GridType,LeafSet> GridPartType;
+    typedef LagrangeDiscreteFunctionSpace
+      < FuncSpaceType , GridPartType , polOrd > FunctionSpaceType;
+    typedef DFAdapt< FunctionSpaceType > DiscreteFunctionType;
+    
+    GrapeDataDisplay < GridType , DiscreteFunctionType > disp(grid);
+    disp.displayVector( vector );
+  }
+};
+  
 } // end namespace Dune
 
 #include "grape/grapedatadisplay.cc"
