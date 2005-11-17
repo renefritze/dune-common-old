@@ -86,6 +86,9 @@ public:
     asImp().jacobianLocal(en,x,ret);
   }
 
+  void assign(int dofNum, const RangeType& dofs) {
+    asImp().assign(dofNum, dofs);
+  }
 private:
   //! Barton-Nackman trick 
   LocalFunctionImp& asImp() 
