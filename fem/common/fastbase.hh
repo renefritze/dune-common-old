@@ -23,8 +23,8 @@ class FastBaseFunctionSet;
 
 template <class FunctionSpaceImp>
 struct FastBaseFunctionSetTraits {
-  typedef FunctionSpaceImp DiscreteFunctionSpaceType;
-  typedef FastBaseFunctionSet<DiscreteFunctionSpaceType> BaseFunctionSetType;
+  typedef FunctionSpaceImp FunctionSpaceType;
+  typedef FastBaseFunctionSet<FunctionSpaceType> BaseFunctionSetType;
   
 };
 
