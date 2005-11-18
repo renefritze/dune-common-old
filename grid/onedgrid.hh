@@ -343,7 +343,7 @@ public:
      *
      * \return false, which is not compliant with the official specification!
      */
-    bool mark(int refCount, typename Traits::template Codim<0>::EntityPointer& e );
+    bool mark(int refCount, const typename Traits::template Codim<0>::EntityPointer& e );
 
     //! Triggers the grid refinement process
     bool adapt();
