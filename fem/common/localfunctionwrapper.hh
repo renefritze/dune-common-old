@@ -28,18 +28,20 @@ private:
   public:
   //! constructor 
   LocalFunctionStorage (const DiscreteFunctionType & df) 
-    : df_(df) , obj_(0,0) {}
+    : df_(df) , obj_(0,0), count_(0) {}
 
   //! delete all objects on stack 
   ~LocalFunctionStorage ()
   {
+    assert(count_ == 0);
+
     while ( !lfStack_.empty() )
     {
       obj_ = lfStack_.top();
       lfStack_.pop();
-      if( obj_.first  ) delete obj_.first; 
+      delete obj_.first; 
       obj_.first = 0;
-      if( obj_.second ) delete obj_.second;
+      delete obj_.second;
       obj_.second = 0;
     }
   }
@@ -47,6 +49,8 @@ private:
   //! get local function object
   StackStorageType & getObject () 
   {
+    ++count_;
+   
     if( lfStack_.empty() )
     {
       // first pointer is the local function pointer 
@@ -65,6 +69,7 @@ private:
   //! push local function to stack 
   void freeObject ( StackStorageType & obj)
   {
+    --count_;
     lfStack_.push(obj);
   }
   
@@ -72,6 +77,8 @@ private:
   //! prohibited methods 
   LocalFunctionStorage ( const MyType & c);// : df_(c.df_) {}; 
   MyType & operator = ( const MyType & c ); // { return *this; }
+
+  int count_;
 };
 
 template < class DFTraits > class DiscreteFunctionDefault;
@@ -156,6 +163,7 @@ public:
     removeObj();
   }
 
+private:
   //! Assignment operator
   LocalFunctionWrapper& operator=(const LocalFunctionWrapper& org) 
   {
@@ -168,7 +176,7 @@ public:
     }
     return *this;
   }
-
+public:
   //! access to dof number num, all dofs of the dof entity
   RangeFieldType & operator [] (int num) { return localFunc()[num]; }
   
