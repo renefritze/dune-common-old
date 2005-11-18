@@ -3518,7 +3518,14 @@ template < int dim, int dimworld >
 inline bool AlbertaGrid < dim, dimworld >::postAdapt()
 {
   isMarked_ = false;
-  if(leafIndexSet_) leafIndexSet_->compress();
+  if(leafIndexSet_) 
+  { 
+    leafIndexSet_->compress();
+    // the number of leaf elements is store in mesh 
+    // check that they are the same 
+    assert( mesh_->n_elements == leafIndexSet_->size(0) );
+  }
+  
   return wasChanged_;
 }
 
@@ -4127,10 +4134,10 @@ inline void AlbertaGrid < dim, dimworld >::calcExtras ()
     if(levelIndexVec_[i]) (*levelIndexVec_[i]).calcNewIndex();
 
   if( leafIndexSet_ ) (*leafIndexSet_).resize();
-  
+    
   // this is done in postAdapt
   //if( leafIndexSet_ ) (*leafIndexSet_).compress();
-
+  
   if(sizeCache_) delete sizeCache_;
   sizeCache_ = new SizeCacheType (*this,true);
   
@@ -4526,7 +4533,7 @@ fillElInfo(int ichild, int actLevel , const ALBERTA EL_INFO *elinfo_old,
   {
     // allow to go down on neighbour more than once 
     // if the following condition is satisfied 
-    const bool leafLevel = ((el->child[0] == 0) && (elinfo->level < actLevel));
+    const bool leafLevel = ((el->child[0] == 0) || (elinfo->level < actLevel));
     firstNeigh (ichild,elinfo_old,elinfo,leafLevel);
     secondNeigh(ichild,elinfo_old,elinfo,leafLevel);
     thirdNeigh (ichild,elinfo_old,elinfo,leafLevel);
