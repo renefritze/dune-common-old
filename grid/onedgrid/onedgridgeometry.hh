@@ -132,7 +132,7 @@ public:
     }
 
     //! The Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix<OneDCType,mydim,mydim>& jacobianInverse (const FieldVector<OneDCType, mydim>& local) const {
+    const FieldMatrix<OneDCType,mydim,mydim>& jacobianInverseTransposed (const FieldVector<OneDCType, mydim>& local) const {
         jacInverse_[0][0] = 1 / (target_->vertex_[1]->pos_[0] - target_->vertex_[0]->pos_[0]);
         return jacInverse_;
     }

@@ -20,7 +20,7 @@ struct OneDGridLevelIteratorFactory<1>
     template <Dune::PartitionIteratorType PiType>
     static Dune::OneDGridLevelIterator<1,PiType, const Dune::OneDGrid<1,1> > 
     lbegin(const Dune::OneDGrid<1,1> * g, int level) {
-    if (level<0 || level>g->maxlevel())
+    if (level<0 || level>g->maxLevel())
         DUNE_THROW(Dune::GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
     return Dune::OneDGridLevelIterator<1,PiType, const Dune::OneDGrid<1,1> >(g->vertices[level].begin);
@@ -34,7 +34,7 @@ struct OneDGridLevelIteratorFactory<0>
     template <Dune::PartitionIteratorType PiType>
     static Dune::OneDGridLevelIterator<0,PiType, const Dune::OneDGrid<1,1> > 
     lbegin(const Dune::OneDGrid<1,1> * g, int level) {
-    if (level<0 || level>g->maxlevel())
+    if (level<0 || level>g->maxLevel())
         DUNE_THROW(Dune::GridError, "LevelIterator in nonexisting level " << level << " requested!");
 
     return Dune::OneDGridLevelIterator<0,PiType, const Dune::OneDGrid<1,1> >(g->elements[level].begin);
@@ -176,7 +176,7 @@ template <int codim>
 typename Dune::OneDGrid<dim,dimworld>::Traits::template Codim<codim>::LevelIterator
 Dune::OneDGrid<dim,dimworld>::lend(int level) const
 {
-    if (level<0 || level>maxlevel())
+    if (level<0 || level>maxLevel())
         DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
     
     OneDGridLevelIterator<codim,All_Partition, const Dune::OneDGrid<dim,dimworld> > it(0);
@@ -196,7 +196,7 @@ template <int codim, Dune::PartitionIteratorType PiType>
 typename Dune::OneDGrid<dim,dimworld>::Traits::template Codim<codim>::template Partition<PiType>::LevelIterator
 Dune::OneDGrid<dim,dimworld>::lend(int level) const
 {
-    if (level<0 || level>maxlevel())
+    if (level<0 || level>maxLevel())
         DUNE_THROW(GridError, "LevelIterator in nonexisting level " << level << " requested!");
     
     OneDGridLevelIterator<codim,PiType, const Dune::OneDGrid<dim,dimworld> > it(0);
@@ -289,7 +289,7 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
     bool changedGrid = false;
 
     // remove all elements that have been marked for coarsening
-    for (int i=1; i<=maxlevel(); i++) {
+    for (int i=1; i<=maxLevel(); i++) {
 
         for (eIt = elements[i].begin; eIt!=NULL; eIt = eIt->succ_) {
  
@@ -336,7 +336,7 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
     //  In that case add another level
     // /////////////////////////////////////////////////////////////////////////
     bool toplevelRefinement = false;
-    for (eIt = elements[maxlevel()].begin; eIt!=NULL; eIt=eIt->succ_) 
+    for (eIt = elements[maxLevel()].begin; eIt!=NULL; eIt=eIt->succ_) 
         if (eIt->adaptationState == REFINED) {
             toplevelRefinement = true;
             break;
@@ -352,7 +352,7 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
     // //////////////////////////////
     // refine all marked elements
     // //////////////////////////////
-    int oldMaxlevel = (toplevelRefinement) ? maxlevel()-1 : maxlevel();
+    int oldMaxlevel = (toplevelRefinement) ? maxLevel()-1 : maxLevel();
     for (int i=0; i<=oldMaxlevel; i++) {
 
         for (eIt = elements[i].begin; eIt!=NULL; eIt = eIt->succ_) {
@@ -453,8 +453,8 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
     }
 
     // delete uppermost level if it doesn't contain elements anymore
-    if (elements[maxlevel()].size()==0) {
-        assert(vertices[maxlevel()].size()==0);
+    if (elements[maxLevel()].size()==0) {
+        assert(vertices[maxLevel()].size()==0);
         elements.pop_back();
         vertices.pop_back();
     }
@@ -464,7 +464,7 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
     // by copying elements
     if (refinementType_ == COPY) {
         
-        for (int i=0; i<maxlevel(); i++) {
+        for (int i=0; i<maxLevel(); i++) {
             
             OneDEntityImp<1>* eIt;
             for (eIt = elements[i].begin; eIt!=NULL; eIt = eIt->succ_) {
@@ -552,11 +552,11 @@ bool Dune::OneDGrid<dim,dimworld>::adapt()
 template < int dim, int dimworld >
 void Dune::OneDGrid < dim, dimworld >::setIndices()
 {
-    for (int i=levelIndexSets_.size(); i<maxlevel()+1; i++)
+    for (int i=levelIndexSets_.size(); i<maxLevel()+1; i++)
       levelIndexSets_.push_back(0);
-      //    levelIndexSets_.resize(maxlevel()+1);
+      //    levelIndexSets_.resize(maxLevel()+1);
 
-    for (int i=0; i<=maxlevel(); i++)
+    for (int i=0; i<=maxLevel(); i++)
       if (levelIndexSets_[i])
         levelIndexSets_[i]->update(*this, i);
 
@@ -570,8 +570,8 @@ template <int dim, int dimworld>
 void Dune::OneDGrid<dim,dimworld>::globalRefine(int refCount)
 {
    // mark all entities for grid refinement
-    typename Traits::template Codim<0>::LevelIterator iIt    = lbegin<0>(maxlevel());
-    typename Traits::template Codim<0>::LevelIterator iEndIt = lend<0>(maxlevel());
+    typename Traits::template Codim<0>::LevelIterator iIt    = lbegin<0>(maxLevel());
+    typename Traits::template Codim<0>::LevelIterator iEndIt = lend<0>(maxLevel());
 
     for (; iIt!=iEndIt; ++iIt)
         mark(1, iIt);
