@@ -478,6 +478,13 @@ convert2FV(const alu3d_ctype (&p)[3]) const {
   return result;
 }
 
+template <class GridImp>
+inline int 
+ALU3dGridIntersectionIterator<GridImp>::
+level() const {
+  assert( item_ );
+  return item_->level();
+}
 
 /*************************************************************************
  #       ######  #    #  ######  #          #     #####  ######  #####
@@ -496,7 +503,7 @@ inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   : ALU3dGridEntityPointer<codim,GridImp> (grid,level)
   , index_(-1) 
   , level_(level)
-  , isCopy_ (false)
+  , isCopy_ (0)
 {
   IteratorType * it = new IteratorType ( this->grid_ , vxList , level_ );
   iter_.store( it );
@@ -518,7 +525,7 @@ inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   : ALU3dGridEntityPointer<codim,GridImp> (grid ,level)
   , index_(-1) 
   , level_(level)
-  , isCopy_ (false)
+  , isCopy_ (0)
 {
   this->done();
 }
@@ -530,10 +537,10 @@ inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   , index_( org.index_ ) 
   , level_( org.level_ )
   , iter_ ( org.iter_ )
-  , isCopy_(true)
+  , isCopy_(org.isCopy_+1)
 {
-  // dont copy a copy of a copy of a copy of a copy 
-  assert( ! org.isCopy_ );
+  // don't copy a copy of a copy of a copy of a copy 
+  assert( org.isCopy_ < 3 );
   
   if(index_ >= 0)
   {
@@ -574,7 +581,7 @@ ALU3dGridLeafIterator(const GridImp &grid, int level,
   : ALU3dGridEntityPointer <codim,GridImp> ( grid,level) 
   , index_(-1) 
   , level_(level)
-  , isCopy_ (false)
+  , isCopy_ (0)
 {
   if(!end) 
   {
@@ -652,10 +659,10 @@ ALU3dGridLeafIterator(const ALU3dGridLeafIterator<cdim, pitype, GridImp> &org)
  , index_(org.index_) 
  , level_(org.level_)
  , iter_ ( org.iter_ ) 
- , isCopy_ (true)
+ , isCopy_ (org.isCopy_+1)
 { 
   // dont copy a copy of a copy of a copy of a copy 
-  assert( ! org.isCopy_ );
+  assert( org.isCopy_  < 3 );
   
   if(index_ >= 0)
   {

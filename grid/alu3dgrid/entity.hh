@@ -395,6 +395,7 @@ template<int cd, class GridImp>
 class ALU3dGridEntityPointer : 
 public EntityPointerDefault <cd, GridImp, ALU3dGridEntityPointer<cd,GridImp> >
 {
+  typedef ALU3dGridEntityPointer <cd,GridImp> ThisType;
   enum { dim       = GridImp::dimension };
   enum { dimworld  = GridImp::dimensionworld };
     
@@ -442,8 +443,11 @@ public:
 
   //! has to be called when iterator is finished
   void done (); 
-  
+
 protected:
+  // not allowed 
+  ThisType & operator = (const ALU3dGridEntityPointerType & org);
+    
   // reference to grid 
   const GridImp & grid_;  
 

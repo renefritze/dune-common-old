@@ -807,6 +807,9 @@ public:
   //! coordinates for higher order boundary 
   NormalType & integrationOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
 
+  //! return level of iterator 
+  int level () const;
+
 private:
   // set interator to end iterator 
   void done () ;
@@ -934,7 +937,7 @@ private:
   ALUGridSpace::AutoPointer< IteratorType > iter_;
 
   // true if iterator is already a copy 
-  bool isCopy_; 
+  int isCopy_; 
 };
 
 //********************************************************************
@@ -993,7 +996,7 @@ private:
   ALU3DSPACE AutoPointer < IterInterface > iter_;
 
   // true if iterator is already a copy 
-  bool isCopy_; 
+  int isCopy_; 
 };
 
 // - HierarchicIteraor
@@ -1003,6 +1006,7 @@ public ALU3dGridEntityPointer<0,GridImp> ,
 public HierarchicIteratorDefault <GridImp,ALU3dGridHierarchicIterator>
 {
   enum { dim = GridImp::dimension };
+  typedef ALU3dGridHierarchicIterator<GridImp> ThisType;
 public:
   typedef typename GridImp::template Codim<0>::Entity Entity;
   typedef typename GridImp::ctype ctype;
@@ -1015,20 +1019,15 @@ public:
   //! the normal Constructor
   ALU3dGridHierarchicIterator(const ALU3dGridHierarchicIterator<GridImp> &org);
     
-  //! the Destructor 
-  //~ALU3dGridHierarchicIterator();
- 
   //! increment
   void increment();
 
-  /*
-  //! equality
-  bool equals (const ALU3dGridHierarchicIterator<GridImp>& i) const;
-
-  //! dereferencing
-  Entity & dereference() const;
-  */
-
+  //! the normal Constructor
+  ThisType & operator = (const ALU3dGridHierarchicIterator<GridImp> &org)
+  { 
+    return *this; 
+  };
+  
 private:
   //! return reference to EntityPointers entity_
   EntityImp & myEntity () { return (*(this->entity_)); }
