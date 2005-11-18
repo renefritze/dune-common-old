@@ -2,8 +2,10 @@
 #define DUNE_BASEFUNCTIONS_HH
 
 #include <dune/common/mapping.hh>
+#include <dune/common/matrix.hh>
+#include <dune/fem/feop/spmatrix.hh>
 
-#include <dune/quadrature/common/quadrature.hh>
+#include <dune/quadrature/fixedorder.hh>
 
 namespace Dune{
 
@@ -75,6 +77,7 @@ public:
   virtual void evaluate ( const FieldVector<deriType, 2> &diffVariable, 
                           const DomainType & , RangeType &) const = 0;
 
+  virtual int order() const { return -1; }
 };
 
 /** @} end documentation group */
@@ -122,7 +125,6 @@ public:
   enum { DimDomain = FunctionSpaceType::DimDomain };
   enum { DimRange  = FunctionSpaceType::DimRange  };
   
-  //typedef  Quadrature < FunctionSpaceType > QuadratureType ;
   typedef BaseFunctionInterface<FunctionSpaceType> BaseFunctionType;
 
 public:
@@ -154,13 +156,14 @@ public:
   }
 
   //! \todo Please doc me!
-  template <int diffOrd, class QuadratureType>
+  template <int diffOrd, class QuadratureImp>
   void evaluate (int baseFunct, 
                  const FieldVector<deriType, diffOrd> &diffVariable, 
-                 QuadratureType & quad, 
+                 QuadratureImp& quad, 
                  int quadPoint, RangeType & phi ) const {
     asImp().evaluate( baseFunct, diffVariable, quad, quadPoint, phi );
   }
+
 protected:
 
 //! This function should not be here at all!
@@ -171,9 +174,7 @@ protected:
     return asImp().getBaseFunction( baseFunct );
   }
   
-
 private:
-
   //! Barton-Nackman trick 
   BaseFunctionSetType &asImp() { 
     return static_cast<BaseFunctionSetType&>(*this); 
@@ -209,7 +210,13 @@ public:
   typedef typename FunctionSpaceType::RangeType RangeType ;
   typedef typename FunctionSpaceType::HessianRangeType  HessianRangeType;
   typedef typename FunctionSpaceType::RangeFieldType DofType;
-  typedef std::vector<DofType> DofVectorType;
+
+  typedef typename FunctionSpaceType::RangeFieldType DofType;
+
+  //typedef SparseRowMatrix<DofType> MatrixType;
+  typedef Matrix<DofType> MatrixType;
+  typedef Quadrature<DofType, DomainType> QuadratureType;
+
 public:
   //! set the default diffVar Types 
   BaseFunctionSetDefault () : 
@@ -236,8 +243,8 @@ public:
   }
 
   //! default implementation for evaluation 
-  template <class QuadratureType>
-  void eval(int baseFunct, QuadratureType & quad, int quadPoint, RangeType & phi) const 
+  template <class QuadratureImp>
+  void eval(int baseFunct, QuadratureImp & quad, int quadPoint, RangeType & phi) const 
   {
     asImp().evaluate( baseFunct, diffVariable_ , quad, quadPoint, phi );
     return;
@@ -255,8 +262,8 @@ public:
   }
 
   //! default implementation of evaluation the gradient 
-  template <class QuadratureType>
-  void jacobian ( int baseFunct, QuadratureType & quad, 
+  template <class QuadratureImp>
+  void jacobian ( int baseFunct, QuadratureImp & quad, 
                   int quadPoint, JacobianRangeType & phi ) const 
   {
     for(int i=0; i<dimCol; i++)
@@ -277,19 +284,83 @@ public:
     return phi*factor;
   }
 
+  template <class Entity>
   DofType evaluateGradientSingle(int baseFunct,
+                                 Entity& en,
                                  const DomainType& xLocal,
                                  const JacobianRangeType& factor) const
   {
     JacobianRangeType gradPhi(0.);
+    DomainType gradScaled(0.);
     jacobian(baseFunct, xLocal, gradPhi);
 
     DofType result = 0;
     for (int i = 0; i < FunctionSpaceType::DimDomain; ++i) {
-      result += gradPhi[i]*factor[i];
+      en.geometry().jacobianInverseTransposed(xLocal).
+        umv(gradPhi[i], gradScaled);
+      result += gradScaled*factor[i];
     }
     return result;
   }
+
+  template <class Entity>
+  void localMassMatrix(Entity& en, MatrixType& result) const {
+    // assert(en.geometry().type() == basefunctions.type())
+    result.resize(this->numBaseFunctions(), this->numBaseFunctions());
+
+    RangeType phiI;
+    RangeType phiJ;
+    
+    int order = 0;
+    QuadratureType quad(0, en.geometry().type(), order);
+    for (int q = 0; q < quad.nop(); ++q) {
+      for (int i = 0; i < this->numBaseFunctions(); ++i) {
+        eval(i, quad, q, phiI);
+        for (int j = 0; j < this->numBaseFunctions(); ++j) {
+          eval(j, quad, q, phiJ);
+          assert(false); // is this correct for orthonormal base functions?
+          result[i][j] = (phiI*phiJ)*quad.weight(q)*
+            en.geometry().integrationElement(quad.point(q));
+        }
+      }
+      
+    }
+  }
+
+  template <class Entity>
+  void localMassMatrixInverse(Entity& en, MatrixType& result) const {
+    localMassMatrix(en, result);
+    // *invert(result);
+  }
+
+  template <class Entity>
+  void localStiffnessMatrix(Entity& en, MatrixType& result) const {
+    result.resize(this->numBaseFunctions(), this->numBaseFunctions());
+
+    JacobianRangeType phiI;
+    JacobianRangeType phiJ;
+
+    int order = 0;
+    QuadratureType quad(0, en.geometry().type(), order);
+    for (int q = 0; q < quad.size(); ++q) {
+      for (int i = 0; i < this->numBaseFunctions(); ++i) {
+        jacobian(i, quad, q, phiI);
+        for (int j = 0; j < this->numBaseFunctions(); ++j) {
+          jacobian(j, quad, q, phiJ);
+          double update = 0.;
+          for (int d = 0; d < FunctionSpaceType::DimRange; ++d) {
+            update *= phiI[d]*phiJ[d];
+          }
+          result[i][j] = update*quad.weight(q)*
+            en.geometry().integrationElement(quad.point(q));
+        }
+      }
+      
+    }
+  }
+
+protected:
+  //  void invert(MatrixType& mat);
   
 private: 
   //! just diffVariable for evaluation of the functions 
@@ -309,5 +380,7 @@ private:
 /** @} end documentation group */
 
 }
+
+//#include "basefunctions.cc"
 
 #endif
