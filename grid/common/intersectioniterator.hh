@@ -238,7 +238,7 @@ public:
 
     @copydoc outerNormal
     
-    The normal is scaled with the integration element.
+    The normal is scaled with the integration element of the intersection.
   */
   FieldVector<ct, dimworld> integrationOuterNormal (const FieldVector<ct, dim-1>& local) const
     {
@@ -431,7 +431,7 @@ class IntersectionIteratorDefault
 public:
   //! return unit outer normal, this should be dependent on
   //! local coordinates for higher order boundary
-  //! the normal is scaled with the integration element
+  //! the normal is scaled with the integration element of the intersection.
   FieldVector<ct, dimworld> integrationOuterNormal (const FieldVector<ct, dim-1>& local) const
     {
         FieldVector<ct, dimworld> n = unitOuterNormal(local);
