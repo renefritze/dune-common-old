@@ -181,6 +181,7 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
 
           for(int j=0 ;j<numSubEntities; j++ )
             local[j] = refElem.subEntity(subEntity , codim , j , dim );
+          
 
           sout << numSubEntities << " Vertices on subEntity<codim=" << codim << ">\n";
           sout << "check suben [";
@@ -309,6 +310,7 @@ struct CheckIndexSet<GridType,IndexSetType,OutputStreamImp,codim,false>
   static void checkIndexSet( const GridType &grid , 
         const IndexSetType & iset, OutputStreamImp & sout )
   {
+    derr << "ERROR: entities for codim " << codim << " are not working for some reason!" << std::endl;
     CheckIndexSet<GridType,IndexSetType,OutputStreamImp,
       codim-1, Dune::Capabilities::hasEntity<GridType, codim-1>::v > :: 
       checkIndexSet( grid, iset, sout );
