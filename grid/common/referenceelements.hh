@@ -635,9 +635,11 @@ namespace Dune
           subsizes[0][0][2]=3; 
           subsizes[0][0][1]=3; 
           // triangle  has 2 vertices on each  edge
-          for (int k=0;k<3;++k)
-            subsizes[k][1][2]=2; 
-          
+          for (int k=0;k<3;++k){
+            subsizes[k][1][2]=2;
+			// triangle  has 1 edge on each edge ;-)
+			subsizes[k][1][1]=1;
+          }
           // subentity indices
           // node indices on element
           for(int i=0;i<subsizes[0][0][2];++i)
@@ -646,7 +648,7 @@ namespace Dune
           for(int i=0;i<subsizes[0][0][1];++i)
             subentityindex[0][0][i][1]=i;
           
-	  // node indices on edge 0
+		  // node indices on edge 0
           subentityindex[0][1][0][2]=1;
           subentityindex[0][1][1][2]=2;
           // node indices on edge 1
@@ -681,10 +683,16 @@ namespace Dune
             subsizes[i][1][3]=3;
           //  tetrahedron has 3 edges on each triang. face 
           for(int i=0;i<subsizes[0][0][1];++i)
-            subsizes[i][1][2]=3; 
+            subsizes[i][1][2]=3;
+		  //  tetrahedron has 1 face on each triang. face! 
+		  for(int i=0;i<subsizes[0][0][1];++i)
+            subsizes[i][1][1]=1;
           //  tetrahedron has 3 vertices on each edge 
           for (int k=0;k<subsizes[0][0][2];++k)
-            subsizes[k][2][3]=2; 
+            subsizes[k][2][3]=2;
+		  //  tetrahedron has 1 edge on each edge! 
+          for (int k=0;k<subsizes[0][0][2];++k)
+            subsizes[k][2][2]=1;
           // subentity indices
           // node indices on element
           for(int i=0;i<subsizes[0][0][3];++i)
@@ -699,7 +707,7 @@ namespace Dune
 	  // node numbering- normal pointing outward
           // reference triangle in dune has a counter-clockwise
 	  // numbering. so each triangle face in tetrahedron numbered same way
-
+		  
           // node indices on face 0
           subentityindex[0][1][0][3]=1;
           subentityindex[0][1][1][3]=2;
@@ -716,7 +724,7 @@ namespace Dune
           subentityindex[3][1][0][3]=0;
           subentityindex[3][1][1][3]=2;
           subentityindex[3][1][2][3]=1;
-
+		  
           // edge indices on face 0
           subentityindex[0][1][0][2]=5;
           subentityindex[0][1][1][2]=4;
@@ -957,15 +965,19 @@ namespace Dune
  
       // face indices according to that given in 
       //http://hal.iwr.uni-heidelberg.de/dune/doc/appl/refelements.html
-
+	  
+	  // prism has one face on each face!
+	  for(int ii=0;ii<5;++ii)
+		subsizes[ii][1][1]=1;
       //  prism has 3 vertices on bott triang. face 
-      subsizes[0][1][3]=3; 
+      subsizes[0][1][3]=3;
       //  prism has 4 vertices on front,right and left  rectang. faces
       subsizes[1][1][3]=4; 
       subsizes[2][1][3]=4; 
-      subsizes[3][1][3]=4; 
-      //  prism has 3 vertices on top triang. face 
-      subsizes[4][1][3]=3; 
+      subsizes[3][1][3]=4;
+	  //  prism has 3 vertices on top triang. face 
+      subsizes[4][1][3]=3;
+	  
       // prism has 3 edges on a bott triang. face
       subsizes[0][1][2]=3; 
       // prism has 4 edges on  front,right and left rec. faces 
@@ -975,8 +987,12 @@ namespace Dune
       // prism has 3 edges on a top triang. face
       subsizes[4][1][2]=3; 
       // prism has 2 vertices on each  edge
-      for (int k=0;k<9;++k)
-	subsizes[k][2][3]=2; 
+	  // also 1 edge on each edge
+      for (int k=0;k<9;++k){
+		subsizes[k][2][3]=2;
+		subsizes[k][2][2]=1;
+	  }
+	  
       //------------------------------------------
 
       // positions of vertex with local index "i", there are 6 vertices
@@ -1293,7 +1309,9 @@ namespace Dune
       
       // a pyramid itself has one pyramid ;) 
       subsizes[0][0][0]=1; 
- 
+ // pyramid has one face on each face!
+	  for(int ii=0;ii<5;++ii)
+		subsizes[ii][1][1]=1;
        // face indices according to that given in 
       //http://hal.iwr.uni-heidelberg.de/dune/doc/appl/refelements.html
 
@@ -1312,8 +1330,11 @@ namespace Dune
         subsizes[i][1][2]=3; 
      
       // pyramid has 2 vertices on each  edge
-      for (int k=0;k<8;++k)
-	subsizes[k][2][3]=2; 
+      for (int k=0;k<8;++k){
+	subsizes[k][2][3]=2;
+	//also one edge on each edge!!
+	subsizes[k][2][2]=1;
+	  }
       //------------------------------------------
 
       // positions of vertex with local index "i", there are 5 vertices
