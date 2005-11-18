@@ -221,7 +221,10 @@ namespace Dune
       for (int i=0; i<MAXE; ++i) 
         for (int j=0; j<=dim; ++j) 
           for (int k=0; k<=dim; ++k)
-            subsizes[i][j][k] = 0;
+			if (j==k)
+			  subsizes[i][j][k] = 1;
+			else
+			  subsizes[i][j][k] = 0;
       FieldVector<int,dim> direction;
       for (int c=dim; c>=0; --c)
         generate(0,c,direction);
@@ -506,9 +509,12 @@ namespace Dune
       for (int i=0; i<=dim; ++i)
 	sizes[i]=0;
       for (int i=0; i<MAXE; ++i) 
-	for (int j=0; j<=dim; ++j) 
-	  for (int k=0; k<=dim; ++k)
-            subsizes[i][j][k] = 0;
+		for (int j=0; j<=dim; ++j) 
+		  for (int k=0; k<=dim; ++k)
+			if (j==k)
+			  subsizes[i][j][k] = 1;
+			else
+			  subsizes[i][j][k] = 0;
       
       for (int c=dim; c>=0; --c)
 	entity_details (c);
@@ -858,15 +864,18 @@ namespace Dune
     ReferencePrism()
     {
       for (int i=0; i<=3; ++i)
-	sizes[i]=0;
+		sizes[i]=0;
 
       for (int i=0; i<MAXE; ++i) 
-	for (int j=0; j<=dim; ++j) 
-	  for (int k=0; k<=dim; ++k)
-	    subsizes[i][j][k] = 0;
+		for (int j=0; j<=dim; ++j) 
+		  for (int k=0; k<=dim; ++k)
+			if (j==k)
+			  subsizes[i][j][k] = 1;
+			else
+			  subsizes[i][j][k] = 0;
 
       for (int c=3; c>=0; --c)
-	prism_entities (c);
+		prism_entities (c);
     }
 
     //! number of entities of codim c	
@@ -1193,15 +1202,18 @@ namespace Dune
     ReferencePyramid()
     {
       for (int i=0; i<=3; ++i)
-	sizes[i]=0;
-
+		sizes[i]=0;
+	  
       for (int i=0; i<MAXE; ++i) 
         for (int j=0; j<=dim; ++j) 
           for (int k=0; k<=dim; ++k)
-            subsizes[i][j][k] = 0;
-
+			if (j==k)
+			  subsizes[i][j][k] = 1;
+			else
+			  subsizes[i][j][k] = 0;
+	  
       for (int c=3; c>=0; --c)
-	pyramid_entities (c);
+		pyramid_entities (c);
     }
 
     //! number of entities of codim c	
