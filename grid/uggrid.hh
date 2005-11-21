@@ -323,10 +323,11 @@ public:
     }
     
     /** \brief Access to the LevelIndexSets */
-    //const LevelIndexSet& levelIndexSet(int level) const
     const typename Traits::LevelIndexSet& levelIndexSet(int level) const
     {
-	return * levelIndexSets_[level];
+        if (level<0 || level>maxLevel())
+            DUNE_THROW(GridError, "levelIndexSet of nonexisting level " << level << " requested!");
+	return *levelIndexSets_[level];
     }
     
     /** \brief Access to the LeafIndexSet */
