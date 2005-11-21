@@ -272,8 +272,8 @@ protected:
   }
 
   //! return reference for local function storage  
-  LocalFunctionStorageType* localFunctionStorage() const { 
-    return &lfStorage_; 
+  LocalFunctionStorageType& localFunctionStorage() const { 
+    return lfStorage_; 
   }
 
   // the local function storage stack 
