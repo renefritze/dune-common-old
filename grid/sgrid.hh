@@ -430,9 +430,6 @@ public:
   */ 
   template<int cc> typename Codim<cc>::EntityPointer entity (int i) const;
 
-  //! return global index of entity<cc> number i 
-  template <int cc> int subIndex ( int i ) const;
-
   //! subentity compressed index
   template<int cc>
   int subCompressedIndex (int i) const
