@@ -105,7 +105,11 @@ namespace Dune {
   public:
     VectorialBaseFunctionSet(const FactoryType& factory) :
       baseFunctions_(),
-      util_(FunctionSpaceType::DimRange)
+      util_(FunctionSpaceType::DimRange),
+      diffVar0_(),
+      diffVar1_(0),
+      tmp_(0.),
+      jTmp_(0.)
     {
       for (int i = 0; i < factory.numBaseFunctions(); ++i) {
         baseFunctions_.push_back(factory.baseFunction(i));
@@ -120,6 +124,8 @@ namespace Dune {
       }
     }
 
+    // * override other functions as well!!!!
+
     int numBaseFunctions() const;
 
     template <int diffOrd>
@@ -129,10 +135,10 @@ namespace Dune {
                   RangeType& phi) const;
 
     template <int diffOrd, class QuadratureType>
-    void evaluate (int baseFunct, 
-                   const FieldVector<deriType, diffOrd> &diffVariable, 
-                   QuadratureType & quad, 
-                   int quadPoint, RangeType & phi ) const;
+    void evaluate(int baseFunct, 
+                  const FieldVector<deriType, diffOrd> &diffVariable, 
+                  QuadratureType & quad, 
+                  int quadPoint, RangeType & phi ) const;
 
     // * add those methods with quadratures as well
     DofType evaluateSingle(int baseFunct, 
@@ -149,8 +155,10 @@ namespace Dune {
     std::vector<BaseFunctionType*> baseFunctions_;
     DofConversionUtility<PointBased> util_;
 
+    mutable FieldVector<int, 0> diffVar0_;
+    mutable FieldVector<int, 1> diffVar1_;
     mutable ScalarRangeType tmp_;
-    mutable ScalarJacobianRangeType jTmp_;
+    mutable DomainType jTmp_;
   };
 
 } // end namespace Dune
