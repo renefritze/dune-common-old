@@ -4533,7 +4533,9 @@ fillElInfo(int ichild, int actLevel , const ALBERTA EL_INFO *elinfo_old,
   {
     // allow to go down on neighbour more than once 
     // if the following condition is satisfied 
-    const bool leafLevel = ((el->child[0] == 0) || (elinfo->level < actLevel));
+    //const bool leafLevel = ((el->child[0] == 0) || (elinfo->level < actLevel));
+    const bool leafLevel = (leaf) ? true : ((el->child[0] == 0) && (elinfo->level < actLevel));
+    
     firstNeigh (ichild,elinfo_old,elinfo,leafLevel);
     secondNeigh(ichild,elinfo_old,elinfo,leafLevel);
     thirdNeigh (ichild,elinfo_old,elinfo,leafLevel);
@@ -4570,7 +4572,7 @@ fillElInfo(int ichild, int actLevel , const ALBERTA EL_INFO *elinfo_old,
   enum { dim = 3 };
   enum { dimworld = 3 };
 
-#if 1
+#if 0
   ALBERTA fill_elinfo(ichild,elinfo_old,elinfo);
 #else 
   static S_CHAR child_orientation[3][2] = {{1,1}, {1,-1}, {1,-1}};
@@ -4777,7 +4779,7 @@ fillElInfo(int ichild, int actLevel , const ALBERTA EL_INFO *elinfo_old,
     { 
       if ((nb = neigh_old[cv[i]])) 
       {
-  TEST_EXIT(nb->child[0])("nonconforming triangulation\n");
+        TEST_EXIT(nb->child[0])("nonconforming triangulation\n");
 
   for (k=0; k<2; k++)  /* look at both childs of old neighbour */
   {       
@@ -4789,20 +4791,20 @@ fillElInfo(int ichild, int actLevel , const ALBERTA EL_INFO *elinfo_old,
         ov = 1;
         if (nbk->child[0])
         {
-    if (fill_opp_coords)
-    {
-      if (nbk->new_coord)
-        for (int j = 0; j < dimworld; j++)
-          opp_coord[i][j] = nbk->new_coord[j];
-      else
-        for (int j = 0; j < dimworld; j++)
-          opp_coord[i][j] = 0.5*
-      (oldopp_coord[cv[i]][j]
-       + old_coord[ichild][j]);
-    }
-    neigh[i]      = nbk->child[0];
-    opp_vertex[i] = 3;
-    break;
+          if (fill_opp_coords)
+          {
+            if (nbk->new_coord)
+              for (int j = 0; j < dimworld; j++)
+                opp_coord[i][j] = nbk->new_coord[j];
+            else
+              for (int j = 0; j < dimworld; j++)
+                opp_coord[i][j] = 0.5*
+            (oldopp_coord[cv[i]][j]
+             + old_coord[ichild][j]);
+          }
+          neigh[i]      = nbk->child[0];
+          opp_vertex[i] = 3;
+          break;
         }
       }
       else
@@ -4815,7 +4817,7 @@ fillElInfo(int ichild, int actLevel , const ALBERTA EL_INFO *elinfo_old,
       {
         for (int j = 0; j < dimworld; j++)
         {
-    opp_coord[i][j] = oldopp_coord[cv[i]][j];
+          opp_coord[i][j] = oldopp_coord[cv[i]][j];
         }
       }
       neigh[i]      = nbk;
@@ -4828,7 +4830,7 @@ fillElInfo(int ichild, int actLevel , const ALBERTA EL_INFO *elinfo_old,
       }
       else 
       {
-  neigh[i] = nil;
+        neigh[i] = 0;
       }
     }  /* end for i */
 
