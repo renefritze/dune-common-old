@@ -151,10 +151,10 @@ namespace Dune {
 
     };
 
-template<int dim, int dimworld>
+template<int dim, int dimw>
 struct OneDGridFamily
 {
-    typedef GridTraits<dim,dimworld,Dune::OneDGrid<dim,dimworld>,
+    typedef GridTraits<dim,dimw,Dune::OneDGrid<dim,dimw>,
                        OneDGridGeometry,
                        OneDGridEntity,
                        OneDGridEntityPointer,
@@ -162,13 +162,13 @@ struct OneDGridFamily
                        OneDGridIntersectionIterator,
                        OneDGridHierarchicIterator,
                        OneDGridLeafIterator,
-                       OneDGridLevelIndexSet< OneDGrid<dim,dimworld> >,
-					   OneDGridLevelIndexSetTypes<OneDGrid<dim,dimworld> >,
-                       OneDGridLeafIndexSet< OneDGrid<dim,dimworld> >,
-					   OneDGridLeafIndexSetTypes<OneDGrid<dim,dimworld> >,
-                       OneDGridIdSet< OneDGrid<dim,dimworld> >,
+                       OneDGridLevelIndexSet<const OneDGrid<dim,dimw> >,
+					   OneDGridLevelIndexSetTypes<const OneDGrid<dim,dimw> >,
+                       OneDGridLeafIndexSet<const OneDGrid<dim,dimw> >,
+					   OneDGridLeafIndexSetTypes<const OneDGrid<dim,dimw> >,
+                       OneDGridIdSet<const OneDGrid<dim,dimw> >,
                        unsigned int,
-                       OneDGridIdSet< OneDGrid<dim,dimworld> >,
+                       OneDGridIdSet<const OneDGrid<dim,dimw> >,
                        unsigned int> Traits;
 };
 
@@ -200,9 +200,9 @@ class OneDGrid : public GridDefault <dim, dimworld,OneDCType,OneDGridFamily<dim,
     friend class OneDGridHierarchicIterator<OneDGrid>;
     friend class OneDGridIntersectionIterator<OneDGrid>;
 
-    friend class OneDGridLevelIndexSet<OneDGrid<dim,dimworld> >;
-    friend class OneDGridLeafIndexSet<OneDGrid<dim,dimworld> >;
-    friend class OneDGridIdSet<OneDGrid<dim,dimworld> >;
+    friend class OneDGridLevelIndexSet<const OneDGrid<dim,dimworld> >;
+    friend class OneDGridLeafIndexSet<const OneDGrid<dim,dimworld> >;
+    friend class OneDGridIdSet<const OneDGrid<dim,dimworld> >;
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
     friend class OneDGridLeafIterator;
@@ -324,7 +324,7 @@ public:
     {
         if (! levelIndexSets_[level]) {
             levelIndexSets_[level] =
-                new OneDGridLevelIndexSet<OneDGrid<dim,dimworld> >;
+                new OneDGridLevelIndexSet<const OneDGrid<dim,dimworld> >;
             levelIndexSets_[level]->update(*this, level);
         }
 
@@ -413,11 +413,11 @@ private:
     std::vector<List<OneDEntityImp<1> > > elements;
 
     // Our set of level indices
-    mutable std::vector<OneDGridLevelIndexSet<OneDGrid<dim,dimworld> >* > levelIndexSets_;
+    mutable std::vector<OneDGridLevelIndexSet<const OneDGrid<dim,dimworld> >* > levelIndexSets_;
 
-    OneDGridLeafIndexSet<OneDGrid<dim,dimworld> > leafIndexSet_;
+    OneDGridLeafIndexSet<const OneDGrid<dim,dimworld> > leafIndexSet_;
 
-    OneDGridIdSet<OneDGrid<dim,dimworld> > idSet_;
+    OneDGridIdSet<const OneDGrid<dim,dimworld> > idSet_;
 
     unsigned int freeVertexIdCounter_;
 

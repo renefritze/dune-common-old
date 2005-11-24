@@ -871,7 +871,7 @@ inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* H_)
         L_[i] = 0;
 
     makeSGrid(N_,L_, H_);
-	indexsets.push_back( new SGridLevelIndexSet<SGrid<dim,dimworld> >(*this,0) );
+	indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
 }
 
 template<int dim, int dimworld>
@@ -881,7 +881,7 @@ inline SGrid<dim,dimworld>::SGrid (const int* N_, const sgrid_ctype* L_, const s
   IsTrue< dimworld <= std::numeric_limits<int>::digits >::yes();
 
   makeSGrid(N_, L_, H_);
-  indexsets.push_back( new SGridLevelIndexSet<SGrid<dim,dimworld> >(*this,0) );
+  indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
 }
 
 template<int dim, int dimworld>
@@ -899,7 +899,7 @@ inline SGrid<dim,dimworld>::SGrid ()
   }
 
   makeSGrid(N_, L_, H_);
-  indexsets.push_back( new SGridLevelIndexSet<SGrid<dim,dimworld> >(*this,0) );
+  indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,0) );
 }
 
 template<int dim, int dimworld>
@@ -921,7 +921,7 @@ inline void SGrid<dim,dimworld>::globalRefine (int refCount)
 //     for (int i=1; i<dim; i++) std::cout << "," <<  N[L-1][i];
 //     std::cout << ")" << std::endl;
 
-	indexsets.push_back( new SGridLevelIndexSet<SGrid<dim,dimworld> >(*this,maxLevel()) );
+	indexsets.push_back( new SGridLevelIndexSet<const SGrid<dim,dimworld> >(*this,maxLevel()) );
   }
 }
 

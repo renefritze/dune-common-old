@@ -1034,13 +1034,13 @@ struct SGridFamily
                      SEntityPointer,SLevelIterator,
                      SIntersectionIterator,SHierarchicIterator,
                      SLevelIterator,
-					 SGridLevelIndexSet<SGrid<dim,dimworld> >,
-					 SGridLevelIndexSetTypes<SGrid<dim,dimworld> >,
-					 SGridLeafIndexSet<SGrid<dim,dimworld> >,
-					 SGridLeafIndexSetTypes<SGrid<dim,dimworld> >,
-					 SGridGlobalIdSet<SGrid<dim,dimworld> >,
+					 SGridLevelIndexSet<const SGrid<dim,dimworld> >,
+					 SGridLevelIndexSetTypes<const SGrid<dim,dimworld> >,
+					 SGridLeafIndexSet<const SGrid<dim,dimworld> >,
+					 SGridLeafIndexSetTypes<const SGrid<dim,dimworld> >,
+					 SGridGlobalIdSet<const SGrid<dim,dimworld> >,
 					 bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits>,
-					 SGridGlobalIdSet<SGrid<dim,dimworld> >,
+					 SGridGlobalIdSet<const SGrid<dim,dimworld> >,
 					 bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits> > Traits;
 };
 
@@ -1334,9 +1334,9 @@ public:
 
 private:
 
-  std::vector<SGridLevelIndexSet<SGrid<dim,dimworld> >*> indexsets;
-  SGridLeafIndexSet<SGrid<dim,dimworld> > theleafindexset;
-  SGridGlobalIdSet<SGrid<dim,dimworld> > theglobalidset;
+  std::vector<SGridLevelIndexSet<const SGrid<dim,dimworld> >*> indexsets;
+  SGridLeafIndexSet<const SGrid<dim,dimworld> > theleafindexset;
+  SGridGlobalIdSet<const SGrid<dim,dimworld> > theglobalidset;
 
   // Index classes need access to the real entity
   friend class Dune::SGridLevelIndexSet<Dune::SGrid<dim,dimworld> >;
