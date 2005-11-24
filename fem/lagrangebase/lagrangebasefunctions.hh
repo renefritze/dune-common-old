@@ -768,9 +768,9 @@ public:
     {
       for(int k=0; k<dimrange; k++)
       {
-        //baseFuncList_[ i*dimrange + k ] = new LagrangeBaseFunctionType ( i ) ;
         size_t idx = i*dimrange + k;
-        this->setBaseFunctionPointer ( idx, new LagrangeBaseFunctionType(i) );
+        // for each dimrange we have a base function 
+        this->setBaseFunctionPointer ( idx, new LagrangeBaseFunctionType(idx) );
       }
     }
     this->setNumOfDiffFct ( numOfDifferentFuncs );
