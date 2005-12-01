@@ -105,7 +105,7 @@ template <> struct AlbertaDofType<3,2> {
 
 // default is doing nothing 
 template <int codim> 
-void preserveDofs (int * vec, const int k, const int nv, const EL * father, int split_face )
+inline void preserveDofs (int * vec, const int k, const int nv, const EL * father, int split_face )
 {
   assert(false);
   abort();
@@ -113,7 +113,7 @@ void preserveDofs (int * vec, const int k, const int nv, const EL * father, int 
 
 // create new element numbers for children 
 template <>
-void preserveDofs<0> (int * vec, const int k, const int nv, const EL * el, int split_face )
+inline void preserveDofs<0> (int * vec, const int k, const int nv, const EL * el, int split_face )
 {
   enum { codim = 0 };
   // create two new element numbers 
@@ -127,7 +127,7 @@ void preserveDofs<0> (int * vec, const int k, const int nv, const EL * el, int s
    
 // preserve dofs for faces  
 template <>
-void preserveDofs<1> (int * vec, const int k, const int nv, const EL * el, int split_face )
+inline void preserveDofs<1> (int * vec, const int k, const int nv, const EL * el, int split_face )
 {
   enum { codim = 1 };
 
@@ -159,7 +159,7 @@ void preserveDofs<1> (int * vec, const int k, const int nv, const EL * el, int s
 
 // preserve dofs for edges   
 template <>
-void preserveDofs<2> (int * vec, const int k, const int nv, const EL * el, int split_face )
+inline void preserveDofs<2> (int * vec, const int k, const int nv, const EL * el, int split_face )
 {
   enum { codim = 2 };
  
