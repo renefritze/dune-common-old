@@ -3,6 +3,12 @@
 
 enum { MAX_NAME_LENGTH = 32 };
 
+typedef struct dune_elem  DUNE_ELEM;
+typedef struct dune_fdata DUNE_FDATA;
+
+typedef void evalDof_t  (DUNE_ELEM *, DUNE_FDATA *, int , double *);
+typedef void evalCoord_t(DUNE_ELEM *, DUNE_FDATA *, const double *, double * );
+
 /* interface element */
 typedef struct dune_elem 
 {
@@ -31,8 +37,7 @@ typedef struct dune_elem
 
   int isLeafIterator;
 
-} DUNE_ELEM ;
-
+};
 
 typedef struct dune_fdata 
 {
@@ -40,12 +45,13 @@ typedef struct dune_fdata
   int mynum; 
   
   const char * name;
+
+  // functions to evaluate 
+  evalCoord_t * evalCoord; 
+  evalDof_t   * evalDof; 
   
   /* pointer to object of discrete function */
   const void *discFunc;
-
-  /* pointer to local function */
-  //const void *lf;
 
   /* are all Levels occupied? */
   int allLevels; 
@@ -67,7 +73,7 @@ typedef struct dune_fdata
   /* max number of components */
   int compName;
   
-} DUNE_FDATA ;
+};
 
 /* setup hmesh with given data */
 extern void *hmesh( 
