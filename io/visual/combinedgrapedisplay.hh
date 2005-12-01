@@ -12,7 +12,11 @@
 
 namespace Dune 
 {
-  
+ 
+/*! \brief 
+ * Combines GrapeDataDisplays to one so that visualisation for parallel
+ * grid is more easy to handle.
+ */
 template<class DisplayType>
 class CombinedGrapeDisplay 
 {
@@ -34,11 +38,13 @@ protected:
   DisplayListIteratorType grditer_;
   DisplayListIteratorType enditer_;
 
+  // pointer to actual display
   DisplayType * disp_;
+  
   DUNE_ELEM * dhel_;
-  
+ 
+  // actual element data 
   DUNE_ELEM hel_;
-  
   
 public:
 
@@ -121,10 +127,19 @@ protected:
   inline static int fst_child (DUNE_ELEM * he);
   inline static int nxt_child (DUNE_ELEM * he);
 
+  //! calles evalCoord for data of actual display 
   inline void evalCoord (DUNE_ELEM *he, DUNE_FDATA *df,
                   const double *coord, double * val);
+  //! calles evalDof for data of actual display 
   inline void evalDof (DUNE_ELEM *he, DUNE_FDATA *df, int localNum, double * val);
-
+ 
+  //! functions pointer for calling evaluate in ghmesh 
+  //! just calles evalCoord for actual display 
+  inline static void evalCoordWrap (DUNE_ELEM *he, DUNE_FDATA *df,
+                  const double *coord, double * val);
+  //! functions pointer for calling evaluate in ghmesh 
+  //! just calles evalDof for actual display 
+  inline static void evalDofWrap (DUNE_ELEM *he, DUNE_FDATA *df, int localNum, double * val);
   
   // function to evaluate data 
   inline static void func_real (DUNE_ELEM *he , DUNE_FDATA * fe,int ind,
@@ -132,11 +147,8 @@ protected:
   
 }; // end class GrapeGridDisplay
 
-
 } // end namespace Dune
 
 
 #include "grape/combinedgrapedisplay.cc"
-
-
 #endif
