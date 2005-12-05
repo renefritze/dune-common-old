@@ -364,26 +364,37 @@ class UGGridLeafIndexSet: public IndexSet<GridImp,UGGridLeafIndexSet<GridImp>,UG
 {
   typedef IndexSet<GridImp,UGGridLeafIndexSet<GridImp>,UGGridLeafIndexSetTypes<GridImp> > Base;
 public:
-    //friend class UGGrid<dim,dim>;
+  //friend class UGGrid<dim,dim>;
 
-    enum {dim = GridImp::dimension};
+  /*
+    We use the RemoveConst to extract the Type from the mutable class,
+    because the const class is not instatiated yet.
+  */
+  enum {dim = RemoveConst<GridImp>::Type::dimension};
 
   //! constructor stores reference to a grid and level
   UGGridLeafIndexSet (const GridImp& g) : grid_(g)
   {
   }
 
-
   //! get index of an entity
+  /*
+    We use the RemoveConst to extract the Type from the mutable class,
+    because the const class is not instatiated yet.
+  */
   template<int cd>
-  int index (const typename GridImp::Traits::template Codim<cd>::Entity& e) const 
+  int index (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const 
   {
       return grid_.template getRealEntity<cd>(e).leafIndex(); 
   }
 
   //! get index of subEntity of a codim 0 entity
+  /*
+    We use the RemoveConst to extract the Type from the mutable class,
+    because the const class is not instatiated yet.
+  */
   template<int cc>
-  int subIndex (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
+  int subIndex (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
   {
       return grid_.template getRealEntity<0>(e).template subLeafIndex<cc>(i);
   }
@@ -424,7 +435,7 @@ public:
 	DUNE_THROW(NotImplemented, "Wrong codim!");
   }
 
-    /** deliver all geometry types used in this grid */
+  /** deliver all geometry types used in this grid */
   const std::vector<GeometryType>& geomTypes (int codim) const
   {
 	return myTypes_[codim];
@@ -444,7 +455,7 @@ public:
 	return grid_.template leafend<cd,pitype>();
   }
 
-    //private:
+  //private:
   int renumberVertex(GeometryType gt, int i) const 
   {
     if (gt==cube) {
@@ -714,15 +725,23 @@ public:
   typedef unsigned int GlobalIdType;
 
   //! get id of an entity
+  /*
+    We use the RemoveConst to extract the Type from the mutable class,
+    because the const class is not instatiated yet.
+  */
   template<int cd>
-  GlobalIdType id (const typename GridImp::Traits::template Codim<cd>::Entity& e) const 
+  GlobalIdType id (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const 
   {
       return grid_.template getRealEntity<cd>(e).globalId();
   }
 
   //! get id of subEntity
+  /*
+    We use the RemoveConst to extract the Type from the mutable class,
+    because the const class is not instatiated yet.
+  */
   template<int cc>
-  GlobalIdType subid (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
+  GlobalIdType subid (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
   {
       return grid_.template getRealEntity<0>(e).template subGlobalId<cc>(i);
   }
@@ -750,15 +769,23 @@ public:
   typedef unsigned int LocalIdType;
 
   //! get id of an entity
+  /*
+    We use the RemoveConst to extract the Type from the mutable class,
+    because the const class is not instatiated yet.
+  */
   template<int cd>
-  LocalIdType id (const typename GridImp::Traits::template Codim<cd>::Entity& e) const 
+  LocalIdType id (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const 
   {
       return grid_.template getRealEntity<cd>(e).localId();
   }
 
   //! get id of subEntity
+  /*
+    We use the RemoveConst to extract the Type from the mutable class,
+    because the const class is not instatiated yet.
+  */
   template<int cc>
-  LocalIdType subid (const typename GridImp::Traits::template Codim<0>::Entity& e, int i) const
+  LocalIdType subid (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
   {
       return grid_.template getRealEntity<0>(e).template subLocalId<cc>(i);
   }
