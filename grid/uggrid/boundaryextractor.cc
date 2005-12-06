@@ -20,8 +20,6 @@ void Dune::BoundaryExtractor::detectBoundarySegments(std::vector<unsigned char> 
         {0,1},{1,2},{2,3},{2,0}
     };
 
-    //int verticesPerElement = (containsOnlyTriangles) ? 3 : 4;
-
     boundarySegments.resize(0);
     unsigned int currentBase = 0;
 
@@ -48,6 +46,10 @@ void Dune::BoundaryExtractor::detectBoundarySegments(std::vector<unsigned char> 
                 const FieldVector<int, 2>& o = boundarySegments[j];
                 if ( (v[0]==o[0] && v[1]==o[1]) ||
                      (v[0]==o[1] && v[1]==o[0]) ) {
+
+                    // Testing
+                    CompareBoundarySegments<2> foo;
+                    assert(!foo(v,o) && !foo(o,v));
                     break;
                 }
 
@@ -149,9 +151,12 @@ void Dune::BoundaryExtractor::detectBoundarySegments(std::vector<unsigned char> 
                         (v[0]==o[1] && v[1]==o[0] && v[2]==o[2]) ||
                         (v[0]==o[1] && v[1]==o[2] && v[2]==o[0]) ||
                         (v[0]==o[2] && v[1]==o[0] && v[2]==o[1]) ||
-                        (v[0]==o[2] && v[1]==o[1] && v[2]==o[0]) )
+                        (v[0]==o[2] && v[1]==o[1] && v[2]==o[0]) ) {
+                        // Testing
+                        CompareBoundarySegments<3> foo;
+                        assert(!foo(v,o) && !foo(o,v));
                         break;
-
+                    }
                 if ( (v[0]==o[0] && v[1]==o[1] && v[2]==o[2] && v[3]==o[3]) ||
                      (v[0]==o[0] && v[1]==o[1] && v[2]==o[3] && v[3]==o[2]) ||
                      (v[0]==o[0] && v[1]==o[2] && v[2]==o[1] && v[3]==o[3]) ||
@@ -178,10 +183,14 @@ void Dune::BoundaryExtractor::detectBoundarySegments(std::vector<unsigned char> 
                      (v[0]==o[3] && v[1]==o[1] && v[2]==o[0] && v[3]==o[2]) ||
                      (v[0]==o[3] && v[1]==o[1] && v[2]==o[2] && v[3]==o[0]) ||
                      (v[0]==o[3] && v[1]==o[2] && v[2]==o[0] && v[3]==o[1]) ||
-                     (v[0]==o[3] && v[1]==o[2] && v[2]==o[1] && v[3]==o[0]) )
-
+                     (v[0]==o[3] && v[1]==o[2] && v[2]==o[1] && v[3]==o[0]) ) {
+                    
+                    // Testing
+                    CompareBoundarySegments<3> foo;
+                    assert(!foo(v,o) && !foo(o,v));
                     break;
                 }
+            }
 
         
 
