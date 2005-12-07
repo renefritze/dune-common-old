@@ -402,6 +402,7 @@ namespace ALUGridSpace {
     GitterImplType & gitter_; 
 
     typedef ALUHElementType<1>::ElementType ElType; 
+    //typedef IteratorElType<0>::ElType ElType; 
   private:
 
     
@@ -709,7 +710,6 @@ public IntersectionIteratorDefault <GridImp,ALU3dGridIntersectionIterator>
     ALU3dGridGeometricFaceInfoHexa
                     >::Type GeometryInfoType;
       
-  typedef ALU3dGridGeometricFaceInfo<GridImp::elementType> GeometryInfoType;
   typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
   typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
 

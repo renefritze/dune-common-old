@@ -144,6 +144,9 @@ public:
   // set element as normal entity
   void setElement(const BSElementType & item, int twist, int face = -1); 
   void setElement(const ALU3DSPACE HElementType & el, const ALU3DSPACE VertexType & vx);
+  
+  //! setGhost is not valid for this codim 
+  void setGhost(const ALU3DSPACE HBndSegType  &ghost);
 
   //! reset item pointer to NULL 
   void removeElement (); 
