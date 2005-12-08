@@ -675,13 +675,21 @@ public:
   }
 
   //! return size of grid entities per level and codim 
-  int size ( int codim , GeometryType type = unknown ) const
+  int size ( int codim , GeometryType type ) const
   {
     if( !codimUsed_[codim] )
     {
+      assert( hIndexSet_.geomTypes(codim).size() == 1 ); 
       return CountElements<MyType,dim>::count(*this,codim,type);
     }
     return codimLeafSet_[codim].size();
+  }
+  
+  //! return size of grid entities per level and codim 
+  int size ( int codim ) const
+  {
+    assert( hIndexSet_.geomTypes(codim).size() == 1 ); 
+    return size(codim,hIndexSet_.geomTypes(codim)[0]);
   }
   
   //! returns vector with geometry tpyes this index set has indices for
@@ -778,8 +786,8 @@ public:
     resizeVectors();
 
     // give all entities that lie below the old entities new numbers 
-    //markAllBelowOld ();
-    markAllUsed ();
+    markAllBelowOld ();
+    //markAllUsed ();
   }
 
   //! for dof manager, to check whether it has to copy dof or not 
