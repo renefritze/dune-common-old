@@ -62,10 +62,11 @@ void checkSubEntity ( const GridType & grid,
       }
       for(int subEntity = 0; subEntity < refElem.size(0,0,codim); subEntity++)
       {
+        typedef std::pair < int , GeometryType > SubEntityKeyType; 
         {
           int numSubEntities = refElem.size(subEntity,codim,dim);
           // every entity have at least one vertex
-          assert( numSubEntities > 0 );
+          //assert( numSubEntities > 0 );
           
           // create vectors of number of vertices on sub entity  
           std::vector<int> local (numSubEntities,-1);
@@ -86,9 +87,11 @@ void checkSubEntity ( const GridType & grid,
             global[j] = lset.template subIndex<dim> ( en, local[j]);
           }
           
-          int globalSubEntity = lset.template subIndex<codim>(en,subEntity);
-          assert( globalSubEntity >= 0 );
-          sout << "local subentity " << subEntity << " consider subentity with global index " << globalSubEntity << " on en = " << lset.index(en) << "\n";
+          SubEntityKeyType globalSubEntity = 
+            SubEntityKeyType ( lset.template subIndex<codim>(en,subEntity), 
+                               (en.template entity<codim> (subEntity))->geometry().type());
+          assert( globalSubEntity.first >= 0 );
+          sout << "local subentity " << subEntity << " consider subentity with global key (" << globalSubEntity.first << "," << globalSubEntity.second << ") on en = " << lset.index(en) << "\n";
 
           sout << "Found global numbers of entity [ "; 
           for(int j=0 ;j<numSubEntities; j++ )
@@ -143,8 +146,7 @@ void checkSubEntity ( const GridType & grid,
           }
           else 
           {
-            int otherSubEntity = vertices[global];
-            // ??? WTF ???
+            SubEntityKeyType otherSubEntity = vertices[global];
             assert( globalSubEntity == otherSubEntity );
           }
 
@@ -158,7 +160,7 @@ void checkSubEntity ( const GridType & grid,
             std::vector<int> globalcheck = subEntities[globalSubEntity];
             if(! (global == globalcheck ))
             {
-              std::cerr << "For subEntity " << globalSubEntity << "\n";
+              std::cerr << "For subEntity key (" << globalSubEntity.first << "," << globalSubEntity.second << ") \n";
               std::cerr << "Got ";
               for(int j=0 ;j<numSubEntities; j++ )
               {
@@ -169,7 +171,7 @@ void checkSubEntity ( const GridType & grid,
               for(int j=0 ;j<numSubEntities; j++ )
               {
                 std::cerr << globalcheck [j] << " "; 
-                }
+              }
               std::cerr << "\n";
               DUNE_THROW(Dune::GridError, "global != globalcheck");
             }
@@ -250,10 +252,11 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
 
 
   //******************************************************************
-  
+ 
+  typedef std::pair < int , GeometryType > SubEntityKeyType; 
   typedef std::map < int , std::pair<int,int> > subEntitymapType;
-  std::map < int , std::vector<int> > subEntities;
-  std::map < std::vector<int> , int > vertices;
+  std::map < SubEntityKeyType , std::vector<int> > subEntities;
+  std::map < std::vector<int> , SubEntityKeyType > vertices;
   
   std::map < int , FieldVector<coordType,dim> > vertexCoordsMap;
   // setup vertex map , store vertex coords for vertex number 
