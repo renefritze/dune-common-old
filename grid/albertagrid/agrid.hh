@@ -64,6 +64,7 @@ namespace Dune
   typedef ALBERTA REAL albertCtype;
 
   template<int codim, int dim, class GridImp> class AlbertaGridEntity;
+  template<int codim, int dim, class GridImp> class AlbertaGridMakeableEntity;
   template<int codim, PartitionIteratorType pitype, class GridImp> class AlbertaGridTreeIterator;
   template<int codim, PartitionIteratorType pitype, class GridImp> class AlbertaGridLeafIterator;
   template<int cd, class GridImp> class AlbertaGridEntityPointer;
@@ -73,6 +74,21 @@ namespace Dune
   template<class GridImp>         class AlbertaGridIntersectionIterator;
   template<int dim, int dimworld> class AlbertaGrid;
   template<int dim, int dimworld> class AlbertaGridHierarchicIndexSet;
+
+#define MAKEENTITY 0
+
+  template <int codim, int dim, class GridImp> 
+  struct SelectEntityImp
+  {
+#if MAKEENTITY
+    typedef AlbertaGridMakeableEntity<codim,dim,GridImp> EntityImp;
+    typedef Dune::Entity<codim, dim, const GridImp, AlbertaGridEntity> Entity;
+#else 
+    typedef AlbertaGridEntity<codim,dim,GridImp> EntityImp;
+    typedef Dune::EntityDefault<codim,dim,const GridImp,AlbertaGridEntity> Entity;
+#endif
+  };
+  
 
   //! Class to mark the Vertices on the leaf level
   //! to visit every vertex only once
@@ -431,6 +447,12 @@ namespace Dune
 
     typedef AlbertaGridMakeableGeometry<dim-cd,dimworld,GridImp> GeometryImp;
   public:
+    template <int cc>
+    struct Codim
+    {
+      typedef typename GridImp::template Codim<cc>::EntityPointer EntityPointer;
+    };
+
     typedef typename GridImp::template Codim<cd>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
     typedef typename GridImp::template Codim<cd>::Geometry Geometry;
@@ -475,7 +497,7 @@ namespace Dune
 
     //! equality of entities  
     bool equals ( const AlbertaGridEntity<cd,dim,GridImp> & i) const;
-  private: 
+//  private: 
     // dummy function, only needed for codim 0 
     bool leafIt () const { return false; }
     
@@ -566,7 +588,7 @@ namespace Dune
       typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
     };
 
-    typedef AlbertaGridMakeableEntity<0,GridImp::dimension,GridImp> EntityImp;
+    typedef typename SelectEntityImp<0,dim,GridImp>::EntityImp EntityImp;
 
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::Geometry Geometry;
@@ -679,7 +701,7 @@ namespace Dune
     //! equality of entities  
     bool equals ( const AlbertaGridEntity<0,dim,GridImp> & i) const;
 
-  private: 
+ // private: 
     // returns true if entity comes from LeafIterator 
     bool leafIt () const { return leafIt_; }
     
@@ -757,7 +779,7 @@ namespace Dune
   public:
 
     typedef typename GridImp::template Codim<cd>::Entity Entity;
-    typedef AlbertaGridMakeableEntity<cd,dim,GridImp> EntityImp;
+    typedef typename SelectEntityImp<cd,dim,GridImp>::EntityImp EntityImp;
 
     //! typedef of my type 
     typedef AlbertaGridEntityPointer<cd,GridImp> AlbertaGridEntityPointerType;
@@ -833,7 +855,9 @@ namespace Dune
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::ctype ctype;
-    typedef AlbertaGridMakeableEntity<0,GridImp::dimension,GridImp> EntityImp;
+
+    //typedef AlbertaGridMakeableEntity<0,GridImp::dimension,GridImp> EntityImp;
+    typedef typename SelectEntityImp<0,GridImp::dimension,GridImp>::EntityImp EntityImp;
 
     //! the normal Constructor
     AlbertaGridHierarchicIterator(const GridImp &grid,
@@ -902,7 +926,10 @@ namespace Dune
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
-    typedef AlbertaGridMakeableEntity<0,dim,GridImp> EntityImp;
+    
+    typedef typename SelectEntityImp<0,dim,GridImp>::EntityImp EntityImp;
+    //typedef AlbertaGridMakeableEntity<0,dim,GridImp> EntityImp;
+    
     typedef AlbertaGridMakeableGeometry<dim-1,dimworld,GridImp> LocalGeometryImp;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
@@ -1092,7 +1119,8 @@ namespace Dune
   public:
   
     typedef typename GridImp::template Codim<cd>::Entity Entity;
-    typedef AlbertaGridMakeableEntity<cd,dim,GridImp> EntityImp;
+    typedef typename SelectEntityImp<cd,dim,GridImp>::EntityImp EntityImp;
+    //typedef AlbertaGridMakeableEntity<cd,dim,GridImp> EntityImp;
   
     //! Constructor making end iterator
     AlbertaGridTreeIterator(const AlbertaGridTreeIterator<cd,pitype,GridImp> & org ); 
@@ -1279,7 +1307,11 @@ namespace Dune
         typedef Dune::Geometry<dim-cd, dimworld, const GridImp, AlbertaGridGeometry> Geometry;
         typedef Dune::Geometry<dim-cd, dim, const GridImp, AlbertaGridGeometry> LocalGeometry;
         // we could - if needed - introduce an other struct for dimglobal of Geometry
-        typedef Dune::Entity<cd, dim, const GridImp, AlbertaGridEntity> Entity;
+
+        typedef typename SelectEntityImp<cd,dim,GridImp>::Entity Entity; 
+
+        //typedef Dune::Entity<cd, dim, const GridImp, AlbertaGridEntity> Entity;
+        //typedef Dune::EntityDefault<cd,dim,const GridImp> Entity;
 
         typedef Dune::LevelIterator<cd,All_Partition,const GridImp,AlbertaGridLevelIterator> LevelIterator;
 
@@ -1605,7 +1637,12 @@ public:
     AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& 
     getRealEntity(typename Traits::template Codim<cd>::Entity& entity) 
     {
+#if MAKEENTITY
       return entity.realEntity;
+#else
+      typedef AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> > EntityImp;
+      return static_cast<EntityImp &> (entity);
+#endif
     }
 
   private:
@@ -1614,7 +1651,12 @@ public:
     const AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> >& 
     getRealEntity(const typename Traits::template Codim<cd>::Entity& entity) const 
     {
+#if MAKEENTITY
       return entity.realEntity;
+#else
+      typedef AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> > EntityImp;
+      return static_cast<const EntityImp &> (entity);
+#endif
     }
 
   public:
@@ -1735,7 +1777,8 @@ public:
     //***********************************************************************
     //  MemoryManagement for Entitys and Geometrys 
     //**********************************************************************
-    typedef AlbertaGridMakeableEntity<0,dim,const MyType>            EntityImp;
+    typedef typename SelectEntityImp<0,dim,const MyType>::EntityImp EntityImp;
+    //typedef AlbertaGridMakeableEntity<0,dim,const MyType>            EntityImp;
     typedef AlbertaGridMakeableGeometry<dim-1,dimworld,const MyType> GeometryImp;
   
   public:
@@ -1747,11 +1790,14 @@ public:
     mutable IntersectionSelfProvider     interSelfProvider_;
     mutable IntersectionNeighProvider    interNeighProvider_;
 
+    //! return obj pointer to EntityImp 
     template <int codim> 
-    AlbertaGridMakeableEntity<codim,dim,const MyType> * getNewEntity (int level, bool leafIt ) const;
+    typename SelectEntityImp<codim,dim,const MyType>::EntityImp * 
+    getNewEntity (int level, bool leafIt ) const;
 
+    //! free obj pointer of EntityImp 
     template <int codim>
-    void freeEntity (AlbertaGridMakeableEntity<codim,dim,const MyType> * en) const;
+    void freeEntity (typename SelectEntityImp<codim,dim,const MyType>::EntityImp * en) const;
 
   private:
     //*********************************************************************
@@ -1865,6 +1911,7 @@ public:
 // undef all dangerous defines
 #undef DIM
 #undef DIM_OF_WORLD
+#undef MAKEENTITY
 #include "alberta_undefs.hh"
 
 #endif

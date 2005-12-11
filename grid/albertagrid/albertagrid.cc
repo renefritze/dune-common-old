@@ -1017,6 +1017,7 @@ struct SubEntity<GridImp,dim,0>
   }
 };
 
+
 // specialisation for faces 
 template <class GridImp, int dim>
 struct SubEntity<GridImp,dim,1>
@@ -1053,7 +1054,6 @@ struct SubEntity<GridImp,dim,dim>
     return AlbertaGridEntityPointer<dim,GridImp> (grid, stack , level ,elInfo, 0,0,i);
   }
 };
-
 
 // default is faces 
 template <int dim, class GridImp>
@@ -1212,7 +1212,8 @@ inline AlbertaGridEntityPointer<codim,GridImp> ::
 
 template<int codim, class GridImp >
 inline AlbertaGridEntityPointer<codim,GridImp> ::
-  AlbertaGridEntityPointer(const AlbertaGridEntityPointerType & org)
+  //AlbertaGridEntityPointer(const AlbertaGridEntityPointerType & org)
+  AlbertaGridEntityPointer(const AlbertaGridEntityPointer<codim,GridImp> & org)
   : grid_(org.grid_)
   , isLeaf_ ( org.isLeaf_ ) 
   , entity_ ( grid_.template getNewEntity<codim> ( org.entity_->level() , isLeaf_) )
@@ -1244,7 +1245,7 @@ inline AlbertaGridEntityPointer<codim,GridImp> ::
 template<int codim, class GridImp >
 inline AlbertaGridEntityPointer<codim,GridImp> :: ~AlbertaGridEntityPointer()
 {
-  grid_.freeEntity( entity_ );
+  grid_.template freeEntity<codim>( entity_ );
 }
 
 template<int codim, class GridImp >
@@ -3030,7 +3031,6 @@ inline void AlbertaMarkerVector::markNewVertices(GridType &grid, int level)
     for(int i=0; i<edgevec.size(); i++) edgevec[i] = -1;
 #endif
 
-    //typedef AlbertaGridMakeableEntity<0,dim,const GridType> MakeableEntityImp;
     typedef typename GridType::template Codim<0>::LevelIterator LevelIteratorType;
     LevelIteratorType endit = grid.template lend<0> (level);
     for(LevelIteratorType it = grid.template lbegin<0> (level); it != endit; ++it)
@@ -3082,7 +3082,6 @@ inline void AlbertaMarkerVector::markNewLeafVertices(GridType &grid)
   
     for(int i=0; i<vec.size(); i++) vec[i] = -1;
 
-    //typedef AlbertaGridMakeableEntity<0,dim,const GridType> MakeableEntityImp;
     typedef typename GridType::template Codim<0>::LeafIterator IteratorType;
     IteratorType endit = grid.template leafend<0> ();
     for(IteratorType it = grid.template leafbegin<0> (); it != endit; ++it)
@@ -3426,13 +3425,14 @@ AlbertaGrid < dim, dimworld >::leafend () const {
 template <class GridImp, class EntityProvider, int dim , int codim >
 struct GetNewEntity 
 {
-  static AlbertaGridMakeableEntity<codim,dim,GridImp> * 
+  typedef typename SelectEntityImp<codim,dim,GridImp>::EntityImp EntityImp;
+  static EntityImp * 
   getNewEntity(GridImp & grid, EntityProvider &enp , int level, bool leafIt ) 
   {
-    return new AlbertaGridMakeableEntity<codim,dim,GridImp> (grid,level,leafIt);
+    return new EntityImp (grid,level,leafIt);
   }
   
-  static void freeEntity (EntityProvider &enp , AlbertaGridMakeableEntity<codim,dim,GridImp> * en)
+  static void freeEntity (EntityProvider &enp , EntityImp * en)
   {
     if(en) delete en;
   }
@@ -3442,14 +3442,15 @@ struct GetNewEntity
 template <class GridImp, class EntityProvider, int dim>
 struct GetNewEntity<GridImp,EntityProvider,dim,0>
 {
-  static AlbertaGridMakeableEntity<0,dim,GridImp> * 
+  typedef typename SelectEntityImp<0,dim,GridImp>::EntityImp EntityImp;
+  static EntityImp * 
   getNewEntity(GridImp & grid, EntityProvider &enp , int level, bool leafIt ) 
   {
     // return object from stack 
     return enp.getNewObjectEntity(grid,level,leafIt);
   }
 
-  static void freeEntity (EntityProvider &enp , AlbertaGridMakeableEntity<0,dim,GridImp> * en)
+  static void freeEntity (EntityProvider &enp , EntityImp * en)
   {
     enp.freeObjectEntity(en);
   }
@@ -3457,7 +3458,7 @@ struct GetNewEntity<GridImp,EntityProvider,dim,0>
 
 template < int dim   , int dimworld >
 template < int codim > 
-inline AlbertaGridMakeableEntity<codim,dim,const AlbertaGrid<dim,dimworld> > * 
+inline typename SelectEntityImp<codim,dim,const AlbertaGrid<dim,dimworld> >::EntityImp *
 AlbertaGrid < dim, dimworld >::getNewEntity (int level, bool leafIt ) const
 {
   return GetNewEntity<const MyType, EntityProvider, dim, codim > :: getNewEntity(*this,entityProvider_,level,leafIt);
@@ -3466,7 +3467,7 @@ AlbertaGrid < dim, dimworld >::getNewEntity (int level, bool leafIt ) const
 template < int dim   , int dimworld >
 template < int codim > 
 inline void AlbertaGrid < dim, dimworld >::
-freeEntity (AlbertaGridMakeableEntity<codim,dim,const MyType> * en) const
+freeEntity (typename SelectEntityImp<codim,dim,const MyType>::EntityImp * en) const
 {
   GetNewEntity<const MyType, EntityProvider, dim, codim > :: freeEntity(entityProvider_,en);
 }
@@ -3491,13 +3492,13 @@ globalRefine(int refCount)
     // mark all interior elements 
     for(LeafIt it = this->leafbegin(this->maxLevel()); it != endit; ++it)
     {
-      this->mark(1,*it);
+      this->mark(1,it);
     }
 
     // mark all ghosts
     for(LeafIt it = leafbegin(maxLevel(),Ghost_Partition); it != endit; ++it)
     {
-      this->mark(1,*it);
+      this->mark(1,it);
     }
 
     this->adapt();
