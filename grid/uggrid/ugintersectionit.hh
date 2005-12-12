@@ -79,8 +79,9 @@ public:
   //! (that is the neighboring Entity)
     EntityPointer outside() const {
         UGGridEntityPointer<0,GridImp> other;
-		typename TargetType<0,GridImp::dimensionworld>::T* otherelem = getNeighbor();
-		if (otherelem==0) DUNE_THROW(GridError,"no neighbor found in outside()");
+        typename TargetType<0,GridImp::dimensionworld>::T* otherelem = getNeighbor();
+        if (otherelem==0) 
+            DUNE_THROW(GridError,"no neighbor found in outside()");
         other.setToTarget(otherelem,UG_NS<GridImp::dimensionworld>::myLevel(otherelem));
         return other;
     }
@@ -94,8 +95,7 @@ public:
 
   //! return information about the Boundary 
   int boundaryId () const {
-      DUNE_THROW(NotImplemented, "Coarse grid boundary segment id");
-    return 0; 
+    return 1;
   }
       
   //! intersection of codimension 1 of this neighbor with element where
@@ -142,7 +142,7 @@ private:
     mutable UGMakeableGeometry<dim-1,dim,GridImp> neighLocal_;
  
   //! pointer to element holding the neighbor_global and neighbor_local 
-  //! information. This element is created on demand.
+  //! information.
     mutable UGMakeableGeometry<dim-1,dimworld,GridImp> neighGlob_;
 
     //! This points to the same UG element as center_ does
