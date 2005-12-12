@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <cstdlib>
 #include <cmath>
+#include "iteratorfacades.hh"
 #include "stdstreams.hh"
 
 struct Indent
