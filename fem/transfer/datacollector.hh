@@ -580,7 +580,6 @@ public LocalInlinePlus < DataInliner< DiscreteFunctionType > ,
     typename std::pair < ObjectStreamType * ,
           const typename  DiscreteFunctionType::FunctionSpaceType::GridType::template Codim<0>::Entity * > >  ChefType;
 public:
-  typedef typename DiscreteFunctionType::FunctionSpaceType::GridType::ObjectStreamType ObjectStreamType;
   typedef typename DiscreteFunctionType::FunctionSpaceType::GridType::template Codim<0>::Entity EntityType;
   typedef typename ChefType::Traits::ParamType ParamType;
 
@@ -632,7 +631,6 @@ public LocalInlinePlus < DataXtractor< DiscreteFunctionType > ,
     typename std::pair < ObjectStreamType * ,
           const typename  DiscreteFunctionType::FunctionSpaceType::GridType::template Codim<0>::Entity * > >  ChefType;
 public:
-  typedef typename DiscreteFunctionType::FunctionSpaceType::GridType::ObjectStreamType ObjectStreamType;
   typedef typename DiscreteFunctionType::FunctionSpaceType::GridType::template Codim<0>::Entity EntityType;
   typedef typename ChefType::Traits::ParamType ParamType;
 
