@@ -464,7 +464,7 @@ namespace Dune
 
 	//! allocate data
 	P1FEFunction (const G& g,  const IS& indexset, bool extendoverlap=false) 
-	  : grid_(g), is(indexset), mapper_(g,indexset)
+            : grid_(g), is(indexset), mapper_(g,indexset), comobj(0), oldcoeff(0)
 	{
 	  // check if overlap extension is possible
 	  if (extendoverlap && g.overlapSize(0)>0)
@@ -696,14 +696,6 @@ namespace Dune
 	 */
 	RepresentationType& operator* ()
 	{
-	  // get communication object. \todo: make this as an option
-	  // because it may be unnecessary for overlapping methods that do communication
-	  // on the grid
-	  if (comobj==0)
-		{
-		  P1ExtendOverlap<G,IS,VM> extender;
-		  comobj = extender.getComObject(grid_,is,mapper_);
-		}
 	  return (*coeff);
 	}
 
@@ -711,6 +703,14 @@ namespace Dune
 	//! deliver communication object
 	const CommunicationType& comm () const
 	{
+	  // get communication object. \todo: make this as an option
+	  // because it may be unnecessary for overlapping methods that do communication
+	  // on the grid
+            if (comobj==0)
+		{
+                    P1ExtendOverlap<G,IS,VM> extender;
+                    comobj = extender.getComObject(grid_,is,mapper_);
+		}
 	  return (*comobj);
 	}
 
