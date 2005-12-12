@@ -706,10 +706,10 @@ namespace Dune
 	  // get communication object. \todo: make this as an option
 	  // because it may be unnecessary for overlapping methods that do communication
 	  // on the grid
-            if (comobj==0)
+	  if (comobj==0)
 		{
-                    P1ExtendOverlap<G,IS,VM> extender;
-                    comobj = extender.getComObject(grid_,is,mapper_);
+		  P1ExtendOverlap<G,IS,VM> extender;
+		  comobj = extender.getComObject(grid_,is,mapper_);
 		}
 	  return (*comobj);
 	}
@@ -870,7 +870,7 @@ namespace Dune
 	RepresentationType* oldcoeff;
 
 	// the mysterious communication object
-	CommunicationType* comobj;
+	mutable CommunicationType* comobj;
   };
 
 
