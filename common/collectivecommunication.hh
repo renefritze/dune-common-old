@@ -24,6 +24,16 @@ namespace Dune
 	  : communicator(c)
 	{}
 
+	int rank ()
+	{
+	  return 0;
+	}
+
+	int procs ()
+	{
+	  return 1;
+	}
+
 	template<typename T>
 	T sum (T& in) const // MPI does not know about const :-(
 	{
@@ -517,6 +527,20 @@ namespace Dune
 	CollectiveCommunication (const MPI_Comm& c)
 	  : communicator(c)
 	{}
+
+	int rank ()
+	{
+	  int me;
+	  MPI_Comm_rank(communicator,&me);
+	  return me;
+	}
+
+	int size ()
+	{
+	  int procs;
+	  MPI_Comm_size(communicator,&procs);
+	  return procs;
+	}
 
 	template<typename T>
 	T sum (T& in) const // MPI does not know about const :-(
