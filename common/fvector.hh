@@ -14,7 +14,9 @@
 #endif
 
 namespace Dune {
-   
+
+#ifndef DUNE_EXPRESSIONTEMPLATES
+  
   /** @defgroup DenseMatVec Dense Matrix and Vector Template Library
       @ingroup Common
 	  @{
@@ -146,6 +148,8 @@ representing a field and a compile-time given size.
 	}
   };
 
+#endif
+  
   // template meta program for operator==
   template<int I>
   struct fvmeta_equality {
@@ -164,6 +168,8 @@ representing a field and a compile-time given size.
 	}
   };
 
+#ifndef DUNE_EXPRESSIONTEMPLATES
+  
   // template meta program for axpy
   template<int I>
   struct fvmeta_axpy {
@@ -327,6 +333,8 @@ representing a field and a compile-time given size.
 	  return fvmeta_absreal(x[0]);
 	}
   };
+
+#endif
 
   //! Iterator class for sequential access to FieldVector and FieldMatrix
   template<class C, class T>
@@ -618,6 +626,7 @@ representing a field and a compile-time given size.
 	//! Constructor making uninitialized vector
 	FieldVector() {}
 
+#ifndef DUNE_EXPRESSIONTEMPLATES
 	//! Constructor making vector with identical coordinates
 	explicit FieldVector (const K& t)
 	{
@@ -625,32 +634,56 @@ representing a field and a compile-time given size.
 	}
 
 	//===== assignment from scalar
-        //! Assignment operator for scalar
+    //! Assignment operator for scalar
 	FieldVector& operator= (const K& k)
 	{
 	  fvmeta_assignscalar<n-1>::assignscalar(*this,k);
 	  return *this;   
 	}
 
-#ifdef DUNE_EXPRESSIONTEMPLATES
+#else
+	//! Constructor making vector with identical coordinates
+	explicit FieldVector (const K& t)
+	{
+#ifdef DUNE_VVERBOSE
+      Dune::dvverb << INDENT << "FieldVector Copy Constructor Scalar\n";
+#endif
+      assignFrom(t);
+	}
+    //! Assignment operator for scalar
+	FieldVector& operator= (const K& k)
+	{
+#ifdef DUNE_VVERBOSE
+      Dune::dvverb << INDENT << "FieldVector Assignment Operator Scalar\n";
+#endif
+      return assignFrom(k);
+	}
     template <class E>
     FieldVector (Dune::ExprTmpl::Expression<E> op) {
+#ifdef DUNE_VVERBOSE
       Dune::dvverb << INDENT << "FieldVector Copy Constructor Expression\n";
+#endif
       assignFrom(op);
     }
     template <class V>
     FieldVector (const Dune::ExprTmpl::Vector<V> & op) {
+#ifdef DUNE_VVERBOSE
       Dune::dvverb << INDENT << "FieldVector Copy Operator Vector\n";
+#endif
       assignFrom(op);
     }
     template <class E>
     FieldVector&  operator = (Dune::ExprTmpl::Expression<E> op) {
+#ifdef DUNE_VVERBOSE
       Dune::dvverb << INDENT << "FieldVector Assignment Operator Expression\n";
+#endif
       return assignFrom(op);
     }
     template <class V>
     FieldVector& operator = (const Dune::ExprTmpl::Vector<V> & op) {
+#ifdef DUNE_VVERBOSE
       Dune::dvverb << INDENT << "FieldVector Assignment Operator Vector\n";
+#endif
       return assignFrom(op);
     }
 #endif
@@ -751,6 +784,7 @@ representing a field and a compile-time given size.
 		return ConstIterator(*this,n);
 	}
     
+#ifndef DUNE_EXPRESSIONTEMPLATES
 	//===== vector space arithmetic
 
 	//! vector space addition
@@ -767,7 +801,6 @@ representing a field and a compile-time given size.
 	  return *this;
 	}
 
-#ifndef DUNE_EXPRESSIONTEMPLATES
 	//! Binary vector addition
 	FieldVector<K, size> operator+ (const FieldVector<K, size>& b) const
 	{
@@ -781,7 +814,6 @@ representing a field and a compile-time given size.
 	  FieldVector<K, size> z = *this;
 	  return (z-=b);
 	}
-#endif
 
 	//! vector space add scalar to all comps
 	FieldVector& operator+= (const K& k)
@@ -811,6 +843,8 @@ representing a field and a compile-time given size.
 	  return *this;
 	}
 
+#endif
+
 	//! Binary vector comparison
 	bool operator== (const FieldVector& y) const
 	{
@@ -820,11 +854,15 @@ representing a field and a compile-time given size.
 	//! vector space axpy operation
 	FieldVector& axpy (const K& a, const FieldVector& y)
 	{
+#ifndef DUNE_EXPRESSIONTEMPLATES
 	  fvmeta_axpy<n-1>::axpy(*this,a,y);
+#else
+      *this = (*this)*a + y;
+#endif
 	  return *this;
 	}
 
-
+#ifndef DUNE_EXPRESSIONTEMPLATES
 	//===== Euclidean scalar product
 
 	//! scalar product
@@ -871,7 +909,7 @@ representing a field and a compile-time given size.
 	{
 	  return fvmeta_infinity_norm_real<n-1>::infinity_norm_real(*this);
 	}
-
+#endif
 
 	//===== sizes
 
@@ -973,22 +1011,30 @@ representing a field and a compile-time given size.
 #ifdef DUNE_EXPRESSIONTEMPLATES
     template <class E>
     FieldVector (Dune::ExprTmpl::Expression<E> op) {
+#ifdef DUNE_VVERBOSE
       Dune::dvverb << INDENT << "FieldVector<1> Copy Constructor Expression\n";
+#endif
       assignFrom(op);
     }
     template <class V>
     FieldVector (const Dune::ExprTmpl::Vector<V> & op) {
+#ifdef DUNE_VVERBOSE
       Dune::dvverb << INDENT << "FieldVector<1> Copy Operator Vector\n";
+#endif
       assignFrom(op);
     }
     template <class E>
     FieldVector&  operator = (Dune::ExprTmpl::Expression<E> op) {
+#ifdef DUNE_VVERBOSE
       Dune::dvverb << INDENT << "FieldVector<1> Assignment Operator Expression\n";
+#endif
       return assignFrom(op);
     }
     template <class V>
     FieldVector& operator = (const Dune::ExprTmpl::Vector<V> & op) {
+#ifdef DUNE_VVERBOSE
       Dune::dvverb << INDENT << "FieldVector<1> Assignment Operator Vector\n";
+#endif
       return assignFrom(op);
     }
 #endif
