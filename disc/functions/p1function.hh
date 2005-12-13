@@ -22,7 +22,7 @@
 #include"dune/istl/bvector.hh"
 #include"dune/istl/operators.hh"
 #include"dune/istl/bcrsmatrix.hh"
-#include"dune/istl/ownercopy.hh"
+#include"dune/istl/owneroverlapcopy.hh"
 #include"dune/disc/shapefunctions/lagrangeshapefunctions.hh"
 
 // same directory includes
