@@ -215,7 +215,7 @@ public:
     /** \brief The HierarchicIterator type*/
   typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
   
-    //! Know your own codimension
+  //! Know your own codimension
   enum { codimension=0 };
   //! Know the grid's dimension
   enum { dimension=dim };
@@ -484,6 +484,9 @@ public:
   //! know your own dimension
   enum { dimension=dim };
 
+  /** \brief Know dimension of the entity */
+  enum { mydimension=dim-cd };
+  
   //! know your own dimension of world
   enum { dimensionworld=dimworld };
 
@@ -529,13 +532,12 @@ class EntityInterface <0,dim,GridImp,EntityImp>
   enum { dimworld = GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
 
+public:
   template <int cc> 
   struct Codim
   {
     typedef typename GridImp::template Codim<cc>::EntityPointer EntityPointer;
   };
-
-public:
 
   //! tpye of Geometry 
   typedef typename GridImp::template Codim<0>::Geometry Geometry;
@@ -551,6 +553,9 @@ public:
 
   //! know your own dimension
   enum { dimension=dim };
+
+  /** \brief Know dimension of the entity */
+  enum { mydimension=dim };
 
   //! know your own dimension of world
   enum { dimensionworld=dimworld };
@@ -674,6 +679,9 @@ public:
   //! know your own dimension
   enum { dimension=dim };
 
+  /** \brief Know dimension of the entity */
+  enum { mydimension=0 };
+
   //! know your own dimension of world
   enum { dimensionworld=dimworld };
 
@@ -728,6 +736,23 @@ class EntityDefault
 {
   enum { dimworld = GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
+  
+public:
+  //! know your own codimension
+  enum { codimension=cd };
+
+  //! know your own dimension
+  enum { dimension=dim };
+
+  /** \brief Know dimension of the entity */
+  enum { mydimension=dim-cd };
+
+  //! know your own dimension of world
+  enum { dimensionworld=dimworld };
+
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
+
 private:
   //!  Barton-Nackman trick 
   EntityImp<cd,dim,GridImp>& asImp () { return static_cast<EntityImp<cd,dim,GridImp>&>(*this); }
@@ -752,6 +777,20 @@ class EntityDefault <0,dim,GridImp,EntityImp> : public EntityInterface <0,dim,Gr
   enum { dimworld = GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
 public:
+  //! know your own codimension
+  enum { codimension=0 };
+
+  //! know your own dimension
+  enum { dimension=dim };
+
+  /** \brief Know dimension of the entity */
+  enum { mydimension=dim };
+
+  //! know your own dimension of world
+  enum { dimensionworld=dimworld };
+
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
 
   /** \brief Default implementation for access to boundaryId of sub entities 
    *
@@ -793,6 +832,21 @@ class EntityDefault <dim,dim,GridImp,EntityImp> : public EntityInterface <dim,di
 {
   enum { dimworld = GridImp::dimensionworld };
   typedef typename GridImp::ctype ct;
+public:
+  //! know your own codimension
+  enum { codimension=dim };
+
+  //! know your own dimension
+  enum { dimension=dim };
+
+  /** \brief Know dimension of the entity */
+  enum { mydimension=0 };
+
+  //! know your own dimension of world
+  enum { dimensionworld=dimworld };
+
+  //! define type used for coordinates in grid module
+  typedef ct ctype;
 private:
   //  Barton-Nackman trick 
   EntityImp<dim,dim,GridImp>& asImp () {return static_cast<EntityImp<dim,dim,GridImp>&>(*this);}
