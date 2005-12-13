@@ -1,6 +1,6 @@
 #include "exprtmpl.hh"
 
 /** This is only needed for debugging and will be removed in the future */
-extern Indent INDENT;
+Indent INDENT;
 
 
