@@ -9,6 +9,8 @@
   - FlatColIterator<Matrix> does not work if Matrix is mutable
  */
 
+#include "config.h"
+
 #include <iostream>
 #include <fstream>
 #include <dune/common/fvector.hh>
@@ -101,6 +103,7 @@ void test_blockblockvector()
 #endif
   std::cout << "infinity_norm(bbv)=" << infinity_norm(bbv) << std::endl;
   std::cout << "two_norm(bbv)=" << two_norm(bbv) << std::endl;
+  std::cout << "bbv.two_norm()=" << bbv.two_norm() << std::endl;
   std::cout << "two_norm2(bbv)=" << two_norm2(bbv) << std::endl;
   std::cout << "one_norm(bbv)=" << one_norm(bbv) << std::endl;
 }
@@ -271,6 +274,13 @@ void test_matrix()
   std::cout << std::endl;
 }
 
+int test_norm()
+{
+  Dune::FieldVector<double,3> a,b;
+
+  double c = (a-b).two_norm();
+}
+
 int main()
 {
   //  Dune::dvverb.attach(std::cout);
@@ -278,6 +288,7 @@ int main()
     {
 //      test_fvector();
 //      test_blockvector();
+      test_norm();
       test_blockblockvector();
       test_matrix<2,3,3,4>();
 #ifdef NOPRINT
