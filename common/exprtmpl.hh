@@ -33,11 +33,15 @@ struct Indent
   }
   void operator ++ ()
     {
+#ifdef DUNE_VVERBOSE
       i += 3;
+#endif
     };
   void operator -- ()
     {
+#ifdef DUNE_VVERBOSE
       i -= 3;
+#endif
     };
 };
 
@@ -45,7 +49,9 @@ extern Indent INDENT;
 
 inline std::ostream & operator << (std::ostream & s, const Indent & i)
 {
+#ifdef DUNE_VVERBOSE
   for (int n = 0; n < i.i; n++) s << " ";
+#endif
   return s;
 }
 
@@ -172,6 +178,18 @@ struct isEndOfExpressionRecusion
 
 template <>
 struct isEndOfExpressionRecusion<double>
+{
+  enum{ value=true };
+};
+
+template <class K>
+struct isEndOfExpressionRecusion< FieldVector<K,1> >
+{
+  enum{ value=true };
+};
+
+template <class K>
+struct isEndOfExpressionRecusion< std::complex<K> >
 {
   enum{ value=true };
 };
