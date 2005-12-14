@@ -18,7 +18,7 @@
 #include"istl/bcrsmatrix.hh"
 
 #include"disc/shapefunctions/lagrangeshapefunctions.hh"
-#include"disc/operators/p1operator.hh"
+#include"disc/operators/boundaryconditions.hh"
 #include"disc/functions/p0function.hh"
 #include"disc/functions/p1function.hh"
 #include"groundwater.hh"
@@ -107,7 +107,7 @@ namespace Dune
 	*/
 	void estimate (const Entity& e, const IntersectionIterator& it, const EEntityPointer& outside, 
 				   RT facefluxK[], RT facefluxN[], RT& facefactor, 
-				   typename GroundwaterEquationParameters<G,RT>::BC& facebctype, bool first)
+				   typename BoundaryConditions::Flags& facebctype, bool first)
 	{
 
 	  // extract some important parameters
@@ -151,7 +151,7 @@ namespace Dune
 	  if (it.neighbor())
 		{
 		  // no neumann condition
-		  facebctype = GroundwaterEquationParameters<G,RT>::process;
+		  facebctype = BoundaryConditions::process;
 
 		  // compute coefficients of flux evaluation in self
 		  for (int i=0; i<sfs.size(); i++)
@@ -187,7 +187,7 @@ namespace Dune
 		{
 		  // evaluate boundary condition type
 		  facebctype = problem.bctype(global,e,local);
-		  if (facebctype!=GroundwaterEquationParameters<G,RT>::neumann)
+		  if (facebctype!=BoundaryConditions::neumann)
 			return; // only Neumann conditions require further work
 
 		  // evaluate Neumann boundary
@@ -204,6 +204,8 @@ namespace Dune
 
   private:
 	const GroundwaterEquationParameters<G,RT>& problem;
+	FieldVector<DT,n> cache[SIZEF];;
+
   };
 
 
@@ -222,15 +224,10 @@ namespace Dune
 	typedef typename G::template Codim<0>::EntityPointer EEntityPointer;
 	typedef typename P1FEFunction<G,RT,IS,1>::RepresentationType VectorType;
 	typedef typename VectorType::block_type BlockType;
-	typedef typename AssembledP1FEOperator<G,RT,IS,1>::RepresentationType MatrixType;
-	typedef typename MatrixType::RowIterator rowiterator;
-	typedef typename MatrixType::ColIterator coliterator;
-	typedef typename AssembledP1FEOperator<G,RT,IS,1>::VM VM;
-
 
   public:
-	P1GroundwaterOperator (const G& grid, const GroundwaterEquationParameters<G,RT>& params)
-		loc(params),g(grid),is(grid.leafIndexSet())
+	GroundwaterEstimator (const G& grid, const GroundwaterEquationParameters<G,RT>& params)
+	  :	loc(params),g(grid),is(grid.leafIndexSet())
 	{}
 
 	/** \brief evaluate error estimator 
@@ -282,7 +279,7 @@ namespace Dune
 				  RT facefluxK[Dune::LagrangeShapeFunctionSetContainer<DT,RT,n>::maxsize];
 				  RT facefluxN[Dune::LagrangeShapeFunctionSetContainer<DT,RT,n>::maxsize];
 				  RT facefactor;
-				  typename GroundwaterEquationParameters<G,RT>::BC facebctype;
+				  BoundaryConditions::Flags facebctype;
 				  loc.estimate(*it,iit,outside,facefluxK,facefluxN,facefactor,facebctype,first);
 				  first=false;
 
@@ -311,12 +308,12 @@ namespace Dune
 				  RT facefluxK[Dune::LagrangeShapeFunctionSetContainer<DT,RT,n>::maxsize];
 				  RT facefluxN[Dune::LagrangeShapeFunctionSetContainer<DT,RT,n>::maxsize];
 				  RT facefactor;
-				  typename GroundwaterEquationParameters<G,RT>::BC facebctype;
+				  BoundaryConditions::Flags facebctype;
 				  loc.estimate(*it,iit,iit.inside(),facefluxK,facefluxN,facefactor,facebctype,first);
 				  first=false;
 
 				  // check bc type
-				  if (facebctype!=GroundwaterEquationParameters<G,RT>::neumann)
+				  if (facebctype!=BoundaryConditions::neumann)
 					continue;
 
 				  // compute contribution of myself
