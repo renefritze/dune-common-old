@@ -23,12 +23,12 @@ namespace Dune
 	CollectiveCommunication ()
 	{}
 
-	int rank ()
+	int rank () const
 	{
 	  return 0;
 	}
 
-	int procs ()
+	int procs () const
 	{
 	  return 1;
 	}
