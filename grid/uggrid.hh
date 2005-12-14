@@ -422,13 +422,6 @@ public:
     /** \brief End the coarse grid creation process */
     void createend();
 
-    /** \brief Preliminary method to insert a linear boundary segment into a UG coarse grid
-        \param vertices The indices of the vertices of the segment
-        \param coordinates The coordinates of the vertices of the segment
-    */
-    void insertLinearSegment(const std::vector<int>& vertices,
-                             const std::vector<FieldVector<double,dimworld> >& coordinates);
-
     /** \brief Method to insert an arbitrarily shaped boundary segment into a coarse grid
         \param vertices The indices of the vertices of the segment
         \param boundarySegment Class implementing the geometry of the boundary segment.
@@ -524,6 +517,13 @@ private:
 
     // Start up the UG system
     void init(unsigned int heapSize, unsigned int envHeapSize);
+
+    /** \brief Convenience method to insert a linear boundary segment into a UG coarse grid
+        \param vertices The indices of the vertices of the segment
+        \param coordinates The coordinates of the vertices of the segment
+    */
+    void insertLinearSegment(const std::vector<int>& vertices,
+                             const std::vector<FieldVector<double,dimworld> >& coordinates);
 
     // Recomputes entity indices after the grid was changed
     void setIndices();
