@@ -10,6 +10,7 @@
 #include"common/grid.hh"
 #include"sgrid/numbering.hh"
 #include"../common/bigunsignedint.hh"
+#include"../common/collectivecommunication.hh"
 #include"common/indexidset.hh"
 
 /*! \file sgrid.hh
@@ -1393,7 +1394,50 @@ public:
 	return theleafindexset;
   }
 
+  // dummy parallel functions
+
+  template<class DataHandle>
+  void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
+  {
+  }
+
+  template<class DataHandle>
+  void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
+  {
+  }
+
+  const CollectiveCommunication<SGrid>& comm () const
+  {
+	return ccobj;
+  }
+
+  //! return size (= distance in graph) of overlap region
+  int overlapSize (int level, int codim) const
+  {
+	return 0;
+  }
+
+  //! return size (= distance in graph) of overlap region
+  int overlapSize (int codim) const
+  {
+	return 0;
+  }
+
+  //! return size (= distance in graph) of ghost region
+  int ghostSize (int level, int codim) const
+  {
+	return 0;
+  }
+
+  //! return size (= distance in graph) of ghost region
+  int ghostSize (int codim) const
+  {
+	return 0;
+  }
+
 private:
+
+  CollectiveCommunication<SGrid> ccobj;
 
   std::vector<SGridLevelIndexSet<const SGrid<dim,dimworld> >*> indexsets;
   SGridLeafIndexSet<const SGrid<dim,dimworld> > theleafindexset;
