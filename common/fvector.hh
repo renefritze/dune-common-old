@@ -857,7 +857,7 @@ representing a field and a compile-time given size.
 #ifndef DUNE_EXPRESSIONTEMPLATES
 	  fvmeta_axpy<n-1>::axpy(*this,a,y);
 #else
-      *this = (*this)*a + y;
+      *this += a*y;
 #endif
 	  return *this;
 	}
