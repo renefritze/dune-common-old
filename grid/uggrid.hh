@@ -9,6 +9,7 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/boundarysegment.hh>
 #include <dune/common/misc.hh>
+#include <dune/common/collectivecommunication.hh>
 
 /* The following lines including the necessary UG headers are somewhat
    tricky.  Here's what's happening:
@@ -407,6 +408,12 @@ public:
     void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const  
     {}
 
+	/** dummy collective communication */
+	const CollectiveCommunication<UGGrid>& comm () const
+	{
+	  return ccobj;
+	}
+
     // **********************************************************
     // End of Interface Methods
     // **********************************************************
@@ -502,6 +509,8 @@ private:
 
     /** \brief Buffer for the vertices of each explicitly given boundary segment */
     std::vector<FixedArray<unsigned int, dim*2-2> > boundarySegmentVertices_;
+
+  CollectiveCommunication<UGGrid> ccobj;
 
     // Access to entity implementations through the interface wrappers
     template <int cd>

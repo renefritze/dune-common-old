@@ -16,6 +16,10 @@
 #include"../common/collectivecommunication.hh"
 #include"common/indexidset.hh"
 
+#if HAVE_MPI
+#include"../common/mpicollectivecommunication.hh"
+#endif
+
 /*! \file yaspgrid.hh
   Yasppergrid stands for yet another structured parallel grid.
   It will implement the dune grid interface for structured grids with codim 0
@@ -2734,7 +2738,7 @@ public:
 	return ccobj;
   }
 #else
-  const CollectiveCommunication<int>& comm () const
+  const CollectiveCommunication<YaspGrid>& comm () const
   {
 	return ccobj;
   }
@@ -2745,7 +2749,7 @@ private:
 #if HAVE_MPI
   CollectiveCommunication<MPI_Comm> ccobj; 
 #else
-  CollectiveCommunication<int> ccobj; 
+  CollectiveCommunication<YaspGrid> ccobj; 
 #endif
 
   std::vector<YaspLevelIndexSet<const YaspGrid<dim,dimworld> >*> indexsets;
