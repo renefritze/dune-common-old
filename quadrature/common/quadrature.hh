@@ -3,8 +3,7 @@
 
 #include <dune/common/dynamictype.hh>
 
-// For GeometryType
-#include <dune/grid/common/grid.hh>
+#include <dune/common/geometrytype.hh>
 
 #include <dune/common/exceptions.hh>
 
