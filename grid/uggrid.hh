@@ -341,11 +341,23 @@ public:
     /** \brief Returns UGGrid_Id for run-time type identification */
     GridIdentifier type () const { return UGGrid_Id; };
 
+    /** \brief Size of the overlap on the leaf level */
     unsigned int overlapSize(int codim) const {
         return 0;
     }
 
+    /** \brief Size of the ghost cell layer on the leaf level */
     unsigned int ghostSize(int codim) const {
+        return (codim==0) ? 1 : 0;
+    }
+
+    /** \brief Size of the overlap on a given level */
+    unsigned int overlapSize(int level, int codim) const {
+        return 0;
+    }
+
+    /** \brief Size of the ghost cell layer on a given level */
+    unsigned int ghostSize(int level, int codim) const {
         return (codim==0) ? 1 : 0;
     }
     
