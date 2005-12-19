@@ -1,9 +1,9 @@
+#ifndef MISC_HH
+#define MISC_HH
+
 /** \file
     \brief Miscellaneous helper stuff
 */
-
-#ifndef MISC_HH
-#define MISC_HH
 
 #include <iostream>
 #include <sstream>
@@ -32,6 +32,13 @@ struct Int2Type {
 
         @{
  */
+
+//! Return the sign of the value
+template <class T>
+int sign(const T& val) 
+{
+  return (val < 0 ? -1 : 1);
+}
 
 /** \brief Compute the square of T */
 template<class T>
