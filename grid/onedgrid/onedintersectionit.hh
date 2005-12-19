@@ -22,7 +22,6 @@ namespace Dune {
  */
 template<class GridImp>
 class OneDGridIntersectionIterator : 
-//        public Dune::OneDGridEntityPointer<0, GridImp>,
         public  IntersectionIteratorDefault <GridImp, OneDGridIntersectionIterator>
 {
   enum { dim=GridImp::dimension };
@@ -32,9 +31,7 @@ class OneDGridIntersectionIterator :
 
     //! Constructor for a given grid entity
     OneDGridIntersectionIterator(OneDEntityImp<1>* center, int nb) : center_(center), neighbor_(nb) 
-    {
-//        this->virtualEntity_.setToTarget(target());
-    }
+    {}
 
 public:
 
@@ -54,7 +51,6 @@ public:
     //! prefix increment
     void increment() {
         neighbor_++;
-//        this->virtualEntity_.setToTarget(target());
     }
 
     OneDEntityImp<1>* target() const {
@@ -146,8 +142,7 @@ public:
 
   //! return information about the Boundary 
   int boundaryId () const {
-#warning please implement a coarse grid boundary segment id
-    return 0;
+    return 1;
   }
  
   //! intersection of codimension 1 of this neighbor with element where
