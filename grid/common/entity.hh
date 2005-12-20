@@ -94,10 +94,7 @@ public:
 
   //! The level of this entity
   int level () const { return realEntity.level(); }
-  //! Unique and consecutive index per level and codim
-  int index () const DUNE_DEPRECATED { return realEntity.index(); } 
-  //! The global unique index
-  int globalIndex () const DUNE_DEPRECATED { return realEntity.globalIndex(); }
+
   //! Return partition type attribute
   PartitionType partitionType () const { return realEntity.partitionType(); }
   /**
@@ -228,10 +225,7 @@ public:
 
   //! Level of this entity
   int level () const { return realEntity.level(); }
-  //! Unique and consecutive index per level and codim
-  int index () const DUNE_DEPRECATED { return realEntity.index(); } 
-  //! Global unique index per grid
-  int globalIndex () const DUNE_DEPRECATED { return realEntity.globalIndex(); }
+
   //! Partition type attribute
   PartitionType partitionType () const { return realEntity.partitionType(); }
   /** \brief Id of the boundary which is associated with 
@@ -426,10 +420,7 @@ public:
 
   //! Level of this entity
   int level () const { return realEntity.level(); }
-  //! Unique and consecutive index per level and codim
-  int index () const DUNE_DEPRECATED { return realEntity.index(); }
-  //! Global unique index per grid
-  int globalIndex () const DUNE_DEPRECATED { return realEntity.globalIndex(); }
+
   //! Partition type attribute
   PartitionType partitionType () const { return realEntity.partitionType(); }
   /** \brief Id of the boundary which is associated with 
@@ -502,10 +493,6 @@ public:
   //! level of this entity
   int level () const { return asImp().level(); }
 
-  //! index is unique and consecutive per level and cd used for access to degrees of freedom
-  int index () const { return asImp().index(); } 
-
-
   //! return partition type attribute
   PartitionType partitionType () const { return asImp().partitionType(); }
 
@@ -571,9 +558,6 @@ public:
 
   //! level of this entity
   int level () const { return asImp().level(); }
-
-  //! index is unique and consecutive per level and cd used for access to degrees of freedom
-  int index () const { return asImp().index(); } 
 
   //! return partition type attribute
   PartitionType partitionType () const { return asImp().partitionType(); }
@@ -696,9 +680,6 @@ public:
 
   //! level of this entity
   int level () const { return asImp().level(); }
-
-  //! index is unique and consecutive per level and cd used for access to degrees of freedom
-  int index () const { return asImp().index(); }
 
   //! return partition type attribute
   PartitionType partitionType () const { return asImp().partitionType(); }
