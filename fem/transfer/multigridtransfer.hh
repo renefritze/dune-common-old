@@ -73,6 +73,15 @@ public:
      */
     virtual void galerkinRestrict(const OperatorType& fineMat, OperatorType& coarseMat) const;
     
+    /** \brief Set Occupation of Galerkin restricted coarse stiffness matrix   
+	*
+	* Set occupation of Galerkin restricted coarse matrix. Call this one before
+	* galerkinRestrict to ensure all non-zeroes are present
+	* \param fineMat The fine level matrix
+	* \param coarseMat The coarse level matrix
+	*/
+	void galerkinRestrictSetOccupation(const OperatorType& fineMat, OperatorType& coarseMat) const;
+	
     /** \brief Direct access to the operator matrix, if you absolutely want it! */
     virtual const OperatorType& getMatrix() const {return matrix_;}
 
@@ -81,8 +90,8 @@ public:
     \deprecated Only exists for backward compatibility
      */
     SparseRowMatrix<double> galerkinRestrict(const SparseRowMatrix<double>& fineMat) const;
-
-    /** \brief Restrict a DiscFuncArray from the fine onto the coarse grid
+	
+	/** \brief Restrict a DiscFuncArray from the fine onto the coarse grid
     \deprecated Only exists for backward compatibility
      */
     void restrictDFA(const DiscFuncType& f, DiscFuncType &t) const;
