@@ -3,6 +3,8 @@
 #include "grid.hh"
 #include "faceutility.hh"
 
+#include <dune/common/misc.hh>
+
 namespace Dune {
 
 /************************************************************************************
@@ -265,6 +267,31 @@ template<class GridImp>
 inline int ALU3dGridIntersectionIterator<GridImp>::numberInNeighbor () const
 {
   return ElementTopo::alu2duneFace(connector_.outerALUFaceIndex());
+}
+
+template<class GridImp>
+inline int ALU3dGridIntersectionIterator<GridImp>::twistInSelf () const
+{
+  int aluTwist = connector_.innerTwist();
+  int mappedZero = 
+    FaceTopo::twist(ElementTopo::dune2aluFaceVertex(numberInSelf(), 0),
+                    aluTwist);
+  return
+    (ElementTopo::faceOrientation(numberInSelf())*sign(aluTwist) >= 0 ?
+     -mappedZero-1 : mappedZero);
+}
+
+template<class GridImp>
+inline int ALU3dGridIntersectionIterator<GridImp>::twistInNeighbor () const
+{
+  int aluTwist = connector_.innerTwist();
+  int mappedZero = 
+    FaceTopo::twist(ElementTopo::dune2aluFaceVertex(numberInNeighbor(), 0),
+                    aluTwist);
+
+  return 
+    (ElementTopo::faceOrientation(numberInNeighbor())*sign(aluTwist) >= 0 ?
+     -mappedZero-1 : mappedZero);
 }
 
 template <class GridImp>

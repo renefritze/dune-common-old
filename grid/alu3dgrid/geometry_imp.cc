@@ -304,6 +304,7 @@ local(const FieldVector<alu3d_ctype, 3>& global) const
 
   // multiply with transposed because Jinv_ is already transposed  
   localCoord_ = FMatrixHelp:: multTransposed(Jinv_,globalCoord_);
+
   return localCoord_;
 }
 

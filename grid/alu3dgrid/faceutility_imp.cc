@@ -68,7 +68,7 @@ namespace Dune {
   // points face from inner element away?
   template <ALU3dGridElementType type> 
   inline ALU3dGridFaceInfo<type>::ALU3dGridFaceInfo(const GEOFaceType& face, 
-                                             int innerTwist) 
+                                                    int innerTwist) 
   {
     updateFaceInfo(face,innerTwist);
   }
