@@ -1872,6 +1872,20 @@ numberInNeighbor () const
   return elInfo_->opp_vertex[neighborCount_];
 }
 
+template <class GridImp>
+inline int AlbertaGridIntersectionIterator<GridImp>::
+twistInSelf() const
+{
+  return 0;
+}
+
+template <class GridImp>
+inline int AlbertaGridIntersectionIterator<GridImp>::
+twistInNeighbor() const
+{
+  return twist_;
+}
+
 // setup neighbor element with the information of elInfo_
 template< class GridImp >
 inline bool AlbertaGridIntersectionIterator<GridImp>::neighborHasSameLevel () const
@@ -1890,7 +1904,7 @@ inline bool AlbertaGridIntersectionIterator<GridImp>::neighborHasSameLevel () co
 template <class GridImp, int dimworld , int dim > 
 struct SetupVirtualNeighbour 
 {
-  static void setupNeighInfo(GridImp & grid, const ALBERTA EL_INFO * elInfo,
+  static int setupNeighInfo(GridImp & grid, const ALBERTA EL_INFO * elInfo,
                              const int vx, const int nb, ALBERTA EL_INFO * neighInfo)
   {
     
@@ -1908,6 +1922,8 @@ struct SetupVirtualNeighbour
       for(int j=0; j<dimworld; j++) newcoord[j] = coord[j];
     }
     //****************************************
+    // twist is always 1
+    return 1;
   }
 };
 
@@ -1918,8 +1934,8 @@ struct SetupVirtualNeighbour
 template <class GridImp, int dimworld > 
 struct SetupVirtualNeighbour<GridImp,dimworld,3> 
 {
-  static void setupNeighInfo(GridImp & grid, const ALBERTA EL_INFO * elInfo,
-                             const int vx, const int nb, ALBERTA EL_INFO * neighInfo)
+  static int setupNeighInfo(GridImp & grid, const ALBERTA EL_INFO * elInfo,
+                            const int vx, const int nb, ALBERTA EL_INFO * neighInfo)
   {
     enum { dim = 3 };
     // the face might be twisted when look from different elements 
@@ -1941,7 +1957,7 @@ struct SetupVirtualNeighbour<GridImp,dimworld,3>
         if( myvx[i] != neighvx[i] ) allRight = false;
       }
 
-      // note: if the vertices are equalm then the face in the neighbor 
+      // note: if the vertices are equal then the face in the neighbor 
       // is not oriented right, because all face are oriented math. pos when
       // one looks from the outside of the element. 
       // if the vertices are the same, the face in the neighbor is therefore
@@ -1963,7 +1979,6 @@ struct SetupVirtualNeighbour<GridImp,dimworld,3>
       }
     }
 
-
     // TODO check infulence of orientation 
     // is used when calculation the outerNormal 
     neighInfo->orientation = ( rightOriented ) ? elInfo->orientation : -elInfo->orientation; 
@@ -1982,6 +1997,10 @@ struct SetupVirtualNeighbour<GridImp,dimworld,3>
       for(int j=0; j<dimworld; j++) newcoord[j] = coord[j];
     }
     //****************************************
+    if (faceMap[1] == (faceMap[0]+1)%3) {
+      return faceMap[0];
+    }
+    return faceMap[1]-3;
   }
 };
 #endif
@@ -2009,7 +2028,7 @@ inline void AlbertaGridIntersectionIterator<GridImp>::setupVirtEn() const
   }
   
   // setup coordinates of neighbour elInfo 
-  SetupVirtualNeighbour<GridImp,dimworld,dim>::
+  twist_ = SetupVirtualNeighbour<GridImp,dimworld,dim>::
     setupNeighInfo(this->grid_,elInfo_,vx,neighborCount_,neighElInfo_);
   
   virtualEntity_.setElInfo(neighElInfo_);
