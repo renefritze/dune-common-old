@@ -214,8 +214,8 @@ public:
   typedef typename FunctionSpaceType::RangeFieldType DofType;
 
   //typedef SparseRowMatrix<DofType> MatrixType;
-  typedef Matrix<DofType> MatrixType;
-  typedef Quadrature<DofType, DomainType> QuadratureType;
+  //typedef Matrix<DofType> MatrixType;
+  // typedef QuadratureOld<DofType, DomainType> QuadratureType;
 
 public:
   //! set the default diffVar Types 
@@ -284,6 +284,14 @@ public:
     return phi*factor;
   }
 
+  template <class QuadratureType>
+  DofType evaluateSingle(int baseFunct,
+                         const QuadratureType& quad, int quadPoint,
+                         const RangeType& factor) const
+  {
+    return evaluateSingle(baseFunct, quad.point(quadPoint), factor);
+  }
+
   template <class Entity>
   DofType evaluateGradientSingle(int baseFunct,
                                  Entity& en,
@@ -303,6 +311,17 @@ public:
     return result;
   }
 
+  template <class Entity, class QuadratureType>
+  DofType evaluateGradientSingle(int baseFunct,
+                                 Entity& en,
+                                 const QuadratureType& quad, int quadPoint,
+                                 const JacobianRangeType& factor) const
+  {
+    return evaluateGradientSingle(baseFunct, en, quad.point(quadPoint), 
+                                  factor);
+  }
+
+  /*
   template <class Entity>
   void localMassMatrix(Entity& en, MatrixType& result) const {
     // assert(en.geometry().type() == basefunctions.type())
@@ -358,6 +377,7 @@ public:
       
     }
   }
+  */
 
 protected:
   //  void invert(MatrixType& mat);
