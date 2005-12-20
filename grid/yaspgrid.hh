@@ -2744,6 +2744,18 @@ public:
   }
 #endif
 
+  YaspIntersectionIterator<const YaspGrid<dim, dimworld> >&
+  getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
+  {
+    return it.realIterator;
+  }
+
+  const YaspIntersectionIterator<const YaspGrid<dim, dimworld> >&
+  getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const
+  {
+    return it.realIterator;
+  }
+
 private:
 
 #if HAVE_MPI
