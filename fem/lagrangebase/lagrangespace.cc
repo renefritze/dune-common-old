@@ -35,13 +35,17 @@ makeFunctionSpace (GridPartType& gridPart)
     int dimension = static_cast<int>( EntityType::mydimension);
     GeometryIdentifier::IdentifierType id = 
       GeometryIdentifier::fromGeo(dimension, geo);
-    if(baseFuncSet_[id] == 0 )
-      baseFuncSet_[id] = setBaseFuncSetPointer(*it, gridPart.indexSet());
+    if(baseFuncSet_[id] == 0 ) {
+      baseFuncSet_[id] = setBaseFuncSetPointer(*it);
+      mapper_ = new typename 
+        Traits::MapperType(const_cast<IndexSetType&>(gridPart.indexSet()),
+                           baseFuncSet_[id]->numBaseFunctions());
+    }
   }
 
   // for empty functions space which can happen for BSGrid 
-  if(!mapper_) makeBaseSet<line,0> (gridPart.indexSet());
-  assert(mapper_);
+  //if(!mapper_) makeBaseSet<line,0> (gridPart.indexSet());
+  //assert(mapper_);
 }
   
 template <class FunctionSpaceImp, class GridPartImp, int polOrd>
@@ -146,7 +150,22 @@ LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd>::mapper() c
   assert(mapper_);
   return *mapper_;
 }
-
+    
+template <class FunctionSpaceImp, class GridPartImp, int polOrd>
+template <class EntityType>
+typename LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd>::
+BaseFunctionSetType* 
+LagrangeDiscreteFunctionSpace<FunctionSpaceImp, GridPartImp, polOrd>::
+setBaseFuncSetPointer(EntityType& en) 
+{
+  typedef typename ToScalarFunctionSpace<
+    typename Traits::FunctionSpaceType>::Type ScalarFunctionSpaceType;
+  
+  LagrangeBaseFunctionFactory<
+    ScalarFunctionSpaceType, polOrd> fac(en.geometry().type());
+  return new BaseFunctionSetType(fac);
+}
+/*
 template <class FunctionSpaceImp, class GridPartImp, int polOrd>
 template <class EntityType> 
 inline typename 
@@ -211,7 +230,7 @@ makeBaseSet (const IndexSetType& iset)
 
   return baseFuncSet;
 }
-
+*/
 } // end namespace Dune 
 
 #endif
