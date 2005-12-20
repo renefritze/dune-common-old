@@ -71,6 +71,7 @@ namespace Dune {
     const int numComponents_;
   };
 
+  //! Specialisation for VariableBased approach
   template <>
   class DofConversionUtility<VariableBased> {
   public:
