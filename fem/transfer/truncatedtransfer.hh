@@ -42,6 +42,9 @@ public:
      *        Those dofs with a set bit are treated as critical.
      */
     void restrict(const DiscFuncType& f, DiscFuncType &t, const Dune::BitField& critical) const;
+		
+	/** \brief Restriction of  MultiGridTransfer*/
+	using Dune::MultiGridTransfer< DiscFuncType >::restrict;
     
     /** \brief Prolong level cL of f and store the result in level fL of t
      * 
@@ -49,6 +52,9 @@ public:
      *        Those dofs with a set bit are treated as critical.
      */
     void prolong(const DiscFuncType& f, DiscFuncType &t, const Dune::BitField& critical) const;
+	
+	/** \brief Prolongation of  MultiGridTransfer*/
+	using Dune::MultiGridTransfer< DiscFuncType >::prolong;
     
     /** \brief Galerkin assemble a coarse stiffness matrix
      *
@@ -57,6 +63,9 @@ public:
      */
     void galerkinRestrict(const OperatorType& fineMat, OperatorType& coarseMat,
                           const Dune::BitField& critical) const;
+						  
+	/** \brief Galerkin restriction of  MultiGridTransfer*/
+	using Dune::MultiGridTransfer< DiscFuncType >::galerkinRestrict;
     
     /** \brief Bitfield specifying a subsets of dofs which need to be recomputed
      * when doing Galerkin restriction
