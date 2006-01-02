@@ -151,9 +151,9 @@ public:
   typedef Geometry<mydim,mydim,GridImp,Dune::YaspGeometry> ReferenceGeometry;
   
   //! return the element type identifier
-  GeometryType type () const
+  NewGeometryType type () const
   {
-	return cube;
+      return NewGeometryType(NewGeometryType::cube,mydim);
   }
 
   //! return the number of corners of this element. Corners are numbered 0...n-1
@@ -286,9 +286,9 @@ public:
   typedef Geometry<mydim,mydim,GridImp,Dune::YaspGeometry> ReferenceGeometry;
   
   //! return the element type identifier
-  GeometryType type () const
+  NewGeometryType type () const
   {
-	return cube;
+      return NewGeometryType(NewGeometryType::cube,mydim);
   }
 
   //! return the number of corners of this element. Corners are numbered 0...n-1
@@ -403,9 +403,9 @@ public:
   typedef typename GridImp::ctype ctype;
   
   //! return the element type identifier
-  GeometryType type () const
+  NewGeometryType type () const
   {
-        return cube;
+      return NewGeometryType(NewGeometryType::cube,0);
   }
 
   //! return the number of corners of this element. Corners are numbered 0...n-1
