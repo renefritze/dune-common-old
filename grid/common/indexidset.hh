@@ -197,7 +197,7 @@ namespace Dune
   class IdSet
   {
   public:
-	//! define the type used for persisitent indices
+	//! define the type used for persistent indices
 	typedef IdTypeImp IdType;
 
 	//! get id of an entity
