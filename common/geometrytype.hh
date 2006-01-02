@@ -87,6 +87,18 @@ namespace Dune {
             : basicType_(basicType), dim_(dim)
         {}
 
+        /** \brief Cast to old-style GeometryType
+            \deprecated Only here for backward compatibility
+        */
+        operator GeometryType() const /*DUNE_DEPRECATED*/ {
+            switch (basicType_) {
+            case simplex: return Dune::simplex;
+            case cube:    return Dune::cube;
+            case pyramid: return Dune::pyramid;
+            case prism:   return Dune::prism;
+            }
+        }
+
         /** @name Setup Methods */
         /*@{*/
 
@@ -160,6 +172,26 @@ namespace Dune {
 
         /*@}*/
         
+        /** \brief Prints the type to an output stream */
+        friend std::ostream& operator<< (std::ostream& s, const NewGeometryType& a)
+        {
+            switch (a.basicType_) {
+            case simplex:   
+                s << "(simplex, " << a.dim_ << ")";
+                break;
+            case cube:      
+                s << "(cube, " << a.dim_ << ")";
+                break;
+            case pyramid:
+                s << "pyramid"; 
+                break;
+            case prism:
+                s << "prims";
+            }
+            
+            return s;
+        }
+
     };
     
 }
