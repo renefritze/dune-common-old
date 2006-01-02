@@ -231,9 +231,9 @@ inline void AlbertaGridGeometry<mydim,cdim,GridImp>::print (std::ostream& ss) co
 }
 
 template <int mydim, int cdim, class GridImp>
-inline GeometryType AlbertaGridGeometry<mydim,cdim,GridImp>::type() const
+inline NewGeometryType AlbertaGridGeometry<mydim,cdim,GridImp>::type() const
 {
-  return simplex;
+    return NewGeometryType(NewGeometryType::simplex,mydim);
 }
 
 template <int mydim, int cdim, class GridImp>

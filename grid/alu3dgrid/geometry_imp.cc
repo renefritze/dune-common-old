@@ -252,15 +252,15 @@ buildGeom(const ALU3DSPACE VertexType & item, int, int)
 
 /* Comment in for adaptation to new GeometryType */
 template <int mydim, int cdim>
-inline GeometryType 
+inline NewGeometryType 
 ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::type () const {
-  return simplex;
+    return NewGeometryType(NewGeometryType::simplex,mydim);
 }
 
 template <int mydim, int cdim>
-inline GeometryType 
+inline NewGeometryType 
 ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> > ::type () const {
-  return cube;
+  return NewGeometryType(NewGeometryType::cube,mydim);
 }
 
 template<int mydim, int cdim>
