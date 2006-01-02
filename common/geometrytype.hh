@@ -5,6 +5,8 @@
     \brief A unique label for each type of element that can occur in a grid
 */
 
+#include <dune/common/exceptions.hh>
+
 namespace Dune {
 
     /** \brief Enum that declares identifiers for different geometry types. 
@@ -97,6 +99,7 @@ namespace Dune {
             case pyramid: return Dune::pyramid;
             case prism:   return Dune::prism;
             }
+            DUNE_THROW(Exception, "Non-existing BasicType found!");
         }
 
         /** @name Setup Methods */
