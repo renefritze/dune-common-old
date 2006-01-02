@@ -12,6 +12,8 @@ class OneDGridEntityPointer
 {
   enum { dim = GridImp::dimension };
   friend class OneDGridIntersectionIterator<GridImp>;
+    friend class OneDGridEntity<0,dim,GridImp>;
+    
 public:
   typedef typename GridImp::template Codim<codim>::Entity Entity;
 
