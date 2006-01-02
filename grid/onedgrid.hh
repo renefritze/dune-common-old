@@ -428,7 +428,7 @@ private:
     }
 
     unsigned int getNextFreeId(int codim) {
-        return (codim==0) ? freeElementIdCounter_++ : freeVertexIdCounter_;
+        return (codim==0) ? freeElementIdCounter_++ : freeVertexIdCounter_++;
     }
         
    //! The type of grid refinement currently in use
