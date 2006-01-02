@@ -144,7 +144,7 @@ public:
      * UGGrid supports triangles and quadrilaterals in 2D, and
      * tetrahedra, pyramids, prisms, and hexahedra in 3D.
      */
-    GeometryType type () const;
+    NewGeometryType type () const;
 
   //! return the number of corners of this element. Corners are numbered 0...n-1
   int corners () const;
@@ -255,7 +255,11 @@ public:
     {elementType_=simplex;}
 
   //! return the element type identifier (triangle or quadrilateral)
-    GeometryType type () const {return elementType_;}
+    NewGeometryType type () const {
+        return (elementType_==simplex) 
+            ? NewGeometryType(NewGeometryType::simplex,2)
+            : NewGeometryType(NewGeometryType::cube,2);
+    }
 
   //! return the number of corners of this element. Corners are numbered 0...n-1
     int corners () const {return (elementType_==simplex) ? 3 : 4;}
@@ -342,9 +346,8 @@ public:
     UGGridGeometry() 
     {}
 
-    /** \brief Return the element type identifier.  This class always returns 'simplex',
-     because a one-dimensional simplex is a line.*/
-    GeometryType type () const {return simplex;}
+    /** \brief Return the element type identifier.  */
+    NewGeometryType type () const {return NewGeometryType(NewGeometryType::simplex,1);}
 
     //! return the number of corners of this element. This class always returns 2
     int corners () const {return 2;}

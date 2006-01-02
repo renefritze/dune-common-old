@@ -5,8 +5,6 @@
  * \brief The OneDGridElement class and its specializations
  */
 
-#include <dune/common/fixedarray.hh>
-
 namespace Dune {
 
     template<int mydim, int coorddim, class GridImp>
@@ -49,7 +47,7 @@ class OneDGridGeometry <0, 1, GridImp> :
 public:
 
     //! return the element type identifier (vertex)
-    GeometryType type () const {return vertex;}
+    NewGeometryType type () const {return NewGeometryType(NewGeometryType::cube,0);}
 
     //! return the number of corners of this element (==1)
     int corners () const {return 1;}
@@ -91,7 +89,7 @@ public:
      *
      * OneDGrid obviously supports only lines
      */
-    GeometryType type () const {return cube;}
+    NewGeometryType type () const {return NewGeometryType(NewGeometryType::cube,1);}
 
     //! return the number of corners of this element. Corners are numbered 0...n-1
     int corners () const {return 2;}
