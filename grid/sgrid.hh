@@ -81,7 +81,7 @@ public:
         typedef sgrid_ctype ctype;
 
         //! return the element type identifier
-        GeometryType type () const;             
+        NewGeometryType type () const;             
 
         //! return the number of corners of this element. Corners are numbered 0...n-1
         int corners () const;                  
@@ -151,7 +151,7 @@ public:
         typedef sgrid_ctype ctype;
 
         //! return the element type identifier
-        GeometryType type () const;             
+        NewGeometryType type () const;             
 
         //! return the number of corners of this element. Corners are numbered 0...n-1
         int corners () const;

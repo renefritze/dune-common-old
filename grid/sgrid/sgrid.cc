@@ -39,9 +39,9 @@ inline void SGeometry<mydim,cdim,GridImp>::make(FieldMatrix<sgrid_ctype,mydim+1,
 }
 
 template<int mydim, int cdim, class GridImp> 
-inline GeometryType SGeometry<mydim,cdim,GridImp>::type () const
+inline NewGeometryType SGeometry<mydim,cdim,GridImp>::type () const
 {
-    return cube;
+    return NewGeometryType(NewGeometryType::cube,mydim);
 }
 
 template<int mydim, int cdim, class GridImp> 
@@ -143,9 +143,9 @@ inline void SGeometry<0,cdim,GridImp>::make (FieldMatrix<sgrid_ctype,1,cdim>& __
 }
 
 template<int cdim, class GridImp> 
-inline GeometryType SGeometry<0,cdim,GridImp>::type () const
+inline NewGeometryType SGeometry<0,cdim,GridImp>::type () const
 {
-        return cube;
+    return NewGeometryType(NewGeometryType::cube,0);
 }
 
 template<int cdim, class GridImp> 
