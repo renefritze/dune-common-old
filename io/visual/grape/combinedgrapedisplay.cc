@@ -313,7 +313,7 @@ template<class DisplayType>
 inline void CombinedGrapeDisplay<DisplayType>::
 func_real (DUNE_ELEM *he , DUNE_FDATA * fe,int ind, const double *coord, double *val )
 {
-  MyDisplayType * disp = (MyDisplayType *) he->display;
+  //MyDisplayType * disp = (MyDisplayType *) he->display;
   // this methtod is to be removed 
   assert(false);
   abort();
@@ -376,8 +376,8 @@ inline void * CombinedGrapeDisplay<DisplayType>::setupHmesh()
   {
     const GridType & grid = (*grditer_)->getGrid();
     maxlevel = std::max( maxlevel, grid.maxLevel());
-    noe += grid.leafIndexSet().size(0,unknown);
-    nov += grid.leafIndexSet().size(dim,unknown);
+    noe += grid.leafIndexSet().size(0);
+    nov += grid.leafIndexSet().size(dim);
   }
 
   hel_.display = (void *) this;
