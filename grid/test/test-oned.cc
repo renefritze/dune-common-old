@@ -8,8 +8,27 @@
 
 #include "gridcheck.cc"
 
-int main () {
-  try {
+template <class GridType >
+void markOne ( GridType & grid , int num , int ref )
+{
+  typedef typename GridType::template Codim<0>::LeafIterator LeafIterator;
+
+  int count = 0;
+  
+  LeafIterator endit = grid.template leafend  <0> ();
+  for(LeafIterator it = grid.template leafbegin<0> (); it != endit ; ++it )
+  {
+    if(num == count) grid.mark( ref, it );
+    count++;
+  }
+
+  grid.preAdapt();
+  grid.adapt();
+  grid.postAdapt();
+}
+
+int main () try
+{
 
     Dune::SimpleVector<double> coords(6);
     coords[0] = -1;
@@ -23,16 +42,24 @@ int main () {
     {
       std::cout << std::endl << "OneDGrid<1,1>" << std::endl << std::endl;
       Dune::OneDGrid<1,1> grid(coords);
+
+      // check macro grid 
+      gridcheck(grid);
+      
+      // create hybrid grid 
+      markOne(grid,0,1) ;
+      gridcheck(grid);
+
+      grid.globalRefine(1);
       gridcheck(grid);
     };
 
-  } catch (Dune::Exception &e) {
+  return 0;
+
+ } catch (Dune::Exception &e) {
     std::cerr << e << std::endl;
     return 1;
-  } catch (...) {
+ } catch (...) {
     std::cerr << "Generic exception!" << std::endl;
     return 2;
-  }
-
-  return 0;
-};
+ }
