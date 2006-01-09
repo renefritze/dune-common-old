@@ -9,6 +9,7 @@
 #include <dune/common/capabilities.hh>
 #include <dune/common/interfaces.hh>
 #include <dune/common/collectivecommunication.hh>
+#include <dune/common/bigunsignedint.hh>
 
 #include "../common/grid.hh"
 #include "../common/referenceelements.hh"
@@ -102,13 +103,14 @@ namespace Dune {
     //! Type of the leaf index set
     typedef AdaptiveLeafIndexSet<ALU3dGrid < dim, dimworld, elType > >  LeafIndexSetImp; 
 
-    typedef int GlobalIdType;
+    typedef bigunsignedint<6*32> GlobalIdType;
     typedef int LocalIdType;
 
   typedef ALU3dGrid<dim,dimworld,elType> GridImp;
 
   struct Traits
   {
+    typedef bigunsignedint<6*32> GlobalIdType;
     typedef ALU3dGrid<dim,dimworld,elType> Grid;
 
     typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorWrapper> IntersectionIterator;
@@ -195,6 +197,8 @@ namespace Dune {
   public:
     static const ALU3dGridElementType elementType = elType;
     typedef ALU3DSPACE ObjectStream ObjectStreamType;
+
+    typedef ALU3dGridFamily<dim,dimworld,elType> GridFamily; 
     
     friend class Conversion< ALU3dGrid<dim,dimworld,elementType> , HasObjectStream > ;  
     friend class Conversion< const ALU3dGrid<dim,dimworld,elementType> , HasObjectStream > ; 
@@ -368,7 +372,10 @@ namespace Dune {
     int hierSetSize (int cd) const;
 
     //! get global id set of grid 
-    const GlobalIdSet & globalIdSet () const { return globalIdSet_; }
+    const GlobalIdSet & globalIdSet () const { 
+      if(!globalIdSet_) globalIdSet_ = new GlobalIdSetImp(*this); 
+      return *globalIdSet_; 
+    }
 
     //! get global id set of grid 
     const LocalIdSet & localIdSet () const { return localIdSet_; }
@@ -561,7 +568,7 @@ namespace Dune {
     HierarchicIndexSet hIndexSet_;
 
     // out global id set 
-    GlobalIdSetImp globalIdSet_; 
+    mutable GlobalIdSetImp * globalIdSet_; 
 
     // out global id set 
     LocalIdSetImp localIdSet_;
