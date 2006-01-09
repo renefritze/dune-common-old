@@ -649,7 +649,7 @@ buildGeom(const ALU3DSPACE HFaceType & item, int twist, int faceNum ) {
     }
   }
  
-  if(biMap_) delete biMap_; 
+  delete biMap_; 
   biMap_ = new BilinearSurfaceMapping(coord_[0], coord_[1],
                                       coord_[2], coord_[3]);
 
@@ -667,7 +667,7 @@ buildGeom(const FaceCoordinatesType& coords) {
     coord_[i] = coords[i];
   }
 
-  if(biMap_) delete biMap_;
+  delete biMap_;
   biMap_ = new BilinearSurfaceMapping(coord_[0], coord_[1],
                                       coord_[2], coord_[3]);
 

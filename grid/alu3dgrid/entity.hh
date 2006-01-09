@@ -46,7 +46,8 @@ class ALU3dGridMakeableEntity :
   typedef ALU3dImplTraits<GridImp::elementType> ImplTraitsType;
 
   typedef typename ImplTraitsType::PLLBndFaceType PLLBndFaceType;
-  typedef typename ImplTraitsType::IMPLElementType IMPLElementType;
+  typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::ImplementationType IMPLElementType;
+  typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType MyHElementType;
  
 public:
    
@@ -88,6 +89,9 @@ public:
   {
     this->realEntity.setEntity(org.realEntity);
   }
+
+  // return reference to internal item 
+  const MyHElementType & getItem () const { return this->realEntity.getItem(); }
 };
 
 /*! 
@@ -109,12 +113,9 @@ public EntityDefault <cd,dim,GridImp,ALU3dGridEntity>
   friend class ALU3dGridHierarchicIndexSet<dim,dimworld,GridImp::elementType>;
 
 public:
-  typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType BSElementType;
-  typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::ImplementationType BSIMPLElementType;
+  typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType ElementType;
+  typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::ImplementationType IMPLElementType;
 
-  //typedef typename ALU3DSPACE ALUHElementType<cd>::ElementType BSElementType;
-  //typedef typename ALU3DSPACE BSIMPLElementType<cd>::ElementType BSIMPLElementType;
-  
   typedef typename GridImp::template Codim<cd>::Entity Entity;  
   typedef typename GridImp::template Codim<cd>::Geometry Geometry;
   typedef ALU3dGridMakeableGeometry<dim-cd,GridImp::dimensionworld,GridImp> GeometryImp;
@@ -142,7 +143,7 @@ public:
   FieldVector<alu3d_ctype, dim>& positionInOwnersFather () const;
  
   // set element as normal entity
-  void setElement(const BSElementType & item, int twist, int face = -1); 
+  void setElement(const ElementType & item, int twist, int face = -1); 
   void setElement(const ALU3DSPACE HElementType & el, const ALU3DSPACE VertexType & vx);
   
   //! setGhost is not valid for this codim 
@@ -159,6 +160,10 @@ public:
   
   //! set item from other entity, mainly for copy constructor of entity pointer
   void setEntity ( const ALU3dGridEntity<cd,dim,GridImp> & org );
+  
+  // return reference to internal item 
+  const IMPLElementType & getItem () const { return *item_; }
+  
 private: 
   //! index is unique within the grid hierachy and per codim
   int getIndex () const;
@@ -172,7 +177,7 @@ private:
   int face_;   //! for face, know on which face we are 
 
   // corresponding ALU3dGridElement
-  const BSIMPLElementType * item_;
+  const IMPLElementType * item_;
   const ALU3DSPACE HElementType * father_;
     
   //! the cuurent geometry
@@ -209,6 +214,7 @@ class ALU3dGridEntity<0,dim,GridImp>
   enum { dimworld = GridImp::dimensionworld };
   typedef typename ALU3dImplTraits<GridImp::elementType>::GEOElementType GEOElementType;
   typedef typename ALU3dImplTraits<GridImp::elementType>::PLLBndFaceType PLLBndFaceType;
+  typedef typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElementType;
 
   enum { refine_element_t = 
          ALU3dImplTraits<GridImp::elementType>::refine_element_t };
@@ -349,10 +355,10 @@ public:
   //! for use in hierarchical index set 
   template<int cc> int getSubIndex (int i) const;
 
-private:
-  typedef typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElementType;
-  IMPLElementType & getItem () const { return *item_; }
+  // return reference to internal item 
+  const IMPLElementType & getItem () const { return *item_; }
 
+private:
   //! index is unique within the grid hierachie and per codim
   int getIndex () const;
 
@@ -407,6 +413,8 @@ public EntityPointerDefault <cd, GridImp, ALU3dGridEntityPointer<cd,GridImp> >
   friend class ALU3dGrid < dim , dimworld, GridImp::elementType >;
 
   typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType MyHElementType;
+
+  typedef ALU3DSPACE HBndSegType HBndSegType;
   //typedef typename ALU3DSPACE ALUHElementType<cd>::ElementType  MyHElementType;
 public:
   typedef typename ALU3dImplTraits<GridImp::elementType>::BNDFaceType BNDFaceType;
@@ -422,6 +430,10 @@ public:
                          int twist = 0,
                          int face  = -1 
                         );
+
+  //! Constructor for EntityPointer that points to an ghost 
+  ALU3dGridEntityPointer(const GridImp & grid, 
+                         const HBndSegType & ghostFace );  
 
   //! Constructor for EntityPointer that points to a ghost
   ALU3dGridEntityPointer(const GridImp & grid, const ALU3dGridMakeableEntity<cd,dim,GridImp> & e );
@@ -448,14 +460,27 @@ public:
   void done (); 
 
 protected:
+  // update underlying item pointer and set ghost entity
+  void updateGhostPointer( HBndSegType & ghostFace );  
+  // update underlying item pointer and set entity
+  void updateEntityPointer( const MyHElementType & item );  
+  
   // not allowed 
   ThisType & operator = (const ALU3dGridEntityPointerType & org);
     
   // reference to grid 
   const GridImp & grid_;  
 
+  // pointer to item 
+  const MyHElementType * item_;
+
+  // twist of face, for codim 1 only 
+  int twist_;
+  // face number, for codim 1 only 
+  int face_;
+
   // entity that this EntityPointer points to 
-  EntityImp * entity_;
+  mutable EntityImp * entity_;
 };
 
 } // end namespace Dune
