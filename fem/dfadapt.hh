@@ -172,7 +172,7 @@ public:
   void setLocal (EntityType &it, const RangeFieldType &scalar);
   
   //! print all dofs 
-  void print(std::ostream& s); 
+  void print(std::ostream& s) const; 
 
   //! write data of discrete function to file filename|timestep 
   //! with xdr methods 
