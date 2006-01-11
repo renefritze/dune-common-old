@@ -10,13 +10,13 @@
 #include "quadrature/quadraturerules.hh"
 
 /**
- * @file 
+ * @file dune/disc/shapefunctions/quadpointshapefunctions.hh
  * @brief  abstract base class for shape functions
- * @author Peter Bastian
+ * @author Christian Engwer
  */
 namespace Dune
 {
-  /** @addtogroup DISC
+  /** @addtogroup DISC_Shapefnkt
    *
    * @{
    */

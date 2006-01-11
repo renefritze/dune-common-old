@@ -27,7 +27,7 @@
 #include"groundwater.hh"
 
 /**
- * @file 
+ * @file dune/disc/groundwater/p1groundwater.hh
  * @brief  compute local stiffness matrix for conforming finite elements for diffusion equation
  * @author Peter Bastian
  */
@@ -35,7 +35,7 @@
 
 namespace Dune
 {
-  /** @addtogroup DISC
+  /** @addtogroup DISC_Disc
    *
    * @{
    */

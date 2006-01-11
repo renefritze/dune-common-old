@@ -7,7 +7,7 @@
 #include"grid/common/grid.hh"
 
 /**
- * @file 
+ * @file dune/disc/shapefunctions/lagrange/pyramidshapefunctions.hh
  * @brief  define Lagrange type shape functions for pyramidal elements
  * @author Sreejith Pulloor Kuttanikkad
  */
@@ -15,7 +15,7 @@
 namespace Dune
 {
 
-  /** @addtogroup DISC
+  /** @addtogroup DISC_Shapefnkt
    *
    * @{
    */
