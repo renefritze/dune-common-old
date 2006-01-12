@@ -1,9 +1,15 @@
 #ifndef DUNE_GRAPEDATAIO_HH
 #define DUNE_GRAPEDATAIO_HH
 
+//- system includes 
+
+//- Dune includes 
 #include <dune/common/misc.hh>
 #include <dune/grid/common/grid.hh>
 #include <dune/io/file/asciiparser.hh>
+#include <dune/fem/dofmanager.hh>
+
+//- Local includes 
 
 namespace Dune {
 
@@ -49,7 +55,6 @@ inline GrapeIOStringType typeIdentifier<double> ()
   GrapeIOStringType tmp = "double";
   return tmp;
 };
-
 
 
 template <class GridType>
@@ -98,27 +103,44 @@ inline bool GrapeDataIO<GridType> :: writeGrid
   const GrapeIOFileFormatType ftype, const GrapeIOStringType fnprefix , 
   double time, int timestep, int precision )
 {
-  const char *path = "";
-  std::fstream file (fnprefix.c_str(),std::ios::out);
-  file << "Grid: "   << transformToGridName(grid.type()) << std::endl;
-  file << "Format: " << ftype <<  std::endl;
-  file << "Precision: " << precision << std::endl;
 
-  GrapeIOStringType fnstr = genFilename(path,fnprefix,timestep,precision);
-  file.close();
-  switch (ftype)
+  // write dof manager, that corresponds to grid 
   {
-    case xdr  :   return grid.template writeGrid<xdr>  (fnstr,time);
-    case ascii:   return grid.template writeGrid<ascii>(fnstr,time);
-    default:
-        {
-          std::cerr << ftype << " GrapeIOFileFormatType not supported at the moment! " << __FILE__ << __LINE__ << "\n";
-          assert(false);
-          abort();
-          return false;
-        }
+    typedef DofManager<GridType> DofManagerType; 
+    typedef DofManagerFactory<DofManagerType> DMFactoryType; 
+
+    std::string dmname(fnprefix);
+    dmname += "_dm";
+    DMFactoryType::writeDofManager(grid,dmname,timestep);
+  }
+ 
+  // write Grid itself 
+  {
+    const char *path = "";
+    std::fstream file (fnprefix.c_str(),std::ios::out);
+    file << "Grid: "   << transformToGridName(grid.type()) << std::endl;
+    file << "Format: " << ftype <<  std::endl;
+    file << "Precision: " << precision << std::endl;
+
+    GrapeIOStringType fnstr = genFilename(path,fnprefix,timestep,precision);
+    
+    file.close();
+    switch (ftype)
+    {
+      case xdr  :   return grid.template writeGrid<xdr>  (fnstr,time);
+      case ascii:   return grid.template writeGrid<ascii>(fnstr,time);
+      default:
+          {
+            std::cerr << ftype << " GrapeIOFileFormatType not supported at the moment! " << __FILE__ << __LINE__ << "\n";
+            assert(false);
+            abort();
+            return false;
+          }
+    }
+    return false;
   }
   return false;
+  
 }
 
 
