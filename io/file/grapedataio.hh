@@ -159,13 +159,14 @@ inline bool GrapeDataIOImp<dim,dimworld,GridImp> :: writeGrid
   double time, int timestep, int precision )
 {
   // write dof manager, that corresponds to grid 
+  bool hasDm = false;
   {
     typedef DofManager<GridImp> DofManagerType; 
     typedef DofManagerFactory<DofManagerType> DMFactoryType; 
 
     std::string dmname(fnprefix);
     dmname += "_dm";
-    DMFactoryType::writeDofManager(grid,dmname,timestep);
+    hasDm = DMFactoryType::writeDofManager(grid,dmname,timestep);
   }
  
   // write Grid itself 
@@ -175,6 +176,8 @@ inline bool GrapeDataIOImp<dim,dimworld,GridImp> :: writeGrid
     file << "Grid: "   << transformToGridName(grid.type()) << std::endl;
     file << "Format: " << ftype <<  std::endl;
     file << "Precision: " << precision << std::endl;
+    int writeDm = (hasDm)? 1 : 0;
+    file << "DofManager: " << writeDm << std::endl; 
 
     GrapeIOStringType fnstr = genFilename(path,fnprefix,timestep,precision);
     
@@ -219,14 +222,18 @@ inline bool GrapeDataIOImp<dim,dimworld,GridImp> :: readGrid
   int precision = 6;
   readParameter(fnprefix,"Precision",precision);
 
+  int hasDm = 0;
+  readParameter(fnprefix,"DofManager",hasDm);
+
   const char *path = "";
   GrapeIOStringType fn = genFilename(path,fnprefix,timestep,precision);
   std::cout << "Read file: fnprefix = `" << fn << "' \n";
 
+  bool succeded = false;
   switch (ftype)
   {
-    case xdr  :   return grid.template readGrid<xdr>  (fn,time);
-    case ascii:   return grid.template readGrid<ascii>(fn,time);
+    case xdr  :   succeded = grid.template readGrid<xdr>  (fn,time); break;
+    case ascii:   succeded = grid.template readGrid<ascii>(fn,time); break;
     default:
         {
           std::cerr << ftype << " GrapeIOFileFormatType not supported at the moment! \n";
@@ -235,7 +242,21 @@ inline bool GrapeDataIOImp<dim,dimworld,GridImp> :: readGrid
           return false;
         }
   }
-  return false;
+  
+  // write dof manager, that corresponds to grid 
+  if(hasDm)
+  {
+    typedef DofManager<GridImp> DofManagerType; 
+    typedef DofManagerFactory<DofManagerType> DMFactoryType; 
+    
+    std::string dmname(fn);
+    dmname += "_dm";
+    //std::cout << "Read DofManager from file " << dmname << "\n";
+    // this call creates DofManager if not already existing 
+    DMFactoryType::getDofManager(grid);
+    succeded = DMFactoryType::writeDofManager(grid,dmname,timestep);
+  }
+  return succeded;
 }
 
 template <class GridType>
