@@ -110,6 +110,13 @@ buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
   return true;
 }
 
+template <int dim>
+inline static void copyCoordVec(const alu3d_ctype (& point)[dim] ,
+    FieldVector<alu3d_ctype,dim> & coord )
+{
+  std::memcpy(&coord[0],&point[0],dim*sizeof(alu3d_ctype));
+}
+
 template <> 
 inline bool ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> > :: 
 buildGeom(const IMPLElementType & item, int, int) 
@@ -118,7 +125,12 @@ buildGeom(const IMPLElementType & item, int, int)
   enum { dimworld = 3};
 
   builtinverse_ = builtA_ = builtDetDF_ = false;
-  
+  copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(0))->Point(), coord_[0]);
+  copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(1))->Point(), coord_[1]);
+  copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(2))->Point(), coord_[2]);
+  copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(3))->Point(), coord_[3]);
+
+  /*
   for (int i=0;i<(dim+1);i++) 
   {
     const double (&p)[3] = 
@@ -128,6 +140,7 @@ buildGeom(const IMPLElementType & item, int, int)
       coord_[i][j] = p[j];
     }
   } 
+  */
   return true;
 }
 
@@ -632,8 +645,7 @@ buildGeom(const ALU3DSPACE HFaceType & item, int twist, int faceNum ) {
 
   const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
   
-  if( faceNum >= 6 ) std::cout << "\n" << faceNum << " wrong face num (too big) \n";
-  if( faceNum < 0 ) std::cout << "\n" << faceNum << " wrong face num \n";
+  assert( faceNum >= 0 && faceNum < 6 );
   // for all vertices of this face 
   for (int i = 0; i < 4; ++i) 
   {
