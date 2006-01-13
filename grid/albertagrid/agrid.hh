@@ -76,7 +76,7 @@ namespace Dune
   template<int dim, int dimworld> class AlbertaGrid;
   template<int dim, int dimworld> class AlbertaGridHierarchicIndexSet;
 
-#define MAKEENTITY 0
+#define MAKEENTITY 1
 
   template <int codim, int dim, class GridImp> 
   struct SelectEntityImp
@@ -86,7 +86,7 @@ namespace Dune
     typedef Dune::Entity<codim, dim, const GridImp, AlbertaGridEntity> Entity;
 #else 
     typedef AlbertaGridEntity<codim,dim,GridImp> EntityImp;
-    typedef Dune::EntityDefault<codim,dim,const GridImp,AlbertaGridEntity> Entity;
+    typedef Dune::EntityDefaultImplementation<codim,dim,const GridImp,AlbertaGridEntity> Entity;
 #endif
   };
   
@@ -210,7 +210,7 @@ namespace Dune
   //******************************************************
   template <int mydim, int cdim, class GridImp>
   class AlbertaGridGeometry : 
-    public GeometryDefault<mydim,cdim,GridImp,AlbertaGridGeometry>
+    public GeometryDefaultImplementation<mydim,cdim,GridImp,AlbertaGridGeometry>
   { 
 
     //! know dimension of barycentric coordinates
@@ -438,7 +438,7 @@ namespace Dune
   */
   template<int cd, int dim, class GridImp>
   class AlbertaGridEntity : 
-    public EntityDefault <cd,dim,GridImp,AlbertaGridEntity>
+    public EntityDefaultImplementation <cd,dim,GridImp,AlbertaGridEntity>
   {
     enum { dimworld = GridImp::dimensionworld };
     friend class AlbertaGrid < dim , dimworld >;
@@ -573,7 +573,7 @@ namespace Dune
   //***********************
   template<int dim, class GridImp>
   class AlbertaGridEntity<0,dim,GridImp> : 
-    public EntityDefault <0,dim,GridImp,AlbertaGridEntity>
+    public EntityDefaultImplementation <0,dim,GridImp,AlbertaGridEntity>
   {
     enum { dimworld = GridImp::dimensionworld };
     friend class AlbertaGrid < dim , GridImp::dimensionworld >;
@@ -768,7 +768,7 @@ namespace Dune
   */
   template<int cd, class GridImp>
   class AlbertaGridEntityPointer :
-    public EntityPointerDefault <cd, GridImp, AlbertaGridEntityPointer<cd,GridImp> >
+    public EntityPointerDefaultImplementation <cd, GridImp, AlbertaGridEntityPointer<cd,GridImp> >
   {
     enum { dim       = GridImp::dimension };
     enum { dimworld  = GridImp::dimensionworld };
@@ -851,7 +851,7 @@ namespace Dune
   template<class GridImp>
   class AlbertaGridHierarchicIterator :
     public AlbertaGridEntityPointer<0,GridImp> ,
-    public HierarchicIteratorDefault <GridImp,AlbertaGridHierarchicIterator>
+    public HierarchicIteratorDefaultImplementation <GridImp,AlbertaGridHierarchicIterator>
   {
   public:
     typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -917,7 +917,7 @@ namespace Dune
   template<class GridImp>
   class AlbertaGridIntersectionIterator : 
     public AlbertaGridEntityPointer<0,GridImp> ,
-    public IntersectionIteratorDefault <GridImp,AlbertaGridIntersectionIterator>
+    public IntersectionIteratorDefaultImplementation <GridImp,AlbertaGridIntersectionIterator>
   {
     enum { dim      = GridImp::dimension };
     enum { dimworld = GridImp::dimensionworld };
@@ -1117,7 +1117,7 @@ namespace Dune
   template<int cd, PartitionIteratorType pitype, class GridImp>
   class AlbertaGridTreeIterator : 
     public AlbertaGridEntityPointer<cd,GridImp> 
-  //public LevelIteratorDefault <cd,pitype,GridImp,AlbertaGridTreeIterator>
+  //public LevelIteratorDefaultImplementation <cd,pitype,GridImp,AlbertaGridTreeIterator>
   {
     enum { dim = GridImp::dimension };
     friend class AlbertaGridEntity<2,dim,GridImp>;
@@ -1223,7 +1223,7 @@ namespace Dune
   template<int cd, PartitionIteratorType pitype, class GridImp>
   class AlbertaGridLevelIterator : 
     public AlbertaGridTreeIterator<cd,pitype,GridImp> , 
-    public LevelIteratorDefault <cd,pitype,GridImp,AlbertaGridLevelIterator>
+    public LevelIteratorDefaultImplementation <cd,pitype,GridImp,AlbertaGridLevelIterator>
   {
   public:  
     typedef typename GridImp::template Codim<cd>::Entity Entity;
@@ -1257,7 +1257,7 @@ namespace Dune
   template<int codim, PartitionIteratorType pitype, class GridImp>
   class AlbertaGridLeafIterator : 
     public AlbertaGridTreeIterator<codim, pitype, GridImp>, 
-    public LeafIteratorDefault<codim, pitype, GridImp, AlbertaGridLeafIterator>
+    public LeafIteratorDefaultImplementation<codim, pitype, GridImp, AlbertaGridLeafIterator>
   {
   public:  
     typedef typename GridImp::template Codim<codim>::Entity Entity;
@@ -1321,7 +1321,7 @@ namespace Dune
         typedef typename SelectEntityImp<cd,dim,GridImp>::Entity Entity; 
 
         //typedef Dune::Entity<cd, dim, const GridImp, AlbertaGridEntity> Entity;
-        //typedef Dune::EntityDefault<cd,dim,const GridImp> Entity;
+        //typedef Dune::EntityDefaultImplementation<cd,dim,const GridImp> Entity;
 
         typedef Dune::LevelIterator<cd,All_Partition,const GridImp,AlbertaGridLevelIterator> LevelIterator;
 
@@ -1380,7 +1380,7 @@ namespace Dune
   */
   template <int dim, int dimworld>
   class AlbertaGrid : 
-    public GridDefault <dim,dimworld,albertCtype, AlbertaGridFamily<dim,dimworld> >,
+    public GridDefaultImplementation <dim,dimworld,albertCtype, AlbertaGridFamily<dim,dimworld> >,
     public HasObjectStream
   {
     friend class AlbertaGridEntity <0,dim,const AlbertaGrid<dim,dimworld> >;
@@ -1409,15 +1409,10 @@ namespace Dune
     // The Interface Methods
     //**********************************************************
   public: 
-    /*
-    typedef GridTraits<dim,dimworld,Dune::AlbertaGrid<dim,dimworld> ,
-                       AlbertaGridGeometry,AlbertaGridEntity,
-                       AlbertaGridEntityPointer,
-                       AlbertaGridLevelIterator,
-                       AlbertaGridIntersectionIterator,
-                       AlbertaGridHierarchicIterator,
-                       AlbertaGridLeafIterator>  Traits;
-                       */
+    //! the grid family of AlbertaGrid 
+    typedef AlbertaGridFamily<dim,dimworld> GridFamily;  
+
+    //! the Traits 
     typedef typename AlbertaGridFamily<dim,dimworld> :: Traits Traits;  
     
     typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
@@ -1676,7 +1671,7 @@ public:
     getRealEntity(typename Traits::template Codim<cd>::Entity& entity) 
     {
 #if MAKEENTITY
-      return entity.realEntity;
+      return this->getRealImplementation(entity);
 #else
       typedef AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> > EntityImp;
       return static_cast<EntityImp &> (entity);
@@ -1686,13 +1681,13 @@ public:
     AlbertaGridIntersectionIterator<const AlbertaGrid<dim, dimworld> >&
     getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
     {
-      return it.realIterator;
+      return this->getRealImplementation(it);
     }
 
     const AlbertaGridIntersectionIterator<const AlbertaGrid<dim, dimworld> >&
     getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const
     {
-      return it.realIterator;
+      return this->getRealImplementation(it);
     }
 
   private:
@@ -1702,7 +1697,7 @@ public:
     getRealEntity(const typename Traits::template Codim<cd>::Entity& entity) const 
     {
 #if MAKEENTITY
-      return entity.realEntity;
+      return this->getRealImplementation(entity);
 #else
       typedef AlbertaGridEntity<cd,dim,const AlbertaGrid<dim,dimworld> > EntityImp;
       return static_cast<const EntityImp &> (entity);

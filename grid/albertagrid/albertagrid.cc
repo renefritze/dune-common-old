@@ -3055,7 +3055,7 @@ inline void AlbertaMarkerVector::markNewVertices(GridType &grid, int level)
     for(LevelIteratorType it = grid.template lbegin<0> (level); it != endit; ++it)
     {
       const ALBERTA EL * el = 
-        (grid.template getRealEntity<0> (*it)).getElInfo()->el;
+        (grid.getRealImplementation(*it)).getElInfo()->el;
       
       int elindex = grid.getElementNumber(el);  
       for(int local=0; local<dim+1; local++)
@@ -3106,7 +3106,7 @@ inline void AlbertaMarkerVector::markNewLeafVertices(GridType &grid)
     for(IteratorType it = grid.template leafbegin<0> (); it != endit; ++it)
     {
       const ALBERTA EL * el = 
-        (grid.template getRealEntity<0> (*it)).getElInfo()->el;
+        (grid.getRealImplementation(*it)).getElInfo()->el;
       
       int elindex = grid.hierarchicIndexSet().index(*it); 
       for(int local=0; local<dim+1; local++)
@@ -3554,7 +3554,7 @@ template < int dim, int dimworld >
 template <class EntityType>
 inline int AlbertaGrid < dim, dimworld >::owner(const EntityType & en) const
 {
-  return this->getOwner( (this->template getRealEntity<0>(en)).getElInfo()->el );
+  return this->getOwner( (this->getRealImplementation(en)).getElInfo()->el );
 }
 
 template < int dim, int dimworld >
@@ -3853,7 +3853,7 @@ template <class EntityType>
 inline int AlbertaGrid < dim, dimworld >:: 
 getMark( const EntityType & ep ) const 
 {
-  return (this->template getRealEntity<0>(ep)).getElInfo()->el->mark;
+  return (this->getRealImplementation(ep)).getElInfo()->el->mark;
 }
 
 //--mark
@@ -3861,7 +3861,7 @@ template<int dim, int dimworld>
 inline bool AlbertaGrid < dim, dimworld >:: 
 mark( int refCount , const typename Traits::template Codim<0>::Entity & ep ) const
 {
-  ALBERTA EL_INFO * elInfo = (this->template getRealEntity<0>(ep)).getElInfo();
+  ALBERTA EL_INFO * elInfo = (this->getRealImplementation(ep)).getElInfo();
   if(!elInfo) return false;
   assert(elInfo);
 
@@ -3963,7 +3963,7 @@ template <class EntityType>
 inline bool AlbertaGrid < dim, dimworld >::
 partition( int proc , EntityType & en ) 
 {
-  return this->setOwner( (this->template getRealEntity<0>(en)).getElInfo()->el , proc );
+  return this->setOwner( (this->getRealImplementation(en)).getElInfo()->el , proc );
 }
 
 template < int dim, int dimworld >
