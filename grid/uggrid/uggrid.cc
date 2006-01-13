@@ -1599,4 +1599,3 @@ template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::All_Partition>::Le
 Dune::UGGrid<3,3>::leafend<3,Dune::All_Partition>() const;
 template Dune::UGGrid<3,3>::Traits::Codim<3>::Partition<Dune::Ghost_Partition>::LeafIterator
 Dune::UGGrid<3,3>::leafend<3,Dune::Ghost_Partition>() const;
-

@@ -110,7 +110,7 @@ public:
 */
 template<int mydim, int coorddim, class GridImp>  
 class UGGridGeometry : 
-        public GeometryDefault <mydim, coorddim, GridImp, UGGridGeometry>
+        public GeometryDefaultImplementation <mydim, coorddim, GridImp, UGGridGeometry>
 { 
     typedef typename GridImp::ctype UGCtype;
 
@@ -235,7 +235,7 @@ private:
 
     template<class GridImp>  
     class UGGridGeometry<2, 3, GridImp> : 
-        public GeometryDefault <2, 3, GridImp, UGGridGeometry>
+        public GeometryDefaultImplementation <2, 3, GridImp, UGGridGeometry>
 { 
 
     template <int codim_, int dim_, class GridImp_>
@@ -327,7 +327,7 @@ private:
 
 template<class GridImp>  
 class UGGridGeometry <1, 2, GridImp> : 
-        public GeometryDefault <1, 2, GridImp, UGGridGeometry>
+        public GeometryDefaultImplementation <1, 2, GridImp, UGGridGeometry>
 { 
     
     template <int codim_, int dim_, class GridImp_>

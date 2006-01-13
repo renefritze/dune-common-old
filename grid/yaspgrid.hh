@@ -142,7 +142,7 @@ FieldVector<yaspgrid_ctype,dim> YaspFatherRelativeLocalElement<dim,GridImp>::ext
 
 //! The general version implements dimworld==dimworld. If this is not the case an error is thrown
 template<int mydim,int cdim, class GridImp>
-class YaspGeometry : public GeometryDefault<mydim,cdim,GridImp,YaspGeometry>
+class YaspGeometry : public GeometryDefaultImplementation<mydim,cdim,GridImp,YaspGeometry>
 {
 public:
   //! define type used for coordinates in grid module
@@ -278,7 +278,7 @@ private:
 
 //! specialize for dim=dimworld, i.e. a volume element
 template<int mydim, class GridImp>
-class YaspGeometry<mydim,mydim,GridImp> : public GeometryDefault<mydim,mydim,GridImp,YaspGeometry>
+class YaspGeometry<mydim,mydim,GridImp> : public GeometryDefaultImplementation<mydim,mydim,GridImp,YaspGeometry>
 {
 public:
   typedef typename GridImp::ctype ctype;
@@ -397,7 +397,7 @@ private:
 
 //! specialization for dim=0, this is a vertex
 template<int cdim, class GridImp>
-class YaspGeometry<0,cdim,GridImp> : public GeometryDefault<0,cdim,GridImp,YaspGeometry>
+class YaspGeometry<0,cdim,GridImp> : public GeometryDefaultImplementation<0,cdim,GridImp,YaspGeometry>
 {
 public:
   typedef typename GridImp::ctype ctype;
@@ -486,7 +486,8 @@ public:
 };
 
 template<int codim, int dim, class GridImp>
-class YaspEntity :  public EntityDefault <codim,dim,GridImp,YaspEntity>
+class YaspEntity 
+:  public EntityDefaultImplementation <codim,dim,GridImp,YaspEntity>
 {
 public:
   typedef typename GridImp::ctype ctype;
@@ -551,7 +552,8 @@ public:
 
 // specialization for codim=0
 template<int dim, class GridImp>
-class YaspEntity<0,dim,GridImp> : public EntityDefault <0,dim,GridImp,YaspEntity>
+class YaspEntity<0,dim,GridImp> 
+: public EntityDefaultImplementation <0,dim,GridImp,YaspEntity>
 {
   enum { dimworld = GridImp::dimensionworld };
 public:
@@ -1110,7 +1112,8 @@ private:
 
 // specialization for codim=dim
 template<int dim, class GridImp>
-class YaspEntity<dim,dim,GridImp> : public EntityDefault <dim,dim,GridImp,YaspEntity>
+class YaspEntity<dim,dim,GridImp> 
+: public EntityDefaultImplementation <dim,dim,GridImp,YaspEntity>
 {
   enum { dimworld = GridImp::dimensionworld };
 public:
@@ -1319,7 +1322,7 @@ private:
 template<class GridImp>
 class YaspIntersectionIterator :
   public YaspEntityPointer<0,GridImp>,
-  public IntersectionIteratorDefault<GridImp,YaspIntersectionIterator>
+  public IntersectionIteratorDefaultImplementation<GridImp,YaspIntersectionIterator>
 {
   enum { dim=GridImp::dimension };
   enum { dimworld=GridImp::dimensionworld };  
@@ -1611,7 +1614,7 @@ private:
 template<class GridImp>
 class YaspHierarchicIterator :
   public YaspEntityPointer<0,GridImp>,
-  public HierarchicIteratorDefault <GridImp,YaspHierarchicIterator>
+  public HierarchicIteratorDefaultImplementation <GridImp,YaspHierarchicIterator>
 {
   enum { dim=GridImp::dimension };
   enum { dimworld=GridImp::dimensionworld };  
@@ -1727,7 +1730,7 @@ private:
 //========================================================================
 template<int codim, class GridImp>
 class YaspEntityPointer :
-  public EntityPointerDefault<codim,GridImp,
+  public EntityPointerDefaultImplementation<codim,GridImp,
                               Dune::YaspEntityPointer<codim,GridImp> >
 {
   //! know your own dimension
@@ -1805,7 +1808,7 @@ protected:
 template<int codim, PartitionIteratorType pitype, class GridImp>
 class YaspLevelIterator :
   public YaspEntityPointer<codim,GridImp>,
-  public LevelIteratorDefault<codim,pitype,GridImp,YaspLevelIterator>
+  public LevelIteratorDefaultImplementation<codim,pitype,GridImp,YaspLevelIterator>
 {
   //! know your own dimension
   enum { dim=GridImp::dimension };
@@ -2110,7 +2113,7 @@ struct YaspCommunicateMeta<dim,0> {
  */
 template<int dim, int dimworld>
 class YaspGrid :
-  public GridDefault<dim,dimworld,yaspgrid_ctype,YaspGridFamily<dim,dimworld> >,
+  public GridDefaultImplementation<dim,dimworld,yaspgrid_ctype,YaspGridFamily<dim,dimworld> >,
   public MultiYGrid<dim,yaspgrid_ctype>
 {
   typedef const YaspGrid<dim,dimworld> GridImp;
@@ -2121,6 +2124,9 @@ public:
   // define the persistent index type
   typedef bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits> PersistentIndexType;
 
+  //! the GridFamily of this grid 
+  typedef YaspGridFamily<dim,dimworld> GridFamily;
+  //! the Traits 
   typedef typename YaspGridFamily<dim,dimworld>::Traits Traits;
 
   // need for friend declarations in entity
@@ -2747,13 +2753,13 @@ public:
   YaspIntersectionIterator<const YaspGrid<dim, dimworld> >&
   getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
   {
-    return it.realIterator;
+    return this->getRealImplementation(it);
   }
 
   const YaspIntersectionIterator<const YaspGrid<dim, dimworld> >&
   getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const
   {
-    return it.realIterator;
+    return this->getRealImplementation(it);
   }
 
 private:
@@ -2777,14 +2783,14 @@ private:
   YaspEntity<codim,dim,const YaspGrid<dim,dimworld> >& 
   getRealEntity(typename Traits::template Codim<codim>::Entity& e )
   {
-	return e.realEntity;
+  	return this->getRealImplementation(e);
   }
   
   template<int codim>
   const YaspEntity<codim,dim,const YaspGrid<dim,dimworld> >& 
   getRealEntity(const typename Traits::template Codim<codim>::Entity& e ) const
   {
-	return e.realEntity;
+  	return this->getRealImplementation(e);
   }
 
   template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>

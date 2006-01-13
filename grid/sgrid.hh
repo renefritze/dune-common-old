@@ -74,7 +74,7 @@ template<class GridImp> class SHierarchicIterator;
   The resulting system is diagonal since the direction vectors are required to be orthogonal.
  */
 template<int mydim, int cdim, class GridImp> 
-class SGeometry : public GeometryDefault<mydim,cdim,GridImp,SGeometry>
+class SGeometry : public GeometryDefaultImplementation<mydim,cdim,GridImp,SGeometry>
 {
 public:
         //! define type used for coordinates in grid module
@@ -144,7 +144,7 @@ private:
 
 //! specialization for dim=0, this is a vertex
 template<int cdim, class GridImp> 
-class SGeometry<0,cdim,GridImp> : public GeometryDefault<0,cdim,GridImp,SGeometry>
+class SGeometry<0,cdim,GridImp> : public GeometryDefaultImplementation<0,cdim,GridImp,SGeometry>
 {
 public:
         //! define type used for coordinates in grid module
@@ -342,7 +342,7 @@ protected:
  */
 template<int codim, int dim, class GridImp> 
 class SEntity : public SEntityBase<codim,dim,GridImp>, 
-                public EntityDefault<codim,dim,GridImp,SEntity>
+                public EntityDefaultImplementation<codim,dim,GridImp,SEntity>
 {
   enum { dimworld = GridImp::dimensionworld };
 public:
@@ -389,7 +389,7 @@ static FixedArray <int,2> zentityGlob;
 /** \todo Please doc me! */
 template<int dim, class GridImp>
 class SEntity<0,dim,GridImp> : public SEntityBase<0,dim,GridImp>, 
-                               public EntityDefault<0,dim,GridImp,SEntity>
+                               public EntityDefaultImplementation<0,dim,GridImp,SEntity>
 {
   enum { dimworld = GridImp::dimensionworld };
 public:
@@ -537,7 +537,7 @@ private:
  */
 template<int dim, class GridImp>
 class SEntity<dim,dim,GridImp> : public SEntityBase<dim,dim,GridImp>, 
-                                 public EntityDefault <dim,dim,GridImp,SEntity>
+                                 public EntityDefaultImplementation <dim,dim,GridImp,SEntity>
 {
   enum { dimworld = GridImp::dimensionworld };
 public:
@@ -621,7 +621,7 @@ struct SHierarchicStackElem {
 template<class GridImp>
 class SHierarchicIterator :
   public Dune::SEntityPointer <0,GridImp>,
-  public HierarchicIteratorDefault <GridImp,SHierarchicIterator>
+  public HierarchicIteratorDefaultImplementation <GridImp,SHierarchicIterator>
 {
   friend class SHierarchicIterator<const GridImp>;
   enum { dim = GridImp::dimension };
@@ -696,7 +696,7 @@ private:
  */
 template<class GridImp>
 class SIntersectionIterator :
-  public IntersectionIteratorDefault <GridImp,SIntersectionIterator>
+  public IntersectionIteratorDefaultImplementation <GridImp,SIntersectionIterator>
 {
   enum { dim=GridImp::dimension };
   enum { dimworld=GridImp::dimensionworld };
@@ -819,7 +819,7 @@ private:
  */
 template<int codim, class GridImp>
 class SEntityPointer :
-  public EntityPointerDefault <codim, GridImp,
+  public EntityPointerDefaultImplementation <codim, GridImp,
                                Dune::SEntityPointer<codim,GridImp> >
 {
   enum { dim = GridImp::dimension };
@@ -856,7 +856,7 @@ protected:
 template<int codim, PartitionIteratorType pitype, class GridImp>
 class SLevelIterator :
   public Dune::SEntityPointer <codim,GridImp>,
-  public LevelIteratorDefault <codim,pitype,GridImp,SLevelIterator>
+  public LevelIteratorDefaultImplementation <codim,pitype,GridImp,SLevelIterator>
 {
   friend class SLevelIterator<codim, pitype,const GridImp>;
   enum { dim = GridImp::dimension };
@@ -1158,9 +1158,10 @@ struct SGridFamily
   data structures (which are not part of this module).
  */
 template<int dim, int dimworld>
-class SGrid : public GridDefault <dim,dimworld,sgrid_ctype,SGridFamily<dim,dimworld> >
+class SGrid : public GridDefaultImplementation <dim,dimworld,sgrid_ctype,SGridFamily<dim,dimworld> >
 {
 public:
+  typedef SGridFamily<dim,dimworld> GridFamily;
   typedef bigunsignedint<dim*sgrid_dim_bits+sgrid_level_bits+sgrid_codim_bits> PersistentIndexType;
 
   // need for friend declarations in entity
@@ -1438,13 +1439,13 @@ public:
   SIntersectionIterator<const SGrid<dim, dimworld> >&
   getRealIntersectionIterator(typename Traits::IntersectionIterator& it) 
   {
-    return it.realIterator;
+    return this->getRealImplementation(it);
   }
 
   const SIntersectionIterator<const SGrid<dim, dimworld> >&
   getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const
   {
-    return it.realIterator;
+    return this->getRealImplementation(it);
   }
 
 
@@ -1470,19 +1471,19 @@ private:
   friend class Dune::SIntersectionIterator<const Dune::SGrid<dim,dimworld> >;
   friend class Dune::SHierarchicIterator<const Dune::SGrid<dim,dimworld> >;
   friend class Dune::SEntity<0,dim,const Dune::SGrid<dim,dimworld> >;
-#if 1
+  
   template<int codim>
   SEntity<codim,dim,const SGrid<dim,dimworld> >& getRealEntity(typename Traits::template Codim<codim>::Entity& e )
   {
-	return e.realEntity;
+    return this->getRealImplementaion(e);
   }
   
   template<int codim>
   const SEntity<codim,dim,const SGrid<dim,dimworld> >& getRealEntity(const typename Traits::template Codim<codim>::Entity& e ) const
   {
-	return e.realEntity;
+    return this->getRealImplementation(e);
   }
-#endif
+  
   template<int codim_, int dim_, class GridImp_, template<int,int,class> class EntityImp_>
   friend class Entity;
 

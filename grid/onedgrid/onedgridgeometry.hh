@@ -68,7 +68,7 @@ public:
 
 template<class GridImp>  
 class OneDGridGeometry <0, 1, GridImp> : 
-        public GeometryDefault <0, 1, GridImp,OneDGridGeometry>
+        public GeometryDefaultImplementation <0, 1, GridImp,OneDGridGeometry>
 { 
     
     template <int codim_, int dim_, class GridImp_>
@@ -106,7 +106,7 @@ public:
 */
 template<int mydim, int coorddim, class GridImp>  
 class OneDGridGeometry : 
-public GeometryDefault <mydim, coorddim, GridImp, OneDGridGeometry>
+public GeometryDefaultImplementation <mydim, coorddim, GridImp, OneDGridGeometry>
 { 
     template <int codim_, int dim_, class GridImp_>
     friend class OneDGridEntity;

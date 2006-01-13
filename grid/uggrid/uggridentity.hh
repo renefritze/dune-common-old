@@ -63,7 +63,7 @@ public:
  */
 template<int codim, int dim, class GridImp>
 class UGGridEntity : 
-        public EntityDefault <codim,dim,GridImp,UGGridEntity>
+        public EntityDefaultImplementation <codim,dim,GridImp,UGGridEntity>
 {
 
     template <int codim_, PartitionIteratorType PiType_, class GridImp_>
@@ -207,7 +207,7 @@ private:
    */
 template<int dim, class GridImp>
 class UGGridEntity<0,dim,GridImp> : 
-        public EntityDefault<0,dim,GridImp, UGGridEntity>
+        public EntityDefaultImplementation<0,dim,GridImp, UGGridEntity>
 {
     friend class UGGrid < dim , dim>;
     friend class UGGridIntersectionIterator <GridImp>;

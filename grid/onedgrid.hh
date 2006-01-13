@@ -190,7 +190,7 @@ struct OneDGridFamily
  and provides local mesh refinement and coarsening.
  */
 template <int dim, int dimworld>
-class OneDGrid : public GridDefault <dim, dimworld,OneDCType,OneDGridFamily<dim,dimworld> >
+class OneDGrid : public GridDefaultImplementation <dim, dimworld,OneDCType,OneDGridFamily<dim,dimworld> >
 {
 
     friend class OneDGridLevelIteratorFactory <0>;
@@ -219,6 +219,8 @@ class OneDGrid : public GridDefault <dim, dimworld,OneDCType,OneDGridFamily<dim,
     // **********************************************************
 
 public:  
+    /** \brief GridFamily of OneDGrid */
+    typedef OneDGridFamily<dim,dimworld> GridFamily;
 
     /** \brief Provides the standard grid types */
     typedef typename OneDGridFamily<dim,dimworld>::Traits Traits;
@@ -397,12 +399,12 @@ public:
 
     OneDGridIntersectionIterator<const OneDGrid<dim, dimworld> >&
     getRealIntersectionIterator(typename Traits::IntersectionIterator& it) {
-      return it.realIterator;
+      return this->getRealImplementation(it);
     }
 
     const OneDGridIntersectionIterator<const OneDGrid<dim, dimworld> >&
     getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const {
-      return it.realIterator;
+      return this->getRealImplementation(it);
     }
 
     
@@ -413,12 +415,12 @@ private:
 
     template <int cd>
     OneDGridEntity<cd,dim,const OneDGrid>& getRealEntity(typename Traits::template Codim<cd>::Entity& entity) {
-        return entity.realEntity;
+        return this->getRealImplementation(entity);
     }
     
     template <int cd>
     const OneDGridEntity<cd,dim,const OneDGrid>& getRealEntity(const typename Traits::template Codim<cd>::Entity& entity) const {
-        return entity.realEntity;
+        return this->getRealImplementation(entity);
     }
 
     unsigned int getNextFreeId(int codim) {
