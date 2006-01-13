@@ -25,7 +25,9 @@ public:
       this->realIterator.increment();
       return *this;
     }
-  
+
+//private:
+  //! should not be used 
   /** @brief Postincrement operator. */
   LeafIterator operator++(int)
     {
@@ -34,38 +36,12 @@ public:
       return tmp;
     }
   
+public:  
   /** @brief copy constructor from LevelIteratorImp */
   LeafIterator (const LeafIteratorImp<codim, pitype, const GridImp> & i) : 
     EntityPointer<GridImp, LeafIteratorImp<codim, pitype, GridImp> >(i) {};
 };
 
-/**********************************************************************/
-/**
-   @brief Interface Definition for LeafIteratorImp
-
-   @ingroup GridDevel
-*/
-template<int codim, PartitionIteratorType pitype, class GridImp,
-         template<int,PartitionIteratorType,class> class LeafIteratorImp>
-class LeafIteratorInterface
-{
-public:
-  typedef typename GridImp::template Codim<0>::Entity Entity;
-
-  //! increment
-  void increment()
-    {
-      asImp().increment();
-    }
-
-private:
-  //!  Barton-Nackman trick
-  LeafIteratorImp<codim,pitype,GridImp>& asImp ()
-    {return static_cast<LeafIteratorImp<codim,pitype,GridImp>&>(*this);}
-  const LeafIteratorImp<codim,pitype,GridImp>& asImp () const
-    {return static_cast<const LeafIteratorImp<codim,pitype,GridImp>&>(*this);}
-};
-  
 //**********************************************************************
 /**
    @brief Default Implementations for LevelIteratorImp
@@ -74,8 +50,7 @@ private:
 */
 template<int codim, PartitionIteratorType pitype, class GridImp,
          template<int,PartitionIteratorType,class> class LeafIteratorImp>
-class LeafIteratorDefault
-: public LeafIteratorInterface <codim,pitype,GridImp,LeafIteratorImp>
+class LeafIteratorDefaultImplementation
 {
 private:
   //!  Barton-Nackman trick
