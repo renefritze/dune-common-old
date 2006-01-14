@@ -451,6 +451,7 @@ Has to be checked
       public:
 	enum { dimension = dimension_ };
 	// to make Dune::Geometry work:
+	struct GridFamily;
 	typedef CoordType ctype;
 	enum { dimensionworld = dimension };
 	
@@ -779,7 +780,7 @@ Has to be checked
       class ReferenceGeometryInstance;
 
       template<int mydimension, int coorddimension, class GridImp>
-      class Geometry : public GeometryDefault<mydimension, coorddimension, GridImp, Geometry>
+      class Geometry : public GeometryDefaultImplementation<mydimension, coorddimension, GridImp, Geometry>
       {
 	typedef typename GridImp::ctype ct;
 	typedef Dune::Geometry<mydimension, mydimension, GridImp, Simplex::Geometry> ReferenceGeometry;
