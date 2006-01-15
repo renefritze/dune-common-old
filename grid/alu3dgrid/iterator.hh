@@ -926,9 +926,9 @@ private:
   //! do not allow assigment 
   ALU3dGridLevelIterator<cd, pitype, GridImp> & operator = (const ALU3dGridLevelIterator<cd, pitype, GridImp> & org)  { return *this; }
   
-  // element index, -1 for end  
-  int index_;
-
+  // true if iterator is end iterator 
+  bool endIter_; 
+  
   // actual level
   int level_;
 
@@ -977,10 +977,10 @@ public:
 private:
   //! do not allow assigment 
   ALU3dGridLeafIterator<cdim, pitype, GridImp> & operator = (const ALU3dGridLeafIterator<cdim, pitype, GridImp> & org)  { return *this; }
-  
-  // element index, -1 for end  
-  int index_;
 
+  // true if iterator is end iterator 
+  bool endIter_; 
+  
   // actual level
   int level_;
 
@@ -1025,7 +1025,7 @@ private:
   ThisType & operator = (const ALU3dGridHierarchicIterator<GridImp> &org);
   
   // go to next valid element 
-  const ALU3DSPACE HElementType * goNextElement (const ALU3DSPACE HElementType * oldEl);
+  ALU3DSPACE HElementType * goNextElement (ALU3DSPACE HElementType * oldEl);
   
   //! element from where we started 
   const ALU3DSPACE HElementType & elem_;
