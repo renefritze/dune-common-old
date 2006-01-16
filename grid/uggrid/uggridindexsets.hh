@@ -204,7 +204,7 @@ public:
 		  // codim dim-1
 		  for (int i=0; i<eIt->template count<dim-1>(); i++)
 			{
-			  GeometryType gt = eIt->geometry().type();
+			  NewGeometryType gt = eIt->geometry().type();
 			  int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
 			  int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
 			  int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
@@ -261,7 +261,7 @@ public:
 			// codim dim-1 (edges)
 			for (int i=0; i<eIt->template count<dim-1>(); i++)
 			  {
-				GeometryType gt = eIt->geometry().type();
+				NewGeometryType gt = eIt->geometry().type();
 				int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
 				int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
 				int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
@@ -272,7 +272,7 @@ public:
 			if (dim==3)
 			  for (int i=0; i<eIt->template count<1>(); i++)
 				{
-				  GeometryType gt = eIt->geometry().type();
+				  NewGeometryType gt = eIt->geometry().type();
 				  int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,renumberFace(gt,i)));
 				  if (index<0) // not visited yet 
 					switch (ReferenceElements<double,dim>::general(gt).type(i,1))
@@ -284,7 +284,7 @@ public:
 						index = numQuadFaces_++;
 						break;
 					  default:
-						std::cout << "face geometry type is " << GeometryName(ReferenceElements<double,dim>::general(gt).type(i,1)) << std::endl;
+						std::cout << "face geometry type is " << ReferenceElements<double,dim>::general(gt).type(i,1) << std::endl;
 						DUNE_THROW(GridError, "wrong geometry type in face");
 					  }
 				}
@@ -532,7 +532,7 @@ public:
 				// codim dim-1
 				for (int i=0; i<eIt->template count<dim-1>(); i++)
 				  {
-					GeometryType gt = eIt->geometry().type();
+					NewGeometryType gt = eIt->geometry().type();
 					int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
 					int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
 					int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
@@ -572,7 +572,7 @@ public:
 				// codim dim-1 (edges)
 				for (int i=0; i<eIt->template count<dim-1>(); i++)
 				  {
-					GeometryType gt = eIt->geometry().type();
+					NewGeometryType gt = eIt->geometry().type();
 					int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
 					int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
 					int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
@@ -595,7 +595,7 @@ public:
 				if (dim==3)
 				  for (int i=0; i<eIt->template count<1>(); i++)
 					{
-					  GeometryType gt = eIt->geometry().type();
+                                            NewGeometryType gt = eIt->geometry().type();
 					  int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,renumberFace(gt,i)));
 					  if (index<0) // not visited yet 
 						{
