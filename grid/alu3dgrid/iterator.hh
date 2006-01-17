@@ -922,6 +922,9 @@ public:
   //! prefix increment
   void increment ();
 
+  //! dereference Entity, faster then the entity pointersmethod 
+  Entity & dereference () const;
+
 private:
   //! do not allow assigment 
   ALU3dGridLevelIterator<cd, pitype, GridImp> & operator = (const ALU3dGridLevelIterator<cd, pitype, GridImp> & org)  { return *this; }
@@ -974,6 +977,9 @@ public:
   //! prefix increment
   void increment ();
 
+  //! dereference Entity, faster then the entity pointersmethod 
+  Entity & dereference () const;
+
 private:
   //! do not allow assigment 
   ALU3dGridLeafIterator<cdim, pitype, GridImp> & operator = (const ALU3dGridLeafIterator<cdim, pitype, GridImp> & org)  { return *this; }
@@ -1019,6 +1025,9 @@ public:
     
   //! increment
   void increment();
+
+  //! dereference Entity, faster then the entity pointersmethod 
+  Entity & dereference () const;
 
 private:
   //! the assignment operator 

@@ -579,6 +579,17 @@ inline void ALU3dGridLevelIterator<codim,pitype,GridImp> :: increment ()
   return ;
 }
 
+template<int cdim, PartitionIteratorType pitype, class GridImp> 
+inline typename ALU3dGridLevelIterator<cdim, pitype, GridImp> :: Entity &
+ALU3dGridLevelIterator<cdim, pitype, GridImp> :: dereference () const 
+{ 
+  // don't dereference empty entity pointer 
+  assert( this->item_ );
+  assert( this->entity_ );
+  assert( this->item_ == & (*this->entity_).getItem() );
+  return (*this->entity_);
+} 
+
 //*******************************************************************
 //
 //  LEAFITERATOR 
@@ -654,6 +665,18 @@ inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> :: increment ()
 
   return ;
 }
+
+template<int cdim, PartitionIteratorType pitype, class GridImp> 
+inline typename ALU3dGridLeafIterator<cdim, pitype, GridImp> :: Entity &
+ALU3dGridLeafIterator<cdim, pitype, GridImp> :: dereference () const 
+{ 
+  // don't dereference empty entity pointer 
+  assert( this->item_ );
+  assert( this->entity_ );
+  assert( this->item_ == & (*this->entity_).getItem() );
+  return (*this->entity_);
+} 
+
 
 /************************************************************************************
 #     #
@@ -756,4 +779,19 @@ inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   this->updateEntityPointer(nextItem);
   return ;
 }
+
+template <class GridImp>
+inline typename ALU3dGridHierarchicIterator<GridImp> :: Entity &  
+ALU3dGridHierarchicIterator<GridImp> :: dereference () const 
+{ 
+  // don't dereference empty entity pointer 
+  assert( this->item_ );
+  assert( this->entity_ );
+  assert( this->item_ == & (*this->entity_).getItem() );
+  return (*this->entity_);
+} 
+
+
+
+
 } // end namespace Dune
