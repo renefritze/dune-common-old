@@ -31,6 +31,8 @@ namespace Dune {
   template<int cd, PartitionIteratorType pitype, class GridImp > 
   class ALU3dGridLevelIterator;
   template<int cd, class GridImp >
+  class ALU3dGridEntityPointerBase;  
+  template<int cd, class GridImp >
   class ALU3dGridEntityPointer;  
   template<int mydim, int coorddim, class GridImp>  
   class ALU3dGridMakeableGeometry;
@@ -103,50 +105,62 @@ namespace Dune {
     //! Type of the leaf index set
     typedef AdaptiveLeafIndexSet<ALU3dGrid < dim, dimworld, elType > >  LeafIndexSetImp; 
 
+    //! type of ALU3dGrids global id 
     typedef bigunsignedint<6*32> GlobalIdType;
+
+    //! type of ALU3dGrids local id 
     typedef int LocalIdType;
 
-  typedef ALU3dGrid<dim,dimworld,elType> GridImp;
+    typedef ALU3dGrid<dim,dimworld,elType> GridImp;
 
-  struct Traits
-  {
-    typedef bigunsignedint<6*32> GlobalIdType;
-    typedef ALU3dGrid<dim,dimworld,elType> Grid;
-
-    typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorWrapper> IntersectionIterator;
-
-    typedef Dune::HierarchicIterator<const GridImp, ALU3dGridHierarchicIterator> HierarchicIterator;
-
-    template <int cd>
-    struct Codim
+    struct Traits
     {
-      // IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
-      typedef Dune::Geometry<dim-cd, dimworld, const GridImp, ALU3dGridGeometry> Geometry;
-      typedef Dune::Geometry<dim-cd, dim, const GridImp, ALU3dGridGeometry> LocalGeometry;
-      // we could - if needed - introduce an other struct for dimglobal of Geometry
-      typedef Dune::Entity<cd, dim, const GridImp, ALU3dGridEntity> Entity;
+      //! type of ALU3dGrids local id 
+      typedef int LocalIdType;
 
-      typedef Dune::LevelIterator<cd,All_Partition,const GridImp,ALU3dGridLevelIterator> LevelIterator;
+      //! type of ALU3dGrids global id 
+      typedef bigunsignedint<6*32> GlobalIdType;
+      
+      typedef ALU3dGrid<dim,dimworld,elType> Grid;
 
-      typedef Dune::LeafIterator<cd,All_Partition,const GridImp,ALU3dGridLeafIterator> LeafIterator;
+      typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorWrapper> IntersectionIterator;
 
-      typedef Dune::EntityPointer<const GridImp,ALU3dGridEntityPointer<cd,const GridImp> > EntityPointer;
+      typedef Dune::HierarchicIterator<const GridImp, ALU3dGridHierarchicIterator> HierarchicIterator;
 
-      template <PartitionIteratorType pitype>
-      struct Partition
+      template <int cd>
+      struct Codim
       {
-        typedef Dune::LevelIterator<cd,pitype,const GridImp,ALU3dGridLevelIterator> LevelIterator;
-        typedef Dune::LeafIterator<cd,pitype,const GridImp,ALU3dGridLeafIterator> LeafIterator;
+        // IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
+        typedef Dune::Geometry<dim-cd, dimworld, const GridImp, ALU3dGridGeometry> Geometry;
+        typedef Dune::Geometry<dim-cd, dim, const GridImp, ALU3dGridGeometry> LocalGeometry;
+        // we could - if needed - introduce an other struct for dimglobal of Geometry
+        typedef Dune::Entity<cd, dim, const GridImp, ALU3dGridEntity> Entity;
+
+        typedef Dune::LevelIterator<cd,All_Partition,const GridImp,ALU3dGridLevelIterator> LevelIterator;
+
+        typedef Dune::LeafIterator<cd,All_Partition,const GridImp,ALU3dGridLeafIterator> LeafIterator;
+
+        typedef Dune::EntityPointer<const GridImp,ALU3dGridEntityPointer<cd,const GridImp> > EntityPointer;
+
+        template <PartitionIteratorType pitype>
+        struct Partition
+        {
+          typedef Dune::LevelIterator<cd,pitype,const GridImp,ALU3dGridLevelIterator> LevelIterator;
+          typedef Dune::LeafIterator<cd,pitype,const GridImp,ALU3dGridLeafIterator> LeafIterator;
+        };
+
       };
 
+      typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;
+      typedef LeafIndexSetImp LeafIndexSet;
+      typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
+#ifdef _ALU3DGRID_PARALLEL_
+      typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
+#else 
+      typedef LocalIdSet GlobalIdSet;
+#endif
     };
-
-    typedef IndexSet<GridImp,LevelIndexSetImp,DefaultLevelIteratorTypes<GridImp> > LevelIndexSet;
-    typedef LeafIndexSetImp LeafIndexSet;
-    typedef IdSet<GridImp,GlobalIdSetImp,GlobalIdType> GlobalIdSet;
-    typedef IdSet<GridImp,LocalIdSetImp,LocalIdType> LocalIdSet;
   };
-};
 
 
   /**
@@ -182,9 +196,12 @@ namespace Dune {
     friend class ALU3dGridEntity <0,dim,const MyType>;
     friend class ALU3dGridIntersectionIterator<MyType>;
 
-    friend class ALU3dGridEntityPointer<0,const MyType >;
+    friend class ALU3dGridEntityPointerBase<0,const MyType >;
+    friend class ALU3dGridEntityPointerBase<1,const MyType >;
     friend class ALU3dGridEntityPointer<1,const MyType >;
+    friend class ALU3dGridEntityPointerBase<2,const MyType >;
     friend class ALU3dGridEntityPointer<2,const MyType >;
+    friend class ALU3dGridEntityPointerBase<3,const MyType >;
     friend class ALU3dGridEntityPointer<3,const MyType >;
   
     friend class ALU3dGridIntersectionIterator<const MyType>;
@@ -212,11 +229,15 @@ namespace Dune {
     //! Type of the hierarchic index set
     typedef ALU3dGridHierarchicIndexSet<dim,dimworld,elType> HierarchicIndexSet;
     
-    //! Type of the global id set 
-    typedef ALU3dGridGlobalIdSet<dim,dimworld,elType> GlobalIdSetImp;
-    
     //! Type of the local id set 
     typedef ALU3dGridLocalIdSet<dim,dimworld,elType> LocalIdSetImp;
+    
+#ifdef _ALU3DGRID_PARALLEL_
+    //! Type of the global id set 
+    typedef ALU3dGridGlobalIdSet<dim,dimworld,elType> GlobalIdSetImp;
+#else 
+    typedef LocalIdSetImp GlobalIdSetImp;
+#endif
     
     //! Type of the global id set 
     typedef typename Traits :: GlobalIdSet GlobalIdSet;
