@@ -185,6 +185,13 @@ namespace Dune {
       buildIdSet();
     }
 
+    // update id set after adaptation 
+    void updateIdSet() 
+    {
+      // to be revised 
+      buildIdSet();
+    }
+
     // print all ids 
     void print () const 
     {
@@ -555,6 +562,9 @@ namespace Dune {
         codimStart_[i] = i*codimMultiplier; 
     }
     friend class ALU3dGrid<dim,dimworld,elType>;
+
+    // fake method to have the same method like GlobalIdSet 
+    void updateIdSet() {}
 
   public:
     //! export type of id 
