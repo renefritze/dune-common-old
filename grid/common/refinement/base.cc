@@ -58,11 +58,11 @@ namespace Dune {
       //! The implementation this specialisation maps to
       typedef SquaringTheCircle::Refinement Imp;
     };
-#else //!DOXYGEN
+#else // !DOXYGEN
     // Doxygen won't see this
-    template<GeometryType geometryType, class CoordType, GeometryType coerceTo>
+    template<GeometryType geometryType, class CoordType, GeometryType coerceTo, int dim=0>
     struct Traits;
-#endif //DOXYGEN
+#endif // !DOXYGEN
   } // namespace RefinementImp
 
 
@@ -85,9 +85,9 @@ namespace Dune {
      <dd>codimension template containing the SubEntityIterator</dd>
      </dl>
   */
-  template<GeometryType geometryType, class CoordType, GeometryType coerceTo>
+  template<GeometryType geometryType, class CoordType, GeometryType coerceTo, int dim=0>
   class Refinement
-    : public RefinementImp::Traits<geometryType, CoordType, coerceTo>::Imp
+    : public RefinementImp::Traits<geometryType, CoordType, coerceTo, dim>::Imp
   {
   public:
 #ifdef DOXYGEN
@@ -138,7 +138,7 @@ namespace Dune {
     //! Get an ElementIterator
     static ElementIterator eEnd(int level);
 #endif //DOXYGEN
-    typedef typename RefinementImp::Traits<geometryType, CoordType, coerceTo>::Imp RefinementImp;
+    typedef typename RefinementImp::Traits<geometryType, CoordType, coerceTo, dim>::Imp RefinementImp;
 
     using RefinementImp::dimension;
 
