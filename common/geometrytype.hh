@@ -90,7 +90,14 @@ namespace Dune {
         NewGeometryType(BasicType basicType, unsigned int dim)
             : basicType_(basicType), dim_(dim)
         {}
-      
+
+        /** \brief Constructor for vertices and segments
+            \todo Add check for dim={0,1} when compiled with a suitable flag
+        */
+        NewGeometryType(unsigned int dim)
+            : basicType_(cube), dim_(dim)
+        {}
+
         NewGeometryType(Dune::GeometryType type, unsigned int dim) DUNE_DEPRECATED
             : dim_(dim)
         {
@@ -131,7 +138,7 @@ namespace Dune {
         /** \brief Cast to old-style GeometryType
             \deprecated Only here for backward compatibility
         */
-        operator GeometryType() const /*DUNE_DEPRECATED*/ {
+        operator GeometryType() const DUNE_DEPRECATED {
             switch (basicType_) {
             case simplex: return Dune::simplex;
             case cube:    return Dune::cube;
