@@ -277,13 +277,13 @@ public:
   }
 
   //! number of entities per level, codim and geometry type in this process
-  int size (int level, int codim, GeometryType type) const
+  int size (int level, int codim, NewGeometryType type) const
   {
 	return this->levelIndexSet(level).size(codim,type);
   }
 
   //! number of leaf entities per codim and geometry type in this process
-  int size (int codim, GeometryType type) const
+  int size (int codim, NewGeometryType type) const
   {
 	return this->leafIndexSet().size(codim,type);
   }

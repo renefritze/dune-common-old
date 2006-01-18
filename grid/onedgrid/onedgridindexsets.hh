@@ -52,7 +52,7 @@ public:
   }
 
   //! get number of entities of given codim, type and on this level
-  int size (int codim, GeometryType type) const
+  int size (int codim, NewGeometryType type) const
   {
       return grid_->size(level_,codim, type);
   }
@@ -64,7 +64,7 @@ public:
   }
 
     /** \brief Deliver all geometry types used in this grid */
-  const std::vector<GeometryType>& geomTypes (int codim) const
+  const std::vector<NewGeometryType>& geomTypes (int codim) const
   {
 	return myTypes_;
   }
@@ -97,7 +97,7 @@ public:
         // Update the list of geometry types present
         if (numElements>0) {
             myTypes_.resize(1);
-            myTypes_[0] = cube;
+            myTypes_[0] = NewGeometryType(NewGeometryType::cube,1);
         } else
             myTypes_.resize(0);
 
@@ -115,7 +115,7 @@ public:
 private:
   const GridImp* grid_;
   int level_;
-  std::vector<GeometryType> myTypes_;
+  std::vector<NewGeometryType> myTypes_;
 };
 
 template <class GridImp> 
@@ -166,7 +166,7 @@ public:
   }
 
   //! get number of entities of given codim, type on the leaf level
-  int size (int codim, GeometryType type) const
+  int size (int codim, NewGeometryType type) const
   {
       if (codim==GridImp::dimension) {
 
@@ -174,13 +174,7 @@ public:
 
       } else if (codim==0) {
 
-          switch (type) {
-          case simplex:
-          case cube:
-              return numElements_;
-          default:
-              return 0;
-          }
+          return (type.isLine()) ? numElements_ : 0;
 
       } else {
           DUNE_THROW(NotImplemented, "OneDGridLeafIndexSet::size(codim,type) for codim neither 0 nor 1");
@@ -188,7 +182,7 @@ public:
   }
 
     /** deliver all geometry types used in this grid */
-  const std::vector<GeometryType>& geomTypes (int codim) const
+  const std::vector<NewGeometryType>& geomTypes (int codim) const
   {
 	return myTypes_;
   }
@@ -226,7 +220,7 @@ public:
         // Update the list of geometry types present
         if (numElements_>0) {
             myTypes_.resize(1);
-            myTypes_[0] = cube;
+            myTypes_[0] = NewGeometryType(NewGeometryType::cube,1);
         } else
             myTypes_.resize(0);
 
@@ -250,7 +244,7 @@ private:
     int numElements_;
     int numVertices_;
 
-  std::vector<GeometryType> myTypes_;
+  std::vector<NewGeometryType> myTypes_;
 };
 
 

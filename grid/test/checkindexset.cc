@@ -49,7 +49,7 @@ void checkSubEntity ( const GridType & grid,
       if(en.template count<codim>() != refElem.size(0,0,codim))
       {
         std::cerr << "entity index = " << lset.index(en)
-                  << ", type = " << GeometryName(type)
+                  << ", type = " << type
                   << std::endl
                   << "codim = " << codim
                   << std::endl
@@ -63,7 +63,7 @@ void checkSubEntity ( const GridType & grid,
 
       for(int subEntity = 0; subEntity < refElem.size(0,0,codim); subEntity++)
       {
-        typedef std::pair < int , GeometryType > SubEntityKeyType; 
+        typedef std::pair < int , NewGeometryType > SubEntityKeyType; 
         {
           int numSubEntities = refElem.size(subEntity,codim,dim);
           // every entity have at least one vertex
@@ -143,12 +143,12 @@ void checkSubEntity ( const GridType & grid,
           // check whether vertex key is already stored in map
           if(vertices.find(global) == vertices.end())
           {
-            vertices[global] = globalSubEntity;
+              vertices[global] = globalSubEntity;
           }
           else 
           {
-            SubEntityKeyType otherSubEntity = vertices[global];
-            assert( globalSubEntity == otherSubEntity );
+              SubEntityKeyType otherSubEntity = vertices[global];
+              assert( globalSubEntity == otherSubEntity );
           }
 
           // check whether subEntity is already stored in map 
@@ -255,7 +255,7 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
 
   //******************************************************************
  
-  typedef std::pair < int , GeometryType > SubEntityKeyType; 
+  typedef std::pair < int , NewGeometryType > SubEntityKeyType; 
   typedef std::map < int , std::pair<int,int> > subEntitymapType;
   std::map < SubEntityKeyType , std::vector<int> > subEntities;
   std::map < std::vector<int> , SubEntityKeyType > vertices;
@@ -287,7 +287,7 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
     assert( vertexCoordsMap.size() == count );
     
     // check whether size of vertices of set equals all found vertices 
-    assert( count == (unsigned int)lset.size(dim,vertex) );
+    assert( count == (unsigned int)lset.size(dim,Dune::NewGeometryType(0)) );
   }
 
   {

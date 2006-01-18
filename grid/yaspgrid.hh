@@ -1886,13 +1886,13 @@ public:
   }
 
   //! get number of entities of given codim, type and level (the level is known to the object)
-  int size (int codim, GeometryType type) const
+  int size (int codim, NewGeometryType type) const
   {
 	return grid.size(level,codim);
   }
 
   //! deliver all geometry types used in this grid
-  const std::vector<GeometryType>& geomTypes (int codim) const
+  const std::vector<NewGeometryType>& geomTypes (int codim) const
   {
 	return mytypes;
   }
@@ -1914,7 +1914,7 @@ public:
 private:
   const GridImp& grid;
   int level;
-  std::vector<GeometryType> mytypes;
+  std::vector<NewGeometryType> mytypes;
 };
 
 
@@ -1971,13 +1971,13 @@ public:
   }
 
   //! get number of entities of given codim, type
-  int size (int codim, GeometryType type) const
+  int size (int codim, NewGeometryType type) const
   {
 	return grid.size(grid.maxLevel(),codim);
   }
 
   //! deliver all geometry types used in this grid
-  const std::vector<GeometryType>& geomTypes (int codim) const
+  const std::vector<NewGeometryType>& geomTypes (int codim) const
   {
 	return mytypes;
   }
@@ -1998,7 +1998,7 @@ public:
 
 private:
   const GridImp& grid;
-  std::vector<GeometryType> mytypes;
+  std::vector<NewGeometryType> mytypes;
 };
 
 
@@ -2303,7 +2303,7 @@ public:
   }
 
   //! number of entities per level, codim and geometry type in this process
-  int size (int level, int codim, GeometryType type) const
+  int size (int level, int codim, NewGeometryType type) const
   {
 	if (type==cube) return sizes[level][codim];
 	switch (dim-codim)
@@ -2328,7 +2328,7 @@ public:
   }
 
   //! number of leaf entities per codim and geometry type in this process
-  int size (int codim, GeometryType type) const
+  int size (int codim, NewGeometryType type) const
   {
 	return size(maxLevel(),codim,type);
   }
@@ -2337,7 +2337,7 @@ public:
         @param T: array class holding data associated with the entities
         @param P: type used to gather/scatter data in and out of the message buffer
         @param codim: communicate entites of given codim
-        @param if: one of the predifined interface types, throws error if it is not implemented
+        @param if: one of the predefined interface types, throws error if it is not implemented
         @param level: communicate for entities on the given level
 
         Implements a generic communication function sending an object of type P for each entity

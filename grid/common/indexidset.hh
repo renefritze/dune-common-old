@@ -119,7 +119,7 @@ namespace Dune
 
 	   \return number of entities.
 	*/
-	int size (int codim, GeometryType type) const
+	int size (int codim, NewGeometryType type) const
 	{
       return asImp().size(codim,type);
 	}
@@ -131,7 +131,7 @@ namespace Dune
 	int size (int codim) const
 	{
     int s=0;
-    const std::vector<GeometryType>& geomTs = geomTypes(codim); 
+    const std::vector<NewGeometryType>& geomTs = geomTypes(codim); 
     for (unsigned int i=0; i<geomTs.size(); i++)
       s += size(codim,geomTs[i]);
 
@@ -142,7 +142,7 @@ namespace Dune
 
 	   \return reference to vector of geometry types.
 	*/
-	const std::vector<GeometryType>& geomTypes (int codim) const
+	const std::vector<NewGeometryType>& geomTypes (int codim) const
 	{
 	  return asImp().geomTypes(codim);
 	}
