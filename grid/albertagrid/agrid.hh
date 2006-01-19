@@ -1541,10 +1541,10 @@ namespace Dune
     int size (int codim) const; 
 
     //! number of entities per level, codim and geometry type in this process
-    int size (int level, int codim, GeometryType type) const;
+    int size (int level, int codim, NewGeometryType type) const;
 
     //! number of leaf entities per codim and geometry type in this process
-    int size (int codim, GeometryType type) const;
+    int size (int codim, NewGeometryType type) const;
 
     /** \brief ghostSize is zero for this grid  */
     int ghostSize (int level, int codim) const { return 0; } 
@@ -1739,7 +1739,7 @@ public:
     bool isNoElement( const ALBERTA MACRO_EL * mel) const;
 
     //! returns geometry type vector for codimension
-    const std::vector < GeometryType > & geomTypes (int codim) const { return geomTypes_; }
+    const std::vector < NewGeometryType > & geomTypes (int codim) const { return geomTypes_; }
 
   private:
     friend class Conversion<AlbertaGrid<dim, dimworld>, HasObjectStream>;  
@@ -1922,7 +1922,7 @@ public:
     mutable LeafIndexSet* leafIndexSet_;
 
     //! stores geometry types of this grid 
-    const std::vector < GeometryType > geomTypes_;
+    const std::vector < NewGeometryType > geomTypes_;
 
     // stack for storing BOUNDARY objects created during mesh creation 
     std::stack < BOUNDARY * > bndStack_; 

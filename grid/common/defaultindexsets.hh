@@ -198,7 +198,7 @@ public:
   IndexSetWrapper(const IndexSetWrapper<IndexSetImp> & s) : set_(s.set_) {}
  
   //! return size of set for codim  
-  int size ( int codim , GeometryType type ) const   
+  int size ( int codim , NewGeometryType type ) const   
   {
     return set_.size(codim,type);
   }
@@ -207,7 +207,7 @@ public:
   int size ( int codim ) const   
   {
     int s = 0; 
-    const std::vector< GeometryType > & types = set_.geomTypes(codim);
+    const std::vector< NewGeometryType > & types = set_.geomTypes(codim);
     for(unsigned int i=0; i<types.size(); i++)
       s += set_.size(codim,types[i]);
     return s;
@@ -228,7 +228,7 @@ public:
   }
 
   //! wrap geomTypes method of set 
-  const std::vector< GeometryType > & geomTypes (int codim) const 
+  const std::vector< NewGeometryType > & geomTypes (int codim) const 
   {
     return set_.geomTypes(codim); 
   }
@@ -428,7 +428,7 @@ public:
 
   //! return size of IndexSet for a given level and codim 
   //! this method is to be revised 
-  int size ( int codim , GeometryType type ) const
+  int size ( int codim , NewGeometryType type ) const
   {
     return size_[codim];
   }
@@ -467,7 +467,7 @@ public:
   }
 
   //! deliver all geometry types used in this grid
-  const std::vector<GeometryType>& geomTypes (int codim) const
+  const std::vector<NewGeometryType>& geomTypes (int codim) const
   {
     return grid_.geomTypes(codim);
   }
