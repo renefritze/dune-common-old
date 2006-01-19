@@ -30,6 +30,7 @@
 
 */
 
+#include "../../../common/geometrytype.hh"
 #include "../../../common/fvector.hh"
 #include "base.cc"
 #include "simplex.cc"
@@ -57,7 +58,6 @@ namespace Dune {
       using Simplex::getPermutation;
       using Simplex::referenceToKuhn;
       using Simplex::kuhnToReference;
-      using Simplex::SimplexTraits;
 
       // ////////////////////////////////////
       //
@@ -368,8 +368,8 @@ namespace Dune {
 	typedef typename GridImp::BackendRefinement BackendRefinement;
 	typedef typename BackendRefinement::template Codim<dimension-mydimension>::SubEntityIterator BackendIterator;
       public:
-	GeometryType type() const
-	{ return SimplexTraits<mydimension>::geometryType; }
+	NewGeometryType type() const
+	{ return NewGeometryType(NewGeometryType::simplex, mydimension); }
 
 	int corners() const
 	{ return mydimension + 1; }

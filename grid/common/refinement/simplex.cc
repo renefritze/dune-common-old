@@ -242,6 +242,7 @@
     - \f$x_{p_d}:=x_{p_d}-x_{p_{d+1}}\f$.
 */
 
+#include "../../../common/geometrytype.hh"
 #include "../../../common/fvector.hh"
 #include "../../../common/helpertemplates.hh"
 #include "base.cc"
@@ -411,29 +412,6 @@ Has to be checked
 	return point;
       }
 
-#ifdef DOXYGEN
-      /*! @brief Map simplex dimension to Dune::GeometryType
-	@param dimension Dimension of the simplex
-       */
-      template<int dimension>
-      struct SimplexTraits
-      {
-	enum {
-	  //! The Dune::GeometryType of the simplex
-	  geometryType
-	};
-      };
-#else // !DOXYGEN
-      template<int dimension> struct SimplexTraits;
-#endif // !DOXYGEN
-      template<> struct SimplexTraits<0>
-      { enum { geometryType = vertex }; };
-      template<> struct SimplexTraits<1>
-      { enum { geometryType = line }; };
-      template<> struct SimplexTraits<2>
-      { enum { geometryType = triangle }; };
-      template<> struct SimplexTraits<3>
-      { enum { geometryType = tetrahedron }; };
 
       //@} <!-- Group utilities -->
 
@@ -785,8 +763,8 @@ Has to be checked
 	typedef typename GridImp::ctype ct;
 	typedef Dune::Geometry<mydimension, mydimension, GridImp, Simplex::Geometry> ReferenceGeometry;
       public:
-	GeometryType type() const
-	{ return SimplexTraits<mydimension>::geometryType; }
+	NewGeometryType type() const
+	{ return NewGeometryType(NewGeometryType::simplex, mydimension); }
 
 	int corners() const
 	{ return mydimension + 1; }
