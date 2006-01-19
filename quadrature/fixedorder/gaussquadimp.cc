@@ -1,8 +1,9 @@
 #ifndef __GAUSSQUADRATUREIMP_CC__
 #define __GAUSSQUADRATUREIMP_CC__
 
-#include<new>
-#include<iostream>
+#include <new>
+#include <iostream>
+#include <dune/common/fvector.hh>
 
 namespace Dune {
 
