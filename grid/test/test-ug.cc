@@ -16,6 +16,7 @@
 #include <dune/io/file/amirameshreader.hh>
 
 #include "gridcheck.cc"
+#include "checkgeometryinfather.cc"
 
 class ArcOfCircle : public Dune::BoundarySegment<2>
 {
@@ -152,6 +153,9 @@ int main () {
 
       grid.globalRefine(1);
       gridcheck(grid);
+
+      // check the method geometryInFather()
+      checkGeometryInFather(grid);
     }
 
     // ////////////////////////////////////////////////////////////////////////
@@ -172,6 +176,9 @@ int main () {
 
       grid.globalRefine(1);
       gridcheck(grid);
+
+      // check the method geometryInFather()
+      checkGeometryInFather(grid);
     }
 
     // ////////////////////////////////////////////////////////////////////////
