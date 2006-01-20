@@ -239,7 +239,7 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
           std::cerr << "  " << *it << std::endl;
       
       std::cerr << std::endl << "but the method geomTypes() returned:" << std::endl;
-      for (int j=0; j<lset.geomTypes(codim).size(); j++)
+      for (size_t j=0; j<lset.geomTypes(codim).size(); j++)
           std::cerr << "  " << lset.geomTypes(codim)[j] << std::endl;
       
       DUNE_THROW(GridError, "!");
