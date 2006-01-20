@@ -35,9 +35,9 @@ namespace Dune {
        @brief Mapping from geometryType, CoordType and coerceTo to a
               particular @ref Refinement implementation.
 
-       @param geometryType The basic geometry type of the element to refine
+       @param geometryType The NewGeometryType::BasicType of the element to refine
        @param CoordType    The C++ type of the coordinates
-       @param coerceTo     The basic geometry type of the subelements
+       @param coerceTo     The NewGeometryType::BasicType of the subelements
        @param dimension    The dimension of the refinement.
 
        Each @ref Refinement implementation has to define one or more
@@ -49,7 +49,7 @@ namespace Dune {
        e.g.:
        @code
   template<class CoordType>
-  struct Traits<circle, CoordType, quadrilateral, 2>
+  struct Traits<NewGeometryType::sphere, CoordType, NewGeometryType::cube, 2>
   {
     typedef SquaringTheCircle::Refinement Imp;
   };
@@ -77,9 +77,9 @@ namespace Dune {
   /*! @brief Wrap each @ref Refinement implementation to get a
              consistent interface
 
-     @param geometryType The basic geometry type of the element to refine
+     @param geometryType The NewGeometryType::BasicType of the element to refine
      @param CoordType    The C++ type of the coordinates
-     @param coerceTo     The basic geometry type of the subelements
+     @param coerceTo     The NewGeometryType::BasicType of the subelements
      @param dimension    The dimension of the refinement.
 
      @par Member Structs:

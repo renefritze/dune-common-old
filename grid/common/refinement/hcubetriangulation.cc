@@ -41,7 +41,7 @@ namespace Dune {
 
     /*! @brief This namespace contains the @ref Refinement
                implementation for triangulating hypercubes
-               (quadrilateral -> triangle, hexahedron -> tetrahedron)
+               (NewGeometryType::cube -> NewGeometryType::simplex)
 
       See @ref HCubeTriangulation.
     */
