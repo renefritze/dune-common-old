@@ -219,6 +219,9 @@ namespace Dune {
         /** \brief Return dimension of the entity */
         unsigned int dim() const {return dim_;}
 
+        /** \brief Return the basic type of the entity */
+        BasicType basicType() const {return basicType_;}
+
         /*@}*/
 
         /** \brief Check for equality */
@@ -255,6 +258,19 @@ namespace Dune {
 
     };
     
+    /** \brief Prints a NewGeometryType::BasicType to an output stream */
+    std::ostream& operator<< (std::ostream& s, NewGeometryType::BasicType type)
+    {
+      switch (type) {
+      case NewGeometryType::simplex: s << "simplex"; break;
+      case NewGeometryType::cube:    s << "cube";    break;
+      case NewGeometryType::pyramid: s << "pyramid"; break;
+      case NewGeometryType::prism:   s << "prims";   break;
+      default: s << "[unknown NewGeometryType::BasicType: " << int(type) << "]";
+      }
+            
+      return s;
+    }
 }
 
 #endif
