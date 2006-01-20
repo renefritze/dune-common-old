@@ -19,16 +19,18 @@
 #include <dune/common/capabilities.hh>
 #include <dune/common/stdstreams.hh>
 #include <dune/common/collectivecommunication.hh>
-#include <dune/grid/common/grid.hh>
-#include <dune/grid/common/sizecache.hh>
-
 #include <dune/common/exceptions.hh>
 
-// some cpp defines and include of alberta.h
-#include "albertaheader.hh"
+#include <dune/grid/common/grid.hh>
+#include <dune/grid/common/sizecache.hh>
+#include <dune/grid/common/intersectioniteratorwrapper.hh>
 
 // stack for index management 
 #include <dune/grid/common/indexstack.hh>
+
+//- Local includes 
+// some cpp defines and include of alberta.h
+#include "albertaheader.hh"
 
 // grape data io 
 #include <dune/io/file/grapedataio.hh>
@@ -44,7 +46,6 @@ namespace Dune {
   // own exception classes
   class AlbertaError   : public Exception {};
   class AlbertaIOError : public IOError {};  
-
 }
 
 // contains a simple memory management for some componds of this grid 
@@ -600,6 +601,12 @@ namespace Dune
     typedef typename GridImp::template Codim<0>::HierarchicIterator HierarchicIterator;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
 
+    //typedef AlbertaGridIntersectionIterator<GridImp>
+    //  AlbertaGridIntersectionIteratorType;
+
+    typedef IntersectionIteratorWrapper<GridImp> 
+      AlbertaGridIntersectionIteratorType;
+
     enum { dimension = dim };
   
     //! Destructor, needed perhaps needed for deleteing faceEntity_ and
@@ -638,10 +645,10 @@ namespace Dune
       which has an entity of codimension 1 in commen with this entity. Access to neighbors
       is provided using iterators. This allows meshes to be nonmatching. Returns iterator
       referencing the first neighbor. */
-    AlbertaGridIntersectionIterator<GridImp> ibegin () const;
+    AlbertaGridIntersectionIteratorType ibegin () const;
 
     //! Reference to one past the last intersection with neighbor
-    AlbertaGridIntersectionIterator<GridImp> iend () const;
+    AlbertaGridIntersectionIteratorType iend () const;
 
     //! returns true if entity is leaf entity, i.e. has no children  
     bool isLeaf () const ; 
@@ -916,7 +923,7 @@ namespace Dune
   */
   template<class GridImp>
   class AlbertaGridIntersectionIterator : 
-    public AlbertaGridEntityPointer<0,GridImp> ,
+    //public AlbertaGridEntityPointer<0,GridImp> ,
     public IntersectionIteratorDefaultImplementation <GridImp,AlbertaGridIntersectionIterator>
   {
     enum { dim      = GridImp::dimension };
@@ -958,7 +965,8 @@ namespace Dune
 
     //! The default Constructor 
     AlbertaGridIntersectionIterator(const GridImp & grid,
-                                    int level);
+                                    int level,
+                                    bool );
 
     //! The Constructor 
     AlbertaGridIntersectionIterator(const GridImp & grid,
@@ -969,10 +977,10 @@ namespace Dune
     AlbertaGridIntersectionIterator(const AlbertaGridIntersectionIterator<GridImp> & org);
 
     //! assignment operator, implemented because default does not the right thing 
-    AlbertaGridIntersectionIterator<GridImp> & operator = (const AlbertaGridIntersectionIterator<GridImp> & org);
+    void assign (const AlbertaGridIntersectionIterator<GridImp> & org);
   
     //! The Destructor 
-    ~AlbertaGridIntersectionIterator();
+    //~AlbertaGridIntersectionIterator();
 
     //! return true if intersection is with boundary. \todo connection with 
     //! boundary information, processor/outer boundary
@@ -1023,14 +1031,20 @@ namespace Dune
     //! return outer normal, this should be dependent on local 
     //! coordinates for higher order boundary 
     const NormalVecType & integrationOuterNormal (const LocalCoordType & local) const;
-  
-  private:
+
+    //! reset IntersectionIterator  
+    template <class EntityType> 
+    void first(const EntityType & en, int level ); 
+
     //**********************************************************
     //  private methods 
     //**********************************************************
     // calls EntityPointer done and sets done_ to true
     void done (); 
 
+    void setNewLevel(int , bool ) {}
+
+  private:
     // returns true if actual neighbor has same level 
     bool neighborHasSameLevel () const;
     
@@ -1051,11 +1065,18 @@ namespace Dune
     //! calculate normal to current face 
     void calcOuterNormal () const;
 
+    // return whether the iterator was called from a LeafIterator entity or
+    // LevelIterator entity
+    bool leafIt () const { return leafIt_; }
+    ////////////////////////////////////////////////
+    // private member variables 
+    ////////////////////////////////////////////////
+
     //! know the grid were im coming from
-    //const GridImp& grid_;
+    const GridImp& grid_;
 
     //! the actual level
-    mutable int level_;
+    //mutable int level_;
   
     //! count on which neighbor we are lookin' at
     mutable int neighborCount_;
@@ -1065,30 +1086,25 @@ namespace Dune
     //! therefore this element is only created on demand. 
     mutable bool builtNeigh_;
 
-    EntityImp & virtualEntity_;
- 
+    bool leafIt_;
+
     //! pointer to the EL_INFO struct storing the real element information
     mutable ALBERTA EL_INFO * elInfo_;
 
-    // for memory management 
-    //mutable typename GridImp::EntityProvider::ObjectEntity                *manageObj_;
-    //mutable typename GridImp::IntersectionSelfProvider::ObjectEntity      *manageInterEl_;
-    //mutable typename GridImp::IntersectionNeighProvider::ObjectEntity     *manageNeighEl_;
- 
     //! pointer to element holding the intersectionNeighbourLocal information.
     //! This element is created on demand.
-    mutable LocalGeometryImp *fakeNeigh_;
+    mutable LocalGeometryImp fakeNeigh_;
  
     //! pointer to element holding the intersectionSelfLocal information.
     //! This element is created on demand.
-    mutable LocalGeometryImp *fakeSelf_;
+    mutable LocalGeometryImp fakeSelf_;
  
     //! pointer to element holding the neighbor_global and neighbor_local 
     //! information. This element is created on demand.
-    mutable LocalGeometryImp *neighGlob_;
+    mutable LocalGeometryImp neighGlob_;
 
     //! EL_INFO th store the information of the neighbor if needed
-    mutable ALBERTA EL_INFO * neighElInfo_;
+    mutable ALBERTA EL_INFO neighElInfo_;
 
     mutable NormalVecType outNormal_;
     mutable NormalVecType unitNormal_;
@@ -1303,7 +1319,7 @@ namespace Dune
     {
       typedef GridImp Grid;
 
-      typedef Dune::IntersectionIterator<const GridImp, AlbertaGridIntersectionIterator> IntersectionIterator;
+      typedef Dune::IntersectionIterator<const GridImp, IntersectionIteratorWrapper > IntersectionIterator;
 
       typedef Dune::HierarchicIterator<const GridImp, AlbertaGridHierarchicIterator> HierarchicIterator;
 
@@ -1678,18 +1694,6 @@ public:
 #endif
     }
 
-    AlbertaGridIntersectionIterator<const AlbertaGrid<dim, dimworld> >&
-    getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
-    {
-      return this->getRealImplementation(it);
-    }
-
-    const AlbertaGridIntersectionIterator<const AlbertaGrid<dim, dimworld> >&
-    getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const
-    {
-      return this->getRealImplementation(it);
-    }
-
   private:
     //! return real entity implementation 
     template <int cd>
@@ -1834,6 +1838,29 @@ public:
     mutable EntityProvider               entityProvider_;
     mutable IntersectionSelfProvider     interSelfProvider_;
     mutable IntersectionNeighProvider    interNeighProvider_;
+
+    typedef AlbertaGridIntersectionIterator< const MyType > IntersectionIteratorImp;
+    typedef AGMemoryProvider< IntersectionIteratorImp > IntersectionIteratorProviderType;
+    friend class IntersectionIteratorWrapper< const MyType > ;
+
+    typedef IntersectionIteratorWrapper<const MyType >
+      AlbertaGridIntersectionIteratorType; 
+
+    IntersectionIteratorProviderType & intersetionIteratorProvider() const { return interItProvider_; }
+    mutable IntersectionIteratorProviderType interItProvider_;
+    
+    AlbertaGridIntersectionIteratorType & 
+    getRealIntersectionIterator(typename Traits::IntersectionIterator& it)
+    {
+      return this->getRealImplementation(it);
+    }
+
+    AlbertaGridIntersectionIteratorType & 
+    getRealIntersectionIterator(const typename Traits::IntersectionIterator& it) const
+    {
+      return this->getRealImplementation(it);
+    }
+
 
     //! return obj pointer to EntityImp 
     template <int codim> 
