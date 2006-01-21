@@ -56,12 +56,12 @@ namespace Dune
 	struct Codim
 	{
 
-            /** \brief Define types needed to iterate over entities of a given partition type */
+      /** \brief Define types needed to iterate over entities of a given partition type */
 	  template <PartitionIteratorType pitype>
 	  struct Partition
 	  {
-              /** \brief The iterator needed to iterate over the entities of a given codim and 
-                  partition type of this index set */
+        /** \brief The iterator needed to iterate over the entities of a given codim and 
+            partition type of this index set */
 		typedef typename IndexSetTypes::template Codim<cd>::template Partition<pitype>::Iterator Iterator;
 	  };
 	};
@@ -125,9 +125,9 @@ namespace Dune
 	}
 
 	/** @brief Return total number of entities of given codim as a sum 
-   * for all geometry types in this index set.
-   *  \param codim A valid codimension
-   */
+        for all geometry types in this index set.
+        \param codim A valid codimension
+    */
 	int size (int codim) const
 	{
     int s=0;
@@ -146,6 +146,22 @@ namespace Dune
 	{
 	  return asImp().geomTypes(codim);
 	}
+
+    /** @brief Does the index set contain this Entity?
+     */
+    template<class EntityType>
+    bool contains (const EntityType& e) const
+    {
+      enum { cd = EntityType::codimension };
+      /*
+      return asImp().template contains<cd>(e);
+      */
+      typename Codim<cd>::template Partition<All_Partition>::Iterator it=begin<cd,All_Partition>();
+      typename Codim<cd>::template Partition<All_Partition>::Iterator iend=end<cd,All_Partition>();
+      for (; it != iend; ++it)
+        if (it->level() == e.level() && index(*it) == index(e)) return true;
+      return false;
+    }
 
 	/** @brief Iterator to first entity of given codimension and partition type.
 	 */
