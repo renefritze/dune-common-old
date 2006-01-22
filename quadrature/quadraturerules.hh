@@ -351,6 +351,7 @@ namespace Dune {
   {
   public:
     enum{d=1};
+    enum{dim=1};
     enum{highest_order=GaussPoints::highest_order};
     typedef ct CoordType;
     typedef SimplexQuadratureRule value_type;
