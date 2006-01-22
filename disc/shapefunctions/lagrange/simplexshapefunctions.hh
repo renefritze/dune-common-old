@@ -159,8 +159,9 @@ namespace Dune
 	}
 
 	//! return type of element
-	GeometryType type () const
+	NewGeometryType type () const
 	{
+      static NewGeometryType simplex(NewGeometryType::simplex, dim);
 	  return simplex;
 	}
 
@@ -185,10 +186,9 @@ namespace Dune
 	typedef T ResultType;
 	typedef P0SimplexShapeFunctionSet<C,T,d,P0SimplexShapeFunction<C,T,d> > value_type;
 
-	const value_type& operator() (GeometryType type, int order) const
+	const value_type& operator() (NewGeometryType type, int order) const
 	{
-
-	  if((type==simplex)|| (type==line)|| (type==triangle) || (type==tetrahedron) ) return p0simplex;
+      if (type.isSimplex()) return p0simplex;
 	  DUNE_THROW(NotImplemented, "type not implemented yet");
 	}
   private:
@@ -353,8 +353,9 @@ public:
   }
 
   //! return type of element
-  GeometryType type () const
+  NewGeometryType type () const
   {
+    static NewGeometryType simplex(NewGeometryType::simplex, dim);
     return simplex;
   }
 private:
@@ -377,9 +378,9 @@ private:
     typedef T ResultType;
     typedef P1SimplexShapeFunctionSet<C,T,d,P1SimplexShapeFunction<C,T,d> > value_type;
 
-    const value_type& operator() (GeometryType type, int order) const
+    const value_type& operator() (NewGeometryType type, int order) const
     {
-      if((type==simplex)|| (type==line)|| (type==triangle) || (type==tetrahedron) ) return p1simplex;
+      if (type.isSimplex()) return p1simplex;
       DUNE_THROW(NotImplemented,"type not yet implemented");
 	}
   private:
@@ -478,9 +479,10 @@ public:
   }
 
   //! return type of element
-  GeometryType type () const
+  NewGeometryType type () const
   {
-    return line;
+    static NewGeometryType simplex(NewGeometryType::simplex, dim);
+    return simplex;
   }
 private:
   S sf[m];
@@ -506,9 +508,9 @@ class P2SimplexShapeFunctionSetContainer<C,T,1>
     typedef T ResultType;
     typedef P2SimplexShapeFunctionSet<C,T,dim,P2SimplexShapeFunction<C,T,dim> > value_type;
 
-    const value_type& operator() (GeometryType type, int order) const
+    const value_type& operator() (NewGeometryType type, int order) const
     {
-      if((type==simplex) || (type==line) ) return p2simplex;
+      if (type.isSimplex()) return p2simplex;
       DUNE_THROW(NotImplemented,"type not yet implemented");
 	}
   private:
@@ -812,9 +814,10 @@ public:
   }
 
   //! return type of element
-  GeometryType type () const
+  NewGeometryType type () const
   {
-    return triangle;
+    static NewGeometryType simplex(NewGeometryType::simplex, dim);
+    return simplex;
   }
 private:
   S sf[m];
@@ -840,9 +843,9 @@ class P2SimplexShapeFunctionSetContainer<C,T,2>
     typedef T ResultType;
     typedef P2SimplexShapeFunctionSet<C,T,dim,P2SimplexShapeFunction<C,T,dim> > value_type;
 
-    const value_type& operator() (GeometryType type, int order) const
+    const value_type& operator() (NewGeometryType type, int order) const
     {
-      if((type==simplex) || (type==triangle) ) return p2simplex;
+      if (type.isSimplex()) return p2simplex;
       DUNE_THROW(NotImplemented,"type not yet implemented");
 	}
   private:
@@ -1329,9 +1332,10 @@ public:
   }
 
   //! return type of element
-  GeometryType type () const
+  NewGeometryType type () const
   {
-    return tetrahedron;
+    static NewGeometryType simplex(NewGeometryType::simplex, dim);
+    return simplex;
   }
 private:
   S sf[m];
@@ -1347,7 +1351,6 @@ private:
 template<typename C,typename T>
 class P2SimplexShapeFunctionSetContainer<C,T,3>
   {
-
   public:
 
     enum {dim=3};
@@ -1359,9 +1362,9 @@ class P2SimplexShapeFunctionSetContainer<C,T,3>
     typedef T ResultType;
     typedef P2SimplexShapeFunctionSet<C,T,dim,P2SimplexShapeFunction<C,T,dim> > value_type;
 
-    const value_type& operator() (GeometryType type, int order) const
+    const value_type& operator() (NewGeometryType type, int order) const
     {
-      if((type==simplex) || (type==tetrahedron) ) return p2simplex;
+      if (type.isSimplex()) return p2simplex;
       DUNE_THROW(NotImplemented,"type not yet implemented");
 	}
   private:

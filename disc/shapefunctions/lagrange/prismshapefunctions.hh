@@ -449,8 +449,9 @@ namespace Dune
 	}
 
 	//! return type of element
-	GeometryType type () const
+	NewGeometryType type () const
 	{
+      static NewGeometryType prism(NewGeometryType::prism, dim);
 	  return prism;
 	}
 
@@ -509,8 +510,9 @@ namespace Dune
 	}
 
 	//! return type of element
-	GeometryType type () const
+	NewGeometryType type () const
 	{
+      static NewGeometryType prism(NewGeometryType::prism, dim);
 	  return prism;
 	}
 
@@ -534,9 +536,9 @@ namespace Dune
 	typedef T ResultType;
 	typedef P0PrismShapeFunctionSet<C,T,P0PrismShapeFunction<C,T> > value_type;
 
-	const value_type& operator() (GeometryType type, int order) const
+	const value_type& operator() (NewGeometryType type, int order) const
 	{
-	  if(type==prism) return p0prism;
+	  if(type.isPrism()) return p0prism;
 	  DUNE_THROW(NotImplemented, "type not implemented yet");
 	}
 
@@ -559,9 +561,9 @@ namespace Dune
 	typedef T ResultType;
 	typedef P1PrismShapeFunctionSet<C,T,P1PrismShapeFunction<C,T> > value_type;
 
-	const value_type& operator() (GeometryType type, int order) const
+	const value_type& operator() (NewGeometryType type, int order) const
 	{
-	  if(type==prism) return p1prism;
+	  if(type.isPrism()) return p1prism;
 	  DUNE_THROW(NotImplemented, "type not implemented yet");
 	}
 
