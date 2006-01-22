@@ -5,10 +5,10 @@ namespace Dune {
 
 
 //! organizes the caching of sizes for one grid and one GeometryType 
-template <class GridImp, GeometryType geomType > 
+template <class GridImp> 
 class SingleTypeSizeCache 
 {
-  typedef SingleTypeSizeCache<GridImp,geomType> ThisType;
+  typedef SingleTypeSizeCache<GridImp> ThisType;
   //! our dimension 
   enum { dim    = GridImp::dimension   };
 
@@ -27,6 +27,11 @@ class SingleTypeSizeCache
   const GridType & grid_;
 
   bool notWorry_; 
+
+  // true if this class counts simplices 
+  const bool isSimplex_;
+  // true if this class counts cubes 
+  const bool isCube_;
 
   // count elements of set by iterating the grid 
   template <class SzCacheType , int codim >
@@ -85,9 +90,11 @@ class SingleTypeSizeCache
 
   
 public:
-    SingleTypeSizeCache (const GridType & grid, bool notWorry = false )
-      : grid_(grid) , notWorry_ ( notWorry )
+    SingleTypeSizeCache (const GridType & grid, 
+        const bool isSimplex , const bool isCube, bool notWorry = false )
+      : grid_(grid) , isSimplex_(isSimplex) , isCube_(isCube), notWorry_ ( notWorry )
     {
+      assert( isSimplex_ != isCube_ );
       for(int i=0; i<nCodim; i++) 
       {
         leafSizes_[i] = -1;
@@ -127,7 +134,10 @@ public:
     //! number of entities per level, codim and geometry type in this process
     int size (int level, int codim, NewGeometryType type) const
     {
-        if((GeometryType)type != geomType) return 0;
+      // if isSimplex true, then this is a simplex counting one 
+      if( (isSimplex_) && (isSimplex_ != type.isSimplex()) ) return 0;
+      // if isCube true, then this is a cube counting one 
+      if( (isCube_)    && (isCube_    != type.isCube()    ) ) return 0;
       return size(level,codim);
     }
    
@@ -147,7 +157,10 @@ public:
     //! number of leaf entities per codim and geometry type in this process
     int size (int codim, NewGeometryType type) const
     {
-      if((GeometryType)type != geomType) return 0;
+      // if isSimplex true, then this is a simplex counting one 
+      if( (isSimplex_) && (isSimplex_ != type.isSimplex()) ) return 0;
+      // if isCube true, then this is a cube counting one 
+      if( (isCube_)    && (isCube_    != type.isCube()   ) ) return 0;
       return size(codim);
     }
 
@@ -158,8 +171,11 @@ private:
       typedef typename GridType::template Codim<codim> :: LevelIterator LevelIterator;
       LevelIterator it  = grid_.template lbegin<codim> (level);
       LevelIterator end = grid_.template lend<codim>   (level);
-      if( notWorry_ )  return countElements(it,end);
-      return countElements(it,end,geomType);
+
+      NewGeometryType type (((isSimplex_) ?  NewGeometryType::simplex :  NewGeometryType::cube ),dim-codim); 
+      assert( type.isCube() == isCube_ );
+      if( notWorry_ )  return countElements(it,end,type);
+      return countElements(it,end);
     }
     
     template <int codim> 
@@ -168,14 +184,16 @@ private:
       typedef typename GridType::template Codim<codim> :: LeafIterator LeafIterator;
       LeafIterator it  = grid_.template leafbegin<codim> ();
       LeafIterator end = grid_.template leafend<codim>   ();
-      if( notWorry_ )  return countElements(it,end);
-      return countElements(it,end,geomType);
+      NewGeometryType type (((isSimplex_) ? NewGeometryType::simplex : NewGeometryType::cube ),dim-codim); 
+      assert( type.isCube() == isCube_ );
+      if( notWorry_ )  return countElements(it,end,type);
+      return countElements(it,end);
     }
     
     // counts entities with given type for given iterator 
     template <class IteratorType> 
     int countElements(IteratorType & it, const IteratorType & end ,
-                      NewGeometryType type) const 
+        const NewGeometryType & type ) const 
     {
       int count = 0;
       if((type.isSimplex()) || (type.isCube()))
@@ -209,20 +227,21 @@ class SizeCache
   typedef SizeCache<GridImp> ThisType;
   typedef GridImp GridType;
   
-  SingleTypeSizeCache<GridType,simplex> simplexSize_;
-  SingleTypeSizeCache<GridType,cube>    cubeSize_;
+  SingleTypeSizeCache<GridType> simplexSize_;
+  SingleTypeSizeCache<GridType>    cubeSize_;
   
 public:
-    SizeCache (const GridType & grid) : simplexSize_(grid), cubeSize_(grid) 
+    SizeCache (const GridType & grid) : simplexSize_(grid,true,false), cubeSize_(grid,false,true) 
     {
       // check that used grid only has simplex and/or cube as geomTypes 
-      const std::vector<GeometryType> & geomTypes = grid.geomTypes();
+      // to be revised 
+      const std::vector<NewGeometryType> & geomTypes = grid.geomTypes(0);
       int found  = 0;
       int others = 0;
       for(unsigned int i=0; i<geomTypes.size(); i++)
       {
-        if( (geomTypes[i] == simplex) || 
-            (geomTypes[i] == cube)    )
+        if( (geomTypes[i].isSimplex()) || 
+            (geomTypes[i].isCube()   )    )
           found++; 
         else 
           others++;
@@ -244,14 +263,14 @@ public:
      */
     int size (int level, int codim) const
     {
-      return size(level,codim,simplex) + size(level,codim,cube);
+      return (simplexSize_.size(level,codim) + cubeSize_(level,codim));
     }
     
     //! number of entities per level, codim and geometry type in this process
-    int size (int level, int codim, GeometryType type) const
+    int size (int level, int codim, NewGeometryType type) const
     {
-      if( type == simplex ) return simplexSize_.size(level,codim);
-      if( type == cube ) return cubeSize_(level,codim);
+      if( type.isSimplex()) return simplexSize_.size(level,codim);
+      if( type.isCube()   ) return cubeSize_(level,codim);
       return 0; 
     }
    
@@ -261,14 +280,14 @@ public:
     //! number of leaf entities per codim in this process
     int size (int codim) const
     {
-      return size(codim,simplex) + size(codim,cube);
+      return (simplexSize_.size(codim) + cubeSize_(codim));
     }; 
     
     //! number of leaf entities per codim and geometry type in this process
-    int size (int codim, GeometryType type) const
+    int size (int codim, NewGeometryType type) const
     {
-      if( type == simplex ) return simplexSize_.size(codim);
-      if( type == cube ) return cubeSize_(codim);
+      if( type.isSimplex() ) return simplexSize_.size(codim);
+      if( type.isCube()    ) return cubeSize_(codim);
       return 0; 
     }
 };
