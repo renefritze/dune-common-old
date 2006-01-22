@@ -313,7 +313,8 @@ namespace Dune {
 	//! return type of element
 	NewGeometryType type () const
       {
-        return hexahedron;
+        static const NewGeometryType cube (NewGeometryType::cube, d);
+        return cube;
       }
 
 	//! appear as your own container
@@ -404,7 +405,8 @@ namespace Dune {
 	//! return type of element
 	NewGeometryType type () const
       {
-        return line;
+        static const NewGeometryType simplex (NewGeometryType::simplex, d);
+        return simplex;
       }
 
 	//! appear as your own container
@@ -1137,7 +1139,8 @@ namespace Dune {
 	//! return type of element
 	NewGeometryType type () const
       {
-        return triangle;
+        static const NewGeometryType simplex (NewGeometryType::simplex, d);
+        return simplex;
       }
 
 	//! appear as your own container
@@ -1334,7 +1337,8 @@ namespace Dune {
 	//! return type of element
 	NewGeometryType type () const
       {
-        return tetrahedron;
+        static const NewGeometryType simplex (NewGeometryType::simplex, d);
+        return simplex;
       }
 
 	//! appear as your own container
@@ -1521,6 +1525,7 @@ namespace Dune {
 	//! return type of element
 	NewGeometryType type () const
       {
+        static const NewGeometryType prism (NewGeometryType::prism, d);
         return prism;
       }
 
@@ -1678,6 +1683,7 @@ namespace Dune {
 	//! return type of element
 	NewGeometryType type () const
       {
+        static const NewGeometryType pyramid (NewGeometryType::pyramid, d);
         return pyramid;
       }
 
