@@ -42,6 +42,10 @@ public:
     typedef UG2d::grid GridType;
 
     typedef UG2d::domain DomainType;
+
+    typedef UG2d::node Node;
+
+    typedef UG2d::element Element;
 };
 
 template <>
@@ -53,6 +57,10 @@ public:
     typedef UG3d::grid GridType;
 
     typedef UG3d::domain DomainType;
+
+    typedef UG3d::node Node;
+
+    typedef UG3d::element Element;
 };
 
 
