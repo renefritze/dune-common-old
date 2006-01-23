@@ -807,55 +807,32 @@ public:
 
   virtual BaseFunctionType* baseFunction(int i) const 
   {
-    switch (GeometryIdentifier::fromGeo(this->geometry())) {
-    case simplex:
-      switch (FunctionSpaceType::DimDomain) {
-      case 1:
+    switch (GeometryIdentifier::fromGeo(this->geometry())) 
+    {
+      case GeometryIdentifier::Line:
         return new 
           LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Line, polOrd>(i);
-      case 2:
+      case GeometryIdentifier::Triangle:
         return new 
           LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Triangle, polOrd>(i);
-      case 3:
+      case GeometryIdentifier::Tetrahedron:
         return new 
           LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Tetrahedron, polOrd>(i);
-      }
-    case cube:
-      switch (FunctionSpaceType::DimDomain) {
-      case 1:
-        return new 
-          LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Line, polOrd>(i);
-      case 2:
+      case GeometryIdentifier::Quadrilateral:
         return new 
           LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Quadrilateral, polOrd>(i);
-      case 3:
+      case GeometryIdentifier::Hexahedron:
         return new 
           LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Hexahedron, polOrd>(i);
-      }
-    case GeometryIdentifier::Line:
-      return new 
-        LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Line, polOrd>(i);
-    case GeometryIdentifier::Triangle:
-      return new 
-        LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Triangle, polOrd>(i);
-    case GeometryIdentifier::Tetrahedron:
-      return new 
-        LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Tetrahedron, polOrd>(i);
-    case GeometryIdentifier::Quadrilateral:
-      return new 
-        LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Quadrilateral, polOrd>(i);
-    case GeometryIdentifier::Hexahedron:
-      return new 
-        LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Hexahedron, polOrd>(i);
-    case GeometryIdentifier::Prism:
-      return new 
-        LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Prism, polOrd>(i);
-    case GeometryIdentifier::Pyramid:
-      return new 
-        LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Pyramid, polOrd>(i);
-    default:
-      DUNE_THROW(NotImplemented, 
-                 "The chosen geometry type is not implemented");
+      case GeometryIdentifier::Prism:
+        return new 
+          LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Prism, polOrd>(i);
+      case GeometryIdentifier::Pyramid:
+        return new 
+          LagrangeBaseFunction<FunctionSpaceType, GeometryIdentifier::Pyramid, polOrd>(i);
+      default:
+        DUNE_THROW(NotImplemented, 
+                   "The chosen geometry type is not implemented");
     }
     return 0;
   }
@@ -864,55 +841,32 @@ public:
   {
     const int dimRange = FunctionSpaceType::DimRange;
 
-    switch (GeometryIdentifier::fromGeo(this->geometry())) {
-    case simplex:
-      switch (FunctionSpaceType::DimDomain) {
-      case 1:
-        return
-          LagrangeDefinition<GeometryIdentifier::Line, polOrd, dimRange>::numOfBaseFct;
-      case 2:
-        return
-          LagrangeDefinition<GeometryIdentifier::Triangle, polOrd, dimRange>::numOfBaseFct;
-      case 3:
-        return
-          LagrangeDefinition<GeometryIdentifier::Tetrahedron, polOrd, dimRange>::numOfBaseFct;
-      }
-    case cube:
-      switch (FunctionSpaceType::DimDomain) {
-      case 1:
+    switch (GeometryIdentifier::fromGeo(this->geometry())) 
+    {
+      case GeometryIdentifier::Line:
         return  
           LagrangeDefinition<GeometryIdentifier::Line, polOrd, dimRange>::numOfBaseFct;
-      case 2:
+      case GeometryIdentifier::Triangle:
+        return  
+          LagrangeDefinition<GeometryIdentifier::Triangle, polOrd, dimRange>::numOfBaseFct;
+      case GeometryIdentifier::Tetrahedron:
+        return  
+          LagrangeDefinition<GeometryIdentifier::Tetrahedron, polOrd, dimRange>::numOfBaseFct;
+      case GeometryIdentifier::Quadrilateral:
         return  
           LagrangeDefinition<GeometryIdentifier::Quadrilateral, polOrd, dimRange>::numOfBaseFct;
-      case 3:
+      case GeometryIdentifier::Hexahedron:
         return  
           LagrangeDefinition<GeometryIdentifier::Hexahedron, polOrd, dimRange>::numOfBaseFct;
-      }
-    case GeometryIdentifier::Line:
-      return  
-        LagrangeDefinition<GeometryIdentifier::Line, polOrd, dimRange>::numOfBaseFct;
-    case GeometryIdentifier::Triangle:
-      return  
-        LagrangeDefinition<GeometryIdentifier::Triangle, polOrd, dimRange>::numOfBaseFct;
-    case GeometryIdentifier::Tetrahedron:
-      return  
-        LagrangeDefinition<GeometryIdentifier::Tetrahedron, polOrd, dimRange>::numOfBaseFct;
-    case GeometryIdentifier::Quadrilateral:
-      return  
-        LagrangeDefinition<GeometryIdentifier::Quadrilateral, polOrd, dimRange>::numOfBaseFct;
-    case GeometryIdentifier::Hexahedron:
-      return  
-        LagrangeDefinition<GeometryIdentifier::Hexahedron, polOrd, dimRange>::numOfBaseFct;
-    case GeometryIdentifier::Prism:
-      return  
-        LagrangeDefinition<GeometryIdentifier::Prism, polOrd, dimRange>::numOfBaseFct;
-    case GeometryIdentifier::Pyramid:
-      return 
-        LagrangeDefinition<GeometryIdentifier::Pyramid, polOrd, dimRange>::numOfBaseFct;
-    default:
-      DUNE_THROW(NotImplemented, 
-                 "The chosen geometry type is not implemented");
+      case GeometryIdentifier::Prism:
+        return  
+          LagrangeDefinition<GeometryIdentifier::Prism, polOrd, dimRange>::numOfBaseFct;
+      case GeometryIdentifier::Pyramid:
+        return 
+          LagrangeDefinition<GeometryIdentifier::Pyramid, polOrd, dimRange>::numOfBaseFct;
+      default:
+        DUNE_THROW(NotImplemented, 
+                   "The chosen geometry type is not implemented");
     }
     return 0;
   }
