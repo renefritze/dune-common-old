@@ -19,5 +19,6 @@
 #include <shapes.h>
 #include <algebra.h>
 #include <refine.h>
+#include <ugm.h>
 
 #endif
