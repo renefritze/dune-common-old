@@ -10,7 +10,7 @@ namespace Dune {
 //
 //*****************************************************************
 template<class FunctionSpaceType>
-class LagrangeBaseFunction < FunctionSpaceType , line , 2 >  
+class LagrangeBaseFunction < FunctionSpaceType , GeometryIdentifier::Line , 2 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
   typedef typename FunctionSpaceType::DomainType DomainType;
@@ -76,7 +76,7 @@ public:
 //
 //*****************************************************************
 template<class FunctionSpaceType>
-class LagrangeBaseFunction < FunctionSpaceType , triangle, 2 >  
+class LagrangeBaseFunction < FunctionSpaceType , GeometryIdentifier::Triangle, 2 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
   typedef typename FunctionSpaceType::DomainType DomainType;
@@ -114,7 +114,7 @@ public:
 //
 //*****************************************************************
 template<class FunctionSpaceType>
-class LagrangeBaseFunction < FunctionSpaceType , quadrilateral, 2 >  
+class LagrangeBaseFunction < FunctionSpaceType , GeometryIdentifier::Quadrilateral, 2 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
   typedef typename FunctionSpaceType::DomainType DomainType;
@@ -152,7 +152,7 @@ public:
 //
 //*****************************************************************
 template<class FunctionSpaceType>
-class LagrangeBaseFunction < FunctionSpaceType , tetrahedron, 2 >  
+class LagrangeBaseFunction < FunctionSpaceType , GeometryIdentifier::Tetrahedron, 2 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
   typedef typename FunctionSpaceType::DomainType DomainType;
@@ -192,7 +192,7 @@ public:
 //
 //*****************************************************************
 template<class FunctionSpaceType>
-class LagrangeBaseFunction < FunctionSpaceType , pyramid, 2 >  
+class LagrangeBaseFunction < FunctionSpaceType , GeometryIdentifier::Pyramid, 2 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
   typedef typename FunctionSpaceType::DomainType DomainType;
@@ -232,7 +232,7 @@ public:
 //
 //*****************************************************************
 template<class FunctionSpaceType>
-class LagrangeBaseFunction < FunctionSpaceType , prism, 2 >  
+class LagrangeBaseFunction < FunctionSpaceType , GeometryIdentifier::Prism, 2 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
   typedef typename FunctionSpaceType::DomainType DomainType;
@@ -270,7 +270,7 @@ public:
 //
 //*****************************************************************
 template<class FunctionSpaceType>
-class LagrangeBaseFunction < FunctionSpaceType , hexahedron, 2 >  
+class LagrangeBaseFunction < FunctionSpaceType , GeometryIdentifier::Hexahedron, 2 >  
 : public BaseFunctionInterface<FunctionSpaceType> 
 {
   typedef typename FunctionSpaceType::DomainType DomainType;
