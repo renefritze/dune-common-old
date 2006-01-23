@@ -72,6 +72,11 @@ public:
   {  
     return asImp().additionalSizeEstimate(); 
   }
+
+  bool needCompress () const 
+  {
+    return asImp().needCompress ();
+  }
   
 private:  
   //! Barton-Nackman trick 
