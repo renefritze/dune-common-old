@@ -1530,7 +1530,7 @@ template< class GridImp >
 inline AlbertaGridIntersectionIterator<GridImp>::
 AlbertaGridIntersectionIterator(const GridImp & grid,int level, bool ) : 
   grid_(grid),
-//  level_ (level), 
+  level_ (level), 
   neighborCount_ (dim+1),
   elInfo_ (0),
   fakeNeigh_ (),
@@ -1546,7 +1546,7 @@ template< class EntityType >
 inline void AlbertaGridIntersectionIterator<GridImp>::
 first(const EntityType & en ,int level) 
 {
- // level_ = level; 
+  level_ = level; 
   neighborCount_ = 0; 
   builtNeigh_    = false; 
   elInfo_        = en.getElInfo();
@@ -1559,7 +1559,7 @@ template< class GridImp >
 inline void AlbertaGridIntersectionIterator<GridImp>::
 done () 
 {
-  //level_ = -1; 
+  level_ = -1; 
   neighborCount_ = dim+1; 
   builtNeigh_    = false; 
   elInfo_        = 0;
@@ -1571,7 +1571,7 @@ template< class GridImp >
 inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator 
 (const AlbertaGridIntersectionIterator<GridImp> & org) 
   : grid_(org.grid_)
-  //, level_(org.level_) 
+  , level_(org.level_) 
   , neighborCount_(org.neighborCount_)
   , builtNeigh_ (false) 
   , elInfo_ ( org.elInfo_ ) 
@@ -1591,7 +1591,7 @@ assign (const AlbertaGridIntersectionIterator<GridImp> & org)
 {
   // only assign iterators from the same grid 
   assert( &this->grid_ == &(org.grid_));
-  //level_ =  org.level_;
+  level_ =  org.level_;
   neighborCount_ = org.neighborCount_;
   elInfo_ = org.elInfo_; 
   builtNeigh_ = false;
@@ -1650,6 +1650,7 @@ AlbertaGridIntersectionIterator<GridImp>::outside () const
     
     setupVirtEn();
 
+    assert( level_ == elInfo_->level );
     assert( (this->leafIt() ) ? (1) : (elInfo_->level == neighElInfo_.level) );
   }
   assert( builtNeigh_ );
@@ -1825,6 +1826,14 @@ intersectionGlobal () const
   return neighGlob_;
 }
 
+
+template< class GridImp >
+inline int AlbertaGridIntersectionIterator<GridImp>::
+level () const
+{
+  assert( level_ >= 0 );
+  return level_;
+}
 
 template< class GridImp >
 inline int AlbertaGridIntersectionIterator<GridImp>::
