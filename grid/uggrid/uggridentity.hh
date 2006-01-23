@@ -86,16 +86,11 @@ public:
     typedef typename GridImp::template Codim<codim>::Geometry Geometry;
 
     //! Constructor for an entity in a given grid level
-  UGGridEntity(int level);
+    UGGridEntity(int level) 
+        : level_(level) {}
 
   //! level of this element
-  int level () const;
-
-  //! index is unique and consecutive per level and codim 
-  //! used for access to degrees of freedom
-    int index () const {
-        return levelIndex();
-    }
+    int level () const {return level_;}
 
     int levelIndex() const {
         return UG_NS<dim>::levelIndex(target_);
@@ -134,7 +129,7 @@ public:
     template<int cc> int subIndex (int i) const;
 
   //! geometry of this entity
-    const Geometry& geometry () const;
+    const Geometry& geometry () const {return geo_;}
 
   UGGridEntityPointer<0,GridImp> ownersFather() const 
   {
@@ -171,9 +166,16 @@ public:
 private: 
 
 
-    void setToTarget(typename TargetType<codim,dim>::T* target);
+    void setToTarget(typename TargetType<codim,dim>::T* target) {
+        target_ = target;
+        geo_.setToTarget(target);
+    }
 
-    void setToTarget(typename TargetType<codim,dim>::T* target, int level);
+    void setToTarget(typename TargetType<codim,dim>::T* target, int level) {
+        target_ = target;
+        level_  = level;
+        geo_.setToTarget(target);
+    }
 
   //! the current geometry
     UGMakeableGeometry<dim-codim,dim,GridImp> geo_;
@@ -234,18 +236,13 @@ public:
   typedef UGGridHierarchicIterator<GridImp> HierarchicIterator; 
   
     //! Constructor with a given grid level
-  UGGridEntity(int level);
+    UGGridEntity(int level) : level_(level) {}
 
   //! Destructor
   ~UGGridEntity() {};
 
   //! Level of this element
   int level () const;
-
-  //! Index is unique and consecutive per level and codim
-    int index () const {
-        return levelIndex();
-    }
 
     int levelIndex() const {
         return UG_NS<dim>::levelIndex(target_);
@@ -296,22 +293,88 @@ public:
     /** \brief Return level index of sub entity with codim = cc and local number i
      */
     template<int cc> 
-    int subIndex (int i) const;
-
+    int subIndex (int i) const{
+        assert(i>=0 && i<count<cc>());
+        
+        if (cc==dim)
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(target_,renumberVertex(i)));
+        if (cc==0)
+            return UG_NS<dim>::levelIndex(target_);
+	if (cc==dim-1)
+            {
+		int a=ReferenceElements<double,dim>::general(geometry().type()).subEntity(i,dim-1,0,dim);	
+		int b=ReferenceElements<double,dim>::general(geometry().type()).subEntity(i,dim-1,1,dim);
+		return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(a)),UG_NS<dim>::Corner(target_,renumberVertex(b))));
+            }
+	if (cc==1)
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,renumberFace(i)));
+        
+	DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subIndex isn't implemented for cc==" << cc );
+    }
+    
     /** \brief Return leaf index of sub entity with codim = cc and local number i
      */
     template<int cc> 
-    int subLeafIndex (int i) const;
-
+    int subLeafIndex (int i) const{
+        assert(i>=0 && i<count<cc>());
+        
+	if (cc==dim)
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(target_,renumberVertex(i)));
+        if (cc==0)
+            return UG_NS<dim>::leafIndex(target_);
+	if (cc==dim-1)
+            {
+		int a=ReferenceElements<double,dim>::general(geometry().type()).subEntity(i,dim-1,0,dim);	
+		int b=ReferenceElements<double,dim>::general(geometry().type()).subEntity(i,dim-1,1,dim);
+		return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(a)),UG_NS<dim>::Corner(target_,renumberVertex(b))));
+            }
+	if (cc==1)
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,renumberFace(i)));
+        
+	DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLeafIndex isn't implemented for cc==" << cc );
+    }
+    
     /** \brief Return global id of sub entity with codim = cc and local number i
      */
     template<int cc> 
-    unsigned int subGlobalId (int i) const;
+    unsigned int subGlobalId (int i) const{
+        assert(i>=0 && i<count<cc>());
+        
+	if (cc==0)
+            {
+#ifdef ModelP
+		return target_->ddd.gid;
+#else
+		return UG_NS<dim>::id(target_);
+#endif
+            }
+	if (cc==dim)
+            {
+#ifdef ModelP
+		return UG_NS<dim>::Corner(target_,renumberVertex(i))->ddd.gid;
+#else
+		return UG_NS<dim>::id(UG_NS<dim>::Corner(target_,renumberVertex(i)));
+#endif
+            }
+        
+	DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subGlobalId isn't implemented for cc==" << cc );
+	return 0;
+    }
 
     /** \brief Return local id of sub entity with codim = cc and local number i
+        \todo Only called from the id set
      */
     template<int cc> 
-    unsigned int subLocalId (int i) const;
+    unsigned int subLocalId (int i) const {
+        assert(i>=0 && i<count<cc>());
+
+        if (cc==dim)
+            return UG_NS<dim>::id(UG_NS<dim>::Corner(target_,renumberVertex(i)));
+        else if (cc==0)
+            return UG_NS<dim>::id(target_);
+        else
+            DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLocalId isn't implemented for cc==" << cc );
+    }
 
 
     /** \brief Provide access to sub entity i of given codimension. Entities
@@ -389,7 +452,7 @@ public:
 }; // end of UGGridEntity codim = 0
 
 // Include class method definitions
-#include "uggridentity.cc"
+//#include "uggridentity.cc"
 
 } // namespace Dune
 
