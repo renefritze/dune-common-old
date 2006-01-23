@@ -222,7 +222,7 @@ public:
     DofIteratorType dest_it = dest.dbegin();
     ConstDofIteratorType arg_it = arg.dbegin();
 
-    const GeometryType t = en.geometry().type();
+    const NewGeometryType t = en.geometry().type();
 
     NeighIt endnit = en.iend();
     for(NeighIt nit = en.ibegin(); nit != endnit ; ++nit)
@@ -363,7 +363,7 @@ protected:
     {
       const EntityType & en = *it; 
 
-      const GeometryType t = en.geometry().type();
+      const NewGeometryType t = en.geometry().type();
       NeighIt endnit = en.iend();
       for(NeighIt nit = en.ibegin(); nit != endnit ; ++nit)
       {
@@ -374,7 +374,7 @@ protected:
           enum { dim = EntityType :: dimension };
           typedef typename EntityType :: ctype coordType;
 
-          if( (t == simplex) || (t == triangle) || (t == tetrahedron ) )
+          if( t.isSimplex() )
           {
             if( nit.boundaryId() != 0 )
             {
@@ -394,7 +394,7 @@ protected:
               }
             }
           }
-          if((t == quadrilateral) || (t == cube) || (t == hexahedron))
+          if( t.isCube() )
           {
             static ReferenceCube< coordType, dim > refElem;
             int novx = refElem.size( face, faceCodim , dim );
