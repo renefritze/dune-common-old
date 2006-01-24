@@ -209,7 +209,7 @@ namespace Dune
 
 	//! return type of element where this QuadraturePointShapeFunctionSet
     //! is for
-	GeometryType type () const
+	NewGeometryType type () const
       {
         return fset.type();        
       };
@@ -290,7 +290,7 @@ namespace Dune
       }
 
 	//! return type of element
-	GeometryType type () const
+	NewGeometryType type () const
       {
         return qr.type();
       }
