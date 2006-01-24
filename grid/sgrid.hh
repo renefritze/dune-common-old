@@ -904,8 +904,7 @@ public:
   SGridLevelIndexSet (const GridImp& g, int l) : grid(g), level(l)
   {
     // contains a single element type;
-    mytypes.push_back(
-      NewGeometryType(NewGeometryType::cube,GridImp::dimension)); 
+    mytypes.push_back(NewGeometryType(NewGeometryType::cube,0)); 
   }
 
   //! get index of an entity
@@ -981,8 +980,7 @@ public:
   SGridLeafIndexSet (const GridImp& g) : grid(g)
   {
     // contains a single element type;
-    mytypes.push_back(
-      NewGeometryType(NewGeometryType::cube,GridImp::dimension)); 
+    mytypes.push_back(NewGeometryType(NewGeometryType::cube,0)); 
   }
 
   //! get index of an entity
