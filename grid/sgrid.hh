@@ -898,15 +898,14 @@ template<class GridImp>
 class SGridLevelIndexSet : public IndexSet<GridImp,SGridLevelIndexSet<GridImp>,SGridLevelIndexSetTypes<GridImp> >
 {
   typedef IndexSet<GridImp,SGridLevelIndexSet<GridImp>,SGridLevelIndexSetTypes<GridImp> > Base;
-  enum { dim = GridImp::dimension };
 public:
 
   //! constructor stores reference to a grid and level
   SGridLevelIndexSet (const GridImp& g, int l) : grid(g), level(l)
   {
     // contains a single element type;
-    for (int d=0; d<=GridImp::dimension; d++)
-      mytypes.push_back(NewGeometryType(NewGeometryType::cube,d)); 
+    mytypes.push_back(
+      NewGeometryType(NewGeometryType::cube,GridImp::dimension)); 
   }
 
   //! get index of an entity
@@ -976,15 +975,14 @@ template<class GridImp>
 class SGridLeafIndexSet : public IndexSet<GridImp,SGridLeafIndexSet<GridImp>,SGridLeafIndexSetTypes<GridImp> >
 {
   typedef IndexSet<GridImp,SGridLeafIndexSet<GridImp>,SGridLeafIndexSetTypes<GridImp> > Base;
-  enum { dim = GridImp::dimension };
 public:
 
   //! constructor stores reference to a grid and level
   SGridLeafIndexSet (const GridImp& g) : grid(g)
   {
     // contains a single element type;
-    for (int d=0; d<=GridImp::dimension; d++)
-      mytypes.push_back(NewGeometryType(NewGeometryType::cube,d)); 
+    mytypes.push_back(
+      NewGeometryType(NewGeometryType::cube,GridImp::dimension)); 
   }
 
   //! get index of an entity
