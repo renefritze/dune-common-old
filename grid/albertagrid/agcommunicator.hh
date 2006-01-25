@@ -8,7 +8,7 @@
 #endif
 
 #include <dune/common/dlist.hh>
-#include <dune/quadrature/barycenter.hh>
+// #include <dune/quadrature/barycenter.hh>
 #include <dune/io/file/grapedataio.hh>
 
 #define _ANSI_HEADER
@@ -76,8 +76,8 @@ static int cycle_ = 0;
 template <class GridType, class DofManagerType>
 class AlbertGridCommunicator : public CommunicatorInterface<DofManagerType>
 {
-  typedef BaryCenterQuad < double , FieldVector < double , 2 > , 0 > QuadType;
-  QuadType quad;
+//   typedef BaryCenterQuad < double , FieldVector < double , 2 > , 0 > QuadType;
+//   QuadType quad;
   
 public: 
 
@@ -85,7 +85,7 @@ public:
   AlbertGridCommunicator(MPI_Comm mpiComm, GridType &grid, int mySize) 
     : grid_ (grid) , myRank_ (grid.myRank() ) , _ldbOver(1.2) , _ldbUnder(0.0) 
     , mpAccess_ ( mpiComm )
-    , quad (triangle)
+//     , quad (triangle)
     , elmap_ (mySize)
     , elmap2_(mySize)
     , osv_ (0), interiorEls_ (0) , ghostEls_(0)
