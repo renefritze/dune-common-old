@@ -15,6 +15,8 @@
   @endverbatim
 */
 
+#include <assert.h>
+
 #include "../../common/exceptions.hh"
 #include "../../common/geometrytype.hh"
 #include "grid.hh"
@@ -481,20 +483,44 @@ namespace Dune {
 		  //! geometry type of the subelements
 		  NewGeometryType coerceTo)
   {
+    // Check that the user used valid geometry types
+    assert(geometryType.dim() == dimension && coerceTo.dim() == dimension);
+    return RefinementBuilder<dimension, CoordType>::build(geometryType.basicType(), coerceTo.basicType());
+  }
+
+  /*! @brief return a reference to the VirtualRefinement according to
+             the parameters
+
+    @param dimension Dimension of the element to refine
+    @param CoordType C++ type of the coordinates
+
+    @throws NotImplemented There is no Refinement implementation for
+                           the specified parameters.
+  */
+  template<int dimension, class CoordType>
+  VirtualRefinement<dimension, CoordType> &
+  buildRefinement(//! geometry type of the refined element
+		  NewGeometryType::BasicType geometryType,
+		  //! geometry type of the subelements
+		  NewGeometryType::BasicType coerceTo)
+  {
     return RefinementBuilder<dimension, CoordType>::build(geometryType, coerceTo);
   }
 
+  // In principle the trick with the class is no longer neccessary,
+  // but I'm keeping it in here so it will be easier to specialize
+  // buildRefinement when someone implements pyramids and prisms
   template<int dimension, class CoordType>
   class RefinementBuilder
   {
   public:
     static 
     VirtualRefinement<dimension, CoordType> &
-    build(NewGeometryType geometryType, NewGeometryType coerceTo)
+    build(NewGeometryType::BasicType geometryType, NewGeometryType::BasicType coerceTo)
     {
-      switch(geometryType.basicType()) {
+      switch(geometryType) {
       case NewGeometryType::simplex:
-        switch(coerceTo.basicType()) {
+        switch(coerceTo) {
 	case NewGeometryType::simplex:
           return VirtualRefinementImp<NewGeometryType::simplex, CoordType, NewGeometryType::simplex, dimension>::instance();
         default:
@@ -502,7 +528,7 @@ namespace Dune {
         }
         break;
       case NewGeometryType::cube:
-        switch(coerceTo.basicType()) {
+        switch(coerceTo) {
 	case NewGeometryType::simplex:
           return VirtualRefinementImp<NewGeometryType::cube, CoordType, NewGeometryType::simplex, dimension>::instance();
         case NewGeometryType::cube:
@@ -514,8 +540,8 @@ namespace Dune {
       default:
 	break;
       }
-      DUNE_THROW(NotImplemented, "No Refinement<" << geometryType.basicType() << ", CoordType, "
-				 << coerceTo.basicType() << " >.");
+      DUNE_THROW(NotImplemented, "No Refinement<" << geometryType << ", CoordType, "
+				 << coerceTo << " >.");
     }
   };
 
