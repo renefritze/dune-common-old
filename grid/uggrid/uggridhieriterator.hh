@@ -31,12 +31,9 @@ class UGGridHierarchicIterator :
 
     friend class UGGridEntity<0,GridImp::dimension,GridImp>;
 
-    // Either UG3d::ELEMENT or UG2d:ELEMENT
-    typedef typename TargetType<0,GridImp::dimension>::T UGElementType;
-
     // Stack entry
     struct StackEntry {
-        UGElementType* element;
+        typename UGTypes<GridImp::dimension>::Element* element;
         int level;
     };
 
