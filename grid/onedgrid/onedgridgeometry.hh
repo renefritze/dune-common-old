@@ -76,14 +76,10 @@ class OneDGridGeometry <0, 1, GridImp> :
     template <int mydim_, int coorddim_, class GridImp_>
     friend class OneDGridGeometry;
 
-    template <int cc_, int dim_, class GridImp_>
-    friend class OneDGridSubEntityFactory;
-
-
 public:
 
     //! return the element type identifier (vertex)
-    NewGeometryType type () const {return NewGeometryType(NewGeometryType::cube,0);}
+    NewGeometryType type () const {return NewGeometryType(0);}
 
     //! return the number of corners of this element (==1)
     int corners () const {return 1;}
@@ -125,7 +121,7 @@ public:
      *
      * OneDGrid obviously supports only lines
      */
-    NewGeometryType type () const {return NewGeometryType(NewGeometryType::cube,1);}
+    NewGeometryType type () const {return NewGeometryType(1);}
 
     //! return the number of corners of this element. Corners are numbered 0...n-1
     int corners () const {return 2;}
