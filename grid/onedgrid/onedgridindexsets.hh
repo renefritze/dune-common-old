@@ -66,7 +66,7 @@ public:
     /** \brief Deliver all geometry types used in this grid */
   const std::vector<NewGeometryType>& geomTypes (int codim) const
   {
-	return myTypes_;
+	return myTypes_[codim];
   }
 
   //! one past the end on this level
@@ -89,33 +89,45 @@ public:
         // ///////////////////////////////
         //   Init the element indices
         // ///////////////////////////////
-        int numElements = 0;
+        numElements_ = 0;
         OneDEntityImp<1>* eIt;
         for (eIt = grid_->elements[level_].begin; eIt!=NULL; eIt = eIt->succ_)
-            eIt->levelIndex_ = numElements++;
-
-        // Update the list of geometry types present
-        if (numElements>0) {
-            myTypes_.resize(1);
-            myTypes_[0] = NewGeometryType(NewGeometryType::cube,1);
-        } else
-            myTypes_.resize(0);
+            eIt->levelIndex_ = numElements_++;
 
         // //////////////////////////////
         //   Init the vertex indices
         // //////////////////////////////
 
-        int id = 0;
+        numVertices_ = 0;
         OneDEntityImp<0>* vIt;
         for (vIt = grid_->vertices[level_].begin; vIt!=NULL; vIt = vIt->succ_)
-            vIt->levelIndex_ = id++;
+            vIt->levelIndex_ = numVertices_++;
 
+        // ///////////////////////////////////////////////
+        //   Update the list of geometry types present
+        // ///////////////////////////////////////////////
+        if (numElements_>0) {
+            myTypes_[0].resize(1);
+            myTypes_[0][0] = NewGeometryType(1);
+        } else
+            myTypes_[0].resize(0);
+
+        if (numVertices_>0) {
+            myTypes_[1].resize(1);
+            myTypes_[1][0] = NewGeometryType(0);
+        } else
+            myTypes_[1].resize(0);
     }
 
 private:
   const GridImp* grid_;
   int level_;
-  std::vector<NewGeometryType> myTypes_;
+
+    int numElements_;
+    int numVertices_;
+
+    /** \brief The GeometryTypes present for each codim */
+  std::vector<NewGeometryType> myTypes_[2];
 };
 
 template <class GridImp> 
@@ -184,7 +196,7 @@ public:
     /** deliver all geometry types used in this grid */
   const std::vector<NewGeometryType>& geomTypes (int codim) const
   {
-	return myTypes_;
+	return myTypes_[codim];
   }
 
   //! one past the end on this level
@@ -217,14 +229,6 @@ public:
 
         }
 
-        // Update the list of geometry types present
-        if (numElements_>0) {
-            myTypes_.resize(1);
-            myTypes_[0] = NewGeometryType(1);
-        } else
-            myTypes_.resize(0);
-
-
         // //////////////////////////////
         //   Init the vertex indices
         // //////////////////////////////
@@ -235,6 +239,21 @@ public:
         for (; vIt!=vEndIt; ++vIt)
             grid_.getRealImplementation(*vIt).target_->leafIndex_ = numVertices_++;
 
+        // ///////////////////////////////////////////////
+        //   Update the list of geometry types present
+        // ///////////////////////////////////////////////
+        if (numElements_>0) {
+            myTypes_[0].resize(1);
+            myTypes_[0][0] = NewGeometryType(1);
+        } else
+            myTypes_[0].resize(0);
+
+        if (numVertices_>0) {
+            myTypes_[1].resize(1);
+            myTypes_[1][0] = NewGeometryType(0);
+        } else
+            myTypes_[1].resize(0);
+
     }
 
 private:
@@ -244,7 +263,8 @@ private:
     int numElements_;
     int numVertices_;
 
-  std::vector<NewGeometryType> myTypes_;
+    /** \brief The GeometryTypes present for each codim */
+    std::vector<NewGeometryType> myTypes_[2];
 };
 
 
