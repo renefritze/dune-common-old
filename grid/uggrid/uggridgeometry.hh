@@ -394,9 +394,9 @@ private:
 
 };
 
+}  // namespace Dune
+
 // Include method definitions
 #include "uggridgeometry.cc"
-
-}  // namespace Dune
 
 #endif
