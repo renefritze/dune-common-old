@@ -6,6 +6,8 @@
  */
 
 #include "ugtypes.hh"
+#include "uggridrenumberer.hh"
+
 #include <dune/grid/common/referenceelements.hh>
 
 
@@ -294,17 +296,20 @@ public:
         assert(i>=0 && i<count<cc>());
         
         if (cc==dim)
-            return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(target_,renumberVertex(i)));
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,geometry().type())));
         if (cc==0)
             return UG_NS<dim>::levelIndex(target_);
 	if (cc==dim-1)
             {
 		int a=ReferenceElements<double,dim>::general(geometry().type()).subEntity(i,dim-1,0,dim);	
 		int b=ReferenceElements<double,dim>::general(geometry().type()).subEntity(i,dim-1,1,dim);
-		return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(a)),UG_NS<dim>::Corner(target_,renumberVertex(b))));
+		return UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
+                                                                                     UGGridRenumberer<dim>::verticesDUNEtoUG(a,geometry().type())),
+                                                                  UG_NS<dim>::Corner(target_,
+                                                                                     UGGridRenumberer<dim>::verticesDUNEtoUG(b,geometry().type()))));
             }
 	if (cc==1)
-            return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,renumberFace(i)));
+            return UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,geometry().type())));
         
 	DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subIndex isn't implemented for cc==" << cc );
     }
@@ -316,17 +321,20 @@ public:
         assert(i>=0 && i<count<cc>());
         
 	if (cc==dim)
-            return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(target_,renumberVertex(i)));
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,geometry().type())));
         if (cc==0)
             return UG_NS<dim>::leafIndex(target_);
 	if (cc==dim-1)
             {
 		int a=ReferenceElements<double,dim>::general(geometry().type()).subEntity(i,dim-1,0,dim);	
 		int b=ReferenceElements<double,dim>::general(geometry().type()).subEntity(i,dim-1,1,dim);
-		return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(a)),UG_NS<dim>::Corner(target_,renumberVertex(b))));
+		return UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
+                                                                                     UGGridRenumberer<dim>::verticesDUNEtoUG(a,geometry().type())),
+                                                                  UG_NS<dim>::Corner(target_,
+                                                                                     UGGridRenumberer<dim>::verticesDUNEtoUG(b,geometry().type()))));
             }
 	if (cc==1)
-            return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,renumberFace(i)));
+            return UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,geometry().type())));
         
 	DUNE_THROW(GridError, "UGGrid<" << dim << "," << dim << ">::subLeafIndex isn't implemented for cc==" << cc );
     }
@@ -348,9 +356,9 @@ public:
 	if (cc==dim)
             {
 #ifdef ModelP
-		return UG_NS<dim>::Corner(target_,renumberVertex(i))->ddd.gid;
+		return UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,geometry().type()))->ddd.gid;
 #else
-		return UG_NS<dim>::id(UG_NS<dim>::Corner(target_,renumberVertex(i)));
+		return UG_NS<dim>::id(UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,geometry().type())));
 #endif
             }
         
@@ -366,7 +374,7 @@ public:
         assert(i>=0 && i<count<cc>());
 
         if (cc==dim)
-            return UG_NS<dim>::id(UG_NS<dim>::Corner(target_,renumberVertex(i)));
+            return UG_NS<dim>::id(UG_NS<dim>::Corner(target_,UGGridRenumberer<dim>::verticesDUNEtoUG(i,geometry().type())));
         else if (cc==0)
             return UG_NS<dim>::id(target_);
         else
@@ -426,9 +434,6 @@ public:
     AdaptationState state() const;
   
     //private: 
-    int renumberVertex(int i) const;
-    int renumberFace(int i) const;
-
     void setToTarget(typename TargetType<0,dim>::T* target, int level);
 
     //! Leaves the level untouched
@@ -447,9 +452,6 @@ public:
     
 
 }; // end of UGGridEntity codim = 0
-
-// Include class method definitions
-//#include "uggridentity.cc"
 
 } // namespace Dune
 
