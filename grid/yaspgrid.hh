@@ -1869,7 +1869,8 @@ public:
   YaspLevelIndexSet (const GridImp& g, int l) : grid(g), level(l)
   {
     // contains a single element type;
-    mytypes.push_back(NewGeometryType(NewGeometryType::cube,0));
+	for (int codim=0; codim<=GridImp::dimension; codim++)
+	  mytypes[codim].push_back(NewGeometryType(NewGeometryType::cube,GridImp::dimension-codim));
   }
 
   //! get index of an entity
@@ -1895,7 +1896,7 @@ public:
   //! deliver all geometry types used in this grid
   const std::vector<NewGeometryType>& geomTypes (int codim) const
   {
-	return mytypes;
+	return mytypes[codim];
   }
 
   //! one past the end on this level
@@ -1915,7 +1916,7 @@ public:
 private:
   const GridImp& grid;
   int level;
-  std::vector<NewGeometryType> mytypes;
+  std::vector<NewGeometryType> mytypes[GridImp::dimension+1];
 };
 
 
@@ -1946,7 +1947,8 @@ public:
   YaspLeafIndexSet (const GridImp& g) : grid(g)
   {
     // contains a single element type;
-    mytypes.push_back(NewGeometryType(NewGeometryType::cube,0));
+	for (int codim=0; codim<=GridImp::dimension; codim++)
+	  mytypes[codim].push_back(NewGeometryType(NewGeometryType::cube,GridImp::dimension-codim));
   }
 
   //! get index of an entity
@@ -1981,7 +1983,7 @@ public:
   //! deliver all geometry types used in this grid
   const std::vector<NewGeometryType>& geomTypes (int codim) const
   {
-	return mytypes;
+	return mytypes[codim];
   }
 
   //! one past the end on this level
@@ -2000,7 +2002,7 @@ public:
 
 private:
   const GridImp& grid;
-  std::vector<NewGeometryType> mytypes;
+  std::vector<NewGeometryType> mytypes[GridImp::dimension+1];
 };
 
 
