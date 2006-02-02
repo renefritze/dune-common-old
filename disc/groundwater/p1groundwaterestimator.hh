@@ -132,7 +132,7 @@ namespace Dune
 	  facefactor = detjacface*h_e;
 
 	  // compute Kgradphi
-	  if (first || gt!=simplex)
+	  if (first || !gt.isSimplex())
 		{
 		  jac = e.geometry().jacobianInverseTransposed(local); // eval jacobian inverse at face center
 		  Kjac = problem.K(center,e,local);             // eval diffusion tensor at face center
