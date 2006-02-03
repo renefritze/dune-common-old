@@ -379,8 +379,7 @@ private:
 
   int walkLevel_; //! tells the actual level of walk put to LevelIterator..
   
-  //int glIndex_;  //!< global index of element 
-  //int level_;    //!< level of element 
+  int level_;    //!< level of element 
 
   mutable GeometryImp geoInFather_;
 

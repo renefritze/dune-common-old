@@ -175,7 +175,7 @@ namespace Dune {
     , isGhost_(false), geo_() , builtgeometry_(false)
     , walkLevel_ (wLevel) 
     //, glIndex_(-1)
-    //, level_(-1)
+    , level_(-1)
     , geoInFather_ ()
     , isLeaf_ (false)
   {  }
@@ -200,7 +200,7 @@ namespace Dune {
     builtgeometry_ = false;
     walkLevel_     = walkLevel; 
     //glIndex_    = -1; 
-    //level_      = -1;
+    level_      = -1;
     isLeaf_     = false;
   }
 
@@ -213,7 +213,7 @@ namespace Dune {
     isGhost_       = org.isGhost_;
     //ghost_         = org.ghost_;
     builtgeometry_ = false;
-    //level_         = org.level_;
+    level_         = org.level_;
     walkLevel_     = org.walkLevel_;
     //glIndex_       = org.glIndex_;
     isLeaf_        = org.isLeaf_;
@@ -232,7 +232,7 @@ namespace Dune {
     isGhost_ = false;
     //ghost_ = 0;
     builtgeometry_=false;
-    //level_   = (*item_).level();
+    level_   = (*item_).level();
     //glIndex_ = (*item_).getIndex();
     isLeaf_  = ((*item_).down() == 0);
 
@@ -262,7 +262,7 @@ namespace Dune {
     item_    = 0;
     //ghost_   = static_cast<PLLBndFaceType *> (&ghost);
     //glIndex_ = ghost_->getIndex();
-    //level_   = ghost_->level();
+    level_   = ghost_->level();
 #else 
     // use element as ghost 
     typedef typename ALU3dImplTraits<GridImp::elementType>::IMPLElementType IMPLElementType;
@@ -270,8 +270,8 @@ namespace Dune {
     assert(item_);
     //ghost_   = 0;
     //glIndex_ = item_->getIndex();
-    //level_   = item_->level();
-    int level_ = item_->level();
+    level_   = item_->level();
+    //int level_ = item_->level();
 #endif
     isGhost_ = true;
     builtgeometry_ = false;
@@ -294,9 +294,9 @@ namespace Dune {
   inline int
   ALU3dGridEntity<0,dim,GridImp> :: level() const
   {
-    //return level_;
-    assert( item_ );
-    return (*item_).level();
+    return level_;
+    //assert( item_ );
+    //return (*item_).level();
   }
 
   template<int dim, class GridImp>
