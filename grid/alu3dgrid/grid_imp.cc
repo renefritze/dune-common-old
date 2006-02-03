@@ -42,7 +42,6 @@ namespace Dune {
     }
   }
 
-  
 
   //--Grid
   //template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -57,18 +56,20 @@ namespace Dune {
 #endif
             ) 
     : mygrid_ (0) , maxlevel_(0) 
-      , coarsenMarked_(0) , refineMarked_(0) 
+    , coarsenMarked_(0) , refineMarked_(0) 
 #ifdef _ALU3DGRID_PARALLEL_
-      , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
+    , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
 #else 
-      ,  myRank_(-1) 
+    ,  myRank_(-1) 
 #endif
-      , geomTypes_(1,(elType == tetra) ? simplex : cube)
-      , hIndexSet_ (*this)
-      , globalIdSet_(0), localIdSet_(*this)
-      , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
-      , sizeCache_ (0)
+    , geomTypes_(dim+1,1)
+    , hIndexSet_ (*this)
+    , globalIdSet_(0), localIdSet_(*this)
+    , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
+    , sizeCache_ (0)
   {
+    makeGeomTypes();
+    
     mygrid_ = new ALU3DSPACE GitterImplType (macroTriangFilename.c_str()
 #ifdef _ALU3DGRID_PARALLEL_
                                              , mpAccess_ 
@@ -99,14 +100,15 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline ALU3dGrid<dim, dimworld, elType>::ALU3dGrid(MPI_Comm mpiComm) 
     : mygrid_ (0) , maxlevel_(0) 
-      , coarsenMarked_(0) , refineMarked_(0) 
-      , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
-      , geomTypes_(1,(elType == tetra) ? simplex : cube)
-      , hIndexSet_ (*this)
-      , globalIdSet_(0), localIdSet_(*this)
-      , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
-      , sizeCache_ (0)
+    , coarsenMarked_(0) , refineMarked_(0) 
+    , mpAccess_(mpiComm) , myRank_( mpAccess_.myrank() )
+    , geomTypes_(dim+1,1)
+    , hIndexSet_ (*this)
+    , globalIdSet_(0), localIdSet_(*this)
+    , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
+    , sizeCache_ (0)
   {
+    makeGeomTypes();
   }
 #else 
   template <int dim, int dimworld, ALU3dGridElementType elType>
@@ -114,12 +116,13 @@ namespace Dune {
     : mygrid_ (0) , maxlevel_(0) 
     , coarsenMarked_(0) , refineMarked_(0) 
     , myRank_(myrank) 
-    , geomTypes_(1,(elType == tetra) ? simplex : cube)
+    , geomTypes_(dim+1,1)
     , hIndexSet_ (*this)
     , globalIdSet_ (0)
     , localIdSet_ (*this)
     , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
   {
+    makeGeomTypes();
   }
 #endif
 
@@ -128,7 +131,7 @@ namespace Dune {
     : mygrid_ (0) , maxlevel_(0) 
     , coarsenMarked_(0) , refineMarked_(0) 
     , myRank_(-1) 
-    , geomTypes_(1,(elType == tetra) ? simplex : cube)
+    , geomTypes_(dim+1,1)
     , hIndexSet_(*this) 
     , globalIdSet_ (0)
     , localIdSet_ (*this)
@@ -170,10 +173,30 @@ namespace Dune {
   }
 
   template <int dim, int dimworld, ALU3dGridElementType elType>
-  inline int ALU3dGrid<dim, dimworld, elType>::size(int level, int codim, NewGeometryType type) const 
+  inline void ALU3dGrid<dim, dimworld, elType>::makeGeomTypes() 
   {
-    int mytype = (elType == tetra) ? simplex : cube;
-    if(type != mytype) return 0; 
+    if(elType == tetra)
+    {
+      // stored is the dim, where is the codim  
+      for(int i=dim; i>= 0; i--)
+        geomTypes_[dim-i][0] = NewGeometryType(NewGeometryType::simplex,i);
+      return; 
+    }
+    if(elType == hexa)
+    {
+      // stored is the dim, where is the codim  
+      for(int i=dim; i>= 0; i--)
+        geomTypes_[dim-i][0] = NewGeometryType(NewGeometryType::cube,i);
+      return;
+    }
+    DUNE_THROW(GridError,"Geometrytype not implemented!");
+  }
+
+  template <int dim, int dimworld, ALU3dGridElementType elType>
+  inline int ALU3dGrid<dim, dimworld, elType>::size(int level, int codim, GeometryType type) const 
+  {
+    if(elType == tetra) if(!type.isSimplex()) return 0; 
+    if(elType == hexa ) if(!type.isCube   ()) return 0; 
     return size(level,codim);
   }
 
@@ -189,8 +212,8 @@ namespace Dune {
   template <int dim, int dimworld, ALU3dGridElementType elType>
   inline int ALU3dGrid<dim, dimworld, elType>::size(int codim, NewGeometryType type) const 
   {
-    int mytype = (elType == tetra) ? simplex : cube;
-    if(type != mytype) return 0; 
+    if(elType == tetra) if(!type.isSimplex()) return 0; 
+    if(elType == hexa ) if(!type.isCube   ()) return 0; 
     return size(codim);
   }
 
@@ -227,7 +250,8 @@ namespace Dune {
     for(unsigned int i=0; i<MAXL; i++) vertexList_[i].unsetUp2Date();
 
     if(sizeCache_) delete sizeCache_;
-    sizeCache_ = new SizeCacheType (*this,true);
+    bool isSimplex = (elType == tetra) ? true : false;
+    sizeCache_ = new SizeCacheType (*this,isSimplex,!isSimplex,true);
 
     coarsenMarked_ = 0;
     refineMarked_  = 0;

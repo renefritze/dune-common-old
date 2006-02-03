@@ -58,7 +58,7 @@ public:
       (*refCount_)--;
       if((*refCount_) <= 0)
       {
-        if(ptr_) delete  ptr_;
+        if(ptr_) delete ptr_;
         if(refCount_) delete refCount_;
         owner_ = false;
       }

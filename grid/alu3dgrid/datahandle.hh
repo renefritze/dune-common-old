@@ -154,9 +154,19 @@ public:
   AdaptRestrictProlongImpl (GridType & grid, EntityType & f, 
       EntityType & s, DofManagerType & dm, RestrictProlongOperatorType & rp ) 
     : grid_(grid), reFather_(f), reSon_(s), realFather_(f) 
-      , realSon_(s) , dm_(dm) , rp_(rp) , maxlevel_(-1) {}
+      , realSon_(s) , dm_(dm) , rp_(rp) , maxlevel_(-1) 
+  {
+//#ifndef NDEBUG
+//    global_Geometry_lock = true; 
+//#endif
+  }
 
-  virtual ~AdaptRestrictProlongImpl () {};
+  virtual ~AdaptRestrictProlongImpl () 
+  {
+//#ifndef NDEBUG
+//    global_Geometry_lock = false; 
+//#endif
+  }
 
   //! restrict data , elem is always the father 
   int preCoarsening ( HElementType & elem )
@@ -164,6 +174,7 @@ public:
     // set element and then start 
     HElementType * son = elem.down();
     if(elem.level() > maxlevel_) maxlevel_ = elem.level();
+
     //elem.resetRefinedTag();
     assert( son );
    
@@ -191,7 +202,8 @@ public:
    
     realFather_.setElement(elem);
     realSon_.setElement(*son);
-    if(realSon_.level() > maxlevel_) maxlevel_ = realSon_.level();
+    int level = realSon_.level(); 
+    if(level > maxlevel_) maxlevel_ = level;
     
     rp_.prolongLocal(reFather_,reSon_, false);
 

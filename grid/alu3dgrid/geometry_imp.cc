@@ -8,7 +8,14 @@ namespace Dune {
 template<int mydim, int cdim>
 inline ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> >:: 
 ALU3dGridGeometry() 
-  : builtinverse_ (false) , builtA_ (false) , builtDetDF_ (false) 
+  : coord_()
+  , Jinv_ () 
+  , AT_() 
+  , localCoord_() 
+  , globalCoord_()
+  , tmpV_()
+  , tmpU_()
+  , builtinverse_ (false) , builtA_ (false) , builtDetDF_ (false) 
 {}
 
 //   B U I L T G E O M   - - -
@@ -128,16 +135,15 @@ buildGeom(const IMPLElementType & item, int, int)
   enum { dim = 3 };
   enum { dimworld = 3};
 
+  //assert( ! ALU3DSPACE global_Geometry_lock );
+
   builtinverse_ = builtA_ = builtDetDF_ = false;
-#ifndef NDEBUG
-  for(int i=0;i<4; i++)
-    assert( ElementTopo::dune2aluVertex(i) == i );
-#endif
-  
-  copyCoordVec(item.myvertex(0)->Point(), coord_[0]);
-  copyCoordVec(item.myvertex(1)->Point(), coord_[1]);
-  copyCoordVec(item.myvertex(2)->Point(), coord_[2]);
-  copyCoordVec(item.myvertex(3)->Point(), coord_[3]);
+  detDF_ = 6.0 * item.volume();
+ 
+  for(int i=0; i<4; i++) 
+  {
+    copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(i))->Point(), coord_[i]);
+  }
   return true;
 }
 
@@ -262,15 +268,15 @@ buildGeom(const ALU3DSPACE VertexType & item, int, int)
 
 /* Comment in for adaptation to new GeometryType */
 template <int mydim, int cdim>
-inline NewGeometryType 
+inline GeometryType 
 ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::type () const {
-    return NewGeometryType(NewGeometryType::simplex,mydim);
+  return GeometryType(GeometryType::simplex,mydim);
 }
 
 template <int mydim, int cdim>
-inline NewGeometryType 
+inline GeometryType 
 ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> > ::type () const {
-  return NewGeometryType(NewGeometryType::cube,mydim);
+  return GeometryType(NewGeometryType::cube,mydim);
 }
 
 template<int mydim, int cdim>
@@ -348,6 +354,8 @@ template<int mydim, int cdim>
 inline alu3d_ctype 
 ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::integrationElement (const FieldVector<alu3d_ctype, mydim>& local) const 
 {
+  return detDF_; 
+  /*
   if(builtDetDF_)
     return detDF_;
 
@@ -359,6 +367,7 @@ ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::integrationElement
 
   builtDetDF_ = true;
   return detDF_;
+  */
 }
 
 //  J A C O B I A N _ I N V E R S E  - - -
