@@ -47,8 +47,7 @@ numberOfQuadPoints(GeometryType type)
     return quad->nip;
   }
 
-  assert(false);
-  abort();
+  DUNE_THROW(NotImplemented,"geom type not implemented");
   return -1;
 }
 
@@ -68,8 +67,7 @@ order (GeometryType type)
     return quad->order;
   }
       
-  assert(false);
-  abort();
+  DUNE_THROW(NotImplemented,"geom type not implemented");
   return polOrd;
 }
 
@@ -105,8 +103,7 @@ getWeight(GeometryType type, int i)
     return w;
   }
   
-  assert(false);
-  abort();
+  DUNE_THROW(NotImplemented,"geom type not implemented");
   return -1.0;
 }
 
@@ -132,16 +129,16 @@ getPoint(GeometryType type, int i)
 
   if(type.isSimplex())
   {
-    int numberOfCorners = type.dim()+1;  
+    int dim = type.dim();
+    int numberOfCorners = dim+1;  
     typedef UG_Quadratures::QUADRATURE QUADRATURE;
-    QUADRATURE * quad = UG_Quadratures::GetQuadratureRule(type.dim(),numberOfCorners,polOrd);
+    QUADRATURE * quad = UG_Quadratures::GetQuadratureRule(dim,numberOfCorners,polOrd);
     Domain tmp;
     for(int j=0; j<dim; j++) tmp[j] = quad->local[i][j];
     return tmp;
   }
 
-  assert(false);
-  abort();
+  DUNE_THROW(NotImplemented,"geom type not implemented");
   return Domain(-1.0);
 }
 
