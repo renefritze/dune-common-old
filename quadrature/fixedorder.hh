@@ -3,11 +3,13 @@
 
 #include "common/quadrature.hh"
 
+#include <dune/common/geometryidentifier.hh>
+
 #include <vector>
 
 // the specialisations 
 #include "fixedorder/quadlqh.hh"
-#include "fixedorder/quadtetratri.hh"
+//#include "fixedorder/quadtetratri.hh"
 
 namespace Dune{
 
@@ -50,52 +52,23 @@ private:
   enum { maxQuadPoints = power_M_P < m , dim >::power };
 
 public:
+  //! for consistency with caching quad 
+  enum Side { INSIDE, OUTSIDE };
+
+  enum { codimension = 0 };
+  
   //! Constructor build the vec with the points and weights
   template <class EntityType>
-  FixedOrderQuad ( EntityType &en ) 
+  FixedOrderQuad ( EntityType &en , int ord = 0 ) 
   {
-    switchTheType(en.geometry().type());
+    makeQuadrature(en.geometry().type());
   };
 
   FixedOrderQuad ( GeometryType eltype ) 
   {
-    switchTheType( eltype );
+    makeQuadrature(eltype);
   }
     
-  //! Constructor build the vec with the points and weights
-  void makeTheQuad( GeometryType eltype ) 
-  {
-    switch(eltype)
-    {
-      case line:          { makeQuadrature<line> (); break; }
-      case quadrilateral: { makeQuadrature<quadrilateral> (); break; }
-      case hexahedron:    { makeQuadrature<hexahedron> (); break; }
-      case triangle:      { makeQuadrature<triangle> (); break; }
-      case tetrahedron:   { makeQuadrature<tetrahedron> (); break; }
-      default:
-	DUNE_THROW(NotImplemented, "Unkown GeometryType in FixedOrderQuad::makeQuadrature()");
-    }
-  };
-  
-  //! Constructor build the vec with the points and weights
-  void switchTheType ( GeometryType eltype ) 
-  {
-    GeometryType t = eltype;
-    if(eltype == simplex) 
-    {
-      if(dim == 1) t = line;
-      if(dim == 2) t = triangle;
-      if(dim == 3) t = tetrahedron;
-    }
-    if(eltype == cube) 
-    {
-      if(dim == 1) t = line;
-      if(dim == 2) t = quadrilateral;
-      if(dim == 3) t = hexahedron;
-    }
-    makeTheQuad(t);  
-  };
-
   virtual ~FixedOrderQuad() {}
   
   //! return number of quadrature points 
@@ -116,25 +89,31 @@ public:
     return points_[i];
   }
 
+  int id () const { return (int) this->getIdentifier(); }
+
+  size_t cachingPoint(size_t quadraturePoint) const 
+  { 
+    return quadraturePoint; 
+  }
+
 private:
-  template <GeometryType ElType> 
-  void makeQuadrature ()
+  void makeQuadrature (GeometryType type)
   {
     // is called by the constructor 
     typedef QuadraturePoints< DomainType, 
-                RangeFieldType,ElType, poly_order>  QuadInitializer;
+                RangeFieldType,poly_order>  QuadInitializer;
 
     // same story as above 
-    numberOfQuadPoints_ = QuadInitializer::numberOfQuadPoints(); 
-    order_              = QuadInitializer::order();
+    numberOfQuadPoints_ = QuadInitializer::numberOfQuadPoints(type); 
+    order_              = QuadInitializer::order(type);
 
     for(int i=0; i<numberOfQuadPoints_; i++)
     {
-      points_[i]  = QuadInitializer::getPoint(i);
-      weights_[i] = QuadInitializer::getWeight(i);
+      points_[i]  = QuadInitializer::getPoint(type,i);
+      weights_[i] = QuadInitializer::getWeight(type,i);
     }
 
-    int myType = (int) ElType;
+    int myType = 1;//(int) ElType;
     myType *= 100;
     this->setIdentifier( myType + order_);
 
@@ -169,6 +148,7 @@ private:
  * FixedOrderQuad class.
  */
 //********************************************************************
+/*
 template< class RangeFieldType , class DomainType >
 class QuadratureOld : public QuadratureDefault  < RangeFieldType ,
   DomainType , QuadratureOld < RangeFieldType , DomainType > >  {
@@ -178,19 +158,19 @@ class QuadratureOld : public QuadratureDefault  < RangeFieldType ,
   
 public:
   //! Constructor building the quadrature 
-  QuadratureOld ( int id , GeometryType eltype, int polOrd ) : 
+  QuadratureOld ( int id , NewGeometryType eltype, int polOrd ) : 
     order_ ( polOrd )  , eltype_ ( eltype ) 
   {
     switch ( eltype_ )
     {
-      case vertex       : { buildQuadrature<vertex> ( id , polOrd ); break; }
-      case line         : { buildQuadrature<line> ( id , polOrd ); break; }
-      case triangle     : { buildQuadrature<triangle> ( id , polOrd ); break; }
-      case quadrilateral: { buildQuadrature<quadrilateral> ( id , polOrd ); break; }
-      case tetrahedron  : { buildQuadrature<tetrahedron> ( id , polOrd ); break; }
-      case pyramid      : { buildQuadrature<pyramid> ( id , polOrd ); break; }
-      case prism        : { buildQuadrature<prism> ( id , polOrd ); break; }
-      case hexahedron   : { buildQuadrature<hexahedron> ( id , polOrd ); break; }
+      case GeometryIdentifier::Vertex       : { buildQuadrature<GeometryIdentifier::Vertex> ( id , polOrd ); break; }
+      case GeometryIdentifier::Line         : { buildQuadrature<GeometryIdentifier::Line> ( id , polOrd ); break; }
+      case GeometryIdentifier::Triangle     : { buildQuadrature<GeometryIdentifier::Triangle> ( id , polOrd ); break; }
+      case GeometryIdentifier::Quadrilateral: { buildQuadrature<GeometryIdentifier::Quadrilateral> ( id , polOrd ); break; }
+      case GeometryIdentifier::Tetrahedron  : { buildQuadrature<GeometryIdentifier::Tetrahedron> ( id , polOrd ); break; }
+      case GeometryIdentifier::Pyramid      : { buildQuadrature<GeometryIdentifier::Pyramid> ( id , polOrd ); break; }
+      case GeometryIdentifier::Prism        : { buildQuadrature<GeometryIdentifier::Prism> ( id , polOrd ); break; }
+      case GeometryIdentifier::Hexahedron   : { buildQuadrature<GeometryIdentifier::Hexahedron> ( id , polOrd ); break; }
     default :
       DUNE_THROW(NotImplemented, "Element type is unkown in Constructor of Quadrature!");
     }
@@ -291,6 +271,7 @@ private:
     }
   };
 }; // end class Quadrature
+*/
 
 } // end namespace Dune 
 
