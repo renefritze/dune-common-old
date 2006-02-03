@@ -2356,18 +2356,6 @@
   #undef G_UPPER_BOUND
 #endif // G_UPPER_BOUND
 
-#ifdef M_PI
-  #undef M_PI
-#endif // M_PI
-
-#ifdef M_PI_2
-  #undef M_PI_2
-#endif // M_PI_2
-
-#ifdef M_E
-  #undef M_E
-#endif // M_E
-
 #ifdef G_VOID_P_TO_ANY_P
   #undef G_VOID_P_TO_ANY_P
 #endif // G_VOID_P_TO_ANY_P
@@ -2871,10 +2859,6 @@
 #ifdef G_NOEDGE
   #undef G_NOEDGE
 #endif // G_NOEDGE
-
-#ifdef restrict
-  #undef restrict
-#endif // restrict
 
 #ifdef G_MAX_BND_FUNCTIONS
   #undef G_MAX_BND_FUNCTIONS
