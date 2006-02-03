@@ -1,8 +1,9 @@
 #ifndef DUNE_SIZECACHE_HH
 #define DUNE_SIZECACHE_HH
 
-namespace Dune {
+#include <dune/common/array.hh>
 
+namespace Dune {
 
 //! organizes the caching of sizes for one grid and one GeometryType 
 template <class GridImp> 
@@ -26,13 +27,13 @@ class SingleTypeSizeCache
   // the grid 
   const GridType & grid_;
 
-  bool notWorry_; 
-
   // true if this class counts simplices 
   const bool isSimplex_;
   // true if this class counts cubes 
   const bool isCube_;
 
+  bool notWorry_; 
+  
   // count elements of set by iterating the grid 
   template <class SzCacheType , int codim >
   struct CountLevelEntities
