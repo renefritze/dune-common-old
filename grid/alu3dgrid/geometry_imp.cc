@@ -15,6 +15,7 @@ ALU3dGridGeometry()
   , globalCoord_()
   , tmpV_()
   , tmpU_()
+  , myGeomType_(GeometryType::simplex,mydim)
   , builtinverse_ (false) , builtA_ (false) , builtDetDF_ (false) 
 {}
 
@@ -268,15 +269,15 @@ buildGeom(const ALU3DSPACE VertexType & item, int, int)
 
 /* Comment in for adaptation to new GeometryType */
 template <int mydim, int cdim>
-inline GeometryType 
+inline const GeometryType &
 ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::type () const {
-  return GeometryType(GeometryType::simplex,mydim);
+  return myGeomType_;
 }
 
 template <int mydim, int cdim>
-inline GeometryType 
+inline const GeometryType &
 ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, hexa> > ::type () const {
-  return GeometryType(NewGeometryType::cube,mydim);
+  return myGeomType_;
 }
 
 template<int mydim, int cdim>
@@ -399,6 +400,7 @@ template <int mydim, int cdim>
 inline ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
 ALU3dGridGeometry() :
   coord_(0.0),
+  myGeomType_(GeometryType::cube,mydim),
   triMap_(0),
   biMap_(0)
 {}
@@ -407,6 +409,7 @@ template <>
 inline ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
 ALU3dGridGeometry() :
   coord_(0.0),
+  myGeomType_(GeometryType::cube,3),
   triMap_(0),
   biMap_(0)
 {}
@@ -415,6 +418,7 @@ template <>
 inline ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
 ALU3dGridGeometry() 
   : coord_(0.0),
+    myGeomType_(GeometryType::cube,2),
     triMap_(0),
     biMap_(0) 
 {}
@@ -423,6 +427,7 @@ template <>
 inline ALU3dGridGeometry<2, 2, const ALU3dGrid<3, 3, hexa> >::
 ALU3dGridGeometry() 
   : coord_(0.0),
+    myGeomType_(GeometryType::cube,2),
     triMap_(0),
     biMap_(0) 
 {}
