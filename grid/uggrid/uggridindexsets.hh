@@ -5,7 +5,6 @@
     \brief The index and id sets for the UGGrid class
 */
 
-//#include <dune/grid/common/defaultindexsets.hh>
 #include <vector>
 
 
@@ -49,7 +48,6 @@ public:
   template<int cd>
   int index (const typename GridImp::Traits::template Codim<cd>::Entity& e) const 
   {
-      //return grid_->template getRealEntity<cd>(e).levelIndex(); 
       return grid_->getRealImplementation(e).levelIndex(); 
   }
 
@@ -129,63 +127,6 @@ public:
 	return grid_->template lend<cd,pitype>(level_);
   }
 
-  //private:
-  int renumberVertex(NewGeometryType gt, int i) const 
-  {
-      if (gt.isCube()) {
-	  // Dune numbers the vertices of a hexahedron and quadrilaterals differently than UG.
-	  // The following two lines do the transformation
-	  // The renumbering scheme is {0,1,3,2} for quadrilaterals, therefore, the
-	  // following code works for 2d and 3d.
-	  // It also works in both directions UG->DUNE, DUNE->UG !
-	  const int renumbering[8] = {0, 1, 3, 2, 4, 5, 7, 6};
-	  return renumbering[i];
-    } else
-	  return i;
-  }
-
-  int renumberFace(NewGeometryType gt, int i) const 
-  {
-
-      if (gt.isHexahedron()) {
-
-	  // Dune numbers the vertices of a hexahedron and quadrilaterals differently than UG.
-	  // The following two lines do the transformation
-	  // The renumbering scheme is {0,1,3,2} for quadrilaterals, therefore, the
-	  // following code works for 2d and 3d.
-	  const int renumbering[6] = {4, 2, 1, 3, 0, 5};
-	  return renumbering[i];
-      } 
-      if (gt.isTetrahedron()) {
-
-	  // Dune numbers the vertices of a hexahedron and quadrilaterals differently than UG.
-	  // The following two lines do the transformation
-	  // The renumbering scheme is {0,1,3,2} for quadrilaterals, therefore, the
-	  // following code works for 2d and 3d.
-	  const int renumbering[4] = {1, 2, 0, 3};
-	  return renumbering[i];
-      } 
-      if (gt.isQuadrilateral()) {
-
-	  // Dune numbers the vertices of a hexahedron and quadrilaterals differently than UG.
-	  // The following two lines do the transformation
-	  // The renumbering scheme is {0,1,3,2} for quadrilaterals, therefore, the
-	  // following code works for 2d and 3d.
-	  const int renumbering[4] = {3, 1, 0, 2};
-	  return renumbering[i];
-      } 
-      if (gt.isTriangle()) {
-          
-	  // Dune numbers the vertices of a hexahedron and quadrilaterals differently than UG.
-	  // The following two lines do the transformation
-	  // The renumbering scheme is {0,1,3,2} for quadrilaterals, therefore, the
-	  // following code works for 2d and 3d.
-	  const int renumbering[3] = {1, 2, 0};
-	  return renumbering[i];
-      } 
-      return i;
-  }
-
     void update(const GridImp& grid, int level) {
 
         // Commit the index set to a specific level of a specific grid
@@ -207,15 +148,18 @@ public:
 			  NewGeometryType gt = eIt->geometry().type();
 			  int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
 			  int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
-			  int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
+			  int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
+                                                                                                     UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
+                                                                                  UG_NS<dim>::Corner(target_,
+                                                                                                     UGGridRenumberer<dim>::verticesDUNEtoUG(b,gt))));
 			  index = -1;
 			}
-		  // codim 1 (faces): todo
+		  /** \todo codim 1 (faces) */
 		  if (dim==3)
 			for (int i=0; i<eIt->template count<1>(); i++)
 			  {
                               NewGeometryType gt = eIt->geometry().type();
-				int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,renumberFace(gt,i)));
+                              int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
 				index = -1;
 			  }
 
@@ -228,9 +172,9 @@ public:
         numPyramids_  = 0;
         numPrisms_    = 0;
         numCubes_     = 0;
-		numEdges_     = 0;
-		numTriFaces_  = 0;
-		numQuadFaces_ = 0;
+        numEdges_     = 0;
+        numTriFaces_  = 0;
+        numQuadFaces_ = 0;
 
         eIt    = grid_->template lbegin<0>(level_);
         eEndIt = grid_->template lend<0>(level_);
@@ -260,7 +204,10 @@ public:
 				NewGeometryType gt = eIt->geometry().type();
 				int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
 				int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
-				int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
+				int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
+                                                                                                           UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
+                                                                                        UG_NS<dim>::Corner(target_,
+                                                                                                           UGGridRenumberer<dim>::verticesDUNEtoUG(b,gt))));
 				if (index<0) index = numEdges_++;
 			  }
 
@@ -269,7 +216,7 @@ public:
 			  for (int i=0; i<eIt->template count<1>(); i++)
 				{
 				  NewGeometryType gt = eIt->geometry().type();
-				  int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,renumberFace(gt,i)));
+				  int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
 				  if (index<0) { // not visited yet 
                                       NewGeometryType gtType = ReferenceElements<double,dim>::general(gt).type(i,1);
                                       if (gtType.isSimplex()) {
@@ -296,7 +243,7 @@ public:
             myTypes_[0].push_back(NewGeometryType(NewGeometryType::cube,dim));
 
         myTypes_[dim-1].resize(0);
-        myTypes_[dim-1].push_back(NewGeometryType(NewGeometryType::cube,1));
+        myTypes_[dim-1].push_back(NewGeometryType(1));
         
         if (dim==3)
             {
@@ -445,63 +392,6 @@ public:
 	return grid_.template leafend<cd,pitype>();
   }
 
-  //private:
-  int renumberVertex(NewGeometryType gt, int i) const 
-  {
-      if (gt.isCube()) {
-	  // Dune numbers the vertices of a hexahedron and quadrilaterals differently than UG.
-	  // The following two lines do the transformation
-	  // The renumbering scheme is {0,1,3,2} for quadrilaterals, therefore, the
-	  // following code works for 2d and 3d.
-	  // It also works in both directions UG->DUNE, DUNE->UG !
-	  const int renumbering[8] = {0, 1, 3, 2, 4, 5, 7, 6};
-	  return renumbering[i];
-    } else
-	  return i;
-  }
-    
-  int renumberFace(NewGeometryType gt, int i) const 
-  {
-
-      if (gt.isHexahedron()) {
-               
-	  // Dune numbers the vertices of a hexahedron and quadrilaterals differently than UG.
-	  // The following two lines do the transformation
-	  // The renumbering scheme is {0,1,3,2} for quadrilaterals, therefore, the
-	  // following code works for 2d and 3d.
-          const int renumbering[6] = {4, 2, 1, 3, 0, 5};
-          return renumbering[i];
-      } 
-      if (gt.isTetrahedron()) {
-
-	  // Dune numbers the vertices of a hexahedron and quadrilaterals differently than UG.
-	  // The following two lines do the transformation
-	  // The renumbering scheme is {0,1,3,2} for quadrilaterals, therefore, the
-	  // following code works for 2d and 3d.
-	  const int renumbering[4] = {1, 2, 0, 3};
-	  return renumbering[i];
-      } 
-      if (gt.isQuadrilateral()) {
-          
-	  // Dune numbers the vertices of a hexahedron and quadrilaterals differently than UG.
-	  // The following two lines do the transformation
-	  // The renumbering scheme is {0,1,3,2} for quadrilaterals, therefore, the
-	  // following code works for 2d and 3d.
-	  const int renumbering[4] = {3, 1, 0, 2};
-	  return renumbering[i];
-      } 
-      if (gt.isTriangle()) {
-                    
-	  // Dune numbers the vertices of a hexahedron and quadrilaterals differently than UG.
-	  // The following two lines do the transformation
-	  // The renumbering scheme is {0,1,3,2} for quadrilaterals, therefore, the
-	  // following code works for 2d and 3d.
-	  const int renumbering[3] = {1, 2, 0};
-	  return renumbering[i];
-      } 
-      return i;
-  }
-
     void update() {
 
         // //////////////////////////////////////////////////////
@@ -525,7 +415,10 @@ public:
 					NewGeometryType gt = eIt->geometry().type();
 					int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
 					int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
-					int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
+					int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
+                                                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
+                                                                                               UG_NS<dim>::Corner(target_,
+                                                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(b,gt))));
 					index = -1;
 				  }
 
@@ -534,7 +427,7 @@ public:
 				  for (int i=0; i<eIt->template count<1>(); i++)
 					{
 					  NewGeometryType gt = eIt->geometry().type();
-					  int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,renumberFace(gt,i)));
+					  int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
 					  index = -1;
 					}
 			  }
@@ -565,7 +458,10 @@ public:
 					NewGeometryType gt = eIt->geometry().type();
 					int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
 					int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
-					int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,renumberVertex(gt,a)),UG_NS<dim>::Corner(target_,renumberVertex(gt,b))));
+					int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
+                                                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
+                                                                                               UG_NS<dim>::Corner(target_,
+                                                                                                                  UGGridRenumberer<dim>::verticesDUNEtoUG(b,gt))));
 					if (index<0)
 					  { 
 						// get new index and assign
@@ -575,7 +471,10 @@ public:
 						while (father_!=0)
 						  {
 							if (!UG_NS<dim>::hasCopy(father_)) break; // handle only copies
-							UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(father_,renumberVertex(gt,a)),UG_NS<dim>::Corner(father_,renumberVertex(gt,b)))) = index;
+							UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(father_,
+                                                                                                                     UGGridRenumberer<dim>::verticesDUNEtoUG(a,gt)),
+                                                                                                  UG_NS<dim>::Corner(father_,
+                                                                                                                     UGGridRenumberer<dim>::verticesDUNEtoUG(b,gt)))) = index;
 							father_ = UG_NS<dim>::EFather(father_);
 						  }
 					  }
@@ -586,7 +485,7 @@ public:
 				  for (int i=0; i<eIt->template count<1>(); i++)
 					{
                                             NewGeometryType gt = eIt->geometry().type();
-					  int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,renumberFace(gt,i)));
+                                            int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
 					  if (index<0) // not visited yet 
 						{
 						  // get new index and assign
@@ -604,7 +503,7 @@ public:
 						  while (father_!=0)
 							{
 							  if (!UG_NS<dim>::hasCopy(father_)) break; // handle only copies
-							  UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(father_,renumberFace(gt,i))) = index;
+							  UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(father_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt))) = index;
 							  father_ = UG_NS<dim>::EFather(father_);
 							}
 						}
