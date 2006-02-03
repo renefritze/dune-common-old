@@ -21,7 +21,7 @@ namespace Dune {
 
     public:
 
-        /** \brief Turn a local vertex number from DUNE numbering to UG numbering *
+        /** \brief Turn a local vertex number from DUNE numbering to UG numbering */
         static int verticesDUNEtoUG(int i, NewGeometryType type) {
             
             if (type.isCube()) {
@@ -32,7 +32,7 @@ namespace Dune {
             return i;
         }
         
-        /** \brief Turn a local face number from DUNE numbering to UG numbering *
+        /** \brief Turn a local face number from DUNE numbering to UG numbering */
         static int facesDUNEtoUG(int i, NewGeometryType type) {
 
             if (type.isCube()) {
@@ -68,7 +68,7 @@ namespace Dune {
 
     public:
 
-        /** \brief Turn a local vertex number from DUNE numbering to UG numbering *
+        /** \brief Turn a local vertex number from DUNE numbering to UG numbering */
         static int verticesDUNEtoUG(int i, NewGeometryType type) {
             
             if (type.isCube()) {
@@ -79,7 +79,7 @@ namespace Dune {
             return i;
         }
         
-        /** \brief Turn a local face number from DUNE numbering to UG numbering *
+        /** \brief Turn a local face number from DUNE numbering to UG numbering */
         static int facesDUNEtoUG(int i, NewGeometryType type) {
 
             if (type.isCube()) {
