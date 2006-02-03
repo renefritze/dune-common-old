@@ -1571,16 +1571,16 @@ template< class GridImp >
 inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator 
 (const AlbertaGridIntersectionIterator<GridImp> & org) 
   : grid_(org.grid_)
-  , level_(org.level_) 
+  , level_(org.level_)
   , neighborCount_(org.neighborCount_)
-  , builtNeigh_ (false) 
-  , elInfo_ ( org.elInfo_ ) 
-  , fakeNeigh_ () 
-  , fakeSelf_ () 
-  , neighGlob_ ()  
-  , neighElInfo_()
-  , done_ ( org.done_ )                                                                   
+  , builtNeigh_ (false)
   , leafIt_( org.leafIt_ )
+  , elInfo_ ( org.elInfo_ )
+  , fakeNeigh_ ()
+  , fakeSelf_ ()
+  , neighGlob_ ()
+  , neighElInfo_()
+  , done_ ( org.done_ )
 {
 }
 
