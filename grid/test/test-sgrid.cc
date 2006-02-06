@@ -8,6 +8,7 @@
 
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
+#include "checkintersectionit.cc"
 
 int main () {
   try {
@@ -23,6 +24,7 @@ int main () {
 
       g1.globalRefine(1);
       checkGeometryInFather(g1);
+      checkIntersectionIterator(g1);
     };
 
     {
@@ -32,6 +34,7 @@ int main () {
 
       g2.globalRefine(1);
       checkGeometryInFather(g2);
+      checkIntersectionIterator(g2);
     };
 
   } catch (Dune::Exception &e) {

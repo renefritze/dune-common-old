@@ -17,6 +17,7 @@
 
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
+#include "checkintersectionit.cc"
 
 class ArcOfCircle : public Dune::BoundarySegment<2>
 {
@@ -156,6 +157,9 @@ int main () {
 
       // check the method geometryInFather()
       checkGeometryInFather(grid);
+
+      // check the intersection iterator
+      checkIntersectionIterator(grid);
     }
 
     // ////////////////////////////////////////////////////////////////////////
@@ -179,6 +183,9 @@ int main () {
 
       // check the method geometryInFather()
       checkGeometryInFather(grid);
+
+      // check the intersection iterator
+      checkIntersectionIterator(grid);
     }
 
     // ////////////////////////////////////////////////////////////////////////

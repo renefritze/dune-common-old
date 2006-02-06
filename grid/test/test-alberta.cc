@@ -16,6 +16,7 @@
 
 #include "gridcheck.cc"
 #include "checkgeometryinfather.cc"
+#include "checkintersectionit.cc"
 
 template <class GridType >
 void markOne ( GridType & grid , int num , int ref )
@@ -69,6 +70,7 @@ int main () {
       }
 
       checkGeometryInFather(grid);
+      checkIntersectionIterator(grid);
     };
 
   } catch (Dune::Exception &e) {
