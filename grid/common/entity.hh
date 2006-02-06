@@ -283,7 +283,6 @@ public:
 
      This is provided for sparsely stored nested unstructured meshes.
      Returns iterator to first son.
-     \todo Does this point to the first son or the entity itself?
   */
   HierarchicIterator hbegin (int maxlevel) const
     {
