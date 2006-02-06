@@ -102,11 +102,11 @@ public:
   //! iteration started. 
   //! Here returned element is in LOCAL coordinates of the element
   //! where iteration started.
-  const  LocalGeometry& intersectionSelfLocal () const;
+  const LocalGeometry& intersectionSelfLocal () const;
 
   //! intersection of codimension 1 of this neighbor with element where iteration started. 
   //! Here returned element is in GLOBAL coordinates of the element where iteration started.
-  const  Geometry& intersectionGlobal () const;
+  const Geometry& intersectionGlobal () const;
 
   //! local number of codim 1 entity in self where intersection is contained in 
   int numberInSelf () const;
@@ -128,11 +128,8 @@ private:
   //**********************************************************
 
   //! get neighbor on same or lower level or 0
-  typename TargetType<0,GridImp::dimensionworld>::T* getNeighbor () const;
+    typename UGTypes<GridImp::dimension>::Element* getNeighbor () const;
 
-  //! renumbering of faces from UG to Dune
-  int renumberFaceUGToDune (int nSides, int i) const;
-  
   //! vector storing the outer normal 
     mutable FieldVector<UGCtype, dimworld> outerNormal_;
 
@@ -145,8 +142,8 @@ private:
   //! information.
     mutable UGMakeableGeometry<dim-1,dimworld,GridImp> neighGlob_;
 
-    //! This points to the same UG element as center_ does
-    typename TargetType<0,GridImp::dimensionworld>::T *center_;
+    //! The UG element the iterator was created from
+    typename UGTypes<dim>::Element *center_;
 
     //! The level we're on
     int level_;
