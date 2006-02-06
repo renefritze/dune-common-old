@@ -139,7 +139,7 @@ buildGeom(const IMPLElementType & item, int, int)
   //assert( ! ALU3DSPACE global_Geometry_lock );
 
   builtinverse_ = builtA_ = builtDetDF_ = false;
-  detDF_ = 6.0 * item.volume();
+  //detDF_ = 6.0 * item.volume();
  
   for(int i=0; i<4; i++) 
   {
@@ -355,8 +355,7 @@ template<int mydim, int cdim>
 inline alu3d_ctype 
 ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::integrationElement (const FieldVector<alu3d_ctype, mydim>& local) const 
 {
-  return detDF_; 
-  /*
+  //return detDF_; 
   if(builtDetDF_)
     return detDF_;
 
@@ -368,7 +367,6 @@ ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::integrationElement
 
   builtDetDF_ = true;
   return detDF_;
-  */
 }
 
 //  J A C O B I A N _ I N V E R S E  - - -
