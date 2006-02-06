@@ -21,15 +21,16 @@ namespace Dune {
 */
 
 /*! \file
-    A simple timing class.
+    \brief A simple timing class.
 */
 
+    /** \brief %Exception thrown by the Timer class */
   class TimerError : public SystemError {} ;
    
 
-  /*! a simple stop watch
+    /** \brief A simple stop watch
     
-  this class reports the elapsed user-time, i.e. time spent computing,
+  This class reports the elapsed user-time, i.e. time spent computing,
   after the last call to Timer::reset(). The results are seconds and
   fractional seconds. Note that the resolution of the timing depends
   on your OS kernel which should be somewhere in the milisecond range.
@@ -40,13 +41,13 @@ namespace Dune {
 class Timer
 {
 public:
-	//! a new timer, start immediately
+	//! A new timer, start immediately
         Timer () throw(TimerError)
 	{
 	  reset();
 	}
 
-	//! reset timer
+	//! Reset timer
 	void reset() throw (TimerError)
 	{
 	  rusage ru;
@@ -55,7 +56,7 @@ public:
 	  cstart = ru.ru_utime;
 	}
 
-	//! get elapsed user-time in seconds
+	//! Get elapsed user-time in seconds
 	double elapsed () const throw (TimerError)
         {
 	  rusage ru;
