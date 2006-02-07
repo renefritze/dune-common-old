@@ -57,10 +57,15 @@ inline void ALU3dGridGeometry<2,3, const ALU3dGrid<3,3,tetra> > :: buildJacobian
 {
   if(!builtinverse_)
   {
+    std::cout << "building inverse \n";
     enum { dim = 3 };
     
     //derr << "WARNING: ALU3dGridGeometry::buildJacobianInverseTransposed not tested yet! " << __LINE__ <<"\n";
     // create vectors of face 
+    Jinv_[0] = coord_[1] - coord_[0];
+    Jinv_[1] = coord_[2] - coord_[0];
+    
+    // 
     tmpV_ = coord_[1] - coord_[0];
     tmpU_ = coord_[2] - coord_[1];
 
@@ -141,7 +146,7 @@ buildGeom(const IMPLElementType & item, int, int)
   builtinverse_ = builtA_ = builtDetDF_ = false;
   //detDF_ = 6.0 * item.volume();
  
-  for(int i=0; i<4; i++) 
+  for(int i=0; i<4; ++i) 
   {
     copyCoordVec(item.myvertex(ElementTopo::dune2aluVertex(i))->Point(), coord_[i]);
   }
@@ -321,7 +326,23 @@ local(const FieldVector<alu3d_ctype, 3>& global) const
 
   // multiply with transposed because Jinv_ is already transposed  
   localCoord_ = FMatrixHelp:: multTransposed(Jinv_,globalCoord_);
+  return localCoord_;
+}
 
+template<int mydim, int cdim>  // dim = dimworld = 3
+inline FieldVector<alu3d_ctype, mydim> 
+ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3,3,tetra> > :: 
+local(const FieldVector<alu3d_ctype, cdim>& global) const
+{
+  //assert(false);
+  //DUNE_THROW(NotImplemented,"Method not implemented!\n");
+  if (!builtinverse_) buildJacobianInverseTransposed();
+
+  globalCoord_ = global - coord_[0];
+  // multiply with transposed because Jinv_ is already transposed  
+  localCoord_ = FMatrixHelp:: multTransposed(Jinv_,globalCoord_);
+  
+  localCoord_ *=1.5;
   return localCoord_;
 }
 
@@ -655,6 +676,7 @@ buildGeom(const ALU3DSPACE HFaceType & item, int twist, int duneFace ) {
   const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
   
   assert( duneFace >= 0 && duneFace < 6 );
+  if(duneFace < 0 ) duneFace = 0;
   // for all vertices of this face 
   for (int i = 0; i < 4; ++i) 
   {
