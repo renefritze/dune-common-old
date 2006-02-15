@@ -62,8 +62,8 @@ inline void ALU3dGridGeometry<2,3, const ALU3dGrid<3,3,tetra> > :: buildJacobian
     
     //derr << "WARNING: ALU3dGridGeometry::buildJacobianInverseTransposed not tested yet! " << __LINE__ <<"\n";
     // create vectors of face 
-    Jinv_[0] = coord_[1] - coord_[0];
-    Jinv_[1] = coord_[2] - coord_[0];
+    //Jinv_[0] = coord_[1] - coord_[0];
+    //Jinv_[1] = coord_[2] - coord_[0];
     
     // 
     tmpV_ = coord_[1] - coord_[0];
