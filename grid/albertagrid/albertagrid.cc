@@ -4045,13 +4045,11 @@ partitionType (ALBERTA EL_INFO *elinfo) const
   return OverlapEntity;
 }
 
-/*
 template < int dim, int dimworld >
 inline int AlbertaGrid < dim, dimworld >::maxLevel() const
 {
   return maxlevel_;
 }
-*/
 
 template < int dim, int dimworld >
 inline int AlbertaGrid < dim, dimworld >::global_size (int codim) const
