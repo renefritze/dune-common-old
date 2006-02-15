@@ -621,31 +621,43 @@ checkInside(const FieldVector<albertCtype, mydim> &local) const
 // getElInfo. 
 //*********************************************************************8
 template<int codim, int dim, class GridImp>
-inline void AlbertaGridEntity<codim,dim,GridImp>::
-makeDescription()
-{
-  elInfo_  = 0;
-  element_ = 0;
-  builtgeometry_ = false;
-}
-
-template<int codim, int dim, class GridImp>
-inline PartitionType AlbertaGridEntity <codim,dim,GridImp>::
-partitionType () const 
-{
-  return InteriorEntity;
-}
-
-template<int codim, int dim, class GridImp>
 inline AlbertaGridEntity<codim,dim,GridImp>::
 AlbertaGridEntity(const GridImp &grid, int level, 
       ALBERTA TRAVERSE_STACK * travStack) 
   : grid_(grid) 
+  , elInfo_(0)
+  , element_(0)
+  , travStack_(travStack)
   , level_ ( level )
-  , geo_ (false)
+  , geo_ (GeometryImp())
+  , geoImp_( grid_.getRealImplementation(geo_) )
+  , builtgeometry_    (false)
+  , localFatherCoords_()
+  , localFCoordCalced_(false)
+  , face_             (-1)
+  , edge_             (-1)
+  , vertex_           (-1)
 {
-  travStack_ = travStack;
-  makeDescription();
+}
+
+
+template<int codim, int dim, class GridImp>
+inline AlbertaGridEntity<codim,dim,GridImp>::
+AlbertaGridEntity(const AlbertaGridEntity<codim,dim,GridImp> & org) 
+  : grid_     (org.grid_) 
+  , elInfo_   (org.elInfo_)
+  , element_  ( (elInfo_) ? (elInfo_->el) : 0 )
+  , travStack_(org.travStack_)
+  , level_    (org.level_ )
+  , geo_      (org.geo_)
+  , geoImp_   ( grid_.getRealImplementation(geo_) )
+  , builtgeometry_    (false)
+  , localFatherCoords_()
+  , localFCoordCalced_(false)
+  , face_             (org.face_)
+  , edge_             (org.edge_)
+  , vertex_           (org.vertex_)
+{
 }
 
 
@@ -658,14 +670,28 @@ setTraverseStack(ALBERTA TRAVERSE_STACK * travStack)
 
 template<int codim, int dim, class GridImp>
 inline AlbertaGridEntity<codim,dim,GridImp>::
-AlbertaGridEntity(const GridImp &grid, int level, bool) : 
-  grid_(grid)
-, level_ (level)
-, geo_ ( )
-, localFCoordCalced_(false)
+AlbertaGridEntity(const GridImp &grid, int level, bool) 
+  : grid_(grid)
+  , elInfo_(0)
+  , element_(0)
+  , travStack_(0)
+  , level_ (level)
+  , geo_ (GeometryImp())
+  , geoImp_( grid_.getRealImplementation(geo_) )
+  , builtgeometry_(false)
+  , localFatherCoords_()
+  , localFCoordCalced_(false)
+  , face_             (-1)
+  , edge_             (-1)
+  , vertex_           (-1)
 {
-  travStack_ = 0;
-  makeDescription();
+}
+
+template<int codim, int dim, class GridImp>
+inline PartitionType AlbertaGridEntity <codim,dim,GridImp>::
+partitionType () const 
+{
+  return InteriorEntity;
 }
 
 template<int codim, int dim, class GridImp>
@@ -716,7 +742,7 @@ setElInfo(ALBERTA EL_INFO * elInfo, int face,
     element_ = elInfo_->el;
   else 
     element_ = 0;
-  builtgeometry_ = geo_.builtGeom(elInfo_,face,edge,vertex);
+  builtgeometry_ = geoImp_.builtGeom(elInfo_,face,edge,vertex);
   localFCoordCalced_ = false;
 }
 
@@ -902,9 +928,44 @@ AlbertaGridEntity<codim,dim,GridImp>::positionInOwnersFather() const
 //  --0Entity codim = 0 
 //
 template<int dim, class GridImp>
+inline AlbertaGridEntity <0,dim,GridImp>::
+AlbertaGridEntity(const GridImp &grid, int level, bool leafIt ) 
+  : grid_(grid) 
+  , level_ (level)
+  , travStack_ (0) 
+  , elInfo_ (0) 
+  , element_(0)
+  , fatherReLocalObj_ ( GeometryImp() )
+  , fatherReLocal_( grid_.getRealImplementation(fatherReLocalObj_) )
+  , geoObj_( GeometryImp() )
+  , geo_( grid_.getRealImplementation(geoObj_) ) 
+  , builtgeometry_ (false)
+  , leafIt_ ( leafIt )
+{
+}
+
+template<int dim, class GridImp>
+inline AlbertaGridEntity <0,dim,GridImp>::
+AlbertaGridEntity(const AlbertaGridEntity & org) 
+  : grid_(org.grid_) 
+  , level_ (org.level_)
+  , travStack_ (org.travStack_) 
+  , elInfo_ (org.elInfo_) 
+  , element_( (elInfo_) ? (elInfo_->el) : 0)
+  , fatherReLocalObj_ ( org.fatherReLocalObj_ )
+  , fatherReLocal_( grid_.getRealImplementation(fatherReLocalObj_) )
+  , geoObj_( org.geoObj_ )
+  , geo_( grid_.getRealImplementation(geoObj_) ) 
+  , builtgeometry_ (false)
+  , leafIt_ ( org.leafIt_ )
+{
+}
+
+template<int dim, class GridImp>
 inline int AlbertaGridEntity <0,dim,GridImp>::
 boundaryId() const
 {
+  // elements are always inside of our Domain 
   return 0;
 }
 
@@ -967,19 +1028,6 @@ inline void AlbertaGridEntity <0,dim,GridImp>::
 setTraverseStack(ALBERTA TRAVERSE_STACK * travStack)
 {
   travStack_ = travStack;
-}
-
-template<int dim, class GridImp>
-inline AlbertaGridEntity <0,dim,GridImp>::
-AlbertaGridEntity(const GridImp &grid, int level, bool leafIt ) 
-  : grid_(grid) 
-  , level_ (level)
-  , travStack_ (0) , elInfo_ (0) 
-  , fatherReLocal_()
-  , geo_() 
-  , builtgeometry_ (false)
-  , leafIt_ ( leafIt )
-{
 }
 
 //*****************************************************************
@@ -1145,7 +1193,7 @@ AlbertaGridEntity <0,dim,GridImp>::geometry() const
   if(!builtgeometry_) builtgeometry_ = geo_.builtGeom(elInfo_,0,0,0);
 
   assert(builtgeometry_ == true);
-  return geo_;
+  return geoObj_;
 }
 
 
@@ -1169,7 +1217,7 @@ AlbertaGridEntity <0,dim,GridImp>::geometryInFather() const
 
   fatherReLocal_.buildGeomInFather( (*ep).geometry() , geometry() );
     
-  return fatherReLocal_;
+  return fatherReLocalObj_;
 }
 // end AlbertaGridEntity
 
@@ -1533,9 +1581,12 @@ AlbertaGridIntersectionIterator(const GridImp & grid,int level, bool ) :
   level_ (level), 
   neighborCount_ (dim+1),
   elInfo_ (0),
-  fakeNeigh_ (),
-  fakeSelf_ () ,
-  neighGlob_ (),
+  fakeNeighObj_(LocalGeometryImp()),
+  fakeSelfObj_ (LocalGeometryImp()),
+  neighGlobObj_(LocalGeometryImp()),
+  fakeNeigh_ (grid_.getRealImplementation(fakeNeighObj_) ),
+  fakeSelf_  (grid_.getRealImplementation(fakeSelfObj_)  ),
+  neighGlob_ (grid_.getRealImplementation(neighGlobObj_)),
   neighElInfo_ () ,
   done_(true) 
 {
@@ -1576,9 +1627,12 @@ inline AlbertaGridIntersectionIterator<GridImp>::AlbertaGridIntersectionIterator
   , builtNeigh_ (false)
   , leafIt_( org.leafIt_ )
   , elInfo_ ( org.elInfo_ )
-  , fakeNeigh_ ()
-  , fakeSelf_ ()
-  , neighGlob_ ()
+  , fakeNeighObj_(LocalGeometryImp())
+  , fakeSelfObj_ (LocalGeometryImp())
+  , neighGlobObj_(LocalGeometryImp())
+  , fakeNeigh_ (grid_.getRealImplementation(fakeNeighObj_))
+  , fakeSelf_  (grid_.getRealImplementation(fakeSelfObj_ ))
+  , neighGlob_ (grid_.getRealImplementation(neighGlobObj_))
   , neighElInfo_()
   , done_ ( org.done_ )
 {
@@ -1789,7 +1843,7 @@ intersectionSelfLocal () const
 {
   fakeSelf_.builtLocalGeom(inside()->geometry(),intersectionGlobal(),
                             elInfo_,neighborCount_);
-  return fakeSelf_;
+  return fakeSelfObj_;
 }
 
 template< class GridImp >
@@ -1801,13 +1855,12 @@ AlbertaGridIntersectionIterator<GridImp>::intersectionNeighborLocal () const
   if(fakeNeigh_.builtLocalGeom(outside()->geometry(),intersectionGlobal(),
                                &neighElInfo_,neighborCount_)
     ) 
-    return fakeNeigh_;
+    return fakeNeighObj_;
   else 
   {
     DUNE_THROW(AlbertaError, "intersection_neighbor_local: error occured!");
   }
-  return fakeNeigh_;
-
+  return fakeNeighObj_;
 }
 
 template< class GridImp >
@@ -1818,12 +1871,12 @@ intersectionGlobal () const
   assert( elInfo_ );
 
   if(neighGlob_.builtGeom(elInfo_,neighborCount_,0,0))
-    return neighGlob_;
+    return neighGlobObj_;
   else 
   {
     DUNE_THROW(AlbertaError, "intersection_self_global: error occured!");
   }
-  return neighGlob_;
+  return neighGlobObj_;
 }
 
 
@@ -3290,7 +3343,8 @@ inline AlbertaGrid < dim, dimworld >::~AlbertaGrid()
 template < int dim, int dimworld > 
 template<int codim, PartitionIteratorType pitype>
 inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LevelIterator
-AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
+//AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
+AlbertaGrid < dim, dimworld >::lbegin (int level) const
 {
   assert( level >= 0 );
   // if we dont have this level return empty iterator 
@@ -3301,29 +3355,31 @@ AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
     if( ! (vertexMarkerLevel_[level].up2Date() ) ) 
         vertexMarkerLevel_[level].markNewVertices(*this,level);
   }
-  return AlbertaGridLevelIterator<codim,pitype,const MyType> (*this,&vertexMarkerLevel_[level],level,proc);
+  return AlbertaGridLevelIterator<codim,pitype,const MyType> (*this,&vertexMarkerLevel_[level],level,-1);
 }
 
 template < int dim, int dimworld > template<int codim, PartitionIteratorType pitype>
 inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<pitype>::LevelIterator
-AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
+//AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
+AlbertaGrid < dim, dimworld >::lend (int level) const
 {
-  return AlbertaGridLevelIterator<codim,pitype,const MyType> ((*this),level,proc);
+  return AlbertaGridLevelIterator<codim,pitype,const MyType> ((*this),level,-1);
 }
 
 template < int dim, int dimworld > template<int codim>
 inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-AlbertaGrid < dim, dimworld >::lbegin (int level, int proc) const
+AlbertaGrid < dim, dimworld >::lbegin (int level) const
 {
-  return this->template lbegin<codim,All_Partition> (level,proc);
+  return this->template lbegin<codim,All_Partition> (level);
 }
 
 template < int dim, int dimworld > template<int codim>
 inline typename AlbertaGrid<dim, dimworld>::Traits::template Codim<codim>::template Partition<All_Partition>::LevelIterator
-AlbertaGrid < dim, dimworld >::lend (int level, int proc ) const
+AlbertaGrid < dim, dimworld >::lend (int level) const
 {
-  return this->template lend<codim,All_Partition> (level,proc);
+  return this->template lend<codim,All_Partition> (level);
 }
+
 
 template < int dim, int dimworld >
 template<int codim, PartitionIteratorType pitype>
@@ -3494,7 +3550,7 @@ globalRefine(int refCount)
     }
 
     // mark all ghosts
-    for(LeafIt it = leafbegin(maxLevel(),Ghost_Partition); it != endit; ++it)
+    for(LeafIt it = leafbegin(this->maxLevel(),Ghost_Partition); it != endit; ++it)
     {
       this->mark(1,it);
     }
@@ -3988,11 +4044,14 @@ partitionType (ALBERTA EL_INFO *elinfo) const
   
   return OverlapEntity;
 }
+
+/*
 template < int dim, int dimworld >
 inline int AlbertaGrid < dim, dimworld >::maxLevel() const
 {
   return maxlevel_;
 }
+*/
 
 template < int dim, int dimworld >
 inline int AlbertaGrid < dim, dimworld >::global_size (int codim) const
@@ -4002,6 +4061,7 @@ inline int AlbertaGrid < dim, dimworld >::global_size (int codim) const
   return indexStack_[codim].size();
 }
 
+// --size 
 template < int dim, int dimworld >
 inline int AlbertaGrid < dim, dimworld >::size (int level, int codim) const
 {
@@ -4011,6 +4071,7 @@ inline int AlbertaGrid < dim, dimworld >::size (int level, int codim) const
   assert( sizeCache_ );
   return sizeCache_->size(level,codim);
 }
+
 
 template < int dim, int dimworld >
 inline int AlbertaGrid < dim, dimworld >::size (int level, int codim, NewGeometryType type) const
