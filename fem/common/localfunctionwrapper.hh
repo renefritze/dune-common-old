@@ -226,6 +226,11 @@ public:
     localFunc().init(en);
   } 
 
+  const BaseFunctionSetType& getBaseFunctionSet() const 
+  {
+    return localFunc().getBaseFunctionSet();
+  }
+
 private:
   LocalFunctionWrapper& operator=(const LocalFunctionWrapper);
 
