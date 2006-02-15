@@ -203,7 +203,6 @@ namespace Dune {
     //! Function space type
     typedef typename SpaceTraits::FunctionSpaceType FunctionSpaceType;
     //! The base function set of DiscreteFunctionSpaceType
-    typedef typename SpaceTraits::BaseFunctionSetType BaseFunctionSetType;
     
     //! Intrinsic data type for range field
     typedef typename Traits::RangeFieldType RangeFieldType;
