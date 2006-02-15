@@ -219,6 +219,7 @@ namespace Dune {
     //! Container class type for the dofs
     typedef typename Traits::DofStorageType DofStorageType;
 
+    typedef typename DiscreteFunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
     //! Dimension of the range field
     enum { dimRange = DiscreteFunctionSpaceType::DimRange };
 
@@ -238,32 +239,39 @@ namespace Dune {
 
     //- Operators
     //! Random access operator
+    inline
     DofType& operator[] (int num);
 
      //! Cosnt random access operator
+    inline
     const DofType& operator[] (int num) const;
 
     //- Methods
     //! Number of dofs on this element
+    inline
     int numberOfDofs() const DUNE_DEPRECATED;
 
     //! Number of dofs on this element
+    inline
     int numDofs() const;
 
     //! Evaluation of the discrete function
     template <class EntityType>
+    inline
     void evaluate(EntityType& en, 
                   const DomainType& x, 
                   RangeType & ret) const;
 
     //! Evaluation of the discrete function
     template <class EntityType>
+    inline
     void evaluateLocal(EntityType& en, 
                        const DomainType& x, 
                        RangeType & ret) const;
 
     //! Evaluation of the discrete function
     template <class EntityType, class QuadratureType>
+    inline
     void evaluate(EntityType& en, 
                   QuadratureType& quad,
                   int quadPoint,
@@ -271,23 +279,28 @@ namespace Dune {
 
     //! Jacobian of the discrete function
     template <class EntityType>
+    inline
     void jacobianLocal(EntityType& en, 
                        const DomainType& x, 
                        JacobianRangeType& ret) const; 
 
     //! Jacobian of the discrete function
     template <class EntityType, class QuadratureType>
+    inline
     void jacobian(EntityType& en,
                   QuadratureType& quad,
                   int quadPoint,
                   JacobianRangeType& ret) const;
 
+    //! get the base function set
+    const BaseFunctionSetType& getBaseFunctionSet() const;
   private:
     //- Forbidden methods
     //! assignment operator
     ThisType& operator=(const ThisType& other);
 
     template <class EntityType>
+    inline
     void init(const EntityType& en);
   private:
     //- Data members
@@ -300,6 +313,8 @@ namespace Dune {
     mutable JacobianRangeType tmpGrad_;
 
     mutable bool init_;
+    mutable BaseFunctionSetType* baseSet_;
+  
   }; // end class AdaptiveLocalFunction
 
   //- Specialisations
@@ -452,7 +467,6 @@ namespace Dune {
     
     typedef typename Traits::DiscreteFunctionType DiscreteFunctionType;
     typedef typename Traits::DofStorageType DofStorageType;
-   
   public:
     //- Public methods
     //- Constructors and destructors
@@ -469,31 +483,38 @@ namespace Dune {
 
     //- Operators
     //! Random access operator
+    inline
     DofType& operator[] (int num);
 
      //! Cosnt random access operator
-    const DofType& operator[] (int num) const;
+     inline
+   const DofType& operator[] (int num) const;
 
     //- Methods
+    inline
     int numberOfDofs() const DUNE_DEPRECATED;
 
     //! Number of degrees of freedom
+    inline
     int numDofs() const;
 
     //! Evaluation
     template <class EntityType>
+    inline
     void evaluate(EntityType& en, 
                   const DomainType& x, 
                   RangeType & ret) const;
 
     //! Evaluation
     template <class EntityType>
+    inline
     void evaluateLocal(EntityType& en, 
                        const DomainType& x, 
                        RangeType & ret) const;
 
     //! Evaluation
     template <class EntityType, class QuadratureType>
+    inline
     void evaluate(EntityType& en,
                   QuadratureType& quad,
                   int quadPoint, 
@@ -501,12 +522,14 @@ namespace Dune {
 
     //! Evaluation
     template <class EntityType>
+    inline
     void jacobianLocal(EntityType& en, 
                        const DomainType& x, 
                        JacobianRangeType& ret) const;
 
     //! Evaluation
     template <class EntityType, class QuadratureType>
+    inline
     void jacobian(EntityType& en,
                   QuadratureType& quad,
                   int quadPoint,
@@ -514,14 +537,17 @@ namespace Dune {
 
     //- Additional methods for specialisation
     //! Assign a vector of dofs
+    inline
     void assign(int dofNum, const RangeType& dofs);
     
     //! Number of contained scalar base functions
+    inline
     int numDifferentBaseFunctions() const;
 
   private:
     //- Private methods
     template <class EntityType>
+    inline
     void init(const EntityType& en);
 
   private:
@@ -539,6 +565,7 @@ namespace Dune {
     mutable ContainedJacobianRangeType cTmpGradRef_;
     mutable ContainedJacobianRangeType cTmpGradReal_;
     mutable RangeType tmp_;
+    mutable BaseFunctionSetType* baseSet_;
 
   }; // end class AdaptiveLocalFunction (specialised for CombinedSpace)
   
