@@ -300,7 +300,7 @@ public:
   // A(l) 
     UGCtype integrationElement (const FieldVector<UGCtype, 2>& local) const;
 
-  //! can only be called for dim=dimworld!
+    //! !
     const FieldMatrix<UGCtype,2,2>& jacobianInverseTransposed (const FieldVector<UGCtype, 2>& local) const;
 
 private:
@@ -313,7 +313,7 @@ private:
     //! The element type, either triangle or quadrilateral
     NewGeometryType elementType_;
 
-  //! the vertex coordinates 
+  //! the vertex coordinates in UG numbering
     mutable FixedArray<FieldVector<UGCtype, 3>, 4> coord_;
 
     //! The jacobian inverse
