@@ -130,7 +130,7 @@ public:
     }
   
   /** @brief Postincrement operator. */
-  IntersectionIterator operator++(int)
+  IntersectionIterator operator++(int) DUNE_DEPRECATED
     {
       const IntersectionIterator tmp(*this);
       this->realIterator.increment();

@@ -29,7 +29,7 @@ public:
 //private:
   //! should not be used 
   /** @brief Postincrement operator. */
-  LeafIterator operator++(int)
+  LeafIterator operator++(int) DUNE_DEPRECATED 
     {
       const LeafIterator tmp(*this);
       this->realIterator.increment();
