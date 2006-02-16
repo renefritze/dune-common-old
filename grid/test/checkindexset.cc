@@ -38,7 +38,7 @@ void checkSubEntity ( const GridType & grid,
     OutputStreamImp & sout , MapType1 & subEntities , MapType2 & vertices ,
     MapType3 & vertexCoordsMap )
 {
-  NewGeometryType type = en.geometry().type();
+  GeometryType type = en.geometry().type();
   enum { dim = EntityType::dimension };
   typedef typename EntityType :: ctype coordType;
 
@@ -64,7 +64,7 @@ void checkSubEntity ( const GridType & grid,
 
       for(int subEntity = 0; subEntity < refElem.size(0,0,codim); subEntity++)
       {
-        typedef std::pair < int , NewGeometryType > SubEntityKeyType; 
+        typedef std::pair < int , GeometryType > SubEntityKeyType; 
         {
           int numSubEntities = refElem.size(subEntity,codim,dim);
           // every entity have at least one vertex
@@ -205,7 +205,7 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
   IteratorType endit  = lset.template end<codim,All_Partition>   ();
   IteratorType it = lset.template begin<codim,All_Partition> ();
 
-  std::set<NewGeometryType> geometryTypes;
+  std::set<GeometryType> geometryTypes;
 
   for (; it!=endit; ++it)
       geometryTypes.insert(it->geometry().type());
@@ -218,7 +218,7 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
           
 
   // And vice versa
-  for (std::set<NewGeometryType>::iterator it = geometryTypes.begin(); it!=geometryTypes.end(); ++it) {
+  for (std::set<GeometryType>::iterator it = geometryTypes.begin(); it!=geometryTypes.end(); ++it) {
       bool found = false;
       for (size_t i=0; i<lset.geomTypes(codim).size(); i++) 
           if (*it == lset.geomTypes(codim)[i]) {
@@ -235,7 +235,7 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
 
       std::cerr << "There is a mismatch in the list of geometry types of codim " << codim << "." << std::endl;
       std::cerr << "Geometry types present in the grid are:" << std::endl;
-      for (std::set<NewGeometryType>::iterator it = geometryTypes.begin(); it!=geometryTypes.end(); ++it)
+      for (std::set<GeometryType>::iterator it = geometryTypes.begin(); it!=geometryTypes.end(); ++it)
           std::cerr << "  " << *it << std::endl;
       
       std::cerr << std::endl << "but the method geomTypes() returned:" << std::endl;
@@ -304,7 +304,7 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
 
   //******************************************************************
  
-  typedef std::pair < int , NewGeometryType > SubEntityKeyType; 
+  typedef std::pair < int , GeometryType > SubEntityKeyType; 
   typedef std::map < int , std::pair<int,int> > subEntitymapType;
   std::map < SubEntityKeyType , std::vector<int> > subEntities;
   std::map < std::vector<int> , SubEntityKeyType > vertices;
@@ -336,7 +336,7 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
     assert( vertexCoordsMap.size() == count );
     
     // check whether size of vertices of set equals all found vertices 
-    assert( count == (unsigned int)lset.size(dim,Dune::NewGeometryType(0)) );
+    assert( count == (unsigned int)lset.size(dim,Dune::GeometryType(0)) );
   }
 
   {
@@ -345,7 +345,7 @@ void checkIndexSetForCodim ( const GridType &grid , const IndexSetType & lset,
     Iterator refit  = lset.template begin<0,All_Partition>();
     assert( refit != refend );
       
-    NewGeometryType type = refit->geometry().type();    
+    GeometryType type = refit->geometry().type();    
     
     const ReferenceElement< coordType, dim > & refElem =
       ReferenceElements< coordType, dim >::general(type);

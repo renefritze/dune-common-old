@@ -52,7 +52,7 @@ public:
   }
 
   //! get number of entities of given codim, type and on this level
-  int size (int codim, NewGeometryType type) const
+  int size (int codim, GeometryType type) const
   {
       return grid_->size(level_,codim, type);
   }
@@ -64,7 +64,7 @@ public:
   }
 
     /** \brief Deliver all geometry types used in this grid */
-  const std::vector<NewGeometryType>& geomTypes (int codim) const
+  const std::vector<GeometryType>& geomTypes (int codim) const
   {
 	return myTypes_[codim];
   }
@@ -108,13 +108,13 @@ public:
         // ///////////////////////////////////////////////
         if (numElements_>0) {
             myTypes_[0].resize(1);
-            myTypes_[0][0] = NewGeometryType(1);
+            myTypes_[0][0] = GeometryType(1);
         } else
             myTypes_[0].resize(0);
 
         if (numVertices_>0) {
             myTypes_[1].resize(1);
-            myTypes_[1][0] = NewGeometryType(0);
+            myTypes_[1][0] = GeometryType(0);
         } else
             myTypes_[1].resize(0);
     }
@@ -127,7 +127,7 @@ private:
     int numVertices_;
 
     /** \brief The GeometryTypes present for each codim */
-  std::vector<NewGeometryType> myTypes_[2];
+  std::vector<GeometryType> myTypes_[2];
 };
 
 template <class GridImp> 
@@ -178,7 +178,7 @@ public:
   }
 
   //! get number of entities of given codim, type on the leaf level
-  int size (int codim, NewGeometryType type) const
+  int size (int codim, GeometryType type) const
   {
       if (codim==GridImp::dimension) {
 
@@ -194,7 +194,7 @@ public:
   }
 
     /** deliver all geometry types used in this grid */
-  const std::vector<NewGeometryType>& geomTypes (int codim) const
+  const std::vector<GeometryType>& geomTypes (int codim) const
   {
 	return myTypes_[codim];
   }
@@ -244,13 +244,13 @@ public:
         // ///////////////////////////////////////////////
         if (numElements_>0) {
             myTypes_[0].resize(1);
-            myTypes_[0][0] = NewGeometryType(1);
+            myTypes_[0][0] = GeometryType(1);
         } else
             myTypes_[0].resize(0);
 
         if (numVertices_>0) {
             myTypes_[1].resize(1);
-            myTypes_[1][0] = NewGeometryType(0);
+            myTypes_[1][0] = GeometryType(0);
         } else
             myTypes_[1].resize(0);
 
@@ -264,7 +264,7 @@ private:
     int numVertices_;
 
     /** \brief The GeometryTypes present for each codim */
-    std::vector<NewGeometryType> myTypes_[2];
+    std::vector<GeometryType> myTypes_[2];
 };
 
 
