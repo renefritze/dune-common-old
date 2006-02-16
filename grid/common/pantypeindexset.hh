@@ -71,13 +71,13 @@ public:
     }
 
   //! get number of entities of given codim, type and on this level
-  int size (int codim, NewGeometryType type) const
+  int size (int codim, GeometryType type) const
   {
       return indexSet_->size(codim, type);
   }
 
   /** \brief Deliver all geometry types used in this grid */
-  const std::vector<NewGeometryType>& geomTypes (int codim) const
+  const std::vector<GeometryType>& geomTypes (int codim) const
   {
       return indexSet_->geomTypes(codim);
   }
@@ -106,14 +106,14 @@ public:
 
             offsets_[i].clear();
 
-            const std::vector<Dune::NewGeometryType>& geomTypes = indexSet_->geomTypes(i);
+            const std::vector<Dune::GeometryType>& geomTypes = indexSet_->geomTypes(i);
         
             if (geomTypes.size()==0)
                 return;
             
             unsigned int offset = 0;
             for (unsigned int j=0; j<geomTypes.size(); j++) {
-                offsets_[i].insert(std::pair<Dune::NewGeometryType,unsigned int>(geomTypes[j], offset));
+                offsets_[i].insert(std::pair<Dune::GeometryType,unsigned int>(geomTypes[j], offset));
                 offset += indexSet_->size(i, geomTypes[j]);
             }
             
@@ -126,7 +126,7 @@ private:
     const IndexSetType* indexSet_;
     
     
-    std::map<Dune::NewGeometryType,unsigned int> offsets_[dim+1];
+    std::map<Dune::GeometryType,unsigned int> offsets_[dim+1];
     
 };
 

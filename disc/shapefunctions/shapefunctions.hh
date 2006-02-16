@@ -146,7 +146,7 @@ namespace Dune
 	virtual int order () const = 0;
 
 	//! return type of element where this ShapeFunctionSet is for
-	virtual NewGeometryType type () const = 0;
+	virtual GeometryType type () const = 0;
 
 	//! virtual destructor
 	virtual ~ShapeFunctionSet () {}
@@ -195,7 +195,7 @@ namespace Dune
 	typedef ShapeFunctionSet<C,T,d,N> value_type;
 
 	//! access a shape function via type and order
-	virtual const value_type& operator() (NewGeometryType type, int order) const = 0;
+	virtual const value_type& operator() (GeometryType type, int order) const = 0;
 
 	//! virtual destructor
 	virtual ~ShapeFunctionSetContainer () {}

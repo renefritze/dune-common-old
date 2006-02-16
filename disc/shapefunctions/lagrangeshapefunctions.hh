@@ -7,7 +7,7 @@
 #include"common/fvector.hh"
 #include"common/exceptions.hh"
 #include"common/misc.hh"
-#include"grid/common/grid.hh"
+#include"common/geometrytype.hh"
 
 #include"shapefunctions.hh"
 #include"lagrange/cubeshapefunctions.hh"
@@ -202,7 +202,7 @@ namespace Dune
 	}
 
 	//! return type of element
-	virtual NewGeometryType type () const
+	virtual GeometryType type () const
 	{
 	  return Imp::type();
 	}
@@ -233,7 +233,7 @@ namespace Dune
 	//! type of objects in the container
 	typedef LagrangeShapeFunctionSet<C,T,d> value_type;
 
-	const value_type& operator() (NewGeometryType type, int order) const
+	const value_type& operator() (GeometryType type, int order) const
 	{
             if ( type.isCube() )
 		{
@@ -315,7 +315,7 @@ namespace Dune
 	//! type of objects in the container
 	typedef LagrangeShapeFunctionSet<C,T,3> value_type;
 
-	const value_type& operator() (NewGeometryType type, int order) const
+	const value_type& operator() (GeometryType type, int order) const
 	{
             if ( type.isCube() )
 		{
