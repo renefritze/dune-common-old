@@ -1496,8 +1496,8 @@ static inline FieldVector<K,dim> mult(const FieldMatrix<K,dim,dim> &matrix, cons
 }
 
 //! calculates ret = matrix^T * x 
-template <typename K, int dim>
-static inline FieldVector<K,dim> multTransposed(const FieldMatrix<K,dim,dim> &matrix, const FieldVector<K,dim> & x) 
+template <typename K, int rows, int cols>
+static inline FieldVector<K,rows> multTransposed(const FieldMatrix<K,rows,cols> &matrix, const FieldVector<K,cols> & x) 
 {
   FieldVector<K,rows> ret;
   typedef typename FieldMatrix<K,rows,cols>::size_type size_type;
