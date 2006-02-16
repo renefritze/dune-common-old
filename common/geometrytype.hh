@@ -14,7 +14,7 @@ namespace Dune {
     This class has to be extended if a grid implementation with new entity types
     is added to DUNE.
      */
-    class NewGeometryType
+    class GeometryType
     {
     public:
         /** \brief Each entity can be tagged by one of these basic types 
@@ -30,19 +30,18 @@ namespace Dune {
         short dim_;
 
     public:
-
         /** \brief Default constructor, not initializing anything */
-        NewGeometryType () {}
+        GeometryType () {}
 
         /** \brief Constructor */
-        NewGeometryType(BasicType basicType, unsigned int dim)
+        GeometryType(BasicType basicType, unsigned int dim)
             : basicType_(basicType), dim_(dim)
         {}
 
         /** \brief Constructor for vertices and segments
             \todo Add check for dim={0,1} when compiled with a suitable flag
         */
-        explicit NewGeometryType(unsigned int dim)
+        explicit GeometryType(unsigned int dim)
             : basicType_(cube), dim_(dim)
         {}
 
@@ -123,18 +122,18 @@ namespace Dune {
         /*@}*/
 
         /** \brief Check for equality */
-        bool operator==(const NewGeometryType& other) const {
+        bool operator==(const GeometryType& other) const {
             return ( (dim()==0 && other.dim()==0) 
                      || (dim()==1 && other.dim()==1)
                      || (dim()==other.dim() && basicType_==other.basicType_) );
         }
 
         /** \brief Check for inequality */
-        bool operator!=(const NewGeometryType& other) const {
+        bool operator!=(const GeometryType& other) const {
             return ! ((*this)==other);
         }
 
-        bool operator<(const NewGeometryType& other) const {
+        bool operator<(const GeometryType& other) const {
             if (dim() != other.dim())
                 return dim() < other.dim();
             else if (dim()==0 || dim()==1)
@@ -144,7 +143,7 @@ namespace Dune {
         }
 
         /** \brief Prints the type to an output stream */
-        friend std::ostream& operator<< (std::ostream& s, const NewGeometryType& a)
+        friend std::ostream& operator<< (std::ostream& s, const GeometryType& a)
         {
             switch (a.basicType_) {
             case simplex:   
@@ -164,9 +163,12 @@ namespace Dune {
         }
 
     };
+
+    //! to be removed soon 
+    typedef GeometryType NewGeometryType;
     
-    /** \brief Prints a NewGeometryType::BasicType to an output stream */
-    inline std::ostream& operator<< (std::ostream& s, NewGeometryType::BasicType type)
+    /** \brief Prints a GeometryType::BasicType to an output stream */
+    inline std::ostream& operator<< (std::ostream& s, GeometryType::BasicType type)
     {
       switch (type) {
       case NewGeometryType::simplex: s << "simplex"; break;
@@ -175,7 +177,6 @@ namespace Dune {
       case NewGeometryType::prism:   s << "prism";   break;
       default: s << "[unknown NewGeometryType::BasicType: " << int(type) << "]";
       }
-            
       return s;
     }
 }
