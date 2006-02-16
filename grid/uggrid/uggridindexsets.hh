@@ -73,7 +73,7 @@ public:
     }
 
   //! get number of entities of given codim, type and on this level
-  int size (int codim, NewGeometryType type) const
+  int size (int codim, GeometryType type) const
   {
 	if (codim==0) {
             if (type.isSimplex())
@@ -108,7 +108,7 @@ public:
   }
 
   /** \brief Deliver all geometry types used in this grid */
-  const std::vector<NewGeometryType>& geomTypes (int codim) const
+  const std::vector<GeometryType>& geomTypes (int codim) const
   {
 	return myTypes_[codim];
   }
@@ -145,7 +145,7 @@ public:
 		  // codim dim-1
 		  for (int i=0; i<eIt->template count<dim-1>(); i++)
 			{
-			  NewGeometryType gt = eIt->geometry().type();
+			  GeometryType gt = eIt->geometry().type();
 			  int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
 			  int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
 			  int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
@@ -158,7 +158,7 @@ public:
 		  if (dim==3)
 			for (int i=0; i<eIt->template count<1>(); i++)
 			  {
-                              NewGeometryType gt = eIt->geometry().type();
+                              GeometryType gt = eIt->geometry().type();
                               int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
 				index = -1;
 			  }
@@ -182,7 +182,7 @@ public:
         for (; eIt!=eEndIt; ++eIt) {
  
             // codim 0 (elements)
-            NewGeometryType eType = eIt->geometry().type();
+            GeometryType eType = eIt->geometry().type();
             if (eType.isSimplex()) {
                 UG_NS<dim>::levelIndex(grid_->getRealImplementation(*eIt).target_) = numSimplices_++;
             } else if (eType.isPyramid()) {
@@ -201,7 +201,7 @@ public:
 			// codim dim-1 (edges)
 			for (int i=0; i<eIt->template count<dim-1>(); i++)
 			  {
-				NewGeometryType gt = eIt->geometry().type();
+				GeometryType gt = eIt->geometry().type();
 				int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
 				int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
 				int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
@@ -215,10 +215,10 @@ public:
 			if (dim==3)
 			  for (int i=0; i<eIt->template count<1>(); i++)
 				{
-				  NewGeometryType gt = eIt->geometry().type();
+				  GeometryType gt = eIt->geometry().type();
 				  int& index = UG_NS<dim>::levelIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
 				  if (index<0) { // not visited yet 
-                                      NewGeometryType gtType = ReferenceElements<double,dim>::general(gt).type(i,1);
+                                      GeometryType gtType = ReferenceElements<double,dim>::general(gt).type(i,1);
                                       if (gtType.isSimplex()) {
                                           index = numTriFaces_++;
                                       } else if (gtType.isCube()) {
@@ -234,24 +234,24 @@ public:
         // Update the list of geometry types present
         myTypes_[0].resize(0);
         if (numSimplices_ > 0)
-            myTypes_[0].push_back(NewGeometryType(NewGeometryType::simplex,dim));
+            myTypes_[0].push_back(GeometryType(GeometryType::simplex,dim));
         if (numPyramids_ > 0)
-            myTypes_[0].push_back(NewGeometryType(NewGeometryType::pyramid,dim));
+            myTypes_[0].push_back(GeometryType(GeometryType::pyramid,dim));
         if (numPrisms_ > 0)
-            myTypes_[0].push_back(NewGeometryType(NewGeometryType::prism,dim));
+            myTypes_[0].push_back(GeometryType(GeometryType::prism,dim));
         if (numCubes_ > 0)
-            myTypes_[0].push_back(NewGeometryType(NewGeometryType::cube,dim));
+            myTypes_[0].push_back(GeometryType(GeometryType::cube,dim));
 
         myTypes_[dim-1].resize(0);
-        myTypes_[dim-1].push_back(NewGeometryType(1));
+        myTypes_[dim-1].push_back(GeometryType(1));
         
         if (dim==3)
             {
                 myTypes_[1].resize(0);
                 if (numTriFaces_ > 0)
-                    myTypes_[1].push_back(NewGeometryType(NewGeometryType::simplex,dim-1));		
+                    myTypes_[1].push_back(GeometryType(GeometryType::simplex,dim-1));		
                 if (numQuadFaces_ > 0)
-                    myTypes_[1].push_back(NewGeometryType(NewGeometryType::cube,dim-1));		
+                    myTypes_[1].push_back(GeometryType(GeometryType::cube,dim-1));		
             }
         
         // //////////////////////////////
@@ -266,7 +266,7 @@ public:
             UG_NS<dim>::levelIndex(grid_->getRealImplementation(*vIt).target_) = numVertices_++;
 
 		myTypes_[dim].resize(0);
-		myTypes_[dim].push_back(NewGeometryType(NewGeometryType::cube,0));
+		myTypes_[dim].push_back(GeometryType(GeometryType::cube,0));
     }
 
   const GridImp* grid_;
@@ -281,7 +281,7 @@ public:
   int numTriFaces_;
   int numQuadFaces_;
 
-  std::vector<NewGeometryType> myTypes_[dim+1];
+  std::vector<GeometryType> myTypes_[dim+1];
 };
 
 template <class GridImp> 
@@ -340,7 +340,7 @@ public:
   }
 
   //! get number of entities of given codim and type 
-  int size (int codim, NewGeometryType type) const
+  int size (int codim, GeometryType type) const
   {
 	if (codim==0) {
             if (type.isSimplex())
@@ -372,7 +372,7 @@ public:
   }
 
   /** deliver all geometry types used in this grid */
-  const std::vector<NewGeometryType>& geomTypes (int codim) const
+  const std::vector<GeometryType>& geomTypes (int codim) const
   {
 	return myTypes_[codim];
   }
@@ -411,7 +411,7 @@ public:
 				// codim dim-1
 				for (int i=0; i<eIt->template count<dim-1>(); i++)
 				  {
-					NewGeometryType gt = eIt->geometry().type();
+					GeometryType gt = eIt->geometry().type();
 					int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
 					int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
 					int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
@@ -425,7 +425,7 @@ public:
 				if (dim==3)
 				  for (int i=0; i<eIt->template count<1>(); i++)
 					{
-					  NewGeometryType gt = eIt->geometry().type();
+					  GeometryType gt = eIt->geometry().type();
 					  int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
 					  index = -1;
 					}
@@ -461,7 +461,7 @@ public:
 				// codim dim-1 (edges)
 				for (int i=0; i<eIt->template count<dim-1>(); i++)
 				  {
-					NewGeometryType gt = eIt->geometry().type();
+					GeometryType gt = eIt->geometry().type();
 					int a=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,0,dim);	
 					int b=ReferenceElements<double,dim>::general(gt).subEntity(i,dim-1,1,dim);
 					int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::GetEdge(UG_NS<dim>::Corner(target_,
@@ -490,12 +490,12 @@ public:
 				if (dim==3)
 				  for (int i=0; i<eIt->template count<1>(); i++)
 					{
-                                            NewGeometryType gt = eIt->geometry().type();
+                                            GeometryType gt = eIt->geometry().type();
                                             int& index = UG_NS<dim>::leafIndex(UG_NS<dim>::SideVector(target_,UGGridRenumberer<dim>::facesDUNEtoUG(i,gt)));
 					  if (index<0) // not visited yet 
 						{
 						  // get new index and assign
-                                                    NewGeometryType gtType = ReferenceElements<double,dim>::general(gt).type(i,1);
+                                                    GeometryType gtType = ReferenceElements<double,dim>::general(gt).type(i,1);
                                                     if (gtType.isSimplex())
                                                         index = numTriFaces_++;
                                                     else if (gtType.isCube())
@@ -523,15 +523,15 @@ public:
 
         // Update the list of geometry types present
 		myTypes_[dim-1].resize(0);
-		myTypes_[dim-1].push_back(NewGeometryType(NewGeometryType::cube,1));
+		myTypes_[dim-1].push_back(GeometryType(GeometryType::cube,1));
 
 		if (dim==3)
 		  {
 			myTypes_[1].resize(0);
 			if (numTriFaces_ > 0)
-			  myTypes_[1].push_back(NewGeometryType(NewGeometryType::simplex,dim-1));
+			  myTypes_[1].push_back(GeometryType(GeometryType::simplex,dim-1));
 			if (numQuadFaces_ > 0)
-			  myTypes_[1].push_back(NewGeometryType(NewGeometryType::cube,dim-1));
+			  myTypes_[1].push_back(GeometryType(GeometryType::cube,dim-1));
 		  }
 
         // ///////////////////////////////
@@ -547,7 +547,7 @@ public:
 
         for (; eIt!=eEndIt; ++eIt) {
 
-            NewGeometryType eType = eIt->geometry().type();
+            GeometryType eType = eIt->geometry().type();
 
             if (eType.isSimplex())
                 UG_NS<dim>::leafIndex(grid_.getRealImplementation(*eIt).target_) = numSimplices_++;
@@ -566,13 +566,13 @@ public:
         // Update the list of geometry types present
         myTypes_[0].resize(0);
         if (numSimplices_ > 0)
-            myTypes_[0].push_back(NewGeometryType(NewGeometryType::simplex,dim));
+            myTypes_[0].push_back(GeometryType(GeometryType::simplex,dim));
         if (numPyramids_ > 0)
-            myTypes_[0].push_back(NewGeometryType(NewGeometryType::pyramid,dim));
+            myTypes_[0].push_back(GeometryType(GeometryType::pyramid,dim));
         if (numPrisms_ > 0)
-            myTypes_[0].push_back(NewGeometryType(NewGeometryType::prism,dim));
+            myTypes_[0].push_back(GeometryType(GeometryType::prism,dim));
         if (numCubes_ > 0)
-            myTypes_[0].push_back(NewGeometryType(NewGeometryType::cube,dim));
+            myTypes_[0].push_back(GeometryType(GeometryType::cube,dim));
 
 
         // //////////////////////////////
@@ -587,7 +587,7 @@ public:
             UG_NS<dim>::leafIndex(grid_.getRealImplementation(*vIt).target_) = numVertices_++;
 
         myTypes_[dim].resize(0);
-        myTypes_[dim].push_back(NewGeometryType(0));
+        myTypes_[dim].push_back(GeometryType(0));
 
     }
         
@@ -612,7 +612,7 @@ public:
   int numTriFaces_;
   int numQuadFaces_;
 
-  std::vector<NewGeometryType> myTypes_[dim+1];
+  std::vector<GeometryType> myTypes_[dim+1];
 };
 
 
