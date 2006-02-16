@@ -1499,12 +1499,12 @@ static inline FieldVector<K,dim> mult(const FieldMatrix<K,dim,dim> &matrix, cons
 template <typename K, int dim>
 static inline FieldVector<K,dim> multTransposed(const FieldMatrix<K,dim,dim> &matrix, const FieldVector<K,dim> & x) 
 {
-  FieldVector<K,dim> ret;
-  typedef typename FieldMatrix<K,dim,dim>::size_type size_type;
-  for(size_type i=0; i<dim; i++)
+  FieldVector<K,rows> ret;
+  typedef typename FieldMatrix<K,rows,cols>::size_type size_type;
+  for(size_type i=0; i<rows; i++)
   {
     ret[i] = 0.0;
-    for(size_type j=0; j<dim; j++)
+    for(size_type j=0; j<cols; j++)
     {
       ret[i] += matrix[j][i]*x[j];
     }
