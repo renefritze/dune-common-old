@@ -1,7 +1,7 @@
 // $Id$
 
 /** \file
-    \brief A unit test for the class PanTypeIndexSet
+    \brief A unit test for the MultipleCodimMultipleGeometryMapper
 */
 
 #include <config.h>
@@ -11,12 +11,13 @@
 
 #include <dune/grid/uggrid.hh>
 #include <dune/io/file/amirameshreader.hh>
-#include <dune/grid/common/pantypeindexset.hh>
+#include <dune/grid/common/mcmgmapper.hh>
 
 using namespace Dune;
 
+#if 0
 template <class GridType, class HostIndexSet>
-void checkPanTypeIndexSet(const PanTypeIndexSet<GridType,HostIndexSet>& panTypeIndexSet,
+void checkMapper(const PanTypeIndexSet<GridType,HostIndexSet>& panTypeIndexSet,
                           const HostIndexSet& hostIndexSet)
 {
     // //////////////////////////////////////////////////////////////
@@ -119,6 +120,8 @@ void checkPanTypeIndexSet(const PanTypeIndexSet<GridType,HostIndexSet>& panTypeI
         DUNE_THROW(GridError, "PanTypeIndex for codim 1 is not consecutive!");
         
 }
+#endif
+
 
 /*
   PanTypeIndexSets only do something helpful on grids with more than one
@@ -128,7 +131,7 @@ void checkPanTypeIndexSet(const PanTypeIndexSet<GridType,HostIndexSet>& panTypeI
 
 int main () try
 {
-
+#if 0
     // ////////////////////////////////////////////////////////////////////////
     //  Do the standard grid test for a 2d UGGrid
     // ////////////////////////////////////////////////////////////////////////
@@ -182,7 +185,7 @@ int main () try
       }
 
     }
-
+#endif
     return 0;
 
  } catch (Exception &e) {
