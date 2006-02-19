@@ -2006,7 +2006,8 @@ public:
 
 private:
   const GridImp& grid;
-  std::vector<NewGeometryType> mytypes[GridImp::dimension+1];
+  enum { ncodim = RemoveConst<GridImp>::Type::dimension+1 };
+  std::vector<NewGeometryType> mytypes[ncodim];
 };
 
 
@@ -2020,7 +2021,7 @@ private:
 //========================================================================
 
 template<class GridImp>
-class YaspGlobalIdSet : public IdSet<GridImp,YaspGlobalIdSet<GridImp>,
+class YaspGlobalIdSet : public IdSetDefaultImplementation<GridImp,YaspGlobalIdSet<GridImp>,
                                      typename RemoveConst<GridImp>::Type::PersistentIndexType >
 /*
   We used the RemoveConst to extract the Type from the mutable class,
