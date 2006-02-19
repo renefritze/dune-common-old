@@ -942,7 +942,7 @@ struct SGridLevelIndexSetTypes
 };
 
 template<class GridImp>
-class SGridLevelIndexSet : public IndexSet<GridImp,SGridLevelIndexSet<GridImp>,SGridLevelIndexSetTypes<GridImp> >
+class SGridLevelIndexSet : public IndexSetDefaultImplementation<GridImp,SGridLevelIndexSet<GridImp>,SGridLevelIndexSetTypes<GridImp> >
 {
   typedef IndexSet<GridImp,SGridLevelIndexSet<GridImp>,SGridLevelIndexSetTypes<GridImp> > Base;
 public:
@@ -1019,7 +1019,7 @@ struct SGridLeafIndexSetTypes
 };
 
 template<class GridImp>
-class SGridLeafIndexSet : public IndexSet<GridImp,SGridLeafIndexSet<GridImp>,SGridLeafIndexSetTypes<GridImp> >
+class SGridLeafIndexSet : public IndexSetDefaultImplementation<GridImp,SGridLeafIndexSet<GridImp>,SGridLeafIndexSetTypes<GridImp> >
 {
   typedef IndexSet<GridImp,SGridLeafIndexSet<GridImp>,SGridLeafIndexSetTypes<GridImp> > Base;
     enum {dim = RemoveConst<GridImp>::Type::dimension};
@@ -1058,7 +1058,7 @@ public:
   //! get number of entities of given codim, type and level (the level is known to the object)
   int size (int codim, GeometryType type) const
   {
-	return grid.size(grid.maxLevel(),codim);
+	  return grid.size(grid.maxLevel(),codim);
   }
 
   //! deliver all geometry types used in this grid
@@ -1096,7 +1096,7 @@ private:
 
 template<class GridImp>
 class SGridGlobalIdSet :
-  public IdSet<GridImp,SGridGlobalIdSet<GridImp>, typename RemoveConst<GridImp>::Type::PersistentIndexType>
+  public IdSetDefaultImplementation<GridImp,SGridGlobalIdSet<GridImp>, typename RemoveConst<GridImp>::Type::PersistentIndexType>
   /*
     We used the RemoveConst to extract the Type from the mutable class,
     because the const class is not instatiated yet.
@@ -1121,7 +1121,7 @@ public:
   template<int cd>
   IdType id (const typename RemoveConst<GridImp>::Type::Traits::template Codim<cd>::Entity& e) const 
   {
-	return grid.template getRealEntity<cd>(e).persistentIndex();
+	  return grid.template getRealEntity<cd>(e).persistentIndex();
   }
 
   //! get id of subentity
@@ -1130,9 +1130,9 @@ public:
     because the const class is not instatiated yet.
   */
   template<int cc>
-  IdType subid (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
+  IdType subId (const typename RemoveConst<GridImp>::Type::Traits::template Codim<0>::Entity& e, int i) const
   {
-	return grid.template getRealEntity<0>(e).template subPersistentIndex<cc>(i);
+  	return grid.template getRealEntity<0>(e).template subPersistentIndex<cc>(i);
   }
 
 private:
