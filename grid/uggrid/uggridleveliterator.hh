@@ -4,7 +4,7 @@
 #include <dune/grid/uggrid/uggridentitypointer.hh>
 
 /** \file
- * \brief The UGGridLevelIterator class and its specializations
+ * \brief The UGGridLevelIterator class
  */
 
 namespace Dune {
