@@ -7,7 +7,6 @@
 
 namespace UG2d {
     struct multigrid;
-    struct domain;
     struct grid;
 
     union element;
@@ -18,7 +17,6 @@ namespace UG2d {
 
 namespace UG3d {
     struct multigrid;
-    struct domain;
     struct grid;
 
     union element;
@@ -41,8 +39,6 @@ public:
 
     typedef UG2d::grid GridType;
 
-    typedef UG2d::domain DomainType;
-
     typedef UG2d::node Node;
 
     typedef UG2d::element Element;
@@ -55,8 +51,6 @@ public:
     typedef UG3d::multigrid MultiGridType;
 
     typedef UG3d::grid GridType;
-
-    typedef UG3d::domain DomainType;
 
     typedef UG3d::node Node;
 
@@ -88,12 +82,7 @@ public:
 };
 
 template <int codim, int dim>
-class TargetType 
-{
-public:
-    typedef void T;
-
-};
+class TargetType {};
 
 template <>
 class TargetType<0,3>
