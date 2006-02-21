@@ -763,8 +763,8 @@ Has to be checked
 	typedef typename GridImp::ctype ct;
 	typedef Dune::Geometry<mydimension, mydimension, GridImp, Simplex::Geometry> ReferenceGeometry;
       public:
-	NewGeometryType type() const
-	{ return NewGeometryType(NewGeometryType::simplex, mydimension); }
+	GeometryType type() const
+	{ return GeometryType(GeometryType::simplex, mydimension); }
 
 	int corners() const
 	{ return mydimension + 1; }
@@ -904,7 +904,7 @@ Has to be checked
     //
 
     template<class CoordType, int dim>
-    struct Traits<NewGeometryType::simplex, CoordType, NewGeometryType::simplex, dim>
+    struct Traits<GeometryType::simplex, CoordType, GeometryType::simplex, dim>
     {
       typedef Simplex::RefinementImp<dim, CoordType> Imp;
     };
