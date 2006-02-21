@@ -164,9 +164,6 @@ namespace Dune {
 
     };
 
-    //! to be removed soon 
-    typedef GeometryType NewGeometryType;
-    
     /** \brief Prints a GeometryType::BasicType to an output stream */
     inline std::ostream& operator<< (std::ostream& s, GeometryType::BasicType type)
     {
@@ -175,7 +172,7 @@ namespace Dune {
       case GeometryType::cube:    s << "cube";    break;
       case GeometryType::pyramid: s << "pyramid"; break;
       case GeometryType::prism:   s << "prism";   break;
-      default: s << "[unknown NewGeometryType::BasicType: " << int(type) << "]";
+      default: s << "[unknown GeometryType::BasicType: " << int(type) << "]";
       }
       return s;
     }
