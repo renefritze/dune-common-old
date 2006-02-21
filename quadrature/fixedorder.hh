@@ -157,7 +157,7 @@ class QuadratureOld : public QuadratureDefault  < RangeFieldType ,
   
 public:
   //! Constructor building the quadrature 
-  QuadratureOld ( int id , NewGeometryType eltype, int polOrd ) : 
+  QuadratureOld ( int id , GeometryType eltype, int polOrd ) : 
     order_ ( polOrd )  , eltype_ ( eltype ) 
   {
     switch ( eltype_ )

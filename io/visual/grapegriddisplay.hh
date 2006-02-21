@@ -204,7 +204,7 @@ enum GRAPE_ElementType
     };
 
 //! convert dune geometry types to grape geometry types with numbers 
-static inline GRAPE_ElementType convertToGrapeType ( NewGeometryType type , int dim )
+static inline GRAPE_ElementType convertToGrapeType ( GeometryType type , int dim )
 {
   if(dim < 3) 
   {
