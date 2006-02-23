@@ -176,8 +176,10 @@ public:
       dm_.dofCompress();
 
     // here the communicate and load-balancing should be called 
-    //grid_.loadBalance(dm_);
-    //grid_.communicate(dm_);
+#ifdef _ALU3DGRID_PARALLEL_
+    grid_.loadBalance(dm_);
+    grid_.communicate(dm_);
+#endif
     
     // do cleanup 
     grid_.postAdapt();
@@ -297,7 +299,7 @@ class RestProlOperatorFV
   typedef typename DiscreteFunctionType::DomainType DomainType;
   typedef BaryCenterQuad < RangeFieldType , DomainType , 0 > BaryQuadType;
 public:  
-    //! Constructor
+  //! Constructor
   RestProlOperatorFV ( DiscreteFunctionType & df , GeometryType eltype ) : df_ (df) , 
   quad_(eltype) , weight_(-1.0)
   {
@@ -330,7 +332,6 @@ public:
     
     LocalFunctionType vati_ =df_.localFunction( father);
     LocalFunctionType sohn_ =df_.localFunction( son   );
-
 
     if(initialize)
     {
