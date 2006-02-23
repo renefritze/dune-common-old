@@ -577,7 +577,7 @@ namespace Dune
 	  indentUp();
 	  for (functioniterator it=celldata.begin(); it!=celldata.end(); ++it)
 		{
-		  VTKDataArrayWriter<float> *p;
+		  VTKDataArrayWriter<float> *p=0;
 		  if (datamode==VTKOptions::ascii)
 			p = new VTKAsciiDataArrayWriter<float>(s,(*it)->name(),(*it)->ncomps());
 		  if (datamode==VTKOptions::binary)		  
@@ -613,7 +613,7 @@ namespace Dune
 	  indentUp();
 	  for (functioniterator it=vertexdata.begin(); it!=vertexdata.end(); ++it)
 		{
-		  VTKDataArrayWriter<float> *p;
+		  VTKDataArrayWriter<float> *p=0;
 		  if (datamode==VTKOptions::ascii)
 			p = new VTKAsciiDataArrayWriter<float>(s,(*it)->name(),(*it)->ncomps()); 
 		  if (datamode==VTKOptions::binary)
@@ -644,7 +644,7 @@ namespace Dune
 	  indent(s); s << "<Points>" << std::endl;
 	  indentUp();
 
-	  VTKDataArrayWriter<float> *p;
+	  VTKDataArrayWriter<float> *p=0;
 	  if (datamode==VTKOptions::ascii)
 		p = new VTKAsciiDataArrayWriter<float>(s,"Coordinates",3);
 	  if (datamode==VTKOptions::binary)
@@ -679,7 +679,7 @@ namespace Dune
 	  indentUp();
 
 	  // connectivity
-	  VTKDataArrayWriter<int> *p1;
+	  VTKDataArrayWriter<int> *p1=0;
 	  if (datamode==VTKOptions::ascii)
 		p1 = new VTKAsciiDataArrayWriter<int>(s,"connectivity",1); 
 	  if (datamode==VTKOptions::binary)
@@ -693,7 +693,7 @@ namespace Dune
 	  delete p1;
 
 	  // offsets
-	  VTKDataArrayWriter<int> *p2;
+	  VTKDataArrayWriter<int> *p2=0;
 	  if (datamode==VTKOptions::ascii)
 		p2 = new VTKAsciiDataArrayWriter<int>(s,"offsets",1);
 	  if (datamode==VTKOptions::binary)
@@ -710,7 +710,7 @@ namespace Dune
 	  delete p2;
 
 	  // types
-	  VTKDataArrayWriter<unsigned char> *p3; 
+	  VTKDataArrayWriter<unsigned char> *p3=0; 
 	  if (datamode==VTKOptions::ascii)
 		p3 = new VTKAsciiDataArrayWriter<unsigned char>(s,"types",1);
 	  if (datamode==VTKOptions::binary)
@@ -929,7 +929,7 @@ namespace Dune
 	  //! finish output; writes end tag
 	  ~VTKBinaryDataArrayWriter ()
 	  {
-		int codelength;
+// 		int codelength;
 		if (n>0)
 		  {
 			//			codelength = base64::base64_encode_block(buffer,n,code,&_state);
