@@ -374,7 +374,7 @@ protected:
   DofArrayType & dofVec_;
 
   //! the corresponding base function set 
-  mutable BaseFunctionSetType* baseSet_;
+  mutable const BaseFunctionSetType* baseSet_;
   
   //! is it initialised?
   mutable bool init_;
