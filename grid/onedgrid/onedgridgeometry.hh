@@ -77,12 +77,12 @@ public:
     int corners () const {return 1;}
 
     //! access to coordinates of corners. Index is the number of the corner 
-    const FieldVector<OneDCType, 1>& operator[] (int i) const {
+    const FieldVector<typename GridImp::ctype, 1>& operator[] (int i) const {
         return pos_;
     }
 
     //private:
-    FieldVector<OneDCType, 1> pos_;
+    FieldVector<typename GridImp::ctype, 1> pos_;
 
 };
 
@@ -105,20 +105,20 @@ public:
     int corners () const {return 1;}
 
     //! access to coordinates of corners. Index is the number of the corner 
-    const FieldVector<OneDCType, 1>& operator[] (int i) const {
+    const FieldVector<typename GridImp::ctype, 1>& operator[] (int i) const {
         return target_->pos_;
     }
 
     /** \brief Maps a local coordinate within reference element to 
      * global coordinate in element  */
-    FieldVector<OneDCType, 1> global (const FieldVector<OneDCType, 0>& local) const {
+    FieldVector<typename GridImp::ctype, 1> global (const FieldVector<typename GridImp::ctype, 0>& local) const {
         return target_->pos_;
     }
 
     /** \brief Maps a global coordinate within the element to a 
      * local coordinate in its reference element */
-    FieldVector<OneDCType, 0> local (const FieldVector<OneDCType, 1>& global) const {
-        FieldVector<OneDCType, 0> l;
+    FieldVector<typename GridImp::ctype, 0> local (const FieldVector<typename GridImp::ctype, 1>& global) const {
+        FieldVector<typename GridImp::ctype, 0> l;
         return l;
     }
 
@@ -137,7 +137,7 @@ public:
     This method really doesn't make much sense for a zero-dimensional
     object.  It always returns '1'.
     */
-    OneDCType integrationElement (const FieldVector<OneDCType, 0>& local) const {
+    typename GridImp::ctype integrationElement (const FieldVector<typename GridImp::ctype, 0>& local) const {
         return 1;
     }
 
@@ -180,15 +180,15 @@ public:
     int corners () const {return 2;}
 
     //! access to coordinates of corners. Index is the number of the corner 
-    const FieldVector<OneDCType, coorddim>& operator[](int i) const {
+    const FieldVector<typename GridImp::ctype, coorddim>& operator[](int i) const {
         assert(i==0 || i==1);
         return (storeCoordsLocally_) ? pos_[i] : target_->vertex_[i]->pos_;
     }
 
     /** \brief Maps a local coordinate within reference element to 
      * global coordinate in element  */
-    FieldVector<OneDCType, coorddim> global (const FieldVector<OneDCType, mydim>& local) const {
-        FieldVector<OneDCType, coorddim> g;
+    FieldVector<typename GridImp::ctype, coorddim> global (const FieldVector<typename GridImp::ctype, mydim>& local) const {
+        FieldVector<typename GridImp::ctype, coorddim> g;
         g[0] = (storeCoordsLocally_)
             ? pos_[0][0] * (1-local[0]) + pos_[1][0] * local[0]
             : target_->vertex_[0]->pos_[0] * (1-local[0]) + target_->vertex_[1]->pos_[0] * local[0];
@@ -197,8 +197,8 @@ public:
 
     /** \brief Maps a global coordinate within the element to a 
      * local coordinate in its reference element */
-    FieldVector<OneDCType, mydim> local (const FieldVector<OneDCType, coorddim>& global) const {
-        FieldVector<OneDCType, mydim> l;
+    FieldVector<typename GridImp::ctype, mydim> local (const FieldVector<typename GridImp::ctype, coorddim>& global) const {
+        FieldVector<typename GridImp::ctype, mydim> l;
         if (storeCoordsLocally_) {
             l[0] = (global[0] - pos_[0][0]) / (pos_[1][0] - pos_[0][0]);
         } else {
@@ -210,7 +210,7 @@ public:
     }
     
     //! Returns true if the point is in the current element
-    bool checkInside(const FieldVector<OneDCType, coorddim> &global) const {
+    bool checkInside(const FieldVector<typename GridImp::ctype, coorddim> &global) const {
         return (storeCoordsLocally_)
             ? pos_[0][0] <= global[0] && global[0] <= pos_[1][0]
             : target_->vertex_[0]->pos_[0] <= global[0] && global[0] <= target_->vertex_[1]->pos_[0];
@@ -218,14 +218,14 @@ public:
 
     /** ???
    */
-    OneDCType integrationElement (const FieldVector<OneDCType, mydim>& local) const {
+    typename GridImp::ctype integrationElement (const FieldVector<typename GridImp::ctype, mydim>& local) const {
         return (storeCoordsLocally_)
             ? pos_[1][0] - pos_[0][0]
             : target_->vertex_[1]->pos_[0] - target_->vertex_[0]->pos_[0];
     }
 
     //! The Jacobian matrix of the mapping from the reference element to this element
-    const FieldMatrix<OneDCType,mydim,mydim>& jacobianInverseTransposed (const FieldVector<OneDCType, mydim>& local) const {
+    const FieldMatrix<typename GridImp::ctype,mydim,mydim>& jacobianInverseTransposed (const FieldVector<typename GridImp::ctype, mydim>& local) const {
         if (storeCoordsLocally_)
             jacInverse_[0][0] = 1 / (pos_[1][0] - pos_[0][0]);
         else
@@ -241,10 +241,10 @@ public:
     bool storeCoordsLocally_;
 
     // Stores the element corner positions if it is returned as geometryInFather
-    FieldVector<OneDCType,coorddim> pos_[2];
+    FieldVector<typename GridImp::ctype,coorddim> pos_[2];
 
     //! The jacobian inverse
-    mutable FieldMatrix<OneDCType,coorddim,coorddim> jacInverse_;
+    mutable FieldMatrix<typename GridImp::ctype,coorddim,coorddim> jacInverse_;
 
 };
 
