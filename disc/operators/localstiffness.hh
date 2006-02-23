@@ -69,6 +69,8 @@ namespace Dune
 	typedef typename G::ctype DT;
 	typedef typename G::Traits::template Codim<0>::Entity Entity;
 	enum {n=G::dimension};
+
+  protected:
 	enum {SIZE=10};
 
   public:
@@ -158,7 +160,7 @@ namespace Dune
 	//! set the current size of the local stiffness matrix
 	void setcurrentsize (int s)
 	{
-	  if (s>=10)
+	  if (s>=SIZE)
  		DUNE_THROW(MathError,"LocalStiffness: increase SIZE");		
 	  currentsize_ = s;
 	}
@@ -172,9 +174,9 @@ namespace Dune
   protected:
 	// assembled data
 	int currentsize_;
-	MBlockType A[10][10];
-	VBlockType b[10];
-	BCBlockType bctype[10];
+	MBlockType A[SIZE][SIZE];
+	VBlockType b[SIZE];
+	BCBlockType bctype[SIZE];
   };
 
 
