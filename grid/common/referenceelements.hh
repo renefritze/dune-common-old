@@ -562,6 +562,7 @@ namespace Dune
     
     ReferenceSimplex ()
     {
+	  assert(dim<=3);
       for (int i=0; i<=dim; ++i)
 		sizes[i]=0;
       for (int i=0; i<MAXE; ++i) 
