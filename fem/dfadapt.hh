@@ -379,9 +379,11 @@ protected:
   //! is it initialised?
   mutable bool init_;
 
-  //! 
+  //! actual geometry type 
   mutable GeometryType geoType_;
+  //! id of last initialized entity
   mutable IdType id_;
+  //! corresponding local id set 
   const LocalIdSetType& idSet_;
 }; // end LocalFunctionAdapt 
 

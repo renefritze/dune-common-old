@@ -406,8 +406,8 @@ LocalFunctionAdapt( const DiscreteFunctionSpaceType &f ,
   fSpace_ ( f ),
   values_ (),
   dofVec_ ( dofVec ),
-  init_(false),
   baseSet_(0),
+  init_(false),
   id_(-1),
   idSet_(f.grid().localIdSet())
 {}
