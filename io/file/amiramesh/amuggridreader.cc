@@ -91,7 +91,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::createDomain(UGGrid<3,3>& grid,
         // Gets the vertices of a boundary segment
         AmiraGetNodeNumbersOfSegment(point, i);
 
-        std::vector<int> vertices(3);
+        std::vector<unsigned int> vertices(3);
         vertices[0] = point[0];
         vertices[1] = point[1];
         vertices[2] = point[2];
@@ -120,7 +120,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(Dune::UGGrid<3,3>& grid,
     dverb << "This is the AmiraMesh reader for UGGrid<3,3>!" << std::endl;
 
     // Officially start grid creation
-    grid.createbegin();
+    grid.createBegin();
 
     // /////////////////////////////////////////////////////
     // Load the AmiraMesh file
@@ -155,7 +155,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::read(Dune::UGGrid<3,3>& grid,
     dverb << "This is the AmiraMesh reader for UGGrid<3,3>!" << std::endl;
 
     // Officially start grid creation
-    grid.createbegin();
+    grid.createBegin();
 
     // /////////////////////////////////////////////////////
     // Load the AmiraMesh file
@@ -333,7 +333,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<3,3> >::buildGrid(UGGrid<3,3>& grid,
   std::cout << "AmiraMesh reader: " << noOfCreatedElem << " elements created.\n";
   delete am;
 
-  grid.createend();
+  grid.createEnd();
 
 }
 
@@ -353,7 +353,7 @@ void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
     dverb << "Loading 2D Amira mesh " << filename << std::endl;
 
     // Officially start grid creation
-    grid.createbegin();
+    grid.createBegin();
     
     // /////////////////////////////////////////////////////
     // Load the AmiraMesh file
@@ -458,6 +458,6 @@ void Dune::AmiraMeshReader<Dune::UGGrid<2,2> >::read(Dune::UGGrid<2,2>& grid,
 
   std::cout << "amiraloadmesh: " << noOfCreatedElem << " elements created" << std::endl;
 
-  grid.createend();
+  grid.createEnd();
 
 }
