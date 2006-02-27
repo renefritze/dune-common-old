@@ -468,7 +468,7 @@ void Dune::AmiraMeshWriter<GridType>::writeBlockVector(const GridType& grid,
     if (GridType::dimension==2)
         am.parameters.set("ContentType", "HxTriangularData");
 
-    if (!containsOnlyTetrahedra && GridType::dimension==3) {
+   if (!containsOnlyTetrahedra && GridType::dimension==3) {
 
         int numElements = grid.size(level, 0);
         AmiraMesh::Location* hexa_loc = new AmiraMesh::Location("Hexahedra", numElements);
@@ -476,15 +476,33 @@ void Dune::AmiraMeshWriter<GridType>::writeBlockVector(const GridType& grid,
 
     }
 
-    AmiraMesh::Location* sol_nodes = new AmiraMesh::Location("Nodes", f.size());
-    am.insert(sol_nodes);
-    
-    AmiraMesh::Data* nodeData = new AmiraMesh::Data("Data", sol_nodes, McPrimType::mc_double, ncomp);
+    AmiraMesh::Location* amLocation;
+    if (f.size()==grid.size(level,dim)) {
+
+        // P1 data
+        amLocation = new AmiraMesh::Location("Nodes", f.size());
+        
+    } else {
+
+        // P0 data
+        amLocation = new AmiraMesh::Location((containsOnlyTetrahedra) ? "Tetrahedra" : "Hexahedra", f.size());
+        
+    }
+
+    am.insert(amLocation);
+
+    AmiraMesh::Data* nodeData = new AmiraMesh::Data("Data", amLocation, McPrimType::mc_double, ncomp);
     am.insert(nodeData);
+        
 
     AmiraMesh::Field* nodeField;
 
-    if (containsOnlyTetrahedra || GridType::dimension==2) {
+    if (f.size()==grid.size(level,0)) {
+        // P0 data
+         nodeField = new AmiraMesh::Field("sol", ncomp, McPrimType::mc_double,
+                                         AmiraMesh::t_constant, nodeData);
+
+    } else if (containsOnlyTetrahedra || GridType::dimension==2) {
         nodeField = new AmiraMesh::Field("sol", ncomp, McPrimType::mc_double,
                                          AmiraMesh::t_linear, nodeData);
     } else {
