@@ -165,7 +165,6 @@ public:
    */
     const FieldMatrix<ct,mydim,mydim>& jacobianInverseTransposed (const FieldVector<ct, mydim>& local) const
     {
-      IsTrue< ( mydim == cdim ) >::yes();
       return realGeometry.jacobianInverseTransposed(local);
     }
 
