@@ -177,6 +177,11 @@ public:
   /** \brief The geometry type of this entity */
   typedef typename GridImp::template Codim<0>::Geometry Geometry;
 
+  /** \brief The geometry type of this entity when the geometry is expressed
+   embedded in the father element.  This differs from Geometry only when
+  dim != dimworld.*/
+  typedef typename GridImp::template Codim<0>::LocalGeometry LocalGeometry;
+
   /** \brief EntityPointer types of the different codimensions */
   template <int cd>
   struct Codim
@@ -273,7 +278,7 @@ public:
      implementation of numerical algorithms is only done for simple discretizations.
      Assumes that meshes are nested.
   */
-  const Geometry& geometryInFather () const
+  const LocalGeometry& geometryInFather () const
     {
       return realEntity.geometryInFather();
     }
