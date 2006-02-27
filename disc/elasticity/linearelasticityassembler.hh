@@ -22,7 +22,7 @@
 
 /**
  * @file 
- * @brief  compute local stiffness matrix for conforming finite elements for linear elasticity equation
+ * @brief Compute local stiffness matrix for conforming finite elements for linear elasticity equation
  * @author Oliver Sander
  */
 
@@ -41,11 +41,11 @@ namespace Dune
 
   //! A class for computing local stiffness matrices
   /*! A class for computing local stiffness matrix for the 
-	diffusion equation
+	linear elasticity equation
 
-	    div j = q; j = -K grad u; in Omega
+        - div \sigma = f in Omega
 
-		u = g on Gamma1; j*n = J on Gamma2.
+        u = g on Gamma1; j*n = J on Gamma2.
 
 	Uses conforming finite elements with the Lagrange shape functions.
 	It should work for all dimensions and element types.
@@ -68,7 +68,6 @@ namespace Dune
 
 	// some other sizes
 	enum {dim=GridType::dimension};
-      //enum {SIZE=Dune::LagrangeShapeFunctionSetContainer<DT,RT,dim>::maxsize};
 
       //! The engineers' way of writing a symmetric second-order tensor
       typedef FieldVector<double, (dim+1)*dim/2> SymmTensor;
@@ -93,22 +92,25 @@ namespace Dune
         double nu_;
 
 	//! Constructor
-      LinearElasticityLocalStiffness (bool procBoundaryAsDirichlet_=true)
-          : E_(2.5e5)
-	{
-
-            //E_ = 2.5e5;
-            nu_ = 0.3;
-
-            this->currentsize_ = 0;
+      LinearElasticityLocalStiffness (double E, double nu, bool procBoundaryAsDirichlet_=true)
+          : E_(E), nu_(nu)
+      {
+          this->currentsize_ = 0;
 	  procBoundaryAsDirichlet = procBoundaryAsDirichlet_;
-
+          
           // For the time being:  all boundary conditions are homogeneous Neumann
           // This means no boundary condition handling is done at all
           for (int i=0; i<LocalStiffness<GridType,RT,m>::SIZE; i++)
               this->bctype[i] = BoundaryConditions::neumann;
-	}
+      }
 
+      /** \brief Set material parameters */
+      void setEandNu(double E, double nu)
+      {
+          E_  = E;
+          nu_ = nu;
+      }
+      
 
 	//! assemble local stiffness matrix for given element and order
 	/*! On exit the following things have been done:
@@ -129,10 +131,6 @@ namespace Dune
 	  
           this->currentsize_ = sfs.size();
           
-          // 	  std::cout << "Entity:" << std::endl;
-          // 	  for (int i=0; i<e.template count<n>(); i++)
-          // 		std::cout << "corner i=" << i << " pos=" << e.geometry()[i] << std::endl;
-          
 	  // clear assemble data
 	  for (int i=0; i<sfs.size(); i++)
               {
@@ -141,8 +139,6 @@ namespace Dune
 		  for (int j=0; j<sfs.size(); j++) 
                       this->A[i][j] = 0;
               }
-          
-	  // Loop over all quadrature points and assemble matrix and right hand side
           
           // Compute suitable quadrature order
 	  int p=2;
@@ -163,22 +159,12 @@ namespace Dune
               // eval jacobian inverse
               const Dune::FieldMatrix<DT,dim,dim> jac = e.geometry().jacobianInverseTransposed(local);
 
-#if 0              
-              // eval diffusion tensor
-              const Dune::FieldMatrix<DT,dim,dim> K = problem.K(global,e,local);
-#endif     
-         
               // weight of quadrature point
               double weight = Dune::QuadratureRules<DT,dim>::rule(gt,p)[g].weight();
               
               // determinant of jacobian
               DT detjac = e.geometry().integrationElement(local);
 
-#if 0              
-              // Source term;
-              RT q = problem.q(global,e,local);
-#endif     
-         
               RT factor = weight*detjac;
               
               // evaluate gradients at Gauss points
@@ -204,7 +190,6 @@ namespace Dune
                       FieldMatrix<double, dim, dim> Grad(0);
                       Grad[k] = grad[i];
                  
-                      //std::cout << Grad << std::endl;
                       /* Computes the linear strain tensor from the deformation gradient*/
                       computeStrain(Grad,strain[i*dim + k]);
                       
@@ -223,28 +208,10 @@ namespace Dune
                           for (int ccomp=0; ccomp<dim; ccomp++) {
                               
                               this->A[row][col][rcomp][ccomp] += stress*strain[col*dim + ccomp] * weight * detjac;
-//                               printf("adding %g to %d %d %d %d\n", stress*strain[col*dim + ccomp] * weight * detjac,
-//                                      row, col, rcomp, ccomp);
 
                           }
                       }
                   }    
-#if 0
-                  // rhs
-                  b[i] += q*sfs[i].evaluateFunction(0,local)*factor;
-                  
-                  // matrix
-                  gv = 0;	
-                  K.umv(grad[i],gv); // multiply with diffusion tensor
-                  A[i][i] += (grad[i]*gv)*factor;
-                  for (int j=0; j<i; j++)
-                      {
-                          RT t = (grad[j]*gv)*factor;
-                          A[i][j] += t;
-                          A[j][i] += t;
-                      }
-
-#endif
 
               }
               
