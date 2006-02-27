@@ -62,7 +62,7 @@ template<class G,int ordr>
 	DGStokes(Grid &g) : grid(g) {};
 	// assembling local matrix entries
 	void assembleVolumeTerm(Entity& ep, LocalMatrixBlock& Aee,LocalVectorBlock& Be) const;
-	void assembleFaceTerm(Entity& ep, LocalMatrixBlock& Aee,LocalVectorBlock& Be) const;
+	void assembleFaceTerm(Entity& ep,IntersectionIterator& isp, LocalMatrixBlock& Aee,LocalMatrixBlock& Aef,LocalMatrixBlock& Afe, LocalVectorBlock& Be) const;
 	void assembleBoundaryTerm(Entity& ep, LocalMatrixBlock& Aee,LocalVectorBlock& Be)const ;
 	// global assembly and solving
 	void assembleStokesSystem() ;
