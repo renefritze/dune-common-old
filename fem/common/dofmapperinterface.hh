@@ -50,9 +50,9 @@ public:
   } 
   
   //! returns true if index is new ( for dof compress )
-  bool indexNew (int num) const 
+  bool indexIsNew (int num) const 
   { 
-    return asImp().indexNew(num); 
+    return asImp().indexIsNew(num); 
   }
 
   //! return old index in dof array of given index ( for dof compress ) 
@@ -73,9 +73,9 @@ public:
     return asImp().additionalSizeEstimate(); 
   }
 
-  bool needCompress () const 
+  bool needsCompress () const 
   {
-    return asImp().needCompress ();
+    return asImp().needsCompress ();
   }
   
 private:  
