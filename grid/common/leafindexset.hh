@@ -158,7 +158,7 @@ public:
   }
 
   //! for dof manager, to check whether it has to copy dof or not 
-  bool indexNew (int num) const
+  bool indexIsNew (int num) const
   {
     assert((num >= 0) && (num < state_.size()));
     return state_[num] == NEW;
@@ -745,8 +745,8 @@ public:
   }
  
   //! insert new index to set 
-  void insertNewIndex (const typename GridType::template Codim<0>::Entity & en )  {
-
+  void insertNewIndex (const typename GridType::template Codim<0>::Entity & en )  
+  {
     // here we have to add the support of higher codims 
     resizeVectors();
     
@@ -787,18 +787,17 @@ public:
 
     // give all entities that lie below the old entities new numbers 
     markAllBelowOld ();
-    //markAllUsed ();
   }
 
   //! for dof manager, to check whether it has to copy dof or not 
-  bool indexNew (int num, int codim) const
+  bool indexIsNew (int num, int codim) const
   {
     assert( codimUsed_[codim] );
-    return codimLeafSet_[codim].indexNew(num);
+    return codimLeafSet_[codim].indexIsNew(num);
   }
 
   //! make to index numbers consecutive 
-  //! return true, if at least one hole was closed 
+  //! return true, if at least one hole existed  
   bool compress ()
   {
     // if not marked, mark which indices are still used 
@@ -818,6 +817,9 @@ public:
     
     return haveToCopy;
   }
+
+  //! this index set needs compress after adaptation, here true is returned  
+  bool needsCompress () const {  return true; }
 
   //! memorise index 
   // --insert
@@ -839,8 +841,6 @@ public:
   void remove (const EntityCodim0Type & en)
   {
     // if state is NEW or USED the index of all entities is removed 
-    //std::cout << codimLeafSet_[0].state( hIndexSet_.index(en) ) << " state for en = " << hIndexSet_.index(en) << "\n";
-    //std::cout << codimLeafSet_[0].index( hIndexSet_.index(en) ) << " leaf index \n";
     if( codimLeafSet_[0].exsits( hIndexSet_.index(en) ) ) 
     {
       codimLeafSet_[0].remove ( hIndexSet_.index(en) );
@@ -1154,9 +1154,9 @@ public:
   }
 
   //! for dof manager, to check whether it has to copy dof or not 
-  bool indexNew (int num, int codim) 
+  bool indexIsNew (int num, int codim) 
   {
-    return leafIndexSet_.indexNew(num,codim); 
+    return leafIndexSet_.indexIsNew(num,codim); 
   }
 
   //! make to index numbers consecutive 

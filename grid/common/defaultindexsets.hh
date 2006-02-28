@@ -87,13 +87,18 @@ public:
   //! and no compress of date has to be done 
   bool compress () { return false; }
 
-  //! do nothing here, because fathers index should already exist 
-  template <class EntityType> 
-  void insertNewIndex(const EntityType & en ) {}
+  //! returns true if index set gernally needs compress after adaptation 
+  bool needsCompress () const { return false; }
 
   //! do nothing here, because fathers index should already exist 
   template <class EntityType> 
-  void removeOldIndex(const EntityType & en ) {}
+  void insertNewIndex( const EntityType & en ) {
+  }
+
+  //! do nothing here, because fathers index should already exist 
+  template <class EntityType> 
+  void removeOldIndex( const EntityType & en ) {
+  }
 
   //! nothing to do here 
   void resize () {}
@@ -101,8 +106,11 @@ public:
   //! no extra memory for restriction is needed
   int additionalSizeEstimate () const { return 0; }
 
-  //! all indices are old 
-  bool indexNew(int num, int codim ) const { return false; }
+  //! returns true if index idx of codim cd is new, here all indices are old 
+  bool indexIsNew( int idx, int cd ) const { return false; }
+  
+  //! returns true if index idx is new, here all indices are old 
+  bool indexIsNew( int idx ) const { return false; }
 
   //! we have no old size 
   int oldSize ( int codim ) const { return 0; }
