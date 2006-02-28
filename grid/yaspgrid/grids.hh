@@ -1043,9 +1043,9 @@ namespace Dune {
 	  iTupel dims;
 	  double opt=1E100;
 	  optimize_dims(d-1,size,_procs,dims,opt);
-// 	  if (_rank==0) std::cout << "Torus<" << d 
-// 							  << ">: mapping " << _procs << " processes onto "
-// 							  << _dims << " torus." << std::endl;
+//  	  if (_rank==0) std::cout << "Torus<" << d 
+//  							  << ">: mapping " << _procs << " processes onto "
+//  							  << _dims << " torus." << std::endl;
 
 	  // compute increments for lexicographic ordering
 	  int inc = 1;
@@ -1379,6 +1379,8 @@ namespace Dune {
 	  for (unsigned int i=0; i<_sendrequests.size(); i++)
 		if (_sendrequests[i].rank!=rank())
 		  {
+// 			std::cout << "[" << rank() << "]" << " send " << _sendrequests[i].size << " bytes " 
+// 					  << "to " << _sendrequests[i].rank << " p=" << _sendrequests[i].buffer << std::endl;
 			MPI_Isend(_sendrequests[i].buffer, _sendrequests[i].size, MPI_BYTE, 
 					  _sendrequests[i].rank, _tag, _comm, &(_sendrequests[i].request));
 			_sendrequests[i].flag = false;
@@ -1389,6 +1391,8 @@ namespace Dune {
 	  for (unsigned int i=0; i<_recvrequests.size(); i++)
 		if (_recvrequests[i].rank!=rank())
 		  {
+// 			std::cout << "[" << rank() << "]"  << " recv " << _recvrequests[i].size << " bytes " 
+// 					  << "fm " << _recvrequests[i].rank << " p=" << _recvrequests[i].buffer << std::endl;
 			MPI_Irecv(_recvrequests[i].buffer, _recvrequests[i].size, MPI_BYTE, 
 					  _recvrequests[i].rank, _tag, _comm, &(_recvrequests[i].request));
 			_recvrequests[i].flag = false;
@@ -1404,7 +1408,10 @@ namespace Dune {
 				MPI_Status status;
 				MPI_Test( &(_sendrequests[i].request), &(_sendrequests[i].flag), &status);
 				if (_sendrequests[i].flag)
-				  sends--;
+				  {
+					sends--;
+// 					std::cout << "[" << rank() << "]"  << " send to " << _sendrequests[i].rank << " OK" << std::endl;
+				  }
 			  }
 		}
 
@@ -1417,7 +1424,11 @@ namespace Dune {
 				MPI_Status status;
 				MPI_Test( &(_recvrequests[i].request), &(_recvrequests[i].flag), &status);
 				if (_recvrequests[i].flag)
-				  recvs--;
+				  {
+					recvs--;
+// 					std::cout << "[" << rank() << "]"  << " recv fm " << _recvrequests[i].rank << " OK" << std::endl;
+				  }
+
 			  }
 		}
 
@@ -1512,7 +1523,7 @@ namespace Dune {
 		      if (fmod((double)size[k],(double)dims[k])>0.0001) mm*=3;
 		      if ( mm > m ) m = mm;
 			}
-		  if (_rank==0) std::cout << "optimize_dims: " << size << "|" << dims << " norm=" << m << std::endl;  
+		  //		  if (_rank==0) std::cout << "optimize_dims: " << size << " | " << dims << " norm=" << m << std::endl;  
 		  if (m<opt) 
 			{
 			  opt = m;
@@ -2298,18 +2309,18 @@ namespace Dune {
 		  // what must be sent to this neighbor
 		  Intersection send_intersection;
 		  send_intersection.grid = sendgrid.intersection(recv_recvgrid[i.index()]);
-		  //std::cout << "[" << _torus.rank() << "]:   " << "sendgrid=" << sendgrid << std::endl;
-		  //std::cout << "[" << _torus.rank() << "]:   " << "recved recvgrid=" << recv_recvgrid[i.index()] << std::endl;
-		  //std::cout << "[" << _torus.rank() << "]:   " << "intersection=" << send_intersection.grid << std::endl;
+// 		  std::cout << "[" << _torus.rank() << "]:   " << "sendgrid=" << sendgrid << std::endl;
+// 		  std::cout << "[" << _torus.rank() << "]:   " << "recved recvgrid=" << recv_recvgrid[i.index()] << std::endl;
+// 		  std::cout << "[" << _torus.rank() << "]:   " << "intersection=" << send_intersection.grid << std::endl;
 		  send_intersection.rank = i.rank();
 		  send_intersection.distance = i.distance();
 		  if (!send_intersection.grid.empty()) sendlist.push_front(send_intersection);
 
 		  Intersection recv_intersection;
 		  recv_intersection.grid = recvgrid.intersection(recv_sendgrid[i.index()]);
-		  //std::cout << "[" << _torus.rank() << "]:   " << "recvgrid=" << recvgrid << std::endl;
-		  //std::cout << "[" << _torus.rank() << "]:   " << "recved sendgrid=" << recv_sendgrid[i.index()] << std::endl;
-		  //std::cout << "[" << _torus.rank() << "]:   " << "intersection=" << recv_intersection.grid << std::endl;
+// 		  std::cout << "[" << _torus.rank() << "]:   " << "recvgrid=" << recvgrid << std::endl;
+// 		  std::cout << "[" << _torus.rank() << "]:   " << "recved sendgrid=" << recv_sendgrid[i.index()] << std::endl;
+// 		  std::cout << "[" << _torus.rank() << "]:   " << "intersection=" << recv_intersection.grid << std::endl;
 		  recv_intersection.rank = i.rank();
 		  recv_intersection.distance = i.distance();
 		  if(!recv_intersection.grid.empty()) recvlist.push_back(recv_intersection);
