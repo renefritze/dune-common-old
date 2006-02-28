@@ -55,8 +55,12 @@ template<class G,int ordr>
 	// local block size is sum of velocity dof and pressure dof
 	//block size = 2*vdof.size() + pdof.size()
 	static const int BlockSize =3*Dune::MonomialShapeFunctionSetSize<dim,ordr>::maxSize;
-	typedef Dune::SparseRowMatrix<double> LocalMatrixBlock;
-	typedef Dune::SimpleVector<double> LocalVectorBlock;
+	typedef Dune::FieldVector<double,BlockSize> LocalVectorBlock;
+	typedef Dune::FieldMatrix<double,BlockSize,BlockSize> LocalMatrixBlock;
+	// typedef Dune::SparseRowMatrix<double> LocalMatrixBlock;
+// 	typedef Dune::SimpleVector<double> LocalVectorBlock;
+	typedef Dune::BlockVector<LocalVectorBlock> Vector;
+  typedef Dune::BCRSMatrix<LocalMatrixBlock> Matrix;
 	
   public:
 	DGStokes(Grid &g) : grid(g) {};
@@ -74,6 +78,8 @@ template<class G,int ordr>
 	DGStokes<G,ordr> stokessystem;
 	// Dune::SparseRowMatrix<double> AA;
 // 	Dune::SimpleVector<double> bb;
+	Matrix A;
+    Vector b;
   };
 
 #include "dgstokes.cc"

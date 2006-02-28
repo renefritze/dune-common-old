@@ -78,7 +78,9 @@ void DGStokes<G,ordr>::assembleVolumeTerm(Entity& epointer, LocalMatrixBlock& Ae
 				  inv_jac.umv(temp,grad_phi_ej[dm-1]);
 				  int jj=(dm-1)*vsfs.size()+j;
 				  entry =parameter.mu*(grad_phi_ei[dm-1]*grad_phi_ej[dm-1])*detjac*quad_wt;
-				  Aee.add(ii,jj,entry);
+				  //Aee.add(ii,jj,entry);
+				  Aee[ii][jj]+=entry;
+				  
 				}
 			}
 		}
@@ -99,7 +101,8 @@ void DGStokes<G,ordr>::assembleVolumeTerm(Entity& epointer, LocalMatrixBlock& Ae
 				  int jj=vdof+j;
 				  psi_ej=psfs[j].evaluateFunction(0,quad_point_loc);
 				  entry =-(grad_phi_ei[dm-1][dm-1]*psi_ej)*detjac*quad_wt;
-				  Aee.add(ii,jj,entry);
+				  //Aee.add(ii,jj,entry);
+				   Aee[ii][jj]+=entry;
 				}
 			}
 		}
@@ -121,8 +124,8 @@ void DGStokes<G,ordr>::assembleVolumeTerm(Entity& epointer, LocalMatrixBlock& Ae
 				  grad_phi_ej[dm-1] = 0;
 				  inv_jac.umv(temp,grad_phi_ej[dm-1]);
 				  entry =-(grad_phi_ej[dm-1][dm-1]*psi_ei)*detjac*quad_wt;
-				  Aee.add(ii,jj,entry);
-				  //std::cout<<"AA(): "<<AA(ig,jg)<<std::endl;
+				  //Aee.add(ii,jj,entry);
+				  Aee[ii][jj]+=entry;
 				}
 			}
 		}
@@ -193,7 +196,8 @@ void DGStokes<G,ordr>::assembleFaceTerm(Entity& epointer, IntersectionIterator& 
 				  // transform gradient to global ooordinates by multiplying with inverse jacobian
 				  inv_jac.umv(temp,grad_phi_ej[dm-1]);
 				  entry =-0.5 * parameter.mu * ((grad_phi_ej[dm-1]*normal)*phi_ei[dm-1])*detjacface*quad_wt_face;
-				  Aee.add(ii,jj,entry);
+				  //Aee.add(ii,jj,entry);
+				   Aee[ii][jj]+=entry;
 				}
 			}
 		}
@@ -213,7 +217,8 @@ void DGStokes<G,ordr>::assembleFaceTerm(Entity& epointer, IntersectionIterator& 
 				  grad_phi_ej[dm-1] = 0;
 				  inv_jac.umv(temp,grad_phi_ej[dm-1]);
 				  entry =  0.5*parameter.mu*((grad_phi_ej[dm-1]*normal)*phi_fi[dm-1])*detjacface*quad_wt_face;
-				  Afe.add(ii,jj,entry);
+				  //Afe.add(ii,jj,entry);
+				   Afe[ii][jj]+=entry;
 				}
 			}
 		}
@@ -237,7 +242,8 @@ void DGStokes<G,ordr>::assembleFaceTerm(Entity& epointer, IntersectionIterator& 
 				  int jj=(dm-1)*vsfs.size()+j;
 				  phi_ej[dm-1] = vsfs[j].evaluateFunction(0,face_self_local); 
 				  entry=  0.5*parameter.mu*parameter.epsilon*(phi_ej[dm-1]*(grad_phi_ei[dm-1]*normal))*detjacface*quad_wt_face;
-				  Aee.add(ii,jj,entry);
+				  //Aee.add(ii,jj,entry);
+				   Aee[ii][jj]+=entry;
 				}
 			}
 		}
@@ -258,7 +264,8 @@ void DGStokes<G,ordr>::assembleFaceTerm(Entity& epointer, IntersectionIterator& 
 				  int jj=(dm-1)*nbvsfs.size()+j;
 				  phi_fj[dm-1] = nbvsfs[j].evaluateFunction(0,face_neighbor_local); 
 				  entry =-0.5*parameter.mu*parameter.epsilon*( phi_fj[dm-1]*(grad_phi_ei[dm-1]*normal))*detjacface*quad_wt_face;
-				  Aef.add(ii,jj,entry);
+				  //Aef.add(ii,jj,entry);
+				   Aef[ii][jj]+=entry;
 				}
 			}
 		}
@@ -280,7 +287,8 @@ void DGStokes<G,ordr>::assembleFaceTerm(Entity& epointer, IntersectionIterator& 
 				  int jj=(dm-1)*vsfs.size()+j;
 				  phi_ej[dm-1] = vsfs[j].evaluateFunction(0,face_self_local); 	 
 				  entry=parameter.mu*(parameter.sigma/norm_e)*phi_ei[dm-1]*phi_ej[dm-1]*detjacface*quad_wt_face;
-				  Aee.add(ii,jj,entry);
+				  // Aee.add(ii,jj,entry);
+				   Aee[ii][jj]+=entry;
 				}
 			}
 		}
@@ -297,7 +305,8 @@ void DGStokes<G,ordr>::assembleFaceTerm(Entity& epointer, IntersectionIterator& 
 				  int jj=(dm-1)*nbvsfs.size()+j;
 				  phi_fj[dm-1] = nbvsfs[j].evaluateFunction(0,face_neighbor_local);
 				  entry=-parameter.mu*(parameter.sigma/norm_e)*phi_ei[dm-1]*phi_fj[dm-1]*detjacface*quad_wt_face;
-				  Aef.add(ii,jj,entry);
+				  //Aef.add(ii,jj,entry);
+				   Aef[ii][jj]+=entry;
 				}
 			}
 		}
@@ -319,7 +328,8 @@ void DGStokes<G,ordr>::assembleFaceTerm(Entity& epointer, IntersectionIterator& 
 				  int jj=vdof+j;
 				  psi_ej = psfs[j].evaluateFunction(0,face_self_local); 	
 				  entry =0.5*(phi_ei[dm-1]*psi_ej*normal[dm-1])*detjacface*quad_wt_face;
-				  Aee.add(ii,jj,entry);
+				  //Aee.add(ii,jj,entry);
+				   Aee[ii][jj]+=entry;
 				}
 			}
 		}
@@ -337,7 +347,8 @@ void DGStokes<G,ordr>::assembleFaceTerm(Entity& epointer, IntersectionIterator& 
 				  int jj=vdof+j;
 				  psi_ej = psfs[j].evaluateFunction(0,face_self_local); 
 				  entry = -0.5*(phi_fi[dm-1]*psi_ej*normal[dm-1])*detjacface*quad_wt_face;
-				  Afe.add(ii,jj,entry);
+				  //Afe.add(ii,jj,entry);
+				   Afe[ii][jj]+=entry;
 				}
 			}
 		}
@@ -362,7 +373,8 @@ void DGStokes<G,ordr>::assembleFaceTerm(Entity& epointer, IntersectionIterator& 
 				  int jj=(dm-1)*vsfs.size()+j;
 				  phi_ej[dm-1] = vsfs[j].evaluateFunction(0,face_self_local);
 				  entry =0.5*(phi_ej[dm-1]*psi_ei*normal[dm-1])*detjacface*quad_wt_face;
-				  Aee.add(ii,jj,entry);
+				  //Aee.add(ii,jj,entry);
+				   Aee[ii][jj]+=entry;
 				}
 			}
 		}
@@ -381,7 +393,8 @@ void DGStokes<G,ordr>::assembleFaceTerm(Entity& epointer, IntersectionIterator& 
 				  phi_fj[dm-1] = nbvsfs[j].evaluateFunction(0,face_neighbor_local); 
 				  int jj=(dm-1)*nbvsfs.size()+j; 
 				  entry = -0.5*(phi_fj[dm-1]*psi_ei*normal[dm-1])*detjacface*quad_wt_face;
-				  Aef.add(ii,jj,entry);
+				  //Aef.add(ii,jj,entry);
+				   Aef[ii][jj]+=entry;
 				}
 			}
 		}
@@ -457,7 +470,8 @@ void DGStokes<G,ordr>::assembleBoundaryTerm(Entity& epointer, IntersectionIterat
 				  grad_phi_ej[dm-1] = 0;
 				  inv_jac.umv(temp,grad_phi_ej[dm-1]);
 				  entry = ( - parameter.mu * ((grad_phi_ej[dm-1]*boundnormal)*phi_ei[dm-1])) * detjacbound*quad_wt_bound;
-				  Aee.add(ii,jj,entry);
+				  //Aee.add(ii,jj,entry);
+				   Aee[ii][jj]+=entry;
 				}
 			}
 		}
@@ -482,7 +496,8 @@ void DGStokes<G,ordr>::assembleBoundaryTerm(Entity& epointer, IntersectionIterat
 				  phi_ej[dm-1] = vsfs[j].evaluateFunction(0,blocal);
 				  //TERM:5 \mu parameter.epsilon \nabla v . normal. u		 
 				  entry = parameter.mu *(parameter.epsilon*(grad_phi_ei[dm-1]*boundnormal)*phi_ej[dm-1] ) * detjacbound*quad_wt_bound;
-				  Aee.add(ii,jj,entry);
+				  //Aee.add(ii,jj,entry);
+				   Aee[ii][jj]+=entry;
 				}
 			  //------------------------------------
 			  //  TERM:15
@@ -512,7 +527,8 @@ void DGStokes<G,ordr>::assembleBoundaryTerm(Entity& epointer, IntersectionIterat
 				  int jj=(dm-1)*vsfs.size()+j;
 				  phi_ej[dm-1] = vsfs[j].evaluateFunction(0,blocal);
 				  entry = ((parameter.mu*(parameter.sigma/norm_eb)*phi_ej[dm-1]*phi_ei[dm-1]))* detjacbound*quad_wt_bound;
-				  Aee.add(ii,jj,entry);
+				  //Aee.add(ii,jj,entry);
+				   Aee[ii][jj]+=entry;
 				}
 			  //------------------------------------
 			  // TERM:16 
@@ -539,7 +555,8 @@ void DGStokes<G,ordr>::assembleBoundaryTerm(Entity& epointer, IntersectionIterat
 				  psi_ej = psfs[j].evaluateFunction(0,blocal);
 				  int jj=vdof+j;
 				  entry= (psi_ej*(phi_ei[dm-1]*boundnormal[dm-1]))* detjacbound * quad_wt_bound;
-				  Aee.add(ii,jj,entry);
+				  // Aee.add(ii,jj,entry);
+				   Aee[ii][jj]+=entry;
 				}
 			}
 		}
@@ -561,7 +578,8 @@ void DGStokes<G,ordr>::assembleBoundaryTerm(Entity& epointer, IntersectionIterat
 				  phi_ej[dm-1] = vsfs[j].evaluateFunction(0,blocal);
 				  int jj=(dm-1)*vsfs.size()+j;
 				  entry= (psi_ei*(phi_ej[dm-1]*boundnormal[dm-1]) )* detjacbound * quad_wt_bound;
-				  Aee.add(ii,jj,entry);
+				  //Aee.add(ii,jj,entry);
+				   Aee[ii][jj]+=entry;
 			 
 				}
 			}
@@ -596,9 +614,43 @@ void DGStokes<G,ordr>::assembleStokesSystem()
   int N = ndof*grid.size(level, 0);
   int nz=N;
   DGStokesParameters parameter;
+  //sparserowmatrix
    Dune::SparseRowMatrix<double> AA(N,N,nz);
    Dune::SimpleVector<double> bb(N);
-  bb=0.0;
+     bb=0.0;
+	 //istl matrix
+	 Matrix tmp(N,N,Matrix::row_wise);
+     typename Matrix::CreateIterator mit=tmp.createbegin();
+     // build up the matrix structure
+    ElementIterator eit = grid.template lbegin<0>(level);
+     ElementIterator eitend = grid.template lend<0>(level);
+    for (; eit != eitend; ++eit)
+    {
+      // insert a non zero entry for myself
+      mit.insert(grid.levelIndexSet(level).index(*eit));      
+      assert(mit != tmp.createend());
+      
+      IntersectionIterator endit = eit->iend();
+      IntersectionIterator iit = eit->ibegin();
+
+     // insert a non zero entry for each neighbour
+      for(; iit != endit; ++iit)
+      {
+        if (iit.neighbor())
+        {
+          mit.insert(grid.levelIndexSet(level).index(*iit.outside()));
+        }
+      }
+      ++mit;
+    }
+    tmp = 0.0;
+    A = tmp;
+    Vector tmpv(N);
+    b = tmpv;
+    b = 0.0;
+
+
+	 
   // loop over all elements
    ElementIterator it = grid.template lbegin<0>(level);
     ElementIterator itend = grid.template lend<0>(level);
@@ -606,13 +658,19 @@ void DGStokes<G,ordr>::assembleStokesSystem()
     {
 	  EntityPointer epointer = it;
 	  int eid = grid.levelIndexSet(level).index(*epointer);
-	  // Dune::GeometryType gt = *epointer.geometry().type();
-	// void assembleVolumeTerm(Entity& ep, LocalMatrixBlock& Aee,LocalVectorBlock& Be) const;
-// 	void assembleFaceTerm(Entity& ep, LocalMatrixBlock& Aee,LocalVectorBlock& Be) const;
-// 	void assembleBoundaryTerm(Entity& ep, LocalMatrixBlock& Aee,LocalVectorBlock& Be)const ;
-
 	  stokessystem.assembleVolumeTerm(*epointer,AA,bb);
 
+	  IntersectionIterator endis = it->iend();
+	  IntersectionIterator is = it->ibegin();
+	   EntityPointer ispointer = is;
+ if(is.neighbor())
+   {
+	 int fid = grid.levelIndexSet(level).index(*is.outside());
+   stokessystem.assembleFaceTerm(*epointer,*ispointer,AA,AA,AA,bb);
+   }
+ else
+   stokessystem.assembleBoundaryTerm(*epointer,*ispointer,AA,bb);	
+ 
 
 	  
 	  //modify matrix for introducing pressrure boundary condition
