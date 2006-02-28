@@ -4,6 +4,7 @@
 #include <limits>
 #include <vector>
 
+#include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include"../common/stack.hh"
 #include"../common/capabilities.hh"
@@ -1232,6 +1233,40 @@ public:
   //! return GridIdentifierType of Grid, in this case SGrid_Id
   GridIdentifier type() const { return SGrid_Id; };
 
+  // constructors
+
+  /*! @brief Make an SGrid from extend and number of cells per direction
+
+  \param[in] N_ number of cells in each direction on coarsest level
+  \param[in] H_ extend of the unit cube in each dimension
+
+  Note: The origin of the cube is always at (0,0,...,0), only the extend is given.
+  */
+  SGrid (const int* N_, const sgrid_ctype* H_);
+  
+  /*! @brief Make an SGrid from position, extend and number of cells per direction
+
+  \param[in] N_ number of cells in each direction on coarsest level
+  \param[in] L_ position of origin of the cube
+  \param[in] H_ extend of the unit cube in each dimension
+
+  */
+  SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_);
+
+  /*! @brief Make an SGrid from position, extend and number of cells per direction
+
+  \param[in] N_ number of cells in each direction on coarsest level
+  \param[in] L_ position of origin of the cube
+  \param[in] H_ extend of the unit cube in each dimension
+
+  Note: This constructor uses FieldVectors instead of built-in arrays. This is compatible 
+        with the YaspGrid class.
+  */
+  SGrid (FieldVector<int,dim> N_, FieldVector<sgrid_ctype,dim> L_, FieldVector<sgrid_ctype,dim> H_);
+
+  //! @brief empty constructor making grid of unit square discretized with one cell 
+  SGrid ();
+
   /*! Return maximum level defined in this grid. Levels are numbered
         0 ... maxLevel with 0 the coarsest level.   */
   int maxLevel() const;
@@ -1355,22 +1390,6 @@ public:
   }
 
   // these are all members specific to sgrid
-
-  /*! constructor, subject to change!
-        \param H_: array of size dim: length in each dimension
-        \param N_: array of size dim: coarse grid size, #elements in one direction
-  */
-  SGrid (const int* N_, const sgrid_ctype* H_);
-  
-  /*! Constructor using a bounding box
-        \param L_: array of size dim: lower left corner of grid
-        \param H_: array of size dim: upper right corner of grid
-        \param N_: array of size dim: coarse grid size, #elements in one direction
-  */
-  SGrid (const int* N_, const sgrid_ctype* L_, const sgrid_ctype* H_);
-
-  //! empty constructor making grid of unit square 
-  SGrid ();
 
   /** \brief Refine mesh globally by one refCount levels */
   void globalRefine (int refCount);
@@ -1546,12 +1565,12 @@ private:
   void makeSGrid (const int* N_,  const sgrid_ctype* L_, const sgrid_ctype* H_);
     
   int L;                          // number of levels in hierarchic mesh 0<=level<L
-    FieldVector<sgrid_ctype, dim> low;     // lower left corner of the grid
-    FieldVector<sgrid_ctype, dim> H;       // length of cube per direction
+  FieldVector<sgrid_ctype, dim> low;     // lower left corner of the grid
+  FieldVector<sgrid_ctype, dim> H;       // length of cube per direction
   FixedArray<int,dim> N[MAXL];         // number of elements per direction
   FieldVector<sgrid_ctype, dim> h[MAXL];   // mesh size per direction
   mutable CubeMapper<dim> mapper[MAXL];   // a mapper for each level
-
+  
   // faster implemantation od subIndex 
   mutable FixedArray <int,dim> zrefStatic;     // for subIndex of SEntity
   mutable FixedArray <int,dim> zentityStatic;  // for subIndex of SEntity
