@@ -26,7 +26,7 @@ namespace Dune
   /** @brief A function to print some information about the grid as a whole.
    */
   template<class G>
-  void gridinfo (const G& grid, std::string prefix)
+  void gridinfo (const G& grid, std::string prefix="")
   {
 	// first we extract the dimensions of the grid  
 	const int dim = G::dimension;
@@ -39,15 +39,15 @@ namespace Dune
 			  << ")" << std::endl;
 
 	// level information
-// 	for (int level=0; level<=grid.maxLevel(); level++)
-// 	  {
-// 		std::cout << prefix << "level " << level;
-// 		for (int cd=0; cd<=dim; cd++)
-// 		  {
-// 			std::cout << " codim[" << cd << "]=" << grid.size(level,cd);
-// 		  }
-// 		std::cout << std::endl;
-// 	  }
+	for (int level=0; level<=grid.maxLevel(); level++)
+	  {
+		std::cout << prefix << "level " << level;
+		for (int cd=0; cd<=dim; cd++)
+		  {
+			std::cout << " codim[" << cd << "]=" << grid.size(level,cd);
+		  }
+		std::cout << std::endl;
+	  }
 
 	// leaf information
 	std::cout << prefix << "leaf   ";
