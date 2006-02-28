@@ -63,14 +63,17 @@ template<class G,int ordr>
 	// assembling local matrix entries
 	void assembleVolumeTerm(Entity& ep, LocalMatrixBlock& Aee,LocalVectorBlock& Be) const;
 	void assembleFaceTerm(Entity& ep,IntersectionIterator& isp, LocalMatrixBlock& Aee,LocalMatrixBlock& Aef,LocalMatrixBlock& Afe, LocalVectorBlock& Be) const;
-	void assembleBoundaryTerm(Entity& ep, LocalMatrixBlock& Aee,LocalVectorBlock& Be)const ;
+	void assembleBoundaryTerm(Entity& ep, IntersectionIterator& isp, LocalMatrixBlock& Aee,LocalVectorBlock& Be)const ;
 	// global assembly and solving
 	void assembleStokesSystem() ;
 	void solveStokesSystem();
 	public:
   Grid & grid;
   int level;
- 
+  private:
+	DGStokes<G,ordr> stokessystem;
+	// Dune::SparseRowMatrix<double> AA;
+// 	Dune::SimpleVector<double> bb;
   };
 
 #include "dgstokes.cc"
