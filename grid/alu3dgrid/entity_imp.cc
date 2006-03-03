@@ -710,7 +710,7 @@ namespace Dune {
   inline ALU3dGridEntityPointerBase<codim,GridImp> :: 
   ~ALU3dGridEntityPointerBase()
   {
-    if(entity_) grid_.freeEntity( entity_ );
+    this->done();
   }
 
   template<int codim, class GridImp >
