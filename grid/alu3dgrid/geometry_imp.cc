@@ -10,7 +10,8 @@ inline ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> >::
 ALU3dGridGeometry() 
   : coord_()
   , Jinv_ () 
-  , AT_() 
+  , A_() 
+  , AT_x_()
   , localCoord_() 
   , globalCoord_()
   , tmpV_()
@@ -31,8 +32,9 @@ calcElMatrix () const
     // Mapping: R^dim -> R^3,  F(x) = A x + p_0
     // columns:    p_1 - p_0  |  p_2 - p_0  |  p_3 - p_0
       
-    for (int i=0; i<mydim; i++) {
-      AT_[i] = coord_[i+1] - coord_[0];
+    for (int i=0; i<mydim; ++i) {
+      for(int j=0; j<cdim; ++j)
+        A_[j][i] = coord_[i+1][j] - coord_[0][j];
     }
     builtA_ = true;
   }
@@ -47,7 +49,7 @@ inline void ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > :: build
     calcElMatrix(); 
 
     // DetDf = integrationElement, invert transposed Matrix
-    detDF_ = std::abs( FMatrixHelp::invertMatrix(AT_,Jinv_) );
+    detDF_ = std::abs( FMatrixHelp::invertMatrix_retTransposed(A_,Jinv_) );
     builtinverse_ = builtDetDF_ = true;
   }
 }
@@ -57,15 +59,17 @@ inline void ALU3dGridGeometry<2,3, const ALU3dGrid<3,3,tetra> > :: buildJacobian
 {
   if(!builtinverse_)
   {
-    std::cout << "building inverse \n";
+    // calc A and stores it in A_  
+    calcElMatrix();
+
+    // calc ret = A^T*A 
+    FMatrixHelp::multTransposedMatrix(A_,AT_A_);
+
+    // calc Jinv_ = (A^T*A)^-1 
+    FMatrixHelp::invertMatrix_retTransposed(AT_A_,Jinv_);
+
     enum { dim = 3 };
     
-    //derr << "WARNING: ALU3dGridGeometry::buildJacobianInverseTransposed not tested yet! " << __LINE__ <<"\n";
-    // create vectors of face 
-    //Jinv_[0] = coord_[1] - coord_[0];
-    //Jinv_[1] = coord_[2] - coord_[0];
-    
-    // 
     tmpV_ = coord_[1] - coord_[0];
     tmpU_ = coord_[2] - coord_[1];
 
@@ -77,6 +81,9 @@ inline void ALU3dGridGeometry<2,3, const ALU3dGrid<3,3,tetra> > :: buildJacobian
     }
 
     detDF_ = std::abs ( globalCoord_.two_norm() );
+
+    //std::cout << det << " calced| detDF " << detDF_ << "\n";
+    
     builtinverse_ = builtDetDF_ = true;
   }
 }
@@ -86,6 +93,15 @@ inline void ALU3dGridGeometry<1,3, const ALU3dGrid<3,3,tetra> > :: buildJacobian
 {
   if(!builtinverse_)
   {
+    // calc A and stores it in A_  
+    calcElMatrix();
+
+    // calc ret = A^T*A 
+    FMatrixHelp::multTransposedMatrix(A_,AT_A_);
+
+    // calc Jinv_ = (A^T*A)^-1 
+    FMatrixHelp::invertMatrix_retTransposed(AT_A_,Jinv_);
+
     enum { dim = 3 };
     //derr << "WARNING: ALU3dGridGeometry::buildJacobianInverseTransposed not tested yet! " << __LINE__ <<"\n";
     // create vectors of face 
@@ -311,7 +327,7 @@ global(const FieldVector<alu3d_ctype, mydim>& local) const
   
   globalCoord_ = coord_[0];
   // multiply with transposed because AT is also transposed
-  AT_.umtv(local,globalCoord_);
+  A_.umv(local,globalCoord_);
   return globalCoord_;
 }
 
@@ -322,10 +338,12 @@ local(const FieldVector<alu3d_ctype, 3>& global) const
 {
   if (!builtinverse_) buildJacobianInverseTransposed();
 
-  globalCoord_ = global - coord_[0];
+  globalCoord_  = global;
+  globalCoord_ -= coord_[0];
 
+  localCoord_ = 0.0;
   // multiply with transposed because Jinv_ is already transposed  
-  localCoord_ = FMatrixHelp:: multTransposed(Jinv_,globalCoord_);
+  Jinv_.umtv(globalCoord_,localCoord_);
   return localCoord_;
 }
 
@@ -334,15 +352,18 @@ inline FieldVector<alu3d_ctype, mydim>
 ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3,3,tetra> > :: 
 local(const FieldVector<alu3d_ctype, cdim>& global) const
 {
-  //assert(false);
-  //DUNE_THROW(NotImplemented,"Method not implemented!\n");
-  if (!builtinverse_) buildJacobianInverseTransposed();
+  if(!builtinverse_)
+    buildJacobianInverseTransposed();
 
-  globalCoord_ = global - coord_[0];
-  // multiply with transposed because Jinv_ is already transposed  
-  localCoord_ = FMatrixHelp:: multTransposed(Jinv_,globalCoord_);
-  
-  localCoord_ *=1.5;
+  globalCoord_  = global;
+  globalCoord_ -= coord_[0];
+
+  AT_x_ = 0.0;
+  A_.umtv(globalCoord_,AT_x_);
+
+  localCoord_ = 0.0;
+  //multipy with transposed, because Jinv_ ist transposed
+  Jinv_.umtv(AT_x_,localCoord_);
   return localCoord_;
 }
 
@@ -382,7 +403,7 @@ ALU3dGridGeometry<mydim,cdim,const ALU3dGrid<3, 3, tetra> > ::integrationElement
 
   calcElMatrix();
 
-  detDF_ = AT_.determinant();
+  detDF_ = A_.determinant();
 
   assert(detDF_ > 0.0);
 
@@ -396,6 +417,15 @@ template<>  // dim = dimworld = 3
 inline const FieldMatrix<alu3d_ctype,3,3> & 
 ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> >:: 
 jacobianInverseTransposed (const FieldVector<alu3d_ctype, 3>& local) const
+{
+  if (!builtinverse_) buildJacobianInverseTransposed();
+  return Jinv_;
+}
+
+template<>  // dim = dimworld = 3
+inline const FieldMatrix<alu3d_ctype,2,2> & 
+ALU3dGridGeometry<2,3, const ALU3dGrid<3,3,tetra> >:: 
+jacobianInverseTransposed (const FieldVector<alu3d_ctype, 2>& local) const
 {
   if (!builtinverse_) buildJacobianInverseTransposed();
   return Jinv_;
@@ -504,8 +534,7 @@ template <>
 inline FieldVector<alu3d_ctype, 2> 
 ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
 local (const FieldVector<alu3d_ctype, 3>& global) const {
-  assert(false); // could be a bit tricky, eh?
-  //biMap_->world2map(global, tmp1_);
+  biMap_->world2map(global, tmp1_);
   return FieldVector<alu3d_ctype, 2>();
 }
 
@@ -543,6 +572,15 @@ ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
 jacobianInverseTransposed (const FieldVector<alu3d_ctype, 3>& local) const {
   assert(triMap_);
   jInv_ = triMap_->jacobianInverse(local);
+  return jInv_;
+}
+
+template <>
+inline const FieldMatrix<alu3d_ctype, 2, 2>& 
+ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
+jacobianInverseTransposed (const FieldVector<alu3d_ctype, 2>& local) const {
+  assert(triMap_);
+  //jInv_ = triMap_->jacobianInverse(local);
   return jInv_;
 }
 
@@ -675,7 +713,7 @@ buildGeom(const ALU3DSPACE HFaceType & item, int twist, int duneFace ) {
 
   const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
   
-  assert( duneFace >= 0 && duneFace < 6 );
+  //assert( duneFace >= 0 && duneFace < 6 );
   if(duneFace < 0 ) duneFace = 0;
   // for all vertices of this face 
   for (int i = 0; i < 4; ++i) 
