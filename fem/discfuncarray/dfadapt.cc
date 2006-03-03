@@ -407,9 +407,9 @@ LocalFunctionAdapt( const DiscreteFunctionSpaceType &f ,
   values_ (),
   dofVec_ ( dofVec ),
   baseSet_(0),
-  init_(false),
-  id_(-1),
-  idSet_(f.grid().localIdSet())
+  init_(false)
+  //,id_(-1),
+  //idSet_(f.grid().localIdSet())
 {}
       
 
@@ -495,13 +495,7 @@ evaluate (EntityType &en, QuadratureType &quad, int quadPoint, RangeType & ret) 
     bSet.eval(i, quad,quadPoint, tmp_);
     tmp_*= (*values_[i]);
     ret += tmp_;
-    /*
-    for (int l = 0; l < dimRange; ++l) {
-      ret[l] += (*values_[i]) * tmp_[l];
-    }
-    */
   }  
-  // evaluateLocal(en, quad.point(quadPoint), ret);
 }
 
 // hier noch evaluate mit Quadrature Regel einbauen 
@@ -528,16 +522,10 @@ jacobian (EntityType &en, QuadratureType &quad, int quadPoint, JacobianRangeType
 
     tmpGrad_ *= *values_[i];
     tmp += tmpGrad_;
-    /*
-    for (int l = 0; l < dimRange; ++l) {
-      tmpGrad_[l] *= *values_[i];
-        // * umtv or umv?
-    }
-    */
   }
+
   for (int l = 0; l < dimRange; ++l) 
     jti.umv(tmp[l],ret[l]);
-  // jacobianLocal(en, quad.point(quadPoint), ret);
 }
 
 template<class DiscreteFunctionSpaceType> 
@@ -547,11 +535,15 @@ jacobianLocal(EntityType& en, const DomainType& x,
               JacobianRangeType& ret) const 
 {
   assert(init_);
+  assert( en.geometry().checkInside(x) );
   enum { dim = EntityType::dimension };
   enum { dimRange = DiscreteFunctionSpaceType::DimRange };
 
   ret *= 0.0;
   const BaseFunctionSetType& bSet = getBaseFunctionSet();
+  typedef FieldMatrix<DofType, dim, dim> JacobianInverseType;
+  const JacobianInverseType& jti = 
+    en.geometry().jacobianInverseTransposed(x);
 
   for (int i = 0; i < numDofs(); ++i) {
     tmpGrad_ *= 0.0;
@@ -560,7 +552,7 @@ jacobianLocal(EntityType& en, const DomainType& x,
     for (int l = 0; l < dimRange; ++l) {
       tmpGrad_[l] *= *values_[i];
         // * umtv or umv?
-      en.geometry().jacobianInverseTransposed(x).umv(tmpGrad_[l], ret[l]);
+      jti.umv(tmpGrad_[l], ret[l]);
     }
   }
 }
@@ -590,12 +582,15 @@ template <class EntityType>
 inline void LocalFunctionAdapt < DiscreteFunctionSpaceType>::
 init (const EntityType &en ) const
 {
-  //  if (id_==idSet_.id(en))
-  //    return;
-  // if(!uniform_ || !init_)
-  if(geoType_!=en.geometry().type() || !init_)
+  // if id of element is the same, then no init has to be done 
+  // NOTE: this might fail for adaptive grids, unless 
+  // a method of the grid tells wether the grid is new or not 
+  //if( id_ == idSet_.id(en) ) return;
+  
+  if( (geoType_ != en.geometry().type()) ||
+      (!init_) )
   {
-    baseSet_ = &fSpace_.getBaseFunctionSet(en);
+    baseSet_  = &fSpace_.getBaseFunctionSet(en);
     numOfDof_ = baseSet_->numBaseFunctions();
     
     if(numOfDof_ > this->values_.size())
@@ -605,9 +600,10 @@ init (const EntityType &en ) const
     geoType_ = en.geometry().type();
   }
 
-  // id_=idSet_.id(en);
+  assert( geoType_ == en.geometry().type() );
+  //id_=idSet_.id(en);
 
-  for(int i=0; i<numOfDof_; i++)
+  for(int i=0; i<numOfDof_; ++i)
     values_ [i] = &(this->dofVec_[ fSpace_.mapToGlobal ( en , i) ]);
 
   return;
@@ -624,5 +620,4 @@ assign(int numDof, const RangeType& dofs)
 }
 
 } // end namespace 
-
 #endif
