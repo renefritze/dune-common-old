@@ -347,6 +347,10 @@ public:
               typename UG_NS<dim>::RefinementRule rule,
               int side=0);
 
+    /** \brief returns true, if some elements might be coarsend during grid
+     adaption, here always returns true */
+    bool preAdapt();
+    
     //! Triggers the grid refinement process
     bool adapt();
 
