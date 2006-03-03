@@ -31,17 +31,35 @@ struct LeafIteratorTypes
 template <class T> 
 class IndexArray : public Array<T> 
 {
+  int capacity_; 
 public:
   IndexArray() : Array<T> () 
   {    
     this->n = 0; this->p = 0;
+    capacity_ = this->n;
+  }
+
+  void resize(int m) 
+  {
+    if( m<= capacity_ )
+    {
+      this->n = m; 
+      return;
+    }
+    Array<T> :: resize(m);
+    capacity_ = this->n;
   }
 
   //! reallocate array with size m
-  void realloc (int m, int factor)
+  void realloc (int m)
   {
-    if(m <= this->n) return;
-    int newSize = m*factor;
+    if(m <= this->n) 
+    {
+      this->n = m;
+      return;
+    }
+    
+    int newSize = m*2;
     T * newMem = 0;
     
     try 
@@ -57,7 +75,8 @@ public:
     if(this->n > 0)
       std::memcpy(newMem , this->p , this->n*sizeof(T));
     
-    this->n = newSize;
+    this->n = m;
+    capacity_ = newSize;
     if(this->p) delete [] this->p;   
     this->p = newMem;
   }
@@ -93,11 +112,12 @@ private:
   // the mapping of the global to leaf index 
   IndexArray<int> leafIndex_;
 
-  // old indices 
-  IndexArray<int> oldLeafIndex_;
-
   // stack for holes 
   IndexArray<int> holes_; 
+ 
+  // Array that only remeber the occuring holes (for compress of data)
+  IndexArray<int> oldIdx_; 
+  IndexArray<int> newIdx_; 
 
   // the state of each index 
   IndexArray<INDEXSTATE> state_;
@@ -133,35 +153,23 @@ public:
   //! reallocate the vector for new size
   void resize ( int newSize )
   {
-    if(leafIndex_.size() < newSize )
+    //std::cout << "Resize with max = " << hIndexSet_.size(myCodim_) << "\n";
+    int oldSize = leafIndex_.size();
+
+    leafIndex_.realloc( newSize );
+    state_.realloc( newSize );
+
+    // reset new created parts of the vector 
+    for(int i=oldSize; i<leafIndex_.size(); ++i)
     {
-      //std::cout << "Resize with max = " << hIndexSet_.size(myCodim_) << "\n";
-      int oldSize = leafIndex_.size();
-
-      leafIndex_.realloc( newSize , factor_ );
-      state_.realloc( newSize , factor_ );
-
-      // here we dont need to copy 
-      oldLeafIndex_.realloc(newSize, factor_ );
-
-      for(int i=oldSize; i<leafIndex_.size(); i++)
-      {
-        leafIndex_[i] = -1;
-        state_[i] = UNUSED;
-      }
+      leafIndex_[i] = -1;
+      state_[i] = UNUSED;
     }
   }
 
   void set2Unused() 
   {
-    for(int i=0; i<state_.size(); i++) state_[i] = UNUSED;
-  }
-
-  //! for dof manager, to check whether it has to copy dof or not 
-  bool indexIsNew (int num) const
-  {
-    assert((num >= 0) && (num < state_.size()));
-    return state_[num] == NEW;
+    for(int i=0; i<state_.size(); ++i) state_[i] = UNUSED;
   }
 
   //! make to index numbers consecutive 
@@ -169,8 +177,7 @@ public:
   bool compress ()
   {
     const int sizeOfVecs = state_.size();
-    if( holes_.size() < sizeOfVecs )
-      holes_.resize( state_.size() );
+    holes_.resize( sizeOfVecs );
 
     // true if a least one dof must be copied 
     bool haveToCopy = false;
@@ -194,21 +201,20 @@ public:
       }
     }
 
-    //std::cout << "size of set = " << newActSize << " for codim = " << myCodim_ << "\n";
-    
     assert( newActSize >= actHole );
     // the new size is the actual size minus the holes 
     actSize_ = newActSize - actHole;
 
-    // copy index, for copying in dof manager 
-    oldLeafIndex_ = leafIndex_;
+    // resize hole storing vectors 
+    oldIdx_.resize(actHole);
+    newIdx_.resize(actHole);
 
-    //std::cout << "Number of holes = " << actHole << " for codim = " << myCodim_ << "\n";
-    
     // close holes 
     //
     // NOTE: here the holes closing should be done in 
     // the opposite way. future work. 
+     
+    int holes = 0; // number of real holes 
     for(int i=0; i<leafIndex_.size(); i++)
     { 
       // a index that is used but larger then actual size 
@@ -231,6 +237,12 @@ public:
           }
 
           assert(actHole >= 0);
+
+          // remember old and new index 
+          oldIdx_[holes] = leafIndex_[i]; 
+          newIdx_[holes] = holes_[actHole];
+          ++holes;
+          
           leafIndex_[i] = holes_[actHole];
 
           // means that dof manager has to copy the mem
@@ -244,6 +256,10 @@ public:
         leafIndex_[i] = -1;
       }
     }
+
+    // this call only sets the size of the vectors 
+    oldIdx_.resize(holes);
+    newIdx_.resize(holes);
 
     // the next index that can be given away is equal to size
     nextFreeIndex_ = actSize_;
@@ -284,24 +300,23 @@ public:
   {
     return (state(num) != UNUSED);
   }
-  
-  //! return size of grid entities per level and codim 
-  //! for dof mapper 
-  int oldSize () const
+ 
+  //! return number of holes 
+  int numberOfHoles () const
   {
-    return state_.size();
+    return oldIdx_.size();
   }
 
   //! return old index, for dof manager only 
   int oldIndex (int elNum ) const
   {
-    return oldLeafIndex_[elNum]; 
+    return oldIdx_[elNum]; 
   }
 
   //! return new index, for dof manager only returns index 
   int newIndex (int elNum) const
   {
-    return leafIndex_[elNum]; 
+    return newIdx_[elNum]; 
   }
 
   // insert element and create index for element number  
@@ -587,7 +602,7 @@ private:
   };
 
   //! type of this class 
-  typedef AdaptiveLeafIndexSet < GridType > MyType;
+  typedef AdaptiveLeafIndexSet < GridType > ThisType;
   
   // my type, to be revised 
   enum { myType = 5 };
@@ -620,8 +635,8 @@ public:
   AdaptiveLeafIndexSet (const GridType & grid) 
     : DefaultGridIndexSetBase <GridType> (grid) ,  
     hIndexSet_( grid.hierarchicIndexSet() ) , 
-    //marked_ (false) , markAllU_ (false) , higherCodims_ (false) 
-    marked_ (false) , markAllU_ (false) , higherCodims_ (true) 
+    marked_ (false) , markAllU_ (false) , higherCodims_ (false) 
+    //marked_ (false) , markAllU_ (false) , higherCodims_ (true) 
   {
     // codim 0 is used by default
     codimUsed_[0] = true;
@@ -658,7 +673,7 @@ public:
     enum { codim = EntityType::codimension };
     // this IndexWrapper provides specialisations for each codim 
     // see this class above 
-    return DirectIndexWrapper<MyType,HIndexSetType,CodimLeafIndexSet,EntityType,codim> ::
+    return DirectIndexWrapper<ThisType,HIndexSetType,CodimLeafIndexSet,EntityType,codim> ::
       index ( *this , hIndexSet_, codimLeafSet_[codim], en, codimUsed_[codim] );
   }
   
@@ -670,18 +685,18 @@ public:
     // this IndexWrapper provides specialisations for each codim 
     // see this class above 
     enum { enCodim = 0 }; // codim of entity is 0 
-    return IndexWrapper<MyType,HIndexSetType,CodimLeafIndexSet,EntityCodim0Type,enCodim, cd>::
+    return IndexWrapper<ThisType,HIndexSetType,CodimLeafIndexSet,EntityCodim0Type,enCodim, cd>::
              index(*this, hIndexSet_, codimLeafSet_, en , num , codimUsed_);
   }
 
   //! return size of grid entities per level and codim 
-  int size (GeometryType type ) const
+  int size (GeometryType type) const
   {
-      int codim=GridType::dimension-type.dim();
+    int codim=GridType::dimension-type.dim();
     if( !codimUsed_[codim] )
     {
       assert( hIndexSet_.geomTypes(codim).size() == 1 ); 
-      return CountElements<MyType,dim>::count(*this,codim,type);
+      return CountElements<ThisType,dim>::count(*this,codim,type);
     }
     return codimLeafSet_[codim].size();
   }
@@ -790,13 +805,6 @@ public:
     markAllBelowOld ();
   }
 
-  //! for dof manager, to check whether it has to copy dof or not 
-  bool indexIsNew (int num, int codim) const
-  {
-    assert( codimUsed_[codim] );
-    return codimLeafSet_[codim].indexIsNew(num);
-  }
-
   //! make to index numbers consecutive 
   //! return true, if at least one hole existed  
   bool compress ()
@@ -867,20 +875,21 @@ public:
   template <int codim, class EntityType>
   int index (const EntityType & en, int num) const
   {
-    return IndexWrapper<MyType,HIndexSetType,CodimLeafIndexSet,EntityType,EntityType::codimension,codim>::
+    return IndexWrapper<ThisType,HIndexSetType,CodimLeafIndexSet,EntityType,EntityType::codimension,codim>::
            index(*this,hIndexSet_,codimLeafSet_,en,num,codimUsed_);
   }
-  
-  //! return size of grid entities per level and codim 
-  //! for dof mapper 
-  int oldSize ( int codim ) const
+ 
+  //! return number of holes of the sets indices 
+  int numberOfHoles ( int codim ) const
   {
-    return codimLeafSet_[codim].oldSize(); 
+    assert( codimUsed_[codim] );
+    return codimLeafSet_[codim].numberOfHoles(); 
   }
 
   //! return old index, for dof manager only 
   int oldIndex (int num, int codim ) const
   {
+    assert( codimUsed_[codim] );
     return codimLeafSet_[codim].oldIndex(num); 
   }
 
@@ -1152,12 +1161,6 @@ public:
   void resize () 
   {
     leafIndexSet_.resize();
-  }
-
-  //! for dof manager, to check whether it has to copy dof or not 
-  bool indexIsNew (int num, int codim) 
-  {
-    return leafIndexSet_.indexIsNew(num,codim); 
   }
 
   //! make to index numbers consecutive 
