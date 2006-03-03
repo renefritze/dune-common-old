@@ -72,16 +72,23 @@ private:
  all the data belonging to the given dof manager will be rearranged 
  for data set where it is necessary to keep the data.
  */
-template <class GridType, class RestProlOperatorImp, class DofManagerType >
+template <class GridType, class RestProlOperatorImp >
 class AdaptOperator
 : 
 public AdaptMapping , public ObjPointerStorage 
 {  
-  typedef AdaptOperator<GridType,RestProlOperatorImp,DofManagerType> MyType;
+  typedef AdaptOperator<GridType,RestProlOperatorImp> MyType;
+  typedef DofManager< GridType > DofManagerType; 
+  typedef DofManagerFactory<DofManagerType> DofManagerFactoryType;
 public:
+  typedef BaryCenterQuad < double, FieldVector<double,2> , 0 > BaryQuadType;
+  typedef typename GridType :: Traits :: LocalIdSet LocalIdSet;
   //! create DiscreteOperator with a LocalOperator 
-  AdaptOperator (GridType & grid, DofManagerType & dm, RestProlOperatorImp & rpOp) :
-    grid_(grid) , dm_ ( dm ), rpOp_ (rpOp) , calcedWeight_(false) {}
+  AdaptOperator (GridType & grid, RestProlOperatorImp & rpOp) 
+    : grid_(grid) 
+    , dm_ ( DofManagerFactoryType::getDofManager(grid_) )
+    , rpOp_ (rpOp) 
+  {}
 
   virtual ~AdaptOperator () {}
 
@@ -91,18 +98,18 @@ public:
    */
   template <class RestProlOperatorType> 
   AdaptOperator<GridType,
-  CombinedRestProl <RestProlOperatorImp,RestProlOperatorType>, DofManagerType > & 
-  operator + (const AdaptOperator<GridType,RestProlOperatorType,DofManagerType> &op)
+  CombinedRestProl <RestProlOperatorImp,RestProlOperatorType> > & 
+  operator + (const AdaptOperator<GridType,RestProlOperatorType> &op)
   {
     std::cout << "Operator + of AdaptOperator\n";
-    typedef AdaptOperator<GridType,RestProlOperatorType,DofManagerType> CopyType;
+    typedef AdaptOperator<GridType,RestProlOperatorType> CopyType;
     typedef CombinedRestProl <RestProlOperatorImp,RestProlOperatorType> COType;
      
     COType *newRPOp = new COType ( rpOp_  , const_cast<CopyType &> (op).getRestProlOp() );
 
-    typedef AdaptOperator < GridType, COType, DofManagerType > OPType;
+    typedef AdaptOperator < GridType, COType > OPType;
    
-    OPType *adaptOp = new OPType ( grid_ , dm_ , *newRPOp );    
+    OPType *adaptOp = new OPType ( grid_ , *newRPOp );    
 
     // memorize this new generated object because is represents this
     // operator and is deleted if this operator is deleted
@@ -129,8 +136,6 @@ public:
 
     if(restr)
     {
-      if(!calcedWeight_) calcWeight();
-      
       dm_.resizeForRestrict();
       
       typedef typename DofManagerType :: IndexSetRestrictProlongType IndexSetRPType;
@@ -206,8 +211,10 @@ private:
       
       for( ; it != endit; ++it)
       {
+        std::cout << " coarsen \n";
         if((*it).state() == COARSEN)
         {
+          std::cout << "do coarsen \n";
           restop.restrictLocal( en , *it, initialize);     
           initialize = false;
         }
@@ -235,40 +242,6 @@ private:
     }
   }
  
-  // calc ratio of volume of father and volume of child 
-  template <class EntityType>
-  bool hierarchicCalcWeight ( EntityType &en) const 
-  {
-    typedef typename EntityType::HierarchicIterator HierarchicIterator; 
-    HierarchicIterator it    = en.hbegin( en.level() + 1 );
-    HierarchicIterator endit = en.hend  ( en.level() + 1 );
-
-    if(it != endit)
-    {
-      rpOp_.calcFatherChildWeight( en, *it );     
-      return true; 
-    }
-    else 
-      return false;
-  }
-
-  // calc ratio between volume of father and volume of child 
-  void calcWeight() const
-  {
-    typedef typename GridType::template Codim<0>::LevelIterator LevelIterator;
-    // make run through grid 
-    bool done = false;  
-    
-    LevelIterator endit  = grid_.template lend<0>   ( 0 );
-    for(LevelIterator it = grid_.template lbegin<0> ( 0 ); it != endit; ++it )
-    {
-      done = hierarchicCalcWeight( *it );
-      if(done) break;
-    }
-
-    calcedWeight_ = true;
-  }
-
   //! corresponding grid 
   mutable GridType & grid_;
 
@@ -277,11 +250,6 @@ private:
   
   //! Restriction and Prolongation Operator 
   mutable RestProlOperatorImp & rpOp_;
-
-  // assume constant weihgt, i.e. grid is refined and coarsend 
-  // the same way every step 
-  mutable bool calcedWeight_;
-
 };
 
 
@@ -305,16 +273,8 @@ public:
   {
   }
 
-  //! calculates the weight, i.e. (volume son)/(volume father)
-  template <class EntityType>
-  void calcFatherChildWeight (EntityType &father, EntityType &son) const
-  {
-    // volume of son / volume of father  
-    weight_ = son.geometry().integrationElement(quad_.point(0)) /
-              father.geometry().integrationElement(quad_.point(0));
-  }
-  
-  //! the weight can also be seted
+  //! if weight is set, then ists assumend that we have always the same
+  //! proportion between fahter and son volume 
   void setFatherChildWeight (const RangeFieldType& val) const
   {
     // volume of son / volume of father  
@@ -327,24 +287,25 @@ public:
   {
     assert( !father.isLeaf() );
 
-    // if weight < 0.0 , weight has not been calculated
-    assert(weight_ > 0.0);
+    const RangeFieldType weight = (weight_ < 0.0) ? (calcWeight(father,son)) : weight_; 
+    //std::cout << "using weight = " << weight << "\n"; 
     
     LocalFunctionType vati_ =df_.localFunction( father);
     LocalFunctionType sohn_ =df_.localFunction( son   );
 
+    const int numDofs = vati_.numDofs();
     if(initialize)
     {
-      for(int i=0; i<vati_.numDofs(); i++)
+      for(int i=0; i<numDofs; ++i)
       {
-        vati_[i] = weight_ * sohn_[i];
+        vati_[i] = weight * sohn_[i];
       }
     }
     else 
     {
-      for(int i=0; i<vati_.numDofs(); i++)
+      for(int i=0; i<numDofs; ++i)
       {
-        vati_[i] += weight_ * sohn_[i];
+        vati_[i] += weight * sohn_[i];
       }
     }
   }
@@ -353,17 +314,24 @@ public:
   template <class EntityType>
   void prolongLocal ( EntityType &father, EntityType &son, bool initialize ) const
   {
-    //assert( son.state() == REFINED );
-
     LocalFunctionType vati_ = df_.localFunction( father);
     LocalFunctionType sohn_ = df_.localFunction( son   );
-    for(int i=0; i<vati_.numDofs(); i++)
+    const int numDofs = vati_.numDofs();
+    for(int i=0; i<numDofs; ++i)
     {
       sohn_[i] = vati_[i];
     }
   }
 
 private:
+  //! calculates the weight, i.e. (volume son)/(volume father)
+  template <class EntityType>
+  RangeFieldType calcWeight (EntityType &father, EntityType &son) const
+  {
+    return std::abs(son.geometry().integrationElement(quad_.point(0)) /
+              father.geometry().integrationElement(quad_.point(0)));
+  }
+  
   mutable DiscreteFunctionType & df_;
 
   const BaryQuadType quad_;
