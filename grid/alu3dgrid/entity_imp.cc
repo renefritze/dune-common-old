@@ -669,7 +669,7 @@ namespace Dune {
   template<int codim, class GridImp >
   inline ALU3dGridEntityPointerBase<codim,GridImp> :: 
   ALU3dGridEntityPointerBase(const GridImp & grid, 
-                         const HBndSegType & ghostFace )
+                             const HBndSegType & ghostFace )
     : grid_(grid)
     , item_(0)
     , entity_ ( grid_.template getNewEntity<codim> ( ghostFace.level() ))
@@ -710,13 +710,7 @@ namespace Dune {
   inline ALU3dGridEntityPointerBase<codim,GridImp> :: 
   ~ALU3dGridEntityPointerBase()
   {
-    if(entity_) 
-    {
-      //(*entity_).removeElement();
-      grid_.freeEntity( entity_ );
-      //entity_ = 0;
-    }
-    //item_ = 0;
+    if(entity_) grid_.freeEntity( entity_ );
   }
 
   template<int codim, class GridImp >
