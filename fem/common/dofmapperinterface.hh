@@ -48,13 +48,13 @@ public:
   {
     return asImp().numDofs();
   } 
-  
-  //! returns true if index is new ( for dof compress )
-  bool indexIsNew (int num) const 
-  { 
-    return asImp().indexIsNew(num); 
-  }
 
+  //! return number of holes in the data 
+  int numberOfHoles() const 
+  {
+    return asImp().numberOfHoles(); 
+  }
+  
   //! return old index in dof array of given index ( for dof compress ) 
   int oldIndex (int num) const 
   { 
