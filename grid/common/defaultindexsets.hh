@@ -257,7 +257,9 @@ public:
   enum { ncodim = GridType::dimension + 1 };
 
   //! Conschdrugdor 
-  DefaultGridIndexSetBase (const GridType & grid ) : grid_ (grid) {}
+  DefaultGridIndexSetBase (const GridType & grid ) 
+    : DefaultEmptyIndexSet(false) // here false, because methods have to be overloaded
+    , grid_ (grid) {}
 protected:
   // the corresponding grid 
   const GridType & grid_;
