@@ -35,6 +35,7 @@
 #include <dune/common/exceptions.hh>
 
 #include <dune/grid/common/grid.hh>
+#include <dune/grid/common/defaultindexsets.hh>
 #include <dune/grid/common/sizecache.hh>
 #include <dune/grid/common/intersectioniteratorwrapper.hh>
 
