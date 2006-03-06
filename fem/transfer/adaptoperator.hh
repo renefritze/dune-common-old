@@ -286,24 +286,25 @@ public:
     assert( !father.isLeaf() );
 
     const RangeFieldType weight = (weight_ < 0.0) ? (calcWeight(father,son)) : weight_; 
-    //std::cout << "using weight = " << weight << "\n"; 
-    
-    LocalFunctionType vati_ =df_.localFunction( father);
-    LocalFunctionType sohn_ =df_.localFunction( son   );
 
-    const int numDofs = vati_.numDofs();
+    assert( weight > 0.0 );
+    
+    LocalFunctionType vati = df_.localFunction( father);
+    LocalFunctionType sohn = df_.localFunction( son   );
+
+    const int numDofs = vati.numDofs();
     if(initialize)
     {
       for(int i=0; i<numDofs; ++i)
       {
-        vati_[i] = weight * sohn_[i];
+        vati[i] = weight * sohn[i];
       }
     }
     else 
     {
       for(int i=0; i<numDofs; ++i)
       {
-        vati_[i] += weight * sohn_[i];
+        vati[i] += weight * sohn[i];
       }
     }
   }
@@ -312,12 +313,12 @@ public:
   template <class EntityType>
   void prolongLocal ( EntityType &father, EntityType &son, bool initialize ) const
   {
-    LocalFunctionType vati_ = df_.localFunction( father);
-    LocalFunctionType sohn_ = df_.localFunction( son   );
-    const int numDofs = vati_.numDofs();
+    LocalFunctionType vati = df_.localFunction( father);
+    LocalFunctionType sohn = df_.localFunction( son   );
+    const int numDofs = vati.numDofs();
     for(int i=0; i<numDofs; ++i)
     {
-      sohn_[i] = vati_[i];
+      sohn[i] = vati[i];
     }
   }
 
