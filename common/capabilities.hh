@@ -45,6 +45,12 @@ struct hasHangingNodes
   static const bool v = false;
 };
 
+template<class Grid>
+struct hasBackupRestoreFacilities
+{
+  static const bool v = false;
+};
+
 /*
   forward
   Capabilities::Something<const Grid>
@@ -80,6 +86,12 @@ template<class Grid>
 struct hasHangingNodes<const Grid>
 {
   static const bool v = Dune::Capabilities::hasHangingNodes<Grid>::v;
+};
+
+template<class Grid>
+struct hasBackupRestoreFacilities<const Grid> 
+{
+  static const bool v = Dune::Capabilities::hasBackupRestoreFacilities<Grid>::v;
 };
 
 }
