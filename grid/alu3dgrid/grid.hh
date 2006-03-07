@@ -452,7 +452,7 @@ namespace Dune {
 
     /** dummy communicate */
     template<class DataHandle>
-    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir);
+    void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const;
 
     /** dummy collective communication */
     const CollectiveCommunication<ALU3dGrid>& comm () const
