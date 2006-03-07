@@ -13,16 +13,15 @@
 #define HAVE_SUPERLU
 #include <dune/fem/feop/spmatrix.hh>
 
-#include"stokesequation.hh"
+#include"stokesparameters.hh"
 #include"dune/disc/shapefunctions/dgspace/monomialshapefunctions.hh"
-
+#include <dune/disc/functions/dgfunction.hh>
 #include"boundaryconditions.hh"
+#include"testfunctions.hh"
+#include"rhs.hh"
 
 namespace Dune
 {
-
- 
-
 template<class G,int ordr>
   class DGFiniteElementMethod
   {
@@ -64,13 +63,14 @@ template<class G,int ordr>
 	void assembleBoundaryTerm(Entity& ep, IntersectionIterator& isp, LocalMatrixBlock& Aee,LocalVectorBlock& Be)const ;
 
 	double evaluateSolution(int component,const Entity& element,const Dune::FieldVector<ctype,dim>& local, const LocalVectorBlock& xe) const;
-	double evaluateL2error(int component,Entity& element, const LocalVectorBlock& xe) const;
-	
+	double evaluateL2error(int component,const ExactSolution<ctype, dim> & exact,const Entity& element,const LocalVectorBlock& xe)const;
 		
   private:
 
 	Dune::MonomialShapeFunctionSetContainer<ctype,double,dim,order> space;
-	DGStokesParameters param;
+	DGStokesParameters parameter;
+	DirichletBoundary<G> dirichletvalue;
+	ExactSolution<ctype,dim> exact;
   };
 
 
@@ -101,15 +101,20 @@ typedef typename Grid::template Codim<1>::EntityPointer InterSectionPointer;
 	typedef typename DGFiniteElementMethod<G,ordr>::LocalMatrixBlock LocalMatrixBlock;
 	typedef Dune::BlockVector<LocalVectorBlock> Vector;
 	typedef Dune::BCRSMatrix<LocalMatrixBlock> Matrix;
-
+	typedef Dune::LevelDGFunction<Grid, double, ordr> DGFunction;
   public:
-	
-	DGStokes(Grid &g) : grid(g) {};
+	//inline constructor with initializer list
+	DGStokes(Grid &g) : grid(g), dgfem(),x(grid, level),exact(){};
 	// global assembly and solving
 	void assembleStokesSystem() ;
 	void solveStokesSystem();
-	void l2errorStokesSystem() const;
+	double evaluateSolution(const EntityPointer & e,
+                            const Dune::FieldVector<ctype, dim> & local) const;
 	
+	//l2error computation
+	double l2errorStokesSystem() const;
+	
+	const DGFunction & solution() const { return x; }
 
   private:
 	typedef typename DGFiniteElementMethod<G,ordr>::ShapeFunctionSet ShapeFunctionSet;
@@ -117,12 +122,15 @@ typedef typename Grid::template Codim<1>::EntityPointer InterSectionPointer;
   public:
 	Grid & grid;
 	int level;
+		ExactSolution<ctype,dim> exact;
   private:
-	DGFiniteElementMethod<G,ordr> stokessystem;
+	DGFiniteElementMethod<G,ordr> dgfem;
     Dune::SparseRowMatrix<double> AA;
  	Dune::SimpleVector<double> bb;
 	Matrix A;
     Vector b;
+	DGFunction x;
+	
   };
 
    
