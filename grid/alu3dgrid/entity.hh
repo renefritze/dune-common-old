@@ -46,8 +46,10 @@ class ALU3dGridMakeableEntity :
   typedef ALU3dImplTraits<GridImp::elementType> ImplTraitsType;
 
   typedef typename ImplTraitsType::PLLBndFaceType PLLBndFaceType;
-  typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::ImplementationType IMPLElementType;
-  typedef typename ALU3dImplTraits<GridImp::elementType>::template Codim<cd>::InterfaceType MyHElementType;
+  typedef typename ALU3dImplTraits<GridImp::elementType>::
+    template Codim<cd>::ImplementationType IMPLElementType;
+  typedef typename ALU3dImplTraits<GridImp::elementType>::
+    template Codim<cd>::InterfaceType MyHElementType;
   
 public:
    
@@ -145,7 +147,7 @@ public:
   FieldVector<alu3d_ctype, dim>& positionInOwnersFather () const;
  
   // set element as normal entity
-  void setElement(const ElementType & item, int twist, int face = -1); 
+  void setElement(const ElementType & item, int twist=0, int face = -1); 
   void setElement(const ALU3DSPACE HElementType & el, const ALU3DSPACE VertexType & vx);
   
   //! setGhost is not valid for this codim 
