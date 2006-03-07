@@ -37,6 +37,9 @@ public:
   GatherScatterImpl(GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc) 
     : grid_(grid), entity_(en), realEntity_(realEntity) , dc_(dc) {}
 
+  //! returns contains of dc_
+  bool contains(int dim, int cd) const { return dc_.contains(dim,cd); }
+
   //! this method is called from the dunePackAll method of the corresponding 
   //! Macro element class of the BSGrid, see gitter_dune_pll*.*
   //! here the data is written to the ObjectStream 
@@ -45,6 +48,7 @@ public:
     // set element and then start 
     realEntity_.setElement(elem);
     //dc_.inlineData(str,entity_);
+    std::cout << "inline entity " <<  grid_.hierarchicIndexSet().index(entity_) << "\n";
     dc_.gather(str,entity_);
   }
 
@@ -59,7 +63,19 @@ public:
     /*
     dc_.xtractData(str,entity_);
     */
-    dc_.scatter(str,entity_,0);
+    std::cout << "xtract entity " <<  grid_.hierarchicIndexSet().index(entity_) << "\n";
+    dc_.scatter(str,entity_,dc_.size(entity_));
+  }
+
+  void setData ( ObjectStreamType & str , HElementType & elem )
+  {
+    // set element and then start 
+    realEntity_.setElement(elem);
+    /*
+    dc_.xtractData(str,entity_);
+    */
+    std::cout << "set entity " <<  grid_.hierarchicIndexSet().index(entity_) << "\n";
+    dc_.set(str,entity_);
   }
 
   //! write Data of one lement to stream 
@@ -118,6 +134,11 @@ public:
   //! Constructor
   GatherScatterImpl(GridType & grid, EntityType & en, RealEntityType & realEntity , DataCollectorType & dc) 
     : grid_(grid), entity_(en), realEntity_(realEntity) , dc_(dc) {}
+
+  bool contains(int dim, int codim) const 
+  {
+    return dc_.contains(dim,codim);
+  }
 
   //! this method is called from the dunePackAll method of the corresponding 
   //! Macro element class of the BSGrid, see gitter_dune_pll*.*

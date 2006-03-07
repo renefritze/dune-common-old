@@ -3,6 +3,8 @@
 
 // use this define to control if Albert should use the found MPI
 
+#include <dune/grid/common/grid.hh>
+
 #ifdef _BSGRID_PARALLEL_
 #if HAVE_MPI 
 #include <mpi.h>
@@ -46,7 +48,7 @@ public:
   template <class DataType> 
   bool communicate(DataType & data) const
   {
-    grid_.communicate(data);
+    grid_.communicate(data,All_All_Interface,ForwardCommunication);
     return false; 
   }
 
