@@ -13,16 +13,17 @@
 
 namespace Dune{
 
-template <class DiscreteFunctionSpaceType > class DiscFuncArray;
-template <class DiscreteFunctionSpaceType > class LocalFunctionArray;
-template <class DofType>                    class DofIteratorArray;
+template<class DiscreteFunctionSpaceType , class CoeffStorageImp = Array<typename DiscreteFunctionSpaceType::RangeFieldType> > class DiscFuncArray;
+template <class DiscreteFunctionSpaceType, class CoeffStorageImp > class LocalFunctionArray;
+template <class DofType>               class DofIteratorArray;
 
 
-template <class DiscreteFunctionSpaceImp>
+template <class DiscreteFunctionSpaceImp, class CoeffStorageImp>
 struct DiscFuncArrayTraits {
+  typedef CoeffStorageImp CoeffStorageType;
   typedef DiscreteFunctionSpaceImp DiscreteFunctionSpaceType;
   typedef DiscFuncArray<DiscreteFunctionSpaceImp> DiscreteFunctionType;
-  typedef LocalFunctionArray<DiscreteFunctionSpaceImp> LocalFunctionImp;
+  typedef LocalFunctionArray<DiscreteFunctionSpaceImp,CoeffStorageType> LocalFunctionImp;
   typedef LocalFunctionWrapper<DiscreteFunctionType> LocalFunctionType;
   typedef DofIteratorArray<typename DiscreteFunctionSpaceImp::RangeFieldType> DofIteratorType;
   typedef ConstDofIteratorDefault<DofIteratorType> ConstDofIteratorType;
@@ -37,20 +38,22 @@ struct DiscFuncArrayTraits {
 //! array for storing the dofs.  
 //!
 //**********************************************************************
-template<class DiscreteFunctionSpaceType >
+template<class DiscreteFunctionSpaceType, class CoeffStorageImp >
 class DiscFuncArray 
-: public DiscreteFunctionDefault <DiscFuncArrayTraits<DiscreteFunctionSpaceType> > 
+: public DiscreteFunctionDefault <DiscFuncArrayTraits<DiscreteFunctionSpaceType,CoeffStorageImp> > 
 {
-  typedef DiscreteFunctionDefault<DiscFuncArrayTraits <DiscreteFunctionSpaceType > >
+  typedef DiscreteFunctionDefault<DiscFuncArrayTraits <DiscreteFunctionSpaceType,CoeffStorageImp> >
   DiscreteFunctionDefaultType;
 
-  friend class DiscreteFunctionDefault< DiscFuncArrayTraits <DiscreteFunctionSpaceType > > ;
+  friend class DiscreteFunctionDefault< DiscFuncArrayTraits <DiscreteFunctionSpaceType,CoeffStorageImp > > ;
 
   enum { myId_ = 0};
 public:
+  //! type of underlying array
+  typedef CoeffStorageImp CoeffStorageType;
 
   //! my type 
-  typedef DiscFuncArray < DiscreteFunctionSpaceType > DiscreteFunctionType;
+  typedef DiscFuncArray < DiscreteFunctionSpaceType, CoeffStorageType > DiscreteFunctionType;
 
   //! Type of the range field
   typedef typename DiscreteFunctionSpaceType::Traits::RangeFieldType RangeFieldType;
@@ -62,7 +65,7 @@ public:
   typedef typename DiscreteFunctionSpaceType::Traits::GridType GridType;
 
   //! the local function implementation e 
-  typedef LocalFunctionArray<DiscreteFunctionSpaceType> LocalFunctionImp;
+  typedef LocalFunctionArray<DiscreteFunctionSpaceType,CoeffStorageType> LocalFunctionImp;
 
   //! LocalFunctionType is the exported lf type 
   typedef LocalFunctionWrapper < DiscreteFunctionType > LocalFunctionType;
@@ -78,7 +81,7 @@ public:
   typedef DiscreteFunctionSpaceType FunctionSpaceType;
 
   //! our traits, like DofIterator etc. 
-  typedef DiscFuncArrayTraits <DiscreteFunctionSpaceType > Traits;
+  typedef DiscFuncArrayTraits <DiscreteFunctionSpaceType,CoeffStorageImp > Traits;
 
   //! the type of the unknowns 
   typedef RangeFieldType DofType;
@@ -146,24 +149,25 @@ public:
   void set( RangeFieldType x ); 
 
   //! add g * scalar to discrete function 
-  void addScaled ( const DiscFuncArray <DiscreteFunctionSpaceType> & g,
+  void addScaled ( const DiscFuncArray
+      <DiscreteFunctionSpaceType,CoeffStorageImp> & g,
       const RangeFieldType &scalar); 
   
   /** \todo Please to me! */
   template <class GridIteratorType>
   void addScaledLocal (GridIteratorType &it, 
-      const DiscFuncArray <DiscreteFunctionSpaceType> & g,
+      const DiscFuncArray <DiscreteFunctionSpaceType,CoeffStorageImp> & g,
       const RangeFieldType &scalar); 
  
   //! add g to this on local entity
   template <class GridIteratorType>
   void addLocal (GridIteratorType &it, 
-      const DiscFuncArray <DiscreteFunctionSpaceType> & g); 
+      const DiscFuncArray <DiscreteFunctionSpaceType,CoeffStorageImp> & g); 
   
   //! add g to this on local entity
   template <class GridIteratorType>
   void substractLocal (GridIteratorType &it, 
-      const DiscFuncArray <DiscreteFunctionSpaceType> & g); 
+      const DiscFuncArray <DiscreteFunctionSpaceType,CoeffStorageImp> & g); 
   
     /** \todo Please to me! */
   template <class GridIteratorType>
@@ -214,7 +218,7 @@ private:
   LocalFunctionImp localFunc_;
 
   //! the dofs stored in an array
-  mutable Array < RangeFieldType > dofVec_;
+  mutable CoeffStorageType dofVec_;
 }; // end class DiscFuncArray 
 
 
@@ -225,26 +229,27 @@ private:
 //! Implementation of the local functions 
 //
 //**************************************************************************
-template < class DiscreteFunctionSpaceType > 
+template < class DiscreteFunctionSpaceType , class CoeffStorageImp > 
 class LocalFunctionArray 
 : public LocalFunctionDefault <DiscreteFunctionSpaceType ,
-  LocalFunctionArray < DiscreteFunctionSpaceType >  >
+  LocalFunctionArray < DiscreteFunctionSpaceType ,CoeffStorageImp >  >
 {
   typedef typename DiscreteFunctionSpaceType::BaseFunctionSetType BaseFunctionSetType;
-  typedef LocalFunctionArray < DiscreteFunctionSpaceType > MyType;
-  typedef DiscFuncArray <DiscreteFunctionSpaceType> DiscFuncType;
+  typedef LocalFunctionArray < DiscreteFunctionSpaceType, CoeffStorageImp > MyType;
+  typedef DiscFuncArray <DiscreteFunctionSpaceType,CoeffStorageImp> DiscFuncType;
 
   enum { dimrange = DiscreteFunctionSpaceType::DimRange };
   typedef typename DiscreteFunctionSpaceType::Traits::DomainType DomainType;
   typedef typename DiscreteFunctionSpaceType::Traits::RangeType RangeType;
   typedef typename DiscreteFunctionSpaceType::Traits::RangeFieldType RangeFieldType;
   typedef typename DiscreteFunctionSpaceType::Traits::JacobianRangeType JacobianRangeType;
+  typedef CoeffStorageImp CoeffStorageType;
 
-  friend class DiscFuncArray <DiscreteFunctionSpaceType>;
-  friend class LocalFunctionWrapper < DiscFuncArray <DiscreteFunctionSpaceType> >;
+  friend class DiscFuncArray <DiscreteFunctionSpaceType,CoeffStorageType>;
+  friend class LocalFunctionWrapper < DiscFuncArray <DiscreteFunctionSpaceType,CoeffStorageType> >;
 public:
   //! Constructor 
-  LocalFunctionArray ( const DiscreteFunctionSpaceType &f , Array < RangeFieldType >  & dofVec );
+  LocalFunctionArray ( const DiscreteFunctionSpaceType &f , CoeffStorageType & dofVec );
 
   //! Destructor 
   ~LocalFunctionArray ();
@@ -290,7 +295,7 @@ protected:
   const DiscreteFunctionSpaceType &fSpace_;
   
   //! dofVec from all levels of the discrete function 
-  Array < RangeFieldType > & dofVec_;
+  CoeffStorageType & dofVec_;
 
   //! Array holding pointers to the local dofs 
   mutable Array < RangeFieldType * > values_ ;
