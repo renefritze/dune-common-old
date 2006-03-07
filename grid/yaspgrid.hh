@@ -2065,6 +2065,12 @@ private:
 template<int dim, int dimworld>
 struct YaspGridFamily
 {
+#if HAVE_MPI
+  typedef CollectiveCommunication<MPI_Comm> CCType;
+#else
+  typedef CollectiveCommunication<Dune::YaspGrid<dim,dimworld> > CCType;
+#endif
+
   typedef GridTraits<dim,dimworld,Dune::YaspGrid<dim,dimworld>,
 					 YaspGeometry,YaspEntity,
 					 YaspEntityPointer,YaspLevelIterator,
@@ -2077,7 +2083,8 @@ struct YaspGridFamily
 					 YaspGlobalIdSet<const YaspGrid<dim,dimworld> >, 
 					 bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits>,
 					 YaspGlobalIdSet<const YaspGrid<dim,dimworld> >, 
-					 bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits> > 
+					 bigunsignedint<dim*yaspgrid_dim_bits+yaspgrid_level_bits+yaspgrid_codim_bits>,
+					 CCType> 
   Traits;  
 };
 
@@ -2741,11 +2748,15 @@ public:
   }
 
 #if HAVE_MPI
+  /*! @brief return a collective communication object
+   */
   const CollectiveCommunication<MPI_Comm>& comm () const
   {
 	return ccobj;
   }
 #else
+  /*! @brief return a collective communication object
+   */
   const CollectiveCommunication<YaspGrid>& comm () const
   {
 	return ccobj;

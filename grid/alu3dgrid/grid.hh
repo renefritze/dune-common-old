@@ -164,6 +164,9 @@ namespace Dune {
 //#else 
       typedef LocalIdSet GlobalIdSet;
 //#endif
+
+	  typedef CollectiveCommunication<GridImp> CollectiveCommunication;
+
     };
   };
 

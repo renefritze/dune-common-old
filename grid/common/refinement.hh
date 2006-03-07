@@ -16,7 +16,7 @@
   @endverbatim
 */
 
-/*! @defgroup Refinement Refinement
+/*! @addtogroup Refinement Refinement
     @ingroup Grid
     <!--WWWWWWWWWWWWW-->
 
