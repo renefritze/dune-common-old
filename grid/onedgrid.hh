@@ -371,7 +371,7 @@ public:
     bool adapt();
 
     /** \brief Dynamic type identification */
-    GridIdentifier type () { return OneDGrid_Id; }
+    GridIdentifier type () const { return OneDGrid_Id; }
     
     // **********************************************************
     // End of Interface Methods
