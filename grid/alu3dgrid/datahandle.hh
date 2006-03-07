@@ -48,7 +48,7 @@ public:
     // set element and then start 
     realEntity_.setElement(elem);
     //dc_.inlineData(str,entity_);
-    std::cout << "inline entity " <<  grid_.hierarchicIndexSet().index(entity_) << "\n";
+    //std::cout << "inline entity " <<  grid_.hierarchicIndexSet().index(entity_) << "\n";
     dc_.gather(str,entity_);
   }
 
@@ -63,7 +63,7 @@ public:
     /*
     dc_.xtractData(str,entity_);
     */
-    std::cout << "xtract entity " <<  grid_.hierarchicIndexSet().index(entity_) << "\n";
+    //std::cout << "xtract entity " <<  grid_.hierarchicIndexSet().index(entity_) << "\n";
     dc_.scatter(str,entity_,dc_.size(entity_));
   }
 
@@ -74,7 +74,7 @@ public:
     /*
     dc_.xtractData(str,entity_);
     */
-    std::cout << "set entity " <<  grid_.hierarchicIndexSet().index(entity_) << "\n";
+    //std::cout << "set entity " <<  grid_.hierarchicIndexSet().index(entity_) << "\n";
     dc_.set(str,entity_);
   }
 
