@@ -764,7 +764,7 @@ public:
     for(int cd=0; cd<ncodim; ++cd) 
     {
       size_[cd] = num[cd];
-      assert( size_[cd] == grid_.size(cd) );
+      //assert( size_[cd] == grid_.size(cd) );
     }
   }
 
