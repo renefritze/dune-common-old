@@ -5,12 +5,12 @@
 
 template<class Grid>
 double
-DirichletBoundary<Grid>::dirichletValue(int comp,  const Point&global, Point& local) const
+DirichletBoundary<Grid>::dirichletValue(int variable,  const Point& global, Point& local) const
 {
-  return 10;//exact.velocity(comp,global);
+  return exact.velocity(variable,global);
 }
 
 
-
+ 
 
 
