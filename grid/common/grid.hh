@@ -213,9 +213,9 @@ template<class GridImp, class IdSetImp, class IdTypeImp> class IdSet;
    @ingroup GIGrid
 
    This class is the base class for all grid implementations. Although
-   no virtual functions are used we call it abstract base class since its
+   no virtual functions are used we call it abstract since its
    methods do not contain an implementation but forward to the methods of 
-   the derived class.
+   the derived class via the Barton-Nackman trick.
 
    Template parameters:
 
@@ -225,12 +225,39 @@ template<class GridImp, class IdSetImp, class IdTypeImp> class IdSet;
    - <tt>ct</tt> field type of the world vector space.
    - <tt>GridFamily</tt> traits class providing all types
      associated with the grid implementation.
+
+   \nosubgrouping
 */
 template< int dim, int dimworld, class ct, class GridFamily>  
 class Grid {
   typedef typename GridFamily::Traits::Grid GridImp;
   typedef Grid<dim,dimworld,ct,GridFamily> ThisType;
 public:
+
+  //===========================================================
+  /** @name Exported constants
+   */
+  //@{
+  //===========================================================
+
+  //! A constant that exports the template parameter dim
+  enum { 
+    //! \brief The dimension of the grid
+    dimension=dim 
+  };
+
+  //! A constant that exports the template parameter dimworld
+  enum { 
+    //! \brief The dimension of the world the grid lives in.
+    dimensionworld=dimworld 
+  };
+  //@}
+
+  //===========================================================
+  /** @name Exported types
+   */
+  //@{
+  //===========================================================
 
   /** \brief A Traits struct that collects all associated types of one implementation 
 
@@ -330,24 +357,15 @@ public:
 
   };
 
-  //! A constant that exports the template parameter dim
-  enum { 
-    //! \brief The dimension of the grid
-    dimension=dim 
-  };
-
-  //! A constant that exports the template parameter dimworld
-  enum { 
-    //! \brief The dimension of the world the grid lives in.
-    dimensionworld=dimworld 
-  };
-
   //! Define type used for coordinates in grid module
   typedef ct ctype;
+  //@}
 
 
   //===========================================================
-  // grid id
+  /** @name Grid id
+   */
+  //@{
   //===========================================================
 
   //! Return the id of the grid
@@ -358,9 +376,12 @@ public:
        ((GridIdentifier (GridImp::*)() const) &(GridImp::type)));
     return asImp().type();
   }
+  //@}
 
   //===========================================================
-  // size methods
+  /** @name Size methods
+   */
+  //@{
   //===========================================================
 
   /*! \brief Return maximum level defined in this grid. Levels are numbered
@@ -419,12 +440,14 @@ public:
       ((int (GridImp::*)(GeometryType) const) &(GridImp::size))); 
     return asImp().size(type);
   }
+  //@}
 
 
   //===========================================================
-  // iterators
+  /** @name Iterators
+   */
+  //@{
   //===========================================================
-
 
   //! Iterator to first entity of given codim on level
   template<int cd, PartitionIteratorType pitype>
@@ -529,12 +552,14 @@ public:
       ((ItType (GridImp::*)() const) &(GridImp ::template leafend<cd>)));
     return asImp().template leafend<cd,All_Partition>();
   }
+  //@}
 
 
   //===========================================================
-  // access to index and id sets
+  /** @name Access to index and id sets
+   */
+  //@{
   //===========================================================
-
 
   //! return const reference to the grids global id set 
   const typename Codim<0>::GlobalIdSet& globalIdSet() const
@@ -579,10 +604,13 @@ public:
         ((const typename Codim<0>::LeafIndexSet& (GridImp::*)() const) &GridImp::leafIndexSet));
   	return asImp().leafIndexSet();
   }
+  //@}
 
 
   //===========================================================
-  // adaptivity & grid refinement
+  /** @name Adaptivity and grid refinement
+   */
+  //@{
   //===========================================================
 
   //! Refine the grid refCount times using the default refinement rule.
@@ -659,53 +687,14 @@ public:
         ((bool (GridImp::*)() ) &GridImp::postAdapt));
 	return asImp.postAdapt();
   }
+  //@}
 
 
   //===========================================================
-  // parallel stuff
+  /** @name Parallel data distribution and communication
+   */
+  //@{
   //===========================================================
-
-  /*! \brief Communicate information on distributed entities on a given level
-	Template parameter is a model of Dune::CommDataHandle
-   */
-  template<class DataHandle>
-  void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
-  {
-    // compare addresses of the method, if they are equal then derived
-    // class has the method not overloaded which leads to a seg fault 
-//     CHECK_INTERFACE_IMPLEMENTATION(
-//       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection,int) const) &(ThisType::template communicate<DataHandle>)),
-//       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection,int) const) &(GridImp ::template communicate<DataHandle>)));
-    asImp().template communicate<DataHandle>(data,iftype,dir,level);
-	return;
-  }
-
-  /*! \brief Communicate information on distributed entities on the leaf grid
-	Template parameter is a model of Dune::CommDataHandle
-   */
-  template<class DataHandle>
-  void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
-  {
-    // compare addresses of the method, if they are equal then derived
-    // class has the method not overloaded which leads to a seg fault 
-//     CHECK_INTERFACE_IMPLEMENTATION(
-//       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection) const) &(ThisType::template communicate<DataHandle>)),
-//       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection) const) &(GridImp ::template communicate<DataHandle>)));
-    asImp().template communicate<DataHandle>(data,iftype,dir);
-	return;
-  }
-
-  //! return const reference to a collective communication object. The return type is a model of Dune::CollectiveCommunication.
-  const typename Codim<0>::CollectiveCommunication& comm () const
-  {
-    // compare addresses of the method, if they are equal then derived
-    // class has the method not overloaded which leads to a seg fault 
-    CHECK_INTERFACE_IMPLEMENTATION(
-        ((const typename Codim<0>::CollectiveCommunication& (GridImp::*)() const) &ThisType::comm),
-        ((const typename Codim<0>::CollectiveCommunication& (GridImp::*)() const) &GridImp::comm));
-  	return asImp().comm();
-  }
-
 
   //! Return size of overlap for a given codim on a given level 
   int overlapSize (int level, int codim) const
@@ -750,6 +739,48 @@ public:
       ((int (GridImp::*)(int) const) &(GridImp:: ghostSize))); 
     return asImp().ghostSize(codim);
   }
+
+  /*! \brief Communicate information on distributed entities on a given level
+	Template parameter is a model of Dune::CommDataHandle
+   */
+  template<class DataHandle>
+  void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir, int level) const
+  {
+    // compare addresses of the method, if they are equal then derived
+    // class has the method not overloaded which leads to a seg fault 
+//     CHECK_INTERFACE_IMPLEMENTATION(
+//       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection,int) const) &(ThisType::template communicate<DataHandle>)),
+//       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection,int) const) &(GridImp ::template communicate<DataHandle>)));
+    asImp().template communicate<DataHandle>(data,iftype,dir,level);
+	return;
+  }
+
+  /*! \brief Communicate information on distributed entities on the leaf grid
+	Template parameter is a model of Dune::CommDataHandle
+   */
+  template<class DataHandle>
+  void communicate (DataHandle& data, InterfaceType iftype, CommunicationDirection dir) const
+  {
+    // compare addresses of the method, if they are equal then derived
+    // class has the method not overloaded which leads to a seg fault 
+//     CHECK_INTERFACE_IMPLEMENTATION(
+//       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection) const) &(ThisType::template communicate<DataHandle>)),
+//       ((void (GridImp::*)(DataHandle&,InterfaceType,CommunicationDirection) const) &(GridImp ::template communicate<DataHandle>)));
+    asImp().template communicate<DataHandle>(data,iftype,dir);
+	return;
+  }
+
+  //! return const reference to a collective communication object. The return type is a model of Dune::CollectiveCommunication.
+  const typename Codim<0>::CollectiveCommunication& comm () const
+  {
+    // compare addresses of the method, if they are equal then derived
+    // class has the method not overloaded which leads to a seg fault 
+    CHECK_INTERFACE_IMPLEMENTATION(
+        ((const typename Codim<0>::CollectiveCommunication& (GridImp::*)() const) &ThisType::comm),
+        ((const typename Codim<0>::CollectiveCommunication& (GridImp::*)() const) &GridImp::comm));
+  	return asImp().comm();
+  }
+  //@}
 
 
 private:
