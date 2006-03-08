@@ -11,7 +11,7 @@ namespace Dune
    @brief Enables iteration over all entities
    of a given codimension and level of a grid.
 
-   @ingroup GridInterface
+   @ingroup GIIterators
  */
 template<int codim, PartitionIteratorType pitype, class GridImp,
          template<int,PartitionIteratorType,class> class LevelIteratorImp>

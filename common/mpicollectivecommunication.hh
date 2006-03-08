@@ -444,7 +444,9 @@ namespace Dune
   // generate MPI operations
   //=======================================================
 
-  // specialization for MPI
+  /*! \brief Specialization of CollectiveCommunication for MPI
+	\ingroup GICollectiveCommunication
+  */
   template<>
   class CollectiveCommunication<MPI_Comm>
   {
