@@ -534,8 +534,9 @@ template <>
 inline FieldVector<alu3d_ctype, 2> 
 ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
 local (const FieldVector<alu3d_ctype, 3>& global) const {
+  assert( biMap_ );
   biMap_->world2map(global, tmp1_);
-  return FieldVector<alu3d_ctype, 2>();
+  return tmp1_;
 }
 
 template <int mydim, int cdim>
@@ -579,8 +580,8 @@ template <>
 inline const FieldMatrix<alu3d_ctype, 2, 2>& 
 ALU3dGridGeometry<2, 3, const ALU3dGrid<3, 3, hexa> >::
 jacobianInverseTransposed (const FieldVector<alu3d_ctype, 2>& local) const {
-  assert(triMap_);
-  //jInv_ = triMap_->jacobianInverse(local);
+  assert( biMap_ );
+  //biMap_->jacobianInverse(local,jInv_);
   return jInv_;
 }
 
