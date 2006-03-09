@@ -589,11 +589,6 @@ representing a field and a compile-time given size.
   class FieldVector
 #endif
   {
-	//! The actual number of elements that gets allocated.
-	//! It's always at least 1.
-	/** \todo Wie genau gehen wir mit dem Fall N==0 um?  So? */
-	enum { n = (SIZE > 0) ? SIZE : 1 };
-
   public:
 	// remember size of vector 
 	enum { dimension = SIZE };
@@ -620,7 +615,7 @@ representing a field and a compile-time given size.
 	//! export size
 	enum {
 	  //! The size of this vector.
-	  size = n
+	  size = SIZE
 	};
 
 	//! Constructor making uninitialized vector
@@ -630,14 +625,14 @@ representing a field and a compile-time given size.
 	//! Constructor making vector with identical coordinates
 	explicit FieldVector (const K& t)
 	{
-	  for (size_type i=0; i<n; i++) p[i] = t;
+	  for (size_type i=0; i<SIZE; i++) p[i] = t;
 	}
 
 	//===== assignment from scalar
     //! Assignment operator for scalar
 	FieldVector& operator= (const K& k)
 	{
-	  fvmeta_assignscalar<n-1>::assignscalar(*this,k);
+	  fvmeta_assignscalar<SIZE-1>::assignscalar(*this,k);
 	  return *this;   
 	}
 
@@ -694,7 +689,7 @@ representing a field and a compile-time given size.
 	K& operator[] (size_type i)
 	{
 #ifdef DUNE_ISTL_WITH_CHECKING
-	  if (i>=n) DUNE_THROW(MathError,"index out of range");
+	  if (i<0 || i>=SIZE) DUNE_THROW(MathError,"index out of range");
 #endif
 	  return p[i];
 	}
@@ -703,13 +698,13 @@ representing a field and a compile-time given size.
 	const K& operator[] (size_type i) const
 	{
 #ifdef DUNE_ISTL_WITH_CHECKING
-	  if (i>=n) DUNE_THROW(MathError,"index out of range");
+	  if (i<0 || i>=SIZE) DUNE_THROW(MathError,"index out of range");
 #endif
 	  return p[i];
 	}
 
 	//! Iterator class for sequential access
-    typedef FieldIterator<FieldVector<K,n>,K> Iterator;
+    typedef FieldIterator<FieldVector<K,SIZE>,K> Iterator;
 	//! typedef for stl compliant access
     typedef Iterator iterator;
     
@@ -722,13 +717,13 @@ representing a field and a compile-time given size.
 	//! end iterator
 	Iterator end ()
 	{
-	  return Iterator(*this,n);
+	  return Iterator(*this,SIZE);
 	}
 
 	//! begin iterator
 	Iterator rbegin ()
 	{
-	  return Iterator(*this,n-1);
+	  return Iterator(*this,SIZE-1);
 	}
 
 	//! end iterator
@@ -740,14 +735,14 @@ representing a field and a compile-time given size.
 	//! return iterator to given element or end()
 	Iterator find (size_type i)
 	{
-	  if (i<n)
+	  if (i<SIZE)
 		return Iterator(*this,i);
 	  else
-		return Iterator(*this,n);
+		return Iterator(*this,SIZE);
 	}
 
 	//! ConstIterator class for sequential access
-    typedef FieldIterator<const FieldVector<K,n>,const K> ConstIterator;
+    typedef FieldIterator<const FieldVector<K,SIZE>,const K> ConstIterator;
 	//! typedef for stl compliant access
     typedef ConstIterator const_iterator;
 
@@ -760,13 +755,13 @@ representing a field and a compile-time given size.
 	//! end ConstIterator
 	ConstIterator end () const
 	{
-	  return ConstIterator(*this,n);
+	  return ConstIterator(*this,SIZE);
 	}
 
 	//! begin ConstIterator
 	ConstIterator rbegin () const
 	{
-	  return ConstIterator(*this,n-1);
+	  return ConstIterator(*this,SIZE-1);
 	}
 
 	//! end ConstIterator
@@ -778,10 +773,10 @@ representing a field and a compile-time given size.
 	//! return iterator to given element or end()
 	ConstIterator find (size_type i) const
 	{
-	  if (i<n)
+	  if (i<SIZE)
 		return ConstIterator(*this,i);
 	  else
-		return ConstIterator(*this,n);
+		return ConstIterator(*this,SIZE);
 	}
     
 #ifndef DUNE_EXPRESSIONTEMPLATES
@@ -790,14 +785,14 @@ representing a field and a compile-time given size.
 	//! vector space addition
 	FieldVector& operator+= (const FieldVector& y)
 	{
-	  fvmeta_plusequal<n-1>::plusequal(*this,y);
+	  fvmeta_plusequal<SIZE-1>::plusequal(*this,y);
 	  return *this;
 	}
 
 	//! vector space subtraction
 	FieldVector& operator-= (const FieldVector& y)
 	{
-	  fvmeta_minusequal<n-1>::minusequal(*this,y);
+	  fvmeta_minusequal<SIZE-1>::minusequal(*this,y);
 	  return *this;
 	}
 
@@ -818,28 +813,28 @@ representing a field and a compile-time given size.
 	//! vector space add scalar to all comps
 	FieldVector& operator+= (const K& k)
 	{
-	  fvmeta_plusequal<n-1>::plusequal(*this,k);
+	  fvmeta_plusequal<SIZE-1>::plusequal(*this,k);
 	  return *this;
 	}
 
 	//! vector space subtract scalar from all comps
 	FieldVector& operator-= (const K& k)
 	{
-	  fvmeta_minusequal<n-1>::minusequal(*this,k);
+	  fvmeta_minusequal<SIZE-1>::minusequal(*this,k);
 	  return *this;
 	}
 
 	//! vector space multiplication with scalar 
 	FieldVector& operator*= (const K& k)
 	{
-	  fvmeta_multequal<n-1>::multequal(*this,k);
+	  fvmeta_multequal<SIZE-1>::multequal(*this,k);
 	  return *this;
 	}
 
 	//! vector space division by scalar
 	FieldVector& operator/= (const K& k)
 	{
-	  fvmeta_divequal<n-1>::divequal(*this,k);
+	  fvmeta_divequal<SIZE-1>::divequal(*this,k);
 	  return *this;
 	}
 
@@ -848,14 +843,14 @@ representing a field and a compile-time given size.
 	//! Binary vector comparison
 	bool operator== (const FieldVector& y) const
 	{
-	  return fvmeta_equality<n-1>::equality(*this,y);
+	  return fvmeta_equality<SIZE-1>::equality(*this,y);
 	}
 
 	//! vector space axpy operation
 	FieldVector& axpy (const K& a, const FieldVector& y)
 	{
 #ifndef DUNE_EXPRESSIONTEMPLATES
-	  fvmeta_axpy<n-1>::axpy(*this,a,y);
+	  fvmeta_axpy<SIZE-1>::axpy(*this,a,y);
 #else
       *this += a*y;
 #endif
@@ -868,7 +863,7 @@ representing a field and a compile-time given size.
 	//! scalar product
     K operator* (const FieldVector& y) const
 	{
-	  return fvmeta_dot<n-1>::dot(*this,y);
+	  return fvmeta_dot<SIZE-1>::dot(*this,y);
 	}
 
 
@@ -877,37 +872,37 @@ representing a field and a compile-time given size.
 	//! one norm (sum over absolute values of entries)
     double one_norm () const
 	{
-	  return fvmeta_one_norm<n-1>::one_norm(*this);
+	  return fvmeta_one_norm<SIZE-1>::one_norm(*this);
 	}
 
 	//! simplified one norm (uses Manhattan norm for complex values)
     double one_norm_real () const
 	{
-	  return fvmeta_one_norm_real<n-1>::one_norm_real(*this);
+	  return fvmeta_one_norm_real<SIZE-1>::one_norm_real(*this);
 	}
 
 	//! two norm sqrt(sum over squared values of entries)
     double two_norm () const
 	{
-	  return sqrt(fvmeta_two_norm2<n-1>::two_norm2(*this));
+	  return sqrt(fvmeta_two_norm2<SIZE-1>::two_norm2(*this));
 	}
 
 	//! sqare of two norm (sum over squared values of entries), need for block recursion
     double two_norm2 () const
 	{
-	  return fvmeta_two_norm2<n-1>::two_norm2(*this);
+	  return fvmeta_two_norm2<SIZE-1>::two_norm2(*this);
 	}
 
 	//! infinity norm (maximum of absolute values of entries)
     double infinity_norm () const
 	{
-	  return fvmeta_infinity_norm<n-1>::infinity_norm(*this);
+	  return fvmeta_infinity_norm<SIZE-1>::infinity_norm(*this);
 	}
 
 	//! simplified infinity norm (uses Manhattan norm for complex values)
 	double infinity_norm_real () const
 	{
-	  return fvmeta_infinity_norm_real<n-1>::infinity_norm_real(*this);
+	  return fvmeta_infinity_norm_real<SIZE-1>::infinity_norm_real(*this);
 	}
 #endif
 
@@ -916,19 +911,19 @@ representing a field and a compile-time given size.
 	//! number of blocks in the vector (are of size 1 here)
 	size_type N () const
 	{
-	  return n;
+	  return SIZE;
 	}
 
 	//! dimension of the vector space
 	size_type dim () const
 	{
-	  return n;
+	  return SIZE;
 	}
 
       //! Send vector to output stream
 	void print (std::ostream& s) const
 	{
-	  for (size_type i=0; i<n; i++)
+	  for (size_type i=0; i<SIZE; i++)
 		if (i>0)
 		  s << " " << p[i];
 		else
@@ -937,7 +932,7 @@ representing a field and a compile-time given size.
 
   private:
 	// the data, very simply a built in array
-	K p[n]; 
+      K p[(SIZE > 0) ? SIZE : 1]; 
   };
 
   //! Send vector to output stream
