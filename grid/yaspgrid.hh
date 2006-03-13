@@ -1562,7 +1562,7 @@ public:
           _normal(it._normal)
   {}
 
-  //! copy constructor
+  //! assignment
   YaspIntersectionIterator & operator = (const YaspIntersectionIterator& it)
     {
       /* Assert same Iterator Context */
@@ -1747,6 +1747,7 @@ public:
   typedef typename MultiYGrid<dim,ctype>::YGridLevelIterator YGLI;
   typedef typename SubYGrid<dim,ctype>::TransformingSubIterator TSI;
   typedef YaspSpecialEntity<codim,dim,GridImp> SpecialEntity;
+  typedef YaspEntityPointer<codim,GridImp> Base;
 
   //! constructor
   YaspEntityPointer (const YGLI & g, const TSI & it) : _g(g), _it(it), _entity(_g,_it)
@@ -2114,7 +2115,7 @@ struct YaspCommunicateMeta<dim,0> {
 /*!
   \brief [<em> provides \ref Dune::Grid </em>]
   \brief Provides a distributed structured cube mesh.
-  \ingroup GridImplementations
+  \ingroup GImpYaspGrid
 
   YaspGrid stands for yet another structured parallel grid.
   It will implement the dune grid interface for structured grids with codim 0

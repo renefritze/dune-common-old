@@ -873,6 +873,7 @@ class SEntityPointer :
   enum { dim = GridImp::dimension };
   friend class SIntersectionIterator<GridImp>;
 public:
+  typedef SEntityPointer<codim,GridImp> Base;
   typedef typename GridImp::template Codim<codim>::Entity Entity;
 
   //! equality
@@ -1166,7 +1167,7 @@ struct SGridFamily
 /**
  \brief [<em> provides \ref Dune::Grid </em>]
  \brief A structured mesh in d dimensions consisting of "cubes".
- \ingroup GridImplementations
+ \ingroup GImpSGrid
 
         This module describes the pilot implementation of the Dune grid interface.
         It implements the grid interface for simple structured meshes.

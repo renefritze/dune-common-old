@@ -16,6 +16,7 @@ class OneDGridEntityPointer
     
 public:
   typedef typename GridImp::template Codim<codim>::Entity Entity;
+  typedef OneDGridEntityPointer<codim,GridImp> Base;
 
   //! equality
   bool equals(const OneDGridEntityPointer<codim,GridImp>& other) const {
