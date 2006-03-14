@@ -21,7 +21,12 @@ namespace Dune {
     public:
         /** \brief Each entity can be tagged by one of these basic types 
             plus its space dimension */
-        enum BasicType {simplex, cube, pyramid, prism};
+        enum BasicType {
+		  simplex,   //!< Simplicial element in any nonnegative dimension
+		  cube,      //!< Cube element in any nonnegative dimension
+		  pyramid,   //!< Four sided pyramid in three dimensions
+		  prism      //!< Prism element in three dimensions
+		};
 
     private:
 
@@ -123,7 +128,9 @@ namespace Dune {
 
         /*@}*/
 
-        /** \brief Check for equality */
+        /** \brief Check for equality. This method knows that in dimension 0 and 1
+			all BasicTypes are equal.
+		 */
         bool operator==(const GeometryType& other) const {
             return ( (dim()==0 && other.dim()==0) 
                      || (dim()==1 && other.dim()==1)
