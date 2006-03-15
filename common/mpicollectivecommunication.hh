@@ -451,6 +451,7 @@ namespace Dune
   class CollectiveCommunication<MPI_Comm>
   {
   public:
+	//! Instantiation using a MPI communicator
 	CollectiveCommunication (const MPI_Comm& c)
 	  : communicator(c)
 	{
@@ -458,16 +459,19 @@ namespace Dune
 	  MPI_Comm_size(communicator,&procs);
 	}
 
+	//! @copydoc CollectiveCommunication::rank()
 	int rank () const
 	{
 	  return me;
 	}
 
+	//! @copydoc CollectiveCommunication::size()
 	int size () const
 	{
 	  return procs;
 	}
 
+	//! @copydoc CollectiveCommunication::sum(T&)
 	template<typename T>
 	T sum (T& in) const // MPI does not know about const :-(
 	{
@@ -477,6 +481,7 @@ namespace Dune
 	  return out;
 	}
 
+	//! @copydoc CollectiveCommunication::sum(T*,int)
 	template<typename T>
 	int sum (T* inout, int len) const
 	{
@@ -485,6 +490,7 @@ namespace Dune
 						   GenericSum_MPI_Op<T>::get(),communicator);
 	}
 
+	//! @copydoc CollectiveCommunication::prod(T&)
 	template<typename T>
 	T prod (T& in) const // MPI does not know about const :-(
 	{
@@ -494,6 +500,7 @@ namespace Dune
 	  return out;
 	}
 
+	//! @copydoc CollectiveCommunication::prod(T*,int)
 	template<typename T>
 	int prod (T* inout, int len) const
 	{
@@ -502,6 +509,7 @@ namespace Dune
 						   GenericProduct_MPI_Op<T>::get(),communicator);
 	}
 
+	//! @copydoc CollectiveCommunication::min(T&)
 	template<typename T>
 	T min (T& in) const // MPI does not know about const :-(
 	{
@@ -511,6 +519,7 @@ namespace Dune
 	  return out;
 	}
 
+	//! @copydoc CollectiveCommunication::min(T*,int)
 	template<typename T>
 	int min (T* inout, int len) const
 	{
@@ -519,6 +528,7 @@ namespace Dune
 						   GenericMin_MPI_Op<T>::get(),communicator);
 	}
 
+	//! @copydoc CollectiveCommunication::max(T&)
 	template<typename T>
 	T max (T& in) const // MPI does not know about const :-(
 	{
@@ -528,6 +538,7 @@ namespace Dune
 	  return out;
 	}
 
+	//! @copydoc CollectiveCommunication::max(T*,int)
 	template<typename T>
 	int max (T* inout, int len) const
 	{
@@ -536,19 +547,21 @@ namespace Dune
 						   GenericMax_MPI_Op<T>::get(),communicator);
 	}
 
+	//! @copydoc CollectiveCommunication::barrier()
 	int barrier () const
 	{
 	  return MPI_Barrier(communicator);
 	}
 
-	//! send array from process with rank root to all others
+	//! @copydoc CollectiveCommunication::broadcast()
 	template<typename T>
 	int broadcast (T* inout, int len, int root) const
 	{
 	  return MPI_Bcast(inout,len,Generic_MPI_Datatype<T>::get(),root,communicator);
 	}
 
-	//! receive array of values from each processor in root
+	
+	//! @copydoc CollectiveCommunication::gather()
 	template<typename T>
 	int gather (T* in, T* out, int len, int root) const // note out must have space for P*len elements
 	{
