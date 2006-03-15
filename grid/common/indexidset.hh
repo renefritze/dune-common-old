@@ -14,7 +14,6 @@
 */
 
 /** @addtogroup IndexIdSets Index and Id Sets
-	\ingroup Grid
   
 	@section Intro Introduction
   
