@@ -22,16 +22,8 @@
   
 */
 
-
 namespace Dune
 {
-  /** 
-   * @addtogroup IndexIdSets
-   *
-   * @{ 
-   */
- 
-
   /** @brief Index Set %Interface.
    
   This class template is used as a base class for all index set implementations. 
@@ -45,6 +37,8 @@ namespace Dune
   An implementation of the index set interface.
   \par IndexSetTypes
   A class providing the types returned by the methods of IndexSet.
+
+  @ingroup IndexIdSets
   */
   template<class GridImp, class IndexSetImp, class IndexSetTypes>
   class IndexSet {
@@ -193,6 +187,10 @@ namespace Dune
 	const IndexSetImp& asImp () const {return static_cast<const IndexSetImp &>(*this);}
   };
 
+
+  /**\brief Provide default implementation of method if IndexSet
+	 @ingroup GridDevel
+  */
   template<class GridImp, class IndexSetImp, class IndexSetTypes>
   class IndexSetDefaultImplementation : 
     public IndexSet<GridImp,IndexSetImp,IndexSetTypes> 
@@ -248,6 +246,8 @@ namespace Dune
   An implementation of the id set interface.
   \par IdTypeImp
   The type used for the ids (which is returned by functions returning an id).
+
+  @ingroup IndexIdSets
   */
   template<class GridImp, class IdSetImp, class IdTypeImp>
   class IdSet
@@ -313,6 +313,8 @@ namespace Dune
   An implementation of the id set interface.
   \par IdTypeImp
   The type used for the ids (which is returned by functions returning an id).
+
+  @ingroup GridDevel
   */
   template<class GridImp, class IdSetImp, class IdTypeImp>
   class IdSetDefaultImplementation : public IdSet<GridImp,IdSetImp,IdTypeImp>
@@ -336,8 +338,6 @@ namespace Dune
     }
   };
 
-
-  /** @} */
 
 }
 #endif
