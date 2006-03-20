@@ -334,6 +334,13 @@ public:
       return realEntity.isLeaf();
     }
 
+  /** @brief Returns true if element is of regular type in red/green type refinement. 
+	  In bisection or hanging node refinement this is always true.
+  */ 
+  bool isRegular() const {
+	return realEntity.isRegular();
+  }
+
   /**\brief Provides information how this element has been subdivided from 
    its father element. 
    The returned LocalGeometry is a model of Dune::Geometry<dimension,dimension,...>
@@ -663,6 +670,13 @@ public:
 
   //! define type used for coordinates in grid module
   typedef ct ctype;
+
+  /** @brief Returns true if element is of regular type in red/green type refinement. 
+	  In bisection or hanging node refinement this is always true.
+  */ 
+  bool isRegular() const {
+	return true;
+  }
 
   /** \brief Default implementation for access to boundaryId of sub entities 
    *
