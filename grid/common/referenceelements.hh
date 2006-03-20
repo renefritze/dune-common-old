@@ -560,7 +560,7 @@ namespace Dune
 
     typedef ctype CoordType;
     
-    ReferenceSimplex ()
+    ReferenceSimplex () : volume_( (double) 1.0/Factorial<dim>::factorial )
     {
 	  assert(dim<=3);
       for (int i=0; i<=dim; ++i)
@@ -618,14 +618,9 @@ namespace Dune
         return GeometryType(GeometryType::simplex,dim-c);	  
     }
     
-    
     //! volume of the reference element
-    
-    double volume () const
-    {
-	  if (dim==2) return 0.5;
-      return 1.0/6.0;
-    }
+    double volume () const { return volume_; }
+
     //! position of entity (i,c) 
     //   const FieldVector<int,dim>& iposition (int i, int c) const
     //     {
@@ -640,8 +635,8 @@ namespace Dune
       sizes[dim]=dim+1; // simplex definition 
          
       // position of vertices, there are dim+1 vertices
-      FieldVector<int,dim> x;
-      x=0;
+      FieldVector<int,dim> x(0);
+      
       // vertex is codim=dim entity
       for (int n=0;n<dim;n++)
         {
@@ -890,8 +885,10 @@ namespace Dune
     int sizes[dim+1];
     int subsizes[MAXE][dim+1][dim+1];
     int subentityindex[MAXE][dim+1][MAXE][dim+1];
-	FieldVector<ctype,dim> pos[MAXE][dim+1];
-       
+  	FieldVector<ctype,dim> pos[MAXE][dim+1];
+
+    // volume of reference simplex 
+    const double volume_;
   };
 
 
