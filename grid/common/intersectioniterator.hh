@@ -177,14 +177,6 @@ public:
       return *this;
     }
   
-  /** @brief Postincrement operator. Deprecated, do not use it anymore.*/
-  IntersectionIterator operator++(int) DUNE_DEPRECATED
-    {
-      const IntersectionIterator tmp(*this);
-      this->realIterator.increment();
-      return tmp;
-    }
-  
   //! return true if intersection is with interior or exterior boundary (see the cases above)
   bool boundary () const
     {
@@ -359,6 +351,16 @@ protected:
   ImplementationType & getRealImp() { return realIterator; }
   //! return reference to the real implementation 
   const ImplementationType & getRealImp() const { return realIterator; }
+
+  // private, so that nobody will use this method
+  /** @brief Postincrement operator. Deprecated, do not use it anymore.*/
+  IntersectionIterator operator++(int) DUNE_DEPRECATED
+    {
+      const IntersectionIterator tmp(*this);
+      this->realIterator.increment();
+      return tmp;
+    }
+  
 };
 
 //**********************************************************************
