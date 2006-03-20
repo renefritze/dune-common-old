@@ -47,7 +47,7 @@ T SQR (T t)
   return t*t;
 }
 
-  //! Calculates m^p at compile time
+//! Calculates m^p at compile time
 template <int m, int p> 
 struct Power_m_p
 {
@@ -55,12 +55,28 @@ struct Power_m_p
   enum { power = (m * Power_m_p<m,p-1>::power ) };
 };
 
-// end of recursion via specialization
+//! end of recursion via specialization
 template <int m> 
 struct Power_m_p< m , 0>
 {
   // m^0 = 1
   enum { power = 1 };
+};
+
+//! Calculates the factorial of m at compile time
+template <int m> 
+struct Factorial
+{
+  //! factorial stores m! 
+  enum { factorial = m * Factorial<m-1>::factorial };
+};
+
+//! end of recursion of factorial via specialization
+template <> 
+struct Factorial<0>
+{
+  // 0! = 1
+  enum { factorial = 1 };
 };
 
 //********************************************************************
