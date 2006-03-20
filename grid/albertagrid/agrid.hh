@@ -698,8 +698,8 @@ namespace Dune
     typedef typename GridImp::template Codim<cd>::Entity Entity;
     typedef typename SelectEntityImp<cd,dim,GridImp>::EntityImp EntityImp;
     typedef typename SelectEntityImp<cd,dim,GridImp>::EntityObject EntityObject;
-	typedef AlbertaGridEntityPointer<cd,GridImp> Base;
-	
+    typedef AlbertaGridEntityPointer<cd,GridImp> Base;
+  
     //! typedef of my type 
     typedef AlbertaGridEntityPointer<cd,GridImp> AlbertaGridEntityPointerType;
 
@@ -744,6 +744,7 @@ namespace Dune
 
     //! return reference to internal entity imp 
     EntityImp & entityImp (); 
+
     //! return const reference to internal entity imp 
     const EntityImp & entityImp () const; 
     
@@ -805,6 +806,8 @@ namespace Dune
     void increment();
 
   private:
+    const int startLevel_;
+    
     //! the actual Level of this Hierarichic Iterator 
     int level_;
 
@@ -823,6 +826,9 @@ namespace Dune
 
     //! The nessesary things for Albert
     ALBERTA EL_INFO * recursiveTraverse(ALBERTA TRAVERSE_STACK * stack);
+
+    //! The nessesary things for Albert
+    ALBERTA EL_INFO * firstChild(ALBERTA TRAVERSE_STACK * stack);
 
     //! make empty HierarchicIterator
     void makeIterator();
@@ -1284,7 +1290,7 @@ namespace Dune
       typedef IdSet<GridImp,IdSetImp,IdType> GlobalIdSet;
       typedef IdSet<GridImp,IdSetImp,IdType> LocalIdSet;
 
-	  typedef CollectiveCommunication<GridImp> CollectiveCommunication;
+    typedef CollectiveCommunication<GridImp> CollectiveCommunication;
     };
   };
 
@@ -1505,7 +1511,7 @@ namespace Dune
     int size (GeometryType type) const;
 
   private:
-	  CollectiveCommunication<AlbertaGrid> ccobj;
+    CollectiveCommunication<AlbertaGrid> ccobj;
 
   public:
     //***************************************************************
@@ -1551,12 +1557,12 @@ public:
     bool communicate (DofManagerType & dm) { return false; }
     */
 
-	/** dummy collective communication */
-	const CollectiveCommunication<AlbertaGrid>& comm () const
-	{
-	  return ccobj;
-	}
-	
+  /** dummy collective communication */
+  const CollectiveCommunication<AlbertaGrid>& comm () const
+  {
+    return ccobj;
+  }
+  
     /** \brief return type of grid, here AlbertaGrid_Id. */
     GridIdentifier type () const { return AlbertaGrid_Id; };
   
@@ -1872,17 +1878,23 @@ public:
       static const bool v = true;
     };
 
-	template<int dim, int dimw>
-	struct isLevelwiseConforming< AlbertaGrid<dim,dimw> >
-	{
-	  static const bool v = true;
-	};
-	
-	template<int dim, int dimw>
-	struct hasHangingNodes< AlbertaGrid<dim,dimw> >
-	{
-	  static const bool v = false;
-	};
+  template<int dim, int dimw>
+  struct isLevelwiseConforming< AlbertaGrid<dim,dimw> >
+  {
+    static const bool v = true;
+  };
+  
+  template<int dim, int dimw>
+  struct hasHangingNodes< AlbertaGrid<dim,dimw> >
+  {
+    static const bool v = false;
+  };
+  template<int dim, int dimw>
+  struct hasBackupRestoreFacilities< AlbertaGrid<dim,dimw> >
+  {
+    static const bool v = true;
+  };
+
   } // end namespace Capabilities
 
 } // namespace Dune
