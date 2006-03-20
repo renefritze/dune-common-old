@@ -567,6 +567,13 @@ integrationElement (const FieldVector<alu3d_ctype, 2>& local) const {
   return tmp2_.two_norm();
 }
 
+template<>
+inline alu3d_ctype 
+ALU3dGridGeometry<1, 3, const ALU3dGrid<3, 3, hexa> >::
+integrationElement (const FieldVector<alu3d_ctype, 1>& local) const {
+  return (this->operator[] (0) - this->operator[] (1)).two_norm();
+}
+
 template <>
 inline const FieldMatrix<alu3d_ctype, 3, 3>& 
 ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
