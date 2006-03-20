@@ -1276,8 +1276,11 @@ template<int dim, class GridImp>
 inline void AlbertaGridEntity <0,dim,GridImp>::
 setLevel(int actLevel)
 {
+  /*
+  assert(false);
   level_  = actLevel;
   assert( level_ >= 0);
+  */
 }
 
 template<int dim, class GridImp>
@@ -1297,6 +1300,7 @@ removeElInfo()
   elInfo_  = 0; 
   element_ = 0; 
   builtgeometry_ = false; 
+  level_ = -1;
 }
 
 template<int dim, class GridImp>
@@ -1306,9 +1310,15 @@ setElInfo(ALBERTA EL_INFO * elInfo, int , int , int )
   // just set elInfo and element 
   elInfo_ = elInfo;
   if(elInfo_) 
+  {
     element_ = elInfo_->el;
+    level_ = grid_.getLevelOfElement( element_ );
+  }
   else 
+  {
+    level_ = -1;
     element_ = 0;
+  }
   builtgeometry_ = false;
 }
 
