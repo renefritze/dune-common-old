@@ -29,7 +29,9 @@ inline int AlbertaGridGeometry<mydim,cdim,GridImp>::mapVertices (int i) const
 
 template <int mydim, int cdim, class GridImp>
 inline AlbertaGridGeometry<mydim,cdim,GridImp>:: 
-AlbertaGridGeometry() : myGeomType_(GeometryType::simplex,mydim) 
+AlbertaGridGeometry() 
+  : myGeomType_(GeometryType::simplex,mydim) 
+  , detFactor_ ( (albertCtype) 1.0/ Factorial<mydim> :: factorial ) 
 {
   // make empty element 
   initGeom();
@@ -37,7 +39,9 @@ AlbertaGridGeometry() : myGeomType_(GeometryType::simplex,mydim)
 
 template <int mydim, int cdim, class GridImp>
 inline AlbertaGridGeometry<mydim,cdim,GridImp>:: 
-AlbertaGridGeometry(const int child, const int orientation) : myGeomType_(GeometryType::simplex,mydim) 
+AlbertaGridGeometry(const int child, const int orientation) 
+  : myGeomType_(GeometryType::simplex,mydim) 
+  , detFactor_ ( (albertCtype) 1.0/ Factorial<mydim> :: factorial ) 
 {
   // make empty element 
   buildGeomInFather(child,orientation);
@@ -430,6 +434,14 @@ buildJacobianInverseTransposed() const
   calcedDet_ = true;
   builtinverse_ = true;
   return;
+}
+
+template <int mydim, int cdim, class GridImp>
+inline albertCtype AlbertaGridGeometry<mydim,cdim,GridImp>:: 
+volume () const
+{
+  assert( calcedDet_ );
+  return detFactor_ * elDet_;
 }
 
 template <int mydim, int cdim, class GridImp>
@@ -1110,18 +1122,27 @@ template<int dim, class GridImp>
 inline AdaptationState AlbertaGridEntity <0,dim,GridImp>::
 state() const
 {
+  if( mightBeCoarsened () ) return COARSEN; 
+  if( wasRefined () ) return REFINED;
+  return NONE;
+}
+
+template<int dim, class GridImp>
+inline bool AlbertaGridEntity <0,dim,GridImp>::
+wasRefined () const
+{
   assert( element_ && elInfo_ );
   assert( element_ == elInfo_->el );
-  if( element_->mark < 0 )
-  {
-    return COARSEN; 
-  }
-  if( grid_.checkElNew( element_ ) )
-  {
-    return REFINED;   
-  }
+  return grid_.checkElNew( element_ ); 
+}
 
-  return NONE;
+template<int dim, class GridImp>
+inline bool AlbertaGridEntity <0,dim,GridImp>::
+mightBeCoarsened () const
+{
+  assert( element_ && elInfo_ );
+  assert( element_ == elInfo_->el );
+  return ( element_->mark < 0 );
 }
 
 template<int dim, class GridImp>
@@ -1273,27 +1294,6 @@ level() const
 }
 
 template<int dim, class GridImp>
-inline void AlbertaGridEntity <0,dim,GridImp>::
-setLevel(int actLevel)
-{
-  /*
-  assert(false);
-  level_  = actLevel;
-  assert( level_ >= 0);
-  */
-}
-
-template<int dim, class GridImp>
-inline void AlbertaGridEntity <0,dim,GridImp>::
-setNewLevel(int actLevel, bool leafIt )
-{
-  level_  = actLevel;
-  assert( level_ >= 0);
-
-  leafIt_ = leafIt;
-}
-
-template<int dim, class GridImp>
 inline void AlbertaGridEntity<0,dim,GridImp>::
 removeElInfo()
 {
@@ -1328,7 +1328,6 @@ setEntity(const AlbertaGridEntity<0,dim,GridImp> & org)
 {
   setElInfo(org.elInfo_);  
   setTraverseStack(org.travStack_);
-  setLevel(org.level());
 }
 
 template<int dim, class GridImp>
@@ -1439,7 +1438,6 @@ inline AlbertaGridEntityPointer<codim,GridImp> ::
   assert( entity_ );
   // set elinfo and level
   entityImp().setElInfo(elInfo,face,edge,vertex);
-  entityImp().setLevel(level);
 }     
 
 template<int codim, class GridImp >
@@ -1453,7 +1451,6 @@ inline AlbertaGridEntityPointer<codim,GridImp> ::
 {
   // set elinfo and level
   entityImp().setElInfo(elInfo,face,edge,vertex);
-  entityImp().setLevel(level);
   entityImp().setTraverseStack(stack);
 }     
 
@@ -1597,7 +1594,7 @@ AlbertaGridHierarchicIterator(const GridImp & grid,
   if(travStack)
   {
     // get new ALBERTA TRAVERSE STACK 
-    manageStack_.makeItNew(true);
+    manageStack_.create();
     
     ALBERTA TRAVERSE_STACK *stack = manageStack_.getStack();
 
@@ -1625,9 +1622,6 @@ AlbertaGridHierarchicIterator(const GridImp & grid,
     ALBERTA EL_INFO * elInfo = firstChild(stack); 
     
     virtualEntity_.setElInfo(elInfo);
-
-    // set new level 
-    virtualEntity_.setLevel(level_);
   }
   else
   {
@@ -1644,12 +1638,11 @@ AlbertaGridHierarchicIterator(const AlbertaGridHierarchicIterator<GridImp> & org
   , level_ ( org.level_ )
   , maxlevel_ ( org.maxlevel_ )
   , virtualEntity_( this->entityImp() )
-  //, manageStack_ ( org.manageStack_ )
 {
   if( org.virtualEntity_.getElInfo() )
   {
     // get new ALBERTA TRAVERSE STACK 
-    manageStack_.makeItNew(true);
+    manageStack_.create();
     ALBERTA TRAVERSE_STACK *stack = manageStack_.getStack();
     // cut old traverse stack, kepp only actual element 
     ALBERTA copyTraverseStack(stack, org.manageStack_.getStack() );
@@ -1659,8 +1652,6 @@ AlbertaGridHierarchicIterator(const AlbertaGridHierarchicIterator<GridImp> & org
     ALBERTA EL_INFO * elInfo = stack->elinfo_stack+stack->stack_used;
     
     virtualEntity_.setElInfo( elInfo );
-    virtualEntity_.setLevel( org.virtualEntity_.level() );
-
   }
   else 
     this->done();
@@ -1694,8 +1685,6 @@ inline void AlbertaGridHierarchicIterator< GridImp >::increment()
   }
   
   virtualEntity_.setElInfo( nextinfo );
-  // set new actual level, calculated by recursiveTraverse 
-  virtualEntity_.setLevel(level_);
   return ;
 }
 
@@ -2477,7 +2466,7 @@ AlbertaGridTreeIterator(const AlbertaGridTreeIterator<codim,pitype,GridImp> & or
   if(vertexMarker_) 
   { 
     // if vertexMarker is not NULL then we have a real iterator 
-    manageStack_.makeItNew(true);
+    manageStack_.create();
     ALBERTA TRAVERSE_STACK * stack = manageStack_.getStack();
     ALBERTA copyTraverseStack( stack , org.manageStack_.getStack() );
         
@@ -2486,7 +2475,6 @@ AlbertaGridTreeIterator(const AlbertaGridTreeIterator<codim,pitype,GridImp> & or
     ALBERTA EL_INFO * elInfo = stack->elinfo_stack+stack->stack_used;
     
     virtualEntity_.setElInfo( elInfo,face_,edge_,vertex_ );
-    virtualEntity_.setLevel( enLevel_ );
 
     assert( this->grid_.hierarchicIndexSet().index ( *(this->entity_) ) 
         == this->grid_.hierarchicIndexSet().index ( *(org.entity_) ) );
@@ -2512,7 +2500,7 @@ AlbertaGridTreeIterator<codim,pitype,GridImp>::operator =
   if(vertexMarker_) 
   { 
     // if vertexMarker is not NULL then we have a real iterator 
-    manageStack_.makeItNew(true);
+    manageStack_.create();
     ALBERTA TRAVERSE_STACK * stack = manageStack_.getStack();
     ALBERTA copyTraverseStack( stack , org.manageStack_.getStack() );
         
@@ -2521,7 +2509,6 @@ AlbertaGridTreeIterator<codim,pitype,GridImp>::operator =
     ALBERTA EL_INFO * elInfo = stack->elinfo_stack+stack->stack_used;
     
     virtualEntity_.setElInfo( elInfo,face_,edge_,vertex_ );
-    virtualEntity_.setLevel( enLevel_ );
 
     assert( this->grid_.hierarchicIndexSet().index ( *(this->entity_) ) 
         == this->grid_.hierarchicIndexSet().index ( *(org.entity_) ) );
@@ -2557,7 +2544,7 @@ AlbertaGridTreeIterator(const GridImp & grid,
     travFlags = travFlags | CALL_LEAF_EL_LEVEL;
 
     // get traverse_stack
-    manageStack_.makeItNew(true);
+    manageStack_.create();
     
     virtualEntity_.setTraverseStack(manageStack_.getStack());
     
@@ -2567,7 +2554,6 @@ AlbertaGridTreeIterator(const GridImp & grid,
       goFirstElement(manageStack_.getStack(), mesh, travLevel,travFlags);
 
     virtualEntity_.setElInfo(elInfo,face_,edge_,vertex_);
-    virtualEntity_.setLevel( enLevel_ );
   }
   else
   {
@@ -2589,7 +2575,6 @@ inline void AlbertaGridTreeIterator<codim,pitype,GridImp>::increment()
   }
   
   virtualEntity_.setElInfo( nextinfo , face_, edge_, vertex_); 
-  virtualEntity_.setLevel( enLevel_ );
 
   return ;
 }
