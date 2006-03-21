@@ -37,7 +37,7 @@ namespace Dune {
         c(ReferenceElements<C,d>::general)
         {
           InitReferenceElements<C,d-1> i;
-        };
+        }
     };
   
     template <class C>
@@ -57,14 +57,21 @@ namespace Dune {
         f(ReferenceElements<C,d>::pyramid)
         {
           InitReferenceElements<C,d-1> i;
-        };
+        }
     };
   
     template <class C>
     struct InitReferenceElements<C,0>
     {
+      ReferenceCubeContainer<C,0> & a;
+      ReferenceSimplexContainer<C,0> & b;
+      ReferenceElementContainer<C,0> & c;
       enum { d=0 };
-      InitReferenceElements() {};
+      InitReferenceElements():
+        a(ReferenceElements<C,0>::cube),
+        b(ReferenceElements<C,0>::simplices),
+        c(ReferenceElements<C,0>::general)
+	  {}
     };
   
     // force creation of symbols and code ...
@@ -73,7 +80,7 @@ namespace Dune {
       InitReferenceElements<double, 3> i1;
       InitReferenceElements<float, 3> i2;
     }
-    
+
   };
 
 };
