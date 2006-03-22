@@ -43,6 +43,7 @@ struct GrapeInterface
   static int called;
   typedef GrapeInterface_two_two::DUNE_ELEM  DUNE_ELEM;
   typedef GrapeInterface_two_two::DUNE_FDATA DUNE_FDATA;
+  typedef GrapeInterface_two_two::DUNE_DAT   DUNE_DAT;
   
   inline static void init() 
   {
@@ -65,19 +66,12 @@ struct GrapeInterface
   }
 
   inline static void *hmesh(
-          int (* const f_leaf)(DUNE_ELEM *), int (* const n_leaf)(DUNE_ELEM *),
-          int (* const f_mac)(DUNE_ELEM *), int (* const n_mac)(DUNE_ELEM *),
-          int (* const f_chi)(DUNE_ELEM *), int (* const n_chi)(DUNE_ELEM *),
-          void * (* const cp)(const void *),
-          int  (* const check_inside)(DUNE_ELEM *, const double *),
-          int  (* const wtoc)(DUNE_ELEM *, const double *, double *),
-          void (* const ctow)(DUNE_ELEM *, const double *, double *),
           void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const double *coord,  double *),
-          const int noe, const int nov, const int maxlev,int partition,
-          DUNE_ELEM *he , DUNE_FDATA * fe)
+          const int noe, const int nov, const int maxlev,
+          DUNE_FDATA * fe, DUNE_DAT * dune )
   {
-    return  GrapeInterface_two_two::hmesh(f_leaf,n_leaf,f_mac,n_mac,f_chi,n_chi,
-          cp,check_inside,wtoc,ctow,func_real,noe,nov,maxlev,partition,he,fe);
+    return  GrapeInterface_two_two::hmesh(
+              func_real,noe,nov,maxlev,fe,dune);
   }
 
   inline static void addHmeshToTimeScene(void * timescene, double time, void  *hmesh , int proc)
@@ -135,6 +129,7 @@ struct GrapeInterface<3,3>
 {
   typedef GrapeInterface_three_three::DUNE_ELEM  DUNE_ELEM;
   typedef GrapeInterface_three_three::DUNE_FDATA DUNE_FDATA;
+  typedef GrapeInterface_three_three::DUNE_DAT   DUNE_DAT;
 
   inline static void init() 
   {
@@ -161,19 +156,12 @@ struct GrapeInterface<3,3>
   }
 
   inline static void *hmesh(
-          int (* const f_leaf)(DUNE_ELEM *), int (* const n_leaf)(DUNE_ELEM *),
-          int (* const f_mac)(DUNE_ELEM *), int (* const n_mac)(DUNE_ELEM *),
-          int (* const f_chi)(DUNE_ELEM *), int (* const n_chi)(DUNE_ELEM *),
-          void * (* const cp)(const void *),
-          int  (* const check_inside)(DUNE_ELEM *, const double *),
-          int  (* const wtoc)(DUNE_ELEM *, const double *, double *),
-          void (* const ctow)(DUNE_ELEM *, const double *, double *),
           void (* const func_real) (DUNE_ELEM *, DUNE_FDATA*, int ind, const double *coord,  double *),
-          const int noe, const int nov, const int maxlev,int partition,
-          DUNE_ELEM *he , DUNE_FDATA * fe)
+          const int noe, const int nov, const int maxlev,
+          DUNE_FDATA * fe, DUNE_DAT * dune )
   {
-    return  GrapeInterface_three_three::hmesh(f_leaf,n_leaf,f_mac,n_mac,f_chi,n_chi,
-          cp,check_inside,wtoc,ctow,func_real,noe,nov,maxlev,partition,he,fe);
+    return  GrapeInterface_three_three::
+      hmesh(func_real,noe,nov,maxlev,fe,dune);
   }
 
   inline static void addHmeshToTimeScene(void * timescene, double time, void  *hmesh , int proc)
