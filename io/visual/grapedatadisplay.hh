@@ -194,6 +194,9 @@ public:
   // return vector for copying in combined display 
   std::vector < DUNE_FDATA * > & getFdataVec () { return vecFdata_; }
 
+  //! set min and max value for colorbar 
+  void setMinMaxValue(const double minValue, const double maxValue) const; 
+
 private:
   /*! add vector to display
     @param data Data vector storing data to display  
