@@ -25,13 +25,9 @@ public:
     OneDGridLeafIterator(const GridImp& grid) : grid_(&grid) {
 
         /** \todo Can a make the fullRefineLevel work somehow? */
-        //const int fullRefineLevel = grid_->multigrid_->fullrefineLevel;
         const int fullRefineLevel = 0;
         
-        if (pitype==All_Partition || pitype==Ghost_Partition)
-            this->virtualEntity_.setToTarget(grid_->vertices[fullRefineLevel].begin);
-        else
-            this->virtualEntity_.setToTarget(NULL);
+        this->virtualEntity_.setToTarget(grid_->vertices[fullRefineLevel].begin);
 
         if (!this->virtualEntity_.target()->isLeaf())
             increment();
@@ -64,14 +60,8 @@ private:
         this->virtualEntity_.setToTarget(this->virtualEntity_.target()->succ_);
 
         // If beyond the end of this level set to first of next level
-        if (!this->virtualEntity_.target() && oldLevel < grid_->maxLevel()) {
-
-            if (pitype==All_Partition || pitype==Ghost_Partition)
-                this->virtualEntity_.setToTarget(grid_->vertices[oldLevel+1].begin);
-            else
-                this->virtualEntity_.setToTarget(NULL);
-
-        }
+        if (!this->virtualEntity_.target() && oldLevel < grid_->maxLevel())
+            this->virtualEntity_.setToTarget(grid_->vertices[oldLevel+1].begin);
 
     }
 
@@ -90,22 +80,16 @@ private:
     class OneDGridLeafIterator<0,pitype,GridImp> : 
         public Dune::OneDGridEntityPointer <0,GridImp>
 {
-    enum {dim = GridImp::dimension};
-
-    friend class OneDGridEntity<0,dim,GridImp>;
+    friend class OneDGridEntity<0,1,GridImp>;
 
 public:
 
     OneDGridLeafIterator(const GridImp& grid) : grid_(&grid) {
 
         /** \todo Can a make the fullRefineLevel work somehow? */
-        //const int fullRefineLevel = grid_->multigrid_->fullrefineLevel;
         const int fullRefineLevel = 0;
         
-        if (pitype==All_Partition || pitype==Ghost_Partition)
-            this->virtualEntity_.setToTarget(grid_->elements[fullRefineLevel].begin);
-        else
-            this->virtualEntity_.setToTarget(NULL);
+        this->virtualEntity_.setToTarget(grid_->elements[fullRefineLevel].begin);
 
         if (!this->virtualEntity_.target()->isLeaf())
             increment();
@@ -138,14 +122,8 @@ private:
         this->virtualEntity_.setToTarget(this->virtualEntity_.target()->succ_);
 
         // If beyond the end of this level set to first of next level
-        if (!this->virtualEntity_.target() && oldLevel < grid_->maxLevel()) {
-
-            if (pitype==All_Partition || pitype==Ghost_Partition)
-                this->virtualEntity_.setToTarget(grid_->elements[oldLevel+1].begin);
-            else
-                this->virtualEntity_.setToTarget(NULL);
-
-        }
+        if (!this->virtualEntity_.target() && oldLevel < grid_->maxLevel())
+            this->virtualEntity_.setToTarget(grid_->elements[oldLevel+1].begin);
 
     }
 
