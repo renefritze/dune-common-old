@@ -14,7 +14,6 @@ namespace Dune {
     memPair_(dm_.addDofSet(&dofVec_, f.mapper(), name_)),
     dofVec_ ( *memPair_.second ),
     localFunc_(*this)
-    //localFunc_ ( f , dofVec_ )
 {}
 
   // Constructor making discrete function  
