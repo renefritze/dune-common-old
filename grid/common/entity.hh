@@ -335,11 +335,9 @@ public:
     }
 
   /** @brief Returns true if element is of regular type in red/green type refinement. 
-	  In bisection or hanging node refinement this is always true.
+    In bisection or hanging node refinement this is always true.
   */ 
-  bool isRegular() const {
-	return realEntity.isRegular();
-  }
+  bool isRegular() const { return realEntity.isRegular(); }
 
   /**\brief Provides information how this element has been subdivided from 
    its father element. 
@@ -672,11 +670,9 @@ public:
   typedef ct ctype;
 
   /** @brief Returns true if element is of regular type in red/green type refinement. 
-	  In bisection or hanging node refinement this is always true.
+    In bisection or hanging node refinement this is always true.
   */ 
-  bool isRegular() const {
-	return true;
-  }
+  bool isRegular() const { return true; }
 
   /** \brief Default implementation for access to boundaryId of sub entities 
    *
@@ -693,15 +689,20 @@ public:
   //! (REFINED) or nothing happend (NONE) 
   //! @return The default implementation returns NONE for grid with no
   //! adaptation
-  AdaptationState state () const DUNE_DEPRECATED { return NONE; }
+  AdaptationState state () const DUNE_DEPRECATED 
+  { 
+    if(asImp().wasRefined()) return REFINED;
+    if(asImp().mightBeCoarsened()) return COARSEN;
+    return NONE; 
+  }
 
   /**\brief Returns true, if entity was refined during last adaptation cycle 
   */
-  bool wasRefined () const { return asImp().state() == REFINED; }
+  bool wasRefined () const { return false; }
 
   /**\brief Returns true, if entity might be coarsened during next adaption cycle 
   */
-  bool mightBeCoarsened () const { return asImp().state() == COARSEN; }
+  bool mightBeCoarsened () const { return false; }
 
 private:
   //  Barton-Nackman trick 
