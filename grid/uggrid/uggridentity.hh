@@ -434,9 +434,19 @@ public:
   //***************************************************************
   //  Interface for Adaptation
   //***************************************************************
+ 
+    //! returns true, if entity was refined during last adaptation cycle
+    bool wasRefined() const; 
+
+    /*! \brief
+       returns true, if entity might be coarsened during next adaptation
+       cycle, which is true for entities that have been marked for
+       coarsening or for entities that are not regular (i.e. isRegular
+       returns false) */
+    bool mightBeCoarsened() const; 
   
-    /** \todo Please doc me! */
-    AdaptationState state() const;
+    /** method deprecated, removed soon */
+    AdaptationState state() const DUNE_DEPRECATED;
   
     //private: 
     void setToTarget(typename TargetType<0,dim>::T* target, int level);
