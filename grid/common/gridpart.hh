@@ -105,10 +105,16 @@ namespace Dune {
   public:
     //- Public methods
     //! Constructor
-    LevelGridPart(const GridType& grid, int level) :
+    LevelGridPart(const GridType& grid, int level ) :
       GridPartDefault<Traits>(grid,isetWrapper_),
       isetWrapper_(grid,level),
       level_(level) {}
+    
+    //! Constructor, chosing maxLevel
+    LevelGridPart(const GridType& grid) :
+      GridPartDefault<Traits>(grid,isetWrapper_),
+      isetWrapper_(grid,grid.maxLevel()),
+      level_(grid.maxLevel()) {}
     
     //! Returns first iterator on a given level
     template <int cd>
@@ -136,7 +142,7 @@ namespace Dune {
   struct LevelGridPartTraits {
     typedef GridImp GridType;
     typedef LevelGridPart<GridImp,pitype> GridPartType;
-    typedef DefaultGridIndexSet<GridImp,LevelIndex> IndexSetType;
+    typedef WrappedLevelIndexSet<GridType> IndexSetType;
 
     template <int cd>
     struct Codim {
@@ -194,7 +200,7 @@ namespace Dune {
   struct LeafGridPartTraits {
     typedef GridImp GridType;
     typedef LeafGridPart<GridImp,pitype> GridPartType;
-    typedef DefaultGridIndexSet<GridImp,LeafIndex> IndexSetType;
+    typedef WrappedLeafIndexSet<GridType> IndexSetType;
 
     template <int cd>
     struct Codim {
@@ -254,7 +260,7 @@ namespace Dune {
   struct HierarchicGridPartTraits {
     typedef GridImp GridType;
     typedef HierarchicGridPart<GridImp,pitype> GridPartType;
-    typedef DefaultGridIndexSet<GridImp,GlobalIndex> IndexSetType;
+    typedef WrappedHierarchicIndexSet<GridType> IndexSetType;
 
     template <int cd>
     struct Codim {

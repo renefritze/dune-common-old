@@ -198,7 +198,9 @@ class IndexSetWrapper : public DefaultEmptyIndexSet
 public:
   //! store const reference to set 
   IndexSetWrapper(const IndexSetImp & set, bool adaptive = false) 
-    : DefaultEmptyIndexSet(adaptive), set_(set) {}
+    : DefaultEmptyIndexSet(adaptive)
+    , set_(set) 
+  {}
   
   //! store const reference to set 
   IndexSetWrapper(const IndexSetWrapper<IndexSetImp> & s) 
@@ -248,6 +250,7 @@ private:
   const IndexSetImp & set_; 
 };
 
+//! default base class for index set implementations for FR numerics
 template <class GridType>
 class DefaultGridIndexSetBase : public DefaultEmptyIndexSet
 {
@@ -258,7 +261,8 @@ public:
 
   //! Conschdrugdor 
   DefaultGridIndexSetBase (const GridType & grid ) 
-    : DefaultEmptyIndexSet(false) // here false, because methods have to be overloaded
+    // here false, because methods have to be overloaded
+    : DefaultEmptyIndexSet(false) 
     , grid_ (grid) {}
 protected:
   // the corresponding grid 
@@ -266,8 +270,8 @@ protected:
 };
 
 //! Wraps LevelIndexSet for use with LagrangeFunctionSpace 
-template <class GridType, GridIndexType GridIndex = LevelIndex>
-class DefaultGridIndexSet 
+template <class GridType>
+class WrappedLevelIndexSet 
 : public IndexSetWrapper< typename GridType :: Traits:: LevelIndexSet > 
 {
   // my type, to be revised 
@@ -279,7 +283,7 @@ public:
   enum { ncodim = GridType::dimension + 1 };
 
   //! Constructor getting grid and level for Index Set 
-  DefaultGridIndexSet (const GridType & grid , const int level ) 
+  WrappedLevelIndexSet (const GridType & grid , const int level ) 
     : IndexSetWrapper<  LevelIndexSetType > (grid.levelIndexSet(level)) {}
  
   //! return type of index set (for input/output)
@@ -288,7 +292,7 @@ public:
 
 //! Wraps HierarchicIndex Sets of AlbertaGrid and ALUGrid 
 template <class GridType>
-class DefaultGridIndexSet<GridType,GlobalIndex> 
+class WrappedHierarchicIndexSet
 : public IndexSetWrapper< typename GridType :: HierarchicIndexSet >
 {
   // my type, to be revised 
@@ -301,7 +305,7 @@ public:
   enum { ncodim = GridType::dimension + 1 };
 
   //! constructor 
-  DefaultGridIndexSet ( const GridType & grid , const int level =-1 ) 
+  WrappedHierarchicIndexSet ( const GridType & grid , const int level =-1 ) 
     : IndexSetWrapper< HSetType > (grid.hierarchicIndexSet(),true) {}
      
   //! return type (for Grape In/Output)
@@ -310,7 +314,7 @@ public:
 
 //! Wraps LeafIndexSet of Dune Grids for use with LagrangeFunctionSpace 
 template <class GridType>
-class DefaultGridIndexSet<GridType,LeafIndex> 
+class WrappedLeafIndexSet
 :  public IndexSetWrapper<typename GridType :: Traits :: LeafIndexSet> 
 {
   // my type, to be revised 
@@ -322,7 +326,7 @@ public:
   //! number of codimensions 
   enum { ncodim = GridType::dimension + 1 };
   //! constructor 
-  DefaultGridIndexSet ( const GridType & grid , const int level =-1 ) 
+  WrappedLeafIndexSet ( const GridType & grid , const int level =-1 ) 
     : IndexSetWrapper < IndexSetType > (grid.leafIndexSet()) {}
 
   //! return type (for Grape In/Output)
