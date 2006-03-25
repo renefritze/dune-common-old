@@ -23,6 +23,7 @@
 
 //- Local includes
 #include "alu3dinclude.hh"
+#include "topology.hh"
 #include "indexsets.hh"
 #include "memory.hh"
 #include "datahandle.hh"
@@ -220,6 +221,7 @@ namespace Dune {
     friend class ALU3dGridGlobalIdSet<dim,dimworld,elType>;
     friend class ALU3dGridLocalIdSet<dim,dimworld,elType>;
 
+
     //**********************************************************
     // The Interface Methods
     //**********************************************************
@@ -234,6 +236,8 @@ namespace Dune {
 
     //! my Traits class 
     typedef typename ALU3dGridFamily < dim , dimworld , elType > :: Traits Traits;
+    friend class LocalGeometryStorage< typename Traits::template Codim<0>::Geometry , 8 >; 
+         
     
     //! Type of the hierarchic index set
     typedef ALU3dGridHierarchicIndexSet<dim,dimworld,elType> HierarchicIndexSet;
