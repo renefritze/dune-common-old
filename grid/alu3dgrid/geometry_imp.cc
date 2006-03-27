@@ -132,8 +132,13 @@ buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
   builtinverse_ = builtA_ = builtDetDF_ = false;
 
   // compute the local coordinates in father refelem
-  for(int i=0; i < myGeom.corners() ; i++)
+  for(int i=0; i < myGeom.corners() ; ++i)
+  {
     coord_[i] = fatherGeom.local( myGeom[i] );
+    // to avoid rounding errors
+    for(int j=0; j<cdim; ++j) 
+      if ( coord_[i][j] < 1e-16) coord_[i][j] = 0.0;
+  }
 
   return true;
 }
@@ -151,7 +156,7 @@ copyCoordVec(const alu3d_ctype (& point)[cdim] ,
 
 template <> 
 inline bool ALU3dGridGeometry<3,3, const ALU3dGrid<3,3,tetra> > :: 
-buildGeom(const IMPLElementType & item, int, int) 
+buildGeom(const IMPLElementType & item) 
 {
   enum { dim = 3 };
   enum { dimworld = 3};
@@ -628,8 +633,13 @@ ALU3dGridGeometry<mydim, cdim, const ALU3dGrid<3, 3, hexa> >::
 buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
 {
   // compute the local coordinates in father refelem
-  for(int i=0; i < myGeom.corners() ; i++)
+  for(int i=0; i < myGeom.corners() ; ++i)
+  {
     coord_[i] = fatherGeom.local( myGeom[i] );
+    // to avoid rounding errors
+    for(int j=0; j<cdim; ++j) 
+      if ( coord_[i][j] < 1e-16) coord_[i][j] = 0.0;
+  }
 
   // delete old mapping and creats new mapping 
   buildMapping();
@@ -639,7 +649,7 @@ buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
 template <>
 inline bool
 ALU3dGridGeometry<3, 3, const ALU3dGrid<3, 3, hexa> >::
-buildGeom(const IMPLElementType& item, int , int ) {
+buildGeom(const IMPLElementType& item) {
   enum { dim = 3 };
   enum { dimworld = 3 };
 
