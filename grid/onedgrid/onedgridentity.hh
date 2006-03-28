@@ -87,8 +87,6 @@ public:
     //! the level of the entity
     int level_;
     
-    //OneDGridGeometry<dim,dim, GridImp>  fatherReLocal_;
-
     /** \brief Stores requests for refinement and coarsening */
     AdaptationState markState_;
 
