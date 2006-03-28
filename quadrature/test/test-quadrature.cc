@@ -9,7 +9,7 @@
 double success = true;
 
 template<class ctype, int dim>
-bool checkQuadrature(Dune::GeometryType t, int p)
+void checkQuadrature(Dune::GeometryType t, int p)
 {
   double volume = 0;
   // Quadratures
@@ -25,7 +25,7 @@ bool checkQuadrature(Dune::GeometryType t, int p)
   }
   if (std::abs(volume -
                Dune::ReferenceElements<ctype, dim>::general(t).volume())
-      > 10*std::numeric_limits<double>::epsilon())
+      > 20*std::numeric_limits<double>::epsilon())
   {
     std::cerr << "Error: Quadrature for " << t << " and order=" << p
               << " does not sum to volume of RefElem" << std::endl;
