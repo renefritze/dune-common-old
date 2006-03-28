@@ -9,6 +9,12 @@
 
 namespace Dune {
 
+  /**
+     Exception thrown if an Aquired Exception is not available,
+     because the order is to high
+  */
+  class QuadratureOrderOutOfRange : public NotImplemented {};
+  
   /***********************************************************
    * Interface for quadrature points and rules
    ***********************************************************/
@@ -274,7 +280,7 @@ namespace Dune {
 			m = i;
 			break;
 		  }
-        if (m==0) DUNE_THROW(NotImplemented, "order not implemented");
+        if (m==0) DUNE_THROW(QuadratureOrderOutOfRange, "order not implemented");
         delivered_order = GaussPointsSingleton::gp.order(m);
 
         // fill in all the gauss points
@@ -365,7 +371,7 @@ namespace Dune {
 			m = i;
 			break;
 		  }
-        if (m==0) DUNE_THROW(NotImplemented, "order not implemented");
+        if (m==0) DUNE_THROW(QuadratureOrderOutOfRange, "order not implemented");
         delivered_order = GaussPointsSingleton::gp.order(m);
 
         // fill in all the gauss points
@@ -1184,7 +1190,7 @@ namespace Dune {
         G[m][0][1] = 0.25;
         G[m][0][2] = 0.25;
 
-        W[m][0] = 1;
+        W[m][0] = 1.0/6.0;
         O[m] = 1;
 	  
         // polynom degree 2
@@ -1800,7 +1806,7 @@ namespace Dune {
             return *(rules[simplex_order_to_index[p]]);
 	    }
 	  
-        DUNE_THROW(NotImplemented,
+        DUNE_THROW(QuadratureOrderOutOfRange,
                    "QuadratureRule for order " << p << " and GeometryType "
                    << type << " not available");
       }
@@ -1945,7 +1951,7 @@ namespace Dune {
 			return *(rules[cube_order_to_index[p]]);
 		}     
 	    
-        DUNE_THROW(NotImplemented,
+        DUNE_THROW(QuadratureOrderOutOfRange,
                    "QuadratureRule for order " << p << " and GeometryType "
                    << type << " not available");
       }
@@ -2192,7 +2198,7 @@ namespace Dune {
             return *(rules[pyramid_order_to_index[p]]);
 	    }
 
-        DUNE_THROW(NotImplemented,
+        DUNE_THROW(QuadratureOrderOutOfRange,
                    "QuadratureRule for order " << p << " and GeometryType "
                    << type << " not available");
       }
