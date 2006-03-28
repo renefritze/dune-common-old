@@ -24,6 +24,7 @@
 #include"dune/istl/bcrsmatrix.hh"
 #include"dune/istl/owneroverlapcopy.hh"
 #include"dune/disc/shapefunctions/lagrangeshapefunctions.hh"
+#include"dune/io/file/vtk/vtkwriter.hh"
 
 // same directory includes
 #include"functions.hh"
@@ -928,6 +929,13 @@ namespace Dune
 	  return mapper_;
 	}
  
+	//! VTK output
+	void vtkout (VTKWriter<G,IS>& vtkwriter, std::string s)
+	{
+	  typename VTKWriter<G,IS>::VTKFunction *p = new VTKGridFunctionWrapper<G,IS,RT,m>(*this,s);
+	  vtkwriter.addVertexData(p);
+	}
+
   private:
 	// a reference to the grid
 	const G& grid_;
