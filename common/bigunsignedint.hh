@@ -154,13 +154,7 @@ namespace Dune
   // print
   template<int k>
   inline void bigunsignedint<k>::print (std::ostream& s) const
-  {
-    s<<"{";
-    for(std::size_t i=0; i < n-1; ++i)
-      s<<digit[i]<<", ";
-    s<<digit[n-1]<<"}";
-    return;
-    
+  {    
 	bool leading=false;
 
 	// print from left to right
