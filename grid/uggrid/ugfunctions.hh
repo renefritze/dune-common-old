@@ -392,7 +392,7 @@ public:
      */
     static int Transformation(int n, double** x, 
                               const FieldVector<double, 2>& local, FieldMatrix<double,2,2>& mat) {
-        typedef DOUBLE  DOUBLE_VECTOR[2];
+        using UG2d::DOUBLE_VECTOR;
         double det;
         INVERSE_TRANSFORMATION(n, x, local, mat, det);
         return 0;
