@@ -9,10 +9,6 @@
 
 namespace Dune {
 
-    // Forward declaration
-    template <int codim, PartitionIteratorType PiType, class GridImp>
-    class UGGridLevelIteratorFactory;
-
 //**********************************************************************
 //
 // --UGGridLevelIterator
@@ -29,9 +25,6 @@ class UGGridLevelIterator :
 
     friend class UGGridEntity<codim,GridImp::dimension,GridImp>;
     friend class UGGridEntity<0,    GridImp::dimension,GridImp>;
-
-    template <int codim_, PartitionIteratorType PiType_, class GridImp_>
-    friend class UGGridLevelIteratorFactory;
 
 public:
 
