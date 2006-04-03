@@ -81,6 +81,6 @@ namespace Dune {
       InitReferenceElements<float, 3> i2;
     }
 
-  };
+  }
 
-};
+}
