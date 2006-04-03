@@ -58,7 +58,6 @@ class ALUMemoryProvider
   typedef ALUMemoryProvider < Object > MyType;
 public:
   typedef Object ObjectType;
-  //typedef MemoryPointer< ObjectType, MyType > MemoryPointerType;
 
   //! delete all objects stored in stack 
   ALUMemoryProvider() {};
@@ -69,6 +68,22 @@ public:
   //! i.e. return pointer to Entity
   template <class GridType>
   ObjectType * getObject(const GridType &grid, int level);
+
+  //! i.e. return pointer to Entity
+  template <class GridType, class EntityImp>
+  inline ObjectType * getEntityObject(const GridType &grid, int level , EntityImp * fakePtr ) 
+  {
+    if( objStack_.empty() )
+    {
+      return ( new ObjectType(EntityImp(grid,level) )); 
+    }
+    else
+    {
+      ObjectType * obj = objStack_.top();
+      objStack_.pop();
+      return obj;
+    }
+  }
 
   //! i.e. return pointer to Entity
   ObjectType * getObjectCopy(const ObjectType & org);

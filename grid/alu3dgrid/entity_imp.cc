@@ -259,7 +259,7 @@ namespace Dune {
   template<int dim, class GridImp>
   inline void 
   ALU3dGridEntity<0,dim,GridImp>::
-  setElement(ALU3DSPACE HElementType & element, int, int)
+  setElement(ALU3DSPACE HElementType & element)
   {
     // int argument (twist) is only a dummy parameter here,
     // needed for consistency reasons
@@ -332,8 +332,6 @@ namespace Dune {
   ALU3dGridEntity<0,dim,GridImp> :: level() const
   {
     return level_;
-    //assert( item_ );
-    //return (*item_).level();
   }
 
   template<int dim, class GridImp>
@@ -341,31 +339,14 @@ namespace Dune {
   equals (const ALU3dGridEntity<0,dim,GridImp> &org ) const
   {
     return (item_ == org.item_); 
-    //return ( (item_ == org.item_) && (ghost_ == org.ghost_) );
   }
 
   template<int dim, class GridImp>
   inline const typename ALU3dGridEntity<0,dim,GridImp>::Geometry & 
   ALU3dGridEntity<0,dim,GridImp> :: geometry () const
   {
-    //assert((ghost_ != 0) || (item_ != 0));
     assert(item_ != 0);
-#ifdef _ALU3DGRID_PARALLEL_
-    if(!builtgeometry_) 
-      {
-        if(item_) 
-          builtgeometry_ = geoImp_.buildGeom(*item_);
-        /*
-        else 
-          {
-            assert(ghost_);
-            builtgeometry_ = geoImp_.buildGhost(*ghost_);
-          }
-          */
-      }
-#else 
     if(!builtgeometry_) builtgeometry_ = geoImp_.buildGeom(*item_);
-#endif
     return geo_; 
   }
 
@@ -373,8 +354,6 @@ namespace Dune {
   inline const typename ALU3dGridEntity<0,dim,GridImp>::Geometry & 
   ALU3dGridEntity<0,dim,GridImp> :: geometryInFather () const
   {
-    /* new version , not working with ALUGrid-0.14 
-     * uncomment when new ALUGrid Version is published 
     assert( item_ );
     const int child = item_->nChild();
     typedef typename Geometry::ImplementationType GeometryImp; 
@@ -387,11 +366,6 @@ namespace Dune {
       geoms.create(grid_,(*ep).geometry(),geometry(),child );
     }
     return geoms[child];
-    */
-    typedef typename GridImp::template Codim<0> ::EntityPointer EntityPointer;
-    const EntityPointer ep = father();
-    geoInFatherImp_.buildGeomInFather((*ep).geometry(),geometry());
-    return geoInFather_;
   }
 
   template<int dim, class GridImp>
@@ -728,7 +702,7 @@ namespace Dune {
   {
     // this needs to be called 
     // have to investigate why 
-    (*entity_).reset(level);
+    entityImp().reset(level);
   }
 
   template<int codim, class GridImp >
@@ -742,7 +716,7 @@ namespace Dune {
     {
       int level = org.entity_->level();
       entity_ = grid_.template getNewEntity<codim> ( level );
-      (*entity_).setEntity( *(org.entity_) );
+      this->entityImp().setEntity( org.entityImp() );
     }
   }
   
@@ -773,8 +747,9 @@ namespace Dune {
     // sets entity pointer in the status of an empty entity 
     if(entity_) 
     {
-      (*entity_).removeElement();
-      grid_.freeEntity( entity_ );
+      this->entityImp().removeElement();
+      EntityObject * en = entity_;
+      grid_.template freeEntity<codim> ( en ); 
       entity_ = 0;
     }
   }
@@ -796,9 +771,9 @@ namespace Dune {
     if(!entity_)
     {
       entity_ = grid_.template getNewEntity<codim> ( item_->level() );
-      (*entity_).setElement( *item_ );
+      this->entityImp().setElement( *item_ );
     }
-    assert( item_ == & (*entity_).getItem() );
+    assert( item_ == & this->entityImp().getItem() );
     return (*entity_);
   }
 
@@ -814,10 +789,11 @@ namespace Dune {
   updateGhostPointer( ALU3DSPACE HBndSegType & ghostFace )
   {
     assert( entity_ );
-    (*entity_).setGhost( ghostFace );
+    this->entityImp().setGhost( ghostFace );
     // inside the method setGhost the method getGhost of the ghostFace is
     // called and set as item 
-    item_ = const_cast<MyHElementType *> (& ((*entity_).getItem()));
+    const MyHElementType * item = & (this->entityImp().getItem()); 
+    item_ = const_cast<MyHElementType *> (item); 
   }
   
   template<int codim, class GridImp >
@@ -827,7 +803,7 @@ namespace Dune {
     item_ = item;
     if( item_ && entity_ )
     {
-      (*entity_).setElement( *item_ );
+      this->entityImp().setElement( *item_ );
     }
   }
 
@@ -873,9 +849,9 @@ namespace Dune {
     if(!this->entity_)
     {
       this->entity_ = this->grid_.template getNewEntity<codim> ( this->level() );
-      (*this->entity_).setElement( *this->item_ , twist_ , face_ );
+      this->entityImp().setElement( *this->item_ , twist_ , face_ );
     }
-    assert( this->item_ == & (*this->entity_).getItem() );
+    assert( this->item_ == & this->entityImp().getItem() );
     return (*this->entity_);
   }
 
