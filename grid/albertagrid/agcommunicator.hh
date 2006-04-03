@@ -8,7 +8,7 @@
 #endif
 
 #include <dune/common/dlist.hh>
-#include <dune/io/file/grapedataio.hh>
+//#include <dune/io/file/grapedataio.hh>
 
 #define _ANSI_HEADER
 
@@ -503,7 +503,7 @@ public:
   {
     cycle_++;
     int ts = (cycle_ * 100) + 1;
-    GrapeDataIO < GridType > dataIO;
+    //GrapeDataIO < GridType > dataIO;
     //dataIO.writeGrid( grid_, xdr , name, (double) ts, ts);
     
     const int nl = mpAccess_.nlinks();
@@ -620,7 +620,7 @@ public:
   bool secondMark ()
   {
     int ts = (cycle_*100) + 2;
-    GrapeDataIO < GridType > dataIO;
+    //GrapeDataIO < GridType > dataIO;
     //dataIO.writeGrid( grid_, xdr , name, (double) ts, ts );
 
     int oldmxl = oldmxl_;
@@ -798,7 +798,7 @@ public:
   bool thirdMark ()
   {
     int ts = (cycle_*100) + 3;
-    GrapeDataIO < GridType > dataIO;
+    //GrapeDataIO < GridType > dataIO;
     //dataIO.writeGrid( grid_, xdr , name, (double) ts, ts );
     
     int oldmxl = oldmxl_;
@@ -881,7 +881,7 @@ public:
     }
     cyc2 = cycle_;
     int ts = (cycle_*100) + 4;
-    GrapeDataIO < GridType > dataIO;
+    //GrapeDataIO < GridType > dataIO;
     //dataIO.writeGrid( grid_, xdr , name, (double) ts, ts );
 
     const int nl = mpAccess_.nlinks();
