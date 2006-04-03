@@ -4443,7 +4443,7 @@ template < int dim, int dimworld >
 inline int AlbertaGrid < dim, dimworld >::getElementNumber ( const ALBERTA EL * el ) const
 {
   return hIndexSet_.getIndex(el,0,Int2Type<dim>());
-};
+}
 
 template < int dim, int dimworld > 
 inline int AlbertaGrid < dim, dimworld >::getFaceNumber ( const ALBERTA EL * el , int face ) const
@@ -4452,7 +4452,7 @@ inline int AlbertaGrid < dim, dimworld >::getFaceNumber ( const ALBERTA EL * el 
   assert( face >= 0 );
   assert( face < dim+1 );
   return hIndexSet_.getIndex(el,face,Int2Type<dim-1>());
-};
+}
 
 template < int dim, int dimworld > 
 inline int AlbertaGrid < dim, dimworld >::getEdgeNumber ( const ALBERTA EL * el , int edge ) const
@@ -4460,13 +4460,13 @@ inline int AlbertaGrid < dim, dimworld >::getEdgeNumber ( const ALBERTA EL * el 
   assert(dim == 3);
   // codim of edges is 2 therefore dim-2 
   return hIndexSet_.getIndex(el,edge,Int2Type<dim-2>());
-};
+}
 
 template < int dim, int dimworld > 
 inline int AlbertaGrid < dim, dimworld >::getVertexNumber ( const ALBERTA EL * el , int vx ) const
 {
   return hIndexSet_.getIndex(el,vx,Int2Type<0>());
-};
+}
 
 template < int dim, int dimworld > 
 inline void AlbertaGrid < dim, dimworld >::calcExtras ()

@@ -1410,9 +1410,9 @@ class ObjectStream
     void readObject (int) {}
     void readObject (double) {}
     template <class T> 
-    void writeObject (T &) {};
-    void writeObject (int) {} ;
-    void writeObject (double) {};
+    void writeObject (T &) {}
+    void writeObject (int) {}
+    void writeObject (double) {}
 };
 
 typedef ObjectStream ObjectStreamType;

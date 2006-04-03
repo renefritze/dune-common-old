@@ -35,7 +35,7 @@ public:
   int mapToGlobal ( EntityType &en, int localNum ) const
   {
     return asImp().mapToGlobal( en , localNum );
-  };
+  }
 
   //! return new size of space, i.e. after adaptation 
   int newSize() const 

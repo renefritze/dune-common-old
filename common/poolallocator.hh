@@ -283,7 +283,7 @@ namespace Dune
      */
     template<typename U, std::size_t u>
     inline PoolAllocator(const PoolAllocator<U,u>&)
-    {};
+    {}
     
     /**
      * @brief Allocates objects.

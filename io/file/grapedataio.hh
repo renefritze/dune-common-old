@@ -36,28 +36,28 @@ inline GrapeIOStringType typeIdentifier ()
 {
   GrapeIOStringType tmp = "unknown";
   return tmp;
-};
+}
 
 template <>
 inline GrapeIOStringType typeIdentifier<float> ()
 {
   GrapeIOStringType tmp = "float";
   return tmp;
-};
+}
 
 template <>
 inline GrapeIOStringType typeIdentifier<int> ()
 {
   GrapeIOStringType tmp = "int";
   return tmp;
-};
+}
 
 template <>
 inline GrapeIOStringType typeIdentifier<double> ()
 {
   GrapeIOStringType tmp = "double";
   return tmp;
-};
+}
 
 template <int dim, int dimworld, class GridImp, bool hasBackupRestore> 
 class GrapeDataIOImp 
