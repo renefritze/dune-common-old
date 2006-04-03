@@ -47,7 +47,7 @@
 #include "albertaheader.hh"
 
 // grape data io 
-#include <dune/io/file/grapedataio.hh>
+#include <dune/grid/utility/grapedataioformattypes.hh>
 
 // IndexManager defined in indexstack.hh 
 // 10000 is the size of the finite stack used by IndexStack
