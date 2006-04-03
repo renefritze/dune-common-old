@@ -5,14 +5,13 @@
 
 // Dune includes
 #include "../common/grid.hh"
+#include <dune/grid/common/intersectioniteratorwrapper.hh>
 
 // Local includes
 #include "alu3dinclude.hh"
 #include "topology.hh"
 #include "faceutility.hh"
 #include "myautoptr.hh"
-
-// using directives
 
 namespace ALUGridSpace {
   //*************************************************************
@@ -724,7 +723,6 @@ public:
   typedef typename GridImp::template Codim<0>::Entity Entity;
   typedef typename GridImp::template Codim<1>::Geometry Geometry;
   typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
-  typedef ALU3dGridMakeableEntity<0,dim,GridImp> EntityImp;
   
   typedef ALU3dGridGeometry<dim-1,dimworld,GridImp> GeometryImp;
   typedef MakeableInterfaceObject<Geometry> GeometryObject;
@@ -910,8 +908,6 @@ public:
   typedef typename GridImp::template Codim<cd>::Entity Entity;
   typedef ALU3DSPACE VertexListType VertexListType; 
 
-  typedef ALU3dGridMakeableEntity<cd,dim,GridImp> EntityImp;
-  
   //! typedef of my type 
   typedef ALU3dGridLevelIterator<cd,pitype,GridImp> ALU3dGridLevelIteratorType;
   
@@ -968,7 +964,6 @@ class ALU3dGridLeafIterator :
   
 public:
   typedef typename GridImp::template Codim<cdim>::Entity Entity;
-  typedef ALU3dGridMakeableEntity<cdim,dim,GridImp> EntityImp;
   
   typedef ALU3dGridLeafIterator<cdim, pitype, GridImp> ALU3dGridLeafIteratorType;
   
@@ -1019,7 +1014,6 @@ public HierarchicIteratorDefaultImplementation <GridImp,ALU3dGridHierarchicItera
 public:
   typedef typename GridImp::template Codim<0>::Entity Entity;
   typedef typename GridImp::ctype ctype;
-  typedef ALU3dGridMakeableEntity<0,dim,GridImp> EntityImp;
 
   //! the normal Constructor
   ALU3dGridHierarchicIterator(const GridImp &grid,
