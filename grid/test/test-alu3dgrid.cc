@@ -53,7 +53,7 @@ int main () {
         checkGeometryInFather(grid_tetra);
 
         // check the intersection iterator and the geometries it returns
-        checkIntersectionIterator(grid_hexa);
+        checkIntersectionIterator(grid_tetra);
       }
     };
 
