@@ -761,7 +761,13 @@ public:
   bool boundary () const;
 
   //! return true if across the edge an neighbor on this level exists
-  bool neighbor () const; 
+  bool neighbor () const DUNE_DEPRECATED; 
+
+  //! return true if across the edge an neighbor on this level exists
+  bool levelNeighbor () const; 
+
+  //! return true if across the edge an neighbor on leaf level exists
+  bool leafNeighbor () const; 
 
   //! return information about the Boundary 
   int boundaryId () const; 
@@ -880,6 +886,11 @@ private:
 
   // true if end iterator 
   bool done_;
+
+  bool levelNeighbor_;
+  bool leafNeighbor_;
+  bool goneDown_; 
+  bool isLeafItem_; 
  };
 
 
