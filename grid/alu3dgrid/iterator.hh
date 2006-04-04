@@ -1039,15 +1039,15 @@ public:
   //! dereference Entity, faster then the entity pointersmethod 
   Entity & dereference () const;
 
-private:
   //! the assignment operator 
   ThisType & operator = (const ALU3dGridHierarchicIterator<GridImp> &org);
   
+private:
   // go to next valid element 
   ALU3DSPACE HElementType * goNextElement (ALU3DSPACE HElementType * oldEl);
   
   //! element from where we started 
-  const ALU3DSPACE HElementType & elem_;
+  const ALU3DSPACE HElementType * elem_;
 
   //! maximal level to go down
   int maxlevel_; 
