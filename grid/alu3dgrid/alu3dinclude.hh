@@ -185,6 +185,8 @@ namespace Dune {
   struct ALU3dImplTraits<hexa>::Codim<0> {
     typedef ALU3DSPACE GitterType::helement_STI InterfaceType;
     typedef IMPLElementType ImplementationType;
+    typedef ALU3DSPACE HBndSegType GhostInterfaceType; 
+    typedef PLLBndFaceType  GhostImplementationType; 
   };
 
   template <>
