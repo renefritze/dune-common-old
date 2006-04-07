@@ -44,40 +44,51 @@ public:
         \todo Should be private
     */
   UGGridIntersectionIterator(typename TargetType<0,GridImp::dimensionworld>::T* center, int nb, int level)
-      : center_(center), level_(level), neighborCount_(nb)
+	: center_(center), level_(level), neighborCount_(nb), subCount_(0)
     {
     }
 
   //! The Destructor 
   ~UGGridIntersectionIterator() {};
 
-    int level() const {
-        return level_;
-    }
+  int level() const {
+	return level_;
+  }
 
   //! equality
     bool equals(const UGGridIntersectionIterator<GridImp>& i) const {
-        return center_==i.center_ && neighborCount_ == i.neighborCount_;
+        return center_==i.center_ && neighborCount_ == i.neighborCount_ && subCount_==i.subCount_;
     }
 
-    //! prefix increment
-    void increment() {
-        neighborCount_++;
-        if (neighborCount_ >= UG_NS<GridImp::dimensionworld>::Sides_Of_Elem(center_))
-            neighborCount_ = -1;
-    }
+  //! prefix increment
+  void increment() {
+	typename UGTypes<dim>::Element* p = getLevelNeighbor();
+	bool secondnb=false;
+	if (subCount_==0 && p!=0)
+	  if (UG_NS<dim>::isLeaf(p)==false && getLeafNeighbor()!=NULL)
+		secondnb=true;
+	if (secondnb)
+	  subCount_++;
+	else
+	  {
+		neighborCount_++;
+		subCount_=0;
+	  }
+	if (neighborCount_ >= UG_NS<GridImp::dimensionworld>::Sides_Of_Elem(center_))
+	  neighborCount_ = -1;
+  }
 
-    //! return EntityPointer to the Entity on the inside of this intersection
+  //! return EntityPointer to the Entity on the inside of this intersection
   //! (that is the Entity where we started this Iterator)
-    EntityPointer inside() const {
-        UGGridEntityPointer<0,GridImp> center;
-        center.setToTarget(center_, this->level());
-        return center;
-    }
+  EntityPointer inside() const {
+	UGGridEntityPointer<0,GridImp> center;
+	center.setToTarget(center_, this->level());
+	return center;
+  }
 
   //! return EntityPointer to the Entity on the outside of this intersection
   //! (that is the neighboring Entity)
-    EntityPointer outside() const {
+  EntityPointer outside() const {
         UGGridEntityPointer<0,GridImp> other;
         typename TargetType<0,GridImp::dimensionworld>::T* otherelem = getNeighbor();
         if (otherelem==0) 
@@ -128,7 +139,13 @@ private:
   //**********************************************************
 
   //! get neighbor on same or lower level or 0
-    typename UGTypes<GridImp::dimension>::Element* getNeighbor () const;
+  typename UGTypes<GridImp::dimension>::Element* getNeighbor () const;
+
+  //! returns a neighbor that is a leaf or nothing (neighbor might be on the same level)
+  typename UGTypes<GridImp::dimension>::Element* getLeafNeighbor () const;
+
+  //! return a neighbor that is on the same level or nothing (neighbor might be a leaf)
+  typename UGTypes<GridImp::dimension>::Element* getLevelNeighbor () const;
 
   //! vector storing the outer normal 
     mutable FieldVector<UGCtype, dimworld> outerNormal_;
@@ -151,7 +168,8 @@ private:
     //! count on which neighbor we are lookin' at. Note that this is interpreted in UG's ordering!
     int neighborCount_;
 
-
+  // count number of neighbors on current face that have been treated
+  int subCount_;
 };
 
 #include "ugintersectionit.cc"
