@@ -542,6 +542,8 @@ namespace Dune {
 #ifdef _ALU3DGRID_PARALLEL_
     ALU3DSPACE MpAccessMPI mpAccess_;
 #endif
+    const int myRank_;
+
     // max level of grid 
     int maxlevel_; 
 
@@ -549,7 +551,6 @@ namespace Dune {
     mutable int coarsenMarked_;
     mutable int refineMarked_;
 
-    const int myRank_;
 
     // at the moment the number of different geom types is 1 
     enum { numberOfGeomTypes = 1 };
@@ -602,6 +603,9 @@ namespace Dune {
     // the type of our size cache 
     typedef SingleTypeSizeCache<MyType> SizeCacheType;
     SizeCacheType * sizeCache_;
+
+    // actual number of ghost elements 
+    int ghostElements_;
 
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:    
@@ -706,5 +710,4 @@ namespace Dune {
 } // end namespace Dune
 
 #include "grid_imp.cc"
-
 #endif

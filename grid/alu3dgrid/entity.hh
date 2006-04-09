@@ -335,7 +335,7 @@ private:
   // is true if entity is leaf entity 
   bool isLeaf_;
 
-  static const ReferenceElementType refElem_;
+  const ReferenceElementType & refElem_;
 }; // end of ALU3dGridEntity codim = 0
 
 //**********************************************************************
