@@ -7,7 +7,7 @@
 #include"lcm.hh"
 //#include<typeinfo>
 #include<iostream>
-
+#include<cassert>
 
 template<std::size_t size, typename T>
 int testPool();
