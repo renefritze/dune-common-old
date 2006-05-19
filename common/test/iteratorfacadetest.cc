@@ -4,7 +4,7 @@
 #include<algorithm>
   
 void randomize(TestContainer<double>& cont){
-  srand((unsigned)time(0));
+  srand(300);
   double size=1000;
 
   for(int i=0; i < 100; i++){
