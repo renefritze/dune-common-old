@@ -40,6 +40,13 @@ public:
             data[i] = 0;
     }
 
+    /** \brief Assignment from scalar */
+    Matrix& operator= (const T& t)
+    {
+        for (unsigned int i=0; i<data.size(); i++)
+            data[i] = t;
+    }
+
     /** \brief The index operator */
     T* operator[](int row) {
 #ifdef DUNE_ISTL_WITH_CHECKING
@@ -137,6 +144,24 @@ public:
         }
 
         return out;
+    }
+
+    //! y += A x
+    template <class X, class Y>
+    void umv(const X& x, Y& y) const
+    {
+#ifdef DUNE_ISTL_WITH_CHECKING
+        if (x.N()!=M()) DUNE_THROW(ISTLError,"index out of range");
+        if (y.N()!=N()) DUNE_THROW(ISTLError,"index out of range");
+#endif
+
+        for (int i=0; i<rows_; i++) {
+
+            for (int j=0; j<cols_; j++)
+                (*this)[i][j].umv(x[j], y[i]);
+
+        }
+
     }
 
 protected:
