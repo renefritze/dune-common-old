@@ -77,12 +77,12 @@ public:
     }
 
     /** \brief Return the number of rows */
-    size_type M() const {
+    size_type N() const {
         return rows_;
     }
 
     /** \brief Return the number of columns */
-    size_type N() const {
+    size_type M() const {
         return cols_;
     }
 
