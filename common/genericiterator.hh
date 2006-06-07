@@ -112,8 +112,6 @@ public:
   typedef T Value;
   
   /**
-   * 
-  /**
    * @brief The type of the difference between two positions.
    */
   typedef D DifferenceType;
