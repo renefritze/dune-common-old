@@ -47,6 +47,9 @@ namespace Dune {
       DefaultImp>::ObjectStreamType ObjectStreamType;
   };
 
+  //! Tagging interface to indicate that class is of Type DofManager 
+  struct IsDofManager {};
+
 } // end namespace Dune
 
 #endif
