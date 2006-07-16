@@ -13,7 +13,7 @@ int main(int argc, char** argv)
   
   {
     Helper& mpi = Helper::instance(argc, argv);
-    
+
     Helper::MPICommunicator comm= mpi.getCommunicator();
   }
   std::cout << "We are at the end!"<<std::endl;
