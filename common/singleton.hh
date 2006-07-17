@@ -1,5 +1,5 @@
 #ifndef DUNE_SINGLETON_HH
-#define DUEN_DINGLETON_HH
+#define DUNE_SINGLETON_HH
 /**
  * @file
  * @brief Usefull wrapper for creating singletons.
