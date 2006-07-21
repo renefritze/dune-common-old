@@ -1,4 +1,4 @@
-// $Id:$
+// $Id: $
 #ifndef DUNE_MPIHELPER
 #define DUNE_MPIHELPER
 #if HAVE_MPI
