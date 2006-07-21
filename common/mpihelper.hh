@@ -1,4 +1,4 @@
-// $Id: $
+// $Id:$
 #ifndef DUNE_MPIHELPER
 #define DUNE_MPIHELPER
 #if HAVE_MPI
@@ -43,6 +43,9 @@ namespace Dune
    * If one wants to have sequential program even if the code is
    * compiled with mpi then one simply has to exchange the typedef
    * with \code typedef Dune::MPIHelper FakeMPIHelper; \endcode.
+   *
+   * For checking whether we really use MPI or just fake please use
+   * MPIHelper::isFake (this is also possible at compile time!)
    */
    /**
    * @brief A fake mpi helper.
@@ -124,7 +127,7 @@ namespace Dune
      * that the main method of the program was called:
      * \code
      * int main(int argc, char** argv){
-     *   MPIHelper::instance(&argc, &argv);
+     *   MPIHelper::instance(argc, argv);
      *   // program code comes here
      *   ...
      * }
@@ -227,7 +230,7 @@ namespace Dune
      * that the main method of the program was called:
      * \code
      * int main(int argc, char** argv){
-     *   MPIHelper::instance(&argc, &argv);
+     *   MPIHelper::instance(argc, argv);
      *   // program code comes here
      *   ...
      * }
