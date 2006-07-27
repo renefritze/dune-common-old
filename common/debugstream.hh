@@ -195,9 +195,9 @@ namespace Dune {
     \todo Fix visibility of internal data
    */
   template <DebugLevel thislevel = 1, 
-	    DebugLevel dlevel = 1, 
-	    DebugLevel alevel = 1, 
-	    template<DebugLevel, DebugLevel> class activator = greater_or_equal>
+            DebugLevel dlevel = 1, 
+            DebugLevel alevel = 1, 
+            template<DebugLevel, DebugLevel> class activator = greater_or_equal>
   class DebugStream : public DebugStreamState {
   public:
     /*! \brief Create a DebugStream and set initial output stream
@@ -226,7 +226,7 @@ namespace Dune {
     is untie()ed later. Otherwise the stream would be broken afterwards.
     */
     DebugStream (DebugStreamState& master, 
-		std::ostream& fallback = std::cerr) 
+                std::ostream& fallback = std::cerr) 
     {
       // start a new list of streams
       current = new StreamWrap(fallback);
@@ -251,19 +251,19 @@ namespace Dune {
     ~DebugStream() {
       // untie
       if (_tied)
-	tiedstate->_tied_streams--;
+        tiedstate->_tied_streams--;
       else {
-	// check if somebody still ties to us...
-	if (_tied_streams != 0)
-	  DUNE_THROW(DebugStreamError, 
-		     "There are streams still tied to this stream!");
+        // check if somebody still ties to us...
+        if (_tied_streams != 0)
+          DUNE_THROW(DebugStreamError, 
+                     "There are streams still tied to this stream!");
       };
 
       // remove ostream-stack
       while (current != 0) {
-	StreamWrap *s = current;
-	current = current->next;
-	delete s;
+        StreamWrap *s = current;
+        current = current->next;
+        delete s;
       };
     };
 
@@ -272,13 +272,13 @@ namespace Dune {
     DebugStream& operator<<(const T data) {
       // remove the following code if stream wasn't compiled active
       if (activator<thislevel, dlevel>::value) {
-	if (! _tied) {
-	  if (_active)
-	    current->out << data;
-	} else {
-	  if (_active && tiedstate->_active)
-	    tiedstate->current->out << data;	    
-	};
+        if (! _tied) {
+          if (_active)
+            current->out << data;
+        } else {
+          if (_active && tiedstate->_active)
+            tiedstate->current->out << data;        
+        };
       };      
 
       return *this;
@@ -294,13 +294,13 @@ namespace Dune {
     DebugStream& operator<<(const int data) {
       // remove the following code if stream wasn't compiled active
       if (activator<thislevel, dlevel>::value) {
-	if (! _tied) {
-	  if (_active)
-	    current->out << data;
-	} else {
-	  if (_active && tiedstate->_active)
-	    tiedstate->current->out << data;	    
-	};
+        if (! _tied) {
+          if (_active)
+            current->out << data;
+        } else {
+          if (_active && tiedstate->_active)
+            tiedstate->current->out << data;        
+        };
       };      
 
       return *this;
@@ -309,13 +309,13 @@ namespace Dune {
     //! \brief pass on manipulators to underlying output stream
     DebugStream& operator<<(std::ostream& (*f)(std::ostream&)) {
       if (activator<thislevel, dlevel>::value) {
-	if (! _tied) {
-	  if (_active)
-	    f(current->out);
-	} else {
-	  if (_active && tiedstate->_active)
-	    f(tiedstate->current->out);
-	};
+        if (! _tied) {
+          if (_active)
+            f(current->out);
+        } else {
+          if (_active && tiedstate->_active)
+            f(tiedstate->current->out);
+        };
       }
 
       return *this;
@@ -325,18 +325,18 @@ namespace Dune {
     void push(bool b) {
       // are we at all active?
       if (activator<thislevel,alevel>::value) {
-	_actstack.push(_active);
-	_active = b;
+        _actstack.push(_active);
+        _active = b;
       } else {
-	// stay off
-	_actstack.push(false);
+        // stay off
+        _actstack.push(false);
       };
     };
     
     //! \brief restore previously set activation flag
     void pop() throw(DebugStreamError) {
       if (_actstack.empty())
-	DUNE_THROW(DebugStreamError, "No previous activation setting!");
+        DUNE_THROW(DebugStreamError, "No previous activation setting!");
       
       _active = _actstack.top();
       _actstack.pop();
@@ -358,7 +358,7 @@ namespace Dune {
     */
     void attach(std::ostream& stream) {
       if (_tied)
-	DUNE_THROW(DebugStreamError, "Cannot attach to a tied stream!");
+        DUNE_THROW(DebugStreamError, "Cannot attach to a tied stream!");
 
       StreamWrap* newcurr = new StreamWrap(stream);
       newcurr->next = current;
@@ -368,9 +368,9 @@ namespace Dune {
     //! \brief detach current output stream and restore to previous stream
     void detach() throw(DebugStreamError) {
       if (current->next == 0)
-	DUNE_THROW(DebugStreamError, "Cannot detach initial stream!");
+        DUNE_THROW(DebugStreamError, "Cannot detach initial stream!");
       if (_tied)
-	DUNE_THROW(DebugStreamError, "Cannot detach a tied stream!");
+        DUNE_THROW(DebugStreamError, "Cannot detach a tied stream!");
       
       StreamWrap* old = current;
       current = current->next;
@@ -380,9 +380,9 @@ namespace Dune {
     // \brief Tie a stream to this one.
     void tie(DebugStreamState& to) throw(DebugStreamError) {
       if (to._tied)
-	DUNE_THROW(DebugStreamError, "Cannot tie to an already tied stream!");
+        DUNE_THROW(DebugStreamError, "Cannot tie to an already tied stream!");
       if (_tied)
-	DUNE_THROW(DebugStreamError, "Stream already tied: untie first!");
+        DUNE_THROW(DebugStreamError, "Stream already tied: untie first!");
 
       _tied = true;
       tiedstate = &to;
@@ -394,7 +394,7 @@ namespace Dune {
     //! \brief Untie stream
     void untie() throw(DebugStreamError) {
       if(! _tied)
-	DUNE_THROW(DebugStreamError, "Cannot untie, stream is not tied!");
+        DUNE_THROW(DebugStreamError, "Cannot untie, stream is not tied!");
 
       tiedstate->_tied_streams--;
       _tied = false;
