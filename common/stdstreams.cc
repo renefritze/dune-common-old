@@ -1,6 +1,6 @@
 // $Id$
 
-
+#include <config.h>
 #include "stdstreams.hh"
 
 namespace Dune {
