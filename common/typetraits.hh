@@ -243,7 +243,10 @@ namespace Dune
   template<typename T1, typename T2>
   struct SameType
   {
-    enum{ value=false};
+    enum{ 
+      /* @brief Whether T1 is the same type as T2. */
+      value=false
+	};
   };
   
   
