@@ -138,34 +138,6 @@ namespace Dune
     inline const_iterator begin() const;
 
     /**
-     * @brief Get an iterator pointing before the first 
-     * element in the list.
-     *
-     * To be positioned at a valid entry the operator++()
-     * has to be called once.
-     * @return An iterator pointing before the first 
-     * element.
-     * @deprecated There is no use for this function! For insertion
-     * or deletion of elements use beginModify() 
-     */
-    inline iterator oneBeforeBegin() DUNE_DEPRECATED;
-    
-    
-    /**
-     * @brief Get an iterator pointing before the first 
-     * element in the list.
-     *
-     * To be positioned at a valid entry the operator++()
-     * has to be called once.
-     * @return An iterator pointing before the first 
-     * element.
-     * @deprecated There is no use for this function! For insertion
-     * or deletion of elements use beginModify() 
-     */
-    inline const_iterator oneBeforeBegin() const DUNE_DEPRECATED;
-    
-
-    /**
      * @brief Get an iterator capable of deleting and
      * inserting elements.
      *
@@ -199,22 +171,6 @@ namespace Dune
      */
     inline const_iterator end() const;
 
-    /**
-     * @brief Get an iterator pointing to the
-     * last element in the list.
-     *
-     * @return An iterator pointing to the last element.
-     */
-    inline iterator tail() DUNE_DEPRECATED;
-    
-    /**
-     * @brief Get an iterator pointing to the
-     * last element in the list.
-     *
-     * @return An iterator pointing to the last element.
-     */
-    inline const_iterator tail() const DUNE_DEPRECATED;
-    
     /**
      * @brief Check whether the list is empty.
      *
@@ -795,30 +751,6 @@ namespace Dune
     return const_iterator(beforeHead_.next_);
   } 
   
-  template<typename T, class A>
-  inline SLListIterator<T,A> SLList<T,A>::oneBeforeBegin()
-  {
-    return iterator(&beforeHead_, this);
-  }
-  
-  template<typename T, class A>
-  inline SLListConstIterator<T,A> SLList<T,A>::oneBeforeBegin() const
-  {
-    return const_iterator(&beforeHead_);
-  }
-
-  template<typename T, class A>
-  inline SLListIterator<T,A> SLList<T,A>::tail()
-  {
-    return iterator(tail_, this);
-  }
-  
-  template<typename T, class A>
-  inline SLListConstIterator<T,A> SLList<T,A>::tail() const
-  {
-    return const_iterator(tail_);
-  }
-
   template<typename T, class A>
   inline SLListIterator<T,A> SLList<T,A>::end()
   {
