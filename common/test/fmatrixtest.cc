@@ -1,3 +1,4 @@
+#include "config.h"
 #define DUNE_ISTL_WITH_CHECKING
 #include "../fmatrix.hh"
 #include <iostream>
