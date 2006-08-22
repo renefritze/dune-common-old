@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include<dune/common/gcd.hh>
 #include<dune/common/lcm.hh>
 #include<dune/common/helpertemplates.hh>

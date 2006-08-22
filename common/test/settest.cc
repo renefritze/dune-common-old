@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include<dune/common/enumset.hh>
 #include<iostream>
 int main()

@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include<dune/common/singleton.hh>
 #include<iostream>
 class Foo : public Dune::Singleton<Foo>

@@ -1,4 +1,5 @@
-#include"config.h"
+#include "config.h"
+
 #include<dune/common/bigunsignedint.hh>
 #include<limits>
 #include<iostream>

@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include<dune/common/test/iteratorfacadetest.hh>
 #include<dune/common/test/iteratortest.hh>
 #include<iostream>

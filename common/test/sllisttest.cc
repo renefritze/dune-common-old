@@ -1,4 +1,4 @@
-#include <config.h>
+#include "config.h"
 
 #include<dune/common/sllist.hh>
 #include<dune/common/test/iteratortest.hh>

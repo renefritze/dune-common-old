@@ -1,4 +1,6 @@
 // $Id$
+#include "config.h"
+
 #include<dune/common/arraylist.hh>
 #include<dune/common/test/iteratortest.hh>
 #include<iostream>

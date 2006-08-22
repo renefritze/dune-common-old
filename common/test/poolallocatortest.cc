@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include<dune/common/poolallocator.hh>
 #include<dune/common/alignment.hh>
 #include<dune/common/fmatrix.hh>

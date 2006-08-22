@@ -1,4 +1,5 @@
-#include"config.h"
+#include "config.h"
+
 #include<dune/common/mpihelper.hh>
 #include<iostream>
 int main(int argc, char** argv)

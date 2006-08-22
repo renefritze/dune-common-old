@@ -1,4 +1,5 @@
 // $Id$
+#include "config.h"
 
 #include<dune/common/smartpointer.hh>
 #include<iostream>

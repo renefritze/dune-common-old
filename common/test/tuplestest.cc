@@ -1,4 +1,6 @@
 // $Id$
+#include "config.h"
+
 #include<dune/common/tuples.hh>
 #include<string>
 #include<iostream>
