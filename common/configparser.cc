@@ -14,12 +14,12 @@ ConfigParser::ConfigParser()
 {
 }
 
-void ConfigParser::parseFile(string file)
+void ConfigParser::parseFile(std::string file)
 {
 	ifstream in(file.c_str());
 
         if (!in)
-            DUNE_THROW(IOError, "Could open configuration file " << file);
+            DUNE_THROW(IOError, "Could not open configuration file " << file);
 	
 	string prefix;
 	set<string> keysInFile;
