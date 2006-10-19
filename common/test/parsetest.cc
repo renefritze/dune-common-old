@@ -43,6 +43,7 @@ find dune/common/ -maxdepth 1 -name \*.hh -exec echo '#include <{}>' \; | sort
 #include <dune/common/timer.hh>
 #include <dune/common/tuples.hh>
 #include <dune/common/typetraits.hh>
+#include <dune/common/bartonnackmanifcheck.hh>
 
 int main () {
 }
