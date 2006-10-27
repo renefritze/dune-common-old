@@ -125,7 +125,7 @@ inline std::ostream& operator<<(std::ostream &stream, Exception &e) {
   to the text. If DUNE_DEVEL_MODE is defined more detail about the
   function where the exception happened is included. This mode can be
   activated via the \c --enable-dunedevel switch of \c ./configure
-*/
+ */
 // this is the magic: use the usual do { ... } while (0) trick, create
 // the full message via a string stream and throw the created object
 #define DUNE_THROW(E, m) do { E th__ex; std::ostringstream th__out; \
@@ -172,7 +172,7 @@ class RangeError : public Exception {};
 
   - that have to be implemented but should never be called
   - that are missing
-*/
+ */
 class NotImplemented : public Exception {};
 
 /*! \brief Default exception class for OS errors
@@ -183,10 +183,10 @@ class NotImplemented : public Exception {};
  */
 class SystemError : public Exception {};
 
-  /*! \brief Default exception if memory allocation fails
+/*! \brief Default exception if memory allocation fails
 
-  */
-  class OutOfMemoryError : public SystemError {};
+ */
+class OutOfMemoryError : public SystemError {};
 
 } // end namespace
 
