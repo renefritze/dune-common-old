@@ -188,6 +188,11 @@ class SystemError : public Exception {};
  */
 class OutOfMemoryError : public SystemError {};
 
+  /*! \brief Default exception if a function was called while
+   * the object is not in a valid state for that function.
+   */
+  class InvalidStateException : public Exception {};
+  
 } // end namespace
 
 #endif
