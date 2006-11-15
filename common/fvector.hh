@@ -293,7 +293,6 @@ representing a field and a compile-time given size.
 	 It is generally assumed that K is a numerical type compatible with double
 	 (E.g. norms are always computed in double precision).
 
-	 Implementation of all members uses template meta programs where appropriate
   */
   template<class K, int SIZE>
   class FieldVector
@@ -307,7 +306,6 @@ representing a field and a compile-time given size.
 	 It is generally assumed that K is a numerical type compatible with double
 	 (E.g. norms are always computed in double precision).
 
-	 Implementation of all members uses template meta programs where appropriate
   */
   template<class K, int SIZE>
   class FieldVector
@@ -650,7 +648,7 @@ representing a field and a compile-time given size.
 	{
           double result = 0;
             for (int i=0; i<size; i++)
-                result += std::max(result, std::abs(p[i]));
+                result = std::max(result, std::abs(p[i]));
             return result;
 	}
 
@@ -659,7 +657,7 @@ representing a field and a compile-time given size.
 	{
             double result = 0;
             for (int i=0; i<size; i++)
-                result += std::max(result, fvmeta_absreal(p[i]));
+                result = std::max(result, fvmeta_absreal(p[i]));
             return result;
 	}
 #endif
