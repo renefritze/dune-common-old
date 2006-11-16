@@ -42,15 +42,23 @@ namespace Dune
   template<class T>
   struct TupleAccessTraits
   {
-    typedef const T& ConstType;
+    typedef typename ConstantVolatileTraits<T>::ConstType& ConstType;
     typedef T& NonConstType;
     typedef const typename ConstantVolatileTraits<T>::UnqualifiedType& ParameterType;
   };
   
   template<class T>
+  struct TupleAccessTraits<T*>
+  {
+    typedef typename ConstantVolatileTraits<T>::ConstType* ConstType;
+    typedef T* NonConstType;
+    typedef T* ParameterType;
+  };
+
+  template<class T>
   struct TupleAccessTraits<T&>
   {
-    typedef T& ConstType;
+    typedef typename ConstantVolatileTraits<T>::ConstType& ConstType;
     typedef T& NonConstType;
     typedef T& ParameterType;
   };
@@ -407,7 +415,10 @@ namespace Dune
      * @return The N-th element of the tuple.
      */
     template<typename T1, typename T2>
-    static typename ElementType<N,Pair<T1,T2> >::Type& get(Pair<T1,T2>& tuple)
+    static typename TupleAccessTraits<
+      typename ElementType<N,Pair<T1,T2> >::Type
+    >::NonConstType
+    get(Pair<T1,T2>& tuple)
     {
       return Element<N-1>::get(tuple.second());
     }
@@ -418,7 +429,10 @@ namespace Dune
      * @return The N-th element of the tuple.
      */
     template<typename T1, typename T2>
-    static const typename ElementType<N,Pair<T1,T2> >::Type& get(const Pair<T1,T2>& tuple)
+    static typename TupleAccessTraits<
+      typename ElementType<N,Pair<T1,T2> >::Type
+    >::ConstType
+    get(const Pair<T1,T2>& tuple)
     {
       return Element<N-1>::get(tuple.second());
     }
@@ -436,7 +450,7 @@ namespace Dune
      * @return The first element of the tuple.
      */
     template<typename T1, typename T2>
-    static T1& get(Pair<T1,T2>& tuple)
+    static typename TupleAccessTraits<T1>::NonConstType get(Pair<T1,T2>& tuple)
     {
       return tuple.first();
     }
@@ -447,7 +461,7 @@ namespace Dune
      * @return The first element of the tuple.
      */
     template<typename T1, typename T2>
-    static const T1& get(const Pair<T1,T2>& tuple)
+    static typename TupleAccessTraits<T1>::ConstType get(const Pair<T1,T2>& tuple)
     {
       return tuple.first();
     }
