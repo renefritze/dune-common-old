@@ -35,7 +35,6 @@ find dune/common/ -maxdepth 1 -name \*.hh -exec echo '#include <{}>' \; | sort
 #include <dune/common/poolallocator.hh>
 #include <dune/common/precision.hh>
 #include <dune/common/propertymap.hh>
-#include <dune/common/simplevector.hh>
 #include <dune/common/sllist.hh>
 #include <dune/common/smartpointer.hh>
 #include <dune/common/stack.hh>
