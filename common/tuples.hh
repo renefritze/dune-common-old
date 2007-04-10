@@ -77,7 +77,7 @@ namespace Dune
     typedef T1 Type1;
     
     /**
-     * @brief The type of the first field.
+     * @brief The type of the second field.
      */
     typedef TT Type2;
 //     enum{
@@ -139,13 +139,13 @@ namespace Dune
 
     /**
      * @brief Get the second value
-     * @return The first value
+     * @return The second value
      */
     typename TupleAccessTraits<Type2>::NonConstType
     second();
     
     /**
-     * @brief Get the first value
+     * @brief Get the second value
      * @return The second value
      */
     typename TupleAccessTraits<Type2>::ConstType 
