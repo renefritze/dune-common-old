@@ -1,7 +1,10 @@
 #include "config.h"
 
 #include<dune/common/mpihelper.hh>
+
+#if HAVE_MPI 
 #include<dune/common/mpicollectivecommunication.hh>
+#endif
 
 #include<iostream>
 int main(int argc, char** argv)
@@ -9,6 +12,7 @@ int main(int argc, char** argv)
   typedef Dune::MPIHelper Helper;
   typedef Helper::MPICommunicator MPIComm;
   
+#if HAVE_MPI 
   {
     Helper& mpi = Helper::instance(argc, argv);
     
@@ -42,5 +46,8 @@ int main(int argc, char** argv)
   }
   
   std::cout << "We are at the end!"<<std::endl;
+#else 
+  std::cout << "WARNING: test Dune::CollectiveCommunication<MPI_Comm> disabled because MPI not available! " << std::endl;
+#endif
   return 0;
 }
