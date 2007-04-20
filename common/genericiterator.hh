@@ -138,7 +138,7 @@ public:
    * 1. if we are mutable this is the only valid copy constructor, as the arguments is a mutable iterator
    * 2. if we are a const iterator the argument is a mutable iterator => This is the needed conversion to initialize a const iterator form a mutable one.
    */
-  GenericIterator(const GenericIterator<typename remove_const<Container>::type, typename remove_const<T>::type >& other): container_(other.container_), position_(other.position_)
+  GenericIterator(const GenericIterator<typename remove_const<Container>::type, typename remove_const<T>::type,D >& other): container_(other.container_), position_(other.position_)
   {}
 
   /**
@@ -150,17 +150,17 @@ public:
    * 1. if we are mutable the arguments is a const iterator and therefore calling this method is mistake in the users code and results in a (probably not understandable compiler error
    * 2. If we are a const iterator this is the default copy constructor as the argument is a const iterator too.
    */
-  GenericIterator(const GenericIterator<const typename remove_const<Container>::type, const typename remove_const<T>::type >& other): container_(other.container_), position_(other.position_)
+  GenericIterator(const GenericIterator<const typename remove_const<Container>::type, const typename remove_const<T>::type, D >& other): container_(other.container_), position_(other.position_)
   {}
 
   // Methods needed by the forward iterator
-  bool equals(const GenericIterator<typename remove_const<Container>::type,typename remove_const<T>::type>& other) const
+  bool equals(const GenericIterator<typename remove_const<Container>::type,typename remove_const<T>::type,D>& other) const
   {
     return position_ == other.position_ && container_ == other.container_;
   }
 
   
-  bool equals(const GenericIterator<const typename remove_const<Container>::type,const typename remove_const<T>::type>& other) const
+  bool equals(const GenericIterator<const typename remove_const<Container>::type,const typename remove_const<T>::type,D>& other) const
   {
     return position_ == other.position_ && container_ == other.container_;
   }
@@ -187,13 +187,13 @@ public:
     position_=position_+n;
   }
 
-  std::ptrdiff_t distanceTo(GenericIterator<const typename remove_const<Container>::type,const typename remove_const<T>::type> other)const
+  std::ptrdiff_t distanceTo(GenericIterator<const typename remove_const<Container>::type,const typename remove_const<T>::type,D> other)const
   {
     assert(other.container_==container_);
     return other.position_ - position_;
   }
 
-  std::ptrdiff_t distanceTo(GenericIterator<typename remove_const<Container>::type, typename remove_const<T>::type> other)const
+  std::ptrdiff_t distanceTo(GenericIterator<typename remove_const<Container>::type, typename remove_const<T>::type,D> other)const
   {
     assert(other.container_==container_);
     return other.position_ - position_;
