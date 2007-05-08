@@ -1,16 +1,23 @@
 #ifndef DUNE_FIXEDARRAY_HH
 #define DUNE_FIXEDARRAY_HH
 
-
-//***********************************************************************
-//
-//  implementation of peter array
-//
-//***********************************************************************
+/** \file
+    \brief implementation of the stl array class (a static array)
+    and its deprecated ancestor FixedArray
+*/
 
 #include<iostream>
 #include<iomanip>
 #include<string>
+
+// Include system implementation of array class if present
+#ifdef HAVE_ARRAY
+#include <array>
+#endif
+#ifdef HAVE_TR1_ARRAY
+#include <tr1/array>
+#endif
+
 
 namespace Dune 
 {
@@ -18,6 +25,12 @@ namespace Dune
 
   @{
   */
+
+#ifdef HAVE_ARRAY
+    using std::array;
+#elif defined HAVE_TR1_ARRAY
+    using std::tr1::array;
+#else
 
   /** \brief Simple fixed size array class
    *
@@ -56,8 +69,10 @@ namespace Dune
       //! Create uninitialized array
       array () {}
       
-      //! Initialize all components with same size
-      array (const T& t)
+      /** \brief Initialize all components with same entry
+          \deprecated Deprecated because the stl implementation of array doesn't have it
+      */
+      array (const T& t) DUNE_DEPRECATED
       {
           for (int i=0; i<N; i++) a[i]=t;
       }
@@ -87,7 +102,7 @@ namespace Dune
   protected:
       T a[(N > 0) ? N : 1];
   };
-    
+#endif
     //! Output operator for array
     template <class T, int N>
     inline std::ostream& operator<< (std::ostream& s, array<T,N> e)
