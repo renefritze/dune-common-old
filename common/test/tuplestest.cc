@@ -37,6 +37,8 @@ int iteratorTupleTest()
   
 
   Tuple tuple(v.begin(), v.begin(), v.end());
+
+  assert(Size<Tuple>::value==3);
   int ret=0;
   
   if(Element<0>::get(tuple)!= v.begin()){
