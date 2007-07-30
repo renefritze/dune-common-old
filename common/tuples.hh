@@ -6,6 +6,9 @@
 #include"typetraits.hh"
 #include"helpertemplates.hh"
 
+#ifdef HAVE_TUPLE
+#include <tuple>
+#endif
 #ifdef HAVE_TR1_TUPLE
 #include <tr1/tuple>
 #endif
@@ -53,7 +56,9 @@ namespace Dune{
     typedef T& ParameterType;
   };
 
-#ifdef HAVE_TR1_TUPLE
+#ifdef HAVE_TUPLE
+  using std::tuple;
+#elif defined HAVE_TR1_TUPLE
   using std::tr1::tuple;
 #else
   /**
@@ -387,7 +392,9 @@ namespace Dune{
   // be backwards compatible
 #define Tuple tuple
 
-#ifdef HAVE_TR1_TUPLE
+#ifdef HAVE_TUPLE
+  using std::tuple_element;
+#elif defined HAVE_TR1_TUPLE
   using std::tr1::tuple_element;
 #else
   /**
@@ -432,7 +439,7 @@ namespace Dune{
 #ifdef HAVE_TR1_TUPLE
   using std::tr1::get;
 
-  // for backwards compartibility
+  // for backwards compatibility
     template<int i>
   struct Element{
     template<typename T1>
@@ -445,6 +452,24 @@ namespace Dune{
     static typename TupleAccessTraits<typename tuple_element<i,T1>::type>::ConstType get(const T1& t)
     {
       return std::tr1::get<i>(t);
+    }
+  };
+#elif defined HAVE_TUPLE
+  using std::get;
+
+  // for backwards compatibility
+    template<int i>
+  struct Element{
+    template<typename T1>
+    static typename TupleAccessTraits<typename tuple_element<i,T1>::type>::NonConstType get(T1& t)
+    {
+      return std::get<i>(t);
+    }
+
+    template<typename T1>
+    static typename TupleAccessTraits<typename tuple_element<i,T1>::type>::ConstType get(const T1& t)
+    {
+      return std::get<i>(t);
     }
   };
 #else
@@ -525,6 +550,8 @@ namespace Dune{
 
 #ifdef HAVE_TR1_TUPLE
   using std::tr1::tuple_size;
+#elif defined HAVE_TUPLE
+  using std::tuple_size;
 #else
   /**
    * @brief Template meta_programm to query the size of a tuple
@@ -560,7 +587,13 @@ namespace Dune{
 #ifdef HAVE_TR1_TUPLE    
   using std::tr1::tie;
   using std::tr1::make_tuple;
+#endif
+#ifdef HAVE_TUPLE    
+  using std::tie;
+  using std::make_tuple;
+#endif
 
+#if defined HAVE_TUPLE || defined HAVE_TR1_TUPLE
   template<int i>
   struct tuple_writer
   {
