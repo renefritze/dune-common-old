@@ -14,7 +14,6 @@
 // MPI header
 #include<mpi.h>
 
-
 namespace Dune
 {
   //=======================================================
@@ -181,7 +180,7 @@ namespace Dune
   //=======================================================
 
   /*! \brief Specialization of CollectiveCommunication for MPI
-	\ingroup GICollectiveCommunication
+	\ingroup ParallelCommunication
   */
   template<>
   class CollectiveCommunication<MPI_Comm>
