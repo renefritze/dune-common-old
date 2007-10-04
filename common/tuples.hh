@@ -580,6 +580,12 @@ namespace Dune{
   {
     enum{ value=1};
   };
+
+  template<>
+  struct tuple_size<Pair<Nil,Nil> >
+  {
+    enum{ value=0};
+  };
 #endif
 
 #define Size  tuple_size
