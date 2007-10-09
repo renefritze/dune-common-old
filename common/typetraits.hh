@@ -5,6 +5,8 @@
 
 #ifdef HAVE_TR1_TYPE_TRAITS
 #include <tr1/type_traits>
+#elif defined HAVE_TYPE_TRAITS
+#include <type_traits>
 #endif
 
 namespace Dune
@@ -155,6 +157,8 @@ namespace Dune
 
 #ifdef HAVE_TR1_TYPE_TRAITS
     using std::tr1::remove_const;
+#elif defined HAVE_TYPE_TRAITS
+  using std::remove_const;
 #else
 
   /**
@@ -276,6 +280,8 @@ namespace Dune
   
 #ifdef HAVE_TR1_TYPE_TRAITS
     using std::tr1::is_same;
+#elif defined HAVE_TYPE_TRAITS
+  using std::is_same;
 #else
   /**
    * @brief Compile time test for testing whether 
