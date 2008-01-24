@@ -120,7 +120,27 @@ void randomizeListFront(Dune::SLList<T,A>& alist){
     
     check(alist, vals);
 }
-
+int testAssign()
+{
+  typedef Dune::SLList<int,IntAllocator> List;
+  List alist, blist;
+  
+  alist.push_back(3);
+  alist.push_back(4);
+  alist.push_back(5);
+  
+  blist.push_back(-1);
+  
+  blist=alist;
+  List::iterator biter=blist.begin(), aiter=alist.begin();
+  for(; aiter!=alist.end(); ++aiter, ++biter)
+    if(*aiter!=*biter){
+      std::cerr<<"Asignment failed "<<__FILE__<<":"<<__LINE__<<std::endl;
+      return 1;
+    }
+  return 0;
+}
+  
 int testDelete()
 {
   typedef Dune::SLList<int,IntAllocator> List;
@@ -129,7 +149,7 @@ int testDelete()
   alist.push_back(3);
   alist.push_back(4);
   alist.push_back(5);
-  
+      
   List::ModifyIterator iter = alist.beginModify();
   iter.remove();
   if(*(alist.begin())!=4){
@@ -290,29 +310,6 @@ int testInsert()
   }
   return ret;
 }
-
-template<typename T>
-int testOneBeforeBegin(T& alist)
-{
-  typename T::iterator iterBefore = alist.oneBeforeBegin(),
-    iter = alist.begin();
-  typename T::const_iterator citerBefore = alist.oneBeforeBegin();
-  
-  int ret=0;
-  ++iterBefore;
-  ++citerBefore;
-  
-  if(iterBefore!=iter || &(*iterBefore) != &(*iter)){
-    std::cerr<<"one before iterator incremented once should point to begin()! "<<__FILE__<<":"<<__LINE__<<std::endl;
-    ret++;
-  }
-  if(citerBefore!=iter || &(*citerBefore) != &(*iter)){
-    std::cerr<<"one before iterator incremented once should point to begin()! "<<__FILE__<<":"<<__LINE__<<std::endl;
-    ret++;
-  }
-  return ret;
-}
-
   
 int testPushPop(){
     using namespace Dune;
@@ -390,8 +387,8 @@ int main()
       }
   }
     
-  //randomizeListFront(list2);
-  /*
+  randomizeListFront(list2);
+  
   Printer<std::iterator_traits<Dune::SLList<double,DoubleAllocator>::ModifyIterator>::value_type> print;
   
   Dune::SLList<double,DoubleAllocator>::ModifyIterator lbegin = list.beginModify(), lend = list.endModify();
@@ -419,7 +416,7 @@ int main()
   ret+=testPushPop();
   std::cout<<" Test OneBeforeBegin"<<std::endl;
   
-  ret+=testOneBeforeBegin(list1);
+  //ret+=testOneBeforeBegin(list1);
   
   std::cout<< "test empty"<<std::endl;
   ret+=testEmpty();
@@ -428,7 +425,8 @@ int main()
     ret+=testInsert();
   std::cout<< "test delete"<<std::endl;
   ret+=testDelete();
-  */
+  
+  ret+=testAssign();
   list.clear();
   list1.clear();
   list2.clear();
