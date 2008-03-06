@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include "exceptions.hh"
+#include "deprecated.hh"
 
 namespace Dune {
 
@@ -16,7 +17,7 @@ template <bool flag> class CompileTimeChecker;
 
 //! it exists only an implementation for true so the compiler throws an
 //! error if the condition is false 
-template <> class CompileTimeChecker<true> { };
+template <> class CompileTimeChecker<true> { } DUNE_DEPRECATED;
 
 
     /** \brief Map an integer value to a type
