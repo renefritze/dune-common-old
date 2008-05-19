@@ -28,7 +28,7 @@ representing a field and a compile-time given size.
 */
 
   // forward declaration of template
-  template<class K, int n> class FieldVector;
+  template<class K, int SIZE> class FieldVector;
 
 #endif
   
@@ -300,7 +300,7 @@ representing a field and a compile-time given size.
 #else
   /** \brief Construct a vector space out of a tensor product of fields.
 
-	 K is the field type (use float, double, complex, etc) and n 
+	 K is the field type (use float, double, complex, etc) and SIZE 
 	 is the number of components.
 
 	 It is generally assumed that K is a numerical type compatible with double
@@ -926,6 +926,16 @@ representing a field and a compile-time given size.
 	  p += a*y.p;
 	  return *this;
 	}
+        
+#ifndef DUNE_EXPRESSIONTEMPLATES
+    //===== Euclidean scalar product
+
+    //! scalar product
+    inline K operator* ( const FieldVector &y ) const
+    {
+      return p * y[ 0 ];
+    }
+#endif
 
 	//===== norms
 
