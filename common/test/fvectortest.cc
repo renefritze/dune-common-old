@@ -65,6 +65,13 @@ public:
       v = a - v;
       v = a * v;
       v = a / v;
+
+      v -= v;
+      v -= a;
+      v += v;
+      v += a;
+      v *= a;
+      v /= a;
     }
 };
 

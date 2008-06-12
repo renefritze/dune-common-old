@@ -878,20 +878,6 @@ representing a field and a compile-time given size.
 	}
 	//===== vector space arithmetic
 
-	//! vector space addition
-	FieldVector& operator+= (const FieldVector& y)
-	{
-	  p += y.p;
-	  return *this;
-	}
-
-	//! vector space subtraction
-	FieldVector& operator-= (const FieldVector& y)
-	{
-	  p -= y.p;
-	  return *this;
-	}
-
 	//! vector space add scalar to each comp
 	FieldVector& operator+= (const K& k)
 	{
@@ -927,15 +913,11 @@ representing a field and a compile-time given size.
 	  return *this;
 	}
         
-#ifndef DUNE_EXPRESSIONTEMPLATES
-    //===== Euclidean scalar product
-
-    //! scalar product
-    inline K operator* ( const FieldVector &y ) const
-    {
-      return p * y[ 0 ];
-    }
-#endif
+	//! scalar product
+	inline K operator* ( const K & k ) const
+	{
+	  return p * k;
+	}
 
 	//===== norms
 
