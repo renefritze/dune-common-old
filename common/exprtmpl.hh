@@ -1081,7 +1081,7 @@ typename FieldType<A>::type
 operator * (const Vector<A> & a, const Expression<B> & b)
 {
   dune_static_assert((is_same<FieldType<A>,FieldType<B> >::value), 
-		     "Field types of both oprands must match!");
+		     "Field types of both operands must match!");
   assert(a.N() == b.N());
   typename FieldType<A>::type x = 0;
   for (size_t i=0; i<a.N(); i++)
@@ -1095,7 +1095,7 @@ typename FieldType<A>::type
 operator * (const Expression<A> & a, const Vector<B> & b)
 {
   dune_static_assert((is_same<FieldType<A>,FieldType<B> >::value), 
-		     "Field types of both oprands must match!");
+		     "Field types of both operands must match!");
   assert(a.N() == b.N());
   typename FieldType<A>::type x = 0;
   for (size_t i=0; i<a.N(); i++)
