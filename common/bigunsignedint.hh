@@ -5,6 +5,7 @@
 
 #include<iostream>
 #include<limits>
+#include<cstdlib>
 #include<dune/common/exceptions.hh>
 
 /**
