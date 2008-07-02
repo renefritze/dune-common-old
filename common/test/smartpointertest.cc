@@ -4,6 +4,7 @@
 #include<dune/common/smartpointer.hh>
 #include<iostream>
 #include<vector>
+#include<cstdlib>
 
 int main(){
     using namespace Dune;
