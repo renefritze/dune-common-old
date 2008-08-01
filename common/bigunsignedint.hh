@@ -26,7 +26,7 @@ namespace Dune
    * @{
    */
 
-#ifdef HAVE_MPI
+#if HAVE_MPI
   template<class K>
   struct MPITraits;
 #endif
@@ -127,7 +127,7 @@ namespace Dune
     
   private:
 	unsigned short digit[n];
-#ifdef HAVE_MPI
+#if HAVE_MPI
     friend class MPITraits<bigunsignedint<k> >;
 #endif
     
