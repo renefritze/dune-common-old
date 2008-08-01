@@ -3,8 +3,10 @@
 #define DUNE_MPIHELPER
 
 #include <cassert>
+#include"collectivecommunication.hh"
 #if HAVE_MPI
 #include"mpi.h"
+#include"mpicollectivecommunication.hh"
 #endif
 
 #include "stdstreams.hh"
@@ -85,6 +87,12 @@ namespace Dune
       return -1;
     }
     
+    static CollectiveCommunication<MPICommunicator>
+    getCollectiveCommunication()
+    {
+      return CollectiveCommunication<MPICommunicator>(getCommunicator());
+    }
+    
     /**
      * @brief Get the singleton instance of the helper.
      *
@@ -153,7 +161,11 @@ namespace Dune
     static MPICommunicator getCommunicator(){
       return MPI_COMM_WORLD;
     }
-    
+    static CollectiveCommunication<MPICommunicator>
+    getCollectiveCommunication()
+    {
+      return CollectiveCommunication<MPICommunicator>(getCommunicator());
+    }
    /**
      * @brief Get the singleton instance of the helper.
      *
