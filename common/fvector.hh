@@ -569,7 +569,7 @@ representing a field and a compile-time given size.
             return true;
 	}
 
-	//! vector space axpy operation
+	//! vector space axpy operation ( *this += a y )
 	FieldVector& axpy (const K& a, const FieldVector& y)
 	{
 #ifndef DUNE_EXPRESSIONTEMPLATES
@@ -922,7 +922,7 @@ representing a field and a compile-time given size.
 	  return *this;
 	}
 
-	//! vector space axpy operation
+	//! vector space axpy operation ( *this += a y )
 	FieldVector& axpy (const K& a, const FieldVector& y)
 	{
 	  p += a*y.p;
