@@ -40,9 +40,7 @@ struct IsTrue<true>
   static void yes() DUNE_DEPRECATED {};
 };
 
-
-#include<iostream>
-
+#if not HAVE_STATIC_ASSERT
 // Taken from BOOST
 //
 // Helper macro CPPMAGIC_JOIN:
@@ -61,6 +59,7 @@ template <bool x> struct static_assert_failure;
 template <> struct static_assert_failure<true> { };
 
 template<int x> struct static_assert_test{};
+#endif
 
 /**
     \brief Helper template so that compilation fails if condition is not true.
@@ -91,10 +90,16 @@ template<int x> struct static_assert_test{};
     </ol>
     
 */
+
+#if HAVE_STATIC_ASSERT
 #define dune_static_assert(COND,MSG) \
-   typedef static_assert_test<\
+    static_assert(COND,MSG)
+#else
+#define dune_static_assert(COND,MSG) \
+    typedef static_assert_test<                         \
       sizeof(static_assert_failure< (bool)( COND )>)\
       > CPPMAGIC_JOIN(dune_static_assert_typedef_, __LINE__)
+#endif
 
 /* @} */
 
