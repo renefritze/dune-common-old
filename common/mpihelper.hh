@@ -196,6 +196,10 @@ namespace Dune
      * @brief return number of processes 
      */
     int size () const { return size_; }
+
+    void barrier() const {
+      MPI_Barrier(getCommunicator());
+    }
     
   private:
     int rank_;
@@ -213,7 +217,7 @@ namespace Dune
       assert( rank_ >= 0 );
       assert( size_ >= 1 );
       
-      dvverb << "Called  MPI_Init on p=" << rank_ << "!" << std::endl; 
+      dverb << "Called  MPI_Init on p=" << rank_ << "!" << std::endl; 
     }
     //! \brief calls MPI_Finalize 
     ~MPIHelper()
