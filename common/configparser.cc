@@ -30,42 +30,51 @@ void ConfigParser::parseFile(std::string file)
 		string line;
 		getline(in, line);
 		line = trim(line);
-		if (line[0] == '#')
-		{
-		}
-		else if ((line[0] == '[') and (line[line.length()-1] == ']'))
-		{
-			prefix = trim(line.substr(1, line.length()-2)) + ".";
-			if (prefix == ".")
-				prefix = "";
-		}
-		else
-		{
-			string::size_type mid = line.find("=");
-			if (mid != string::npos)
-			{
-				string key = prefix+trim(line.substr(0, mid));
-				string value = trim(line.substr(mid+1));
-				
-				// handle quoted strings
-				if (value.length()>1)
+		switch (line[0]) {
+			case '#':
+				break;
+			case '[':
+				if (line[line.length()-1] == ']')
 				{
-					if ((value[0] == '\'') and (value[value.length()-1] == '\''))
-						value = value.substr(1, value.length()-2);
+					prefix = trim(line.substr(1, line.length()-2));
+					if (prefix != "")
+						prefix += ".";
+				}
+				break;
+			default:
+				string::size_type mid = line.find("=");
+				if (mid != string::npos)
+				{
+					string key = prefix+trim(line.substr(0, mid));
+					string value = trim(line.substr(mid+1));
+					
+					// handle quoted strings
+					if (value.length()>1)
+					{
+						switch (value[0]) {
+							case '\'':
+								if (value[value.length()-1] == '\'')
+									value = value.substr(1, value.length()-2);
+								break;
+							case '"':
+								if (value[value.length()-1] == '"')
+									value = value.substr(1, value.length()-2);
+								break;
+							default:
+								break;
+						}
+					}
+					
+					if (keysInFile.count(key) != 0)
+						DUNE_THROW(Exception, "Key '" << key << "' appears twice in file '" << file << "' !");
 					else
-						if ((value[0] == '"') and (value[value.length()-1] == '"'))
-							value = value.substr(1, value.length()-2);
+					{
+						(*this)[key] = value;
+						keysInFile.insert(key);
+					}
 				}
-				
-				if (keysInFile.count(key) != 0)
-					DUNE_THROW(Exception, "Key '" << key << "' appears twice in file '" << file << "' !");
-				else
-				{
-					(*this)[key] = value;
-					keysInFile.insert(key);
-				}
-			}
-		}	
+				break;
+		}
 	}
 	
 	in.close();
