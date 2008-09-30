@@ -283,20 +283,37 @@ bool ConfigParser::get<bool>(const string& key)
 
 }  // end namespace Dune
 
-string ConfigParser::trim(string s)
+
+static inline bool is_space(char c)
 {
-	int i = 0;
-	while ((s[i] == ' ') or (s[i] == '\n') or (s[i] == '\r'))
-		i++;
-	
-	s.erase(0,i);
-	
-	i = s.length();
-	while ((s[i-1] == ' ') or (s[i-1] == '\n') or (s[i-1] == '\r'))
-		i--;
-	
-	s.erase(i);
-	return s;
+  switch (c) {
+    case ' ':
+    case '\n':
+    case '\r':
+      return true;
+    default:
+      return false;
+  }
+}
+
+string ConfigParser::trim(const string& s) const
+{
+    string::const_iterator b = s.begin();
+    string::const_iterator e = s.end();
+
+    for ( ; ; )
+        if (b != e)
+            if (is_space(*b))
+                ++b;
+            else
+                break;
+        else
+            return string();
+
+    while (is_space(e[-1]))
+        --e;
+
+    return string(b, e);
 }
 
 const ConfigParser::KeyVector& ConfigParser::getValueKeys() const
