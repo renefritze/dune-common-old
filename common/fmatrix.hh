@@ -9,6 +9,7 @@
 #include "exceptions.hh"
 #include "fvector.hh"
 #include "precision.hh"
+#include "static_assert.hh"
 
 namespace Dune {
    
@@ -24,6 +25,37 @@ namespace Dune {
 */
 
   template<class K, int n, int m> class FieldMatrix;
+
+  template<class K, int n, int m, typename T>
+  void istl_assign_to_fmatrix(FieldMatrix<K,n,m>& f, const T& t)
+  {
+    DUNE_THROW(NotImplemented, "You need to specialise this function for type T!");
+  }
+
+  namespace
+  {
+    template<bool b>
+    struct Assigner
+    {
+      template<class K, int n, int m, class T>
+      static void assign(FieldMatrix<K,n,m>& fm, const T& t)
+      {
+	istl_assign_to_fmatrix(fm, t);
+      }
+      
+    };
+    
+
+    template<>
+    struct Assigner<true>
+    {
+      template<class K, int n, int m, class T>
+      static void assign(FieldMatrix<K,n,m>& fm, const T& t)
+      {
+	fm = static_cast<const K>(t);
+      }
+    };  
+  }
   
   /** @brief Error thrown if operations of a FieldMatrix fail. */
   class FMatrixError : public Exception {};
@@ -101,6 +133,12 @@ namespace Dune {
 	  for (size_type i=0; i<n; i++) p[i] = k;
 	}
 
+    template<typename T>
+    explicit FieldMatrix( const T& t)
+    {
+      Assigner<Conversion<T,K>::exists>::assign(*this, t);
+    }
+    
 	//===== random access interface to rows of the matrix
 
 	//! random access to the rows
@@ -197,6 +235,12 @@ namespace Dune {
 	  return *this;	  
 	}
 
+    template<typename T>
+    FieldMatrix& operator= ( const T& t)
+    {
+      Assigner<Conversion<T,K>::exists>::assign(*this, t);
+      return *this;
+    }
 	//===== vector space arithmetic
 
 	//! vector space addition
@@ -700,7 +744,7 @@ namespace Dune {
 	    FieldMatrix<K,n,m>& U=A;
 	    
 	    // initialize inverse
-	    *this=0;
+	    *this=K();
 	    
 	    for(size_type i=0; i<n; ++i)
 	      p[i][i]=1;
@@ -817,7 +861,11 @@ namespace Dune {
 	{
             a = k;
 	}
-
+    template<typename T>
+    explicit FieldMatrix( const T& t)
+    {
+      Assigner<Conversion<T,K>::exists>::assign(*this, t);
+    }
 	//===== random access interface to rows of the matrix
 
 	//! random access to the rows
@@ -912,6 +960,13 @@ namespace Dune {
 	  a[0] = k;
 	  return *this;	  
 	}
+
+    template<typename T>
+    FieldMatrix& operator= ( const T& t)
+    {
+      Assigner<Conversion<T,K>::exists>::assign(*this, t);
+      return *this;
+    }
 
 	//===== vector space arithmetic
 
@@ -1127,6 +1182,7 @@ namespace Dune {
 	private:
 	// the data, just a single row with a single scalar
     row_type a;
+    
   };
 
 namespace FMatrixHelp {
