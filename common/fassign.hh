@@ -6,6 +6,15 @@
 
 namespace Dune {
 
+   /**
+   * @file
+   * @brief Classes for implementing an assignment to FieldVector from a comma-separated list
+   */
+  /** @addtogroup Common
+   *
+   * @{
+   */
+
 /**
  * Emtpy namespace make this class and the object local to one object file
  */
