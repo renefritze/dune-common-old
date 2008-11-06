@@ -52,7 +52,6 @@ namespace Dune {
       T& operator[](int i){
         return values_[i];
       }
-
   
       const T& operator[](int i) const{
         return values_[i];
@@ -85,12 +84,12 @@ namespace Dune {
    * If template parameter C has a const qualifier we are a const iterator, otherwise we 
    * are a mutable iterator.
    */
-template<class C, class T, class D = std::ptrdiff_t>
+template<typename C, typename T, typename R = T&, typename D = std::ptrdiff_t>
 class GenericIterator : 
-public Dune::RandomAccessIteratorFacade<GenericIterator<C,T>,T, T&, D>
+public Dune::RandomAccessIteratorFacade<GenericIterator<C,T>,T, R, D>
 {
-  friend class GenericIterator<typename remove_const<C>::type, typename remove_const<T>::type >;
-  friend class GenericIterator<const typename remove_const<C>::type, const typename remove_const<T>::type >;
+  friend class GenericIterator<typename remove_const<C>::type, typename remove_const<T>::type, R, D>;
+  friend class GenericIterator<const typename remove_const<C>::type, const typename remove_const<T>::type, R, D>;
 
 public:
 
@@ -115,6 +114,11 @@ public:
    * @brief The type of the difference between two positions.
    */
   typedef D DifferenceType;
+    
+  /**
+   * @brief The type of the reference to the values accessed.
+   */
+  typedef R Reference;
   
   // Constructors needed by the base iterators.
   GenericIterator(): container_(0), position_(0)
@@ -138,7 +142,7 @@ public:
    * 1. if we are mutable this is the only valid copy constructor, as the arguments is a mutable iterator
    * 2. if we are a const iterator the argument is a mutable iterator => This is the needed conversion to initialize a const iterator form a mutable one.
    */
-  GenericIterator(const GenericIterator<typename remove_const<Container>::type, typename remove_const<T>::type,D >& other): container_(other.container_), position_(other.position_)
+  GenericIterator(const GenericIterator<typename remove_const<Container>::type, typename remove_const<T>::type,R,D>& other): container_(other.container_), position_(other.position_)
   {}
 
   /**
@@ -150,22 +154,22 @@ public:
    * 1. if we are mutable the arguments is a const iterator and therefore calling this method is mistake in the users code and results in a (probably not understandable compiler error
    * 2. If we are a const iterator this is the default copy constructor as the argument is a const iterator too.
    */
-  GenericIterator(const GenericIterator<const typename remove_const<Container>::type, const typename remove_const<T>::type, D >& other): container_(other.container_), position_(other.position_)
+  GenericIterator(const GenericIterator<const typename remove_const<Container>::type, const typename remove_const<T>::type,R,D>& other): container_(other.container_), position_(other.position_)
   {}
 
   // Methods needed by the forward iterator
-  bool equals(const GenericIterator<typename remove_const<Container>::type,typename remove_const<T>::type,D>& other) const
+  bool equals(const GenericIterator<typename remove_const<Container>::type,typename remove_const<T>::type,R,D>& other) const
   {
     return position_ == other.position_ && container_ == other.container_;
   }
 
   
-  bool equals(const GenericIterator<const typename remove_const<Container>::type,const typename remove_const<T>::type,D>& other) const
+  bool equals(const GenericIterator<const typename remove_const<Container>::type,const typename remove_const<T>::type,R,D>& other) const
   {
     return position_ == other.position_ && container_ == other.container_;
   }
   
-  T& dereference() const{
+  Reference dereference() const{
     return container_->operator[](position_);
   }
 
@@ -179,7 +183,7 @@ public:
   }
 
   // Additional function needed by RandomAccessIterator
-  T& elementAt(DifferenceType i)const{
+  Reference elementAt(DifferenceType i)const{
     return container_->operator[](position_+i);
   }
 
@@ -187,13 +191,13 @@ public:
     position_=position_+n;
   }
 
-  std::ptrdiff_t distanceTo(GenericIterator<const typename remove_const<Container>::type,const typename remove_const<T>::type,D> other)const
+  DifferenceType distanceTo(GenericIterator<const typename remove_const<Container>::type,const typename remove_const<T>::type,R,D> other)const
   {
     assert(other.container_==container_);
     return other.position_ - position_;
   }
 
-  std::ptrdiff_t distanceTo(GenericIterator<typename remove_const<Container>::type, typename remove_const<T>::type,D> other)const
+  DifferenceType distanceTo(GenericIterator<typename remove_const<Container>::type, typename remove_const<T>::type,R,D> other)const
   {
     assert(other.container_==container_);
     return other.position_ - position_;
