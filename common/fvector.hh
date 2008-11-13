@@ -400,6 +400,7 @@ representing a field and a compile-time given size.
       FieldVector& operator= (const FieldVector& other) {
           for (size_type i=0; i<SIZE; i++)
               p[i] = other[i];
+          return *this;
       }
       
 
