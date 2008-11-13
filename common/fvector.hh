@@ -577,6 +577,13 @@ representing a field and a compile-time given size.
             return true;
 	}
 
+        //! Binary vector incomparison
+        bool operator!= (const FieldVector& y) const
+        {
+            return !operator==(y);
+        }
+    
+
 	//! vector space axpy operation ( *this += a y )
 	FieldVector& axpy (const K& a, const FieldVector& y)
 	{

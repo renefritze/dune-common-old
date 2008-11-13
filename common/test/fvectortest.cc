@@ -10,8 +10,8 @@ class FieldVectorMainTest
 {
 protected:
   FieldVectorMainTest() {
-    FieldVector<ct,1> v(1);
-    FieldVector<ct,1> w(2);
+    FieldVector<ct,d> v(1);
+    FieldVector<ct,d> w(2);
     bool b;
     
     (w+v).two_norm();
@@ -20,6 +20,7 @@ protected:
 
     b = (w != v);
     b = (w == v);
+    w=v;
   }
 };
 
@@ -38,9 +39,11 @@ public:
     {
       ct a = 1;
       FieldVector<ct,1> v(2);
+      FieldVector<ct,1> w(2);
       bool b;
       
       v = a;
+      v = w = v;
       a = v;
 
       b = (v == a);
