@@ -39,6 +39,9 @@ namespace Dune {
             blockBitField(blockBitField),
             block_number(block_number)
         {};
+
+        //! hide assignment operator
+        BitSetVectorConstReference& operator=(const BitSetVectorConstReference & b);
         
     public:
 
@@ -250,6 +253,15 @@ namespace Dune {
             return (*this);
         }
 
+        //! Assignment from BitSetVectorReference
+        BitSetVectorReference& operator=(const BitSetVectorReference & b)
+        {
+            for(int i=0; i<block_size; ++i)
+                getBit(i) = b.getBit(i);
+            
+            return (*this);
+        }
+
         //! Bitwise and.
         BitSetVectorReference& operator&=(const BitSetVectorConstReference& x)
         {
@@ -339,6 +351,8 @@ namespace Dune {
         
     protected:
         BitSetVector& blockBitField;
+
+        using BitSetVectorConstReference::getBit;
 
         reference getBit(size_type i)
         {
