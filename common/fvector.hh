@@ -549,7 +549,7 @@ representing a field and a compile-time given size.
           return *this;
 	}
 
-	//! vector space multiplication with scalar 
+	//! vector space multiplication with scalar
 	FieldVector& operator*= (const K& k)
 	{
             for (size_type i=0; i<SIZE; i++)
@@ -599,7 +599,7 @@ representing a field and a compile-time given size.
 #ifndef DUNE_EXPRESSIONTEMPLATES
 	//===== Euclidean scalar product
 
-	//! scalar product
+	//! scalar product (x^T y)
     K operator* (const FieldVector& y) const
 	{
             K result = 0;
@@ -607,7 +607,6 @@ representing a field and a compile-time given size.
                 result += p[i]*y[i];
             return result;
 	}
-
 
 	//===== norms
 
@@ -944,7 +943,7 @@ representing a field and a compile-time given size.
 	  return *this;
 	}
         
-	//! scalar product
+	//! scalar product (x^T y)
 	inline K operator* ( const K & k ) const
 	{
 	  return p * k;
@@ -987,7 +986,6 @@ representing a field and a compile-time given size.
 	{
 	  return fvmeta_abs_real(p);
 	}
-
 
 	//===== sizes
 
