@@ -1,4 +1,7 @@
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include <iostream>
 #include <dune/common/fvector.hh>
 #include <dune/common/fassign.hh>

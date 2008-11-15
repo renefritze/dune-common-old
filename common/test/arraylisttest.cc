@@ -1,5 +1,7 @@
 // $Id$
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include<dune/common/arraylist.hh>
 #include<dune/common/test/iteratortest.hh>

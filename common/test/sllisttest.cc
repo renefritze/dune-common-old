@@ -1,4 +1,6 @@
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include<dune/common/sllist.hh>
 #include<dune/common/test/iteratortest.hh>

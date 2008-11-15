@@ -1,4 +1,6 @@
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 #define DUNE_ISTL_WITH_CHECKING
 #include "../fmatrix.hh"
 #include <iostream>

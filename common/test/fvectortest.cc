@@ -1,4 +1,6 @@
-#include <config.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <dune/common/fvector.hh>
 #include <dune/common/exceptions.hh>
 #include <iostream>

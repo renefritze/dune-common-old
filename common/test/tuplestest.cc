@@ -1,5 +1,7 @@
 // $Id$
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include<dune/common/tuples.hh>
 #include<dune/common/helpertemplates.hh>
