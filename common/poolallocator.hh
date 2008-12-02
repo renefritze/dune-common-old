@@ -242,7 +242,7 @@ namespace Dune
 	 * @brief The size in bytes to use for every memory chunk
 	 * allocated.
 	 */
-	size=s
+	size=s*sizeof(value_type)
       };
 
     /**
@@ -347,7 +347,7 @@ namespace Dune
     /**
      * @brief The underlying memory pool.
      */
-    static Pool<T,s> memoryPool_;
+    static Pool<T,PoolAllocator::size> memoryPool_;
   };
 
   // specialization for void
@@ -524,7 +524,7 @@ namespace Dune
   }
 
   template<class T, std::size_t s> 
-  Pool<T,s> PoolAllocator<T,s>::memoryPool_;
+  Pool<T,PoolAllocator<T,s>::size> PoolAllocator<T,s>::memoryPool_;
 
   template<class T, std::size_t s> 
   inline PoolAllocator<T,s>::PoolAllocator()
