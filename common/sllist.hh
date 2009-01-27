@@ -190,6 +190,11 @@ namespace Dune
      */
     inline int size() const;
     
+    bool operator==(const SLList& sl) const;
+    
+    
+    bool operator!=(const SLList& sl) const;
+    
   private:
     /** \todo Please doc me! */
     struct Element
@@ -608,6 +613,30 @@ namespace Dune
     clear();
   }
 
+  template<typename T, class A>
+  bool SLList<T,A>::operator==(const SLList& other) const
+  {
+    if(size!=other.size())
+      return false;
+    for(const_iterator iter=begin(), oiter=other.begin();
+	iter != end(); ++iter, ++oiter)
+      if(*iter!=*oiter)
+	return false;
+    return true;
+  }
+  
+  template<typename T, class A>
+  bool SLList<T,A>::operator!=(const SLList& other) const
+  {
+    if(size()==other.size()){
+      for(const_iterator iter=begin(), oiter=other.begin();
+	  iter != end(); ++iter, ++oiter)
+	if(*iter!=*oiter)
+	  return true;
+      return false;
+    }else
+      return true;
+  }
   template<typename T, class A>
   SLList<T,A>& SLList<T,A>::operator=(const SLList<T,A>& other)
   {
