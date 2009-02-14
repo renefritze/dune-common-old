@@ -282,6 +282,7 @@ namespace Dune {
 	void mv (const X& x, Y& y) const
 	{
 #ifdef DUNE_FMatrix_WITH_CHECKING
+      assert(&x != &y);
 	  if (x.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
 	  if (y.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
 #endif
@@ -460,41 +461,73 @@ namespace Dune {
 	void solve (V& x, const V& b) const;
 
 	/** \brief Compute inverse
-         *
-         * \exception FMatrixError if the matrix is singular
-         */
-      void invert();
+     *
+     * \exception FMatrixError if the matrix is singular
+     */
+    void invert();
 
-      //! calculates the determinant of this matrix 
-      K determinant () const;
+    //! calculates the determinant of this matrix 
+    K determinant () const;
 
 	//! Multiplies M from the left to this matrix
 	FieldMatrix& leftmultiply (const FieldMatrix<K,n,n>& M)
+ 	{
+      FieldMatrix<K,n,m> C(*this);
+      
+      for (size_type i=0; i<n; i++)
+        for (size_type j=0; j<m; j++) {
+          (*this)[i][j] = 0;
+          for (size_type k=0; k<n; k++)
+            (*this)[i][j] += M[i][k]*C[k][j];
+        }
+      
+ 	  return *this;
+ 	}
+ 
+	//! Multiplies M from the left to this matrix, this matrix is not modified
+    template<int l>
+	FieldMatrix<K,l,m> leftmultiplyany (const FieldMatrix<K,l,n>& M)
 	{
-            FieldMatrix<K,n,m> C(*this);
-            
-            for (size_type i=0; i<n; i++)
-                for (size_type j=0; j<m; j++) {
-                    (*this)[i][j] = 0;
-                    for (size_type k=0; k<n; k++)
-                        (*this)[i][j] += M[i][k]*C[k][j];
-                }
-
-	  return *this;
+      FieldMatrix<K,l,m> C;
+      
+      for (size_type i=0; i<l; i++) {
+        for (size_type j=0; j<m; j++) {
+          C[i][j] = 0;
+          for (size_type k=0; k<n; k++)
+            C[i][j] += M[i][k]*(*this)[k][j];
+        }
+      }
+	  return C;
 	}
 
 	//! Multiplies M from the right to this matrix
 	FieldMatrix& rightmultiply (const FieldMatrix<K,m,m>& M)
-	{
-            FieldMatrix<K,n,m> C(*this);
+ 	{
+      FieldMatrix<K,n,m> C(*this);
+      
+      for (size_type i=0; i<n; i++)
+        for (size_type j=0; j<m; j++) {
+          (*this)[i][j] = 0;
+          for (size_type k=0; k<m; k++)
+            (*this)[i][j] += C[i][k]*M[k][j];
+        }
+      return *this;
+ 	}
 
-            for (size_type i=0; i<n; i++)
-                for (size_type j=0; j<m; j++) {
-                    (*this)[i][j] = 0;
-                    for (size_type k=0; k<m; k++)
-                        (*this)[i][j] += C[i][k]*M[k][j];
-                }
-            return *this;
+	//! Multiplies M from the right to this matrix, this matrix is not modified
+    template<int l>
+	FieldMatrix<K,n,l> rightmultiplyany (const FieldMatrix<K,m,l>& M)
+	{
+      FieldMatrix<K,n,l> C;
+      
+      for (size_type i=0; i<n; i++) {
+        for (size_type j=0; j<l; j++) {
+          C[i][j] = 0;
+          for (size_type k=0; k<m; k++)
+            C[i][j] += (*this)[i][k]*M[k][j];
+        }
+      }
+      return C;
 	}
 
 
