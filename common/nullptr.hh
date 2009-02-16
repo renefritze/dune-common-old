@@ -10,7 +10,7 @@
    http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2431.pdf
  */
 const                        // this is a const object...
-class nullptr_t {            // of type nullptr_t
+class dune_nullptr_t {            // of type nullptr_t
 public:
   template<class T>          // convertible to any type
     operator T*() const      // of null non-member
@@ -21,6 +21,8 @@ public:
 private:
   void operator&() const;    // whose address can't be taken
 } nullptr = {};              // and whose name is nullptr
+
+typedef dune_nullptr_t nullptr_t;
 
 #endif // HAVE_NULLPTR
 
