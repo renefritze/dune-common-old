@@ -388,9 +388,6 @@ namespace Dune{
 
 #endif
 
-  // be backwards compatible
-#define Tuple tuple
-
 #ifdef HAVE_TUPLE
   using std::tuple_element;
 #elif defined HAVE_TR1_TUPLE
