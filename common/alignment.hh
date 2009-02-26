@@ -26,8 +26,8 @@ namespace Dune
   {
     
   /** 
-   * @brief Helper class to meassure alignment requirement. 
-   * @tparam T The type we want to meassure the alignment requirement for. 
+   * @brief Helper class to measure alignment requirement. 
+   * @tparam T The type we want to measure the alignment requirement for. 
    */
   template<class T>
   struct AlignmentStruct
@@ -38,8 +38,8 @@ namespace Dune
   };
 
   /** 
-   * @brief Helper class to meassure alignment requirement. 
-   * @tparam T The type we want to meassure the alignment requirement for. 
+   * @brief Helper class to measure alignment requirement. 
+   * @tparam T The type we want to measure the alignment requirement for. 
    */
   template<class T, std::size_t N>
   struct AlignmentHelper
@@ -97,7 +97,7 @@ namespace Dune
     
     enum
       {
-	/** @brief The alginment requirement. */
+	/** @brief The alignment requirement. */
 #ifdef HAVE_TYPE_TRAITS 
 	value = std::alignment_of<T>::value
 #elif HAVE_TR1_TYPETRAITS
