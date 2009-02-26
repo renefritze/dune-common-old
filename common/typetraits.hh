@@ -1,10 +1,10 @@
 #ifndef DUNE_TYPETRAITS_HH
 #define DUNE_TYPETRAITS_HH
 
-#ifdef HAVE_TR1_TYPE_TRAITS
-#include <tr1/type_traits>
-#elif defined HAVE_TYPE_TRAITS
+#if defined HAVE_TYPE_TRAITS
 #include <type_traits>
+#elif defined HAVE_TR1_TYPE_TRAITS
+#include <tr1/type_traits>
 #endif
 
 #include <dune/common/deprecated.hh>
@@ -155,12 +155,11 @@ namespace Dune
     typedef volatile typename ConstantVolatileTraits<T>::UnqualifiedType Type;
   };
 
-#ifdef HAVE_TR1_TYPE_TRAITS
-    using std::tr1::remove_const;
-#elif defined HAVE_TYPE_TRAITS
+#if defined HAVE_TYPE_TRAITS
   using std::remove_const;
+#elif defined HAVE_TR1_TYPE_TRAITS
+    using std::tr1::remove_const;
 #else
-
   /**
    * @brief Removes a const qualifier while preserving others.
    */
@@ -301,10 +300,10 @@ namespace Dune
     : public EnableIf<IsInteroperable<T1,T2>::value, Type>
   {};
   
-#ifdef HAVE_TR1_TYPE_TRAITS
-    using std::tr1::is_same;
-#elif defined HAVE_TYPE_TRAITS
+#if defined HAVE_TYPE_TRAITS
   using std::is_same;
+#elif defined HAVE_TR1_TYPE_TRAITS
+  using std::tr1::is_same;
 #else
   /**
    * @brief Compile time test for testing whether 
