@@ -22,7 +22,13 @@ namespace Dune
    * @author Markus Blatt
    */
 
-  /** \todo Please doc me! */
+  namespace
+  {
+    
+  /** 
+   * @brief Helper class to meassure alignment requirement. 
+   * @tparam T The type we want to meassure the alignment requirement for. 
+   */
   template<class T>
   struct AlignmentStruct
   {
@@ -31,7 +37,10 @@ namespace Dune
     void hack();
   };
 
-  /** \todo Please doc me! */
+  /** 
+   * @brief Helper class to meassure alignment requirement. 
+   * @tparam T The type we want to meassure the alignment requirement for. 
+   */
   template<class T, std::size_t N>
   struct AlignmentHelper
   {
@@ -48,6 +57,7 @@ namespace Dune
                                      static_cast<std::size_t>(b) ? \
                                      static_cast<std::size_t>(a) : \
                                      static_cast<std::size_t>(b))
+    /**  @brief does the actual calculations. */
   template <class T, std::size_t N>
   struct AlignmentTester
   {
@@ -64,6 +74,7 @@ namespace Dune
       };
   };
 
+    /**  @brief does the actual calculations. */
   template <class T>
   struct AlignmentTester<T, 0>
   {
@@ -72,9 +83,13 @@ namespace Dune
 	result = ALIGNMENT_MODULO(sizeof(AlignmentStruct<T>), sizeof(T))
       };
   };
-  
+  } //end anonymous namspace
+
   /**
-   * @brief Calculates the alignment properties of a type.
+   * @brief Calculates the alignment requirement of a type.
+   *
+   * This will be a safe value and not an optimal one.
+   * If TR1 is available it falls back to std::alignment_of.
    */
   template <class T>
   struct AlignmentOf
