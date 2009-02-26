@@ -18,7 +18,7 @@ namespace Dune
   /**
    * @file 
    * @brief This file implements a template class to determine alignment
-   * requirements at compile time.
+   * requirements of types at compile time.
    * @author Markus Blatt
    */
 
@@ -87,6 +87,8 @@ namespace Dune
 
   /**
    * @brief Calculates the alignment requirement of a type.
+   *
+   * @see http://en.wikipedia.org/wiki/Data_structure_alignment
    *
    * This will be a safe value and not an optimal one.
    * If TR1 is available it falls back to std::alignment_of.
