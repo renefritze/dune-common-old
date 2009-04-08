@@ -73,11 +73,11 @@ namespace Dune
         /** \brief Dereference as const pointer */
         inline const MemberType* operator->() const;
 
-      /**
-       * @brief Deallocates the references object if no other
-       * pointers reference it.
-       */
-      inline void deallocate();
+        /**
+         * @brief Deallocates the references object if no other
+         * pointers reference it.
+         */
+        inline void deallocate();
         int count() const;
     private:
         /** @brief The object we reference. */  
@@ -92,6 +92,8 @@ namespace Dune
             PointerRep() : count_(1), rep_(new MemberType) {}
             /** @brief Constructor from existing Pointer. */
             PointerRep(MemberType * p) : count_(1), rep_(p) {}
+            /** @brief Destructor, deletes MemberType* rep_. */
+            ~PointerRep() { delete rep_; }
         } *rep_;
     };
 
