@@ -1440,4 +1440,5 @@ struct FieldType< FieldMatrix<K,N,M> >
 
 } // end namespace
 
+#include "fmatrixev.hh"
 #endif
