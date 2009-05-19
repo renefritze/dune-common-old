@@ -71,6 +71,11 @@ extern void dsyev_(const char* jobz, const char* uplo, const long
 
 namespace Dune {
 
+/** 
+@addtogroup DenseMatVec
+@{
+ */
+
 namespace FMatrixHelp {
 
 /** \brief calculates the eigen values of a field matrix 
@@ -170,5 +175,8 @@ static void eigenValues(const FieldMatrix<K, dim, dim>& matrix,
 }
 
 } // end namespace FMatrixHelp 
+
+/** @} end documentation */
+
 } // end namespace Dune 
 #endif
