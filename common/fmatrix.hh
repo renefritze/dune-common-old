@@ -14,8 +14,8 @@
 namespace Dune {
    
     /** 
-		@addtogroup DenseMatVec
-		@{
+        @addtogroup DenseMatVec
+        @{
      */
 
 /*! \file
@@ -40,7 +40,7 @@ namespace Dune {
       template<class K, int n, int m, class T>
       static void assign(FieldMatrix<K,n,m>& fm, const T& t)
       {
-	istl_assign_to_fmatrix(fm, t);
+    istl_assign_to_fmatrix(fm, t);
       }
       
     };
@@ -52,7 +52,7 @@ namespace Dune {
       template<class K, int n, int m, class T>
       static void assign(FieldMatrix<K,n,m>& fm, const T& t)
       {
-	fm = static_cast<const K>(t);
+    fm = static_cast<const K>(t);
       }
     };  
   }
@@ -64,14 +64,14 @@ namespace Dune {
   template<class K>
   inline K fm_ck (const K& k)
   {
-	return k;
+    return k;
   }
 
   // conjugate komplex
   template<class K>
   inline std::complex<K> fm_ck (const std::complex<K>& c)
   {
-	return std::complex<K>(c.real(),-c.imag());
+    return std::complex<K>(c.real(),-c.imag());
   }
 
   /** 
@@ -91,47 +91,47 @@ namespace Dune {
 #endif
   {
   public:
-	// standard constructor and everything is sufficient ...
+    // standard constructor and everything is sufficient ...
 
-	//===== type definitions and constants
+    //===== type definitions and constants
 
-	//! export the type representing the field
-	typedef K field_type;
+    //! export the type representing the field
+    typedef K field_type;
 
-	//! export the type representing the components
-	typedef K block_type;
+    //! export the type representing the components
+    typedef K block_type;
     
     //! The type used for the index access and size operations.
     typedef std::size_t size_type;
     
-	//! We are at the leaf of the block recursion
-	enum {
-	  //! The number of block levels we contain. This is 1.
-	  blocklevel = 1
-	};
+    //! We are at the leaf of the block recursion
+    enum {
+      //! The number of block levels we contain. This is 1.
+      blocklevel = 1
+    };
 
-	//! Each row is implemented by a field vector
-	typedef FieldVector<K,m> row_type; 
+    //! Each row is implemented by a field vector
+    typedef FieldVector<K,m> row_type; 
 
-	//! export size
-	enum {
-	  //! The number of rows.
-	  rows = n, 
-	  //! The number of columns.
-	  cols = m
-	};
+    //! export size
+    enum {
+      //! The number of rows.
+      rows = n, 
+      //! The number of columns.
+      cols = m
+    };
 
-	//===== constructors
-	/** \brief Default constructor
+    //===== constructors
+    /** \brief Default constructor
          */
         FieldMatrix () {}
 
         /** \brief Constructor initializing the whole matrix with a scalar
           */
-	FieldMatrix (const K& k)
-	{
-	  for (size_type i=0; i<n; i++) p[i] = k;
-	}
+    FieldMatrix (const K& k)
+    {
+      for (size_type i=0; i<n; i++) p[i] = k;
+    }
 
     template<typename T>
     explicit FieldMatrix( const T& t)
@@ -139,101 +139,101 @@ namespace Dune {
       Assigner<Conversion<T,K>::exists>::assign(*this, t);
     }
     
-	//===== random access interface to rows of the matrix
+    //===== random access interface to rows of the matrix
 
-	//! random access to the rows
-	row_type& operator[] (size_type i)
-	{
+    //! random access to the rows
+    row_type& operator[] (size_type i)
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (i<0 || i>=n) DUNE_THROW(FMatrixError,"index out of range");
+      if (i<0 || i>=n) DUNE_THROW(FMatrixError,"index out of range");
 #endif
-	  return p[i];
-	}
+      return p[i];
+    }
 
-	//! same for read only access
-	const row_type& operator[] (size_type i) const
-	{
+    //! same for read only access
+    const row_type& operator[] (size_type i) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (i<0 || i>=n) DUNE_THROW(FMatrixError,"index out of range");
+      if (i<0 || i>=n) DUNE_THROW(FMatrixError,"index out of range");
 #endif
-	  return p[i];
-	}
+      return p[i];
+    }
 
 
-	//===== iterator interface to rows of the matrix
-	//! Iterator class for sequential access
+    //===== iterator interface to rows of the matrix
+    //! Iterator class for sequential access
     typedef FieldIterator<FieldMatrix<K,n,m>,row_type> Iterator;
-	//! typedef for stl compliant access
+    //! typedef for stl compliant access
     typedef Iterator iterator;
-	//! rename the iterators for easier access
-	typedef Iterator RowIterator;
-	//! rename the iterators for easier access
-	typedef typename row_type::Iterator ColIterator;
+    //! rename the iterators for easier access
+    typedef Iterator RowIterator;
+    //! rename the iterators for easier access
+    typedef typename row_type::Iterator ColIterator;
 
-	//! begin iterator
-	Iterator begin ()
-	{
-	  return Iterator(*this,0);
-	}
-	  
-	//! end iterator
-	Iterator end ()
-	{
-	  return Iterator(*this,n);
-	}
+    //! begin iterator
+    Iterator begin ()
+    {
+      return Iterator(*this,0);
+    }
+      
+    //! end iterator
+    Iterator end ()
+    {
+      return Iterator(*this,n);
+    }
 
-	//! begin iterator
-	Iterator rbegin ()
-	{
-	  return Iterator(*this,n-1);
-	}
-	  
-	//! end iterator
-	Iterator rend ()
-	{
-	  return Iterator(*this,-1);
-	}
+    //! begin iterator
+    Iterator rbegin ()
+    {
+      return Iterator(*this,n-1);
+    }
+      
+    //! end iterator
+    Iterator rend ()
+    {
+      return Iterator(*this,-1);
+    }
 
-	//! Iterator class for sequential access
+    //! Iterator class for sequential access
     typedef FieldIterator<const FieldMatrix<K,n,m>,const row_type> ConstIterator;
-	//! typedef for stl compliant access
+    //! typedef for stl compliant access
     typedef ConstIterator const_iterator;
-	//! rename the iterators for easier access
-	typedef ConstIterator ConstRowIterator;
-	//! rename the iterators for easier access
-	typedef typename row_type::ConstIterator ConstColIterator;
+    //! rename the iterators for easier access
+    typedef ConstIterator ConstRowIterator;
+    //! rename the iterators for easier access
+    typedef typename row_type::ConstIterator ConstColIterator;
 
-	//! begin iterator
-	ConstIterator begin () const
-	{
-	  return ConstIterator(*this,0);
-	}
-	  
-	//! end iterator
-	ConstIterator end () const
-	{
-	  return ConstIterator(*this,n);
-	}
+    //! begin iterator
+    ConstIterator begin () const
+    {
+      return ConstIterator(*this,0);
+    }
+      
+    //! end iterator
+    ConstIterator end () const
+    {
+      return ConstIterator(*this,n);
+    }
 
-	//! begin iterator
-	ConstIterator rbegin () const
-	{
-	  return ConstIterator(*this,n-1);
-	}
-	  
-	//! end iterator
-	ConstIterator rend () const
-	{
-	  return ConstIterator(*this,-1);
-	}
+    //! begin iterator
+    ConstIterator rbegin () const
+    {
+      return ConstIterator(*this,n-1);
+    }
+      
+    //! end iterator
+    ConstIterator rend () const
+    {
+      return ConstIterator(*this,-1);
+    }
 
-	//===== assignment from scalar
-	FieldMatrix& operator= (const K& k)
-	{
+    //===== assignment from scalar
+    FieldMatrix& operator= (const K& k)
+    {
             for (size_type i=0; i<n; i++)
                 p[i] = k;
-	  return *this;	  
-	}
+      return *this;   
+    }
 
     template<typename T>
     FieldMatrix& operator= ( const T& t)
@@ -241,58 +241,58 @@ namespace Dune {
       Assigner<Conversion<T,K>::exists>::assign(*this, t);
       return *this;
     }
-	//===== vector space arithmetic
+    //===== vector space arithmetic
 
-	//! vector space addition
-	FieldMatrix& operator+= (const FieldMatrix& y)
-	{
+    //! vector space addition
+    FieldMatrix& operator+= (const FieldMatrix& y)
+    {
             for (size_type i=0; i<n; i++)
                 p[i] += y.p[i];
-	  return *this;
-	}
+      return *this;
+    }
 
-	//! vector space subtraction
-	FieldMatrix& operator-= (const FieldMatrix& y)
-	{
+    //! vector space subtraction
+    FieldMatrix& operator-= (const FieldMatrix& y)
+    {
             for (size_type i=0; i<n; i++)
                 p[i] -= y.p[i];
-	  return *this;
-	}
+      return *this;
+    }
 
-	//! vector space multiplication with scalar 
-	FieldMatrix& operator*= (const K& k)
-	{
+    //! vector space multiplication with scalar 
+    FieldMatrix& operator*= (const K& k)
+    {
             for (size_type i=0; i<n; i++)
                 p[i] *= k;
-	  return *this;
-	}
+      return *this;
+    }
 
-	//! vector space division by scalar
-	FieldMatrix& operator/= (const K& k)
-	{
+    //! vector space division by scalar
+    FieldMatrix& operator/= (const K& k)
+    {
             for (size_type i=0; i<n; i++)
                 p[i] /= k;
-	  return *this;
-	}
+      return *this;
+    }
 
-	//! vector space axpy operation (*this += k y)
-	FieldMatrix &axpy ( const K &k, const FieldMatrix &y )
-	{
+    //! vector space axpy operation (*this += k y)
+    FieldMatrix &axpy ( const K &k, const FieldMatrix &y )
+    {
           for( size_type i = 0; i < n; ++i )
             p[ i ].axpy( k, y[ i ] );
-	  return *this;
-	}
+      return *this;
+    }
 
-	//===== linear maps
+    //===== linear maps
    
-	//! y = A x
-	template<class X, class Y>
-	void mv (const X& x, Y& y) const
-	{
+    //! y = A x
+    template<class X, class Y>
+    void mv (const X& x, Y& y) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
       assert(&x != &y);
-	  if (x.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
-	  if (y.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
+      if (x.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
+      if (y.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
 #endif
     for (size_type i=0; i<n; ++i)
     {
@@ -300,175 +300,175 @@ namespace Dune {
       for (size_type j=0; j<m; j++)
         y[i] += (*this)[i][j] * x[j];
     }
-	}
+    }
 
-	//! y += A x
-	template<class X, class Y>
-	void umv (const X& x, Y& y) const
-	{
+    //! y += A x
+    template<class X, class Y>
+    void umv (const X& x, Y& y) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (x.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
-	  if (y.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
+      if (x.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
+      if (y.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
 #endif
           for (size_type i=0; i<n; i++)
               for (size_type j=0; j<m; j++)
                   y[i] += (*this)[i][j] * x[j];
-	}
+    }
 
-	//! y += A^T x
-	template<class X, class Y>
-	void umtv (const X& x, Y& y) const
-	{
+    //! y += A^T x
+    template<class X, class Y>
+    void umtv (const X& x, Y& y) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (x.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
-	  if (y.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
+      if (x.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
+      if (y.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
 #endif
-	  
-	  for (size_type i=0; i<n; i++)
-		  for (size_type j=0; j<m; j++)
-			y[j] += p[i][j]*x[i];
-	}
+      
+      for (size_type i=0; i<n; i++)
+          for (size_type j=0; j<m; j++)
+            y[j] += p[i][j]*x[i];
+    }
 
-	//! y += A^H x
-	template<class X, class Y>
-	void umhv (const X& x, Y& y) const
-	{
+    //! y += A^H x
+    template<class X, class Y>
+    void umhv (const X& x, Y& y) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (x.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
-	  if (y.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
+      if (x.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
+      if (y.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
 #endif
-	  
-	  for (size_type i=0; i<n; i++)
-		  for (size_type j=0; j<m; j++)
-			y[j] += fm_ck(p[i][j])*x[i];
-	}
+      
+      for (size_type i=0; i<n; i++)
+          for (size_type j=0; j<m; j++)
+            y[j] += fm_ck(p[i][j])*x[i];
+    }
 
-	//! y -= A x
-	template<class X, class Y>
-	void mmv (const X& x, Y& y) const
-	{
+    //! y -= A x
+    template<class X, class Y>
+    void mmv (const X& x, Y& y) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (x.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
-	  if (y.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
+      if (x.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
+      if (y.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
 #endif
           for (size_type i=0; i<n; i++)
               for (size_type j=0; j<m; j++)
                   y[i] -= (*this)[i][j] * x[j];
-	}
+    }
 
-	//! y -= A^T x
-	template<class X, class Y>
-	void mmtv (const X& x, Y& y) const
-	{
+    //! y -= A^T x
+    template<class X, class Y>
+    void mmtv (const X& x, Y& y) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (x.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
-	  if (y.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
+      if (x.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
+      if (y.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
 #endif
-	  
-	  for (size_type i=0; i<n; i++)
-		  for (size_type j=0; j<m; j++)
-			y[j] -= p[i][j]*x[i];
-	}
+      
+      for (size_type i=0; i<n; i++)
+          for (size_type j=0; j<m; j++)
+            y[j] -= p[i][j]*x[i];
+    }
 
-	//! y -= A^H x
-	template<class X, class Y>
-	void mmhv (const X& x, Y& y) const
-	{
+    //! y -= A^H x
+    template<class X, class Y>
+    void mmhv (const X& x, Y& y) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (x.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
-	  if (y.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
+      if (x.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
+      if (y.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
 #endif
-	  
-	  for (size_type i=0; i<n; i++)
-		  for (size_type j=0; j<m; j++)
-			y[j] -= fm_ck(p[i][j])*x[i];
-	}
+      
+      for (size_type i=0; i<n; i++)
+          for (size_type j=0; j<m; j++)
+            y[j] -= fm_ck(p[i][j])*x[i];
+    }
 
-	//! y += alpha A x
-	template<class X, class Y>
-	void usmv (const K& alpha, const X& x, Y& y) const
-	{
+    //! y += alpha A x
+    template<class X, class Y>
+    void usmv (const K& alpha, const X& x, Y& y) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (x.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
-	  if (y.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
+      if (x.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
+      if (y.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
 #endif
           for (size_type i=0; i<n; i++)
               for (size_type j=0; j<m; j++)
                   y[i] += alpha * (*this)[i][j] * x[j];
-	}
+    }
 
-	//! y += alpha A^T x
-	template<class X, class Y>
-	void usmtv (const K& alpha, const X& x, Y& y) const
-	{
+    //! y += alpha A^T x
+    template<class X, class Y>
+    void usmtv (const K& alpha, const X& x, Y& y) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (x.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
-	  if (y.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
+      if (x.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
+      if (y.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
 #endif
-	  
-	  for (size_type i=0; i<n; i++)
-		  for (size_type j=0; j<m; j++)
-			y[j] += alpha*p[i][j]*x[i];
-	}
+      
+      for (size_type i=0; i<n; i++)
+          for (size_type j=0; j<m; j++)
+            y[j] += alpha*p[i][j]*x[i];
+    }
 
-	//! y += alpha A^H x
-	template<class X, class Y>
-	void usmhv (const K& alpha, const X& x, Y& y) const
-	{
+    //! y += alpha A^H x
+    template<class X, class Y>
+    void usmhv (const K& alpha, const X& x, Y& y) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (x.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
-	  if (y.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
+      if (x.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
+      if (y.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
 #endif
-	  
-	  for (size_type i=0; i<n; i++)
-		  for (size_type j=0; j<m; j++)
-			y[j] += alpha*fm_ck(p[i][j])*x[i];
-	}
+      
+      for (size_type i=0; i<n; i++)
+          for (size_type j=0; j<m; j++)
+            y[j] += alpha*fm_ck(p[i][j])*x[i];
+    }
 
-	//===== norms
+    //===== norms
 
-	//! frobenius norm: sqrt(sum over squared values of entries)
+    //! frobenius norm: sqrt(sum over squared values of entries)
     double frobenius_norm () const
-	{
-	  double sum=0;
-	  for (size_type i=0; i<n; ++i) sum += p[i].two_norm2();
-	  return sqrt(sum);
-	}
+    {
+      double sum=0;
+      for (size_type i=0; i<n; ++i) sum += p[i].two_norm2();
+      return sqrt(sum);
+    }
 
-	//! square of frobenius norm, need for block recursion
+    //! square of frobenius norm, need for block recursion
     double frobenius_norm2 () const
-	{
-	  double sum=0;
-	  for (size_type i=0; i<n; ++i) sum += p[i].two_norm2();
-	  return sum;
-	}
+    {
+      double sum=0;
+      for (size_type i=0; i<n; ++i) sum += p[i].two_norm2();
+      return sum;
+    }
 
-	//! infinity norm (row sum norm, how to generalize for blocks?)
+    //! infinity norm (row sum norm, how to generalize for blocks?)
     double infinity_norm () const
-	{
-	  double max=0;
-	  for (size_type i=0; i<n; ++i) max = std::max(max,p[i].one_norm());
-	  return max;
-	}
+    {
+      double max=0;
+      for (size_type i=0; i<n; ++i) max = std::max(max,p[i].one_norm());
+      return max;
+    }
 
-	//! simplified infinity norm (uses Manhattan norm for complex values)
-	double infinity_norm_real () const
-	{
-	  double max=0;
-	  for (size_type i=0; i<n; ++i) max = std::max(max,p[i].one_norm_real());
-	  return max;
-	}
+    //! simplified infinity norm (uses Manhattan norm for complex values)
+    double infinity_norm_real () const
+    {
+      double max=0;
+      for (size_type i=0; i<n; ++i) max = std::max(max,p[i].one_norm_real());
+      return max;
+    }
 
-	//===== solve
+    //===== solve
 
-	/** \brief Solve system A x = b
+    /** \brief Solve system A x = b
          *
          * \exception FMatrixError if the matrix is singular
          */
-	template<class V>
-	void solve (V& x, const V& b) const;
+    template<class V>
+    void solve (V& x, const V& b) const;
 
-	/** \brief Compute inverse
+    /** \brief Compute inverse
      *
      * \exception FMatrixError if the matrix is singular
      */
@@ -477,9 +477,9 @@ namespace Dune {
     //! calculates the determinant of this matrix 
     K determinant () const;
 
-	//! Multiplies M from the left to this matrix
-	FieldMatrix& leftmultiply (const FieldMatrix<K,n,n>& M)
- 	{
+    //! Multiplies M from the left to this matrix
+    FieldMatrix& leftmultiply (const FieldMatrix<K,n,n>& M)
+    {
       FieldMatrix<K,n,m> C(*this);
       
       for (size_type i=0; i<n; i++)
@@ -489,13 +489,13 @@ namespace Dune {
             (*this)[i][j] += M[i][k]*C[k][j];
         }
       
- 	  return *this;
- 	}
+      return *this;
+    }
  
-	//! Multiplies M from the left to this matrix, this matrix is not modified
+    //! Multiplies M from the left to this matrix, this matrix is not modified
     template<int l>
-	FieldMatrix<K,l,m> leftmultiplyany (const FieldMatrix<K,l,n>& M)
-	{
+    FieldMatrix<K,l,m> leftmultiplyany (const FieldMatrix<K,l,n>& M)
+    {
       FieldMatrix<K,l,m> C;
       
       for (size_type i=0; i<l; i++) {
@@ -505,12 +505,12 @@ namespace Dune {
             C[i][j] += M[i][k]*(*this)[k][j];
         }
       }
-	  return C;
-	}
+      return C;
+    }
 
-	//! Multiplies M from the right to this matrix
-	FieldMatrix& rightmultiply (const FieldMatrix<K,m,m>& M)
- 	{
+    //! Multiplies M from the right to this matrix
+    FieldMatrix& rightmultiply (const FieldMatrix<K,m,m>& M)
+    {
       FieldMatrix<K,n,m> C(*this);
       
       for (size_type i=0; i<n; i++)
@@ -520,12 +520,12 @@ namespace Dune {
             (*this)[i][j] += C[i][k]*M[k][j];
         }
       return *this;
- 	}
+    }
 
-	//! Multiplies M from the right to this matrix, this matrix is not modified
+    //! Multiplies M from the right to this matrix, this matrix is not modified
     template<int l>
-	FieldMatrix<K,n,l> rightmultiplyany (const FieldMatrix<K,m,l>& M)
-	{
+    FieldMatrix<K,n,l> rightmultiplyany (const FieldMatrix<K,m,l>& M)
+    {
       FieldMatrix<K,n,l> C;
       
       for (size_type i=0; i<n; i++) {
@@ -536,36 +536,36 @@ namespace Dune {
         }
       }
       return C;
-	}
+    }
 
 
-	//===== sizes
+    //===== sizes
 
-	//! number of blocks in row direction
-	size_type N () const
-	{
-	  return n;
-	}
+    //! number of blocks in row direction
+    size_type N () const
+    {
+      return n;
+    }
 
-	//! number of blocks in column direction
-	size_type M () const
-	{
-	  return m;
-	}
+    //! number of blocks in column direction
+    size_type M () const
+    {
+      return m;
+    }
 
-	//===== query
-	
-	//! return true when (i,j) is in pattern
-	bool exists (size_type i, size_type j) const
-	{
+    //===== query
+    
+    //! return true when (i,j) is in pattern
+    bool exists (size_type i, size_type j) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (i<0 || i>=n) DUNE_THROW(FMatrixError,"row index out of range");
-	  if (j<0 || j>=m) DUNE_THROW(FMatrixError,"column index out of range");
+      if (i<0 || i>=n) DUNE_THROW(FMatrixError,"row index out of range");
+      if (j<0 || j>=m) DUNE_THROW(FMatrixError,"column index out of range");
 #endif
-	  return true;
-	}
+      return true;
+    }
 
-	//===== conversion operator
+    //===== conversion operator
 
       /** \brief Sends the matrix to an output stream */
       friend std::ostream& operator<< (std::ostream& s, const FieldMatrix<K,n,m>& a)
@@ -576,8 +576,8 @@ namespace Dune {
       }
 
   private:
-	// the data, very simply a built in array with row-wise ordering
-	row_type p[(n > 0) ? n : 1]; 
+    // the data, very simply a built in array with row-wise ordering
+    row_type p[(n > 0) ? n : 1]; 
 
     struct ElimPivot
     {
@@ -652,39 +652,39 @@ namespace Dune {
     // LU decomposition of A in A
     for (int i=0; i<n; i++)  // loop over all rows
       {
-	double pivmax=fvmeta_absreal(A[i][i]);
+    double pivmax=fvmeta_absreal(A[i][i]);
       
-	// pivoting ?
-	if (pivmax<pivthres)
-	  {
-	    // compute maximum of column
-	    int imax=i; double abs;
-	    for (int k=i+1; k<n; k++)
-	      if ((abs=fvmeta_absreal(A[k][i]))>pivmax)
-		{
-		  pivmax = abs; imax = k;
-		}
-	    // swap rows
-	    if (imax!=i){
-	      for (int j=0; j<n; j++)
-		std::swap(A[i][j],A[imax][j]);
-	      func.swap(i, imax); // swap the pivot or rhs
-	    }
-	  }
-	
-	// singular ?
-	if (pivmax<singthres)
-	  DUNE_THROW(FMatrixError,"matrix is singular");		  
-	
-	// eliminate
-	for (int k=i+1; k<n; k++)
-	  {
-	    K factor = A[k][i]/A[i][i];
-	    A[k][i] = factor;
-	    for (int j=i+1; j<n; j++)
-	      A[k][j] -= factor*A[i][j];
-	    func(factor, k, i);
-	  }
+    // pivoting ?
+    if (pivmax<pivthres)
+      {
+        // compute maximum of column
+        int imax=i; double abs;
+        for (int k=i+1; k<n; k++)
+          if ((abs=fvmeta_absreal(A[k][i]))>pivmax)
+        {
+          pivmax = abs; imax = k;
+        }
+        // swap rows
+        if (imax!=i){
+          for (int j=0; j<n; j++)
+        std::swap(A[i][j],A[imax][j]);
+          func.swap(i, imax); // swap the pivot or rhs
+        }
+      }
+    
+    // singular ?
+    if (pivmax<singthres)
+      DUNE_THROW(FMatrixError,"matrix is singular");          
+    
+    // eliminate
+    for (int k=i+1; k<n; k++)
+      {
+        K factor = A[k][i]/A[i][i];
+        A[k][i] = factor;
+        for (int j=i+1; j<n; j++)
+          A[k][j] -= factor*A[i][j];
+        func(factor, k, i);
+      }
       }
   }
 
@@ -735,20 +735,20 @@ namespace Dune {
 
         } else {
 
-	  V& rhs = x; // use x to store rhs
-	  rhs = b; // copy data
-	  Elim<V> elim(rhs);
-	  FieldMatrix<K,n,n> A(*this);
-	  
-	  luDecomposition(A, elim);
-	  
-	  // backsolve
-	  for(int i=n-1; i>=0; i--){
-	    for (int j=i+1; j<n; j++)
-	      rhs[i] -= A[i][j]*x[j];
-	    x[i] = rhs[i]/A[i][i];
-	  }
-	}	
+      V& rhs = x; // use x to store rhs
+      rhs = b; // copy data
+      Elim<V> elim(rhs);
+      FieldMatrix<K,n,n> A(*this);
+      
+      luDecomposition(A, elim);
+      
+      // backsolve
+      for(int i=n-1; i>=0; i--){
+        for (int j=i+1; j<n; j++)
+          rhs[i] -= A[i][j]*x[j];
+        x[i] = rhs[i]/A[i][i];
+      }
+    }   
     }
 
     template <class K, int n, int m>
@@ -766,7 +766,7 @@ namespace Dune {
             K detinv = p[0][0]*p[1][1]-p[0][1]*p[1][0];
 #ifdef DUNE_FMatrix_WITH_CHECKING
             if (fvmeta_absreal(detinv)<FMatrixPrecision<>::absolute_limit())
-                DUNE_THROW(FMatrixError,"matrix is singular");		  
+                DUNE_THROW(FMatrixError,"matrix is singular");        
 #endif
             detinv = 1/detinv;
 
@@ -779,40 +779,40 @@ namespace Dune {
         } else {
 
             FieldMatrix<K,n,n> A(*this);
-	    size_type pivot[n];
-	    luDecomposition(A, ElimPivot(pivot));
-	    FieldMatrix<K,n,m>& L=A;
-	    FieldMatrix<K,n,m>& U=A;
-	    
-	    // initialize inverse
-	    *this=K();
-	    
-	    for(size_type i=0; i<n; ++i)
-	      p[i][i]=1;
-	    
-	    // L Y = I; multiple right hand sides
-	    for (size_type i=0; i<n; i++){
-	      for (size_type j=0; j<i; j++)
-		for (size_type k=0; k<n; k++)
-		  p[i][k] -= L[i][j]*p[j][k];
-	    }
+        size_type pivot[n];
+        luDecomposition(A, ElimPivot(pivot));
+        FieldMatrix<K,n,m>& L=A;
+        FieldMatrix<K,n,m>& U=A;
+        
+        // initialize inverse
+        *this=K();
+        
+        for(size_type i=0; i<n; ++i)
+          p[i][i]=1;
+        
+        // L Y = I; multiple right hand sides
+        for (size_type i=0; i<n; i++){
+          for (size_type j=0; j<i; j++)
+        for (size_type k=0; k<n; k++)
+          p[i][k] -= L[i][j]*p[j][k];
+        }
   
-	    // U A^{-1} = Y
-	    for (size_type i=n; i>0;){
-	      --i;
-	      for (size_type k=0; k<n; k++){
-		for (size_type j=i+1; j<n; j++)
-		  p[i][k] -= U[i][j]*p[j][k];
-		p[i][k] /= U[i][i];
-	      }
-	    }
+        // U A^{-1} = Y
+        for (size_type i=n; i>0;){
+          --i;
+          for (size_type k=0; k<n; k++){
+        for (size_type j=i+1; j<n; j++)
+          p[i][k] -= U[i][j]*p[j][k];
+        p[i][k] /= U[i][i];
+          }
+        }
 
-	    for(size_type i=n; i>0; ){
-	      --i;
-	      if(i!=pivot[i])
-		for(size_type j=0; j<n; ++j)
-		  std::swap(p[j][pivot[i]], p[j][i]);
-	    }
+        for(size_type i=n; i>0; ){
+          --i;
+          if(i!=pivot[i])
+        for(size_type j=0; j<n; ++j)
+          std::swap(p[j][pivot[i]], p[j][i]);
+        }
         }
     }
 
@@ -856,151 +856,151 @@ namespace Dune {
   class FieldMatrix<K,1,1>
   {
   public:
-	// standard constructor and everything is sufficient ...
+    // standard constructor and everything is sufficient ...
 
-	//===== type definitions and constants
+    //===== type definitions and constants
 
-	//! export the type representing the field
-	typedef K field_type;
+    //! export the type representing the field
+    typedef K field_type;
 
-	//! export the type representing the components
-	typedef K block_type;
+    //! export the type representing the components
+    typedef K block_type;
 
     //! The type used for index access and size operations
     typedef std::size_t size_type;
     
-	//! We are at the leaf of the block recursion
-	enum {
-	  //! The number of block levels we contain.
-	  //! This is always one for this type.
-	  blocklevel = 1
-	};
+    //! We are at the leaf of the block recursion
+    enum {
+      //! The number of block levels we contain.
+      //! This is always one for this type.
+      blocklevel = 1
+    };
 
-	//! Each row is implemented by a field vector
-	typedef FieldVector<K,1> row_type; 
+    //! Each row is implemented by a field vector
+    typedef FieldVector<K,1> row_type; 
 
-	//! export size
-	enum {
-	  //! \brief The number of rows.
-	  //! This is always one for this type.
-	  rows = 1,
+    //! export size
+    enum {
+      //! \brief The number of rows.
+      //! This is always one for this type.
+      rows = 1,
       n = 1,
-	  //! \brief The number of columns.
-	  //! This is always one for this type.
-	  cols = 1,
+      //! \brief The number of columns.
+      //! This is always one for this type.
+      cols = 1,
       m = 1
-	};
+    };
 
-	//===== constructors
-	/** \brief Default constructor
+    //===== constructors
+    /** \brief Default constructor
          */
         FieldMatrix () {}
 
         /** \brief Constructor initializing the whole matrix with a scalar
           */
-	FieldMatrix (const K& k)
-	{
+    FieldMatrix (const K& k)
+    {
             a = k;
-	}
+    }
     template<typename T>
     explicit FieldMatrix( const T& t)
     {
       Assigner<Conversion<T,K>::exists>::assign(*this, t);
     }
-	//===== random access interface to rows of the matrix
+    //===== random access interface to rows of the matrix
 
-	//! random access to the rows
-	row_type& operator[] (size_type i)
-	{
+    //! random access to the rows
+    row_type& operator[] (size_type i)
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (i<0 || i>=n) DUNE_THROW(FMatrixError,"index out of range");
+      if (i<0 || i>=n) DUNE_THROW(FMatrixError,"index out of range");
 #endif
-	  return a;
-	}
+      return a;
+    }
 
-	//! same for read only access
-	const row_type& operator[] (size_type i) const
-	{
+    //! same for read only access
+    const row_type& operator[] (size_type i) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	  if (i<0 || i>=n) DUNE_THROW(FMatrixError,"index out of range");
+      if (i<0 || i>=n) DUNE_THROW(FMatrixError,"index out of range");
 #endif
-	  return a;
-	}
+      return a;
+    }
 
-	//===== iterator interface to rows of the matrix
-	//! Iterator class for sequential access
+    //===== iterator interface to rows of the matrix
+    //! Iterator class for sequential access
     typedef FieldIterator<FieldMatrix<K,n,m>,row_type> Iterator;
-	//! typedef for stl compliant access
+    //! typedef for stl compliant access
     typedef Iterator iterator;
-	//! rename the iterators for easier access
-	typedef Iterator RowIterator;
-	//! rename the iterators for easier access
-	typedef typename row_type::Iterator ColIterator;
+    //! rename the iterators for easier access
+    typedef Iterator RowIterator;
+    //! rename the iterators for easier access
+    typedef typename row_type::Iterator ColIterator;
 
-	//! begin iterator
-	Iterator begin ()
-	{
-	  return Iterator(*this,0);
-	}
-	  
-	//! end iterator
-	Iterator end ()
-	{
-	  return Iterator(*this,n);
-	}
+    //! begin iterator
+    Iterator begin ()
+    {
+      return Iterator(*this,0);
+    }
+      
+    //! end iterator
+    Iterator end ()
+    {
+      return Iterator(*this,n);
+    }
 
-	//! begin iterator
-	Iterator rbegin ()
-	{
-	  return Iterator(*this,n-1);
-	}
-	  
-	//! end iterator
-	Iterator rend ()
-	{
-	  return Iterator(*this,-1);
-	}
+    //! begin iterator
+    Iterator rbegin ()
+    {
+      return Iterator(*this,n-1);
+    }
+      
+    //! end iterator
+    Iterator rend ()
+    {
+      return Iterator(*this,-1);
+    }
 
-	//! Iterator class for sequential access
+    //! Iterator class for sequential access
     typedef FieldIterator<const FieldMatrix<K,n,m>,const row_type> ConstIterator;
-	//! typedef for stl compliant access
+    //! typedef for stl compliant access
     typedef ConstIterator const_iterator;
-	//! rename the iterators for easier access
-	typedef ConstIterator ConstRowIterator;
-	//! rename the iterators for easier access
-	typedef typename row_type::ConstIterator ConstColIterator;
+    //! rename the iterators for easier access
+    typedef ConstIterator ConstRowIterator;
+    //! rename the iterators for easier access
+    typedef typename row_type::ConstIterator ConstColIterator;
 
-	//! begin iterator
-	ConstIterator begin () const
-	{
-	  return ConstIterator(*this,0);
-	}
-	  
-	//! end iterator
-	ConstIterator end () const
-	{
-	  return ConstIterator(*this,n);
-	}
+    //! begin iterator
+    ConstIterator begin () const
+    {
+      return ConstIterator(*this,0);
+    }
+      
+    //! end iterator
+    ConstIterator end () const
+    {
+      return ConstIterator(*this,n);
+    }
 
-	//! begin iterator
-	ConstIterator rbegin () const
-	{
-	  return ConstIterator(*this,n-1);
-	}
-	  
-	//! end iterator
-	ConstIterator rend () const
-	{
-	  return ConstIterator(*this,-1);
-	}
+    //! begin iterator
+    ConstIterator rbegin () const
+    {
+      return ConstIterator(*this,n-1);
+    }
+      
+    //! end iterator
+    ConstIterator rend () const
+    {
+      return ConstIterator(*this,-1);
+    }
 
-	//===== assignment from scalar
+    //===== assignment from scalar
 
-	FieldMatrix& operator= (const K& k)
-	{
-	  a[0] = k;
-	  return *this;	  
-	}
+    FieldMatrix& operator= (const K& k)
+    {
+      a[0] = k;
+      return *this;   
+    }
 
     template<typename T>
     FieldMatrix& operator= ( const T& t)
@@ -1009,152 +1009,152 @@ namespace Dune {
       return *this;
     }
 
-	//===== vector space arithmetic
+    //===== vector space arithmetic
 
-	//! vector space addition
-	FieldMatrix& operator+= (const K& y)
-	{
-	  a[0] += y;
-	  return *this;
-	}
+    //! vector space addition
+    FieldMatrix& operator+= (const K& y)
+    {
+      a[0] += y;
+      return *this;
+    }
 
-	//! vector space subtraction
-	FieldMatrix& operator-= (const K& y)
-	{
-	  a[0] -= y;
-	  return *this;
-	}
+    //! vector space subtraction
+    FieldMatrix& operator-= (const K& y)
+    {
+      a[0] -= y;
+      return *this;
+    }
 
-	//! vector space multiplication with scalar 
-	FieldMatrix& operator*= (const K& k)
-	{
-	  a[0] *= k;
-	  return *this;
-	}
+    //! vector space multiplication with scalar 
+    FieldMatrix& operator*= (const K& k)
+    {
+      a[0] *= k;
+      return *this;
+    }
 
-	//! vector space division by scalar
-	FieldMatrix& operator/= (const K& k)
-	{
-	  a[0] /= k;
-	  return *this;
-	}
+    //! vector space division by scalar
+    FieldMatrix& operator/= (const K& k)
+    {
+      a[0] /= k;
+      return *this;
+    }
 
-	//! vector space axpy operation (*this += a y)
-	FieldMatrix &axpy ( const K &k, const FieldMatrix &y )
-	{
+    //! vector space axpy operation (*this += a y)
+    FieldMatrix &axpy ( const K &k, const FieldMatrix &y )
+    {
           a[ 0 ] += k * y.a[ 0 ];
-	  return *this;
-	}
+      return *this;
+    }
 
-	//===== linear maps
+    //===== linear maps
    
-	//! y = A x
-	void mv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
-	{
-	  y.p = a[0] * x.p;
-	}
+    //! y = A x
+    void mv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
+    {
+      y.p = a[0] * x.p;
+    }
 
-	//! y += A x
-	void umv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
-	{
-	  y.p += a[0] * x.p;
-	}
+    //! y += A x
+    void umv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
+    {
+      y.p += a[0] * x.p;
+    }
 
-	//! y += A^T x
-	void umtv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
-	{
-	  y.p += a[0] * x.p;
-	}
+    //! y += A^T x
+    void umtv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
+    {
+      y.p += a[0] * x.p;
+    }
 
-	//! y += A^H x
-	void umhv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
-	{
-	  y.p += fm_ck(a[0]) * x.p;
-	}
+    //! y += A^H x
+    void umhv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
+    {
+      y.p += fm_ck(a[0]) * x.p;
+    }
 
-	//! y -= A x
-	void mmv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
-	{
-	  y.p -= a[0] * x.p;
-	}
+    //! y -= A x
+    void mmv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
+    {
+      y.p -= a[0] * x.p;
+    }
 
-	//! y -= A^T x
-	void mmtv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
-	{
-	  y.p -= a[0] * x.p;
-	}
+    //! y -= A^T x
+    void mmtv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
+    {
+      y.p -= a[0] * x.p;
+    }
 
-	//! y -= A^H x
-	void mmhv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
-	{
-	  y.p -= fm_ck(a[0]) * x.p;
-	}
+    //! y -= A^H x
+    void mmhv (const FieldVector<K,1>& x, FieldVector<K,1>& y) const
+    {
+      y.p -= fm_ck(a[0]) * x.p;
+    }
 
-	//! y += alpha A x
-	void usmv (const K& alpha, const FieldVector<K,1>& x, FieldVector<K,1>& y) const
-	{
-	  y.p += alpha * a[0] * x.p;
-	}
+    //! y += alpha A x
+    void usmv (const K& alpha, const FieldVector<K,1>& x, FieldVector<K,1>& y) const
+    {
+      y.p += alpha * a[0] * x.p;
+    }
 
-	//! y += alpha A^T x
-	void usmtv (const K& alpha, const FieldVector<K,1>& x, FieldVector<K,1>& y) const
-	{
-	  y.p += alpha * a[0] * x.p;
-	}
+    //! y += alpha A^T x
+    void usmtv (const K& alpha, const FieldVector<K,1>& x, FieldVector<K,1>& y) const
+    {
+      y.p += alpha * a[0] * x.p;
+    }
 
-	//! y += alpha A^H x
-	void usmhv (const K& alpha, const FieldVector<K,1>& x, FieldVector<K,1>& y) const
-	{
-	  y.p += alpha * fm_ck(a[0]) * x.p;
-	}
+    //! y += alpha A^H x
+    void usmhv (const K& alpha, const FieldVector<K,1>& x, FieldVector<K,1>& y) const
+    {
+      y.p += alpha * fm_ck(a[0]) * x.p;
+    }
 
-	//===== norms
+    //===== norms
 
-	//! frobenius norm: sqrt(sum over squared values of entries)
+    //! frobenius norm: sqrt(sum over squared values of entries)
     double frobenius_norm () const
-	{
-	  return sqrt(fvmeta_abs2(a[0]));
-	}
+    {
+      return sqrt(fvmeta_abs2(a[0]));
+    }
 
-	//! square of frobenius norm, need for block recursion
+    //! square of frobenius norm, need for block recursion
     double frobenius_norm2 () const
-	{
-	  return fvmeta_abs2(a[0]);
-	}
+    {
+      return fvmeta_abs2(a[0]);
+    }
 
-	//! infinity norm (row sum norm, how to generalize for blocks?)
+    //! infinity norm (row sum norm, how to generalize for blocks?)
     double infinity_norm () const
-	{
+    {
             return std::abs(a[0]);
-	}
+    }
 
-	//! simplified infinity norm (uses Manhattan norm for complex values)
-	double infinity_norm_real () const
-	{
-	  return fvmeta_abs_real(a[0]);
-	}
+    //! simplified infinity norm (uses Manhattan norm for complex values)
+    double infinity_norm_real () const
+    {
+      return fvmeta_abs_real(a[0]);
+    }
 
-	//===== solve
+    //===== solve
 
-	//! Solve system A x = b
-	void solve (FieldVector<K,1>& x, const FieldVector<K,1>& b) const
-	{
+    //! Solve system A x = b
+    void solve (FieldVector<K,1>& x, const FieldVector<K,1>& b) const
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
-	if (fvmeta_absreal(a[0][0])<FMatrixPrecision<>::absolute_limit())
-	  DUNE_THROW(FMatrixError,"matrix is singular");		  
+    if (fvmeta_absreal(a[0][0])<FMatrixPrecision<>::absolute_limit())
+      DUNE_THROW(FMatrixError,"matrix is singular");          
 #endif
-	  x.p = b.p/a[0];
-	}
+      x.p = b.p/a[0];
+    }
 
-	//! compute inverse
-	void invert ()
-	{
+    //! compute inverse
+    void invert ()
+    {
 #ifdef DUNE_FMatrix_WITH_CHECKING
             if (fvmeta_absreal(a[0][0])<FMatrixPrecision<>::absolute_limit())
-                DUNE_THROW(FMatrixError,"matrix is singular");		  
+                DUNE_THROW(FMatrixError,"matrix is singular");        
 #endif
-	  a[0] = 1/a[0];
-	}
+      a[0] = 1/a[0];
+    }
 
     //! calculates the determinant of this matrix 
     K determinant () const
@@ -1162,73 +1162,73 @@ namespace Dune {
       return std::abs(a[0]);
     }
 
-	//! left multiplication
-	FieldMatrix& leftmultiply (const FieldMatrix& M)
-	{
-	  a[0] *= M.a[0];
-	  return *this;
-	}
+    //! left multiplication
+    FieldMatrix& leftmultiply (const FieldMatrix& M)
+    {
+      a[0] *= M.a[0];
+      return *this;
+    }
 
-	//! left multiplication
-	FieldMatrix& rightmultiply (const FieldMatrix& M)
-	{
-	  a[0] *= M.a[0];
-	  return *this;
-	}
+    //! left multiplication
+    FieldMatrix& rightmultiply (const FieldMatrix& M)
+    {
+      a[0] *= M.a[0];
+      return *this;
+    }
 
 
-	//===== sizes
+    //===== sizes
 
-	//! number of blocks in row direction
-	size_type N () const
-	{
-	  return 1;
-	}
+    //! number of blocks in row direction
+    size_type N () const
+    {
+      return 1;
+    }
 
-	//! number of blocks in column direction
-	size_type M () const
-	{
-	  return 1;
-	}
+    //! number of blocks in column direction
+    size_type M () const
+    {
+      return 1;
+    }
 
-	//! row dimension of block r
-	size_type rowdim (size_type r) const
-	{
-	  return 1;
-	}
+    //! row dimension of block r
+    size_type rowdim (size_type r) const
+    {
+      return 1;
+    }
 
-	//! col dimension of block c
-	size_type coldim (size_type c) const
-	{
-	  return 1;
-	}
+    //! col dimension of block c
+    size_type coldim (size_type c) const
+    {
+      return 1;
+    }
 
-	//! dimension of the destination vector space
-	size_type rowdim () const
-	{
-	  return 1;
-	}
+    //! dimension of the destination vector space
+    size_type rowdim () const
+    {
+      return 1;
+    }
 
-	//! dimension of the source vector space
-	size_type coldim () const
-	{
-	  return 1;
-	}
+    //! dimension of the source vector space
+    size_type coldim () const
+    {
+      return 1;
+    }
 
-	//===== query
-	
-	//! return true when (i,j) is in pattern
-	bool exists (size_type i, size_type j) const 
-	{
-	  return i==0 && j==0;
-	}
+    //===== query
+    
+    //! return true when (i,j) is in pattern
+    bool exists (size_type i, size_type j) const 
+    {
+      return i==0 && j==0;
+    }
 
-	//===== conversion operator
+    //===== conversion operator
 
-	operator K () const {return a[0];}
+    operator K () const {return a[0];}
 
-	private:
-	// the data, just a single row with a single scalar
+    private:
+    // the data, just a single row with a single scalar
     row_type a;
     
   };
@@ -1367,8 +1367,8 @@ static inline void multTransposedMatrix(const FieldMatrix<K,rows,cols> &matrix, 
   for(size_type i=0; i<cols; i++)
     for(size_type j=0; j<cols; j++)
       { ret[i][j]=0.0;
-	for(size_type k=0; k<rows; k++)
-	  ret[i][j]+=matrix[k][i]*matrix[k][j];
+    for(size_type k=0; k<rows; k++)
+      ret[i][j]+=matrix[k][i]*matrix[k][j];
       }
 }
 
