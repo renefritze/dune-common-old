@@ -294,12 +294,31 @@ namespace Dune {
       if (x.N()!=M()) DUNE_THROW(FMatrixError,"index out of range");
       if (y.N()!=N()) DUNE_THROW(FMatrixError,"index out of range");
 #endif
-    for (size_type i=0; i<n; ++i)
-    {
-      y[i] = 0;
-      for (size_type j=0; j<m; j++)
-        y[i] += (*this)[i][j] * x[j];
+      for (size_type i=0; i<n; ++i)
+      {
+        y[i] = 0;
+        for (size_type j=0; j<m; j++)
+          y[i] += (*this)[i][j] * x[j];
+      }
     }
+
+    //! y = A^T x
+    template< class X, class Y >
+    void mtv ( const X &x, Y &y ) const
+    {
+#ifdef DUNE_FMatrix_WITH_CHECKING
+      assert( &x != &y );
+      if( x.N() != N() )
+        DUNE_THROW( FMatrixError, "Index out of range." );
+      if( y.N() != M() )
+        DUNE_THROW( FMatrixError, "Index out of range." );
+#endif
+      for( size_type i = 0; i < m; ++i )
+      {
+        y[ i ] = 0;
+        for( size_type j = 0; j < n; ++j )
+          y[ i ] += (*this)[ j ][ i ] * x[ j ];
+      }
     }
 
     //! y += A x
