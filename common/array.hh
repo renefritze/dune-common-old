@@ -1,9 +1,8 @@
-#ifndef DUNE_FIXEDARRAY_HH
-#define DUNE_FIXEDARRAY_HH
+#ifndef DUNE_ARRAY_HH
+#define DUNE_ARRAY_HH
 
 /** \file
     \brief implementation of the stl array class (a static array)
-    and its deprecated ancestor FixedArray
 */
 
 #include<iostream>
@@ -32,7 +31,8 @@ namespace Dune
     using std::tr1::array;
 #else
 
-  /** \brief Simple fixed size array class
+  /** \brief Simple fixed size array class.  This replaces std::array,
+   * if that is not available.
    *
    */
   template<class T, int N>
