@@ -6,7 +6,7 @@
 #include<cassert>
 #include<vector>
 #include"smartpointer.hh"
-#include"fixedarray.hh"
+#include"array.hh"
 #include"iteratorfacades.hh"
 
 namespace Dune
