@@ -622,6 +622,20 @@ namespace Dune {
 
       V* rhs_;
     };
+
+    struct ElimDet
+    {
+      ElimDet(K& sign) : sign_(sign)
+      { sign_ = 1; }
+
+      void swap(int i, int j)
+      { sign_ *= -1; }
+
+      void operator()(const K&, int k, int i)
+      {}
+
+      K& sign_;
+    };
     
     template<class Func>
     void luDecomposition(FieldMatrix<K,n,n>& A, Func func) const;
@@ -862,10 +876,13 @@ namespace Dune {
                     t10*p[2][1]+t12*p[1][2]-t14*p[1][1]);
 
         }
-        
-        DUNE_THROW(FMatrixError, "No implementation of determinantMatrix "
-                   << "for FieldMatrix<" << n << "," << m << "> !");
 
+        FieldMatrix<K,n,n> A(*this);
+        K det;
+        luDecomposition(A, ElimDet(det));
+        for (int i = 0; i < n; ++i)
+          det *= A[i][i];
+        return det;
     }
 
 
