@@ -4,6 +4,7 @@
 #endif
 
 #include <cassert>
+#include <iostream>
 
 #include <dune/common/finitestack.hh>
 
@@ -40,17 +41,28 @@ int main () {
   try {
       Dune::FiniteStack<int, MAX> stack1;
 
-    assert(stack1.empty());
-    stack1.pop();
+      assert(stack1.empty());
+      stack1.pop();
     
-    // exception has to happen
-    return 1;
+      // exception has to happen
+      std::cerr << "Expected exception Dune::RangeError, but nothing caught\n";
+      return 1;
   } catch (Dune::RangeError &e) {
-    // exception was correctly reported
-    return 0;
+      // exception was correctly reported
+      std::cerr << "Caught expected Dune::RangeError: " << e.what() << std::endl;
+      return 0;
+  } catch (Dune::Exception &e) {
+      // exception was correctly reported
+      std::cerr << "Dune::Exception: " << e.what() << std::endl;
+      return 1;
+  } catch (std::exception &e) {
+      // exception was correctly reported
+      std::cerr << "std::exception: " << e.what() << std::endl;
+      return 1;
   } catch (...) {
-    // wrong type of exception
-    return 1;
+      // wrong type of exception
+      std::cerr << "unknown exception\n";
+      return 1;
   }
 
 }
