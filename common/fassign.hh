@@ -77,7 +77,7 @@ public:
     {
     }
     /*! @brief Constructor from vector and temporary flag
-      \param v vector which should be initialized
+      \param _v vector which should be initialized
       \param t bool indicating, that this is a temporary object (see ~fvector_assigner)
      */
     fvector_assigner(FieldVector<T,s> & _v, bool t) : v(_v), c(0), temporary(t)
@@ -188,7 +188,7 @@ public:
     {
     }
     /*! @brief Constructor from matrix and temporary flag
-      \param v matrix which should be initialized
+      \param _A matrix which should be initialized
       \param t bool indicating, that this is a temporary object (see ~fmatrix_assigner)
      */
     fmatrix_assigner(FieldMatrix<T,n,m> & _A, bool t) : A(_A), c(0), r(0), temporary(t)
