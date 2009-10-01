@@ -128,7 +128,7 @@ namespace Dune {
 
         /** \brief Constructor initializing the whole matrix with a scalar
           */
-    FieldMatrix (const K& k)
+    explicit FieldMatrix (const K& k)
     {
       for (size_type i=0; i<n; i++) p[i] = k;
     }
@@ -941,7 +941,7 @@ namespace Dune {
 
         /** \brief Constructor initializing the whole matrix with a scalar
           */
-    FieldMatrix (const K& k)
+    explicit FieldMatrix (const K& k)
     {
             a = k;
     }
