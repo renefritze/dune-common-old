@@ -941,9 +941,9 @@ namespace Dune {
 
         /** \brief Constructor initializing the whole matrix with a scalar
           */
-    explicit FieldMatrix (const K& k)
+    FieldMatrix (const K& k)
     {
-            a = k;
+        a = k;
     }
     template<typename T>
     explicit FieldMatrix( const T& t)
