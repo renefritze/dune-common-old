@@ -41,7 +41,7 @@ namespace Dune
    *   \code
    *   int main(int argc, char** argv){
    *      typedef Dune::MPIHelper MPIHelper;
-   *      MPIHelper::instance(&argc, &argv);
+   *      MPIHelper::instance(argc, argv);
    *      typename MPIHelper::MPICommunicator world = 
    *        MPIHelper::getCommunicator();
    *      ...
