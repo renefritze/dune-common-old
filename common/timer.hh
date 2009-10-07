@@ -1,3 +1,5 @@
+// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+// vi: set ts=8 sw=2 et sts=2:
 #ifndef DUNE_TIMER_HH
 #define DUNE_TIMER_HH
 
@@ -26,12 +28,12 @@ namespace Dune {
     \brief A simple timing class.
 */
 
-    /** \brief %Exception thrown by the Timer class */
+  /** \brief %Exception thrown by the Timer class */
   class TimerError : public SystemError {} ;
-   
 
-    /** \brief A simple stop watch
-    
+
+  /** \brief A simple stop watch
+
   This class reports the elapsed user-time, i.e. time spent computing,
   after the last call to Timer::reset(). The results are seconds and
   fractional seconds. Note that the resolution of the timing depends
@@ -40,48 +42,49 @@ namespace Dune {
   The class is basically a wrapper for the libc-function getrusage()
 
   */
-class Timer
-{
-public:
-	//! A new timer, start immediately
-        Timer () throw(TimerError)
-	{
-	  reset();
-	}
+  class Timer
+  {
+    public:
 
-	//! Reset timer
-	void reset() throw (TimerError)
-	{
-#ifdef TIMER_USE_STD_CLOCK
-	  cstart = std::clock();
-#else
-	  rusage ru;
-	  if (getrusage(RUSAGE_SELF, &ru))
-	    DUNE_THROW(TimerError, strerror(errno));
-	  cstart = ru.ru_utime;
-#endif
-	}
+      //! A new timer, start immediately
+      Timer () throw(TimerError)
+      {
+        reset();
+      }
 
-	//! Get elapsed user-time in seconds
-	double elapsed () const throw (TimerError)
-        {
+      //! Reset timer
+      void reset() throw (TimerError)
+      {
 #ifdef TIMER_USE_STD_CLOCK
-	  return (std::clock()-cstart) / static_cast<double>(CLOCKS_PER_SEC);
+        cstart = std::clock();
 #else
-	  rusage ru;
-	  if (getrusage(RUSAGE_SELF, &ru))
-	    DUNE_THROW(TimerError, strerror(errno));
-	  return 1.0 * (ru.ru_utime.tv_sec - cstart.tv_sec) + (ru.ru_utime.tv_usec - cstart.tv_usec) / (1000.0 * 1000.0);
+        rusage ru;
+        if (getrusage(RUSAGE_SELF, &ru))
+          DUNE_THROW(TimerError, strerror(errno));
+        cstart = ru.ru_utime;
 #endif
-	}
-    
-private:
+      }
+
+      //! Get elapsed user-time in seconds
+      double elapsed () const throw (TimerError)
+      {
 #ifdef TIMER_USE_STD_CLOCK
-  std::clock_t cstart;
+        return (std::clock()-cstart) / static_cast<double>(CLOCKS_PER_SEC);
 #else
-  struct timeval cstart;
+        rusage ru;
+        if (getrusage(RUSAGE_SELF, &ru))
+          DUNE_THROW(TimerError, strerror(errno));
+        return 1.0 * (ru.ru_utime.tv_sec - cstart.tv_sec) + (ru.ru_utime.tv_usec - cstart.tv_usec) / (1000.0 * 1000.0);
 #endif
-}; // end class Timer 
+      }
+
+    private:
+#ifdef TIMER_USE_STD_CLOCK
+      std::clock_t cstart;
+#else
+      struct timeval cstart;
+#endif
+  }; // end class Timer 
 
 /** @} end documentation */
 
