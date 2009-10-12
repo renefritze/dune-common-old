@@ -9,7 +9,7 @@
 #include"exceptions.hh"
 #include"collectivecommunication.hh"
 #include"binaryfunctions.hh"
-#include"smartpointer.hh"
+#include"shared_ptr.hh"
 
 #if HAVE_MPI
 // MPI header
@@ -32,7 +32,7 @@ namespace Dune
 	{
 	  if (type.operator->()==0)
 		{
-		  type = SmartPointer<MPI_Datatype>(new MPI_Datatype);
+		  type = shared_ptr<MPI_Datatype>(new MPI_Datatype);
 		  MPI_Type_contiguous(sizeof(T),MPI_BYTE,type.operator->());
 		  MPI_Type_commit(type.operator->());
 		}
@@ -41,11 +41,11 @@ namespace Dune
   private:
 	Generic_MPI_Datatype () {}
 	Generic_MPI_Datatype (const Generic_MPI_Datatype& ) {}	
-        static SmartPointer<MPI_Datatype> type;
+        static shared_ptr<MPI_Datatype> type;
   };
 
   template<typename T>
-  SmartPointer<MPI_Datatype> Generic_MPI_Datatype<T>::type = SmartPointer<MPI_Datatype>(0); 
+  shared_ptr<MPI_Datatype> Generic_MPI_Datatype<T>::type = shared_ptr<MPI_Datatype>(0); 
 
   // A Macro for defining traits for the primitive data types
 #define ComposeMPITraits(p,m) \
@@ -86,7 +86,7 @@ namespace Dune
 	{
 	  if (op.operator->()==0)
 		{
-		  op = SmartPointer<MPI_Op>(new MPI_Op);
+		  op = shared_ptr<MPI_Op>(new MPI_Op);
 		  MPI_Op_create((void (*)(void*, void*, int*, MPI_Datatype*))&operation,true,op.operator->());
 		}
 	  return *op;
@@ -104,12 +104,12 @@ namespace Dune
 	}
 	Generic_MPI_Op () {}
 	Generic_MPI_Op (const Generic_MPI_Op& ) {}
-	static SmartPointer<MPI_Op> op;
+	static shared_ptr<MPI_Op> op;
   };
 
   
   template<typename Type, typename BinaryFunction>
-  SmartPointer<MPI_Op> Generic_MPI_Op<Type,BinaryFunction>::op = SmartPointer<MPI_Op>(0);
+  shared_ptr<MPI_Op> Generic_MPI_Op<Type,BinaryFunction>::op = shared_ptr<MPI_Op>(0);
   
 #define ComposeMPIOp(type,func,op) \
   template<> \
