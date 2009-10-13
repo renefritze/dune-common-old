@@ -77,7 +77,10 @@ namespace Dune
          * pointers reference it.
          */
         inline void deallocate();
-        int count() const;
+
+        /** \brief The number of shared_ptrs pointing to the object we point to */
+        int use_count() const;
+
     private:
         /** @brief The object we reference. */  
         class PointerRep
