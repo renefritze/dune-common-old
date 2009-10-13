@@ -3,6 +3,17 @@
 #ifndef DUNE_SHARED_PTR_HH
 #define DUNE_SHARED_PTR_HH
 
+
+#if defined HAVE_MEMORY
+# include <memory>
+#endif
+#if defined HAVE_TR1_MEMORY
+# include <tr1/memory>
+#endif
+#if defined HAVE_BOOST_SHARED_PTR_HPP
+# include <boost/shared_ptr.hpp>
+#endif
+
 /**
  * @file 
  * @brief This file implements the class shared_ptr (a reference counting
@@ -11,6 +22,11 @@
  */
 namespace Dune
 {
+    // A shared_ptr implementation has been found if SHARED_PTR_NAMESPACE is set at all
+#ifdef SHARED_PTR_NAMESPACE
+    using SHARED_PTR_NAMESPACE :: shared_ptr;
+#else
+
     /** @addtogroup Common
      *
      * @{
@@ -173,5 +189,7 @@ namespace Dune
         rep_=0;
     }
     /** @} */
+#endif  // #ifdef SHARED_PTR_NAMESPACE
+
 }
 #endif
