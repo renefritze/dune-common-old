@@ -756,7 +756,7 @@ representing a field and a compile-time given size.
   template<class K, int n, int m> class FieldMatrix;
 
 
-  
+#ifndef DOXYGEN
   /** \brief Vectors containing only one component
    */
   template< class K >
@@ -1090,6 +1090,7 @@ representing a field and a compile-time given size.
     FieldVector<K,1> z = a;
     return (z[0]-=b);
   }
+#endif
 #endif
 
   /** @} end documentation */
