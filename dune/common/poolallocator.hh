@@ -231,6 +231,9 @@ namespace Dune
    * This means that assuming that N objects fit into memory only every N-th
    * request for an object will result in memory allocation.
    *
+   * @warning This class currently falls back to std::allocator as the current
+   * implementation has serious and hard to find bugs.
+   *
    * @warning It is not suitable
    * for the use in standard containers as it cannot allocate
    * arrays of arbitrary size
@@ -240,6 +243,11 @@ namespace Dune
    */
   template<class T, std::size_t s>
   class PoolAllocator
+#ifndef USE_DUNE_POOL
+    : public std::allocator<T>
+  {
+  };
+#else
   {
     //friend std::ostream& std::operator<<<>(std::ostream&,PoolAllocator<T,s>&);
     
@@ -450,6 +458,7 @@ namespace Dune
   {
     return false;
   }
+#endif
 
   template<class T, std::size_t S>
   inline Pool<T,S>::Pool()
@@ -541,6 +550,8 @@ namespace Dune
     return reinterpret_cast<T*>(p);
   }
 
+#ifdef USE_DUNE_POOL
+
   template<class T, std::size_t s> 
   typename PoolAllocator<T,s>::PoolType PoolAllocator<T,s>::memoryPool_;
 
@@ -573,7 +584,7 @@ namespace Dune
   {
     p->~T();
   }
-
+#endif
   /** @} */
 }
 #endif
