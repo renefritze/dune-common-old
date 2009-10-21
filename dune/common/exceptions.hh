@@ -1,3 +1,5 @@
+// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+// vi: set et ts=8 sw=2 sts=2:
 // $Id$
 
 #ifndef DUNE_EXCEPTIONS_HH
@@ -116,6 +118,10 @@ inline std::ostream& operator<<(std::ostream &stream, const Exception &e)
 #endif
 
 /*! Macro to throw an exception
+
+  \code
+#include <dune/common/exceptions.hh>
+  \endcode
 
   \param E exception class derived from Dune::Exception
   \param m reason for this exception in ostream-notation
