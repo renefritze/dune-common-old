@@ -1,3 +1,5 @@
+// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+// vi: set et ts=8 sw=2 sts=2:
 // $Id$
 #ifndef DUNE_FMATRIX_HH
 #define DUNE_FMATRIX_HH
@@ -511,7 +513,7 @@ namespace Dune
  
     //! Multiplies M from the left to this matrix, this matrix is not modified
     template<int l>
-    FieldMatrix<K,l,cols> leftmultiplyany (const FieldMatrix<K,l,rows>& M)
+    FieldMatrix<K,l,cols> leftmultiplyany (const FieldMatrix<K,l,rows>& M) const
     {
       FieldMatrix<K,l,cols> C;
       
@@ -533,7 +535,7 @@ namespace Dune
       for (size_type i=0; i<rows; i++)
         for (size_type j=0; j<cols; j++) {
           (*this)[i][j] = 0;
-          for (size_type k=0; k<rows; k++)
+          for (size_type k=0; k<cols; k++)
             (*this)[i][j] += C[i][k]*M[k][j];
         }
       return *this;
@@ -541,7 +543,7 @@ namespace Dune
 
     //! Multiplies M from the right to this matrix, this matrix is not modified
     template<int l>
-    FieldMatrix<K,rows,l> rightmultiplyany (const FieldMatrix<K,cols,l>& M)
+    FieldMatrix<K,rows,l> rightmultiplyany (const FieldMatrix<K,cols,l>& M) const
     {
       FieldMatrix<K,rows,l> C;
       
@@ -1217,6 +1219,16 @@ namespace Dune
       return *this;
     }
 
+    //! Multiplies M from the left to this matrix, this matrix is not modified
+    template<int l>
+    FieldMatrix<K,l,1> leftmultiplyany (const FieldMatrix<K,l,1>& M) const
+    {
+      FieldMatrix<K,l,1> C;
+      for (size_type j=0; j<l; j++)
+        C[j][0] = M[j][0]*a[0];
+      return C;
+    }
+
     //! left multiplication
     FieldMatrix& rightmultiply (const FieldMatrix& M)
     {
@@ -1224,6 +1236,16 @@ namespace Dune
       return *this;
     }
 
+    //! Multiplies M from the right to this matrix, this matrix is not modified
+    template<int l>
+    FieldMatrix<K,1,l> rightmultiplyany (const FieldMatrix<K,1,l>& M) const
+    {
+      FieldMatrix<K,1,l> C;
+      
+      for (size_type j=0; j<l; j++)
+        C[0][j] = M[0][j]*a[0];
+      return C;
+    }
 
     //===== sizes
 
