@@ -37,7 +37,7 @@ int main ( int argc, char **argv )
 {
   Timer timer;
 
-  const unsigned long iterations = 1 << 27;
+  const unsigned long iterations = 1 << 7;
   const unsigned long factor = 16;
   std :: cout << "Performing " << (factor*iterations) << " iterations." << std :: endl;
 
