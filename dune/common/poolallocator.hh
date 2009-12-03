@@ -8,6 +8,7 @@
 #include<typeinfo>
 #include<iostream>
 #include<cassert>
+#include<new>
 
 template<std::size_t size, typename T>
 int testPool();
@@ -190,7 +191,7 @@ namespace Dune
      * @brief Get a new or recycled object 
      * @return A pointer to the object memory.
     */
-    inline T *allocate();
+    inline void* allocate();
     /** 
      * @brief Free an object.
      * @param o The pointer to memory block of the object.
@@ -461,8 +462,8 @@ namespace Dune
     dune_static_assert((chunkSize - (alignment - 1)) % alignment == 0, "Library Error: compiler cannot calculate!");
     dune_static_assert(elements>=1, "Library Error: we need to hold at least one element!");
     dune_static_assert(elements*alignedSize<=chunkSize, "Library Error: aligned elements must fit into chuck!");
-    /*std::cout<<"s= "<<S<<" : T: "<<sizeof(T)<<" Reference: "<<sizeof(Reference)<<" union: "<<unionSize<<" alignment: "<<alignment<<
-      "aligned: "<<alignedSize<<" chunk: "<< chunkSize<<" elements: "<<elements<<std::endl;*/
+    /*    std::cout<<"s= "<<S<<" : T: "<<sizeof(T)<<" Reference: "<<sizeof(Reference)<<" union: "<<unionSize<<" alignment: "<<alignment<<
+	  "aligned: "<<alignedSize<<" chunk: "<< chunkSize<<" elements: "<<elements<<std::endl;*/
   }
   
   template<class T, std::size_t S>
@@ -503,23 +504,24 @@ namespace Dune
     newChunk->next_ = chunks_;
     chunks_ = newChunk;
     
-    char* start = reinterpret_cast<char *>(chunks_->memory_);
-    char* last  = &start[(elements-1)*alignedSize];
-
-    for(char* element=start; element<last; element=element+alignedSize){
-      reinterpret_cast<Reference*>(element)->next_
-	= reinterpret_cast<Reference*>(element+alignedSize);
+    char* start = chunks_->memory_;
+    char* last  = &start[elements*alignedSize];
+    Reference* ref = new (start) (Reference);
+    head_ = ref;
+      
+    for(char* element=start+alignedSize; element<last; element=element+alignedSize){
+      Reference* next = new (element) (Reference);
+      ref->next_ = next;
+      ref = next;
     }
-    
-    reinterpret_cast<Reference*>(last)->next_=0;
-    head_ = reinterpret_cast<Reference*>(start);
+    ref->next_=0;
   }
 
   template<class T, std::size_t S>
   inline void Pool<T,S>::free(void* b)
   {
     if(b){
-    Reference* freed = reinterpret_cast<Reference*>(b);
+    Reference* freed = static_cast<Reference*>(b);
     freed->next_ = head_;
     head_ = freed;
     //--allocated_;
@@ -528,15 +530,15 @@ namespace Dune
   }
 
   template<class T, std::size_t S>
-  inline T* Pool<T,S>::allocate()
+  inline void* Pool<T,S>::allocate()
   {
     if(!head_)
       grow();
-
+      
     Reference* p = head_;
     head_ = p->next_;
     //++allocated_;
-    return reinterpret_cast<T*>(p);
+    return p;
   }
 
   template<class T, std::size_t s> 
@@ -549,8 +551,10 @@ namespace Dune
   template<class T, std::size_t s>
   inline T* PoolAllocator<T,s>::allocate(std::size_t n, const T* hint)
   {
-    assert(n==1);//<=(Pool<T,s>::elements));
-    return memoryPool_.allocate();
+    if(n==1)
+      return static_cast<T*>(memoryPool_.allocate());
+    else
+      throw std::bad_alloc();
   }
 
   template<class T, std::size_t s>
