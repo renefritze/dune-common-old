@@ -251,7 +251,7 @@ int main(int argc, char** argv)
   test(tuple_);
   test(static_cast<tuple<float,int,double,char,std::string>& >(tuple_));
   test(static_cast<const tuple<float,int,double,char,std::string>&>(tuple_));
-  exit(copyTest()+iteratorTupleTest()+referenceTest()+lessTest()
+  return (copyTest()+iteratorTupleTest()+referenceTest()+lessTest()
        +pointerTest()+constPointerTest()+tuple_tr1_test());
   
 }

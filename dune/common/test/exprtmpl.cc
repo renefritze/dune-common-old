@@ -327,5 +327,5 @@ int main()
     {
       std::cout << e << std::endl;
     }
-  exit(0);
+  return (0);
 }

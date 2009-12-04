@@ -5,6 +5,6 @@
 
 int main()
 {
-    dune_static_assert(true, "OK");
+    dune_static_assert(false, "FAIL");
     return 0;
 }
