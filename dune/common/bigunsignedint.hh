@@ -122,6 +122,11 @@ namespace Dune
 	//! export to other types
 //	operator unsigned int () const;
     unsigned int touint() const;
+    /**
+     * @brief Convert to a double.
+     *
+     * @warning Subject to rounding errors!
+     */
     double todouble() const;
 
 	friend class bigunsignedint<k/2>;
