@@ -90,7 +90,7 @@ namespace Dune
             /** @brief The representative. */
             MemberType * rep_;
             /** @brief Default Constructor. */
-            PointerRep() : count_(1), rep_(new MemberType) {}
+            PointerRep() : count_(0), rep_(0) {}
             /** @brief Constructor from existing Pointer. */
             PointerRep(MemberType * p) : count_(1), rep_(p) {}
             /** @brief Destructor, deletes MemberType* rep_. */
