@@ -156,7 +156,7 @@ public:
         /* insert item as mru */
         iterator it = _data.insert(_data.begin(), x);
         /* store index */
-        _index[key] = it;
+        _index.insert(std::make_pair(key,it));
 
         return it->second;
     }
