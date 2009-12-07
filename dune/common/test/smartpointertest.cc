@@ -35,6 +35,10 @@ int main(){
         bar.reset(new double(44.0));
         assert(bar);
         assert(bar.use_count()==1);
+        
+        // test get()
+        double* barPtr = bar.get();
+        assert(barPtr);
 
 	// test constructor from a given pointer
         shared_ptr<double> b(new double(42.0));
