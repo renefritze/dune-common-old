@@ -40,7 +40,7 @@ namespace Dune {
     public:
         /** \brief Default constructor, not initializing anything */
         GeometryType ()
- {}
+        {}
 
         /** \brief Constructor */
         GeometryType(BasicType basicType, unsigned int dim)
@@ -176,7 +176,10 @@ namespace Dune {
             case prism:
                 s << "prism";
                 break;
-             default:
+            case none:
+                s << "(none, " << a.dim_ << ")";
+                break;
+            default:
                 s << "invalid geometry type";
             }
             
@@ -193,6 +196,7 @@ namespace Dune {
       case GeometryType::cube:    s << "cube";    break;
       case GeometryType::pyramid: s << "pyramid"; break;
       case GeometryType::prism:   s << "prism";   break;
+      case GeometryType::none:    s << "none";    break;
       default: s << "[unknown GeometryType::BasicType: " << int(type) << "]";
       }
       return s;
