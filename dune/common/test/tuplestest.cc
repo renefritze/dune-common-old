@@ -4,7 +4,6 @@
 #endif
 
 #include<dune/common/tuples.hh>
-#include<dune/common/helpertemplates.hh>
 #include<string>
 #include<iostream>
 #include<vector>
