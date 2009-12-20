@@ -184,6 +184,8 @@ namespace Dune {
            object it references
          */
         void operator & ();
+
+        friend class BitSetVectorReference<block_size, Alloc>;
     };
 
     /**
