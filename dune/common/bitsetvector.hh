@@ -234,7 +234,6 @@ namespace Dune {
         {
             for(int i=0; i<block_size; ++i)
                 getBit(i) = b;
-            
             return (*this);
         }
         
@@ -242,8 +241,7 @@ namespace Dune {
         BitSetVectorReference& operator=(const bitset & b)
         {
             for(int i=0; i<block_size; ++i)
-                getBit(i) = b[i];
-            
+                getBit(i) = b.test(i);
             return (*this);
         }
 
@@ -251,8 +249,7 @@ namespace Dune {
         BitSetVectorReference& operator=(const BitSetVectorConstReference & b)
         {
             for(int i=0; i<block_size; ++i)
-                getBit(i) = b[i];
-            
+                getBit(i) = b.test(i);
             return (*this);
         }
 
@@ -260,32 +257,55 @@ namespace Dune {
         BitSetVectorReference& operator=(const BitSetVectorReference & b)
         {
             for(int i=0; i<block_size; ++i)
-                getBit(i) = b.getBit(i);
-            
+                getBit(i) = b.test(i);
             return (*this);
         }
 
-        //! Bitwise and.
+        //! Bitwise and (for bitset).
+        BitSetVectorReference& operator&=(const bitset& x)
+        {
+            for (size_type i=0; i<block_size; i++)
+                getBit(i) = (test(i) & x.test(i));
+            return *this;
+        }
+
+        //! Bitwise and (for BitSetVectorConstReference and BitSetVectorReference)
         BitSetVectorReference& operator&=(const BitSetVectorConstReference& x)
         {
             for (size_type i=0; i<block_size; i++)
-                set(i, getBit(i) & x.getBit(i));
+                getBit(i) = (test(i) & x.test(i));
             return *this;
         }
 
-        //! Bitwise inclusive or.
+        //! Bitwise inclusive or (for bitset)
+        BitSetVectorReference& operator|=(const bitset& x)
+        {
+            for (size_type i=0; i<block_size; i++)
+                getBit(i) = (test(i) | x.test(i));
+            return *this;
+        }
+
+        //! Bitwise inclusive or (for BitSetVectorConstReference and BitSetVectorReference)
         BitSetVectorReference& operator|=(const BitSetVectorConstReference& x)
         {
             for (size_type i=0; i<block_size; i++)
-                set(i, getBit(i) | x.getBit(i));
+                getBit(i) = (test(i) | x.test(i));
             return *this;
         }
 
-        //! Bitwise exclusive or.
+        //! Bitwise exclusive or (for bitset).
+        BitSetVectorReference& operator^=(const bitset& x)
+        {
+            for (size_type i=0; i<block_size; i++)
+                getBit(i) = (test(i) ^ x.test(i));
+            return *this;
+        }
+
+        //! Bitwise exclusive or (for BitSetVectorConstReference and BitSetVectorReference)
         BitSetVectorReference& operator^=(const BitSetVectorConstReference& x)
         {
             for (size_type i=0; i<block_size; i++)
-                set(i, getBit(i) ^ x.getBit(i));
+                getBit(i) = (test(i) ^ x.test(i));
             return *this;
         }
 
@@ -293,7 +313,7 @@ namespace Dune {
         BitSetVectorReference& operator<<=(size_type n)
         {
             for (size_type i=0; i<block_size-n; i++)
-                set(i, getBit(i+n));
+                getBit(i) = test(i+n);
             return *this;
         }
 
@@ -301,7 +321,7 @@ namespace Dune {
         BitSetVectorReference& operator>>=(size_type n)
         {
             for (size_type i=0; i<block_size-n; i++)
-                set(i+n, getBit(i));
+                getBit(i+n) = test(i);
             return *this;
         }
 
@@ -347,6 +367,7 @@ namespace Dune {
             return *this;
         }
 
+        using BitSetVectorConstReference::test;
         using BitSetVectorConstReference::operator[];
 
         reference operator[](size_type i)
