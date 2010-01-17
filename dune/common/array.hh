@@ -12,8 +12,6 @@
 // Include system implementation of array class if present
 #ifdef HAVE_ARRAY
 #include <array>
-#elif defined HAVE_TR1_ARRAY
-#include <tr1/array>
 #else
 #include <algorithm>
 #endif
@@ -28,8 +26,6 @@ namespace Dune
 
 #ifdef HAVE_ARRAY
     using std::array;
-#elif defined HAVE_TR1_ARRAY
-    using std::tr1::array;
 #else
 
   /** \brief Simple fixed size array class.  This replaces std::array,
