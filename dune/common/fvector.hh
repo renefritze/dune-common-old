@@ -106,7 +106,7 @@ namespace fvmeta
     {
         static inline typename FieldTraits<K>::real_type sqrt (const K& k)
         {
-            return std::sqrt((double)k);
+            return typename FieldTraits<K>::real_type(std::sqrt(double(k)));
         }
     };
     
