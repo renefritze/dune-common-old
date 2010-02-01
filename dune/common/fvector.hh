@@ -6,6 +6,8 @@
 #include<cstddef>
 #include<cstdlib>
 #include<complex>
+#include<cstring>
+#include<limits>
 
 #include "exceptions.hh"
 #include "genericiterator.hh"
@@ -40,45 +42,85 @@ representing a field and a compile-time given size.
 
 #ifndef DUNE_EXPRESSIONTEMPLATES
 
-  /**
-     \private
-     \memberof FieldVector
-  */
-  template<class K>
-  inline typename FieldTraits<K>::real_type fvmeta_absreal (const K& k)
-  {
-      return std::abs(k);
-  }
+namespace fvmeta
+{
+    /**
+       \private
+       \memberof FieldVector
+    */
+    template<class K>
+    inline typename FieldTraits<K>::real_type absreal (const K& k)
+    {
+        return std::abs(k);
+    }
 
-  /**
-     \private
-     \memberof FieldVector
-  */
-  template<class K>
-  inline typename FieldTraits<K>::real_type fvmeta_absreal (const std::complex<K>& c)
-  {
-	return fvmeta_abs(c.real()) + fvmeta_abs(c.imag());
-  }
+    /**
+       \private
+       \memberof FieldVector
+    */
+    template<class K>
+    inline typename FieldTraits<K>::real_type absreal (const std::complex<K>& c)
+    {
+        return std::abs(c.real()) + std::abs(c.imag());
+    }
 
-  /**
-     \private
-     \memberof FieldVector
-  */
-  template<class K>
-  inline typename FieldTraits<K>::real_type fvmeta_abs2 (const K& k)
-  {
-	return k*k;
-  }
+    /**
+       \private
+       \memberof FieldVector
+    */
+    template<class K>
+    inline typename FieldTraits<K>::real_type abs2 (const K& k)
+    {
+        return k*k;
+    }
+    
+    /**
+       \private
+       \memberof FieldVector
+    */
+    template<class K>
+    inline typename FieldTraits<K>::real_type abs2 (const std::complex<K>& c)
+    {
+        return c.real()*c.real() + c.imag()*c.imag();
+    }
+    
+    /**
+       \private
+       \memberof FieldVector
+    */
+    template<class K, bool isInteger = std::numeric_limits<K>::is_integer>
+    struct Sqrt
+    {
+        static inline typename FieldTraits<K>::real_type sqrt (const K& k)
+        {
+            return std::sqrt(k);
+        }
+    };
+    
+    /**
+       \private
+       \memberof FieldVector
+    */
+    template<class K>
+    struct Sqrt<K, true>
+    {
+        static inline typename FieldTraits<K>::real_type sqrt (const K& k)
+        {
+            return std::sqrt((double)k);
+        }
+    };
+    
+    /**
+       \private
+       \memberof FieldVector
+    */
+    template<class K>
+    inline typename FieldTraits<K>::real_type sqrt (const K& k)
+    {
+        return Sqrt<K>::sqrt(k);
+    }
 
-  /**
-     \private
-     \memberof FieldVector
-  */
-  template<class K>
-  inline typename FieldTraits<K>::real_type fvmeta_abs2 (const std::complex<K>& c)
-  {
-	return c.real()*c.real() + c.imag()*c.imag();
-  }
+}
 
 #endif
 
@@ -357,17 +399,16 @@ representing a field and a compile-time given size.
 	//! Constructor making vector with identical coordinates
 	explicit FieldVector (const K& t)
 	{
-	  for (size_type i=0; i<SIZE; i++) p[i] = t;
+        for (size_type i=0; i<SIZE; i++) p[i] = t;
 	}
 
 	//===== assignment from scalar
     //! Assignment operator for scalar
 	FieldVector& operator= (const K& k)
 	{
-            //fvmeta_assignscalar<SIZE-1>::assignscalar(*this,k);
-            for (size_type i=0; i<SIZE; i++)
-                p[i] = k;
-	  return *this;   
+        for (size_type i=0; i<SIZE; i++)
+            p[i] = k;
+        return *this;   
 	}
 
 #else
@@ -420,14 +461,16 @@ representing a field and a compile-time given size.
     /** \brief copy constructor */
     FieldVector ( const FieldVector &other )
     {
-      for( size_type i = 0; i < SIZE; ++i )
-        p[ i ] = other[ i ];
+      // for( size_type i = 0; i < SIZE; ++i )
+      //   p[ i ] = other[ i ];
+        std::memcpy(p,other.p,SIZE*sizeof(K));
     }
 
       /** \brief Assigment from other vector */
       FieldVector& operator= (const FieldVector& other) {
-          for (size_type i=0; i<SIZE; i++)
-              p[i] = other[i];
+          std::memcpy(p,other.p,SIZE*sizeof(K));
+          // for (size_type i=0; i<SIZE; i++)
+          //     p[i] = other[i];
           return *this;
       }
       
@@ -639,57 +682,57 @@ representing a field and a compile-time given size.
 	//===== norms
 
 	//! one norm (sum over absolute values of entries)
-      typename FieldTraits<K>::real_type one_norm() const {
-          typename FieldTraits<K>::real_type result = 0;
-          for (int i=0; i<size; i++)
-              result += std::abs(p[i]);
-          return result;
-      }
+    typename FieldTraits<K>::real_type one_norm() const {
+        typename FieldTraits<K>::real_type result = 0;
+        for (int i=0; i<size; i++)
+            result += std::abs(p[i]);
+        return result;
+    }
 
 
 	//! simplified one norm (uses Manhattan norm for complex values)
     typename FieldTraits<K>::real_type one_norm_real () const
 	{
-          typename FieldTraits<K>::real_type result = 0;
-          for (int i=0; i<size; i++)
-              result += fvmeta_absreal(p[i]);
-          return result;
+        typename FieldTraits<K>::real_type result = 0;
+        for (int i=0; i<size; i++)
+            result += fvmeta::absreal(p[i]);
+        return result;
 	}
 
 	//! two norm sqrt(sum over squared values of entries)
     typename FieldTraits<K>::real_type two_norm () const
 	{
-          typename FieldTraits<K>::real_type result = 0;
-          for (int i=0; i<size; i++)
-              result += fvmeta_abs2(p[i]);
-          return std::sqrt(result);
+        typename FieldTraits<K>::real_type result = 0;
+        for (int i=0; i<size; i++)
+            result += fvmeta::abs2(p[i]);
+        return fvmeta::sqrt(result);
 	}
 
-      //! square of two norm (sum over squared values of entries), need for block recursion
-      typename FieldTraits<K>::real_type two_norm2 () const
+    //! square of two norm (sum over squared values of entries), need for block recursion
+    typename FieldTraits<K>::real_type two_norm2 () const
 	{
-            typename FieldTraits<K>::real_type result = 0;
-            for (int i=0; i<size; i++)
-                result += fvmeta_abs2(p[i]);
-            return result;
+        typename FieldTraits<K>::real_type result = 0;
+        for (int i=0; i<size; i++)
+            result += fvmeta::abs2(p[i]);
+        return result;
 	}
 
 	//! infinity norm (maximum of absolute values of entries)
     typename FieldTraits<K>::real_type infinity_norm () const
 	{
-          typename FieldTraits<K>::real_type result = 0;
-            for (int i=0; i<size; i++)
-                result = std::max(result, std::abs(p[i]));
-            return result;
+        typename FieldTraits<K>::real_type result = 0;
+        for (int i=0; i<size; i++)
+            result = std::max(result, std::abs(p[i]));
+        return result;
 	}
 
 	//! simplified infinity norm (uses Manhattan norm for complex values)
 	typename FieldTraits<K>::real_type infinity_norm_real () const
 	{
-            typename FieldTraits<K>::real_type result = 0;
-            for (int i=0; i<size; i++)
-                result = std::max(result, fvmeta_absreal(p[i]));
-            return result;
+        typename FieldTraits<K>::real_type result = 0;
+        for (int i=0; i<size; i++)
+            result = std::max(result, fvmeta::absreal(p[i]));
+        return result;
 	}
 #endif
 
@@ -982,37 +1025,37 @@ representing a field and a compile-time given size.
 	//! one norm (sum over absolute values of entries)
     typename FieldTraits<K>::real_type one_norm () const
 	{
-            return std::abs(p);
+        return std::abs(p);
 	}
 
 	//! simplified one norm (uses Manhattan norm for complex values)
     typename FieldTraits<K>::real_type one_norm_real () const
 	{
-	  return fvmeta_absreal(p);
+        return fvmeta::absreal(p);
 	}
 
 	//! two norm sqrt(sum over squared values of entries)
     typename FieldTraits<K>::real_type two_norm () const
 	{
-	  return sqrt(fvmeta_abs2(p));
+        return fvmeta::sqrt(fvmeta::abs2(p));
 	}
 
 	//! square of two norm (sum over squared values of entries), need for block recursion
     typename FieldTraits<K>::real_type two_norm2 () const
 	{
-	  return fvmeta_abs2(p);
+        return fvmeta::abs2(p);
 	}
 
 	//! infinity norm (maximum of absolute values of entries)
-    typename FieldTraits<K>::real_type infinity_norm () const
+    typename FieldTraits<K>::field_type infinity_norm () const
 	{
-            return std::abs(p);
+        return std::abs(p);
 	}
 
 	//! simplified infinity norm (uses Manhattan norm for complex values)
 	typename FieldTraits<K>::real_type infinity_norm_real () const
 	{
-	  return fvmeta_absreal(p);
+        return fvmeta::absreal(p);
 	}
 
 	//===== sizes
