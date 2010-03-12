@@ -461,16 +461,14 @@ namespace fvmeta
     /** \brief copy constructor */
     FieldVector ( const FieldVector &other )
     {
-      // for( size_type i = 0; i < SIZE; ++i )
-      //   p[ i ] = other[ i ];
-        std::memcpy(p,other.p,SIZE*sizeof(K));
+      for( size_type i = 0; i < SIZE; ++i )
+        p[ i ] = other[ i ];
     }
 
       /** \brief Assigment from other vector */
       FieldVector& operator= (const FieldVector& other) {
-          std::memcpy(p,other.p,SIZE*sizeof(K));
-          // for (size_type i=0; i<SIZE; i++)
-          //     p[i] = other[i];
+          for (size_type i=0; i<SIZE; i++)
+              p[i] = other[i];
           return *this;
       }
       
