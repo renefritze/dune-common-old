@@ -136,7 +136,7 @@ void ConfigParser::report(const string prefix) const
 	}
 }
 
-bool ConfigParser::hasKey(const string& key) const
+bool ConfigParser::hasKey(const string& key)
 {
 	string::size_type dot = key.find(".");
 	
@@ -146,14 +146,14 @@ bool ConfigParser::hasKey(const string& key) const
 		if (subs.count(prefix) == 0)
 			return false;
 		
-		const ConfigParser& s = sub(prefix);
+		ConfigParser& s = sub(prefix);
 		return s.hasKey(key.substr(dot+1));
 	}
 	else
 		return (values.count(key) != 0);
 }
 
-bool ConfigParser::hasSub(const string& key) const
+bool ConfigParser::hasSub(const string& key)
 {
 	string::size_type dot = key.find(".");
 	
@@ -163,7 +163,7 @@ bool ConfigParser::hasSub(const string& key) const
 		if (subs.count(prefix) == 0)
 			return false;
 		
-		const ConfigParser& s = sub(prefix);
+		ConfigParser& s = sub(prefix);
 		return s.hasSub(key.substr(dot+1));
 	}
 	else
@@ -181,19 +181,6 @@ ConfigParser& ConfigParser::sub(const string& key)
 	}
 	else
 		return subs[key];
-}
-
-const ConfigParser& ConfigParser::sub(const string& key) const
-{
-	string::size_type dot = key.find(".");
-	
-	if (dot != string::npos)
-	{
-                const ConfigParser& s = sub(key.substr(0,dot));
-		return s.sub(key.substr(dot+1));
-	}
-	else
-                return subs.at(key);
 }
 
 string& ConfigParser::operator[] (const string& key)
@@ -218,7 +205,7 @@ string& ConfigParser::operator[] (const string& key)
 string ConfigParser::get(const string& key, const string& defaultValue)
 {
 	if (hasKey(key))
-               return (*this)[key];
+		return (*this)[key];
 	else
 		return defaultValue;
 }
