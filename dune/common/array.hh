@@ -63,9 +63,6 @@ namespace Dune
       /** \brief Const reverse iterator type */
       typedef std::reverse_iterator<const_iterator>   const_reverse_iterator;
 
-      //! Create uninitialized array
-      array () {}
-      
       /** \brief Return array size */
       size_type size() const {return N;}
 
@@ -114,7 +111,6 @@ namespace Dune
         return a + N;
       }
 
-  protected:
       T a[(N > 0) ? N : 1];
   };
 
