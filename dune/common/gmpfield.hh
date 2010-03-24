@@ -33,6 +33,23 @@ namespace Dune
       return *this;
     }
     */
+
+    // type conversion operators
+    operator double () const
+    {
+      return this->get_d();
+    }
+
+    operator float () const
+    {
+      return this->get_d();
+    }
+
+    operator mpf_class () const
+    {
+      return static_cast<const mpf_class&>(*this);
+    }
+
   };
 
 
@@ -86,6 +103,16 @@ namespace Dune
     return out << static_cast<const mpf_class&>(value);
   }
 
+}
+
+namespace std
+{
+  template< unsigned int precision >
+  inline Dune::GMPField< precision >
+  sqrt ( const Dune::GMPField< precision > &a )
+  {
+    return Dune::GMPField< precision >(sqrt(static_cast<const mpf_class&>(a)));
+  }
 }
 
 #endif // HAVE_GMP
