@@ -1,6 +1,8 @@
 #ifndef DUNE_POLYALLOCATOR_HH
 #define DUNE_POLYALLOCATOR_HH
 
+#include <cstdlib>
+
 namespace Dune
 {
 
