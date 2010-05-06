@@ -4,6 +4,7 @@
 #define DUNE_CONFIGPARSER_HH
 
 
+#include <istream>
 #include <map>
 #include <vector>
 #include <string>
@@ -68,6 +69,18 @@ namespace Dune {
 			ConfigParser();
 			
 			
+            /** \brief parse C++ stream
+             *
+             * Parses C++ stream and build hierarchical config structure.
+             *
+             * \param in      The stream to parse
+             * \param srcname Name of the configuration source for error
+             *                messages, "stdin" or a filename.
+             */
+            void parseStream(std::istream& in,
+                             const std::string srcname = "stream");
+
+
 			/** \brief parse file
 			 * 
 			 * Parses file with given name and build hierarchical config structure.
