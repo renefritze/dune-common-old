@@ -6,6 +6,7 @@
 
 #include <istream>
 #include <map>
+#include <ostream>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -145,6 +146,17 @@ namespace Dune {
 			void report(const std::string prefix) const;
 			
 			
+            /** \brief print distinct substructure to stream
+             *
+			 * Prints all entries with given prefix.
+             *
+             * \param stream Stream to print to
+			 * \param prefix for key and substructure names
+			 */
+            void reportStream(std::ostream& stream,
+                              const std::string& prefix = "") const;
+
+
 			/** \brief get substructure by name
 			 * 
 			 * \param sub substructure name
