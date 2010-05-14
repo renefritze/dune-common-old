@@ -97,7 +97,7 @@ namespace Dune
   }
   
   /**
-   * @brief Adapter to turn a random access iteratorinto a properties map.
+   * @brief Adapter to turn a random access iterator into a property map.
    */
   template<class RAI, class IM, 
 	   class T = typename std::iterator_traits<RAI>::value_type,
@@ -169,7 +169,7 @@ namespace Dune
   };
 
   /**
-   * @brief An adaptor to turn an unique associative container
+   * @brief An adapter to turn an unique associative container
    * into a property map.
    */
   template<typename T>
@@ -285,7 +285,7 @@ namespace Dune
   };
 
   /**
-   * @brief A property map that applies the identy function to integers.
+   * @brief A property map that applies the identity function to integers.
    */
   struct IdentityMap
     : public RAPropertyMapHelper<std::size_t, IdentityMap>
@@ -312,14 +312,13 @@ namespace Dune
     /**
      * @brief Selector for the property map type.
      *
-     * If present the the type of the property map 
-     * is accessible via the typedef Type.
+     * If present the type of the property map is accessible via the typedef Type.
      */
     template<typename T, typename C>
     struct PropertyMapTypeSelector
     {
       /**
-       * @brief the tag idetifying the property.
+       * @brief the tag identifying the property.
        */
       typedef T Tag;
       /**
