@@ -19,19 +19,25 @@ ConfigParser::ConfigParser()
 {
 }
 
-void ConfigParser::parseFile(std::string file)
+void ConfigParser::parseFile(std::string file, bool overwrite)
 {
     ifstream in(file.c_str());
 
     if (!in)
         DUNE_THROW(IOError, "Could not open configuration file " << file);
 
-    parseStream(in, "file '" + file + "'");
+    parseStream(in, "file '" + file + "'", overwrite);
 }
 
 
 void ConfigParser::parseStream(std::istream& in,
-                               const std::string srcname)
+                               bool overwrite)
+{
+    parseStream(in, "stream", overwrite);
+}
+void ConfigParser::parseStream(std::istream& in,
+                               const std::string srcname,
+                               bool overwrite)
 {
 	string prefix;
 	set<string> keysInFile;
@@ -89,7 +95,8 @@ void ConfigParser::parseStream(std::istream& in,
                                    "' appears twice in " << srcname << " !");
 					else
 					{
-						(*this)[key] = value;
+                        if(overwrite || ! hasKey(key))
+                            (*this)[key] = value;
 						keysInFile.insert(key);
 					}
 				}
