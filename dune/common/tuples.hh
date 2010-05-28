@@ -1099,6 +1099,7 @@ struct ElementType
     return first_;
   }
  
+  /** }@ */
 #endif
 }
 #endif
