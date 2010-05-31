@@ -1,6 +1,9 @@
 #ifndef DUNE_IOS_HH
 #define DUNE_IOS_HH
-#include<ios>
+
+#include <ios>
+
+#include <dune/common/deprecated.hh>
 
 namespace Dune{
    /** @addtogroup Common
@@ -18,8 +21,9 @@ namespace Dune{
    * The constructor stores the flags currently set in the ios and the 
    * destructor sets these flags  in the ios object again.
    *
+   * \deprecated Use ios_base_all_saver instead.
    */
-  class IosFlagsRestorer
+  class DUNE_DEPRECATED IosFlagsRestorer
   {
   public:
     /**
