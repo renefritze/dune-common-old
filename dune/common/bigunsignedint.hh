@@ -53,10 +53,10 @@ namespace Dune
 	bigunsignedint ();
 
 	//! Construct from signed int
-    bigunsignedint (int x);
+       bigunsignedint (int x);
 
 	//! Construct from unsigned int
-    bigunsignedint (std::size_t x);
+        bigunsignedint (std::size_t x);
 
 	//! Print number in hex notation
 	void print (std::ostream& s) const ;
@@ -74,9 +74,13 @@ namespace Dune
 	bigunsignedint<k>& operator++ ();
 
 	//! divide
+        //! \warning This function is very slow and its usage should be
+        //! prevented if possible
 	bigunsignedint<k> operator/ (const bigunsignedint<k>& x) const;
 
 	//! modulo
+        //! \warning This function is very slow and its usage should be
+        //! prevented if possible
 	bigunsignedint<k> operator% (const bigunsignedint<k>& x) const;
 
 
