@@ -1,3 +1,5 @@
+// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+// vi: set ts=8 sw=2 et sts=2:
 #ifndef MISC_HH
 #define MISC_HH
 
