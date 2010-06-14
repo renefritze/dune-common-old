@@ -1,3 +1,6 @@
+// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// vi: set et ts=8 sw=4 sts=4:
+
 #ifndef DUNE_COMMON_MPIGUARD_HH
 #define DUNE_COMMON_MPIGUARD_HH
 
