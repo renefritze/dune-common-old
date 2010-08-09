@@ -66,8 +66,8 @@ namespace Dune
   public:
     enum{ 
       /**
-       * @brief Are we fake (i. e. pretend to have MPI support but are compiled
-       * without.
+       * @brief Are we fake (i.e. pretend to have MPI support but are compiled
+       * without.)
        */
       isFake = true
     };
