@@ -201,19 +201,19 @@ namespace Dune
 	  }
 	}
 
-	//! @copydoc CollectiveCommunication::rank()
+	//! @copydoc CollectiveCommunication::rank
 	int rank () const
 	{
 	  return me;
 	}
 
-	//! @copydoc CollectiveCommunication::size()
+	//! @copydoc CollectiveCommunication::size
 	int size () const
 	{
 	  return procs;
 	}
 
-	//! @copydoc CollectiveCommunication::sum(T&)
+	//! @copydoc CollectiveCommunication::sum
 	template<typename T>
 	T sum (T& in) const // MPI does not know about const :-(
 	{
@@ -222,14 +222,14 @@ namespace Dune
 	  return out;
 	}
 
-	//! @copydoc CollectiveCommunication::sum(T*,int)
+	//! @copydoc CollectiveCommunication::sum
 	template<typename T>
 	int sum (T* inout, int len) const
 	{
 	  return allreduce<std::plus<T> >(inout,len);
 	}
 
-	//! @copydoc CollectiveCommunication::prod(T&)
+	//! @copydoc CollectiveCommunication::prod
 	template<typename T>
 	T prod (T& in) const // MPI does not know about const :-(
 	{
@@ -238,14 +238,14 @@ namespace Dune
 	  return out;
 	}
 
-	//! @copydoc CollectiveCommunication::prod(T*,int)
+	//! @copydoc CollectiveCommunication::prod
 	template<typename T>
 	int prod (T* inout, int len) const
 	{
 	  return allreduce<std::plus<T> >(inout,len);
 	}
 
-	//! @copydoc CollectiveCommunication::min(T&)
+	//! @copydoc CollectiveCommunication::min
 	template<typename T>
 	T min (T& in) const // MPI does not know about const :-(
 	{
@@ -254,7 +254,7 @@ namespace Dune
 	  return out;
 	}
 
-	//! @copydoc CollectiveCommunication::min(T*,int)
+	//! @copydoc CollectiveCommunication::min
 	template<typename T>
 	int min (T* inout, int len) const
 	{
@@ -262,7 +262,7 @@ namespace Dune
 	}
 
     
-	//! @copydoc CollectiveCommunication::max(T&)
+	//! @copydoc CollectiveCommunication::max
 	template<typename T>
 	T max (T& in) const // MPI does not know about const :-(
 	{
@@ -271,20 +271,20 @@ namespace Dune
 	  return out;
 	}
 
-	//! @copydoc CollectiveCommunication::max(T*,int)
+	//! @copydoc CollectiveCommunication::max
 	template<typename T>
 	int max (T* inout, int len) const
 	{
 	  return allreduce<Max<T> >(inout,len);
 	}
 
-	//! @copydoc CollectiveCommunication::barrier()
+	//! @copydoc CollectiveCommunication::barrier
 	int barrier () const
 	{
 	  return MPI_Barrier(communicator);
 	}
 
-	//! @copydoc CollectiveCommunication::broadcast()
+	//! @copydoc CollectiveCommunication::broadcast
 	template<typename T>
 	int broadcast (T* inout, int len, int root) const
 	{

@@ -46,7 +46,7 @@ namespace fvmeta
 {
     /**
        \private
-       \memberof FieldVector
+       \memberof Dune::FieldVector
     */
     template<class K>
     inline typename FieldTraits<K>::real_type absreal (const K& k)
@@ -56,7 +56,7 @@ namespace fvmeta
 
     /**
        \private
-       \memberof FieldVector
+       \memberof Dune::FieldVector
     */
     template<class K>
     inline typename FieldTraits<K>::real_type absreal (const std::complex<K>& c)
@@ -66,7 +66,7 @@ namespace fvmeta
 
     /**
        \private
-       \memberof FieldVector
+       \memberof Dune::FieldVector
     */
     template<class K>
     inline typename FieldTraits<K>::real_type abs2 (const K& k)
@@ -76,7 +76,7 @@ namespace fvmeta
     
     /**
        \private
-       \memberof FieldVector
+       \memberof Dune::FieldVector
     */
     template<class K>
     inline typename FieldTraits<K>::real_type abs2 (const std::complex<K>& c)
@@ -86,7 +86,7 @@ namespace fvmeta
     
     /**
        \private
-       \memberof FieldVector
+       \memberof Dune::FieldVector
     */
     template<class K, bool isInteger = std::numeric_limits<K>::is_integer>
     struct Sqrt
@@ -99,7 +99,7 @@ namespace fvmeta
     
     /**
        \private
-       \memberof FieldVector
+       \memberof Dune::FieldVector
     */
     template<class K>
     struct Sqrt<K, true>
@@ -112,7 +112,7 @@ namespace fvmeta
     
     /**
        \private
-       \memberof FieldVector
+       \memberof Dune::FieldVector
     */
     template<class K>
     inline typename FieldTraits<K>::real_type sqrt (const K& k)
@@ -219,7 +219,7 @@ namespace fvmeta
     DifferenceType position_;
   };
 
-  //! Type Traits for Vector::Iterator vs (const Vector)::ConstIterator
+  //! Type Traits for Vector::Iterator vs const Vector::ConstIterator
   template<class T>
   struct IteratorType
   {
