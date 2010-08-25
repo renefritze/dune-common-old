@@ -13,7 +13,8 @@ namespace Dune
    * This file provides template constructs for calculation the 
    * greatest common divisor.
    */
-  
+
+#ifndef DOXYGEN
   /**
    * @brief Helper for calculating the gcd.
    */
@@ -55,6 +56,7 @@ namespace Dune
     const static long gcd=a;
   };
   
+#endif
   
   /**
    * @brief Calculator of the greatest common divisor.
