@@ -1,6 +1,6 @@
 // $Id: fvector.hh 6105 2010-08-25 16:06:36Z christi $
-#ifndef DUNE_FVECTOR_HH
-#define DUNE_FVECTOR_HH
+#ifndef DUNE_DYNVECTOR_HH
+#define DUNE_DYNVECTOR_HH
 
 #include<cmath>
 #include<cstddef>
