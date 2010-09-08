@@ -126,7 +126,26 @@ string& ParameterTree::operator[] (const string& key)
 	}
 }
 
-string ParameterTree::get(const string& key, const string& defaultValue)
+const string& ParameterTree::operator[] (const string& key) const
+{
+    string::size_type dot = key.find(".");
+    
+    if (dot != string::npos)
+    {
+        if (not(hasSub(key.substr(0,dot))))
+            DUNE_THROW(Dune::RangeError, "Key '" << key << "' not found in ParameterTree");
+        const ParameterTree& s = sub(key.substr(0,dot));
+        return s[key.substr(dot+1)];
+    }
+    else
+    {
+        if (not(hasKey(key)))
+            DUNE_THROW(Dune::RangeError, "Key '" << key << "' not found in ParameterTree");
+        return values.find(key)->second;
+    }
+}
+
+string ParameterTree::get(const string& key, const string& defaultValue) const
 {
 	if (hasKey(key))
 		return (*this)[key];
@@ -134,7 +153,7 @@ string ParameterTree::get(const string& key, const string& defaultValue)
 		return defaultValue;
 }
 
-string ParameterTree::get(const string& key, const char* defaultValue)
+string ParameterTree::get(const string& key, const char* defaultValue) const
 {
 	if (hasKey(key))
 		return (*this)[key];
@@ -143,7 +162,7 @@ string ParameterTree::get(const string& key, const char* defaultValue)
 }
 
 
-int ParameterTree::get(const string& key, int defaultValue)
+int ParameterTree::get(const string& key, int defaultValue) const
 {
 	stringstream stream;
 	stream << defaultValue;
@@ -152,7 +171,7 @@ int ParameterTree::get(const string& key, int defaultValue)
 	return atoi(ret.c_str());
 }
 
-double ParameterTree::get(const string& key, double defaultValue)
+double ParameterTree::get(const string& key, double defaultValue) const
 {
     if(hasKey(key))
         return atof((*this)[key].c_str());
@@ -160,7 +179,7 @@ double ParameterTree::get(const string& key, double defaultValue)
         return defaultValue;
 }
 
-bool ParameterTree::get(const string& key, bool defaultValue)
+bool ParameterTree::get(const string& key, bool defaultValue) const
 {
 	stringstream stream;
 	if (defaultValue)
@@ -177,7 +196,7 @@ bool ParameterTree::get(const string& key, bool defaultValue)
 namespace Dune {
 
 template<>
-string ParameterTree::get<string>(const string& key)
+string ParameterTree::get<string>(const string& key) const
 {
 	if (hasKey(key))
 		return (*this)[key];
@@ -186,7 +205,7 @@ string ParameterTree::get<string>(const string& key)
 }
 
 template<>
-int ParameterTree::get<int>(const string& key)
+int ParameterTree::get<int>(const string& key) const
 {
         if (hasKey(key))
             return std::atoi((*this)[key].c_str());
@@ -195,7 +214,7 @@ int ParameterTree::get<int>(const string& key)
 }
 
 template<>
-double ParameterTree::get<double>(const string& key)
+double ParameterTree::get<double>(const string& key) const
 {
     if (hasKey(key))
         return std::atof((*this)[key].c_str());
@@ -204,7 +223,7 @@ double ParameterTree::get<double>(const string& key)
 }
 
 template<>
-bool ParameterTree::get<bool>(const string& key)
+bool ParameterTree::get<bool>(const string& key) const
 {
         if (hasKey(key))
             return (std::atoi((*this)[key].c_str()) !=0 );
