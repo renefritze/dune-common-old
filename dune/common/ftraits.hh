@@ -11,7 +11,7 @@ namespace Dune {
    \brief Type Traits to retrieve the field and the real type of classes
 
    Type Traits to retrieve the field and the real type of classes
-   e.g. that of FIeldVector or FieldMatrix
+   e.g. that of FieldVector or FieldMatrix
 */
 template<class T>
 struct FieldTraits
