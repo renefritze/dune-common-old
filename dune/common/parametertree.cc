@@ -7,12 +7,22 @@
 #include <sstream>
 #include <fstream>
 #include <set>
+#include <algorithm>
 
 #include <dune/common/exceptions.hh>
 #include <dune/common/parametertree.hh>
 
 using namespace Dune;
 using namespace std;
+
+namespace {
+    struct ToLower {
+        int operator()(int c)
+        {
+            return std::tolower(c);
+        }
+    };
+}
 
 ParameterTree::ParameterTree()
 {
@@ -188,6 +198,13 @@ bool ParameterTree::get(const string& key, bool defaultValue) const
 		stream << 0;
 	
 	string ret = get(key, stream.str());
+    std::transform(ret.begin(), ret.end(), ret.begin(), ToLower());
+
+    if (ret == "yes" || ret == "true")
+        return true;
+	
+    if (ret == "no" || ret == "false")
+        return true;
 	
 	return (atoi(ret.c_str()) !=0 );
 }
@@ -225,10 +242,21 @@ double ParameterTree::get<double>(const string& key) const
 template<>
 bool ParameterTree::get<bool>(const string& key) const
 {
-        if (hasKey(key))
-            return (std::atoi((*this)[key].c_str()) !=0 );
+    if (hasKey(key))
+    {
 
-        DUNE_THROW(RangeError, "Key '" << key << "' not found in parameter file!");
+        string ret = (*this)[key];
+        std::transform(ret.begin(), ret.end(), ret.begin(), ToLower());
+        
+        if (ret == "yes" || ret == "true")
+            return true;
+	
+        if (ret == "no" || ret == "false")
+            return true;
+	
+        return (std::atoi(ret.c_str()) !=0 );
+    }
+    DUNE_THROW(RangeError, "Key '" << key << "' not found in parameter file!");
 }
 
 
