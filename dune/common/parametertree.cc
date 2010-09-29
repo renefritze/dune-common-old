@@ -204,7 +204,7 @@ bool ParameterTree::get(const string& key, bool defaultValue) const
         return true;
 	
     if (ret == "no" || ret == "false")
-        return true;
+        return false;
 	
 	return (atoi(ret.c_str()) !=0 );
 }
@@ -252,7 +252,7 @@ bool ParameterTree::get<bool>(const string& key) const
             return true;
 	
         if (ret == "no" || ret == "false")
-            return true;
+            return false;
 	
         return (std::atoi(ret.c_str()) !=0 );
     }
