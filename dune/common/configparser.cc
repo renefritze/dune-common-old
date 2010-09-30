@@ -122,8 +122,14 @@ void ConfigParser::parseCmd(int argc, char* argv [])
 			k = argv[i]+1;
 			continue;
 		}
-		else
-			(*this)[k] = argv[i];
+        else
+        {
+            if (k.size())
+            {
+                (*this)[k] = argv[i];
+            }
+            k.clear();
+        }
 	}
 
 	return;
