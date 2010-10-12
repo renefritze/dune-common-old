@@ -82,7 +82,9 @@ public:
       a = v;
 
       b = (v == a);
+      b = (v != a);
       b = (a == v);
+      b = (a != v);
 
       a = v + a;
       a = v - a;
@@ -110,6 +112,21 @@ public:
       v += a;
       v *= a;
       v /= a;
+
+      b = (v<a);
+      b = (v<=a);
+      b = (v>=a);
+      b = (v>a);
+
+      b = (v<w);
+      b = (v<=w);
+      b = (v>=w);
+      b = (v>w);
+
+      b = (a<w);
+      b = (a<=w);
+      b = (a>=w);
+      b = (a>w);
     }
 };
 
