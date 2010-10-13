@@ -35,6 +35,8 @@ struct FieldVectorMainTest
     FieldVector<ft,d> v(1);
     FieldVector<ft,d> w(2);
     FieldVector<ft,d> z(2);
+    const FieldVector<ft,d> x(z);
+    a = x[0];
     bool b;
     rt n;
 
