@@ -550,11 +550,10 @@ namespace Dune
 
 namespace std
 {
-  template<class T> struct numeric_limits;
-  
   template<int k>
-  struct numeric_limits<Dune::bigunsignedint<k> >
+  class numeric_limits<Dune::bigunsignedint<k> >
   {
+  public:
     static const bool is_specialized = true;
     
     static Dune::bigunsignedint<k> min()
@@ -566,7 +565,7 @@ namespace std
     {
       Dune::bigunsignedint<k> max_;
       for(std::size_t i=0; i < Dune::bigunsignedint<k>::n; ++i)
-	max_.digit[i]=std::numeric_limits<unsigned short>::max();
+        max_.digit[i]=std::numeric_limits<unsigned short>::max();
       return max_;
     }
     
