@@ -25,7 +25,7 @@ public:
     }
 
 private:
-    mutable bool& deleted_;
+    bool& deleted_;
 };
 
 int main(){
