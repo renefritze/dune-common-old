@@ -69,7 +69,7 @@ subclasses and to throw them in a simple manner
 */
 
 /* forward declarations */
-struct Exception;
+class Exception;
 struct ExceptionHook;
 
 /*! \class Exception
