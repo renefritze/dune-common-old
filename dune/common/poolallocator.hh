@@ -1,3 +1,5 @@
+// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+// vi: set et ts=8 sw=2 sts=2:
 // $Id$
 #ifndef DUNE_COMMON_POOLALLOCATOR_HH
 #define DUNE_COMMON_POOLALLOCATOR_HH
@@ -10,10 +12,11 @@
 #include<cassert>
 #include<new>
 
-template<std::size_t size, typename T>
-int testPool();
-
 //forward declarations.
+
+// we need to know the test function to declare it friend
+template<std::size_t size, typename T>
+struct testPoolMain;
 
 namespace Dune
 {
@@ -81,7 +84,8 @@ namespace Dune
   template<class T, std::size_t s>
   class Pool
   {
-    friend int ::testPool<s,T>();
+    // make the test function friend
+    friend struct ::testPoolMain<s,T>;
     
     //friend std::ostream& std::operator<<<>(std::ostream&,Pool<T,s>&);
     template< class, std::size_t > friend class PoolAllocator;
@@ -94,59 +98,58 @@ namespace Dune
       Reference *next_;
     };
 
-    public:
+  public:
 
     /** @brief The type of object we allocate memory for. */
     typedef T MemberType;
     enum 
-      {
-	
-	/**
-	 * @brief The size of a union of Reference and MemberType.
-	 */
-	unionSize = ((sizeof(MemberType) < sizeof(Reference)) ? 
-		     sizeof(Reference) : sizeof(MemberType)),
-		     
-	/**
-	 * @brief Size requirement. At least one object has to
-	 * stored.
-	 */
-	size = ((sizeof(MemberType) <= s && sizeof(Reference) <= s)? 
-		s : unionSize),
-	
-	/**
-	 * @brief The alignment that suits both the MemberType and 
-	 * the Reference (i.e. their least common multiple).
-	 */
-	alignment = Lcm<AlignmentOf<MemberType>::value,AlignmentOf<Reference>::value>::value,
-
-	/**
-	 * @brief The aligned size of the type.
-	 *
-	 * This size is bigger than sizeof of the type and a multiple of
-	 * the alignment requirement.
-	 */
-	alignedSize = ((unionSize % alignment == 0) ?
-		       unionSize : 
-		       ((unionSize / alignment + 1) * alignment)),
-
-	/** 
-	 * @brief The size of each chunk memory chunk. 
-	 *
-	 * Will be adapted to be a multiple of the alignment plus
-	 * an offset to handle the case that the pointer to the memory
-	 * does not satisfy the alignment requirements.
-	 */
-	chunkSize = ((size % alignment == 0)? 
-		     size : ((size / alignment + 1)* alignment)) 
-	+ alignment - 1,
-
-	/**
-	 * @brief The number of element each chunk can hold.
-	 */
-	elements = ((chunkSize - alignment + 1)/ alignedSize)
-      };
-
+    {
+      /**
+       * @brief The size of a union of Reference and MemberType.
+       */
+      unionSize = ((sizeof(MemberType) < sizeof(Reference)) ? 
+        sizeof(Reference) : sizeof(MemberType)),
+      
+      /**
+       * @brief Size requirement. At least one object has to
+       * stored.
+       */
+      size = ((sizeof(MemberType) <= s && sizeof(Reference) <= s)? 
+        s : unionSize),
+      
+      /**
+       * @brief The alignment that suits both the MemberType and 
+       * the Reference (i.e. their least common multiple).
+       */
+      alignment = Lcm<AlignmentOf<MemberType>::value,AlignmentOf<Reference>::value>::value,
+      
+      /**
+       * @brief The aligned size of the type.
+       *
+       * This size is bigger than sizeof of the type and a multiple of
+       * the alignment requirement.
+       */
+      alignedSize = ((unionSize % alignment == 0) ?
+        unionSize : 
+        ((unionSize / alignment + 1) * alignment)),
+      
+      /** 
+       * @brief The size of each chunk memory chunk. 
+       *
+       * Will be adapted to be a multiple of the alignment plus
+       * an offset to handle the case that the pointer to the memory
+       * does not satisfy the alignment requirements.
+       */
+      chunkSize = ((size % alignment == 0)? 
+        size : ((size / alignment + 1)* alignment)) 
+      + alignment - 1,
+      
+      /**
+       * @brief The number of element each chunk can hold.
+       */
+      elements = ((chunkSize - alignment + 1)/ alignedSize)
+    };
+    
   private:
     /** @brief Chunk of memory managed by the pool. */
     struct Chunk
@@ -170,15 +173,15 @@ namespace Dune
        * @brief Constructor.
        */
       Chunk()
-      {	
-	// Make sure the alignment is correct!
-	// long long should be 64bit safe!
-	unsigned long long lmemory = reinterpret_cast<unsigned long long>(chunk_);
-	if(lmemory % alignment != 0)
-	  lmemory = (lmemory / alignment + 1)
-	    * alignment;
-	
-	memory_ = reinterpret_cast<char *>(lmemory);
+      {
+        // Make sure the alignment is correct!
+        // long long should be 64bit safe!
+        unsigned long long lmemory = reinterpret_cast<unsigned long long>(chunk_);
+        if(lmemory % alignment != 0)
+          lmemory = (lmemory / alignment + 1)
+            * alignment;
+        
+        memory_ = reinterpret_cast<char *>(lmemory);
       }
     };
   
@@ -249,14 +252,14 @@ namespace Dune
     typedef T value_type;
 
     enum
-      {
-	/**
-	 * @brief The number of objects to fit into one memory chunk
-	 * allocated.
-	 */
-	size=s*sizeof(value_type)
-      };
-
+    {
+      /**
+       * @brief The number of objects to fit into one memory chunk
+       * allocated.
+       */
+      size=s*sizeof(value_type)
+    };
+    
     /**
      * @brief The pointer type.
      */
@@ -462,7 +465,7 @@ namespace Dune
     dune_static_assert(elements>=1, "Library Error: we need to hold at least one element!");
     dune_static_assert(elements*alignedSize<=chunkSize, "Library Error: aligned elements must fit into chuck!");
     /*    std::cout<<"s= "<<S<<" : T: "<<sizeof(T)<<" Reference: "<<sizeof(Reference)<<" union: "<<unionSize<<" alignment: "<<alignment<<
-	  "aligned: "<<alignedSize<<" chunk: "<< chunkSize<<" elements: "<<elements<<std::endl;*/
+          "aligned: "<<alignedSize<<" chunk: "<< chunkSize<<" elements: "<<elements<<std::endl;*/
   }
   
   template<class T, std::size_t S>
@@ -478,11 +481,11 @@ namespace Dune
     Chunk *current=chunks_;
     
     while(current!=0)
-      {
-	Chunk *tmp = current;
-	current = current->next_;
-	delete tmp;
-      }
+    {
+      Chunk *tmp = current;
+      current = current->next_;
+      delete tmp;
+    }
   }
 
   template<class T, std::size_t S>

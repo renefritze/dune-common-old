@@ -1,3 +1,5 @@
+// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+// vi: set et ts=8 sw=2 sts=2:
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -17,8 +19,10 @@ struct UnAligned
 
 
   
-  template<std::size_t size, typename T>
-  int testPool()
+template<std::size_t size, typename T>
+struct testPoolMain
+{
+  static int test()
   {
     int ret=0;
     
@@ -47,44 +51,44 @@ struct UnAligned
 
       if(element< reinterpret_cast<unsigned long>(currentChunk->chunk_))
       {
-	std::cerr <<" buffer overflow during first alloc: "<<reinterpret_cast<unsigned long>(currentChunk->chunk_)
-		  <<">"<<element<<"+"<<sizeof(T)<<std::endl;
-	return ++ret;
+        std::cerr <<" buffer overflow during first alloc: "<<reinterpret_cast<unsigned long>(currentChunk->chunk_)
+                  <<">"<<element<<"+"<<sizeof(T)<<std::endl;
+        return ++ret;
       }
       
       if(end < element + sizeof(T)){
-	std::cerr <<" buffer overflow during first alloc: "<<end<<"<"<<element<<"+"<<sizeof(T)<<std::endl;
-	return ++ret;
+        std::cerr <<" buffer overflow during first alloc: "<<end<<"<"<<element<<"+"<<sizeof(T)<<std::endl;
+        return ++ret;
       }
       
       oelements[chunk*elements]=element;
       
       for(int i=1; i < elements; i++)
-	{
-	  element = reinterpret_cast<unsigned long>(pool.allocate());
-	  celement = reinterpret_cast<void*>(element);
+      {
+        element = reinterpret_cast<unsigned long>(pool.allocate());
+        celement = reinterpret_cast<void*>(element);
 	  
-	  //  std::cout << element<<" "<<celement<<",  "<<std::endl;
+        //  std::cout << element<<" "<<celement<<",  "<<std::endl;
 
-	  if(element< reinterpret_cast<unsigned long>(currentChunk->chunk_)){
-	    std::cerr <<" buffer underflow during first alloc: "<<reinterpret_cast<unsigned long>(currentChunk->chunk_)
-		      <<">"<<element<<"+"<<sizeof(T)<<std::endl;
-	    return ++ret;
-	  }
+        if(element< reinterpret_cast<unsigned long>(currentChunk->chunk_)){
+          std::cerr <<" buffer underflow during first alloc: "<<reinterpret_cast<unsigned long>(currentChunk->chunk_)
+                    <<">"<<element<<"+"<<sizeof(T)<<std::endl;
+          return ++ret;
+        }
 	  
-	  if(end < element + sizeof(T)){
-	    std::cerr <<" buffer overflow during "<<i<<" alloc: "<<end<<"<"<<element+sizeof(T)<<std::endl;
-	    return ++ret;
+        if(end < element + sizeof(T)){
+          std::cerr <<" buffer overflow during "<<i<<" alloc: "<<end<<"<"<<element+sizeof(T)<<std::endl;
+          return ++ret;
 	    
-	  }
+        }
 
-	  if(oelements[chunk*elements+i-1]+sizeof(T)>element){
-	    std::cerr<<"allocated elements overlap!"<<std::endl;
-	    return ++ret;
-	  }
+        if(oelements[chunk*elements+i-1]+sizeof(T)>element){
+          std::cerr<<"allocated elements overlap!"<<std::endl;
+          return ++ret;
+        }
 	  
-	  oelements[chunk*elements+i]=element;
-	}
+        oelements[chunk*elements+i]=element;
+      }
     }
 
 
@@ -95,6 +99,7 @@ struct UnAligned
 
     return ret;
   }
+};
 
 template<typename T>
 int testPool()
@@ -106,14 +111,15 @@ int testPool()
   std::cout<<"Checking "<<typeid(T).name()<<" sizeof="<<sizeof(T)<<" with size "<< size<<
     " alignment="<<AlignmentOf<T>::value<<std::endl;
 
-  ret += testPool<0,T>();
-  ret += testPool<size,T>();
-  ret += testPool<5*size,T>();
-  ret += testPool<11*size,T>();
-  ret += testPool<33*size,T>();
+  ret += testPoolMain<0,T>::test();
+  ret += testPoolMain<size,T>::test();
+  ret += testPoolMain<5*size,T>::test();
+  ret += testPoolMain<11*size,T>::test();
+  ret += testPoolMain<33*size,T>::test();
   
   return ret;
 }   
+
 int main(int argc, char **argv)
 {
   int ret=0;
