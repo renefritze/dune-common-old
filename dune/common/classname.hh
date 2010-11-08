@@ -3,7 +3,7 @@
 
 /** \file
  * \brief A free function to provide the demangled class name 
- *        of a given object as a string
+ *        of a given object or type as a string
  */
 
 #ifdef __GNUC__
@@ -24,5 +24,17 @@ namespace Dune {
 #endif
     };
 
+    /** \brief Provide the demangled class name of a type T as a string */
+    template <class T>
+    std::string className()
+    {
+#ifdef __GNUC__
+        int status;
+        return abi::__cxa_demangle(typeid(T).name(),0,0,&status);
+#else
+        return typeid(T).name();
+#endif
+    };
+    
 }
 #endif  // DUNE_CLASSNAME_HH
