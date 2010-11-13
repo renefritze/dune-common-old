@@ -220,54 +220,54 @@ namespace Dune {
   class DenseVector
   {
     typedef DenseMatVecTraits<V> Traits;
-	// typedef typename Traits::value_type K;
+    // typedef typename Traits::value_type K;
 
     // Curiously recurring template pattern
     V & asImp() { return static_cast<V&>(*this); }
     const V & asImp() const { return static_cast<const V&>(*this); }
     
   public:
-	//===== type definitions and constants
+    //===== type definitions and constants
 
     //! type of derived vector class
     typedef typename Traits::derived_type derived_type;
 
-	//! export the type representing the field
-	typedef typename Traits::value_type value_type;
+    //! export the type representing the field
+    typedef typename Traits::value_type value_type;
 
-	//! export the type representing the field
-	typedef typename Traits::value_type field_type;
+    //! export the type representing the field
+    typedef typename Traits::value_type field_type;
 
-	//! export the type representing the components
-	typedef typename Traits::value_type block_type;
+    //! export the type representing the components
+    typedef typename Traits::value_type block_type;
 
     //! The type used for the index access and size operation
     typedef typename Traits::size_type size_type;
     
-	//! We are at the leaf of the block recursion
-	enum {
-	  //! The number of block levels we contain
-	  blocklevel = 1
-	};
+    //! We are at the leaf of the block recursion
+    enum {
+      //! The number of block levels we contain
+      blocklevel = 1
+    };
 
-	//===== assignment from scalar
+    //===== assignment from scalar
     //! Assignment operator for scalar
-	inline derived_type& operator= (const value_type& k)
-	{
+    inline derived_type& operator= (const value_type& k)
+    {
       for (size_type i=0; i<size(); i++)
         asImp()[i] = k;
       return asImp();   
-	}
+    }
 
-	//===== access to components
+    //===== access to components
 
-	//! random access
-	value_type & operator[] (size_type i)
+    //! random access
+    value_type & operator[] (size_type i)
     {
       return asImp().vec_access(i);
     }
 
-	const value_type & operator[] (size_type i) const
+    const value_type & operator[] (size_type i) const
     {
       return asImp().vec_access(i);
     }
@@ -278,152 +278,152 @@ namespace Dune {
       return asImp().vec_size();
     }
         
-	//! Iterator class for sequential access
+    //! Iterator class for sequential access
     typedef DenseIterator<DenseVector,value_type> Iterator;
-	//! typedef for stl compliant access
+    //! typedef for stl compliant access
     typedef Iterator iterator;
     
-	//! begin iterator
-	Iterator begin ()
-	{
-	  return Iterator(*this,0);
-	}
+    //! begin iterator
+    Iterator begin ()
+    {
+      return Iterator(*this,0);
+    }
 
-	//! end iterator
-	Iterator end ()
-	{
-	  return Iterator(*this,size());
-	}
+    //! end iterator
+    Iterator end ()
+    {
+      return Iterator(*this,size());
+    }
 
-	//! begin iterator
-	Iterator rbegin ()
-	{
-	  return Iterator(*this,size()-1);
-	}
+    //! begin iterator
+    Iterator rbegin ()
+    {
+      return Iterator(*this,size()-1);
+    }
 
-	//! end iterator
-	Iterator rend ()
-	{
-	  return Iterator(*this,-1);
-	}
+    //! end iterator
+    Iterator rend ()
+    {
+      return Iterator(*this,-1);
+    }
 
-	//! return iterator to given element or end()
-	Iterator find (size_type i)
-	{
+    //! return iterator to given element or end()
+    Iterator find (size_type i)
+    {
       return Iterator(*this,std::min(i,size()));
-	}
+    }
 
-	//! ConstIterator class for sequential access
+    //! ConstIterator class for sequential access
     typedef DenseIterator<const DenseVector,const value_type> ConstIterator;
-	//! typedef for stl compliant access
+    //! typedef for stl compliant access
     typedef ConstIterator const_iterator;
 
-	//! begin ConstIterator
-	ConstIterator begin () const
-	{
-	  return ConstIterator(*this,0);
-	}
+    //! begin ConstIterator
+    ConstIterator begin () const
+    {
+      return ConstIterator(*this,0);
+    }
 
-	//! end ConstIterator
-	ConstIterator end () const
-	{
-	  return ConstIterator(*this,size());
-	}
+    //! end ConstIterator
+    ConstIterator end () const
+    {
+      return ConstIterator(*this,size());
+    }
 
-	//! begin ConstIterator
-	ConstIterator rbegin () const
-	{
-	  return ConstIterator(*this,size()-1);
-	}
+    //! begin ConstIterator
+    ConstIterator rbegin () const
+    {
+      return ConstIterator(*this,size()-1);
+    }
 
-	//! end ConstIterator
-	ConstIterator rend () const
-	{
-	  return ConstIterator(*this,-1);
-	}
+    //! end ConstIterator
+    ConstIterator rend () const
+    {
+      return ConstIterator(*this,-1);
+    }
 
-	//! return iterator to given element or end()
-	ConstIterator find (size_type i) const
-	{
+    //! return iterator to given element or end()
+    ConstIterator find (size_type i) const
+    {
       return ConstIterator(*this,std::min(i,size()));
-	}
+    }
     
-	//===== vector space arithmetic
+    //===== vector space arithmetic
 
-	//! vector space addition
-	derived_type& operator+= (const DenseVector& y)
-	{
+    //! vector space addition
+    derived_type& operator+= (const DenseVector& y)
+    {
       assert(y.size() == size());
       for (size_type i=0; i<size(); i++)
         (*this)[i] += y[i];
-	  return asImp();
-	}
+      return asImp();
+    }
 
-	//! vector space subtraction
-	derived_type& operator-= (const DenseVector& y)
-	{
+    //! vector space subtraction
+    derived_type& operator-= (const DenseVector& y)
+    {
       assert(y.size() == size());
       for (size_type i=0; i<size(); i++)
         (*this)[i] -= y[i];
-	  return asImp();
-	}
+      return asImp();
+    }
 
-	//! Binary vector addition
-	derived_type operator+ (const DenseVector& b) const
-	{
-	  derived_type z = asImp();
-	  return (z+=b);
-	}
+    //! Binary vector addition
+    derived_type operator+ (const DenseVector& b) const
+    {
+      derived_type z = asImp();
+      return (z+=b);
+    }
 
-	//! Binary vector subtraction
-	derived_type operator- (const DenseVector& b) const
-	{
-	  derived_type z = asImp();
-	  return (z-=b);
-	}
+    //! Binary vector subtraction
+    derived_type operator- (const DenseVector& b) const
+    {
+      derived_type z = asImp();
+      return (z-=b);
+    }
 
-	//! vector space add scalar to all comps
-	derived_type& operator+= (const value_type& k)
-	{
+    //! vector space add scalar to all comps
+    derived_type& operator+= (const value_type& k)
+    {
       for (size_type i=0; i<size(); i++)
         (*this)[i] += k;
-	  return asImp();
-	}
+      return asImp();
+    }
 
-	//! vector space subtract scalar from all comps
-	derived_type& operator-= (const value_type& k)
-	{
+    //! vector space subtract scalar from all comps
+    derived_type& operator-= (const value_type& k)
+    {
       for (size_type i=0; i<size(); i++)
         (*this)[i] -= k;
       return asImp();
-	}
+    }
 
-	//! vector space multiplication with scalar
-	derived_type& operator*= (const value_type& k)
-	{
+    //! vector space multiplication with scalar
+    derived_type& operator*= (const value_type& k)
+    {
       for (size_type i=0; i<size(); i++)
         (*this)[i] *= k;
-	  return asImp();
-	}
+      return asImp();
+    }
 
-	//! vector space division by scalar
-	derived_type& operator/= (const value_type& k)
-	{
+    //! vector space division by scalar
+    derived_type& operator/= (const value_type& k)
+    {
       for (size_type i=0; i<size(); i++)
         (*this)[i] /= k;
-	  return asImp();
-	}
+      return asImp();
+    }
 
-	//! Binary vector comparison
-	bool operator== (const DenseVector& y) const
-	{
+    //! Binary vector comparison
+    bool operator== (const DenseVector& y) const
+    {
       assert(y.size() == size());
       for (size_type i=0; i<size(); i++)
         if ((*this)[i]!=y[i])
           return false;
 
       return true;
-	}
+    }
 
     //! Binary vector incomparison
     bool operator!= (const DenseVector& y) const
@@ -432,30 +432,30 @@ namespace Dune {
     }
     
 
-	//! vector space axpy operation ( *this += a y )
-	derived_type& axpy (const value_type& a, const DenseVector& y)
-	{
+    //! vector space axpy operation ( *this += a y )
+    derived_type& axpy (const value_type& a, const DenseVector& y)
+    {
       assert(y.size() == size());
       for (size_type i=0; i<size(); i++)
         (*this)[i] += a*y[i];
-	  return asImp();
-	}
+      return asImp();
+    }
 
-	//===== Euclidean scalar product
+    //===== Euclidean scalar product
 
-	//! scalar product (x^T y)
+    //! scalar product (x^T y)
     value_type operator* (const DenseVector& y) const
-	{
+    {
       assert(y.size() == size());
       value_type result( 0 );
       for (size_type i=0; i<size(); i++)
         result += (*this)[i]*y[i];
       return result;
-	}
+    }
 
-	//===== norms
+    //===== norms
 
-	//! one norm (sum over absolute values of entries)
+    //! one norm (sum over absolute values of entries)
     typename FieldTraits<value_type>::real_type one_norm() const {
       typename FieldTraits<value_type>::real_type result( 0 );
       for (size_type i=0; i<size(); i++)
@@ -464,64 +464,64 @@ namespace Dune {
     }
 
 
-	//! simplified one norm (uses Manhattan norm for complex values)
+    //! simplified one norm (uses Manhattan norm for complex values)
     typename FieldTraits<value_type>::real_type one_norm_real () const
-	{
+    {
       typename FieldTraits<value_type>::real_type result( 0 );
       for (size_type i=0; i<size(); i++)
         result += fvmeta::absreal((*this)[i]);
       return result;
-	}
+    }
 
-	//! two norm sqrt(sum over squared values of entries)
+    //! two norm sqrt(sum over squared values of entries)
     typename FieldTraits<value_type>::real_type two_norm () const
-	{
+    {
       typename FieldTraits<value_type>::real_type result( 0 );
       for (size_type i=0; i<size(); i++)
         result += fvmeta::abs2((*this)[i]);
       return fvmeta::sqrt(result);
-	}
+    }
 
     //! square of two norm (sum over squared values of entries), need for block recursion
     typename FieldTraits<value_type>::real_type two_norm2 () const
-	{
+    {
       typename FieldTraits<value_type>::real_type result( 0 );
       for (size_type i=0; i<size(); i++)
         result += fvmeta::abs2((*this)[i]);
       return result;
-	}
+    }
 
-	//! infinity norm (maximum of absolute values of entries)
+    //! infinity norm (maximum of absolute values of entries)
     typename FieldTraits<value_type>::real_type infinity_norm () const
-	{
+    {
       typename FieldTraits<value_type>::real_type result( 0 );
       for (size_type i=0; i<size(); i++)
         result = std::max(result, std::abs((*this)[i]));
       return result;
-	}
+    }
 
-	//! simplified infinity norm (uses Manhattan norm for complex values)
-	typename FieldTraits<value_type>::real_type infinity_norm_real () const
-	{
+    //! simplified infinity norm (uses Manhattan norm for complex values)
+    typename FieldTraits<value_type>::real_type infinity_norm_real () const
+    {
       typename FieldTraits<value_type>::real_type result( 0 );
       for (size_type i=0; i<size(); i++)
         result = std::max(result, fvmeta::absreal((*this)[i]));
       return result;
-	}
+    }
 
-	//===== sizes
+    //===== sizes
 
-	//! number of blocks in the vector (are of size 1 here)
-	size_type N () const
-	{
-	  return size();
-	}
+    //! number of blocks in the vector (are of size 1 here)
+    size_type N () const
+    {
+      return size();
+    }
 
-	//! dimension of the vector space
-	size_type dim () const
-	{
-	  return size();
-	}
+    //! dimension of the vector space
+    size_type dim () const
+    {
+      return size();
+    }
 
   };
 
