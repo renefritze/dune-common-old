@@ -159,7 +159,7 @@ namespace Dune {
      @brief Stream for error messages. 
 
      Only packages integrating Dune
-     completely will redirect it. The output of derr is independant on
+     completely will redirect it. The output of derr is independent of
      the debug-level, only the activation-flag is checked.
   */
   extern DErrType derr;

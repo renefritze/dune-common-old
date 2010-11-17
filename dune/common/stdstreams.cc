@@ -36,7 +36,7 @@ file so that they can be compiled into libdune
   DGraveType dgrave(std::cerr);
 
   /* stream for error messages: only packages integrating Dune
-    completely will redirect it. The output of derr is independant on
+    completely will redirect it. The output of derr is independent of
     the debug-level, only the activation-flag is checked */
   DErrType derr(std::cerr);
 
