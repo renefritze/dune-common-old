@@ -168,6 +168,7 @@ int main(int argc, char** argv) {
  */
 struct ExceptionHook
 {
+  virtual ~ExceptionHook() {}
   virtual void operator () () = 0;
 };
 
