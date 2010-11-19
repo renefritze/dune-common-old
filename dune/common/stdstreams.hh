@@ -83,6 +83,10 @@ namespace Dune {
   /*! 
     \brief stream for very verbose output.
     
+    \code
+#include <dune/common/stdstreams.hh>
+    \endcode
+
     Information on the lowest
     level. This is expected to report insane amounts of
     information. Use of the activation-flag to only generate output
@@ -102,7 +106,13 @@ namespace Dune {
   */
   typedef DebugStream<VERBOSE_DEBUG_LEVEL, MINIMAL_DEBUG_LEVEL> DVerbType;
 
-  /** @brief Singleton of verbose debug stream. */
+  /**
+   * @brief Singleton of verbose debug stream.
+   *
+   * \code
+#include <dune/common/stdstreams.hh>
+   * \endcode
+   */
   extern DVerbType dverb;
 
   /** 
@@ -120,6 +130,10 @@ namespace Dune {
   /** 
       @brief Stream for informative output.
       
+      \code
+#include <dune/common/stdstreams.hh>
+      \endcode
+
       Summary infos on what a module
       does, runtimes, etc. 
   */
@@ -137,7 +151,13 @@ namespace Dune {
   */
   typedef DebugStream<WARN_DEBUG_LEVEL, MINIMAL_DEBUG_LEVEL> DWarnType;
 
-  /** @brief Stream for warnings indicating problems. */
+  /**
+   * @brief Stream for warnings indicating problems.
+   *
+   * \code
+#include <dune/common/stdstreams.hh>
+   * \endcode
+   */
   extern DWarnType dwarn;
 
   /** 
@@ -149,7 +169,13 @@ namespace Dune {
   /** @brief Type of debug stream for fatal errors.*/
   typedef DebugStream<GRAVE_DEBUG_LEVEL, MINIMAL_DEBUG_LEVEL> DGraveType;
 
-  /**  @brief Stream for warnings indicating fatal errors.*/
+  /**
+   * @brief Stream for warnings indicating fatal errors.
+   *
+   * \code
+#include <dune/common/stdstreams.hh>
+   * \endcode
+   */
   extern DGraveType dgrave;
 
   /** @brief The type of the stream used for error messages. */
@@ -157,6 +183,10 @@ namespace Dune {
 
   /*!
      @brief Stream for error messages. 
+
+     \code
+#include <dune/common/stdstreams.hh>
+     \endcode
 
      Only packages integrating Dune
      completely will redirect it. The output of derr is independent of
