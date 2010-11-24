@@ -13,7 +13,7 @@
 
 namespace Dune
 {
-/** @addtogroup ISTL_Comm
+/** @addtogroup Common_Parallel
    *
    * @{
    */
