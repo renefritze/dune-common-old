@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef DUNE_ISTL_LOCALINDEX_HH
-#define DUNE_ISTL_LOCALINDEX_HH
+#ifndef DUNE_COMMON_LOCALINDEX_HH
+#define DUNE_COMMON_LOCALINDEX_HH
 
 #include<cstddef>
 
