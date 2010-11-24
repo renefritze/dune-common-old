@@ -531,7 +531,7 @@ namespace Dune{
    *
    * In some cases it might advisable to run IndicesSyncer::sync afterwards.
    *
-   * @warning Use with care. If the indices are not consistant afterwards
+   * @warning Use with care. If the indices are not consistent afterwards
    * communication attempts might deadlock!
    */
   template<class T, class A, bool mode>
