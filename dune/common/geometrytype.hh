@@ -284,7 +284,7 @@ namespace Dune {
             return ! ((*this)==other);
         }
 
-        /** \brief lesser operation for use with maps */
+        /** \brief less-than operation for use with maps */
         bool operator < (const GeometryType& other) const {
             if (none)
                 return false;
@@ -302,7 +302,7 @@ namespace Dune {
     {
         if (a.isSimplex())
         {
-            s << "(__simplex, " << a.dim() << ")";
+            s << "(simplex, " << a.dim() << ")";
             return s;
         }
         if (a.isCube())
