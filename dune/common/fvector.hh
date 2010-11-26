@@ -151,7 +151,12 @@ representing a field and a compile-time given size.
     /** \brief Constructor with a given scalar */
 	FieldVector (const K& k) : _data(k) {}
 
-    using Base::operator=;
+    //! Assignment operator for scalar
+    inline FieldVector& operator= (const K& k)
+    {
+      _data = k;
+      return *this;
+    }
     
     //===== forward methods to container
     size_type vec_size() const { return 1; }
