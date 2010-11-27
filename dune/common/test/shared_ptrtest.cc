@@ -28,6 +28,10 @@ private:
     bool& deleted_;
 };
 
+class A {};
+class B : public A {};
+class C : A {};
+
 int main(){
     using namespace Dune;
     int ret=0;
@@ -93,7 +97,7 @@ int main(){
             ret=1;
         }
 
-	// test constructor from a given pointer
+        // test constructor from a given pointer
         shared_ptr<double> bar(new double(43.0));
         assert(bar);
 
@@ -114,44 +118,60 @@ int main(){
         double* barPtr = bar.get();
         assert(barPtr==p);
 
-	// test constructor from a given pointer
+        // test constructor from a given pointer
         shared_ptr<double> b(new double(42.0));
-	{
-	    shared_ptr<double> d(b);
-	    *b = 7;
-	}
+        {
+            shared_ptr<double> d(b);
+            *b = 7;
+        }
 
-	if(b.use_count()!=1){
-	    std::cout << "Reference count is wrong! "<<__LINE__<<":"<<
-		__FILE__<<std::endl;
-	    ret=1;
-	}
-	{
-	    shared_ptr<double> c(b);
+        if(b.use_count()!=1){
+            std::cout << "Reference count is wrong! "<<__LINE__<<":"<<
+                __FILE__<<std::endl;
+            ret=1;
+        }
+        {
+            shared_ptr<double> c(b);
 	
-	    if(*b!=*c){
-		std::cerr<<"References do not match! "<<__LINE__<<":"<<
-		    __FILE__<<std::endl;
-		ret=1;
-	    }
-	    if(b.use_count()!=2 || c.use_count()!=2){
-		std::cout << "Reference count is wrong! "<<__LINE__<<":"<<
-		    __FILE__<<std::endl;
-		ret=1;
-	    }
-	    *b=8;
-	    if(*b!=8 || *c!=8){
-		std::cout<<"Assigning new value failed! "<<__LINE__<<":"<<
-		    __FILE__<<std::endl;
-		ret=1;
-	    }
-	}
+            if(*b!=*c){
+                std::cerr<<"References do not match! "<<__LINE__<<":"<<
+                    __FILE__<<std::endl;
+                ret=1;
+            }
+            if(b.use_count()!=2 || c.use_count()!=2){
+                std::cout << "Reference count is wrong! "<<__LINE__<<":"<<
+                    __FILE__<<std::endl;
+                ret=1;
+            }
+            *b=8;
+            if(*b!=8 || *c!=8){
+                std::cout<<"Assigning new value failed! "<<__LINE__<<":"<<
+                    __FILE__<<std::endl;
+                ret=1;
+            }
+        }
 
-	if(b.use_count()!=1){
-	    std::cout << "Reference count is wrong! "<<__LINE__<<":"<<
-		__FILE__<<std::endl;
-	    ret=1;
-	}
+        if(b.use_count()!=1){
+            std::cout << "Reference count is wrong! "<<__LINE__<<":"<<
+                __FILE__<<std::endl;
+            ret=1;
+        }
+
+        // test shared_ptr for stack allocation
+        {
+            int i = 10;
+            shared_ptr<int> pi = stackobject_to_shared_ptr(i);
+        }
+
+        // test shared_ptr for stack allocation with down cast
+        {
+            B b;
+            shared_ptr<A> pa = stackobject_to_shared_ptr<A>(b);
+#ifdef SHARED_PTR_COMPILE_FAIL
+            C c;
+            pa = stackobject_to_shared_ptr<A>(c); // A is an inaccessible base of C
+#endif
+        }
     }
     return (ret);
 }
