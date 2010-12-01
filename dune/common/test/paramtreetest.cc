@@ -15,6 +15,23 @@ void testparam(const P & p)
     std::cout << p.template get<double>("x1") << std::endl;
     std::cout << p.template get<std::string>("x2") << std::endl;
     std::cout << p.template get<bool>("x3") << std::endl;
+    // try reading array like structures
+    std::vector<unsigned int>
+        array1 = p.template get< std::vector<unsigned int> >("array");
+    Dune::array<unsigned int, 8>
+        array2 = p.template get< Dune::array<unsigned int, 8> >("array");
+    Dune::FieldVector<unsigned int, 8>
+        array3 = p.template get< Dune::FieldVector<unsigned int, 8> >("array");
+    assert(array1.size() == 8);
+    std::cout << "array =";
+    for (unsigned int i=0; i<8; i++)
+    {
+        assert(array1[i] == i+1);
+        assert(array2[i] == i+1);
+        assert(array3[i] == i+1);
+        std::cout << "\t" << array1[i];
+    }
+    std::cout << std::endl;
     // try accessing subtree
     p.sub("Foo");
     p.sub("Foo").template get<std::string>("peng");
@@ -57,7 +74,7 @@ void testmodify(P parameterSet)
     parameterSet["testString"] = "Hallo Welt!";
     parameterSet["testVector"] = "2 3 5 7 11";
     parameterSet.sub("Foo")["bar"] = "2";
-    
+
     double testDouble      = parameterSet.template get<double>("testDouble");
     int testInt            = parameterSet.template get<int>("testInt");
     ++testDouble;
@@ -89,6 +106,7 @@ int main()
         s << "x1 = 1 # comment\n"
           << "x2 = hallo\n"
           << "x3 = no\n"
+          << "array = 1   2 3 4 5\t6 7 8\n"
           << "\n"
           << "[Foo]\n"
           << "peng = ligapokal\n";
