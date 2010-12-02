@@ -1,4 +1,6 @@
-// $Id$
+// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*-
+// vi: set ts=8 sw=2 et sts=2:
+
 #ifndef DUNE_TUPLES_HH
 #define DUNE_TUPLES_HH
 
