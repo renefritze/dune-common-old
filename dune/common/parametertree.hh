@@ -83,20 +83,6 @@ namespace Dune {
     const std::string& operator[] (const std::string& key) const;
     
     
-    /** \brief print structure to std::cout
-     */
-    void report() const;
-
-
-    /** \brief print distinct substructure to std::cout
-     *
-     * Prints all entries with given prefix.
-     *
-     * \param prefix for key and substructure names
-     */
-    void report(const std::string prefix) const;
-
-
     /** \brief print distinct substructure to stream
      *
      * Prints all entries with given prefix.
@@ -104,7 +90,7 @@ namespace Dune {
      * \param stream Stream to print to
      * \param prefix for key and substructure names
      */
-    void reportStream(std::ostream& stream,
+    void report(std::ostream& stream = std::cout,
                       const std::string& prefix = "") const;
 
 
