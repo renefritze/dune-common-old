@@ -1,4 +1,8 @@
+// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+// vi: set ts=8 sw=4 et sts=4:
+
 // $Id$
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
