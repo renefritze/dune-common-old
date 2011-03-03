@@ -81,7 +81,7 @@ representing a field and a compile-time given size.
 
 	//! Constructor making vector with identical coordinates
     template<class C>
-	explicit FieldVector (const DenseVector<C> & x)
+	FieldVector (const DenseVector<C> & x)
 	{
       assert(x.size() == SIZE);
       for (size_type i = 0; i<SIZE; i++)
