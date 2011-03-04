@@ -92,7 +92,7 @@ representing a field and a compile-time given size.
     template<class K1, int SIZE1>
 	explicit FieldVector (const FieldVector<K1,SIZE1> & x)
 	{
-      static_assert(SIZE1 == SIZE, "FieldVector in costructor has wrong size");
+      dune_static_assert(SIZE1 == SIZE, "FieldVector in costructor has wrong size");
       for (size_type i = 0; i<SIZE; i++)
         _data[i] = x[i];
     }
