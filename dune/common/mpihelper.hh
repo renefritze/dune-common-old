@@ -77,17 +77,31 @@ namespace Dune
      */
     typedef No_Comm MPICommunicator;
 
-    /**
-     * @brief Get the default communicator.
+    /** \brief get the default communicator
      *
-     * @return -1 As we are fake.
+     *  Return a communicator to exchange data with all processes
+     *
+     *  \returns a fake communicator
      */
-    static MPICommunicator getCommunicator()
+    static MPICommunicator getCommunicator ()
     {
       static MPICommunicator comm;
       return comm;
     }
-    
+
+    /** \brief get a local communicator
+     *
+     *  Returns a communicator to communicate with the local process only
+     *
+     *  \returns a fake communicator
+     */
+    static MPICommunicator getLocalCommunicator ()
+    {
+      return getCommunicator();
+    }
+
+
+
     static CollectiveCommunication<MPICommunicator>
     getCollectiveCommunication()
     {
@@ -154,14 +168,28 @@ namespace Dune
      */
     typedef MPI_Comm MPICommunicator;
 
-    /**
-     * @brief Get the default communicator.
+    /** \brief get the default communicator
      *
-     * @return MPI_COMM_WORLD
+     *  Return a communicator to exchange data with all processes
+     *
+     *  \returns MPI_COMM_WORLD
      */
-    static MPICommunicator getCommunicator(){
+    static MPICommunicator getCommunicator ()
+    {
       return MPI_COMM_WORLD;
     }
+
+    /** \brief get a local communicator
+     *
+     *  Returns a communicator to exchange data with the local process only
+     *
+     *  \returns MPI_COMM_SELF
+     */
+    static MPICommunicator getLocalCommunicator ()
+    {
+      return MPI_COMM_SELF;
+    }
+
     static CollectiveCommunication<MPICommunicator>
     getCollectiveCommunication()
     {
