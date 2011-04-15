@@ -5,6 +5,8 @@
 #include<dune/common/enumset.hh>
 #include<algorithm>
 #include<iostream>
+
+#if HAVE_MPI
 #include"mpi.h"
 
 enum GridFlags{ 
@@ -663,9 +665,11 @@ void MPI_err_handler(MPI_Comm *comm, int *err_code, ...){
     delete[] err_string;
     throw MPIError(s, *err_code);
 }
+#endif // HAVE_MPI
 
 int main(int argc, char **argv)
 {
+#if HAVE_MPI
   MPI_Init(&argc, &argv);
   MPI_Errhandler handler;
   MPI_Errhandler_create(MPI_err_handler, &handler);
@@ -705,6 +709,11 @@ int main(int argc, char **argv)
   testRedistributeIndicesBuffered(comm);
   MPI_Comm_free(&comm);
   MPI_Finalize();
+
+  return 0;
+#else
+  return 77;
+#endif
 }
 
   
