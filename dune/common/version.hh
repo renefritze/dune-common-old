@@ -22,7 +22,7 @@
      (DUNE_VERSION_JOIN(module,REVISION) == revision))
 
 /** \brief True if 'module' has the version major.minor or newer */
-#define DUNE_VERSION_NEWER(module,major,minor,revision) \
+#define DUNE_VERSION_NEWER(module,major,minor) \
   ((DUNE_VERSION_JOIN(module,MAJOR) > major) \
    || ((DUNE_VERSION_JOIN(module,MAJOR) == major) && (DUNE_VERSION_JOIN(module,MINOR) >= minor)))
 
