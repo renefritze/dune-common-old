@@ -297,6 +297,11 @@ namespace Dune{
 	
     }
     
+    const std::set<int>& getNeighbours() const
+    {
+      return neighbourIds;
+    }
+    
     /**
      * @brief Destructor.
      */
