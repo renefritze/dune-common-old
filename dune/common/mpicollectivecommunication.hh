@@ -1,3 +1,4 @@
+// -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
 #ifndef DUNE_MPICOLLECTIVECOMMUNICATION_HH
 #define DUNE_MPICOLLECTIVECOMMUNICATION_HH
@@ -313,6 +314,15 @@ namespace Dune
 	  return communicator;
 	}
 
+    //! @copydoc CollectiveCommunication::allgather()
+    template<typename T, typename T1>
+    int allgather(T* sbuf, int count, T1* rbuf) const
+    {
+      return MPI_Allgather(sbuf, count, MPITraits<T>::getType(),
+                           rbuf, count, MPITraits<T1>::getType(),
+                           communicator);
+    }
+
     template<typename BinaryFunction, typename Type>
     int allreduce(Type* inout, int len) const
     {
@@ -323,6 +333,7 @@ namespace Dune
       return ret;
     }
     
+    //! @copydoc CollectiveCommunication::allreduce()
     template<typename BinaryFunction, typename Type>
     int allreduce(Type* in, Type* out, int len) const
     {
