@@ -3,7 +3,7 @@
 
 //! @addtogroup Common
 //! @{
-#if defined(DOXYGEN) or not defined(HAS_ATTRIBUTE_DEPRECATED)
+#if defined(DOXYGEN) || !defined(HAS_ATTRIBUTE_DEPRECATED)
 //! Mark some entity as deprecated
 /**
  * \code
@@ -78,7 +78,7 @@ template<typename T> struct Class {
 #define DUNE_DEPRECATED __attribute__((deprecated))
 #endif
 
-#if defined(DOXYGEN) or not defined(HAS_ATTRIBUTE_DEPRECATED_MSG)
+#if defined(DOXYGEN) || !defined(HAS_ATTRIBUTE_DEPRECATED_MSG)
 //! Mark some entity as deprecated
 /**
  * \code
