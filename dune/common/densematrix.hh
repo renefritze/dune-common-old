@@ -138,7 +138,13 @@ namespace Dune
     typedef typename Traits::size_type size_type;
     
     //! The type used to represent a row (must fulfill the Dune::DenseVector interface)
-    typedef typename Traits::row_type row_type; 
+    typedef typename Traits::row_type row_type;
+
+    //! The type used to represent a reference to a row (usually row_type &)
+    typedef typename Traits::row_reference row_reference;
+
+    //! The type used to represent a reference to a constant row (usually const row_type &)
+    typedef typename Traits::const_row_reference const_row_reference;
 
     //! We are at the leaf of the block recursion
     enum {
@@ -149,12 +155,12 @@ namespace Dune
     //===== access to components
     
     //! random access
-    row_type & operator[] (size_type i)
+    row_reference operator[] ( size_type i )
     {
       return asImp().mat_access(i);
     }
     
-    const row_type & operator[] (size_type i) const
+    const_row_reference operator[] ( size_type i ) const
     {
       return asImp().mat_access(i);
     }
