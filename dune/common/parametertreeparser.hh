@@ -10,13 +10,23 @@
 
 namespace Dune {
 
-  /** \brief Parser for hierarchical configuration files
+  /** \brief Parsers to set up a ParameterTree from various input sources
    * \ingroup Common
    *
-   * This class parses config files into a hierarchical structure.
-   * Config files should look like this
-   *
-   \verbatim
+   */
+  class ParameterTreeParser
+  {
+      
+    static std::string ltrim(const std::string& s);
+    static std::string rtrim(const std::string& s);
+
+
+  public:
+      
+      /** @name Parsing methods for the INITTree file format
+       * 
+       *  INITTree files should look like this
+       *  \verbatim
 # this file configures fruit colors in fruitsalad
 
 
@@ -49,21 +59,14 @@ fruit.tropicalfruit.orange = orange
 fruit.pipfruit.apple = green/red/yellow
 fruit.stonefruit.cherry = red
    \endverbatim
-   *
-   * All keys with a common 'prefix.' belong to the same substructure called
-   * 'prefix'.  Leading and trailing spaces and tabs are removed from the
-   * values unless you use single or double quotes around them.  Using single
-   * or double quotes you can also have multiline values.
-   *
-   */
-  class ParameterTreeParser
-  {
+       *
+       * All keys with a common 'prefix.' belong to the same substructure called
+       * 'prefix'.  Leading and trailing spaces and tabs are removed from the
+       * values unless you use single or double quotes around them.  Using single
+       * or double quotes you can also have multiline values.
+       */
+      //@{
       
-    static std::string ltrim(const std::string& s);
-    static std::string rtrim(const std::string& s);
-
-
-  public:
     /** \brief parse C++ stream
      *
      * Parses C++ stream and build hierarchical config structure.
@@ -108,6 +111,7 @@ fruit.stonefruit.cherry = red
      */
     static void readINITree(std::string file, ParameterTree& pt, bool overwrite = true);
 
+    //@}
 
     /** \brief parse command line
      *
