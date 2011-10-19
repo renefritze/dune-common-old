@@ -3,7 +3,7 @@
 #endif
 
 #include <dune/common/bitsetvector.hh>
-#ifdef __GNUC__
+#if defined(__GNUC__) && ! defined(__clang__)
 #include <ext/malloc_allocator.h>
 #endif
 
@@ -178,7 +178,7 @@ void doTest() {
 int main()
 {
     doTest<4, std::allocator<bool> >();
-#ifdef __GNUC__
+#if defined(__GNUC__) && ! defined(__clang__)
     doTest<4, __gnu_cxx::malloc_allocator<bool> >();
 #endif
     return 0;
