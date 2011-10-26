@@ -31,7 +31,7 @@ namespace Dune {
         }
 #endif // #ifdef __GNUC__
         return className;
-    };
+    }
 
     /** \brief Provide the demangled class name of a type T as a string */
     template <class T>
@@ -48,7 +48,7 @@ namespace Dune {
         }
 #endif // #ifdef __GNUC__
         return className;
-    };
+    }
     
 } // namespace Dune
 
