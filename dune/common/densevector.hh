@@ -3,11 +3,13 @@
 #ifndef DUNE_DENSEVECTOR_HH
 #define DUNE_DENSEVECTOR_HH
 
-#include<limits>
+#include <limits>
 
 #include "genericiterator.hh"
 #include "ftraits.hh"
 #include "matvectraits.hh"
+
+#include <dune/common/deprecated.hh>
 
 namespace Dune {
 
