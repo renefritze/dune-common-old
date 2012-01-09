@@ -187,7 +187,7 @@ namespace Dune
             return s;
         }
 
-    private:
+    protected:
         T data[n];
         size_type sz;
     };
