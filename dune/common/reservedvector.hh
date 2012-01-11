@@ -86,6 +86,12 @@ namespace Dune
         {
             if (! empty()) sz--;
         }
+        
+        //! Erases the last element of the vector, and returns it
+        T top_and_pop_back()
+        {
+            return data[--sz];
+        }
 
         //! Returns a iterator pointing to the beginning of the vector.
         iterator begin(){
