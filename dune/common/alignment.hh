@@ -83,7 +83,7 @@ namespace Dune
 	result = ALIGNMENT_MODULO(sizeof(AlignmentStruct<T>), sizeof(T))
       };
   };
-  } //end anonymous namspace
+  } //end anonymous namespace
 
   /**
    * @brief Calculates the alignment requirement of a type.
