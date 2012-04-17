@@ -7,7 +7,6 @@
 #include<dune/common/stdstreams.hh>
 #include<dune/common/tuples.hh>
 #include<dune/common/sllist.hh>
-#include<dune/common/unused.hh>
 #include<cassert>
 #include<cmath>
 #include<limits>
@@ -514,7 +513,6 @@ namespace Dune
       RemoteIndexIterator riEnd  = remote->second.first->end();
       RemoteIndexIterator rIndex = remote->second.first->begin();
       GlobalIndexIterator gIndex = global->second.begin();
-      GlobalIndexIterator gEnd DUNE_UNUSED = global->second.end();
       IndexIterator       index  = indexSet.begin();
 
       assert(rIndex==riEnd || gIndex != global->second.end());
@@ -807,8 +805,6 @@ namespace Dune
     }
     
     // Exchange indices with each neighbour
-    const RemoteIterator rend DUNE_UNUSED = remoteIndices_.end();
-
     calculateMessageSizes();
     
     // Allocate the buffers
@@ -1098,7 +1094,9 @@ namespace Dune
       // remote index list
       SLList<std::pair<int,Attribute> > sourceAttributeList;
       sourceAttributeList.push_back(std::make_pair(source,Attribute(sourceAttribute)));
-      bool foundSelf DUNE_UNUSED = false;
+#ifndef NDEBUG
+      bool foundSelf = false;
+#endif
       Attribute myAttribute=Attribute();
       
       // Unpack the remote indices
@@ -1113,7 +1111,9 @@ namespace Dune
 		   remoteIndices_.communicator());
 
 	if(process==rank_){
+#ifndef NDEBUG
           foundSelf=true;
+#endif
           myAttribute=Attribute(attribute);
 	  // Now we know the local attribute of the global index
           //Only add the index if it is unknown.
