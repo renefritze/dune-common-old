@@ -7,6 +7,7 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/typetraits.hh>
 #include <dune/common/stdstreams.hh>
+#include <dune/common/unused.hh>
 
 #if HAVE_MPI
 // MPI header
@@ -1385,7 +1386,8 @@ namespace Dune
     
     typedef typename CommPolicy<Data>::IndexedType Type;
     Type *sendBuffer, *recvBuffer;
-    size_t sendBufferSize, recvBufferSize;
+    size_t sendBufferSize;
+    size_t recvBufferSize DUNE_UNUSED;
     
     if(FORWARD){
       sendBuffer = reinterpret_cast<Type*>(buffers_[0]);
@@ -1449,7 +1451,7 @@ namespace Dune
     
     // Wait for completion of receive and immediately start scatter
     i=0;
-    int success = 1;
+    //int success = 1;
     int finished = MPI_UNDEFINED;
     MPI_Status status;//[messageInformation_.size()];
     //MPI_Waitall(messageInformation_.size(), recvRequests, status);
@@ -1470,7 +1472,7 @@ namespace Dune
 	MessageScatterer<Data,GatherScatter,FORWARD,Flag>()(interfaces_, dest, recvBuffer+info.start_, proc);
       }else{
 	std::cerr<<rank<<": MPI_Error occurred while receiving message from "<<processMap[finished]<<std::endl;
-	success=0;
+	//success=0;
       }
     }
 
@@ -1480,7 +1482,7 @@ namespace Dune
     for(i=0;i< messageInformation_.size();i++)
       if(MPI_SUCCESS!=MPI_Wait(sendRequests+i, &recvStatus)){
 	std::cerr<<rank<<": MPI_Error occurred while sending message to "<<processMap[finished]<<std::endl;
-	success=0;
+	//success=0;
       }
     /*
     int globalSuccess;
