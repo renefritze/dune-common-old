@@ -170,9 +170,11 @@ void doTest() {
     testConstContainer(cbbf);
     
     // iterator interface
-    ConstReferenceOp<BBF> cop DUNE_UNUSED;
+#ifndef NDEBUG
+    ConstReferenceOp<BBF> cop;
     assert(testIterator(bbf, cop) == 0);
     assert(testIterator(cbbf, cop) == 0);
+#endif
 }
 
 int main()
