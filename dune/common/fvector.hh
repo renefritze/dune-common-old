@@ -125,10 +125,10 @@ representing a field and a compile-time given size.
 	{}
 
 	/**
-     * \brief Constructor making vector with identical coordinates
+     * \brief Copy constructor from a second vector of possibly different type
      *
-     * If the DenseVector type of the this constructors argument
-     * is impemented by a FieldVector, it is statically checked
+     * If the DenseVector type of the this constructor's argument
+     * is implemented by a FieldVector, it is statically checked
      * if it has the correct size. If this is not the case
      * the constructor is removed from the overload set using SFINAE.
      *
