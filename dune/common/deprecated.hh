@@ -164,7 +164,7 @@ template<typename T> struct Class {
  */
 #define DUNE_DEPRECATED_MSG(text) DUNE_DEPRECATED
 #else // defined(HAS_ATTRIBUTE_DEPRECATED_MSG)
-#define DUNE_DEPRECATED_MSG(text) __attribute__((deprecated(text)))
+#define DUNE_DEPRECATED_MSG(text) __attribute__((deprecated(#text)))
 #endif
 
 //! @}
