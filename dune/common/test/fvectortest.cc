@@ -91,9 +91,7 @@ struct FieldVectorMainTest
     
     // test container methods
     typename FieldVector<ft,d>::size_type size DUNE_UNUSED = FieldVector<ft,d>::dimension;
-#if DUNE_COMMON_FIELDVECTOR_SIZE_IS_METHOD
     size = w.size();
-#endif
   }
 };
 
