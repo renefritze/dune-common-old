@@ -3,13 +3,15 @@
 
 #include <exception>
 #include <typeinfo>
-#include <sys/mman.h>
 #include <vector>
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
 #include <malloc.h>
 #include <new>
+#if HAVE_SYS_MMAN_H and HAVE_MPROTECT
+#include <sys/mman.h>
+#endif
 
 #include "mallocallocator.hh"
 
@@ -54,6 +56,7 @@ namespace Dune
         private:
             void memprotect(void* from, difference_type len, int prot)
             {
+#if HAVE_SYS_MMAN_H and HAVE_MPROTECT
                 int result = mprotect(from, len, prot);
                 if (result == -1)
                 {
@@ -71,6 +74,9 @@ namespace Dune
                               << std::endl;
                     abort();
                 }
+#else
+                std::cerr << "WARNING: memory protection not available" << std::endl;
+#endif
             }
 
         public:
