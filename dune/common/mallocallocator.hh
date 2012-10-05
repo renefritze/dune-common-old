@@ -7,7 +7,10 @@
 
 namespace Dune
 {
-    //! allocator which simply calls malloc/free
+    /**
+       @ingroup Allocators
+       @brief Allocators implementation which simply calls malloc/free
+    */
     template <class T>
     class MallocAllocator {
     public:
