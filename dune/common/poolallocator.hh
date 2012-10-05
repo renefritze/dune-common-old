@@ -61,11 +61,11 @@ namespace Dune
    * memory allocation for objects in chunks.
    * @author Markus Blatt
    */
-    /** 
-     * @addtogroup Common
-     *
-     * @{
-     */
+  /** 
+   * @addtogroup Allocators
+   *
+   * @{
+   */
 
   /**
    * @brief A memory pool of objects.
