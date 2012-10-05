@@ -5,7 +5,7 @@
 // #define DEBUG_ALLOCATOR_KEEP 1
 #define DEBUG_NEW_DELETE 3
 
-#include <dune/common/debug_allocator.hh>
+#include <dune/common/debugallocator.hh>
 
 #include <iostream>
 #include <cstdlib>
