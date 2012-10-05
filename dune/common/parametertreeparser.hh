@@ -24,53 +24,52 @@ namespace Dune {
     static std::string ltrim(const std::string& s);
     static std::string rtrim(const std::string& s);
 
-
   public:
-      
-      /** @name Parsing methods for the INITree file format
-       * 
-       *  INITree files should look like this
-       *  \verbatim
-# this file configures fruit colors in fruitsalad
 
+    /** @name Parsing methods for the INITree file format
+     *
+     *  INITree files should look like this
+     *  \verbatim
+     * # this file configures fruit colors in fruitsalad
+     *
+     *
+     * #these are no fruit but could also appear in fruit salad
+     * honeydewmelon = yellow
+     * watermelon = green
+     *
+     * fruit.tropicalfruit.orange = orange
+     *
+     * [fruit]
+     * strawberry = red
+     * pomegranate = red
+     *
+     * [fruit.pipfruit]
+     * apple = green/red/yellow
+     * pear = green
+     *
+     * [fruit.stonefruit]
+     * cherry = red
+     * plum = purple
+     *
+     * \endverbatim
+     *
+     *
+     * If a '[prefix]' statement appears all following entries use this prefix
+     * until the next '[prefix]' statement. Fruitsalads for example contain:
+     * \verbatim
+     * honeydewmelon = yellow
+     * fruit.tropicalfruit.orange = orange
+     * fruit.pipfruit.apple = green/red/yellow
+     * fruit.stonefruit.cherry = red
+     * \endverbatim
+     *
+     * All keys with a common 'prefix.' belong to the same substructure called
+     * 'prefix'.  Leading and trailing spaces and tabs are removed from the
+     * values unless you use single or double quotes around them.  Using single
+     * or double quotes you can also have multiline values.
+     */
+    //@{
 
-#these are no fruit but could also appear in fruit salad
-honeydewmelon = yellow
-watermelon = green
-
-fruit.tropicalfruit.orange = orange
-
-[fruit]
-strawberry = red
-pomegranate = red
-
-[fruit.pipfruit]
-apple = green/red/yellow
-pear = green
-
-[fruit.stonefruit]
-cherry = red
-plum = purple
-
-   \endverbatim
-   *
-   *
-   * If a '[prefix]' statement appears all following entries use this prefix
-   * until the next '[prefix]' statement. Fruitsalads for example contain:
-   \verbatim
-honeydewmelon = yellow
-fruit.tropicalfruit.orange = orange
-fruit.pipfruit.apple = green/red/yellow
-fruit.stonefruit.cherry = red
-   \endverbatim
-       *
-       * All keys with a common 'prefix.' belong to the same substructure called
-       * 'prefix'.  Leading and trailing spaces and tabs are removed from the
-       * values unless you use single or double quotes around them.  Using single
-       * or double quotes you can also have multiline values.
-       */
-      //@{
-      
     /** \brief parse C++ stream
      *
      * Parses C++ stream and build hierarchical config structure.
