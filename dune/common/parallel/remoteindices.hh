@@ -2,22 +2,22 @@
 #ifndef DUNE_REMOTEINDICES_HH
 #define DUNE_REMOTEINDICES_HH
 
-#include"indexset.hh"
+#include "indexset.hh"
+#include "plocalindex.hh"
 #include <dune/common/exceptions.hh>
-#include"plocalindex.hh"
-#include<dune/common/poolallocator.hh>
-#include<dune/common/sllist.hh>
-#include<dune/common/static_assert.hh>
+#include <dune/common/poolallocator.hh>
+#include <dune/common/sllist.hh>
+#include <dune/common/static_assert.hh>
 #include <dune/common/stdstreams.hh>
-#include<map>
-#include<set>
-#include<utility>
-#include<iostream>
-#include<algorithm>
-#include<iterator>
+#include <map>
+#include <set>
+#include <utility>
+#include <iostream>
+#include <algorithm>
+#include <iterator>
 #if HAVE_MPI
-#include <dune/common/mpitraits.hh>
-#include"mpi.h"
+#include "mpitraits.hh"
+#include <mpi.h>
 
 namespace Dune{
   /** @addtogroup Common_Parallel
