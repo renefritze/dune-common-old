@@ -48,11 +48,6 @@ namespace Dune
     {
       return this->get_d();
     }
-
-    operator mpf_class () const
-    {
-      return static_cast<const mpf_class&>(*this);
-    }
   };
 
 
