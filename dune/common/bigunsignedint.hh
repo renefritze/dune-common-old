@@ -7,6 +7,7 @@
 #include<limits>
 #include<cstdlib>
 #include<dune/common/exceptions.hh>
+#include<dune/common/hash.hh>
 
 /**
  * @file 
@@ -131,6 +132,15 @@ namespace Dune
 	friend class bigunsignedint<k/2>;
     friend struct std::numeric_limits< bigunsignedint<k> >;
     
+#if HAVE_DUNE_HASH
+
+    inline friend std::size_t hash_value(const bigunsignedint& arg)
+    {
+      return hash_range(arg.digit,arg.digit + arg.n);
+    }
+
+#endif // HAVE_DUNE_HASH
+
   private:
 	unsigned short digit[n];
 #if HAVE_MPI
@@ -623,7 +633,9 @@ namespace std
     static const float_round_style round_style = round_toward_zero;
 
   };
-  
+
 }
+
+DUNE_DEFINE_HASH(DUNE_HASH_TEMPLATE_ARGS(int k),DUNE_HASH_TYPE(Dune::bigunsignedint<k>))
 
 #endif
