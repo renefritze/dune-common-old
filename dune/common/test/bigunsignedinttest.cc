@@ -6,6 +6,10 @@
 #include<limits>
 #include<iostream>
 
+#if HAVE_BOOST_HASH
+#include<boost/functional/hash.hpp>
+#endif
+
 int main()
 {
   
@@ -80,6 +84,13 @@ int main()
   {
     std::tr1::hash<Dune::bigunsignedint<100> > hasher;
     std::cout << "std::tr1::hash: " << hasher(a) << std::endl;
+  }
+#endif
+
+#if HAVE_BOOST_HASH
+  {
+    boost::hash<Dune::bigunsignedint<100> > hasher;
+    std::cout << "boost::hash:    " << hasher(a) << std::endl;
   }
 #endif
 
