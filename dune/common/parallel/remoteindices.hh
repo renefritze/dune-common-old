@@ -1597,7 +1597,7 @@ namespace Dune{
 	while(index->global()<*giter){
 	  ++index;
 #ifdef DUNE_ISTL_WITH_CHECKING
-	  if(index == indexSet_.end())
+	  if(index == indexSet_->end())
 	    DUNE_THROW(InvalidPosition, "No such global index in set!");
 #endif
 	}
