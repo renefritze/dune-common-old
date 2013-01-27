@@ -33,7 +33,7 @@ namespace Dune
   };
 
   /**
-   * @brief An set containing everything.
+   * @brief A set containing everything.
    */
   template<typename TA>
   class AllSet
