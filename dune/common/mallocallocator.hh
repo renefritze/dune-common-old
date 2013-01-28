@@ -5,6 +5,10 @@
 #include <cstdlib>
 #include <new>
 
+/**
+ * @file 
+ * @brief Allocators that use malloc/free.
+ */
 namespace Dune
 {
     /**
