@@ -144,7 +144,7 @@ namespace Dune
   private:
 	unsigned short digit[n];
 #if HAVE_MPI
-    friend class MPITraits<bigunsignedint<k> >;
+    friend struct MPITraits<bigunsignedint<k> >;
 #endif
     inline void assign(std::size_t x);
     
