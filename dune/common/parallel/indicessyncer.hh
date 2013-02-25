@@ -883,9 +883,6 @@ namespace Dune
   void IndicesSyncer<T>::packAndSend(int destination, char* buffer, std::size_t bufferSize, MPI_Request& request)
   {
     typedef typename ParallelIndexSet::const_iterator IndexIterator;
-    typedef typename RemoteIndexList::const_iterator RemoteIndexIterator;
-    typedef typename GlobalIndexList::const_iterator GlobalIterator;
-    typedef typename BoolList::const_iterator BoolIterator;
         
     IndexIterator      iEnd       = indexSet_.end();
     int                bpos       = 0;
@@ -1043,8 +1040,6 @@ namespace Dune
   void IndicesSyncer<T>::recvAndUnpack(T1& numberer)
   {
     typedef typename ParallelIndexSet::const_iterator IndexIterator;
-    typedef typename RemoteIndexList::iterator RemoteIndexIterator;
-    typedef typename GlobalIndexList::iterator GlobalIndexIterator;
 
     IndexIterator    iEnd   = indexSet_.end();
     IndexIterator    index  = indexSet_.begin();
